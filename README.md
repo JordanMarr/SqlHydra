@@ -8,18 +8,18 @@ Get it from NuGet!
 
 ### Setup
 
-1) You must install `SqlHydra` and `Myriad.Sdk` from NuGet.
+1) Install `SqlHydra` and `Myriad.Sdk` from NuGet.
 
-2) You must add a `myriad.toml` configuration file to your project with the following:
+2) Add a `myriad.toml` configuration file to your project with the following:
 
 ```toml
 [ssdt]
 namespace = "AdventureWorks"
 ```
 
-The generated F# records will be added to the namespace you configure.
+(The generated F# records will be added to the namespace you configure.)
 
-3) Add an `ItemGroup` to your .fsproj file to configure a .dacpac input file and a .fs output file:
+3) Add an `ItemGroup` to your .fsproj file to configure a .dacpac input file and an .fs output file:
 
 ```xml
     <ItemGroup>
@@ -32,7 +32,4 @@ The generated F# records will be added to the namespace you configure.
 
 ```
 
-4) Remember to build your SSDT .sqlproj to generate the source .dacpac file.
-
-5) Build your project to generate the .fs file.
-
+4) Build your project to generate the .fs file.
