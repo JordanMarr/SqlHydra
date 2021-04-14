@@ -1,5 +1,5 @@
 # SqlHydra
-SqlHydra is a Myriad plugin that generates F# records from a SQL Server SSDT .dacpac file.
+SqlHydra is a [Myriad](https://github.com/MoiraeSoftware/myriad) plugin that generates F# records from a SQL Server SSDT .dacpac file.
 
 [![NuGet version (SqlHydra)](https://img.shields.io/nuget/v/SqlHydra.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra/)
 
@@ -30,6 +30,10 @@ namespace = "AdventureWorks"
 ```
 
 4) Build your project to generate the .fs file.
+
+5) Use your generated types with a micro ORM like FSharp.Dapper or RepoDb.
+
+
 
 ## Roadmap
 
