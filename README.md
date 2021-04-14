@@ -41,8 +41,49 @@ namespace = "AdventureWorks"
 * Generated types can be checked into source control (build server friendly)
 
 
+
 ## Roadmap
 * Add a configuration option to add `[<CLIMutable>]` attribute to generated records (required by some ORMs like vanilla Dapper and EF).
 * Possibly adding some generated helpers for db access
 * <cool new thing here?>
 
+
+## Known Issues
+* User defined data types are not supported
+* Computed table and view columns will default to a data type of `obj` since the data type is not listed in the .dacpac file. (See Type Annotations below.)
+
+### Type Annotations
+As a work-around for computed table and view columns having unresolved data types, the SSDT provider allows you to add type annotations directly to the table or view as in-line comments.
+
+In the SalesOrderDetail.sql example table below, `[LineTotal]` is a computed column. Since the .dacpac file cannot determine the datatype for computed columns, the data type of the generated property will be defaulted to `obj`. As a workaround, an in-line type annotation `/* MONEY NOT NULL */` can be added. NOTE: for computed table columns, the comment annotation must be contained within the parentheses.
+
+```sql
+CREATE TABLE [SalesLT].[SalesOrderDetail] (
+[SalesOrderID]       INT              NOT NULL,
+[SalesOrderDetailID] INT              IDENTITY (1, 1) NOT NULL,
+[OrderQty]           SMALLINT         NOT NULL,
+[ProductID]          INT              NOT NULL,
+[UnitPrice]          MONEY            NOT NULL,
+[UnitPriceDiscount]  MONEY            CONSTRAINT [DF_SalesOrderDetail_UnitPriceDiscount] DEFAULT ((0.0)) NOT NULL,
+[LineTotal]          AS               (isnull(([UnitPrice]*((1.0)-[UnitPriceDiscount]))*[OrderQty],(0.0)) /* MONEY NOT NULL */ ),
+[rowguid]            UNIQUEIDENTIFIER CONSTRAINT [DF_SalesOrderDetail_rowguid] DEFAULT (newid()) ROWGUIDCOL NOT NULL,
+[ModifiedDate]       DATETIME         CONSTRAINT [DF_SalesOrderDetail_ModifiedDate] DEFAULT (getdate()) NOT NULL,
+...
+```
+
+In the example `dbo.v_Hours` view below, the `Hours` column is not linked back to the `dbo.TimeEntries.Hours` column in the .dacpac metadata because it is a calculated field, so the data type of the generated property will be defaulted to `obj`. Adding a type annotation within an in-line comment will inform the SSDT provider of the data type to use in the generated `Hours` property:
+
+```sql
+CREATE VIEW dbo.v_Hours
+AS
+SELECT dbo.Projects.Name AS ProjectName, COALESCE (dbo.TimeEntries.Hours, 0) AS Hours /* decimal not null */, dbo.Users.Username
+FROM dbo.Projects
+INNER JOIN dbo.TimeEntries on dbo.Projects.Id = dbo.TimeEntries.ProjectId
+INNER JOIN dbo.Users on dboUsers.Id = dbo.TimeEntries.UserId
+```
+
+_Notes:_
+* If no null constraint is added after the column type, it will allow nulls by default.
+* The annotations are case-insensitive.
+* Hovering over a generated view property will designate if the data type was derived from a type annotations (or if it needs one).
+* Do not include length information in the type annotation. For example, use varchar, not varchar(20).
