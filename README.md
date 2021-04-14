@@ -40,20 +40,82 @@ namespace = "AdventureWorks"
 * Generated types can be used outside of project
 * Generated types can be checked into source control (build server friendly)
 
+## Use Case - RepoDb
+[RepoDb](https://repodb.net/) is a micro ORM that gives very high performance with strongly typed Linq style queries.
+In conjunction with SqlHydra-Myriad, you get the best of performance and type safety.
+Even better, RepoDb provides first-class support for F# features like Option types and records (with no need for `[<CLIMutable>]` attributes) out-of-the-box!
+
+```fsharp
+module RepoDbExample
+open Microsoft.Data.SqlClient
+open RepoDb
+open AdventureWorks // Generated Types
+
+SqlServerBootstrap.Initialize()
+
+FluentMapper
+    .Entity<SalesLT.Address>().Table("[SalesLT].[Address]") // Must manually register non- "dbo" schemas
+    |> ignore
+
+let connect() = 
+    let conn = new SqlConnection("Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;")
+    conn.Open()
+    conn
+
+let runQueries() =    
+    use conn = connect()
+
+    conn.Query(fun (a: SalesLT.Address) -> a.City = "Dallas")
+    |> printfn "Addresses: %A"
+
+    conn.QueryAll<dbo.BuildVersion>()
+    |> printfn "Build Versions: %A"
+```
+
+## Use Case - FSharp.Dapper
+As the name implies, [FSharp.Dapper](https://github.com/Dzoukr/Dapper.FSharp) was written for F# with simplicity and ease-of-use as the top design priorites.
+Features custom Computation Expressions for selecting, inserting, updating and deleting, and support for F# records (no `[<CLIMutable>]` attributes required) and Option types.
+
+```fsharp
+module DapperFSharpExample
+open System.Data
+open System.Data.SqlClient
+open Dapper.FSharp
+open Dapper.FSharp.MSSQL
+open AdventureWorks // Generated Types
+
+Dapper.FSharp.OptionTypes.register()
+
+let connect() = 
+    let cs = "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"
+    let conn = new SqlConnection(cs) :> IDbConnection
+    conn.Open()
+    conn
+
+let getAddressesForCity(conn: IDbConnection) (city: string) = 
+    select {
+        table "SalesLT.Address"
+        where (eq "City" city)
+    } 
+    |> conn.SelectAsync<SalesLT.Address>
+    |> Async.AwaitTask 
+
+let runQueries() = 
+    
+    use conn = connect()
+    
+    let addresses = getAddressesForCity conn "Dallas" |> Async.RunSynchronously
+
+    printfn "Dallas Addresses: %A" addresses
+```
 
 
-## Roadmap
-* Add a configuration option to add `[<CLIMutable>]` attribute to generated records (required by some ORMs like vanilla Dapper and EF).
-* Possibly adding some generated helpers for db access
-* <cool new thing here?>
-
-
-## Known Issues
+## SSDT Type Annotations
+There are a few known issues with the SSDT generated types:
 * User defined data types are not supported
-* Computed table and view columns will default to a data type of `obj` since the data type is not listed in the .dacpac file. (See Type Annotations below.)
+* Computed table and view columns will default to a data type of `obj` since the data type is not listed in the .dacpac file.
 
-### Type Annotations
-As a work-around for computed table and view columns having unresolved data types, the SSDT provider allows you to add type annotations directly to the table or view as in-line comments.
+As a work-around for the above issues, the .dacpac parser allows you to add type annotations directly to the table or view .sql files as in-line comments.
 
 In the SalesOrderDetail.sql example table below, `[LineTotal]` is a computed column. Since the .dacpac file cannot determine the datatype for computed columns, the data type of the generated property will be defaulted to `obj`. As a workaround, an in-line type annotation `/* MONEY NOT NULL */` can be added. NOTE: for computed table columns, the comment annotation must be contained within the parentheses.
 
@@ -87,3 +149,8 @@ _Notes:_
 * The annotations are case-insensitive.
 * Hovering over a generated view property will designate if the data type was derived from a type annotations (or if it needs one).
 * Do not include length information in the type annotation. For example, use varchar, not varchar(20).
+
+## Roadmap
+* Add a configuration option to add `[<CLIMutable>]` attribute to generated records (required by some ORMs like vanilla Dapper and EF).
+* Possibly adding some generated helpers for db access
+* <cool new thing here?>
