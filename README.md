@@ -42,7 +42,7 @@ namespace = "AdventureWorks"
 ## Use Case - RepoDb
 [RepoDb](https://repodb.net/) is a micro ORM that gives very high performance with strongly typed Linq style queries.
 In conjunction with SqlHydra-Myriad, you get the best of performance and type safety.
-Even better, RepoDb provides first-class support for F# features like Option types and records (with no need for `[<CLIMutable>]` attributes) out-of-the-box!
+Even better, RepoDb provides [first-class support](https://www.compositional-it.com/news-blog/repodb-on-f/) for F# features like Option types and records (no need for `[<CLIMutable>]` attributes) out-of-the-box!
 
 ```fsharp
 module RepoDbExample
@@ -72,8 +72,8 @@ let runQueries() =
 ```
 
 ## Use Case - FSharp.Dapper
-As the name implies, [FSharp.Dapper](https://github.com/Dzoukr/Dapper.FSharp) was written for F# with simplicity and ease-of-use as the top design priorites.
-Features custom Computation Expressions for selecting, inserting, updating and deleting, and support for F# records (no `[<CLIMutable>]` attributes required) and Option types.
+As the name implies, [FSharp.Dapper](https://github.com/Dzoukr/Dapper.FSharp) was written for F# with simplicity and ease-of-use as the driving design priorities.
+FSharp.Dapper features custom F# Computation Expressions for selecting, inserting, updating and deleting, and support for F# Option types and records (no need for `[<CLIMutable>]` attributes).
 
 ```fsharp
 module DapperFSharpExample
