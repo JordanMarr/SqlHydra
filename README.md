@@ -150,6 +150,7 @@ _Notes:_
 * Do not include length information in the type annotation. For example, use varchar, not varchar(20).
 
 ## Roadmap
+* Adding new Myriad generators that directly pull schema from SQL Server and other database providers
 * Add a configuration option to add `[<CLIMutable>]` attribute to generated records (required by some ORMs like vanilla Dapper and EF).
-* Possibly adding some generated helpers for db access
-* <cool new thing here?>
+* Adding generated helpers as needed to assist with common data flows
+
