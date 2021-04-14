@@ -7,14 +7,13 @@ SqlHydra is a [Myriad](https://github.com/MoiraeSoftware/myriad) plugin that gen
 
 1) Install `SqlHydra` and `Myriad.Sdk` from NuGet.
 
-2) Add a `myriad.toml` configuration file to your project with the following:
+2) Add a `myriad.toml` configuration file to your project with a namespace that will contain your generated F# record types:
 
 ```toml
 [ssdt]
 namespace = "AdventureWorks"
 ```
 
-(The generated F# records will be added to the namespace you configure.)
 
 3) Add an `ItemGroup` to your .fsproj file to configure a .dacpac input file and an .fs output file:
 
