@@ -33,10 +33,15 @@ namespace = "AdventureWorks"
 
 5) Use your generated types with a micro ORM like FSharp.Dapper or RepoDb.
 
+## Benefits of Myriad
+* Myriad + SSDT is fast - very low impact on your build
+* Myriad detects changes to SSDT .dacpac file and regenerates on next build
+* Generated types are records, not classes (algebraic type safety for your data layer)
+* Generated types can be used outside of project
+* Generated types can be checked into source control (build server friendly)
 
 
 ## Roadmap
-
 * Add a configuration option to add `[<CLIMutable>]` attribute to generated records (required by some ORMs like vanilla Dapper and EF).
 * Possibly adding some generated helpers for db access
 * <cool new thing here?>
