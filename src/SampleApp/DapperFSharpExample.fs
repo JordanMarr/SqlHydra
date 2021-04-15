@@ -1,6 +1,6 @@
 ﻿module DapperFSharpExample
 open System.Data
-open System.Data.SqlClient
+open Microsoft.Data.SqlClient
 open Dapper.FSharp
 open Dapper.FSharp.MSSQL
 open AdventureWorks // Generated Types

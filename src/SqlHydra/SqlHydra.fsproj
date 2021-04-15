@@ -21,6 +21,7 @@
     <Compile Include="DacpacParser.fs" />
     <Compile Include="SqlServerDataTypes.fs" />
     <Compile Include="SsdtGenerator.fs" />
+    <Compile Include="SqlServerGenerator.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.2" />
     <PackageReference Include="Myriad.Core" Version="0.5.0" />
   </ItemGroup>
     

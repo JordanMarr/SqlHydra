@@ -1,6 +1,7 @@
 ﻿module TypeAnnotationTests
 open NUnit.Framework
-open DacpacParser
+open SqlHydra
+open SqlHydra.DacpacParser
 
 let sql = """SELECT dbo.Projects.Name AS ProjectName, dbo.Projects.[ProjectNumber] /* int null */, dbo.Projects.ProjectType,
 dbo.Projects.LOD, dbo.Projects.[Division], dbo.Projects.IsActive, dbo.ProjectTaskCategories.Name AS Category, 

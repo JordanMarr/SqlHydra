@@ -1,6 +1,7 @@
 module ParseSchemaTests
 open NUnit.Framework
-open DacpacParser
+open SqlHydra
+open SqlHydra.DacpacParser
 
 [<Test>]
 let ``Parse AdventureWorks dacpac`` () =

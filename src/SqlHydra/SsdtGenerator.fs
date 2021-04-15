@@ -1,4 +1,4 @@
-﻿namespace Plugin
+﻿module SqlHydra.SsdtGenerator
 
 open Myriad.Core
 open FSharp.Compiler.SyntaxTree

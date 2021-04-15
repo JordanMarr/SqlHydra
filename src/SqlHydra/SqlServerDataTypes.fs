@@ -1,4 +1,4 @@
-﻿module SqlServerDataTypes
+﻿module SqlHydra.SqlServerDataTypes
 
 open System.Data
 

@@ -1,4 +1,4 @@
-﻿module DacpacParser
+﻿module SqlHydra.DacpacParser
 
 open System
 open System.Xml
