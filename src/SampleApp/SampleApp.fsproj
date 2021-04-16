@@ -8,14 +8,16 @@
     <ItemGroup>
         <MyriadSdkGenerator Include="$(MSBuildThisFileDirectory)\..\SqlHydra\bin\Debug\netstandard2.0\SqlHydra.dll" />
         <None Include="myriad.toml" />
+        
         <Compile Include="AdventureWorks.fs">
             <MyriadFile>../AdventureWorks/bin/Debug/AdventureWorks.dacpac</MyriadFile>
         </Compile>
-        <Compile Include="DapperFSharpExample.fs" />
 
-        <!--<Compile Include="Crash.fs">
-            <MyriadFile>../AdventureWorks/bin/Debug/AdventureWorks.dacpac</MyriadFile>
-        </Compile>-->
+        <Compile Include="SqlServer.fs">
+            <MyriadFile>myriad.toml</MyriadFile>
+        </Compile>
+
+        <Compile Include="DapperFSharpExample.fs" />
     </ItemGroup>
     
   <ItemGroup>
