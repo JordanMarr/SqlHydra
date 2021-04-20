@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net50</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+    <Import Project="..\SqlHydra\build\SqlHydra.InTest.props" />
     <ItemGroup>
-        <MyriadSdkGenerator Include="$(MSBuildThisFileDirectory)\..\SqlHydra\bin\Debug\netstandard2.0\SqlHydra.dll" />
         <None Include="myriad.toml" />
         
         <Compile Include="AdventureWorks.fs">
@@ -15,6 +15,7 @@
 
         <Compile Include="SqlServer.fs">
             <MyriadFile>myriad.toml</MyriadFile>
+            <!--<MyriadSdkVerboseOutput>true</MyriadSdkVerboseOutput>-->
         </Compile>
 
         <Compile Include="DapperFSharpExample.fs" />
@@ -28,9 +29,12 @@
   <ItemGroup>
     <PackageReference Include="Dapper.FSharp" Version="1.16.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.2" />
-    <PackageReference Include="Myriad.Core" Version="0.5.0" />
-    <PackageReference Include="Myriad.Sdk" Version="0.5.0" />
+    <PackageReference Include="Myriad.Sdk" Version="0.5.1" />
     <PackageReference Include="RepoDb.SqlServer" Version="1.1.3" />
+  </ItemGroup>
+    
+  <ItemGroup>
+    <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj" />
   </ItemGroup>
 
 </Project>

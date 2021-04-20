@@ -10,10 +10,16 @@
     <PackageProjectUrl>https://github.com/JordanMarr/SqlHydra</PackageProjectUrl>
     <PackageTags>fsharp F# sqlserver SSDT ORM</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <!--<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
   </PropertyGroup>
 
   <ItemGroup>
       <Content Include="build\SqlHydra.props">
+          <Pack>true</Pack>
+          <PackagePath>%(Identity)</PackagePath>
+          <Visible>true</Visible>
+      </Content>
+      <Content Include="build\SqlHydra.InTest.props">
           <Pack>true</Pack>
           <PackagePath>%(Identity)</PackagePath>
           <Visible>true</Visible>
