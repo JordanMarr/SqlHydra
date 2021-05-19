@@ -60,15 +60,16 @@ This is the result:
 module DapperFSharpExample
 open System.Data
 open System.Data.SqlClient
-open Dapper.FSharp
+open Dapper.FSharp.LinqBuilders
 open Dapper.FSharp.MSSQL
 open AdventureWorks // Generated Types
 
 Dapper.FSharp.OptionTypes.register()
     
-let customerTable = table<Customer> |> inSchema (nameof SalesLT)
-let customerAddressTable = table<CustomerAddress> |> inSchema (nameof SalesLT)
-let addressTable = table<SalesLT.Address> |> inSchema (nameof SalesLT)
+// Tables
+let customerTable =         table<Customer>         |> inSchema (nameof SalesLT)
+let customerAddressTable =  table<CustomerAddress>  |> inSchema (nameof SalesLT)
+let addressTable =          table<SalesLT.Address>  |> inSchema (nameof SalesLT)
 
 let getAddressesForCity(conn: IDbConnection) (city: string) = 
     select {
