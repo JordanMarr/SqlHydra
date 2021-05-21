@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Myriad.Core" Version="0.5.1" />
+    <PackageReference Include="Myriad.Core" Version="0.5.3" />
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
     

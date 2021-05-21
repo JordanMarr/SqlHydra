@@ -45,7 +45,7 @@ type SsdtGenerator() =
         member __.Generate(ctx: GeneratorContext) =
 
             let schema = 
-                ctx.InputFileName
+                ctx.InputFilename
                 |> extractModelXml
                 |> parseXml
             
