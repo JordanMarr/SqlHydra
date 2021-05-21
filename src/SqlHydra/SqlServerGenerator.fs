@@ -2,65 +2,10 @@
 open Myriad.Core
 open FSharp.Compiler.SyntaxTree
 open FsAst
-
-module Schema = 
-    open Microsoft.Data.SqlClient
-    open System.Data
+open System.Diagnostics
     
-    type Table = {
-        Catalog: string
-        Schema: string
-        Name: string
-        Type: string
-    }
-    
-    type Column = {
-        TableCatalog: string
-        TableSchema: string
-        TableName: string
-        ColumnName: string
-        DataType: string
-        IsNullable: bool
-    }
-    
-    let getSchema(connectionString: string) =         
-        use conn = new SqlConnection(connectionString)
-        conn.Open()
-        let sTables = conn.GetSchema("Tables")
-        let sColumns = conn.GetSchema("Columns")
-    
-        let tables = 
-            sTables.Rows
-            |> Seq.cast<DataRow>
-            |> Seq.map (fun r -> 
-                { Catalog = r.["TABLE_CATALOG"] :?> string
-                  Schema = r.["TABLE_SCHEMA"] :?> string
-                  Name = r.["TABLE_NAME"] :?> string
-                  Type = r.["TABLE_TYPE"] :?> string }
-            )
-            |> Seq.toList
-    
-        let columns = 
-            sColumns.Rows
-            |> Seq.cast<DataRow>
-            |> Seq.map (fun r -> 
-                { TableCatalog = r.["TABLE_CATALOG"] :?> string
-                  TableSchema = r.["TABLE_SCHEMA"] :?> string
-                  TableName = r.["TABLE_NAME"] :?> string
-                  ColumnName = r.["COLUMN_NAME"] :?> string
-                  DataType = r.["DATA_TYPE"] :?> string
-                  IsNullable = 
-                    match r.["IS_NULLABLE"] :?> string with 
-                    | "YES" -> true
-                    | _ -> false
-                }
-            )
-            |> Seq.toList
-
-        tables, columns
-
 module Gen = 
-    let toRecord (tbl: Schema.Table, columns: Schema.Column list) = 
+    let toRecord (tbl: Table, columns: Column list) = 
         let recordCmpInfo = 
             let myRecordId = LongIdentWithDots.CreateString tbl.Name
             SynComponentInfoRcd.Create(myRecordId.Lid)
@@ -97,33 +42,32 @@ type SqlServerGenerator() =
         member __.ValidInputExtensions = 
             seq { ".toml" }
 
-        //member __.Generate(ctx: GeneratorContext) =
-        //    let let42 =
-        //        SynModuleDecl.CreateLet
-        //            [ { SynBindingRcd.Let with
-        //                    Pattern = SynPatRcd.CreateLongIdent(LongIdentWithDots.CreateString "fourtyTwo", [])
-        //                    Expr = SynExpr.CreateConst(SynConst.Int32 42) } ]
-
-        //    let componentInfo = SynComponentInfoRcd.Create [ Ident.Create "example1" ]
-        //    let nestedModule = SynModuleDecl.CreateNestedModule(componentInfo, [ let42 ])
-
-        //    let namespaceOrModule =
-        //        { SynModuleOrNamespaceRcd.CreateNamespace(Ident.CreateLong "TestNS")
-        //            with Declarations = [ nestedModule ] }
-
-        //    [ namespaceOrModule ]
-
         member __.Generate(ctx: GeneratorContext) =
-            let cs = "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"
-            let tables, columns = Schema.getSchema cs
+            let connStr = "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"
+            let schemaPath = @"C:\_github\SqlHydra\src\SampleApp\mssql.json"
+            let exePath = @"C:\_github\SqlHydra\src\SqlHydra.SqlServer\bin\Debug\netcoreapp3.1\SqlHydra.SqlServer.exe"
+
+            let msSqlProvider = ProcessStartInfo(exePath, sprintf "\"%s\" \"%s\"" connStr schemaPath)
+            msSqlProvider.UseShellExecute <- false
+            msSqlProvider.CreateNoWindow <- true
+            msSqlProvider.WindowStyle <- ProcessWindowStyle.Hidden
+
+            // Write json file
+            use exeProcess = Process.Start(msSqlProvider)
+            exeProcess.WaitForExit()
             
+            // Read schema
+            let schema = Utils.deserializeSchema (schemaPath)
+
             let columnsByTable =
-                columns
+                schema.Columns
+                |> Array.toList
                 |> List.groupBy (fun c -> c.TableCatalog, c.TableSchema, c.TableName)
                 |> Map.ofList
 
             let recordsBySchema = 
-                tables
+                schema.Tables
+                |> Array.toList
                 |> List.groupBy (fun t -> t.Schema)
                 |> List.map (fun (schema, tables) -> 
                     schema, 
@@ -142,7 +86,7 @@ type SqlServerGenerator() =
                 )
 
             // Get ssdt config
-            let config = ctx.ConfigGetter "ssdt"
+            let config = ctx.ConfigGetter "sqlserver"
             // Get namespace
             let ns = 
                 config 
