@@ -59,7 +59,7 @@ type SqlServerGenerator() =
 
             let assembly = System.Reflection.Assembly.GetExecutingAssembly()
             let assemblyDir = FileInfo(assembly.Location).DirectoryName
-            let exePath = Path.Combine(assemblyDir, "SqlHydra.SqlServer.exe")
+            let exePath = Path.Combine(assemblyDir, "SqlHydra.exe")
             if not (File.Exists exePath) then failwithf "Unable to find provider: '%s'." exePath
 
             // Write json file

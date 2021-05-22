@@ -30,9 +30,7 @@
   </ItemGroup>
     
   <ItemGroup>
-    <ProjectReference Include="..\SqlHydra.SqlServer\SqlHydra.SqlServer.fsproj">
-      <Private></Private>
-    </ProjectReference>
+    <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj" />
   </ItemGroup>
 
 </Project>
