@@ -6,12 +6,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="build\SqlHydra.SqlServer.InTest.props">
+      <PackagePath>%(Identity)</PackagePath>
+      <Visible>true</Visible>
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="build\SqlHydra.SqlServer.props">
+      <PackagePath>%(Identity)</PackagePath>
+      <Visible>true</Visible>
+      <Pack>true</Pack>
+    </Content>
+    <Compile Include="SqlServerGenerator.fs" />
     <Compile Include="SqlServerSchemaProvider.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.3" />
+    <PackageReference Include="Myriad.Core" Version="0.5.3" />
   </ItemGroup>
 
   <ItemGroup>

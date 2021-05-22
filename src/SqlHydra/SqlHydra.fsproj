@@ -25,13 +25,9 @@
           <PackagePath>%(Identity)</PackagePath>
           <Visible>true</Visible>
       </Content>
-    <Compile Include="DacpacParser.fs" />
-    <Compile Include="SqlServerDataTypes.fs" />
-    <Compile Include="SsdtGenerator.fs" />
+      <Compile Include="SqlServerDataTypes.fs" />
     <Compile Include="Schema.fs" />
-    <Compile Include="SqlServerGenerator.fs" />
-    <Compile Include="SqlServerSchemaProvider.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="SchemaGenerator.fs" />
   </ItemGroup>
 
   <ItemGroup>

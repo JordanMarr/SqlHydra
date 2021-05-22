@@ -5,7 +5,7 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
-    <Import Project="..\SqlHydra\build\SqlHydra.InTest.props" />
+    <Import Project="..\SqlHydra.SqlServer\build\SqlHydra.SqlServer.InTest.props" />
     <ItemGroup>
         <None Include="myriad.toml" />
         
@@ -30,7 +30,7 @@
   </ItemGroup>
     
   <ItemGroup>
-    <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj" />
+    <ProjectReference Include="..\SqlHydra.SqlServer\SqlHydra.SqlServer.fsproj" />
   </ItemGroup>
 
 </Project>
