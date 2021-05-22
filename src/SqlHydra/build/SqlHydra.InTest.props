@@ -1,5 +1,0 @@
-﻿<Project>
-    <ItemGroup>
-        <MyriadSdkGenerator Include="$(MSBuildThisFileDirectory)/../bin/$(Configuration)/netcoreapp3.1/SqlHydra.dll" />
-    </ItemGroup>
-</Project>

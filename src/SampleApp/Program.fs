@@ -1,7 +1,7 @@
 ﻿[<EntryPoint>]
 let main argv =
     
-    //DapperFSharpExample.runQueries()
+    DapperFSharpExample.runQueries()
     
     0
 

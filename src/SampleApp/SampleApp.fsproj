@@ -13,10 +13,12 @@
             <MyriadFile>../AdventureWorks/bin/Debug/AdventureWorks.dacpac</MyriadFile>
         </Compile>-->
 
-        <Compile Include="AdventureWorksMSSQL.fs">
+        <Compile Include="AdventureWorks.fs">
             <MyriadFile>myriad.toml</MyriadFile>
             <MyriadSdkVerboseOutput>true</MyriadSdkVerboseOutput>
         </Compile>
+
+        <Compile Include="DapperFSharpExample.fs" />
     </ItemGroup>
     
   <ItemGroup>
