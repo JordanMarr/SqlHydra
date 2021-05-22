@@ -1,5 +1,6 @@
 ﻿[ssdt]
-namespace = "AdventureWorks"
+namespace = "AdventureWorksSSDT"
 
 [sqlserver]
-namespace = "Crash"
+namespace = "AdventureWorksMSSQL"
+connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"

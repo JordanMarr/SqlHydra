@@ -1,4 +1,4 @@
-﻿namespace SqlHydra
+﻿module SqlHydra.Schema
 
 open System.Text.Json
     
@@ -23,11 +23,24 @@ type Schema = {
     Columns: Column array
 }
 
-module Utils = 
-    let serializeSchema (schemaPath: string) (schema: Schema) =
-        let json = JsonSerializer.Serialize(schema)
-        System.IO.File.WriteAllText(schemaPath, json)
+let internal errorSchema = 
+    { Tables = [| 
+        { Catalog = "Catalog"
+          Schema = "dbo"
+          Name = "Error"
+          Type = "BASE TABLE" } |]
+      Columns = [| 
+        { TableCatalog = "Catalog" 
+          TableSchema = "dbo"
+          TableName = "Error"
+          ColumnName = "Error"
+          DataType = "nvarchar"
+          IsNullable = false } |] }
 
-    let deserializeSchema (schemaPath: string) =
-        let json = System.IO.File.ReadAllText(schemaPath)
-        JsonSerializer.Deserialize<Schema>(json)
+let serialize (schemaPath: string) (schema: Schema) =
+    let json = JsonSerializer.Serialize(schema)
+    System.IO.File.WriteAllText(schemaPath, json)
+
+let deserialize (schemaPath: string) =
+    let json = System.IO.File.ReadAllText(schemaPath)
+    JsonSerializer.Deserialize<Schema>(json)

@@ -3,6 +3,8 @@ open Myriad.Core
 open FSharp.Compiler.SyntaxTree
 open FsAst
 open System.Diagnostics
+open Schema
+open System.IO
     
 module Gen = 
     let toRecord (tbl: Table, columns: Column list) = 
@@ -43,21 +45,36 @@ type SqlServerGenerator() =
             seq { ".toml" }
 
         member __.Generate(ctx: GeneratorContext) =
-            let connStr = "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"
-            let schemaPath = @"C:\_github\SqlHydra\src\SampleApp\mssql.json"
-            let exePath = @"C:\_github\SqlHydra\src\SqlHydra.SqlServer\bin\Debug\netcoreapp3.1\SqlHydra.SqlServer.exe"
 
-            let msSqlProvider = ProcessStartInfo(exePath, sprintf "\"%s\" \"%s\"" connStr schemaPath)
-            msSqlProvider.UseShellExecute <- false
-            msSqlProvider.CreateNoWindow <- true
-            msSqlProvider.WindowStyle <- ProcessWindowStyle.Hidden
+            // Get ssdt config
+            let config = ctx.ConfigGetter "sqlserver" |> Map.ofSeq
+            
+            let connStr =
+                config.TryFind("connection")
+                |> Option.map string
+                |> Option.defaultWith (fun () -> failwith "Unable to find 'sqlserver' 'connection' in myriad.toml.")
+
+            let inputFile = FileInfo(ctx.InputFilename)
+            let schemaPath = Path.Combine(inputFile.DirectoryName, "schema.json")
+
+            let assembly = System.Reflection.Assembly.GetExecutingAssembly()
+            let assemblyDir = FileInfo(assembly.Location).DirectoryName
+            let exePath = Path.Combine(assemblyDir, "SqlHydra.SqlServer.exe")
+            if not (File.Exists exePath) then failwithf "Unable to find provider: '%s'." exePath
 
             // Write json file
-            use exeProcess = Process.Start(msSqlProvider)
-            exeProcess.WaitForExit()
+            let createSchemaFile() = 
+                let msSqlProvider = ProcessStartInfo(exePath, sprintf "\"%s\" \"%s\"" connStr schemaPath)
+                msSqlProvider.UseShellExecute <- false
+                msSqlProvider.CreateNoWindow <- true
+                msSqlProvider.WindowStyle <- ProcessWindowStyle.Hidden
+                use exeProcess = Process.Start(msSqlProvider)
+                exeProcess.WaitForExit()
+
+            createSchemaFile()
             
             // Read schema
-            let schema = Utils.deserializeSchema (schemaPath)
+            let schema = Schema.deserialize (schemaPath)
 
             let columnsByTable =
                 schema.Columns
@@ -85,14 +102,12 @@ type SqlServerGenerator() =
                     SynModuleDecl.CreateNestedModule(moduleCmpInfo, records)
                 )
 
-            // Get ssdt config
-            let config = ctx.ConfigGetter "sqlserver"
+            
             // Get namespace
             let ns = 
-                config 
-                |> Seq.tryFind(fun (key, value) -> key = "namespace")
-                |> Option.map (fun (key, value) -> string value)
-                |> Option.defaultValue "Ssdt"
+                config.TryFind("namespace")
+                |> Option.map string
+                |> Option.defaultWith (fun () -> failwith "Unable to find 'sqlserver' 'namespace' in myriad.toml.")
 
             let namespaceOrModule =
                 { SynModuleOrNamespaceRcd.CreateNamespace(Ident.CreateLong ns)

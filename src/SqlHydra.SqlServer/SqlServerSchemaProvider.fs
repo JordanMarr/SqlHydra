@@ -2,7 +2,7 @@
 
 open System.Data
 open Microsoft.Data.SqlClient
-open SqlHydra
+open SqlHydra.Schema
 
 let getSchema (connectionString: string) : Schema = 
     use conn = new SqlConnection(connectionString)
