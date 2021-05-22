@@ -25,7 +25,6 @@
           <PackagePath>%(Identity)</PackagePath>
           <Visible>true</Visible>
       </Content>
-      <Compile Include="SqlServerDataTypes.fs" />
     <Compile Include="Schema.fs" />
     <Compile Include="SchemaGenerator.fs" />
   </ItemGroup>

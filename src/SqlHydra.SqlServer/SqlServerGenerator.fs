@@ -1,7 +1,8 @@
-﻿module SqlHydra.SqlServerGenerator
+﻿module SqlHydra.SqlServer.SqlServerGenerator
 
 open Myriad.Core
 open System.IO
+open SqlHydra
     
 [<MyriadGenerator("sqlserver")>]
 type SqlServerGenerator() =
@@ -35,7 +36,7 @@ type SqlServerGenerator() =
             if not (File.Exists exePath) then failwithf "Unable to find provider: '%s'." exePath
 
             // Call exe to pull schema and save as json
-            SchemaGenerator.createSchemaFile(exePath, connectionString, schemaOutputPath)
+            Schema.callSchemaProvider(exePath, connectionString, schemaOutputPath)
             
             // Read schema
             let schema = Schema.deserialize (schemaOutputPath)

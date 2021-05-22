@@ -10,32 +10,57 @@ let getSchema (connectionString: string) : Schema =
     let sTables = conn.GetSchema("Tables")
     let sColumns = conn.GetSchema("Columns")
 
+    let allColumns = 
+        sColumns.Rows
+        |> Seq.cast<DataRow>
+        |> Seq.map (fun col -> 
+            {| TableCatalog = col.["TABLE_CATALOG"] :?> string
+               TableSchema = col.["TABLE_SCHEMA"] :?> string
+               TableName = col.["TABLE_NAME"] :?> string
+               ColumnName = col.["COLUMN_NAME"] :?> string
+               DataType = col.["DATA_TYPE"] :?> string
+               IsNullable = 
+                match col.["IS_NULLABLE"] :?> string with 
+                | "YES" -> true
+                | _ -> false
+            |}
+        )
+
     let tables = 
         sTables.Rows
         |> Seq.cast<DataRow>
-        |> Seq.map (fun r -> 
-            { Table.Catalog = r.["TABLE_CATALOG"] :?> string
-              Table.Schema = r.["TABLE_SCHEMA"] :?> string
-              Table.Name = r.["TABLE_NAME"] :?> string
-              Table.Type = r.["TABLE_TYPE"] :?> string }
-        )
-        |> Seq.toArray
+        |> Seq.map (fun tbl -> 
+            let tableCatalog = tbl.["TABLE_CATALOG"] :?> string
+            let tableSchema = tbl.["TABLE_SCHEMA"] :?> string
+            let tableName  = tbl.["TABLE_NAME"] :?> string
+            let tableType = tbl.["TABLE_TYPE"] :?> string
 
-    let columns = 
-        sColumns.Rows
-        |> Seq.cast<DataRow>
-        |> Seq.map (fun r -> 
-            { Column.TableCatalog = r.["TABLE_CATALOG"] :?> string
-              Column.TableSchema = r.["TABLE_SCHEMA"] :?> string
-              Column.TableName = r.["TABLE_NAME"] :?> string
-              Column.ColumnName = r.["COLUMN_NAME"] :?> string
-              Column.DataType = r.["DATA_TYPE"] :?> string
-              Column.IsNullable = 
-                match r.["IS_NULLABLE"] :?> string with 
-                | "YES" -> true
-                | _ -> false
+            let columns = 
+                allColumns
+                |> Seq.filter (fun col -> 
+                    col.TableCatalog = tableCatalog && 
+                    col.TableSchema = tableSchema &&
+                    col.TableName = tableName
+                )
+                |> Seq.map (fun col -> 
+                    { Column.Name = col.ColumnName
+                      Column.IsNullable = col.IsNullable
+                      Column.DataType = col.DataType
+                      Column.ClrType = 
+                        SqlServerDataTypes.tryFindMapping(col.DataType) 
+                        |> Option.map (fun mapping -> mapping.ClrType)
+                        |> Option.defaultValue "obj"
+                    }
+                )
+                |> Seq.toArray
+
+            { Table.Catalog = tableCatalog
+              Table.Schema = tableSchema
+              Table.Name =  tableName
+              Table.Type = if tableType = "BASE TABLE" then TableType.Table else TableType.View
+              Table.Columns = columns
             }
         )
         |> Seq.toArray
 
-    { Tables = tables; Columns = columns }
+    { Tables = tables }
