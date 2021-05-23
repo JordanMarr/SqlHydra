@@ -3,24 +3,22 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.11.0</Version>
+    <Version>0.20.3-alpha</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.SqlServer is a Myriad plugin that generates F# records a SQL Server database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>    
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <Content Include="build\SqlHydra.SqlServer.InTest.props">
-      <PackagePath>%(Identity)</PackagePath>
-      <Visible>true</Visible>
-      <Pack>true</Pack>
-    </Content>
+    <None Include="build\SqlHydra.SqlServer.InTest.props" />
     <Content Include="build\SqlHydra.SqlServer.props">
       <PackagePath>%(Identity)</PackagePath>
       <Visible>true</Visible>
       <Pack>true</Pack>
     </Content>
+    <Compile Include="..\SqlHydra\Schema.fs" Link="Schema.fs" />
+    <Compile Include="..\SqlHydra\SchemaGenerator.fs" Link="SchemaGenerator.fs" />
     <Compile Include="SqlServerDataTypes.fs" />
     <Compile Include="SqlServerGenerator.fs" />
     <Compile Include="SqlServerSchemaProvider.fs" />
@@ -29,11 +27,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.3" />
+    <PackageReference Include="Myriad.Core" Version="0.5.3" />
+    <PackageReference Include="System.Text.Json" Version="5.0.2" />
     <PackageReference Update="FSharp.Core" Version="5.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,5 +38,18 @@
       <PackagePath></PackagePath>
     </None>
   </ItemGroup>
+  
+  <!--
+    Include the .exe console app in the NuGet package.
+  -->
+  <PropertyGroup>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.exe</AllowedOutputExtensionsInPackageBuildOutputFolder>    
+  </PropertyGroup>
+  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <BuildOutputInPackage Include="$(OutputPath)\*.exe" Exclude="*.dll" />
+    </ItemGroup>
+  </Target>
 
 </Project>
