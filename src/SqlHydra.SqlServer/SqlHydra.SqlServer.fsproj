@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.20.8-alpha</Version>
+    <Version>0.30.0</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.SqlServer is a Myriad plugin that generates F# records a SQL Server database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
