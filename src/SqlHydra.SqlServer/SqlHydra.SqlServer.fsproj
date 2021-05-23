@@ -50,9 +50,9 @@
   </PropertyGroup>
   <Target Name="CopySqlHydraExeToProviderFolder" DependsOnTargets="ResolveReferences">
     <ItemGroup>
-        <BuildOutputInPackage Include="$(OutputPath)\SqlHydra.*" Exclude="*.dll" >
-            <!--<TargetPath>Provider</TargetPath>-->
-        </BuildOutputInPackage>
+        <TfmSpecificPackageFile Include="$(OutputPath)\SqlHydra.*">
+            <PackagePath>lib/$(TargetFramework)/Provider</PackagePath>
+        </TfmSpecificPackageFile>
     </ItemGroup>
   </Target>
 
