@@ -39,73 +39,53 @@ namespace = "AdventureWorks"
 * Generated types can be used outside of project
 * Generated types can be checked into source control (build server friendly)
 
-## Use Case - RepoDb
-[RepoDb](https://repodb.net/) is a micro ORM that gives very high performance with strongly typed Linq style queries.
-In conjunction with SqlHydra-Myriad, you get the best of performance and type safety.
-Even better, RepoDb provides [first-class support](https://www.compositional-it.com/news-blog/repodb-on-f/) for F# features like Option types and records (no need for `[<CLIMutable>]` attributes) out-of-the-box!
+## Officially Recommended ORM: Dapper.FSharp!
 
-```fsharp
-module RepoDbExample
-open Microsoft.Data.SqlClient
-open RepoDb
-open AdventureWorks // Generated Types
+After creating SqlHydra, I was trying to find the perfect ORM to complement SqlHyda's generated records.
+Ideally, I wanted to find a library with 
+- Excellent F# support for records, Option types, etc.
+- Linq queries (to take advantage of strongly typed SqlHydra generated records)
 
-SqlServerBootstrap.Initialize()
+[FSharp.Dapper](https://github.com/Dzoukr/Dapper.FSharp) met the first critera with flying colors. 
+As the name suggests, Dapper.FSharp was written specifically for F# with simplicity and ease-of-use as the driving design priorities.
+FSharp.Dapper features custom F# Computation Expressions for selecting, inserting, updating and deleting, and support for F# Option types and records (no need for `[<CLIMutable>]` attributes!).
 
-FluentMapper
-    .Entity<SalesLT.Address>().Table("[SalesLT].[Address]") // Must manually register non- "dbo" schemas
-    |> ignore
+If only it had Linq queries, it would be the _perfect_ complement to SqlHydra...
 
-let connect() = 
-    let conn = new SqlConnection("Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;")
-    conn.Open()
-    conn
+_So_ I submitted a [PR](https://github.com/Dzoukr/Dapper.FSharp/pull/26) to Dapper.FSharp that adds Linq query expressions (now in v2.0+)!
 
-let runQueries() =    
-    use conn = connect()
-
-    conn.Query(fun (a: SalesLT.Address) -> a.City = "Dallas")
-    |> printfn "Addresses: %A"
-
-    conn.QueryAll<dbo.BuildVersion>()
-    |> printfn "Build Versions: %A"
-```
-
-## Use Case - FSharp.Dapper
-As the name implies, [FSharp.Dapper](https://github.com/Dzoukr/Dapper.FSharp) was written for F# with simplicity and ease-of-use as the driving design priorities.
-FSharp.Dapper features custom F# Computation Expressions for selecting, inserting, updating and deleting, and support for F# Option types and records (no need for `[<CLIMutable>]` attributes).
+This is the result:
 
 ```fsharp
 module DapperFSharpExample
 open System.Data
 open System.Data.SqlClient
-open Dapper.FSharp
+open Dapper.FSharp.LinqBuilders
 open Dapper.FSharp.MSSQL
 open AdventureWorks // Generated Types
 
 Dapper.FSharp.OptionTypes.register()
-
-let connect() = 
-    let cs = "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"
-    let conn = new SqlConnection(cs) :> IDbConnection
-    conn.Open()
-    conn
+    
+// Tables
+let customerTable =         table<Customer>         |> inSchema (nameof SalesLT)
+let customerAddressTable =  table<CustomerAddress>  |> inSchema (nameof SalesLT)
+let addressTable =          table<SalesLT.Address>  |> inSchema (nameof SalesLT)
 
 let getAddressesForCity(conn: IDbConnection) (city: string) = 
     select {
-        table "SalesLT.Address"
-        where (eq "City" city)
-    } 
-    |> conn.SelectAsync<SalesLT.Address>
-    |> Async.AwaitTask 
-
-let runQueries() = 
+        for a in addressTable do
+        where (a.City = city)
+    } |> conn.SelectAsync<SalesLT.Address>
     
-    use conn = connect()
-    
-    let addresses = getAddressesForCity conn "Dallas" |> Async.RunSynchronously
+let getCustomersWithAddresses(conn: IDbConnection) =
+    select {
+        for c in customerTable do
+        leftJoin ca in customerAddressTable on (c.CustomerID = ca.CustomerID)
+        leftJoin a  in addressTable on (ca.AddressID = a.AddressID)
+        where (isIn c.CustomerID [30018;29545;29954;29897;29503;29559])
+        orderBy c.CustomerID
+    } |> conn.SelectAsyncOption<Customer, CustomerAddress, Address>
 
-    printfn "Dallas Addresses: %A" addresses
 ```
 
 
