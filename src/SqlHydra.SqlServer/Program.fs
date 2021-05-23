@@ -1,7 +1,5 @@
-﻿open System
-open SqlHydra
+﻿open SqlHydra
 open SqlHydra.SqlServer
-open System.Text.Json
 
 [<EntryPoint>]
 let main argv =

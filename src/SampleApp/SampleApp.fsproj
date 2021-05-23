@@ -5,7 +5,12 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+    <!-- 
+        When debugging, you must include the ".InTest.Props" import below.
+        When testing the NuGet package, you must comment out the ".InTest.Props" import below.
+    -->
     <Import Project="..\SqlHydra.SqlServer\build\SqlHydra.SqlServer.InTest.props" />
+    
     <ItemGroup>
         <None Include="myriad.toml" />
         
@@ -15,7 +20,6 @@
 
         <Compile Include="AdventureWorks.fs">
             <MyriadFile>myriad.toml</MyriadFile>
-            <MyriadSdkVerboseOutput>true</MyriadSdkVerboseOutput>
         </Compile>
 
         <Compile Include="DapperFSharpExample.fs" />
