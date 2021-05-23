@@ -36,10 +36,10 @@ connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT
 
 4) Build your project to generate the .fs file.
 
-5) Your your new file should now be populated (along with a `schema.json` file which you can check-in or ignore).
+5) Your new file should now be populated (along with a `schema.json` file which you can check-in or ignore).
 
 ### Regenerating Records
-Myriad caches the input files and only runs again when changes are detected.
+Myriad caches the input file and only runs again when changes are detected.
 
 To rebuild, simply change the myriad.toml file and then Rebuild the project. (Rebuilding ensures that the the project is built even when no code changes are detected).
 
