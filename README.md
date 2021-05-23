@@ -1,5 +1,5 @@
 # SqlHydra
-SqlHydra is a collection of [Myriad](https://github.com/MoiraeSoftware/myriad) plugins that generate F# records for a given databse provider.
+SqlHydra is a collection of [Myriad](https://github.com/MoiraeSoftware/myriad) plugins that generate F# records for a given database provider.
 
 ### Benefits of Myriad
 * Myriad is fast and has a low impact on your build
