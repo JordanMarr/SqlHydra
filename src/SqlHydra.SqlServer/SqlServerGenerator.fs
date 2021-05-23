@@ -32,7 +32,7 @@ type SqlServerGenerator() =
 
             let assembly = System.Reflection.Assembly.GetExecutingAssembly()
             let assemblyDir = FileInfo(assembly.Location).DirectoryName
-            let exePath = Path.Combine(assemblyDir, "SqlHydra.SqlServer.exe")
+            let exePath = Path.Combine(assemblyDir, "Provider", "SqlHydra.SqlServer.exe")
             if not (File.Exists exePath) then failwithf "Unable to find provider: '%s'." exePath
 
             // Call exe to pull schema and save as json

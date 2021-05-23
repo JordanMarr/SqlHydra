@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.20.3-alpha</Version>
+    <Version>0.20.7-alpha</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.SqlServer is a Myriad plugin that generates F# records a SQL Server database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -43,12 +43,16 @@
     Include the .exe console app in the NuGet package.
   -->
   <PropertyGroup>
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.exe</AllowedOutputExtensionsInPackageBuildOutputFolder>    
+    <TargetsForTfmSpecificBuildOutput>
+        $(TargetsForTfmSpecificBuildOutput);CopySqlHydraExeToProviderFolder
+    </TargetsForTfmSpecificBuildOutput>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.json;.exe</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
-  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+  <Target Name="CopySqlHydraExeToProviderFolder" DependsOnTargets="ResolveReferences">
     <ItemGroup>
-      <BuildOutputInPackage Include="$(OutputPath)\*.exe" Exclude="*.dll" />
+        <BuildOutputInPackage Include="$(OutputPath)\SqlHydra.*" Exclude="*.dll" >
+            <!--<TargetPath>Provider</TargetPath>-->
+        </BuildOutputInPackage>
     </ItemGroup>
   </Target>
 
