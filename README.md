@@ -19,7 +19,7 @@ SqlHydra is a collection of [Myriad](https://github.com/MoiraeSoftware/myriad) p
 ```toml
 [sqlserver]
 namespace = "AdventureWorks"
-connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT;Integrated Security=SSPI"
 ```
 
 3) Add an `ItemGroup` to your .fsproj file and specifiy an output file:
