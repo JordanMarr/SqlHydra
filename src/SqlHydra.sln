@@ -17,6 +17,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SsdtTests", "SsdtTests\Ssdt
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SqlHydra.SqlServer", "SqlHydra.SqlServer\SqlHydra.SqlServer.fsproj", "{B8A5DF20-CA2D-45B3-B1E5-50986703D899}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SqlHydra.Sqlite", "SqlHydra.Sqlite\SqlHydra.Sqlite.fsproj", "{C2F002EB-5866-45AA-BBAD-DD5DA5AB4DCA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,18 @@ Global
 		{B8A5DF20-CA2D-45B3-B1E5-50986703D899}.Release|x64.Build.0 = Release|Any CPU
 		{B8A5DF20-CA2D-45B3-B1E5-50986703D899}.Release|x86.ActiveCfg = Release|Any CPU
 		{B8A5DF20-CA2D-45B3-B1E5-50986703D899}.Release|x86.Build.0 = Release|Any CPU
+		{C2F002EB-5866-45AA-BBAD-DD5DA5AB4DCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2F002EB-5866-45AA-BBAD-DD5DA5AB4DCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2F002EB-5866-45AA-BBAD-DD5DA5AB4DCA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C2F002EB-5866-45AA-BBAD-DD5DA5AB4DCA}.Debug|x64.Build.0 = Debug|Any CPU
+		{C2F002EB-5866-45AA-BBAD-DD5DA5AB4DCA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C2F002EB-5866-45AA-BBAD-DD5DA5AB4DCA}.Debug|x86.Build.0 = Debug|Any CPU
+		{C2F002EB-5866-45AA-BBAD-DD5DA5AB4DCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2F002EB-5866-45AA-BBAD-DD5DA5AB4DCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2F002EB-5866-45AA-BBAD-DD5DA5AB4DCA}.Release|x64.ActiveCfg = Release|Any CPU
+		{C2F002EB-5866-45AA-BBAD-DD5DA5AB4DCA}.Release|x64.Build.0 = Release|Any CPU
+		{C2F002EB-5866-45AA-BBAD-DD5DA5AB4DCA}.Release|x86.ActiveCfg = Release|Any CPU
+		{C2F002EB-5866-45AA-BBAD-DD5DA5AB4DCA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
