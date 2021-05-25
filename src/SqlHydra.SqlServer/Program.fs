@@ -10,7 +10,7 @@ open Fantomas
 [<EntryPoint>]
 let main argv =
     match argv with
-    | [| connectionString; outputFilePath |] -> 
+    | [| connectionString; nmspace; outputFilePath |] -> 
         let schema = SqlServerSchemaProvider.getSchema connectionString
 
         let declarations = 
@@ -19,7 +19,7 @@ let main argv =
             |> List.map SchemaGenerator.toRecord
 
         let xmlDoc = PreXmlDoc.Create [ ]
-        let sm = SynModuleOrNamespace.SynModuleOrNamespace([ "AdvWorks" |> Ident.Create ], true, SynModuleOrNamespaceKind.DeclaredNamespace,declarations,  xmlDoc, [ ], None, range.Zero)
+        let sm = SynModuleOrNamespace.SynModuleOrNamespace([ nmspace |> Ident.Create ], true, SynModuleOrNamespaceKind.DeclaredNamespace,declarations,  xmlDoc, [ ], None, range.Zero)
         let file = CodeGen.createFile [sm]
         let contents = CodeGen.formatAst file
         System.IO.File.WriteAllText(outputFilePath, contents)
