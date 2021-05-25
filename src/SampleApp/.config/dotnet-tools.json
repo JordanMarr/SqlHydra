@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "sqlhydra.sqlserver": {
+      "version": "0.31.0-alpha",
+      "commands": [
+        "sqlhydra-mssql"
+      ]
+    }
+  }
+}
