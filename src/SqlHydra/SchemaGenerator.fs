@@ -51,3 +51,10 @@ let generateSchema (ns: string, schema: Schema) =
             with Declarations = nestedModules }
 
     [ namespaceOrModule ]
+
+let generateRecordsBySchema (schema: Schema) = 
+    schema.Tables
+    |> Array.toList
+    |> List.groupBy (fun t -> t.Schema)
+    |> List.map (fun (schema, tables) -> schema, tables |> List.map toRecord)
+    
