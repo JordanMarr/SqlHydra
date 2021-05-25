@@ -10,7 +10,7 @@ Run the following commands from your project directory:
 
 ### Configure
 
-Create a batch file or shell script to your project directory to configure SqlHydra. Ex: `gen.bat` or `gen.sh`
+Create a batch file or shell script in your project directory to configure SqlHydra. Ex: `gen.bat` or `gen.sh`
 
 ```bat
 dotnet sqlhydra-mssql {connection string} {namespace} {filename.fs}
