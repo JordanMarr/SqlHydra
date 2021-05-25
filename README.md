@@ -231,7 +231,7 @@ The result is that it is now the _perfect_ complement to SqlHydra!
 Between the two, you can have strongly typed access to your database:
 
 ```fsharp
-module DapperFSharpExample
+module SampleApp.DapperFSharpExample
 open System.Data
 open System.Data.SqlClient
 open Dapper.FSharp.LinqBuilders
