@@ -15,7 +15,6 @@
     <Compile Include="..\SqlHydra\SchemaGenerator.fs" Link="SchemaGenerator.fs" />
     <Compile Include="SqlServerDataTypes.fs" />
     <Compile Include="SqlServerSchemaProvider.fs" />
-    <Compile Include="CodeGen.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

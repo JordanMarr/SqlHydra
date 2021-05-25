@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Fantomas" Version="4.4.0" />
     <PackageReference Include="FsAst" Version="0.9.0" />
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
