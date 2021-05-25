@@ -39,12 +39,3 @@ let serialize (schemaPath: string) (schema: Schema) =
 let deserialize (schemaPath: string) =
     let json = System.IO.File.ReadAllText(schemaPath)
     JsonSerializer.Deserialize<Schema>(json, jsonOptions)
-
-/// Calls the console app that pulls schema and saves as a json file.
-let callSchemaProvider(exePath: string, connStr: string, schemaPath: string) = 
-    let msSqlProvider = ProcessStartInfo(exePath, sprintf "\"%s\" \"%s\"" connStr schemaPath)
-    msSqlProvider.UseShellExecute <- false
-    msSqlProvider.CreateNoWindow <- true
-    msSqlProvider.WindowStyle <- ProcessWindowStyle.Hidden
-    use exeProcess = Process.Start(msSqlProvider)
-    exeProcess.WaitForExit()

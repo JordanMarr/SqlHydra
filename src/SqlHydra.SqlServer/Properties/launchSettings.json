@@ -2,7 +2,7 @@
   "profiles": {
     "SqlHydra.SqlServer": {
       "commandName": "Project",
-      "commandLineArgs": "\"Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI\" \"C:\\_github\\SqlHydra\\src\\SqlHydra.SqlServer\\bin\\Debug\""
+      "commandLineArgs": "\"Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI\" \"AdvWorks.fs\""
     }
   }
 }
