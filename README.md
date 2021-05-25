@@ -236,7 +236,7 @@ open System.Data
 open System.Data.SqlClient
 open Dapper.FSharp.LinqBuilders
 open Dapper.FSharp.MSSQL
-open AdventureWorks // Generated Types
+open SampleApp.AdventureWorks // Generated Types
 
 Dapper.FSharp.OptionTypes.register()
     
