@@ -15,12 +15,16 @@ let getSchema (connectionString: string) : Schema =
     let sTables = conn.GetSchema("Tables")
     let sColumns = conn.GetSchema("Columns")
 
+    // SQLite only supports one schema per file.
+    // We will override to be main; otherwise, all columns will have "sqlite_default_schema"
+    let defaultSchema = "main"
+
     let allColumns = 
         sColumns.Rows
         |> Seq.cast<DataRow>
         |> Seq.map (fun col -> 
             {| TableCatalog = col.["TABLE_CATALOG"] :?> string
-               TableSchema = col.["TABLE_SCHEMA"] :?> string
+               TableSchema = defaultSchema // col.["TABLE_SCHEMA"] :?> string
                TableName = col.["TABLE_NAME"] :?> string
                ColumnName = col.["COLUMN_NAME"] :?> string
                DataType = col.["DATA_TYPE"] :?> string
@@ -33,7 +37,7 @@ let getSchema (connectionString: string) : Schema =
         |> Seq.cast<DataRow>
         |> Seq.map (fun tbl -> 
             {| TableCatalog = tbl.["TABLE_CATALOG"] :?> string
-               TableSchema = tbl.["TABLE_SCHEMA"] |> dbNullOpt<string> |> Option.defaultValue "sqlite_default_schema"
+               TableSchema = tbl.["TABLE_SCHEMA"] |> dbNullOpt<string> |> Option.defaultValue defaultSchema
                TableName  = tbl.["TABLE_NAME"] :?> string
                TableType = tbl.["TABLE_TYPE"] :?> string |}
         )

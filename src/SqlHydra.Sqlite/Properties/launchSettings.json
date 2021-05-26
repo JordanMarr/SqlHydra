@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SqlHydra.Sqlite": {
+      "commandName": "Project",
+      "commandLineArgs": "\"Data Source=$(ProjectDir)\\..\\Tests\\TestData\\AdventureWorksLT.db\" \"SampleApp.AdventureWorks\" \"AdventureWorks.fs\""
+    }
+  }
+}
