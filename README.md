@@ -28,6 +28,33 @@ dotnet sqlhydra-mssql "Data Source=localhost\SQLEXPRESS;Initial Catalog=Adventur
 ### Regenerate Records
 1) Run your `gen.bat` (or `gen.sh`) file to refresh the output .fs file.
 
+## SqlHydra.Sqlite [![NuGet version (SqlHydra.Sqlite)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Sqlite/)
+
+### Local Install (recommended)
+Run the following commands from your project directory:
+1) `dotnet new tool-manifest`
+2) `dotnet tool install SqlHydra.Sqlite`
+
+### Configure
+
+Create a batch file or shell script (`gen.bat` or `gen.sh`) in your project directory with the following contents:
+
+```bat
+dotnet sqlhydra-sqlite {connection string} {namespace} {filename.fs}
+```
+
+_Example:_
+```bat
+dotnet sqlhydra-sqlite "Data Source=C:\MyProject\AdventureWorksLT.db" "SampleApp.AdventureWorks" "AdventureWorks.fs"
+```
+
+### Generate Records
+1) Run your `gen.bat` (or `gen.sh`) file to generate the output .fs file.
+2) Manually add the .fs file to your project.
+
+### Regenerate Records
+1) Run your `gen.bat` (or `gen.sh`) file to refresh the output .fs file.
+
 
 ### Example Output for AdventureWorks
 ```F#
