@@ -1,3 +1,0 @@
-﻿[sqlserver]
-namespace = "AdventureWorksMSSQL"
-connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"

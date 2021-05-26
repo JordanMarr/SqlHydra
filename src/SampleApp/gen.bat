@@ -1,0 +1,1 @@
+dotnet sqlhydra-mssql "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI" "SampleApp.AdventureWorks" "AdventureWorks.fs"

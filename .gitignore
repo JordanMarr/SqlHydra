@@ -8,6 +8,7 @@ node_modules
 deploy
 packages
 paket-files
+nupkg
 *.dll
 *UCASE.txt
 
