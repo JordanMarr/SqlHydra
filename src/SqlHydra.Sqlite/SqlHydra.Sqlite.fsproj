@@ -6,18 +6,17 @@
     <Version>0.40.0</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.Sqlite is a dotnet tool that generates F# records for a SQL Server database.</Description>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>sqlhydra-sqlite</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="build\SqlHydra.Sqlite.props">
-      <PackagePath>%(Identity)</PackagePath>
-      <Visible>true</Visible>
-      <Pack>true</Pack>
-    </Content>
-    <None Include="build\SqlHydra.Sqlite.InTest.props" />
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
     <Compile Include="..\SqlHydra\Schema.fs" Link="Schema.fs" />
     <Compile Include="..\SqlHydra\SchemaGenerator.fs" Link="SchemaGenerator.fs" />
     <Compile Include="SqliteDataTypes.fs" />
