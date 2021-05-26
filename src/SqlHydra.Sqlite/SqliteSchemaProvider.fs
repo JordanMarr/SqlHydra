@@ -54,9 +54,7 @@ let getSchema (connectionString: string) : Schema =
                     { Column.Name = col.ColumnName
                       Column.IsNullable = col.IsNullable
                       Column.DataType = col.DataType
-                      Column.ClrType = 
-                        SqliteDataTypes.tryFindClrType col.DataType
-                        |> Option.defaultValue "obj"
+                      Column.ClrType = SqliteDataTypes.findClrType col.DataType
                     }
                 )
                 |> Seq.toArray

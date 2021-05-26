@@ -48,6 +48,7 @@ let typeMappingsByName =
       "guid"            ,"System.Guid" ]
     |> Map.ofList
 
-let tryFindClrType (dataType: string) =
+let findClrType (dataType: string) =
     typeMappingsByName.TryFind (dataType.ToLower())
+    |> Option.defaultValue "obj"
 

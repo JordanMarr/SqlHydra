@@ -46,10 +46,7 @@ let getSchema (connectionString: string) : Schema =
                     { Column.Name = col.ColumnName
                       Column.IsNullable = col.IsNullable
                       Column.DataType = col.DataType
-                      Column.ClrType = 
-                        SqlServerDataTypes.tryFindMapping(col.DataType) 
-                        |> Option.map (fun mapping -> mapping.ClrType)
-                        |> Option.defaultValue "obj"
+                      Column.ClrType = SqlServerDataTypes.findClrType(col.DataType) 
                     }
                 )
                 |> Seq.toArray

@@ -54,6 +54,8 @@ let typeMappingsByName =
     )
     |> Map.ofList
 
-let tryFindMapping (dataType: string) =
+let findClrType (dataType: string) =
     typeMappingsByName.TryFind (dataType.ToUpper())
+    |> Option.map (fun m -> m.ClrType)
+    |> Option.defaultValue "obj"
 
