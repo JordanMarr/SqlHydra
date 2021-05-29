@@ -239,7 +239,7 @@ module SalesLT =
 
 
 
-## Officially Recommended ORM: Dapper.FSharp!
+## Officially Recommended ORM: Dapper.FSharp.Linq
 
 After creating SqlHydra, I was trying to find the perfect ORM to complement SqlHyda's generated records.
 Ideally, I wanted to find a library with 
@@ -254,13 +254,14 @@ If only it had Linq queries, it would be the _perfect_ complement to SqlHydra...
 
 So I submitted a [PR](https://github.com/Dzoukr/Dapper.FSharp/pull/26) to Dapper.FSharp that adds Linq query expressions (now in v2.0+)!
 
-The result is that it is now the _perfect_ complement to SqlHydra!
+[Dapper.FSharp.Linq](https://github.com/JordanMarr/Dapper.FSharp.Linq) is a more specialized version which takes the new Linq provider in Dapper.FSharp and adds some extra features that facilitate the generated types workflow.
+
 Between the two, you can have strongly typed access to your database:
 
 ```fsharp
 module SampleApp.DapperFSharpExample
 open System.Data
-open System.Data.SqlClient
+open Microsoft.Data.SqlClient
 open Dapper.FSharp.LinqBuilders
 open Dapper.FSharp.MSSQL
 open SampleApp.AdventureWorks // Generated Types
