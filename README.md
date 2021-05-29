@@ -1,6 +1,10 @@
 # SqlHydra
 SqlHydra is a collection of dotnet tools that generate F# records for a given database provider.
 
+Currently supported databases:
+- [SQL Server](https://github.com/JordanMarr/SqlHydra#sqlhydrasqlserver-)
+- [SQLite](https://github.com/JordanMarr/SqlHydra#sqlhydrasqlite-)
+
 ## SqlHydra.SqlServer [![NuGet version (SqlHydra.SqlServer)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.SqlServer/)
 
 ### Local Install (recommended)
