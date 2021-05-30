@@ -5,7 +5,7 @@
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
     <Version>0.40.0</Version>
     <Authors>Jordan Marr</Authors>
-    <Description>SqlHydra.Sqlite is a dotnet tool that generates F# records for a SQL Server database.</Description>
+    <Description>SqlHydra.Sqlite is a dotnet tool that generates F# records for a SQLite database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>sqlhydra-sqlite</ToolCommandName>
