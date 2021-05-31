@@ -42,7 +42,7 @@ let tableRecord (tbl: Table) =
         
     SynModuleDecl.CreateSimpleType(recordCmpInfo, recordDef)
 
-let generateModule (ns: string) (schema: Schema) = 
+let generateModule (cfg: Config) (schema: Schema) = 
     let recordsBySchema = 
         schema.Tables
         |> Array.toList
@@ -55,25 +55,26 @@ let generateModule (ns: string) (schema: Schema) =
             let schemaNestedModule = SynComponentInfoRcd.Create [ Ident.Create schema ]
 
             let tableRecordDeclarations = 
-                [ for record in tableRecords do 
-
-                    yield cliMutableAttribute
-                    yield record 
+                [ 
+                    for record in tableRecords do 
+                        if cfg.IsCLIMutable 
+                        then yield cliMutableAttribute
+                        yield record 
                 ]
 
             SynModuleDecl.CreateNestedModule(schemaNestedModule, tableRecordDeclarations)
         )
 
     let namespaceOrModule =
-        { SynModuleOrNamespaceRcd.CreateNamespace(Ident.CreateLong ns)
+        { SynModuleOrNamespaceRcd.CreateNamespace(Ident.CreateLong cfg.Namespace)
             with Declarations = nestedModules }
 
     namespaceOrModule
 
-let toFormattedCode (outputFilePath: string) (comment: string) (generatedModule: SynModuleOrNamespaceRcd) = 
+let toFormattedCode (cfg: Config) (comment: string) (generatedModule: SynModuleOrNamespaceRcd) = 
         let parsedInput = 
             ParsedInput.CreateImplFile(
-                ParsedImplFileInputRcd.CreateFs(outputFilePath).AddModule generatedModule)
+                ParsedImplFileInputRcd.CreateFs(cfg.OutputFile).AddModule generatedModule)
     
         let cfg = { FormatConfig.FormatConfig.Default with StrictMode = true }
         let formattedCode = CodeFormatter.FormatASTAsync(parsedInput, "output.fs", [], None, cfg) |> Async.RunSynchronously

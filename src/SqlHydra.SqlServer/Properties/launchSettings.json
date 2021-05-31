@@ -2,7 +2,7 @@
   "profiles": {
     "SqlHydra.SqlServer": {
       "commandName": "Project",
-      "commandLineArgs": "\"Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI\" \"SampleApp.AdventureWorks\" \"$(ProjectDir)/../SampleApp/AdventureWorks.fs\""
+      "commandLineArgs": "--connection \"Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI\" --output \"$(ProjectDir)/../SampleApp/AdventureWorks.fs\" --namespace \"SampleApp.AdventureWorks\" --cli-mutable"
     }
   }
 }

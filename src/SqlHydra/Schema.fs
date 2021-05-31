@@ -1,8 +1,6 @@
 ﻿module SqlHydra.Schema
 
-open System.Text.Json
-open System.Diagnostics
-open System.Text.Json.Serialization
+open Argu
 
 type Column = {
     Name: string
@@ -27,15 +25,23 @@ type Schema = {
     Tables: Table array
 }
 
-let jsonOptions = 
-    let opt = JsonSerializerOptions()
-    opt.Converters.Add(JsonStringEnumConverter())
-    opt
+type Config = {
+    ConnectionString: string
+    OutputFile: string
+    Namespace: string
+    IsCLIMutable: bool
+}
 
-let serialize (schemaPath: string) (schema: Schema) =
-    let json = JsonSerializer.Serialize(schema, jsonOptions)
-    System.IO.File.WriteAllText(schemaPath, json)
+type Arguments = 
+    | [<Mandatory>] Connection of string
+    | [<Mandatory>] Output of string
+    | Namespace of string
+    | CLI_Mutable
 
-let deserialize (schemaPath: string) =
-    let json = System.IO.File.ReadAllText(schemaPath)
-    JsonSerializer.Deserialize<Schema>(json, jsonOptions)
+    interface IArgParserTemplate with
+        member s.Usage =
+            match s with
+            | Connection _ -> "The database connection string."
+            | Namespace _ -> "The namespace of the generated .fs output file."
+            | Output _ -> "The file path where the .fs output file will be generated. (Relative paths are valid.)"
+            | CLI_Mutable -> "If this argument exists, a 'CLIMutable' attribute will be added to each record."

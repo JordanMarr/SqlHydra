@@ -4,8 +4,8 @@ open System.Data
 open Microsoft.Data.SqlClient
 open SqlHydra.Schema
 
-let getSchema (connectionString: string) : Schema = 
-    use conn = new SqlConnection(connectionString)
+let getSchema (cfg: Config) : Schema = 
+    use conn = new SqlConnection(cfg.ConnectionString)
     conn.Open()
     let sTables = conn.GetSchema("Tables")
     let sColumns = conn.GetSchema("Columns")
