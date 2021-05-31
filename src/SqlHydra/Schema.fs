@@ -33,11 +33,11 @@ type Config = {
 }
 
 type Arguments = 
-    | [<Mandatory>] Connection of string
-    | [<Mandatory>] Output of string
-    | Namespace of string
-    | CLI_Mutable
-
+    | [<Mandatory;  AltCommandLine("-c")>]      Connection of string
+    | [<Mandatory;  AltCommandLine("-o")>]      Output of string
+    | [<Mandatory;  AltCommandLine("-ns")>]     Namespace of string
+    |                                           CLI_Mutable
+    
     interface IArgParserTemplate with
         member s.Usage =
             match s with

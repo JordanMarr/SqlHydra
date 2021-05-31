@@ -23,9 +23,9 @@ let main argv =
             let parser = ArgumentParser.Create<Schema.Arguments>(command)
             let args = parser.Parse(argv)
 
-            { Config.ConnectionString = args.GetResult(Arguments.Connection, "required")
-              Config.Namespace = args.GetResult(Arguments.Namespace, "Generated")
-              Config.OutputFile = args.GetResult(Arguments.Output, "required")
+            { Config.ConnectionString = args.GetResult(Arguments.Connection)
+              Config.Namespace = args.GetResult(Arguments.Namespace)
+              Config.OutputFile = args.GetResult(Arguments.Output)
               Config.IsCLIMutable = args.Contains(Arguments.CLI_Mutable) }
 
     let formattedCode = 
