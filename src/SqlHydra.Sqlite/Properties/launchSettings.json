@@ -2,7 +2,7 @@
   "profiles": {
     "SqlHydra.Sqlite": {
       "commandName": "Project",
-      "commandLineArgs": "--connection \"Data Source=$(ProjectDir)\\..\\Tests\\TestData\\AdventureWorksLT.db\" --output \"$(ProjectDir)/../SampleApp/AdventureWorks.fs\" --namespace \"SampleApp.AdventureWorks\" --cli-mutable"
+      "commandLineArgs": "-c \"Data Source=$(ProjectDir)\\..\\Tests\\TestData\\AdventureWorksLT.db\" -o \"$(ProjectDir)/../SampleApp/AdventureWorks.fs\" -ns \"SampleApp.AdventureWorks\" --cli-mutable"
     }
   }
 }
