@@ -121,7 +121,7 @@ module SalesLT =
 
 ### Arguments
 
-| Name | Alias | Default | Description |
+| Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Alias | Default | Description |
 | ---- | ----- | ------- | ----------- |
 | --connection | -c | *Required* | The database connection string |
 | --output | -o | *Required* | A path to the generated .fs output file (relative paths are valid) |
