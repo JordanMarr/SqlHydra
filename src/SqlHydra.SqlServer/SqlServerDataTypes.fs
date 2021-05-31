@@ -15,8 +15,8 @@ let typeMappingsByName =
     [ "UNIQUEIDENTIFIER", "System.Guid", DbType.Guid, toInt SqlDbType.UniqueIdentifier
       "BIT", "bool", DbType.Boolean, toInt SqlDbType.Bit
       "INT", "int", DbType.Int32, toInt SqlDbType.Int
-      "BIGINT", "System.Int64", DbType.Int64, toInt SqlDbType.BigInt
-      "SMALLINT", "System.Int16", DbType.Int16, toInt SqlDbType.SmallInt
+      "BIGINT", "int64", DbType.Int64, toInt SqlDbType.BigInt
+      "SMALLINT", "int16", DbType.Int16, toInt SqlDbType.SmallInt
       "TINYINT", "byte", DbType.Byte, toInt SqlDbType.TinyInt
       "FLOAT", "double", DbType.Double, toInt SqlDbType.Float
       "REAL", "System.Single", DbType.Single, toInt SqlDbType.Real

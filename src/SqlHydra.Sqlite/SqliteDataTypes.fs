@@ -1,7 +1,7 @@
 ﻿module SqlHydra.Sqlite.SqliteDataTypes
 
 let typeMappingsByName =
-    [ "smallint"        ,"System.Int16"
+    [ "smallint"        ,"int16"
       "int"             ,"int"
       "real"            ,"double"
       "single"          ,"System.Single"
@@ -17,12 +17,12 @@ let typeMappingsByName =
       "bool"            ,"bool"
       "boolean"         ,"bool"
       "tinyint"         ,"byte"
-      "integer"         ,"System.Int64"    
-      "counter"         ,"System.Int64"    
-      "autoincrement"   ,"System.Int64"    
-      "identity"        ,"System.Int64"    
-      "long"            ,"System.Int64"    
-      "bigint"          ,"System.Int64"    
+      "integer"         ,"int64"    
+      "counter"         ,"int64"    
+      "autoincrement"   ,"int64"    
+      "identity"        ,"int64"    
+      "long"            ,"int64"    
+      "bigint"          ,"int64"    
       "binary"          ,"byte[]"   
       "varbinary"       ,"byte[]"   
       "blob"            ,"byte[]"   
