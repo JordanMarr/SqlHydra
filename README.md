@@ -134,7 +134,7 @@ _Example:_
 dotnet sqlhydra-mssql -c "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI" -o "AdventureWorks.fs" -ns "SampleApp.AdventureWorks" --cli-mutable
 ```
 
-## Officially Recommended ORM: Dapper.FSharp.Linq
+## Officially Recommended ORM: Dapper.FSharp
 
 After creating SqlHydra, I was trying to find the perfect ORM to complement SqlHyda's generated records.
 Ideally, I wanted to find a library with 
@@ -148,8 +148,6 @@ FSharp.Dapper features custom F# Computation Expressions for selecting, insertin
 If only it had Linq queries, it would be the _perfect_ complement to SqlHydra...
 
 So I submitted a [PR](https://github.com/Dzoukr/Dapper.FSharp/pull/26) to Dapper.FSharp that adds Linq query expressions (now in v2.0+)!
-
-[Dapper.FSharp.Linq](https://github.com/JordanMarr/Dapper.FSharp.Linq) is a more specialized version which takes the new Linq provider in Dapper.FSharp and adds some extra features that facilitate the generated types workflow.
 
 Between the two, you can have strongly typed access to your database:
 
