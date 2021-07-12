@@ -59,7 +59,7 @@ let tableReaderClass (tbl: Table) =
         tbl.Columns
         |> Array.toList
         |> List.map (fun col ->
-            let readerCall = 
+            let readerBasicCall = 
                 SynExpr.App(
                     ExprAtomicFlag.Atomic
                     , false
@@ -80,6 +80,13 @@ let tableReaderClass (tbl: Table) =
                     , range0 
                 )
 
+            let readerCall = 
+                if col.TypeMapping.DbType = DbType.Binary
+                then downcastToBytes readerBasicCall
+                else readerBasicCall
+
+            
+
             SynMemberDefn.AutoProperty(
                 []
                 , false
@@ -92,13 +99,11 @@ let tableReaderClass (tbl: Table) =
                         MemberFlags.IsDispatchSlot = false
                         MemberFlags.IsFinal = false
                         MemberFlags.IsOverrideOrExplicitImpl = false
-                        MemberFlags.MemberKind = MemberKind.PropertySet
+                        MemberFlags.MemberKind = MemberKind.PropertyGet
                     })
                 , XmlDoc.PreXmlDocEmpty
                 , None
-                , if col.TypeMapping.DbType = DbType.Binary
-                  then downcastToBytes readerCall
-                  else readerCall
+                , readerCall
                 , None
                 , range0)
         )
@@ -142,11 +147,15 @@ let generateModule (cfg: Config) (db: Schema) =
             SynModuleDecl.CreateNestedModule(schemaNestedModule, tableRecordDeclarations)
         )
 
-    let namespaceOrModule =
-        { SynModuleOrNamespaceRcd.CreateNamespace(Ident.CreateLong cfg.Namespace)
-            with Declarations = nestedSchemaModules }
+    //let openDataProvider = SynModuleDecl.CreateOpen("System.Data.SqlClient")
+    //let declarations = openDataProvider :: nestedSchemaModules
+    let declarations = nestedSchemaModules
 
-    namespaceOrModule
+    let parentNamespace =
+        { SynModuleOrNamespaceRcd.CreateNamespace(Ident.CreateLong cfg.Namespace)
+            with Declarations = declarations }
+
+    parentNamespace
 
 let toFormattedCode (cfg: Config) (comment: string) (generatedModule: SynModuleOrNamespaceRcd) = 
         let parsedInput = 
