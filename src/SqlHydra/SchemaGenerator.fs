@@ -46,7 +46,9 @@ let tableReaderClass (tbl: Table) =
     let classId = Ident.CreateLong(tbl.Name + "Reader")
     let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, Range.range.Zero)
 
-    let ctor = SynMemberDefn.CreateImplicitCtor()
+    let ctor = SynMemberDefn.CreateImplicitCtor([ 
+        SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent("System.Data.IDataReader"))
+    ])
 
     let prop =         
         SynMemberDefn.AutoProperty(
@@ -69,7 +71,7 @@ let tableReaderClass (tbl: Table) =
             , None
             , Range.range.Zero)
 
-    let members = SynMemberDefns.Cons(ctor, [prop])
+    let members = [ ctor; prop ]
 
     let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, Range.range.Zero)
 
