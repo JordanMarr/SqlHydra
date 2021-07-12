@@ -27,7 +27,7 @@ let getSchema (cfg: Config) : Schema =
                TableSchema = defaultSchema // col.["TABLE_SCHEMA"] :?> string
                TableName = col.["TABLE_NAME"] :?> string
                ColumnName = col.["COLUMN_NAME"] :?> string
-               DataType = col.["DATA_TYPE"] :?> string
+               ProviderTypeName = col.["DATA_TYPE"] :?> string
                IsNullable = col.["IS_NULLABLE"] :?> bool
             |}
         )
@@ -53,8 +53,7 @@ let getSchema (cfg: Config) : Schema =
                 |> Seq.map (fun col -> 
                     { Column.Name = col.ColumnName
                       Column.IsNullable = col.IsNullable
-                      Column.DataType = col.DataType
-                      Column.ClrType = SqliteDataTypes.findClrType col.DataType
+                      Column.TypeMapping = SqliteDataTypes.findTypeMapping(col.ProviderTypeName)
                     }
                 )
                 |> Seq.toArray

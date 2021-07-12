@@ -5,6 +5,7 @@ open FsAst
 open Fantomas
 open Schema
 open Range
+open System.Data
 
 let cliMutableAttribute = 
     let attr =
@@ -25,11 +26,11 @@ let tableRecord (tbl: Table) =
         tbl.Columns
         |> Array.map (fun col -> 
             let field = 
-                if col.ClrType = "byte[]" then 
+                if col.TypeMapping.ClrType = "byte[]" then 
                     let b = SynType.Create("byte")
                     SynType.Array(0, b, range.Zero)
                 else
-                    SynType.Create(col.ClrType)
+                    SynType.Create(col.TypeMapping.ClrType)
                     
             if col.IsNullable then                         
                 let opt = SynType.Option(field)
@@ -51,10 +52,33 @@ let tableReaderClass (tbl: Table) =
         SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent("System.Data.IDataReader"))
     ])
 
+    let downcastToBytes expr = SynExpr.Downcast(expr, SynType.Array(0, SynType.Byte(), range.Zero), range.Zero)
+
     let props =
         tbl.Columns
         |> Array.toList
-        |> List.map (fun col -> 
+        |> List.map (fun col ->
+            let readerCall = 
+                SynExpr.App(
+                    ExprAtomicFlag.Atomic
+                    , false
+                    , SynExpr.LongIdent(
+                        false
+                        , LongIdentWithDots.CreateString($"reader.{col.TypeMapping.ReaderMethod}")
+                        , None
+                        , range.Zero)
+                    , SynExpr.CreateParen(
+                        SynExpr.App(
+                            ExprAtomicFlag.Atomic
+                            , false
+                            , SynExpr.LongIdent(false, LongIdentWithDots.CreateString("reader.GetOrdinal"), None, range.Zero)
+                            , SynExpr.CreateConstString(col.Name)
+                            , range.Zero 
+                        )
+                    )
+                    , range.Zero 
+                )
+
             SynMemberDefn.AutoProperty(
                 []
                 , false
@@ -71,21 +95,9 @@ let tableReaderClass (tbl: Table) =
                     })
                 , XmlDoc.PreXmlDocEmpty
                 , None
-                , SynExpr.App(
-                    ExprAtomicFlag.Atomic
-                    , false
-                    , SynExpr.LongIdent(false, LongIdentWithDots.CreateString("reader.GetString"), None, range.Zero)
-                    , SynExpr.CreateParen(
-                        SynExpr.App(
-                            ExprAtomicFlag.Atomic
-                            , false
-                            , SynExpr.LongIdent(false, LongIdentWithDots.CreateString("reader.GetOrdinal"), None, range.Zero)
-                            , SynExpr.CreateConstString(col.Name)
-                            , range.Zero 
-                        )
-                    )
-                    , range.Zero 
-                )
+                , if col.TypeMapping.DbType = DbType.Binary
+                  then downcastToBytes readerCall
+                  else readerCall
                 , None
                 , range.Zero)
         )

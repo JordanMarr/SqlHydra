@@ -1,11 +1,18 @@
 ﻿module SqlHydra.Schema
 
 open Argu
+open System.Data
+
+type TypeMapping = {
+    ClrType: string
+    DbType: DbType
+    ProviderTypeName: string
+    ReaderMethod: string
+}
 
 type Column = {
     Name: string
-    DataType: string
-    ClrType: string
+    TypeMapping: TypeMapping
     IsNullable: bool
 }
 

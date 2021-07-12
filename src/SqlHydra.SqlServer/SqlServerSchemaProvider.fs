@@ -18,7 +18,7 @@ let getSchema (cfg: Config) : Schema =
                TableSchema = col.["TABLE_SCHEMA"] :?> string
                TableName = col.["TABLE_NAME"] :?> string
                ColumnName = col.["COLUMN_NAME"] :?> string
-               DataType = col.["DATA_TYPE"] :?> string
+               ProviderTypeName = col.["DATA_TYPE"] :?> string
                IsNullable = 
                 match col.["IS_NULLABLE"] :?> string with 
                 | "YES" -> true
@@ -45,8 +45,7 @@ let getSchema (cfg: Config) : Schema =
                 |> Seq.map (fun col -> 
                     { Column.Name = col.ColumnName
                       Column.IsNullable = col.IsNullable
-                      Column.DataType = col.DataType
-                      Column.ClrType = SqlServerDataTypes.findClrType(col.DataType) 
+                      Column.TypeMapping = SqlServerDataTypes.findTypeMapping(col.ProviderTypeName)
                     }
                 )
                 |> Seq.toArray
