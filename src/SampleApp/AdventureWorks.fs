@@ -15,15 +15,15 @@ module main =
           ErrorMessage: string }
 
     type ErrorLogReader(reader: System.Data.IDataReader) =
-        member val ErrorLogID = reader.GetString 0
-        member val ErrorTime = reader.GetString 0
-        member val UserName = reader.GetString 0
-        member val ErrorNumber = reader.GetString 0
-        member val ErrorSeverity = reader.GetString 0
-        member val ErrorState = reader.GetString 0
-        member val ErrorProcedure = reader.GetString 0
-        member val ErrorLine = reader.GetString 0
-        member val ErrorMessage = reader.GetString 0
+        member val ErrorLogID = reader.GetString(reader.GetOrdinal "ErrorLogID")
+        member val ErrorTime = reader.GetString(reader.GetOrdinal "ErrorTime")
+        member val UserName = reader.GetString(reader.GetOrdinal "UserName")
+        member val ErrorNumber = reader.GetString(reader.GetOrdinal "ErrorNumber")
+        member val ErrorSeverity = reader.GetString(reader.GetOrdinal "ErrorSeverity")
+        member val ErrorState = reader.GetString(reader.GetOrdinal "ErrorState")
+        member val ErrorProcedure = reader.GetString(reader.GetOrdinal "ErrorProcedure")
+        member val ErrorLine = reader.GetString(reader.GetOrdinal "ErrorLine")
+        member val ErrorMessage = reader.GetString(reader.GetOrdinal "ErrorMessage")
 
     [<CLIMutable>]
     type BuildVersion =
@@ -33,10 +33,10 @@ module main =
           ModifiedDate: System.DateTime }
 
     type BuildVersionReader(reader: System.Data.IDataReader) =
-        member val SystemInformationID = reader.GetString 0
-        member val ``Database Version`` = reader.GetString 0
-        member val VersionDate = reader.GetString 0
-        member val ModifiedDate = reader.GetString 0
+        member val SystemInformationID = reader.GetString(reader.GetOrdinal "SystemInformationID")
+        member val ``Database Version`` = reader.GetString(reader.GetOrdinal "Database Version")
+        member val VersionDate = reader.GetString(reader.GetOrdinal "VersionDate")
+        member val ModifiedDate = reader.GetString(reader.GetOrdinal "ModifiedDate")
 
     [<CLIMutable>]
     type Address =
@@ -51,15 +51,15 @@ module main =
           ModifiedDate: System.DateTime }
 
     type AddressReader(reader: System.Data.IDataReader) =
-        member val AddressID = reader.GetString 0
-        member val AddressLine1 = reader.GetString 0
-        member val AddressLine2 = reader.GetString 0
-        member val City = reader.GetString 0
-        member val StateProvince = reader.GetString 0
-        member val CountryRegion = reader.GetString 0
-        member val PostalCode = reader.GetString 0
-        member val rowguid = reader.GetString 0
-        member val ModifiedDate = reader.GetString 0
+        member val AddressID = reader.GetString(reader.GetOrdinal "AddressID")
+        member val AddressLine1 = reader.GetString(reader.GetOrdinal "AddressLine1")
+        member val AddressLine2 = reader.GetString(reader.GetOrdinal "AddressLine2")
+        member val City = reader.GetString(reader.GetOrdinal "City")
+        member val StateProvince = reader.GetString(reader.GetOrdinal "StateProvince")
+        member val CountryRegion = reader.GetString(reader.GetOrdinal "CountryRegion")
+        member val PostalCode = reader.GetString(reader.GetOrdinal "PostalCode")
+        member val rowguid = reader.GetString(reader.GetOrdinal "rowguid")
+        member val ModifiedDate = reader.GetString(reader.GetOrdinal "ModifiedDate")
 
     [<CLIMutable>]
     type Customer =
@@ -80,21 +80,21 @@ module main =
           ModifiedDate: System.DateTime }
 
     type CustomerReader(reader: System.Data.IDataReader) =
-        member val CustomerID = reader.GetString 0
-        member val NameStyle = reader.GetString 0
-        member val Title = reader.GetString 0
-        member val FirstName = reader.GetString 0
-        member val MiddleName = reader.GetString 0
-        member val LastName = reader.GetString 0
-        member val Suffix = reader.GetString 0
-        member val CompanyName = reader.GetString 0
-        member val SalesPerson = reader.GetString 0
-        member val EmailAddress = reader.GetString 0
-        member val Phone = reader.GetString 0
-        member val PasswordHash = reader.GetString 0
-        member val PasswordSalt = reader.GetString 0
-        member val rowguid = reader.GetString 0
-        member val ModifiedDate = reader.GetString 0
+        member val CustomerID = reader.GetString(reader.GetOrdinal "CustomerID")
+        member val NameStyle = reader.GetString(reader.GetOrdinal "NameStyle")
+        member val Title = reader.GetString(reader.GetOrdinal "Title")
+        member val FirstName = reader.GetString(reader.GetOrdinal "FirstName")
+        member val MiddleName = reader.GetString(reader.GetOrdinal "MiddleName")
+        member val LastName = reader.GetString(reader.GetOrdinal "LastName")
+        member val Suffix = reader.GetString(reader.GetOrdinal "Suffix")
+        member val CompanyName = reader.GetString(reader.GetOrdinal "CompanyName")
+        member val SalesPerson = reader.GetString(reader.GetOrdinal "SalesPerson")
+        member val EmailAddress = reader.GetString(reader.GetOrdinal "EmailAddress")
+        member val Phone = reader.GetString(reader.GetOrdinal "Phone")
+        member val PasswordHash = reader.GetString(reader.GetOrdinal "PasswordHash")
+        member val PasswordSalt = reader.GetString(reader.GetOrdinal "PasswordSalt")
+        member val rowguid = reader.GetString(reader.GetOrdinal "rowguid")
+        member val ModifiedDate = reader.GetString(reader.GetOrdinal "ModifiedDate")
 
     [<CLIMutable>]
     type CustomerAddress =
@@ -105,11 +105,11 @@ module main =
           ModifiedDate: System.DateTime }
 
     type CustomerAddressReader(reader: System.Data.IDataReader) =
-        member val CustomerID = reader.GetString 0
-        member val AddressID = reader.GetString 0
-        member val AddressType = reader.GetString 0
-        member val rowguid = reader.GetString 0
-        member val ModifiedDate = reader.GetString 0
+        member val CustomerID = reader.GetString(reader.GetOrdinal "CustomerID")
+        member val AddressID = reader.GetString(reader.GetOrdinal "AddressID")
+        member val AddressType = reader.GetString(reader.GetOrdinal "AddressType")
+        member val rowguid = reader.GetString(reader.GetOrdinal "rowguid")
+        member val ModifiedDate = reader.GetString(reader.GetOrdinal "ModifiedDate")
 
     [<CLIMutable>]
     type Product =
@@ -132,23 +132,23 @@ module main =
           ModifiedDate: System.DateTime }
 
     type ProductReader(reader: System.Data.IDataReader) =
-        member val ProductID = reader.GetString 0
-        member val Name = reader.GetString 0
-        member val ProductNumber = reader.GetString 0
-        member val Color = reader.GetString 0
-        member val StandardCost = reader.GetString 0
-        member val ListPrice = reader.GetString 0
-        member val Size = reader.GetString 0
-        member val Weight = reader.GetString 0
-        member val ProductCategoryID = reader.GetString 0
-        member val ProductModelID = reader.GetString 0
-        member val SellStartDate = reader.GetString 0
-        member val SellEndDate = reader.GetString 0
-        member val DiscontinuedDate = reader.GetString 0
-        member val ThumbNailPhoto = reader.GetString 0
-        member val ThumbnailPhotoFileName = reader.GetString 0
-        member val rowguid = reader.GetString 0
-        member val ModifiedDate = reader.GetString 0
+        member val ProductID = reader.GetString(reader.GetOrdinal "ProductID")
+        member val Name = reader.GetString(reader.GetOrdinal "Name")
+        member val ProductNumber = reader.GetString(reader.GetOrdinal "ProductNumber")
+        member val Color = reader.GetString(reader.GetOrdinal "Color")
+        member val StandardCost = reader.GetString(reader.GetOrdinal "StandardCost")
+        member val ListPrice = reader.GetString(reader.GetOrdinal "ListPrice")
+        member val Size = reader.GetString(reader.GetOrdinal "Size")
+        member val Weight = reader.GetString(reader.GetOrdinal "Weight")
+        member val ProductCategoryID = reader.GetString(reader.GetOrdinal "ProductCategoryID")
+        member val ProductModelID = reader.GetString(reader.GetOrdinal "ProductModelID")
+        member val SellStartDate = reader.GetString(reader.GetOrdinal "SellStartDate")
+        member val SellEndDate = reader.GetString(reader.GetOrdinal "SellEndDate")
+        member val DiscontinuedDate = reader.GetString(reader.GetOrdinal "DiscontinuedDate")
+        member val ThumbNailPhoto = reader.GetString(reader.GetOrdinal "ThumbNailPhoto")
+        member val ThumbnailPhotoFileName = reader.GetString(reader.GetOrdinal "ThumbnailPhotoFileName")
+        member val rowguid = reader.GetString(reader.GetOrdinal "rowguid")
+        member val ModifiedDate = reader.GetString(reader.GetOrdinal "ModifiedDate")
 
     [<CLIMutable>]
     type ProductCategory =
@@ -159,11 +159,11 @@ module main =
           ModifiedDate: System.DateTime }
 
     type ProductCategoryReader(reader: System.Data.IDataReader) =
-        member val ProductCategoryID = reader.GetString 0
-        member val ParentProductCategoryID = reader.GetString 0
-        member val Name = reader.GetString 0
-        member val rowguid = reader.GetString 0
-        member val ModifiedDate = reader.GetString 0
+        member val ProductCategoryID = reader.GetString(reader.GetOrdinal "ProductCategoryID")
+        member val ParentProductCategoryID = reader.GetString(reader.GetOrdinal "ParentProductCategoryID")
+        member val Name = reader.GetString(reader.GetOrdinal "Name")
+        member val rowguid = reader.GetString(reader.GetOrdinal "rowguid")
+        member val ModifiedDate = reader.GetString(reader.GetOrdinal "ModifiedDate")
 
     [<CLIMutable>]
     type ProductDescription =
@@ -173,10 +173,10 @@ module main =
           ModifiedDate: System.DateTime }
 
     type ProductDescriptionReader(reader: System.Data.IDataReader) =
-        member val ProductDescriptionID = reader.GetString 0
-        member val Description = reader.GetString 0
-        member val rowguid = reader.GetString 0
-        member val ModifiedDate = reader.GetString 0
+        member val ProductDescriptionID = reader.GetString(reader.GetOrdinal "ProductDescriptionID")
+        member val Description = reader.GetString(reader.GetOrdinal "Description")
+        member val rowguid = reader.GetString(reader.GetOrdinal "rowguid")
+        member val ModifiedDate = reader.GetString(reader.GetOrdinal "ModifiedDate")
 
     [<CLIMutable>]
     type ProductModel =
@@ -187,11 +187,11 @@ module main =
           ModifiedDate: System.DateTime }
 
     type ProductModelReader(reader: System.Data.IDataReader) =
-        member val ProductModelID = reader.GetString 0
-        member val Name = reader.GetString 0
-        member val CatalogDescription = reader.GetString 0
-        member val rowguid = reader.GetString 0
-        member val ModifiedDate = reader.GetString 0
+        member val ProductModelID = reader.GetString(reader.GetOrdinal "ProductModelID")
+        member val Name = reader.GetString(reader.GetOrdinal "Name")
+        member val CatalogDescription = reader.GetString(reader.GetOrdinal "CatalogDescription")
+        member val rowguid = reader.GetString(reader.GetOrdinal "rowguid")
+        member val ModifiedDate = reader.GetString(reader.GetOrdinal "ModifiedDate")
 
     [<CLIMutable>]
     type ProductModelProductDescription =
@@ -202,11 +202,11 @@ module main =
           ModifiedDate: System.DateTime }
 
     type ProductModelProductDescriptionReader(reader: System.Data.IDataReader) =
-        member val ProductModelID = reader.GetString 0
-        member val ProductDescriptionID = reader.GetString 0
-        member val Culture = reader.GetString 0
-        member val rowguid = reader.GetString 0
-        member val ModifiedDate = reader.GetString 0
+        member val ProductModelID = reader.GetString(reader.GetOrdinal "ProductModelID")
+        member val ProductDescriptionID = reader.GetString(reader.GetOrdinal "ProductDescriptionID")
+        member val Culture = reader.GetString(reader.GetOrdinal "Culture")
+        member val rowguid = reader.GetString(reader.GetOrdinal "rowguid")
+        member val ModifiedDate = reader.GetString(reader.GetOrdinal "ModifiedDate")
 
     [<CLIMutable>]
     type SalesOrderDetail =
@@ -221,15 +221,15 @@ module main =
           ModifiedDate: System.DateTime }
 
     type SalesOrderDetailReader(reader: System.Data.IDataReader) =
-        member val SalesOrderID = reader.GetString 0
-        member val SalesOrderDetailID = reader.GetString 0
-        member val OrderQty = reader.GetString 0
-        member val ProductID = reader.GetString 0
-        member val UnitPrice = reader.GetString 0
-        member val UnitPriceDiscount = reader.GetString 0
-        member val LineTotal = reader.GetString 0
-        member val rowguid = reader.GetString 0
-        member val ModifiedDate = reader.GetString 0
+        member val SalesOrderID = reader.GetString(reader.GetOrdinal "SalesOrderID")
+        member val SalesOrderDetailID = reader.GetString(reader.GetOrdinal "SalesOrderDetailID")
+        member val OrderQty = reader.GetString(reader.GetOrdinal "OrderQty")
+        member val ProductID = reader.GetString(reader.GetOrdinal "ProductID")
+        member val UnitPrice = reader.GetString(reader.GetOrdinal "UnitPrice")
+        member val UnitPriceDiscount = reader.GetString(reader.GetOrdinal "UnitPriceDiscount")
+        member val LineTotal = reader.GetString(reader.GetOrdinal "LineTotal")
+        member val rowguid = reader.GetString(reader.GetOrdinal "rowguid")
+        member val ModifiedDate = reader.GetString(reader.GetOrdinal "ModifiedDate")
 
     [<CLIMutable>]
     type SalesOrderHeader =
@@ -257,25 +257,25 @@ module main =
           ModifiedDate: System.DateTime }
 
     type SalesOrderHeaderReader(reader: System.Data.IDataReader) =
-        member val SalesOrderID = reader.GetString 0
-        member val RevisionNumber = reader.GetString 0
-        member val OrderDate = reader.GetString 0
-        member val DueDate = reader.GetString 0
-        member val ShipDate = reader.GetString 0
-        member val Status = reader.GetString 0
-        member val OnlineOrderFlag = reader.GetString 0
-        member val SalesOrderNumber = reader.GetString 0
-        member val PurchaseOrderNumber = reader.GetString 0
-        member val AccountNumber = reader.GetString 0
-        member val CustomerID = reader.GetString 0
-        member val ShipToAddressID = reader.GetString 0
-        member val BillToAddressID = reader.GetString 0
-        member val ShipMethod = reader.GetString 0
-        member val CreditCardApprovalCode = reader.GetString 0
-        member val SubTotal = reader.GetString 0
-        member val TaxAmt = reader.GetString 0
-        member val Freight = reader.GetString 0
-        member val TotalDue = reader.GetString 0
-        member val Comment = reader.GetString 0
-        member val rowguid = reader.GetString 0
-        member val ModifiedDate = reader.GetString 0
+        member val SalesOrderID = reader.GetString(reader.GetOrdinal "SalesOrderID")
+        member val RevisionNumber = reader.GetString(reader.GetOrdinal "RevisionNumber")
+        member val OrderDate = reader.GetString(reader.GetOrdinal "OrderDate")
+        member val DueDate = reader.GetString(reader.GetOrdinal "DueDate")
+        member val ShipDate = reader.GetString(reader.GetOrdinal "ShipDate")
+        member val Status = reader.GetString(reader.GetOrdinal "Status")
+        member val OnlineOrderFlag = reader.GetString(reader.GetOrdinal "OnlineOrderFlag")
+        member val SalesOrderNumber = reader.GetString(reader.GetOrdinal "SalesOrderNumber")
+        member val PurchaseOrderNumber = reader.GetString(reader.GetOrdinal "PurchaseOrderNumber")
+        member val AccountNumber = reader.GetString(reader.GetOrdinal "AccountNumber")
+        member val CustomerID = reader.GetString(reader.GetOrdinal "CustomerID")
+        member val ShipToAddressID = reader.GetString(reader.GetOrdinal "ShipToAddressID")
+        member val BillToAddressID = reader.GetString(reader.GetOrdinal "BillToAddressID")
+        member val ShipMethod = reader.GetString(reader.GetOrdinal "ShipMethod")
+        member val CreditCardApprovalCode = reader.GetString(reader.GetOrdinal "CreditCardApprovalCode")
+        member val SubTotal = reader.GetString(reader.GetOrdinal "SubTotal")
+        member val TaxAmt = reader.GetString(reader.GetOrdinal "TaxAmt")
+        member val Freight = reader.GetString(reader.GetOrdinal "Freight")
+        member val TotalDue = reader.GetString(reader.GetOrdinal "TotalDue")
+        member val Comment = reader.GetString(reader.GetOrdinal "Comment")
+        member val rowguid = reader.GetString(reader.GetOrdinal "rowguid")
+        member val ModifiedDate = reader.GetString(reader.GetOrdinal "ModifiedDate")

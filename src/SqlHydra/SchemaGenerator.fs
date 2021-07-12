@@ -4,14 +4,15 @@ open FSharp.Compiler
 open FsAst
 open Fantomas
 open Schema
+open Range
 
 let cliMutableAttribute = 
     let attr =
         { TypeName = LongIdentWithDots.CreateString "CLIMutable"
-          ArgExpr = SynExpr.CreateUnit
-          Target = None
-          AppliesToGetterAndSetter = false
-          Range = Range.range.Zero } : SynAttribute
+        ; ArgExpr = SynExpr.CreateUnit
+        ; Target = None
+        ; AppliesToGetterAndSetter = false
+        ; Range = range.Zero } : SynAttribute
 
     let atts = [ SynAttributeList.Create(attr) ]
     SynModuleDecl.CreateAttributes(atts)
@@ -26,7 +27,7 @@ let tableRecord (tbl: Table) =
             let field = 
                 if col.ClrType = "byte[]" then 
                     let b = SynType.Create("byte")
-                    SynType.Array(0, b, Range.range.Zero)
+                    SynType.Array(0, b, range.Zero)
                 else
                     SynType.Create(col.ClrType)
                     
@@ -44,7 +45,7 @@ let tableRecord (tbl: Table) =
 
 let tableReaderClass (tbl: Table) = 
     let classId = Ident.CreateLong(tbl.Name + "Reader")
-    let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, Range.range.Zero)
+    let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, range.Zero)
 
     let ctor = SynMemberDefn.CreateImplicitCtor([ 
         SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent("System.Data.IDataReader"))
@@ -70,23 +71,37 @@ let tableReaderClass (tbl: Table) =
                     })
                 , XmlDoc.PreXmlDocEmpty
                 , None
-                , SynExpr.App(ExprAtomicFlag.Atomic, false, SynExpr.LongIdent(false, LongIdentWithDots.CreateString("reader.GetString"), None, Range.range.Zero), SynExpr.Const(SynConst.Int32(0), Range.range.Zero), Range.range.Zero )
+                , SynExpr.App(
+                    ExprAtomicFlag.Atomic
+                    , false
+                    , SynExpr.LongIdent(false, LongIdentWithDots.CreateString("reader.GetString"), None, range.Zero)
+                    , SynExpr.CreateParen(
+                        SynExpr.App(
+                            ExprAtomicFlag.Atomic
+                            , false
+                            , SynExpr.LongIdent(false, LongIdentWithDots.CreateString("reader.GetOrdinal"), None, range.Zero)
+                            , SynExpr.CreateConstString(col.Name)
+                            , range.Zero 
+                        )
+                    )
+                    , range.Zero 
+                )
                 , None
-                , Range.range.Zero)
+                , range.Zero)
         )
 
     let members =  ctor :: props
 
-    let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, Range.range.Zero)
+    let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range.Zero)
 
     let readerClass = 
         SynTypeDefn.TypeDefn(
             classCmpInfo,
             typeRepr,
             SynMemberDefns.Empty,
-            Range.range.Zero)
+            range.Zero)
     
-    SynModuleDecl.Types([readerClass], Range.range.Zero)
+    SynModuleDecl.Types([ readerClass ], range.Zero)
 
 let generateModule (cfg: Config) (db: Schema) = 
     let schemas = db.Tables |> Array.map (fun t -> t.Schema) |> Array.distinct
