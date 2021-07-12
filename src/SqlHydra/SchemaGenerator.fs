@@ -50,28 +50,32 @@ let tableReaderClass (tbl: Table) =
         SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent("System.Data.IDataReader"))
     ])
 
-    let prop =         
-        SynMemberDefn.AutoProperty(
-            []
-            , false
-            , Ident.Create("FirstName")
-            , None
-            , MemberKind.PropertyGet
-            , (fun mk -> 
-                {
-                    MemberFlags.IsInstance = true
-                    MemberFlags.IsDispatchSlot = false
-                    MemberFlags.IsFinal = false
-                    MemberFlags.IsOverrideOrExplicitImpl = false
-                    MemberFlags.MemberKind = MemberKind.PropertySet
-                })
-            , XmlDoc.PreXmlDocEmpty
-            , None
-            , SynExpr.CreateConstString("FirstName")
-            , None
-            , Range.range.Zero)
+    let props =
+        tbl.Columns
+        |> Array.toList
+        |> List.map (fun col -> 
+            SynMemberDefn.AutoProperty(
+                []
+                , false
+                , Ident.Create(col.Name)
+                , None
+                , MemberKind.PropertyGet
+                , (fun mk -> 
+                    {
+                        MemberFlags.IsInstance = true
+                        MemberFlags.IsDispatchSlot = false
+                        MemberFlags.IsFinal = false
+                        MemberFlags.IsOverrideOrExplicitImpl = false
+                        MemberFlags.MemberKind = MemberKind.PropertySet
+                    })
+                , XmlDoc.PreXmlDocEmpty
+                , None
+                , SynExpr.App(ExprAtomicFlag.Atomic, false, SynExpr.LongIdent(false, LongIdentWithDots.CreateString("reader.GetString"), None, Range.range.Zero), SynExpr.Const(SynConst.Int32(0), Range.range.Zero), Range.range.Zero )
+                , None
+                , Range.range.Zero)
+        )
 
-    let members = [ ctor; prop ]
+    let members =  ctor :: props
 
     let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, Range.range.Zero)
 
