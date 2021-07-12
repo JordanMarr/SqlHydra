@@ -42,24 +42,67 @@ let tableRecord (tbl: Table) =
         
     SynModuleDecl.CreateSimpleType(recordCmpInfo, recordDef)
 
-let generateModule (cfg: Config) (schema: Schema) = 
-    let recordsBySchema = 
-        schema.Tables
-        |> Array.toList
-        |> List.groupBy (fun t -> t.Schema)
-        |> List.map (fun (schema, tables) -> schema, tables |> List.map tableRecord)
+let tableReaderClass (tbl: Table) = 
+    let classId = Ident.CreateLong(tbl.Name + "Reader")
+    let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, Range.range.Zero)
+
+    let ctor = SynMemberDefn.CreateImplicitCtor()
+
+    let prop =         
+        SynMemberDefn.AutoProperty(
+            []
+            , false
+            , Ident.Create("FirstName")
+            , None
+            , MemberKind.PropertyGet
+            , (fun mk -> 
+                {
+                    MemberFlags.IsInstance = true
+                    MemberFlags.IsDispatchSlot = false
+                    MemberFlags.IsFinal = false
+                    MemberFlags.IsOverrideOrExplicitImpl = false
+                    MemberFlags.MemberKind = MemberKind.PropertySet
+                })
+            , XmlDoc.PreXmlDocEmpty
+            , None
+            , SynExpr.CreateConstString("FirstName")
+            , None
+            , Range.range.Zero)
+
+    let members = SynMemberDefns.Cons(ctor, [prop])
+
+    let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, Range.range.Zero)
+
+    let readerClass = 
+        SynTypeDefn.TypeDefn(
+            classCmpInfo,
+            typeRepr,
+            SynMemberDefns.Empty,
+            Range.range.Zero)
+    
+    SynModuleDecl.Types([readerClass], Range.range.Zero)
+
+let generateModule (cfg: Config) (db: Schema) = 
+    let schemas = db.Tables |> Array.map (fun t -> t.Schema) |> Array.distinct
     
     let nestedModules = 
-        recordsBySchema
-        |> List.map (fun (schema, tableRecords) -> 
+        schemas
+        |> Array.toList
+        |> List.map (fun schema -> 
             let schemaNestedModule = SynComponentInfoRcd.Create [ Ident.Create schema ]
+
+            let tables = db.Tables |> Array.filter (fun t -> t.Schema = schema)
+            let tableRecords = tables |> Array.map tableRecord
+            let readerClasses = tables |> Array.map tableReaderClass
+            let zip = Array.zip tableRecords readerClasses
 
             let tableRecordDeclarations = 
                 [ 
-                    for record in tableRecords do 
-                        if cfg.IsCLIMutable 
-                        then yield cliMutableAttribute
-                        yield record 
+                    for (record, reader) in zip do 
+                        if cfg.IsCLIMutable then yield cliMutableAttribute
+                        yield record
+                        
+                        yield reader
                 ]
 
             SynModuleDecl.CreateNestedModule(schemaNestedModule, tableRecordDeclarations)
