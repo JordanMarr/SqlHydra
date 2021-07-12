@@ -4,8 +4,9 @@ open FSharp.Compiler
 open FsAst
 open Fantomas
 open Schema
-open Range
 open System.Data
+
+let range0 = Range.range.Zero
 
 let cliMutableAttribute = 
     let attr =
@@ -13,7 +14,7 @@ let cliMutableAttribute =
         ; ArgExpr = SynExpr.CreateUnit
         ; Target = None
         ; AppliesToGetterAndSetter = false
-        ; Range = range.Zero } : SynAttribute
+        ; Range = range0 } : SynAttribute
 
     let atts = [ SynAttributeList.Create(attr) ]
     SynModuleDecl.CreateAttributes(atts)
@@ -28,7 +29,7 @@ let tableRecord (tbl: Table) =
             let field = 
                 if col.TypeMapping.ClrType = "byte[]" then 
                     let b = SynType.Create("byte")
-                    SynType.Array(0, b, range.Zero)
+                    SynType.Array(0, b, range0)
                 else
                     SynType.Create(col.TypeMapping.ClrType)
                     
@@ -46,13 +47,13 @@ let tableRecord (tbl: Table) =
 
 let tableReaderClass (tbl: Table) = 
     let classId = Ident.CreateLong(tbl.Name + "Reader")
-    let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, range.Zero)
+    let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, range0)
 
     let ctor = SynMemberDefn.CreateImplicitCtor([ 
         SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent("System.Data.IDataReader"))
     ])
 
-    let downcastToBytes expr = SynExpr.Downcast(expr, SynType.Array(0, SynType.Byte(), range.Zero), range.Zero)
+    let downcastToBytes expr = SynExpr.Downcast(expr, SynType.Array(0, SynType.Byte(), range0), range0)
 
     let props =
         tbl.Columns
@@ -66,17 +67,17 @@ let tableReaderClass (tbl: Table) =
                         false
                         , LongIdentWithDots.CreateString($"reader.{col.TypeMapping.ReaderMethod}")
                         , None
-                        , range.Zero)
+                        , range0)
                     , SynExpr.CreateParen(
                         SynExpr.App(
                             ExprAtomicFlag.Atomic
                             , false
-                            , SynExpr.LongIdent(false, LongIdentWithDots.CreateString("reader.GetOrdinal"), None, range.Zero)
+                            , SynExpr.LongIdent(false, LongIdentWithDots.CreateString("reader.GetOrdinal"), None, range0)
                             , SynExpr.CreateConstString(col.Name)
-                            , range.Zero 
+                            , range0 
                         )
                     )
-                    , range.Zero 
+                    , range0 
                 )
 
             SynMemberDefn.AutoProperty(
@@ -99,26 +100,26 @@ let tableReaderClass (tbl: Table) =
                   then downcastToBytes readerCall
                   else readerCall
                 , None
-                , range.Zero)
+                , range0)
         )
 
     let members =  ctor :: props
 
-    let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range.Zero)
+    let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range0)
 
     let readerClass = 
         SynTypeDefn.TypeDefn(
             classCmpInfo,
             typeRepr,
             SynMemberDefns.Empty,
-            range.Zero)
+            range0)
     
-    SynModuleDecl.Types([ readerClass ], range.Zero)
+    SynModuleDecl.Types([ readerClass ], range0)
 
 let generateModule (cfg: Config) (db: Schema) = 
     let schemas = db.Tables |> Array.map (fun t -> t.Schema) |> Array.distinct
     
-    let nestedModules = 
+    let nestedSchemaModules = 
         schemas
         |> Array.toList
         |> List.map (fun schema -> 
@@ -143,7 +144,7 @@ let generateModule (cfg: Config) (db: Schema) =
 
     let namespaceOrModule =
         { SynModuleOrNamespaceRcd.CreateNamespace(Ident.CreateLong cfg.Namespace)
-            with Declarations = nestedModules }
+            with Declarations = nestedSchemaModules }
 
     namespaceOrModule
 
