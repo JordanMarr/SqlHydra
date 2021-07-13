@@ -63,20 +63,20 @@ let tableReaderClass (tbl: Table) =
                 SynExpr.App(
                     ExprAtomicFlag.Atomic
                     , false
+                    
+                    // Function:
                     , SynExpr.LongIdent(
                         false
-                        , LongIdentWithDots.CreateString($"reader.{col.TypeMapping.ReaderMethod}")
+                        , LongIdentWithDots.CreateString(if col.IsNullable then "reader.Optional" else "reader.Required")
                         , None
                         , range0)
-                    , SynExpr.CreateParen(
-                        SynExpr.App(
-                            ExprAtomicFlag.Atomic
-                            , false
-                            , SynExpr.LongIdent(false, LongIdentWithDots.CreateString("reader.GetOrdinal"), None, range0)
-                            , SynExpr.CreateConstString(col.Name)
-                            , range0 
-                        )
-                    )
+                    
+                    // Args:
+                    , SynExpr.CreateParenedTuple([
+                        SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString($"reader.{col.TypeMapping.ReaderMethod}"), None)
+                        SynExpr.CreateConstString(col.Name)
+                    ])
+
                     , range0 
                 )
 
@@ -84,8 +84,6 @@ let tableReaderClass (tbl: Table) =
                 if col.TypeMapping.DbType = DbType.Binary
                 then downcastToBytes readerBasicCall
                 else readerBasicCall
-
-            
 
             SynMemberDefn.AutoProperty(
                 []
@@ -137,25 +135,42 @@ let generateModule (cfg: Config) (db: Schema) =
 
             let tableRecordDeclarations = 
                 [ 
-                    for (record, reader) in zip do 
+                    for (record, recordReader) in zip do 
                         if cfg.IsCLIMutable then yield cliMutableAttribute
                         yield record
-                        
-                        yield reader
+                        yield recordReader
                 ]
 
             SynModuleDecl.CreateNestedModule(schemaNestedModule, tableRecordDeclarations)
         )
 
     //let openDataProvider = SynModuleDecl.CreateOpen("System.Data.SqlClient")
-    //let declarations = openDataProvider :: nestedSchemaModules
-    let declarations = nestedSchemaModules
+    let openPlaceholder = SynModuleDecl.CreateOpen("Substitute.Extensions")
+    let declarations = openPlaceholder :: nestedSchemaModules
 
     let parentNamespace =
         { SynModuleOrNamespaceRcd.CreateNamespace(Ident.CreateLong cfg.Namespace)
             with Declarations = declarations }
 
     parentNamespace
+
+let substitutions = 
+    [
+        "open Substitute.Extensions",
+        """
+[<AutoOpen>]
+module internal Extensions = 
+    type System.Data.IDataReader with
+        member this.Required (getter: int -> 'T, col: string) =
+            this.GetOrdinal col |> getter
+
+        member this.Optional (getter: int -> 'T, col: string) = 
+            let ordinal = this.GetOrdinal col
+            if this.IsDBNull ordinal
+            then None
+            else Some (getter ordinal)
+        """
+    ]
 
 let toFormattedCode (cfg: Config) (comment: string) (generatedModule: SynModuleOrNamespaceRcd) = 
         let parsedInput = 
@@ -164,10 +179,13 @@ let toFormattedCode (cfg: Config) (comment: string) (generatedModule: SynModuleO
     
         let cfg = { FormatConfig.FormatConfig.Default with StrictMode = true }
         let formattedCode = CodeFormatter.FormatASTAsync(parsedInput, "output.fs", [], None, cfg) |> Async.RunSynchronously
-    
+        let finalCode = substitutions |> List.fold (fun (code: string) (placeholder, sub) -> code.Replace(placeholder, sub)) formattedCode
+
         let formattedCodeWithComment =
-            [   comment
-                formattedCode ]
+            [   
+                comment
+                finalCode
+            ]
             |> String.concat System.Environment.NewLine
 
         formattedCodeWithComment
