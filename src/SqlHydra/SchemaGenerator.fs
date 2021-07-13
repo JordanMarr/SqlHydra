@@ -53,13 +53,11 @@ let tableReaderClass (tbl: Table) =
         SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent("System.Data.IDataReader"))
     ])
 
-    let downcastToBytes expr = SynExpr.Downcast(expr, SynType.Array(0, SynType.Byte(), range0), range0)
-
     let props =
         tbl.Columns
         |> Array.toList
         |> List.map (fun col ->
-            let readerBasicCall = 
+            let readerCall = 
                 SynExpr.App(
                     ExprAtomicFlag.Atomic
                     , false
@@ -67,7 +65,13 @@ let tableReaderClass (tbl: Table) =
                     // Function:
                     , SynExpr.LongIdent(
                         false
-                        , LongIdentWithDots.CreateString(if col.IsNullable then "reader.Optional" else "reader.Required")
+                        , LongIdentWithDots.CreateString(
+                            match col.TypeMapping.DbType, col.IsNullable with
+                            | DbType.Binary, true -> "reader.OptionalBinary"
+                            | DbType.Binary, false -> "reader.RequiredBinary"
+                            | _, true -> "reader.Optional"
+                            | _, false -> "reader.Required"
+                        )
                         , None
                         , range0)
                     
@@ -79,11 +83,6 @@ let tableReaderClass (tbl: Table) =
 
                     , range0 
                 )
-
-            let readerCall = 
-                if col.TypeMapping.DbType = DbType.Binary
-                then downcastToBytes readerBasicCall
-                else readerBasicCall
 
             SynMemberDefn.AutoProperty(
                 []
@@ -169,6 +168,16 @@ module internal Extensions =
             if this.IsDBNull ordinal
             then None
             else Some (getter ordinal)
+
+        member this.RequiredBinary (getValue: int -> obj, col: string) =
+            let o = this.GetOrdinal col |> getValue
+            o :?> byte[]
+
+        member this.OptionalBinary (getValue: int -> obj, col: string) = 
+            let ordinal = this.GetOrdinal col
+            if this.IsDBNull ordinal
+            then None
+            else Some (getValue ordinal :?> byte[])
         """
     ]
 

@@ -14,6 +14,15 @@ module internal Extensions =
             then None
             else Some (getter ordinal)
 
+        member this.RequiredBinary (getValue: int -> obj, col: string) =
+            let o = this.GetOrdinal col |> getValue
+            o :?> byte[]
+
+        member this.OptionalBinary (getValue: int -> obj, col: string) = 
+            let ordinal = this.GetOrdinal col
+            if this.IsDBNull ordinal
+            then None
+            else Some (getValue ordinal :?> byte[])
         
 module main =
     [<CLIMutable>]
@@ -93,22 +102,22 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
-    type CustomerReader(rdr: System.Data.IDataReader) =
-        member val CustomerID = rdr.Required(rdr.GetInt64, "CustomerID")
-        member val NameStyle = rdr.Required(rdr.GetInt64, "NameStyle")
-        member val Title = rdr.Optional(rdr.GetString, "Title")
-        member val FirstName = rdr.Required(rdr.GetString, "FirstName")
-        member val MiddleName = rdr.Optional(rdr.GetString, "MiddleName")
-        member val LastName = rdr.Required(rdr.GetString, "LastName")
-        member val Suffix = rdr.Optional(rdr.GetString, "Suffix")
-        member val CompanyName = rdr.Optional(rdr.GetString, "CompanyName")
-        member val SalesPerson = rdr.Optional(rdr.GetString, "SalesPerson")
-        member val EmailAddress = rdr.Optional(rdr.GetString, "EmailAddress")
-        member val Phone = rdr.Optional(rdr.GetString, "Phone")
-        member val PasswordHash = rdr.Required(rdr.GetString, "PasswordHash")
-        member val PasswordSalt = rdr.Required(rdr.GetString, "PasswordSalt")
-        member val rowguid = rdr.Required(rdr.GetString, "rowguid")
-        member val ModifiedDate = rdr.Required(rdr.GetDateTime, "ModifiedDate")
+    type CustomerReader(reader: System.Data.IDataReader) =
+        member val CustomerID = reader.Required(reader.GetInt64, "CustomerID")
+        member val NameStyle = reader.Required(reader.GetInt64, "NameStyle")
+        member val Title = reader.Optional(reader.GetString, "Title")
+        member val FirstName = reader.Required(reader.GetString, "FirstName")
+        member val MiddleName = reader.Optional(reader.GetString, "MiddleName")
+        member val LastName = reader.Required(reader.GetString, "LastName")
+        member val Suffix = reader.Optional(reader.GetString, "Suffix")
+        member val CompanyName = reader.Optional(reader.GetString, "CompanyName")
+        member val SalesPerson = reader.Optional(reader.GetString, "SalesPerson")
+        member val EmailAddress = reader.Optional(reader.GetString, "EmailAddress")
+        member val Phone = reader.Optional(reader.GetString, "Phone")
+        member val PasswordHash = reader.Required(reader.GetString, "PasswordHash")
+        member val PasswordSalt = reader.Required(reader.GetString, "PasswordSalt")
+        member val rowguid = reader.Required(reader.GetString, "rowguid")
+        member val ModifiedDate = reader.Required(reader.GetDateTime, "ModifiedDate")
 
     [<CLIMutable>]
     type CustomerAddress =
@@ -159,7 +168,7 @@ module main =
         member val SellStartDate = reader.Required(reader.GetDateTime, "SellStartDate")
         member val SellEndDate = reader.Optional(reader.GetDateTime, "SellEndDate")
         member val DiscontinuedDate = reader.Optional(reader.GetDateTime, "DiscontinuedDate")
-        member val ThumbNailPhoto = reader.Optional(reader.GetValue, "ThumbNailPhoto") :?> byte []
+        member val ThumbNailPhoto = reader.OptionalBinary(reader.GetValue, "ThumbNailPhoto")
         member val ThumbnailPhotoFileName = reader.Optional(reader.GetString, "ThumbnailPhotoFileName")
         member val rowguid = reader.Required(reader.GetString, "rowguid")
         member val ModifiedDate = reader.Required(reader.GetDateTime, "ModifiedDate")
