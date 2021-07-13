@@ -158,26 +158,23 @@ let substitutions =
         "open Substitute.Extensions",
         """
 [<AutoOpen>]
-module internal Extensions = 
+module Extensions = 
     type System.Data.IDataReader with
         member this.Required (getter: int -> 'T, col: string) =
             this.GetOrdinal col |> getter
 
         member this.Optional (getter: int -> 'T, col: string) = 
-            let ordinal = this.GetOrdinal col
-            if this.IsDBNull ordinal
-            then None
-            else Some (getter ordinal)
+            match this.GetOrdinal col with
+            | o when this.IsDBNull o -> None
+            | o -> Some (getter o)
 
         member this.RequiredBinary (getValue: int -> obj, col: string) =
-            let o = this.GetOrdinal col |> getValue
-            o :?> byte[]
+            this.GetOrdinal col |> getValue :?> byte[]
 
         member this.OptionalBinary (getValue: int -> obj, col: string) = 
-            let ordinal = this.GetOrdinal col
-            if this.IsDBNull ordinal
-            then None
-            else Some (getValue ordinal :?> byte[])
+            match this.GetOrdinal col with
+            | o when this.IsDBNull o -> None
+            | o -> Some (getValue o :?> byte[])
         """
     ]
 
