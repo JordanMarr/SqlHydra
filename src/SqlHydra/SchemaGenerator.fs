@@ -105,7 +105,34 @@ let tableReaderClass (tbl: Table) =
                 , range0)
         )
 
-    let members =  ctor :: props
+    let memberFlags : MemberFlags = {IsInstance = true; IsDispatchSlot = false; IsOverrideOrExplicitImpl = false; IsFinal = false; MemberKind = MemberKind.Member}
+    let readMethod = 
+        SynMemberDefn.CreateMember(
+            {   
+                SynBindingRcd.Access = None
+                SynBindingRcd.Kind = SynBindingKind.NormalBinding
+                SynBindingRcd.IsInline = false
+                SynBindingRcd.IsMutable = false
+                SynBindingRcd.Attributes = SynAttributes.Empty
+                SynBindingRcd.XmlDoc = XmlDoc.PreXmlDocEmpty
+                SynBindingRcd.ValData = SynValData.SynValData(Some memberFlags, SynValInfo.Empty, None)
+                SynBindingRcd.Pattern = 
+                    SynPatRcd.LongIdent(
+                        SynPatLongIdentRcd.Create(
+                            LongIdentWithDots.CreateString("__.Read")
+                            , SynArgPats.Pats([ SynPat.Paren(SynPat.Const(SynConst.Unit, range0), range0) ])
+                        )
+                    )
+                SynBindingRcd.ReturnInfo = None
+                SynBindingRcd.Expr = 
+                    // TODO: Return {tbl.Name} record with each property set to __.{PropertyName}
+                    SynExpr.Const(SynConst.Int32 3, range0)
+                SynBindingRcd.Range = range0
+                SynBindingRcd.Bind = DebugPointForBinding.NoDebugPointAtInvisibleBinding
+            }
+        )
+
+    let members = ctor :: (props @ [ readMethod ])
 
     let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range0)
 

@@ -44,6 +44,7 @@ module main =
         member val ErrorProcedure = reader.Optional(reader.GetString, "ErrorProcedure")
         member val ErrorLine = reader.Optional(reader.GetInt64, "ErrorLine")
         member val ErrorMessage = reader.Required(reader.GetString, "ErrorMessage")
+        member __.Read() = 3
 
     [<CLIMutable>]
     type BuildVersion =
@@ -57,6 +58,7 @@ module main =
         member val ``Database Version`` = reader.Required(reader.GetString, "Database Version")
         member val VersionDate = reader.Required(reader.GetDateTime, "VersionDate")
         member val ModifiedDate = reader.Required(reader.GetDateTime, "ModifiedDate")
+        member __.Read() = 3
 
     [<CLIMutable>]
     type Address =
@@ -80,6 +82,7 @@ module main =
         member val PostalCode = reader.Required(reader.GetString, "PostalCode")
         member val rowguid = reader.Required(reader.GetString, "rowguid")
         member val ModifiedDate = reader.Required(reader.GetDateTime, "ModifiedDate")
+        member __.Read() = 3
 
     [<CLIMutable>]
     type Customer =
@@ -115,6 +118,7 @@ module main =
         member val PasswordSalt = reader.Required(reader.GetString, "PasswordSalt")
         member val rowguid = reader.Required(reader.GetString, "rowguid")
         member val ModifiedDate = reader.Required(reader.GetDateTime, "ModifiedDate")
+        member __.Read() = 3
 
     [<CLIMutable>]
     type CustomerAddress =
@@ -130,6 +134,7 @@ module main =
         member val AddressType = reader.Required(reader.GetString, "AddressType")
         member val rowguid = reader.Required(reader.GetString, "rowguid")
         member val ModifiedDate = reader.Required(reader.GetDateTime, "ModifiedDate")
+        member __.Read() = 3
 
     [<CLIMutable>]
     type Product =
@@ -169,6 +174,7 @@ module main =
         member val ThumbnailPhotoFileName = reader.Optional(reader.GetString, "ThumbnailPhotoFileName")
         member val rowguid = reader.Required(reader.GetString, "rowguid")
         member val ModifiedDate = reader.Required(reader.GetDateTime, "ModifiedDate")
+        member __.Read() = 3
 
     [<CLIMutable>]
     type ProductCategory =
@@ -184,6 +190,7 @@ module main =
         member val Name = reader.Required(reader.GetString, "Name")
         member val rowguid = reader.Required(reader.GetString, "rowguid")
         member val ModifiedDate = reader.Required(reader.GetDateTime, "ModifiedDate")
+        member __.Read() = 3
 
     [<CLIMutable>]
     type ProductDescription =
@@ -197,6 +204,7 @@ module main =
         member val Description = reader.Required(reader.GetString, "Description")
         member val rowguid = reader.Required(reader.GetString, "rowguid")
         member val ModifiedDate = reader.Required(reader.GetDateTime, "ModifiedDate")
+        member __.Read() = 3
 
     [<CLIMutable>]
     type ProductModel =
@@ -212,6 +220,7 @@ module main =
         member val CatalogDescription = reader.Optional(reader.GetString, "CatalogDescription")
         member val rowguid = reader.Required(reader.GetString, "rowguid")
         member val ModifiedDate = reader.Required(reader.GetDateTime, "ModifiedDate")
+        member __.Read() = 3
 
     [<CLIMutable>]
     type ProductModelProductDescription =
@@ -227,6 +236,7 @@ module main =
         member val Culture = reader.Required(reader.GetString, "Culture")
         member val rowguid = reader.Required(reader.GetString, "rowguid")
         member val ModifiedDate = reader.Required(reader.GetDateTime, "ModifiedDate")
+        member __.Read() = 3
 
     [<CLIMutable>]
     type SalesOrderDetail =
@@ -250,6 +260,7 @@ module main =
         member val LineTotal = reader.Required(reader.GetInt64, "LineTotal")
         member val rowguid = reader.Required(reader.GetString, "rowguid")
         member val ModifiedDate = reader.Required(reader.GetDateTime, "ModifiedDate")
+        member __.Read() = 3
 
     [<CLIMutable>]
     type SalesOrderHeader =
@@ -299,3 +310,4 @@ module main =
         member val Comment = reader.Optional(reader.GetString, "Comment")
         member val rowguid = reader.Required(reader.GetString, "rowguid")
         member val ModifiedDate = reader.Required(reader.GetDateTime, "ModifiedDate")
+        member __.Read() = 3
