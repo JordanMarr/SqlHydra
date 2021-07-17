@@ -2,7 +2,7 @@
 namespace SampleApp.AdventureWorks
 
 [<AutoOpen>]
-module Extensions = 
+module private Extensions = 
     type System.Data.IDataReader with
         member this.Required (getter: int -> 'T, col: string) =
             this.GetOrdinal col |> getter

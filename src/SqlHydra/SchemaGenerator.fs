@@ -57,10 +57,16 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
         SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent(cfg.Readers.ReaderType)) 
     ])
 
-    let properties =
+    let readerProperties =
         tbl.Columns
         |> Array.toList
-        |> List.map (fun col ->
+        // Only create reader properties for columns that have a ReaderMethod specified
+        |> List.choose (fun col -> 
+            match col.TypeMapping.ReaderMethod with
+            | Some readerMethod -> Some (col, readerMethod)
+            | None -> None
+        )
+        |> List.map (fun (col, readerMethod) ->
             let readerCall = 
                 SynExpr.App(
                     ExprAtomicFlag.Atomic
@@ -81,7 +87,7 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                     
                     // Args:
                     , SynExpr.CreateParenedTuple([
-                        SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString($"reader.{col.TypeMapping.ReaderMethod}"), None)
+                        SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString($"reader.%s{readerMethod}"), None)
                         SynExpr.CreateConstString(col.Name)
                     ])
 
@@ -143,15 +149,16 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
             }
         )
 
-    let members = [ 
-        ctor
-        yield! properties
+    let members = 
+        [ 
+            ctor
+            yield! readerProperties
 
-        // Generate Read method ONLY IF no unsupported column types exist
-        let unsupported = Set [ DbType.Object; DbType.Xml ]
-        if not (tbl.Columns |> Array.exists (fun c -> unsupported.Contains c.TypeMapping.DbType))
-        then readMethod 
-    ]
+            // Generate Read method only if all column types have a ReaderMethod specified;
+            // otherwise, the record will be partially initialized and break the build.
+            if tbl.Columns |> Array.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome) then 
+                readMethod 
+        ]
 
     let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range0)
 
@@ -196,12 +203,13 @@ let generateModule (cfg: Config) (db: Schema) =
 
     let readerExtensionsPlaceholder = SynModuleDecl.CreateOpen("Substitute.Extensions")
 
-    let declarations = [ 
-        if cfg.Readers.IsEnabled then
-            readerExtensionsPlaceholder 
+    let declarations = 
+        [ 
+            if cfg.Readers.IsEnabled then
+                readerExtensionsPlaceholder 
 
-        yield! nestedSchemaModules
-    ]
+            yield! nestedSchemaModules
+        ]
 
     let parentNamespace =
         { SynModuleOrNamespaceRcd.CreateNamespace(Ident.CreateLong cfg.Namespace)
@@ -214,7 +222,7 @@ let substitutions =
     [
         "open Substitute.Extensions",
         """[<AutoOpen>]
-module Extensions = 
+module private Extensions = 
     type System.Data.IDataReader with
         member this.Required (getter: int -> 'T, col: string) =
             this.GetOrdinal col |> getter
