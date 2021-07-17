@@ -48,12 +48,13 @@ let tableRecord (tbl: Table) =
     SynModuleDecl.CreateSimpleType(recordCmpInfo, recordDef)
 
 /// Creates a "Reader" class that reads columns for a given table/record.
-let tableReaderClass (tbl: Table) = 
+let tableReaderClass (cfg: Config) (tbl: Table) = 
     let classId = Ident.CreateLong(tbl.Name + "Reader")
     let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, range0)
 
     let ctor = SynMemberDefn.CreateImplicitCtor([ 
-        SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent("System.Data.IDataReader"))
+        // Ex: (reader: Microsoft.Data.SqlClient.SqlDataReader)
+        SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent(cfg.Readers.ReaderType)) 
     ])
 
     let properties =
@@ -175,23 +176,32 @@ let generateModule (cfg: Config) (db: Schema) =
 
             let tables = db.Tables |> Array.filter (fun t -> t.Schema = schema)
             let tableRecords = tables |> Array.map tableRecord
-            let readerClasses = tables |> Array.map tableReaderClass
+            let readerClasses = tables |> Array.map (tableReaderClass cfg)
             let zip = Array.zip tableRecords readerClasses
 
             let tableRecordDeclarations = 
                 [ 
                     for (record, recordReader) in zip do 
-                        if cfg.IsCLIMutable then yield cliMutableAttribute
+                        if cfg.IsCLIMutable then 
+                            yield cliMutableAttribute
+                        
                         yield record
-                        yield recordReader
+                        
+                        if cfg.Readers.IsEnabled then 
+                            yield recordReader
                 ]
 
             SynModuleDecl.CreateNestedModule(schemaNestedModule, tableRecordDeclarations)
         )
 
-    //let openDataProvider = SynModuleDecl.CreateOpen("System.Data.SqlClient")
-    let openPlaceholder = SynModuleDecl.CreateOpen("Substitute.Extensions")
-    let declarations = openPlaceholder :: nestedSchemaModules
+    let readerExtensionsPlaceholder = SynModuleDecl.CreateOpen("Substitute.Extensions")
+
+    let declarations = [ 
+        if cfg.Readers.IsEnabled then
+            readerExtensionsPlaceholder 
+
+        yield! nestedSchemaModules
+    ]
 
     let parentNamespace =
         { SynModuleOrNamespaceRcd.CreateNamespace(Ident.CreateLong cfg.Namespace)
@@ -203,8 +213,7 @@ let generateModule (cfg: Config) (db: Schema) =
 let substitutions = 
     [
         "open Substitute.Extensions",
-        """
-[<AutoOpen>]
+        """[<AutoOpen>]
 module Extensions = 
     type System.Data.IDataReader with
         member this.Required (getter: int -> 'T, col: string) =
