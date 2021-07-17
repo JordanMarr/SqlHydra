@@ -125,8 +125,14 @@ let tableReaderClass (tbl: Table) =
                     )
                 SynBindingRcd.ReturnInfo = None
                 SynBindingRcd.Expr = 
-                    // TODO: Return {tbl.Name} record with each property set to __.{PropertyName}
-                    SynExpr.Const(SynConst.Int32 3, range0)
+                    SynExpr.CreateRecord (
+                        tbl.Columns
+                        |> Array.map (fun col -> 
+                            RecordFieldName(LongIdentWithDots.CreateString(col.Name), false), 
+                            SynExpr.CreateLongIdent(LongIdentWithDots.Create(["__"; col.Name])) |> Some
+                        )
+                        |> Array.toList
+                    )
                 SynBindingRcd.Range = range0
                 SynBindingRcd.Bind = DebugPointForBinding.NoDebugPointAtInvisibleBinding
             }
