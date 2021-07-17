@@ -8,6 +8,7 @@ open System.Data
 
 let range0 = Range.range.Zero
 
+/// Generates a CLIMutable attribute.
 let cliMutableAttribute = 
     let attr =
         { TypeName = LongIdentWithDots.CreateString "CLIMutable"
@@ -19,6 +20,7 @@ let cliMutableAttribute =
     let atts = [ SynAttributeList.Create(attr) ]
     SynModuleDecl.CreateAttributes(atts)
     
+/// Creates a record definition named after a table.
 let tableRecord (tbl: Table) = 
     let myRecordId = LongIdentWithDots.CreateString tbl.Name
     let recordCmpInfo = SynComponentInfoRcd.Create(myRecordId.Lid)
@@ -45,6 +47,7 @@ let tableRecord (tbl: Table) =
         
     SynModuleDecl.CreateSimpleType(recordCmpInfo, recordDef)
 
+/// Creates a "Reader" class that reads columns for a given table/record.
 let tableReaderClass (tbl: Table) = 
     let classId = Ident.CreateLong(tbl.Name + "Reader")
     let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, range0)
@@ -53,7 +56,7 @@ let tableReaderClass (tbl: Table) =
         SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent("System.Data.IDataReader"))
     ])
 
-    let props =
+    let properties =
         tbl.Columns
         |> Array.toList
         |> List.map (fun col ->
@@ -106,6 +109,7 @@ let tableReaderClass (tbl: Table) =
         )
 
     let memberFlags : MemberFlags = {IsInstance = true; IsDispatchSlot = false; IsOverrideOrExplicitImpl = false; IsFinal = false; MemberKind = MemberKind.Member}
+    /// Initializes a table record using the reader column properties.
     let readMethod = 
         SynMemberDefn.CreateMember(
             {   
@@ -138,7 +142,15 @@ let tableReaderClass (tbl: Table) =
             }
         )
 
-    let members = ctor :: (props @ [ readMethod ])
+    let members = [ 
+        ctor
+        yield! properties
+
+        // Generate Read method ONLY IF no unsupported column types exist
+        let unsupported = Set [ DbType.Object; DbType.Xml ]
+        if not (tbl.Columns |> Array.exists (fun c -> unsupported.Contains c.TypeMapping.DbType))
+        then readMethod 
+    ]
 
     let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range0)
 
@@ -151,6 +163,7 @@ let tableReaderClass (tbl: Table) =
     
     SynModuleDecl.Types([ readerClass ], range0)
 
+/// Generates the outer module and table records.
 let generateModule (cfg: Config) (db: Schema) = 
     let schemas = db.Tables |> Array.map (fun t -> t.Schema) |> Array.distinct
     
@@ -186,6 +199,7 @@ let generateModule (cfg: Config) (db: Schema) =
 
     parentNamespace
 
+/// A list of text substitutions to the generated file.
 let substitutions = 
     [
         "open Substitute.Extensions",
@@ -211,6 +225,7 @@ module Extensions =
         """
     ]
 
+/// Formats the generated code using Fantomas.
 let toFormattedCode (cfg: Config) (comment: string) (generatedModule: SynModuleOrNamespaceRcd) = 
         let parsedInput = 
             ParsedInput.CreateImplFile(
