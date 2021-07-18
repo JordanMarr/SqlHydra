@@ -1,7 +1,6 @@
-﻿[<EntryPoint>]
-let main argv =
+﻿
+[<EntryPoint>]
+let main argv = 
     
-    SampleApp.DapperFSharpExample.runQueries()
-    
+    SampleApp.DapperFSharpExample.runQueries() |> Async.AwaitTask |> Async.RunSynchronously
     0
-

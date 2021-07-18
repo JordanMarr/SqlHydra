@@ -57,6 +57,8 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
         SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent(cfg.Readers.ReaderType)) 
     ])
 
+    let memberFlags : MemberFlags = {IsInstance = true; IsDispatchSlot = false; IsOverrideOrExplicitImpl = false; IsFinal = false; MemberKind = MemberKind.Member}
+
     let readerProperties =
         tbl.Columns
         |> Array.toList
@@ -94,28 +96,31 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                     , range0 
                 )
 
-            SynMemberDefn.AutoProperty(
-                []
-                , false
-                , Ident.Create(col.Name)
-                , None
-                , MemberKind.PropertyGet
-                , (fun mk -> 
-                    {
-                        MemberFlags.IsInstance = true
-                        MemberFlags.IsDispatchSlot = false
-                        MemberFlags.IsFinal = false
-                        MemberFlags.IsOverrideOrExplicitImpl = false
-                        MemberFlags.MemberKind = MemberKind.PropertyGet
-                    })
-                , XmlDoc.PreXmlDocEmpty
-                , None
-                , readerCall
-                , None
-                , range0)
+            SynMemberDefn.CreateMember(
+                {   
+                    SynBindingRcd.Access = None
+                    SynBindingRcd.Kind = SynBindingKind.NormalBinding
+                    SynBindingRcd.IsInline = false
+                    SynBindingRcd.IsMutable = false
+                    SynBindingRcd.Attributes = SynAttributes.Empty
+                    SynBindingRcd.XmlDoc = XmlDoc.PreXmlDocEmpty
+                    SynBindingRcd.ValData = SynValData.SynValData(Some memberFlags, SynValInfo.Empty, None)
+                    SynBindingRcd.Pattern = 
+                        SynPatRcd.LongIdent(
+                            SynPatLongIdentRcd.Create(
+                                LongIdentWithDots.Create([ "__"; col.Name ]) // One method per column name
+                                , SynArgPats.Pats([ SynPat.Paren(SynPat.Const(SynConst.Unit, range0), range0) ])
+                            )
+                        )
+                    SynBindingRcd.ReturnInfo = None
+                    SynBindingRcd.Expr = readerCall
+                    SynBindingRcd.Range = range0
+                    SynBindingRcd.Bind = DebugPointForBinding.NoDebugPointAtInvisibleBinding
+                }
+            )
         )
 
-    let memberFlags : MemberFlags = {IsInstance = true; IsDispatchSlot = false; IsOverrideOrExplicitImpl = false; IsFinal = false; MemberKind = MemberKind.Member}
+    
     /// Initializes a table record using the reader column properties.
     let readMethod = 
         SynMemberDefn.CreateMember(
@@ -139,8 +144,8 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                     SynExpr.CreateRecord (
                         tbl.Columns
                         |> Array.map (fun col -> 
-                            RecordFieldName(LongIdentWithDots.CreateString(col.Name), false), 
-                            SynExpr.CreateLongIdent(LongIdentWithDots.Create(["__"; col.Name])) |> Some
+                            RecordFieldName(LongIdentWithDots.CreateString(col.Name), false)
+                            , SynExpr.CreateInstanceMethodCall(LongIdentWithDots.Create(["__"; col.Name ])) |> Some
                         )
                         |> Array.toList
                     )
