@@ -61,7 +61,7 @@ module dbo =
         member __.ErrorLine() =
             reader.Optional(reader.GetInt32, "ErrorLine")
 
-        member __.Read() =
+        member __.ToRecord() =
             { ErrorLogID = __.ErrorLogID()
               ErrorTime = __.ErrorTime()
               UserName = __.UserName()
@@ -92,7 +92,7 @@ module dbo =
         member __.ModifiedDate() =
             reader.Required(reader.GetDateTime, "ModifiedDate")
 
-        member __.Read() =
+        member __.ToRecord() =
             { SystemInformationID = __.SystemInformationID()
               ``Database Version`` = __.``Database Version`` ()
               VersionDate = __.VersionDate()
@@ -139,7 +139,7 @@ module SalesLT =
         member __.AddressLine2() =
             reader.Optional(reader.GetString, "AddressLine2")
 
-        member __.Read() =
+        member __.ToRecord() =
             { City = __.City()
               StateProvince = __.StateProvince()
               CountryRegion = __.CountryRegion()
@@ -214,7 +214,7 @@ module SalesLT =
         member __.Phone() =
             reader.Optional(reader.GetString, "Phone")
 
-        member __.Read() =
+        member __.ToRecord() =
             { LastName = __.LastName()
               PasswordHash = __.PasswordHash()
               PasswordSalt = __.PasswordSalt()
@@ -255,7 +255,7 @@ module SalesLT =
         member __.ModifiedDate() =
             reader.Required(reader.GetDateTime, "ModifiedDate")
 
-        member __.Read() =
+        member __.ToRecord() =
             { CustomerID = __.CustomerID()
               AddressID = __.AddressID()
               AddressType = __.AddressType()
@@ -334,7 +334,7 @@ module SalesLT =
         member __.Color() =
             reader.Optional(reader.GetString, "Color")
 
-        member __.Read() =
+        member __.ToRecord() =
             { ProductID = __.ProductID()
               Name = __.Name()
               ProductNumber = __.ProductNumber()
@@ -377,7 +377,7 @@ module SalesLT =
         member __.ParentProductCategoryID() =
             reader.Optional(reader.GetInt32, "ParentProductCategoryID")
 
-        member __.Read() =
+        member __.ToRecord() =
             { Name = __.Name()
               rowguid = __.rowguid ()
               ModifiedDate = __.ModifiedDate()
@@ -404,7 +404,7 @@ module SalesLT =
         member __.ModifiedDate() =
             reader.Required(reader.GetDateTime, "ModifiedDate")
 
-        member __.Read() =
+        member __.ToRecord() =
             { ProductDescriptionID = __.ProductDescriptionID()
               Description = __.Description()
               rowguid = __.rowguid ()
@@ -455,7 +455,7 @@ module SalesLT =
         member __.ModifiedDate() =
             reader.Required(reader.GetDateTime, "ModifiedDate")
 
-        member __.Read() =
+        member __.ToRecord() =
             { ProductModelID = __.ProductModelID()
               ProductDescriptionID = __.ProductDescriptionID()
               Culture = __.Culture()
@@ -502,7 +502,7 @@ module SalesLT =
         member __.ModifiedDate() =
             reader.Required(reader.GetDateTime, "ModifiedDate")
 
-        member __.Read() =
+        member __.ToRecord() =
             { SalesOrderID = __.SalesOrderID()
               SalesOrderDetailID = __.SalesOrderDetailID()
               OrderQty = __.OrderQty()
@@ -605,7 +605,7 @@ module SalesLT =
         member __.ShipDate() =
             reader.Optional(reader.GetDateTime, "ShipDate")
 
-        member __.Read() =
+        member __.ToRecord() =
             { SalesOrderID = __.SalesOrderID()
               RevisionNumber = __.RevisionNumber()
               OrderDate = __.OrderDate()
@@ -653,7 +653,7 @@ module SalesLT =
         member __.Description() =
             reader.Required(reader.GetString, "Description")
 
-        member __.Read() =
+        member __.ToRecord() =
             { ProductID = __.ProductID()
               Name = __.Name()
               ProductModel = __.ProductModel()
@@ -764,7 +764,7 @@ module SalesLT =
         member __.RiderExperience() =
             reader.Optional(reader.GetString, "RiderExperience")
 
-        member __.Read() =
+        member __.ToRecord() =
             { ProductModelID = __.ProductModelID()
               Name = __.Name()
               rowguid = __.rowguid ()
@@ -807,7 +807,7 @@ module SalesLT =
         member __.ProductCategoryID() =
             reader.Optional(reader.GetInt32, "ProductCategoryID")
 
-        member __.Read() =
+        member __.ToRecord() =
             { ParentProductCategoryName = __.ParentProductCategoryName()
               ProductCategoryName = __.ProductCategoryName()
               ProductCategoryID = __.ProductCategoryID() }

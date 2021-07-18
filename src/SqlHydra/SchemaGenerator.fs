@@ -122,7 +122,7 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
 
     
     /// Initializes a table record using the reader column properties.
-    let readMethod = 
+    let toRecordMethod = 
         SynMemberDefn.CreateMember(
             {   
                 SynBindingRcd.Access = None
@@ -135,7 +135,7 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                 SynBindingRcd.Pattern = 
                     SynPatRcd.LongIdent(
                         SynPatLongIdentRcd.Create(
-                            LongIdentWithDots.CreateString("__.Read")
+                            LongIdentWithDots.CreateString("__.ToRecord")
                             , SynArgPats.Pats([ SynPat.Paren(SynPat.Const(SynConst.Unit, range0), range0) ])
                         )
                     )
@@ -162,7 +162,7 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
             // Generate Read method only if all column types have a ReaderMethod specified;
             // otherwise, the record will be partially initialized and break the build.
             if tbl.Columns |> Array.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome) then 
-                readMethod 
+                toRecordMethod 
         ]
 
     let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range0)

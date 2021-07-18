@@ -43,7 +43,7 @@ let getProductsWithThumbnail(conn: SqlConnection) = task {
     let productDataReader = SalesLT.ProductReader(reader)
     return [
         while reader.Read() do
-            productDataReader.Read()
+            productDataReader.ToRecord()
     ]
 }
 
