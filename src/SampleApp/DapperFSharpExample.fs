@@ -40,7 +40,7 @@ let getProductsWithThumbnail(conn: SqlConnection) = task {
     let sql = "SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
-    let productDataReader = SalesLT.ProductReader(reader)
+    let productDataReader = SalesLT.ProductDataReader(reader)
     return [
         while reader.Read() do
             productDataReader.ToRecord()
@@ -52,7 +52,7 @@ let getProductNamesNumbers(conn: SqlConnection) = task {
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
     return [
-        let productDataReader = SalesLT.ProductReader(reader)
+        let productDataReader = SalesLT.ProductDataReader(reader)
         while reader.Read() do
             productDataReader.Name(), productDataReader.ProductNumber()
     ]

@@ -49,7 +49,7 @@ let tableRecord (tbl: Table) =
 
 /// Creates a "Reader" class that reads columns for a given table/record.
 let tableReaderClass (cfg: Config) (tbl: Table) = 
-    let classId = Ident.CreateLong(tbl.Name + "Reader")
+    let classId = Ident.CreateLong(tbl.Name + "DataReader")
     let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, range0)
 
     let ctor = SynMemberDefn.CreateImplicitCtor([ 

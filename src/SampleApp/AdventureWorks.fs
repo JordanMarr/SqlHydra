@@ -33,7 +33,7 @@ module dbo =
           ErrorProcedure: Option<string>
           ErrorLine: Option<int> }
 
-    type ErrorLogReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type ErrorLogDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.ErrorLogID() =
             reader.Required(reader.GetInt32, "ErrorLogID")
 
@@ -79,7 +79,7 @@ module dbo =
           VersionDate: System.DateTime
           ModifiedDate: System.DateTime }
 
-    type BuildVersionReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type BuildVersionDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.SystemInformationID() =
             reader.Required(reader.GetByte, "SystemInformationID")
 
@@ -111,7 +111,7 @@ module SalesLT =
           AddressLine1: string
           AddressLine2: Option<string> }
 
-    type AddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type AddressDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.City() =
             reader.Required(reader.GetString, "City")
 
@@ -168,7 +168,7 @@ module SalesLT =
           EmailAddress: Option<string>
           Phone: Option<string> }
 
-    type CustomerReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type CustomerDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.LastName() =
             reader.Required(reader.GetString, "LastName")
 
@@ -239,7 +239,7 @@ module SalesLT =
           rowguid: System.Guid
           ModifiedDate: System.DateTime }
 
-    type CustomerAddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type CustomerAddressDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.CustomerID() =
             reader.Required(reader.GetInt32, "CustomerID")
 
@@ -282,7 +282,7 @@ module SalesLT =
           ProductModelID: Option<int>
           Color: Option<string> }
 
-    type ProductReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type ProductDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.ProductID() =
             reader.Required(reader.GetInt32, "ProductID")
 
@@ -361,7 +361,7 @@ module SalesLT =
           ProductCategoryID: int
           ParentProductCategoryID: Option<int> }
 
-    type ProductCategoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type ProductCategoryDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.Name() =
             reader.Required(reader.GetString, "Name")
 
@@ -391,7 +391,7 @@ module SalesLT =
           rowguid: System.Guid
           ModifiedDate: System.DateTime }
 
-    type ProductDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type ProductDescriptionDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.ProductDescriptionID() =
             reader.Required(reader.GetInt32, "ProductDescriptionID")
 
@@ -418,7 +418,7 @@ module SalesLT =
           ModifiedDate: System.DateTime
           CatalogDescription: Option<System.Xml.Linq.XElement> }
 
-    type ProductModelReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type ProductModelDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.ProductModelID() =
             reader.Required(reader.GetInt32, "ProductModelID")
 
@@ -439,7 +439,7 @@ module SalesLT =
           rowguid: System.Guid
           ModifiedDate: System.DateTime }
 
-    type ProductModelProductDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type ProductModelProductDescriptionDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.ProductModelID() =
             reader.Required(reader.GetInt32, "ProductModelID")
 
@@ -474,7 +474,7 @@ module SalesLT =
           rowguid: System.Guid
           ModifiedDate: System.DateTime }
 
-    type SalesOrderDetailReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type SalesOrderDetailDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.SalesOrderID() =
             reader.Required(reader.GetInt32, "SalesOrderID")
 
@@ -538,7 +538,7 @@ module SalesLT =
           AccountNumber: Option<string>
           ShipDate: Option<System.DateTime> }
 
-    type SalesOrderHeaderReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type SalesOrderHeaderDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.SalesOrderID() =
             reader.Required(reader.GetInt32, "SalesOrderID")
 
@@ -637,7 +637,7 @@ module SalesLT =
           Culture: string
           Description: string }
 
-    type vProductAndDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type vProductAndDescriptionDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.ProductID() =
             reader.Required(reader.GetInt32, "ProductID")
 
@@ -688,7 +688,7 @@ module SalesLT =
           Style: Option<string>
           RiderExperience: Option<string> }
 
-    type vProductModelCatalogDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type vProductModelCatalogDescriptionDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.ProductModelID() =
             reader.Required(reader.GetInt32, "ProductModelID")
 
@@ -797,7 +797,7 @@ module SalesLT =
           ProductCategoryName: Option<string>
           ProductCategoryID: Option<int> }
 
-    type vGetAllCategoriesReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type vGetAllCategoriesDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member __.ParentProductCategoryName() =
             reader.Required(reader.GetString, "ParentProductCategoryName")
 
