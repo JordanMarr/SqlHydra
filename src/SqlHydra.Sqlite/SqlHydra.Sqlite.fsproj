@@ -3,13 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
-    <Version>0.60.0</Version>
+    <Version>0.70.0-alpha1</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.Sqlite is a dotnet tool that generates F# records for a SQLite database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>sqlhydra-sqlite</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,8 +18,6 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-    <Compile Include="..\SqlHydra\Schema.fs" Link="Schema.fs" />
-    <Compile Include="..\SqlHydra\SchemaGenerator.fs" Link="SchemaGenerator.fs" />
     <Compile Include="SqliteDataTypes.fs" />
     <Compile Include="SqliteSchemaProvider.fs" />
     <Compile Include="Program.fs" />
@@ -30,5 +29,18 @@
     <PackageReference Include="FsAst" Version="0.9.0" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.113.7" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj">
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <IncludeAssets>SqlHydra.dll</IncludeAssets>
+    </ProjectReference>
+  </ItemGroup>
+
+  <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"/>
+    </ItemGroup>
+  </Target>
 
 </Project>

@@ -2,11 +2,24 @@
 
 open NUnit.Framework
 open SqlHydra.SqlServer
+open SqlHydra.Schema
 
 [<Test>]
 let getSchema() =
-    let connStr = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"
-    let schema = SqlServerSchemaProvider.getSchema connStr
+    
+    let cfg = 
+        {
+            ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"
+            OutputFile = ""
+            Namespace = "TestNS"
+            IsCLIMutable = true
+            Readers = 
+                {
+                    ReadersConfig.IsEnabled = true
+                    ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader"
+                } 
+        }
+    let schema = SqlServerSchemaProvider.getSchema cfg
     printfn "Schema: %A" schema
     Assert.Pass()
 

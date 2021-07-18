@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SqlHydra.Sqlite\SqlHydra.Sqlite.fsproj" />
     <ProjectReference Include="..\SqlHydra.SqlServer\SqlHydra.SqlServer.fsproj" />
+    <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
