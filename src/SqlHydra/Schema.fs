@@ -7,7 +7,7 @@ type TypeMapping =
     {
         ClrType: string
         DbType: DbType
-        ProviderTypeName: string
+        ColumnTypeAlias: string
         ReaderMethod: string option
     }
 

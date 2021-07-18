@@ -42,10 +42,10 @@ let typeMappingsByName =
         "GEOMETRY",             "Microsoft.SqlServer.Types.SqlGeometry",    DbType.Object,              None
         "HIERARCHYID",          "Microsoft.SqlServer.Types.SqlHierarchyId", DbType.Object,              None 
     ]
-    |> List.map (fun (providerTypeName, clrType, dbType, readerMethod) ->
-        providerTypeName,
+    |> List.map (fun (columnTypeAlias, clrType, dbType, readerMethod) ->
+        columnTypeAlias,
         { 
-            TypeMapping.ProviderTypeName = providerTypeName
+            TypeMapping.ColumnTypeAlias = columnTypeAlias
             TypeMapping.ClrType = clrType
             TypeMapping.DbType = dbType
             TypeMapping.ReaderMethod = readerMethod
@@ -55,5 +55,5 @@ let typeMappingsByName =
         
 let findTypeMapping (providerTypeName: string) =
     typeMappingsByName.TryFind (providerTypeName.ToUpper())
-    |> Option.defaultWith (fun () -> failwithf "Provider type not handled: %s" providerTypeName)
+    |> Option.defaultWith (fun () -> failwithf "Column type not handled: %s" providerTypeName)
         

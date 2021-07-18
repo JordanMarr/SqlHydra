@@ -55,10 +55,10 @@ let typeMappingsByName =
         "uniqueidentifier", "System.Guid",      DbType.Guid,        Some "GetGuid"
         "guid",             "System.Guid",      DbType.Guid,        Some "GetGuid" 
     ]
-    |> List.map (fun (providerTypeName, clrType, dbType, readerMethod) ->
-        providerTypeName,
+    |> List.map (fun (columnTypeAlias, clrType, dbType, readerMethod) ->
+        columnTypeAlias,
         { 
-            TypeMapping.ProviderTypeName = providerTypeName
+            TypeMapping.ColumnTypeAlias = columnTypeAlias
             TypeMapping.ClrType = clrType
             TypeMapping.DbType = dbType
             TypeMapping.ReaderMethod = readerMethod
@@ -68,5 +68,5 @@ let typeMappingsByName =
 
 let findTypeMapping (providerTypeName: string) = 
     typeMappingsByName.TryFind(providerTypeName.ToLower().Trim())
-    |> Option.defaultWith (fun () -> failwithf "Provider type not handled: %s" providerTypeName)
+    |> Option.defaultWith (fun () -> failwithf "Column type not handled: %s" providerTypeName)
 
