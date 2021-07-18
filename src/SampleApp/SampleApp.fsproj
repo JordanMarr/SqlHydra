@@ -9,6 +9,8 @@
         <Compile Include="AdventureWorks.fs" />
 
         <Compile Include="DapperFSharpExample.fs" />
+
+        <Compile Include="ReaderExample.fs" />
     </ItemGroup>
     
   <ItemGroup>
