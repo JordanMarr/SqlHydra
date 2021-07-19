@@ -23,19 +23,28 @@ let getAddressesForCity(conn: IDbConnection) (city: string) =
     select {
         for a in addressTable do
         where (a.City = city)
-    } |> conn.SelectAsync<SalesLT.Address>
+    } 
+    |> conn.SelectAsync<SalesLT.Address>
     
 let getCustomersWithAddresses(conn: IDbConnection) =
-    select {
-        for c in customerTable do
-        leftJoin ca in customerAddressTable on (c.CustomerID = ca.CustomerID)
-        leftJoin a  in addressTable on (ca.AddressID = a.AddressID)
-        where (isIn c.CustomerID [30018;29545;29954;29897;29503;29559])
-        orderBy c.CustomerID
-    } |> conn.SelectAsyncOption<SalesLT.Customer, SalesLT.CustomerAddress, SalesLT.Address>
+    let query = 
+        select {
+            for c in customerTable do
+            join ca in customerAddressTable on (c.CustomerID = ca.CustomerID)
+            join a  in addressTable on (ca.AddressID = a.AddressID)
+            where (isIn c.CustomerID [30018;29545;29954;29897;29503;29559])
+            orderBy c.CustomerID
+        } 
+
+    let (sql, p, _) = query |> Deconstructor.select<SalesLT.Customer, SalesLT.CustomerAddress, SalesLT.Address>
+    
+    query |> conn.SelectAsyncOption<SalesLT.Customer, SalesLT.CustomerAddress, SalesLT.Address>
 
 let runQueries() = task {
     use conn = connect()    
     let! addresses = getAddressesForCity conn "Dallas"
     printfn "Dallas Addresses: %A" addresses
+    
+    let! customers = getCustomersWithAddresses conn
+    printfn "Customer Addresses: %A" customers
 }

@@ -53,6 +53,24 @@ let getCustomersWithAddresses_Readers(conn: SqlConnection) = task {
     ]
 }
 
+let getProductsAndCategories(conn: SqlConnection) = task {
+    let sql = 
+        """
+        SELECT TOP 4 [SalesLT].[Product].[Name], [SalesLT].[ProductCategory].[Name] 
+        FROM SalesLT.Product
+        JOIN SalesLT.ProductCategory ON [SalesLT].[Product].ProductCategoryID = [SalesLT].[ProductCategory].ProductCategoryID
+        """
+    use cmd = new SqlCommand(sql, conn)
+    use! reader = cmd.ExecuteReaderAsync()
+    let product = SalesLT.ProductDataReader(reader)
+    let category = SalesLT.ProductCategoryDataReader(reader)
+
+    return [
+        while reader.Read() do
+            product.Name(), category.Name()
+    ]
+}
+
 let runQueries() = task {
     use conn = connect()    
     
@@ -64,4 +82,7 @@ let runQueries() = task {
 
     let! customersAddresses = getCustomersWithAddresses_Readers conn
     printfn "Customers-Addresses: %A" customersAddresses
+
+    let! productsCategories = getProductsAndCategories conn
+    printfn "Products-Categories: %A" productsCategories
 }
