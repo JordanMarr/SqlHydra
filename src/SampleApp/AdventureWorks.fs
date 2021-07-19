@@ -19,6 +19,15 @@ module private Extensions =
             match this.GetOrdinal col with
             | o when this.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
+
+
+type Column<'T> = {
+    Name: string
+    IsNull: unit -> bool
+    Read: unit -> 'T
+}
+
+
         
 module dbo =
     [<CLIMutable>]
@@ -362,27 +371,43 @@ module SalesLT =
           ParentProductCategoryID: Option<int> }
 
     type ProductCategoryDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
-        member __.Name() =
-            reader.Required(reader.GetString, "Name")
+        member __.Name = 
+            { Name = "Name"
+              IsNull = fun () -> reader.IsDBNull(reader.GetOrdinal("Name"))
+              Read = fun () -> reader.Required(reader.GetString, "Name") }
 
-        member __.rowguid() =
-            reader.Required(reader.GetGuid, "rowguid")
+        member __.rowguid = 
+            { Name = "rowguid"
+              IsNull = fun () -> reader.IsDBNull(reader.GetOrdinal("rowguid"))
+              Read = fun () -> reader.Required(reader.GetGuid, "rowguid") }
 
-        member __.ModifiedDate() =
-            reader.Required(reader.GetDateTime, "ModifiedDate")
+        member __.ModifiedDate = 
+            { Name = "ModifiedDate"
+              IsNull = fun () -> reader.IsDBNull(reader.GetOrdinal("ModifiedDate"))
+              Read = fun () -> reader.Required(reader.GetDateTime, "ModifiedDate") }
 
-        member __.ProductCategoryID() =
-            reader.Required(reader.GetInt32, "ProductCategoryID")
+        member __.ProductCategoryID = 
+            { Name = "ProductCategoryID"
+              IsNull = fun () -> reader.IsDBNull(reader.GetOrdinal("ProductCategoryID"))
+              Read = fun () -> reader.Required(reader.GetInt32, "ProductCategoryID") }
 
-        member __.ParentProductCategoryID() =
-            reader.Optional(reader.GetInt32, "ParentProductCategoryID")
+        member __.ParentProductCategoryID = 
+            { Name = "ParentProductCategoryID"
+              IsNull = fun () -> reader.IsDBNull(reader.GetOrdinal("ParentProductCategoryID"))
+              Read = fun () -> reader.Optional(reader.GetInt32, "ParentProductCategoryID") }
 
         member __.ToRecord() =
-            { Name = __.Name()
-              rowguid = __.rowguid ()
-              ModifiedDate = __.ModifiedDate()
-              ProductCategoryID = __.ProductCategoryID()
-              ParentProductCategoryID = __.ParentProductCategoryID() }
+            { Name = __.Name.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read()
+              ProductCategoryID = __.ProductCategoryID.Read()
+              ParentProductCategoryID = __.ParentProductCategoryID.Read() }
+
+        member __.ToRecordIf(column) = 
+            if column.IsNull()
+            then None
+            else Some (__.ToRecord())
+
 
     [<CLIMutable>]
     type ProductDescription =
