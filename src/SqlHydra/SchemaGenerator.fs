@@ -117,7 +117,6 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                 , None
                 , range0)
         )
-
     
     /// Initializes a table record using the reader column properties.
     let toRecordMethod = 
@@ -152,6 +151,94 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
             }
         )
 
+    /// Initializes an optional table record (Some if the given column is not null).
+    let toRecordIfMethod = 
+        SynMemberDefn.CreateMember(
+            {   
+                SynBindingRcd.Access = None
+                SynBindingRcd.Kind = SynBindingKind.NormalBinding
+                SynBindingRcd.IsInline = false
+                SynBindingRcd.IsMutable = false
+                SynBindingRcd.Attributes = SynAttributes.Empty
+                SynBindingRcd.XmlDoc = XmlDoc.PreXmlDocEmpty
+                SynBindingRcd.ValData = SynValData.SynValData(Some memberFlags, SynValInfo.Empty, None)
+                SynBindingRcd.Pattern = 
+                    SynPatRcd.LongIdent(
+                        SynPatLongIdentRcd.Create(
+                            LongIdentWithDots.CreateString("__.ToRecordIf")
+                            , SynArgPats.Pats([ 
+                                SynPat.Paren(
+                                    SynPat.Typed(
+                                        SynPat.LongIdent(LongIdentWithDots.CreateString("column"), None, None, SynArgPats.Empty, None, range0)
+                                        , SynType.Create("Column")
+                                        , range0
+                                    )
+                                    , range0
+                                )
+                            ])
+                        )
+                    )
+                SynBindingRcd.ReturnInfo = None
+                SynBindingRcd.Expr = 
+                    SynExpr.IfThenElse(
+                        SynExpr.App(
+                            ExprAtomicFlag.Atomic
+                            , false
+                            
+                            // Function:
+                            , SynExpr.LongIdent(
+                                false
+                                , LongIdentWithDots.Create([ "column"; "IsNull" ])
+                                , None
+                                , range0)
+                            
+                            // Args:
+                            , SynExpr.CreateParenedTuple([])
+                            , range0 
+                        )
+                        , SynExpr.CreateIdentString("None")
+                        ,   SynExpr.App(
+                                ExprAtomicFlag.Atomic
+                                , false
+                            
+                                // Function:
+                                , SynExpr.LongIdent(
+                                    false
+                                    , LongIdentWithDots.CreateString("Some")
+                                    , None
+                                    , range0)
+                            
+                                // Args:
+                                , SynExpr.CreateParenedTuple([
+                                    SynExpr.App(
+                                        ExprAtomicFlag.Atomic
+                                        , false
+                                        
+                                        // Function:
+                                        , SynExpr.LongIdent(
+                                            false
+                                            , LongIdentWithDots.Create([ "__"; "ToRecord" ])
+                                            , None
+                                            , range0)
+                                        
+                                        // Args:
+                                        , SynExpr.CreateParenedTuple([])
+                                        , range0 
+                                    )
+                                ])
+                                , range0 
+                            ) 
+                            |> Some
+                        , DebugPointForBinding.DebugPointAtBinding(range0)
+                        , false
+                        , range0
+                        , range0
+                    )
+                SynBindingRcd.Range = range0
+                SynBindingRcd.Bind = DebugPointForBinding.NoDebugPointAtInvisibleBinding
+            }
+        )
+
     let members = 
         [ 
             ctor
@@ -161,6 +248,7 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
             // otherwise, the record will be partially initialized and break the build.
             if tbl.Columns |> Array.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome) then 
                 toRecordMethod 
+                toRecordIfMethod
         ]
 
     let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range0)

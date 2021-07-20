@@ -61,6 +61,12 @@ module dbo =
               ErrorProcedure = __.ErrorProcedure.Read()
               ErrorLine = __.ErrorLine.Read() }
 
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
+
     [<CLIMutable>]
     type BuildVersion =
         { SystemInformationID: byte
@@ -78,6 +84,12 @@ module dbo =
               ``Database Version`` = __.``Database Version``.Read()
               VersionDate = __.VersionDate.Read()
               ModifiedDate = __.ModifiedDate.Read() }
+
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
 
 module SalesLT =
     [<CLIMutable>]
@@ -112,6 +124,12 @@ module SalesLT =
               AddressID = __.AddressID.Read()
               AddressLine1 = __.AddressLine1.Read()
               AddressLine2 = __.AddressLine2.Read() }
+
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
 
     [<CLIMutable>]
     type Customer =
@@ -164,6 +182,12 @@ module SalesLT =
               EmailAddress = __.EmailAddress.Read()
               Phone = __.Phone.Read() }
 
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
+
     [<CLIMutable>]
     type CustomerAddress =
         { CustomerID: int
@@ -184,6 +208,12 @@ module SalesLT =
               AddressType = __.AddressType.Read()
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
+
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
 
     [<CLIMutable>]
     type Product =
@@ -242,6 +272,12 @@ module SalesLT =
               ProductModelID = __.ProductModelID.Read()
               Color = __.Color.Read() }
 
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
+
     [<CLIMutable>]
     type ProductCategory =
         { Name: string
@@ -263,6 +299,12 @@ module SalesLT =
               ProductCategoryID = __.ProductCategoryID.Read()
               ParentProductCategoryID = __.ParentProductCategoryID.Read() }
 
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
+
     [<CLIMutable>]
     type ProductDescription =
         { ProductDescriptionID: int
@@ -280,6 +322,12 @@ module SalesLT =
               Description = __.Description.Read()
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
+
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
 
     [<CLIMutable>]
     type ProductModel =
@@ -316,6 +364,12 @@ module SalesLT =
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
+
     [<CLIMutable>]
     type SalesOrderDetail =
         { SalesOrderID: int
@@ -348,6 +402,12 @@ module SalesLT =
               LineTotal = __.LineTotal.Read()
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
+
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
 
     [<CLIMutable>]
     type SalesOrderHeader =
@@ -421,6 +481,12 @@ module SalesLT =
               AccountNumber = __.AccountNumber.Read()
               ShipDate = __.ShipDate.Read() }
 
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
+
     [<CLIMutable>]
     type vProductAndDescription =
         { ProductID: int
@@ -441,6 +507,12 @@ module SalesLT =
               ProductModel = __.ProductModel.Read()
               Culture = __.Culture.Read()
               Description = __.Description.Read() }
+
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
 
     [<CLIMutable>]
     type vProductModelCatalogDescription =
@@ -523,6 +595,12 @@ module SalesLT =
               Style = __.Style.Read()
               RiderExperience = __.RiderExperience.Read() }
 
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
+
     [<CLIMutable>]
     type vGetAllCategories =
         { ParentProductCategoryName: string
@@ -537,3 +615,9 @@ module SalesLT =
             { ParentProductCategoryName = __.ParentProductCategoryName.Read()
               ProductCategoryName = __.ProductCategoryName.Read()
               ProductCategoryID = __.ProductCategoryID.Read() }
+
+        member __.ToRecordIf(column: Column) =
+            if column.IsNull() then
+                None
+            else
+                Some(__.ToRecord())
