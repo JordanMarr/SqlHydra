@@ -79,16 +79,17 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                         false
                         , LongIdentWithDots.CreateString(
                             match col.TypeMapping.DbType, col.IsNullable with
-                            | DbType.Binary, true -> "reader.OptionalBinary"
-                            | DbType.Binary, false -> "reader.RequiredBinary"
-                            | _, true -> "reader.Optional"
-                            | _, false -> "reader.Required"
+                            | DbType.Binary, true -> "OptionalBinaryColumn"
+                            | DbType.Binary, false -> "RequiredBinaryColumn"
+                            | _, true -> "OptionalColumn"
+                            | _, false -> "RequiredColumn"
                         )
                         , None
                         , range0)
                     
                     // Args:
                     , SynExpr.CreateParenedTuple([
+                        SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("reader"), None)
                         SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString($"reader.%s{readerMethod}"), None)
                         SynExpr.CreateConstString(col.Name)
                     ])
@@ -96,28 +97,25 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                     , range0 
                 )
 
-            SynMemberDefn.CreateMember(
-                {   
-                    SynBindingRcd.Access = None
-                    SynBindingRcd.Kind = SynBindingKind.NormalBinding
-                    SynBindingRcd.IsInline = false
-                    SynBindingRcd.IsMutable = false
-                    SynBindingRcd.Attributes = SynAttributes.Empty
-                    SynBindingRcd.XmlDoc = XmlDoc.PreXmlDocEmpty
-                    SynBindingRcd.ValData = SynValData.SynValData(Some memberFlags, SynValInfo.Empty, None)
-                    SynBindingRcd.Pattern = 
-                        SynPatRcd.LongIdent(
-                            SynPatLongIdentRcd.Create(
-                                LongIdentWithDots.Create([ "__"; col.Name ]) // One method per column name
-                                , SynArgPats.Pats([ SynPat.Paren(SynPat.Const(SynConst.Unit, range0), range0) ])
-                            )
-                        )
-                    SynBindingRcd.ReturnInfo = None
-                    SynBindingRcd.Expr = readerCall
-                    SynBindingRcd.Range = range0
-                    SynBindingRcd.Bind = DebugPointForBinding.NoDebugPointAtInvisibleBinding
-                }
-            )
+            SynMemberDefn.AutoProperty(
+                []
+                , false
+                , Ident.Create(col.Name)
+                , None
+                , MemberKind.PropertyGet
+                , (fun mk -> 
+                    {
+                        MemberFlags.IsInstance = true
+                        MemberFlags.IsDispatchSlot = false
+                        MemberFlags.IsFinal = false
+                        MemberFlags.IsOverrideOrExplicitImpl = false
+                        MemberFlags.MemberKind = MemberKind.PropertyGet
+                    })
+                , XmlDoc.PreXmlDocEmpty
+                , None
+                , readerCall
+                , None
+                , range0)
         )
 
     
@@ -145,7 +143,7 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                         tbl.Columns
                         |> Array.map (fun col -> 
                             RecordFieldName(LongIdentWithDots.CreateString(col.Name), false)
-                            , SynExpr.CreateInstanceMethodCall(LongIdentWithDots.Create(["__"; col.Name ])) |> Some
+                            , SynExpr.CreateInstanceMethodCall(LongIdentWithDots.Create([ "__"; col.Name; "Read" ])) |> Some
                         )
                         |> Array.toList
                     )
@@ -226,23 +224,30 @@ let generateModule (cfg: Config) (db: Schema) =
 let substitutions = 
     [
         "open Substitute.Extensions",
-        """[<AutoOpen>]
-module private Extensions = 
-    type System.Data.IDataReader with
-        member this.Required (getter: int -> 'T, col: string) =
-            this.GetOrdinal col |> getter
+        """type Column(reader: System.Data.IDataReader, column) =
+        member __.Name = column
+        member __.IsNull() = reader.GetOrdinal column |> reader.IsDBNull
 
-        member this.Optional (getter: int -> 'T, col: string) = 
-            match this.GetOrdinal col with
-            | o when this.IsDBNull o -> None
+type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getter: int -> 'T, column) =
+        inherit Column(reader, column)
+        member __.Read() = reader.GetOrdinal column |> getter
+
+type OptionalColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getter: int -> 'T, column) =
+        inherit Column(reader, column)
+        member __.Read() = 
+            match reader.GetOrdinal column with
+            | o when reader.IsDBNull o -> None
             | o -> Some (getter o)
 
-        member this.RequiredBinary (getValue: int -> obj, col: string) =
-            this.GetOrdinal col |> getValue :?> byte[]
+type RequiredBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getValue: int -> obj, column) =
+        inherit Column(reader, column)
+        member __.Read() = reader.GetOrdinal column |> getValue :?> byte[]
 
-        member this.OptionalBinary (getValue: int -> obj, col: string) = 
-            match this.GetOrdinal col with
-            | o when this.IsDBNull o -> None
+type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getValue: int -> obj, column) =
+        inherit Column(reader, column)
+        member __.Read() = 
+            match reader.GetOrdinal column with
+            | o when reader.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
         """
     ]
