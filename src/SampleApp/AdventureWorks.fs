@@ -4,31 +4,48 @@ namespace SampleApp.AdventureWorks
 [<AutoOpen>]
 module private Extensions = 
     type System.Data.IDataReader with
-        member this.Required (getter: int -> 'T, col: string) =
-            this.GetOrdinal col |> getter
+        member __.Required (getter: int -> 'T, col: string) =
+            __.GetOrdinal col |> getter
 
-        member this.Optional (getter: int -> 'T, col: string) = 
-            match this.GetOrdinal col with
-            | o when this.IsDBNull o -> None
+        member __.Optional (getter: int -> 'T, col: string) = 
+            match __.GetOrdinal col with
+            | o when __.IsDBNull o -> None
             | o -> Some (getter o)
 
-        member this.RequiredBinary (getValue: int -> obj, col: string) =
-            this.GetOrdinal col |> getValue :?> byte[]
+        member __.RequiredBinary (getValue: int -> obj, col: string) =
+            __.GetOrdinal col |> getValue :?> byte[]
 
-        member this.OptionalBinary (getValue: int -> obj, col: string) = 
-            match this.GetOrdinal col with
-            | o when this.IsDBNull o -> None
+        member __.OptionalBinary (getValue: int -> obj, col: string) = 
+            match __.GetOrdinal col with
+            | o when __.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
 
+type Column(reader: System.Data.IDataReader, column) =
+    member __.Name = column
+    member __.IsNull() = reader.GetOrdinal column |> reader.IsDBNull
 
-type Column<'T> = {
-    Name: string
-    IsNull: unit -> bool
-    Read: unit -> 'T
-}
+type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getter: int -> 'T, column) =
+    inherit Column(reader, column)
+    member __.Read() = reader.GetOrdinal column |> getter
 
+type OptionalColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getter: int -> 'T, column) =
+    inherit Column(reader, column)
+    member __.Read() = 
+        match reader.GetOrdinal column with
+        | o when reader.IsDBNull o -> None
+        | o -> Some (getter o)
 
-        
+type RequiredBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getValue: int -> obj, column) =
+    inherit Column(reader, column)
+    member __.Read() = reader.GetOrdinal column |> getValue :?> byte[]
+
+type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getValue: int -> obj, column) =
+    inherit Column(reader, column)
+    member __.Read() = 
+        match reader.GetOrdinal column with
+        | o when reader.IsDBNull o -> None
+        | o -> Some (getValue o :?> byte[])
+                
 module dbo =
     [<CLIMutable>]
     type ErrorLog =
@@ -371,30 +388,11 @@ module SalesLT =
           ParentProductCategoryID: Option<int> }
 
     type ProductCategoryDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
-        member __.Name = 
-            { Name = "Name"
-              IsNull = fun () -> reader.IsDBNull(reader.GetOrdinal("Name"))
-              Read = fun () -> reader.Required(reader.GetString, "Name") }
-
-        member __.rowguid = 
-            { Name = "rowguid"
-              IsNull = fun () -> reader.IsDBNull(reader.GetOrdinal("rowguid"))
-              Read = fun () -> reader.Required(reader.GetGuid, "rowguid") }
-
-        member __.ModifiedDate = 
-            { Name = "ModifiedDate"
-              IsNull = fun () -> reader.IsDBNull(reader.GetOrdinal("ModifiedDate"))
-              Read = fun () -> reader.Required(reader.GetDateTime, "ModifiedDate") }
-
-        member __.ProductCategoryID = 
-            { Name = "ProductCategoryID"
-              IsNull = fun () -> reader.IsDBNull(reader.GetOrdinal("ProductCategoryID"))
-              Read = fun () -> reader.Required(reader.GetInt32, "ProductCategoryID") }
-
-        member __.ParentProductCategoryID = 
-            { Name = "ParentProductCategoryID"
-              IsNull = fun () -> reader.IsDBNull(reader.GetOrdinal("ParentProductCategoryID"))
-              Read = fun () -> reader.Optional(reader.GetInt32, "ParentProductCategoryID") }
+        member __.Name = RequiredColumn(reader, reader.GetString, "Name")
+        member __.rowguid = RequiredColumn(reader, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, reader.GetDateTime, "ModifiedDate")
+        member __.ProductCategoryID = RequiredColumn(reader, reader.GetInt32, "ProductCategoryID")
+        member __.ParentProductCategoryID = OptionalColumn(reader, reader.GetInt32, "ParentProductCategoryID")
 
         member __.ToRecord() =
             { Name = __.Name.Read()
@@ -403,7 +401,7 @@ module SalesLT =
               ProductCategoryID = __.ProductCategoryID.Read()
               ParentProductCategoryID = __.ParentProductCategoryID.Read() }
 
-        member __.ToRecordIf(column) = 
+        member __.ToRecordIf(column: Column) = 
             if column.IsNull()
             then None
             else Some (__.ToRecord())
