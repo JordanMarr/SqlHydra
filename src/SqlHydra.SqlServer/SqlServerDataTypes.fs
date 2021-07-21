@@ -15,7 +15,7 @@ let typeMappingsByName =
         "SMALLINT",             "int16",                                    DbType.Int16,               Some "GetInt16"
         "TINYINT",              "byte",                                     DbType.Byte,                Some "GetByte"
         "FLOAT",                "double",                                   DbType.Double,              Some "GetDouble"
-        "REAL",                 "System.Single",                            DbType.Single,              Some "GetDouble"
+        "REAL",                 "System.Single",                            DbType.Single,              Some "GetFloat"
         "DECIMAL",              "decimal",                                  DbType.Decimal,             Some "GetDecimal"
         "NUMERIC",              "decimal",                                  DbType.Decimal,             Some "GetDecimal"
         "MONEY",                "decimal",                                  DbType.Decimal,             Some "GetDecimal"
