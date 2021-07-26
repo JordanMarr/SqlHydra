@@ -49,7 +49,7 @@ let tableRecord (tbl: Table) =
 
 /// Creates a "Reader" class that reads columns for a given table/record.
 let tableReaderClass (cfg: Config) (tbl: Table) = 
-    let classId = Ident.CreateLong(tbl.Name + "DataReader")
+    let classId = Ident.CreateLong(tbl.Name + "Reader")
     let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, range0)
 
     let ctor = SynMemberDefn.CreateImplicitCtor([ 
@@ -132,7 +132,7 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                 SynBindingRcd.Pattern = 
                     SynPatRcd.LongIdent(
                         SynPatLongIdentRcd.Create(
-                            LongIdentWithDots.CreateString("__.ToRecord")
+                            LongIdentWithDots.CreateString("__.Read")
                             , SynArgPats.Pats([ SynPat.Paren(SynPat.Const(SynConst.Unit, range0), range0) ])
                         )
                     )
@@ -165,7 +165,7 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                 SynBindingRcd.Pattern = 
                     SynPatRcd.LongIdent(
                         SynPatLongIdentRcd.Create(
-                            LongIdentWithDots.CreateString("__.ToRecordIf")
+                            LongIdentWithDots.CreateString("__.ReadIf")
                             , SynArgPats.Pats([ 
                                 SynPat.Paren(
                                     SynPat.Typed(
@@ -217,7 +217,7 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                                         // Function:
                                         , SynExpr.LongIdent(
                                             false
-                                            , LongIdentWithDots.Create([ "__"; "ToRecord" ])
+                                            , LongIdentWithDots.Create([ "__"; "Read" ])
                                             , None
                                             , range0)
                                         
@@ -313,28 +313,30 @@ let substitutions =
     [
         "open Substitute.Extensions",
         """type Column(reader: System.Data.IDataReader, column) =
-        member __.Name = column
+        member val Name = column with get,set
         member __.IsNull() = reader.GetOrdinal column |> reader.IsDBNull
+        member __.Alias(alias) = __.Name <- alias
+        override __.ToString() = __.Name
 
 type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getter: int -> 'T, column) =
         inherit Column(reader, column)
-        member __.Read() = reader.GetOrdinal column |> getter
+        member __.Read(?alias) = alias |> Option.defaultValue __.Name |> reader.GetOrdinal |> getter
 
 type OptionalColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getter: int -> 'T, column) =
         inherit Column(reader, column)
-        member __.Read() = 
-            match reader.GetOrdinal column with
+        member __.Read(?alias) = 
+            match alias |> Option.defaultValue __.Name |> reader.GetOrdinal with
             | o when reader.IsDBNull o -> None
             | o -> Some (getter o)
 
 type RequiredBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getValue: int -> obj, column) =
         inherit Column(reader, column)
-        member __.Read() = reader.GetOrdinal column |> getValue :?> byte[]
+        member __.Read(?alias) = alias |> Option.defaultValue __.Name |> reader.GetOrdinal |> getValue :?> byte[]
 
 type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getValue: int -> obj, column) =
         inherit Column(reader, column)
-        member __.Read() = 
-            match reader.GetOrdinal column with
+        member __.Read(?alias) = 
+            match alias |> Option.defaultValue __.Name |> reader.GetOrdinal with
             | o when reader.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
         """

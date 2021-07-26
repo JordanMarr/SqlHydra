@@ -14,21 +14,21 @@ let getProductsWithThumbnail(conn: SqlConnection) = task {
     let sql = "SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
-    let productDataReader = SalesLT.ProductDataReader(reader)
+    let p = SalesLT.ProductReader(reader)
     return [
         while reader.Read() do
-            productDataReader.ToRecord()
+            p.Read()
     ]
 }
 
 let getProductNamesNumbers(conn: SqlConnection) = task {
-    let sql = "SELECT TOP 10 [Name], [ProductNumber] FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
+    let sql = "SELECT TOP 10 [Name], [ProductNumber] AS ProductNo FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
     return [
-        let productDataReader = SalesLT.ProductDataReader(reader)
+        let productDataReader = SalesLT.ProductReader(reader)
         while reader.Read() do
-            productDataReader.Name.Read(), productDataReader.ProductNumber.Read()
+            productDataReader.Name.Read(), productDataReader.ProductNumber.Read("ProductNo")
     ]
 }
 
@@ -43,13 +43,12 @@ let getCustomersJoinAddresses(conn: SqlConnection) = task {
         """
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
-    let customer = SalesLT.CustomerDataReader(reader)
-    //let customerAddress = SalesLT.CustomerAddressDataReader(reader)
-    let address = SalesLT.AddressDataReader(reader)
+    let c = SalesLT.CustomerReader(reader)
+    let a = SalesLT.AddressReader(reader)
 
     return [
         while reader.Read() do
-            customer.ToRecord(), address.ToRecord()
+            c.Read(), a.Read()
     ]
 }
 
@@ -66,31 +65,31 @@ let getCustomersLeftJoinAddresses(conn: SqlConnection) = task {
         """
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
-    let customer = SalesLT.CustomerDataReader(reader)
-    let address = SalesLT.AddressDataReader(reader)
+    let c = SalesLT.CustomerReader(reader)
+    let a = SalesLT.AddressReader(reader)
 
     return [
         while reader.Read() do
-            customer.ToRecord(), address.ToRecordIf(address.AddressID)
+            c.Read(), a.ReadIf(a.AddressID)
     ]
 }
 
 let getProductsAndCategories(conn: SqlConnection) = task {
     let sql = 
         """
-        SELECT *
+        SELECT *, c.Name as Category
         FROM SalesLT.Product p
-        JOIN SalesLT.ProductCategory c ON p.ProductCategoryID = c.ProductCategoryID
+        LEFT JOIN SalesLT.ProductCategory c ON p.ProductCategoryID = c.ProductCategoryID
         """
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
-    let product = SalesLT.ProductDataReader(reader)
-    let category = SalesLT.ProductCategoryDataReader(reader)
+    let p = SalesLT.ProductReader(reader)
+    let c = SalesLT.ProductCategoryReader(reader)
+    c.Name.Alias "Category"
 
     return [
         while reader.Read() do
-            product.ToRecord(), 
-            category.ToRecordIf(category.ProductCategoryID)
+            p.Read(), c.ReadIf(c.ProductCategoryID)
     ]
 }
 

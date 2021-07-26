@@ -2,28 +2,30 @@
 namespace SampleApp.AdventureWorks
 
 type Column(reader: System.Data.IDataReader, column) =
-        member __.Name = column
+        member val Name = column with get,set
         member __.IsNull() = reader.GetOrdinal column |> reader.IsDBNull
+        member __.Alias(alias) = __.Name <- alias
+        override __.ToString() = __.Name
 
 type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getter: int -> 'T, column) =
         inherit Column(reader, column)
-        member __.Read() = reader.GetOrdinal column |> getter
+        member __.Read(?alias) = alias |> Option.defaultValue __.Name |> reader.GetOrdinal |> getter
 
 type OptionalColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getter: int -> 'T, column) =
         inherit Column(reader, column)
-        member __.Read() = 
-            match reader.GetOrdinal column with
+        member __.Read(?alias) = 
+            match alias |> Option.defaultValue __.Name |> reader.GetOrdinal with
             | o when reader.IsDBNull o -> None
             | o -> Some (getter o)
 
 type RequiredBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getValue: int -> obj, column) =
         inherit Column(reader, column)
-        member __.Read() = reader.GetOrdinal column |> getValue :?> byte[]
+        member __.Read(?alias) = alias |> Option.defaultValue __.Name |> reader.GetOrdinal |> getValue :?> byte[]
 
 type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getValue: int -> obj, column) =
         inherit Column(reader, column)
-        member __.Read() = 
-            match reader.GetOrdinal column with
+        member __.Read(?alias) = 
+            match alias |> Option.defaultValue __.Name |> reader.GetOrdinal with
             | o when reader.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
         
@@ -40,7 +42,7 @@ module dbo =
           ErrorProcedure: Option<string>
           ErrorLine: Option<int> }
 
-    type ErrorLogDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type ErrorLogReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val ErrorLogID = RequiredColumn(reader, reader.GetInt32, "ErrorLogID")
         member val ErrorTime = RequiredColumn(reader, reader.GetDateTime, "ErrorTime")
         member val UserName = RequiredColumn(reader, reader.GetString, "UserName")
@@ -50,7 +52,7 @@ module dbo =
         member val ErrorState = OptionalColumn(reader, reader.GetInt32, "ErrorState")
         member val ErrorProcedure = OptionalColumn(reader, reader.GetString, "ErrorProcedure")
         member val ErrorLine = OptionalColumn(reader, reader.GetInt32, "ErrorLine")
-        member __.ToRecord() =
+        member __.Read() =
             { ErrorLogID = __.ErrorLogID.Read()
               ErrorTime = __.ErrorTime.Read()
               UserName = __.UserName.Read()
@@ -61,11 +63,11 @@ module dbo =
               ErrorProcedure = __.ErrorProcedure.Read()
               ErrorLine = __.ErrorLine.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
 
     [<CLIMutable>]
     type BuildVersion =
@@ -74,22 +76,22 @@ module dbo =
           VersionDate: System.DateTime
           ModifiedDate: System.DateTime }
 
-    type BuildVersionDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type BuildVersionReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val SystemInformationID = RequiredColumn(reader, reader.GetByte, "SystemInformationID")
         member val ``Database Version`` = RequiredColumn(reader, reader.GetString, "Database Version")
         member val VersionDate = RequiredColumn(reader, reader.GetDateTime, "VersionDate")
         member val ModifiedDate = RequiredColumn(reader, reader.GetDateTime, "ModifiedDate")
-        member __.ToRecord() =
+        member __.Read() =
             { SystemInformationID = __.SystemInformationID.Read()
               ``Database Version`` = __.``Database Version``.Read()
               VersionDate = __.VersionDate.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
 
 module SalesLT =
     [<CLIMutable>]
@@ -104,7 +106,7 @@ module SalesLT =
           AddressLine1: string
           AddressLine2: Option<string> }
 
-    type AddressDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type AddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val City = RequiredColumn(reader, reader.GetString, "City")
         member val StateProvince = RequiredColumn(reader, reader.GetString, "StateProvince")
         member val CountryRegion = RequiredColumn(reader, reader.GetString, "CountryRegion")
@@ -114,7 +116,7 @@ module SalesLT =
         member val AddressID = RequiredColumn(reader, reader.GetInt32, "AddressID")
         member val AddressLine1 = RequiredColumn(reader, reader.GetString, "AddressLine1")
         member val AddressLine2 = OptionalColumn(reader, reader.GetString, "AddressLine2")
-        member __.ToRecord() =
+        member __.Read() =
             { City = __.City.Read()
               StateProvince = __.StateProvince.Read()
               CountryRegion = __.CountryRegion.Read()
@@ -125,11 +127,11 @@ module SalesLT =
               AddressLine1 = __.AddressLine1.Read()
               AddressLine2 = __.AddressLine2.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
 
     [<CLIMutable>]
     type Customer =
@@ -149,7 +151,7 @@ module SalesLT =
           EmailAddress: Option<string>
           Phone: Option<string> }
 
-    type CustomerDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type CustomerReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val LastName = RequiredColumn(reader, reader.GetString, "LastName")
         member val PasswordHash = RequiredColumn(reader, reader.GetString, "PasswordHash")
         member val PasswordSalt = RequiredColumn(reader, reader.GetString, "PasswordSalt")
@@ -165,7 +167,7 @@ module SalesLT =
         member val SalesPerson = OptionalColumn(reader, reader.GetString, "SalesPerson")
         member val EmailAddress = OptionalColumn(reader, reader.GetString, "EmailAddress")
         member val Phone = OptionalColumn(reader, reader.GetString, "Phone")
-        member __.ToRecord() =
+        member __.Read() =
             { LastName = __.LastName.Read()
               PasswordHash = __.PasswordHash.Read()
               PasswordSalt = __.PasswordSalt.Read()
@@ -182,11 +184,11 @@ module SalesLT =
               EmailAddress = __.EmailAddress.Read()
               Phone = __.Phone.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
 
     [<CLIMutable>]
     type CustomerAddress =
@@ -196,24 +198,24 @@ module SalesLT =
           rowguid: System.Guid
           ModifiedDate: System.DateTime }
 
-    type CustomerAddressDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type CustomerAddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val CustomerID = RequiredColumn(reader, reader.GetInt32, "CustomerID")
         member val AddressID = RequiredColumn(reader, reader.GetInt32, "AddressID")
         member val AddressType = RequiredColumn(reader, reader.GetString, "AddressType")
         member val rowguid = RequiredColumn(reader, reader.GetGuid, "rowguid")
         member val ModifiedDate = RequiredColumn(reader, reader.GetDateTime, "ModifiedDate")
-        member __.ToRecord() =
+        member __.Read() =
             { CustomerID = __.CustomerID.Read()
               AddressID = __.AddressID.Read()
               AddressType = __.AddressType.Read()
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
 
     [<CLIMutable>]
     type Product =
@@ -235,7 +237,7 @@ module SalesLT =
           ProductModelID: Option<int>
           Color: Option<string> }
 
-    type ProductDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type ProductReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val ProductID = RequiredColumn(reader, reader.GetInt32, "ProductID")
         member val Name = RequiredColumn(reader, reader.GetString, "Name")
         member val ProductNumber = RequiredColumn(reader, reader.GetString, "ProductNumber")
@@ -253,7 +255,7 @@ module SalesLT =
         member val ProductCategoryID = OptionalColumn(reader, reader.GetInt32, "ProductCategoryID")
         member val ProductModelID = OptionalColumn(reader, reader.GetInt32, "ProductModelID")
         member val Color = OptionalColumn(reader, reader.GetString, "Color")
-        member __.ToRecord() =
+        member __.Read() =
             { ProductID = __.ProductID.Read()
               Name = __.Name.Read()
               ProductNumber = __.ProductNumber.Read()
@@ -272,11 +274,11 @@ module SalesLT =
               ProductModelID = __.ProductModelID.Read()
               Color = __.Color.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
 
     [<CLIMutable>]
     type ProductCategory =
@@ -286,24 +288,24 @@ module SalesLT =
           ProductCategoryID: int
           ParentProductCategoryID: Option<int> }
 
-    type ProductCategoryDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type ProductCategoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val Name = RequiredColumn(reader, reader.GetString, "Name")
         member val rowguid = RequiredColumn(reader, reader.GetGuid, "rowguid")
         member val ModifiedDate = RequiredColumn(reader, reader.GetDateTime, "ModifiedDate")
         member val ProductCategoryID = RequiredColumn(reader, reader.GetInt32, "ProductCategoryID")
         member val ParentProductCategoryID = OptionalColumn(reader, reader.GetInt32, "ParentProductCategoryID")
-        member __.ToRecord() =
+        member __.Read() =
             { Name = __.Name.Read()
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read()
               ProductCategoryID = __.ProductCategoryID.Read()
               ParentProductCategoryID = __.ParentProductCategoryID.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
 
     [<CLIMutable>]
     type ProductDescription =
@@ -312,22 +314,22 @@ module SalesLT =
           rowguid: System.Guid
           ModifiedDate: System.DateTime }
 
-    type ProductDescriptionDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type ProductDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val ProductDescriptionID = RequiredColumn(reader, reader.GetInt32, "ProductDescriptionID")
         member val Description = RequiredColumn(reader, reader.GetString, "Description")
         member val rowguid = RequiredColumn(reader, reader.GetGuid, "rowguid")
         member val ModifiedDate = RequiredColumn(reader, reader.GetDateTime, "ModifiedDate")
-        member __.ToRecord() =
+        member __.Read() =
             { ProductDescriptionID = __.ProductDescriptionID.Read()
               Description = __.Description.Read()
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
 
     [<CLIMutable>]
     type ProductModel =
@@ -337,7 +339,7 @@ module SalesLT =
           ModifiedDate: System.DateTime
           CatalogDescription: Option<System.Xml.Linq.XElement> }
 
-    type ProductModelDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type ProductModelReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val ProductModelID = RequiredColumn(reader, reader.GetInt32, "ProductModelID")
         member val Name = RequiredColumn(reader, reader.GetString, "Name")
         member val rowguid = RequiredColumn(reader, reader.GetGuid, "rowguid")
@@ -351,24 +353,24 @@ module SalesLT =
           rowguid: System.Guid
           ModifiedDate: System.DateTime }
 
-    type ProductModelProductDescriptionDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type ProductModelProductDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val ProductModelID = RequiredColumn(reader, reader.GetInt32, "ProductModelID")
         member val ProductDescriptionID = RequiredColumn(reader, reader.GetInt32, "ProductDescriptionID")
         member val Culture = RequiredColumn(reader, reader.GetString, "Culture")
         member val rowguid = RequiredColumn(reader, reader.GetGuid, "rowguid")
         member val ModifiedDate = RequiredColumn(reader, reader.GetDateTime, "ModifiedDate")
-        member __.ToRecord() =
+        member __.Read() =
             { ProductModelID = __.ProductModelID.Read()
               ProductDescriptionID = __.ProductDescriptionID.Read()
               Culture = __.Culture.Read()
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
 
     [<CLIMutable>]
     type SalesOrderDetail =
@@ -382,7 +384,7 @@ module SalesLT =
           rowguid: System.Guid
           ModifiedDate: System.DateTime }
 
-    type SalesOrderDetailDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type SalesOrderDetailReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val SalesOrderID = RequiredColumn(reader, reader.GetInt32, "SalesOrderID")
         member val SalesOrderDetailID = RequiredColumn(reader, reader.GetInt32, "SalesOrderDetailID")
         member val OrderQty = RequiredColumn(reader, reader.GetInt16, "OrderQty")
@@ -392,7 +394,7 @@ module SalesLT =
         member val LineTotal = RequiredColumn(reader, reader.GetDecimal, "LineTotal")
         member val rowguid = RequiredColumn(reader, reader.GetGuid, "rowguid")
         member val ModifiedDate = RequiredColumn(reader, reader.GetDateTime, "ModifiedDate")
-        member __.ToRecord() =
+        member __.Read() =
             { SalesOrderID = __.SalesOrderID.Read()
               SalesOrderDetailID = __.SalesOrderDetailID.Read()
               OrderQty = __.OrderQty.Read()
@@ -403,11 +405,11 @@ module SalesLT =
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
 
     [<CLIMutable>]
     type SalesOrderHeader =
@@ -434,7 +436,7 @@ module SalesLT =
           AccountNumber: Option<string>
           ShipDate: Option<System.DateTime> }
 
-    type SalesOrderHeaderDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type SalesOrderHeaderReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val SalesOrderID = RequiredColumn(reader, reader.GetInt32, "SalesOrderID")
         member val RevisionNumber = RequiredColumn(reader, reader.GetByte, "RevisionNumber")
         member val OrderDate = RequiredColumn(reader, reader.GetDateTime, "OrderDate")
@@ -457,7 +459,7 @@ module SalesLT =
         member val PurchaseOrderNumber = OptionalColumn(reader, reader.GetString, "PurchaseOrderNumber")
         member val AccountNumber = OptionalColumn(reader, reader.GetString, "AccountNumber")
         member val ShipDate = OptionalColumn(reader, reader.GetDateTime, "ShipDate")
-        member __.ToRecord() =
+        member __.Read() =
             { SalesOrderID = __.SalesOrderID.Read()
               RevisionNumber = __.RevisionNumber.Read()
               OrderDate = __.OrderDate.Read()
@@ -481,11 +483,11 @@ module SalesLT =
               AccountNumber = __.AccountNumber.Read()
               ShipDate = __.ShipDate.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
 
     [<CLIMutable>]
     type vProductAndDescription =
@@ -495,24 +497,24 @@ module SalesLT =
           Culture: string
           Description: string }
 
-    type vProductAndDescriptionDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type vProductAndDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val ProductID = RequiredColumn(reader, reader.GetInt32, "ProductID")
         member val Name = RequiredColumn(reader, reader.GetString, "Name")
         member val ProductModel = RequiredColumn(reader, reader.GetString, "ProductModel")
         member val Culture = RequiredColumn(reader, reader.GetString, "Culture")
         member val Description = RequiredColumn(reader, reader.GetString, "Description")
-        member __.ToRecord() =
+        member __.Read() =
             { ProductID = __.ProductID.Read()
               Name = __.Name.Read()
               ProductModel = __.ProductModel.Read()
               Culture = __.Culture.Read()
               Description = __.Description.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
 
     [<CLIMutable>]
     type vProductModelCatalogDescription =
@@ -542,7 +544,7 @@ module SalesLT =
           Style: Option<string>
           RiderExperience: Option<string> }
 
-    type vProductModelCatalogDescriptionDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type vProductModelCatalogDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val ProductModelID = RequiredColumn(reader, reader.GetInt32, "ProductModelID")
         member val Name = RequiredColumn(reader, reader.GetString, "Name")
         member val rowguid = RequiredColumn(reader, reader.GetGuid, "rowguid")
@@ -568,7 +570,7 @@ module SalesLT =
         member val ProductLine = OptionalColumn(reader, reader.GetString, "ProductLine")
         member val Style = OptionalColumn(reader, reader.GetString, "Style")
         member val RiderExperience = OptionalColumn(reader, reader.GetString, "RiderExperience")
-        member __.ToRecord() =
+        member __.Read() =
             { ProductModelID = __.ProductModelID.Read()
               Name = __.Name.Read()
               rowguid = __.rowguid.Read()
@@ -595,11 +597,11 @@ module SalesLT =
               Style = __.Style.Read()
               RiderExperience = __.RiderExperience.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
 
     [<CLIMutable>]
     type vGetAllCategories =
@@ -607,17 +609,17 @@ module SalesLT =
           ProductCategoryName: Option<string>
           ProductCategoryID: Option<int> }
 
-    type vGetAllCategoriesDataReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+    type vGetAllCategoriesReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         member val ParentProductCategoryName = RequiredColumn(reader, reader.GetString, "ParentProductCategoryName")
         member val ProductCategoryName = OptionalColumn(reader, reader.GetString, "ProductCategoryName")
         member val ProductCategoryID = OptionalColumn(reader, reader.GetInt32, "ProductCategoryID")
-        member __.ToRecord() =
+        member __.Read() =
             { ParentProductCategoryName = __.ParentProductCategoryName.Read()
               ProductCategoryName = __.ProductCategoryName.Read()
               ProductCategoryID = __.ProductCategoryID.Read() }
 
-        member __.ToRecordIf(column: Column) =
+        member __.ReadIf(column: Column) =
             if column.IsNull() then
                 None
             else
-                Some(__.ToRecord())
+                Some(__.Read())
