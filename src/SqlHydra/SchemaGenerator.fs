@@ -165,7 +165,7 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                 SynBindingRcd.Pattern = 
                     SynPatRcd.LongIdent(
                         SynPatLongIdentRcd.Create(
-                            LongIdentWithDots.CreateString("__.ReadIf")
+                            LongIdentWithDots.CreateString("__.ReadIfNotNull")
                             , SynArgPats.Pats([ 
                                 SynPat.Paren(
                                     SynPat.Typed(
@@ -315,7 +315,7 @@ let substitutions =
         """type Column(reader: System.Data.IDataReader, column) =
         member val Name = column with get,set
         member __.IsNull() = reader.GetOrdinal column |> reader.IsDBNull
-        member __.Alias(alias) = __.Name <- alias
+        member __.As(alias) = __.Name <- alias
         override __.ToString() = __.Name
 
 type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getter: int -> 'T, column) =

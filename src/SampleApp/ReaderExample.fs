@@ -70,7 +70,7 @@ let getCustomersLeftJoinAddresses(conn: SqlConnection) = task {
 
     return [
         while reader.Read() do
-            c.Read(), a.ReadIf(a.AddressID)
+            c.Read(), a.ReadIfNotNull(a.AddressID)
     ]
 }
 
@@ -85,11 +85,12 @@ let getProductsAndCategories(conn: SqlConnection) = task {
     use! reader = cmd.ExecuteReaderAsync()
     let p = SalesLT.ProductReader(reader)
     let c = SalesLT.ProductCategoryReader(reader)
-    c.Name.Alias "Category"
+    c.Name.As "Category"
 
     return [
         while reader.Read() do
-            p.Read(), c.ReadIf(c.ProductCategoryID)
+            p.Read(), 
+            c.ReadIfNotNull(c.ProductCategoryID)
     ]
 }
 

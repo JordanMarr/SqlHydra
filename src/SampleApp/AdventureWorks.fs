@@ -4,7 +4,7 @@ namespace SampleApp.AdventureWorks
 type Column(reader: System.Data.IDataReader, column) =
         member val Name = column with get,set
         member __.IsNull() = reader.GetOrdinal column |> reader.IsDBNull
-        member __.Alias(alias) = __.Name <- alias
+        member __.As(alias) = __.Name <- alias
         override __.ToString() = __.Name
 
 type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getter: int -> 'T, column) =
@@ -63,7 +63,7 @@ module dbo =
               ErrorProcedure = __.ErrorProcedure.Read()
               ErrorLine = __.ErrorLine.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
@@ -87,7 +87,7 @@ module dbo =
               VersionDate = __.VersionDate.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
@@ -127,7 +127,7 @@ module SalesLT =
               AddressLine1 = __.AddressLine1.Read()
               AddressLine2 = __.AddressLine2.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
@@ -184,7 +184,7 @@ module SalesLT =
               EmailAddress = __.EmailAddress.Read()
               Phone = __.Phone.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
@@ -211,7 +211,7 @@ module SalesLT =
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
@@ -274,7 +274,7 @@ module SalesLT =
               ProductModelID = __.ProductModelID.Read()
               Color = __.Color.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
@@ -301,7 +301,7 @@ module SalesLT =
               ProductCategoryID = __.ProductCategoryID.Read()
               ParentProductCategoryID = __.ParentProductCategoryID.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
@@ -325,7 +325,7 @@ module SalesLT =
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
@@ -366,7 +366,7 @@ module SalesLT =
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
@@ -405,7 +405,7 @@ module SalesLT =
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
@@ -483,7 +483,7 @@ module SalesLT =
               AccountNumber = __.AccountNumber.Read()
               ShipDate = __.ShipDate.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
@@ -510,7 +510,7 @@ module SalesLT =
               Culture = __.Culture.Read()
               Description = __.Description.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
@@ -597,7 +597,7 @@ module SalesLT =
               Style = __.Style.Read()
               RiderExperience = __.RiderExperience.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
@@ -618,7 +618,7 @@ module SalesLT =
               ProductCategoryName = __.ProductCategoryName.Read()
               ProductCategoryID = __.ProductCategoryID.Read() }
 
-        member __.ReadIf(column: Column) =
+        member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then
                 None
             else
