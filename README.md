@@ -2,8 +2,8 @@
 SqlHydra is a collection of dotnet tools that generate F# records for a given database provider.
 
 Currently supported databases:
-- [SQL Server](https://github.com/JordanMarr/SqlHydra#sqlhydrasqlserver-)
-- [SQLite](https://github.com/JordanMarr/SqlHydra#sqlhydrasqlite-)
+- [SQL Server](#sqlhydrasqlserver-)
+- [SQLite](#sqlhydrasqlite-)
 
 Features
 - Generate a record for each table
