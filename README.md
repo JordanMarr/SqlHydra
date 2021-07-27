@@ -65,8 +65,10 @@ dotnet sqlhydra-sqlite -c "Data Source=C:\MyProject\AdventureWorksLT.db" -o "Adv
 ### Regenerate Records
 1) Run your `gen.bat` (or `gen.sh`) file to refresh the output .fs file.
 
+
+
 ## Data Readers
-In addition to generating table reocrds, you can now also generate data readers for each table using the `--readers` option.
+Using the `--readers` option will generate a data reader class for each table. 
 The generated reader classes provide strongly typed access for each column, and also include helper methods for loading the entire table record.
 
 ### Reading Generated Table Records
@@ -81,9 +83,6 @@ let getCustomersLeftJoinAddresses(conn: SqlConnection) = task {
         SELECT TOP 20 * FROM SalesLT.Customer c
         LEFT JOIN SalesLT.CustomerAddress ca ON c.CustomerID = ca.CustomerID
         LEFT JOIN SalesLT.Address a on ca.AddressID = a.AddressID
-        WHERE c.CustomerID IN (
-            29485,29486, 29489, -- these have an a.AddressID, so LEFT JOIN should yield "Some"
-            1,2)                -- these do not have have an a.AddressID, so LEFT JOIN should yield "None"
         ORDER BY c.CustomerID
         """
     use cmd = new SqlCommand(sql, conn)
