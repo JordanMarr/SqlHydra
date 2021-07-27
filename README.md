@@ -5,7 +5,7 @@ Currently supported databases:
 - [SQL Server](#sqlhydrasqlserver-)
 - [SQLite](#sqlhydrasqlite-)
 
-Features
+Features:
 - Generate a record for each table
 - Generate [Data Readers](#data-readers) for each table
 
