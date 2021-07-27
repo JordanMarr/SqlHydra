@@ -202,7 +202,7 @@ let getProductsAndCategories(conn: SqlConnection) = task {
 }
 ```
 
-2) If you reading entire table records that have shared columns, you can configure aliases in advance using the `As` method on an individual column property:
+2) If you reading entire table records that have shared column names, you can configure aliases in advance using the `As` method on an individual column property:
 
 ```fsharp
 let getProductsAndCategories(conn: SqlConnection) = task {
