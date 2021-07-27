@@ -297,20 +297,22 @@ _Example:_
 dotnet sqlhydra-mssql -c "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI" -o "AdventureWorks.fs" -ns "SampleApp.AdventureWorks" --cli-mutable
 ```
 
-## Recommended ORM?
+## Recommended 3rd Party Data Library?
 
 The answer is: it depends on how you like to design your data access code!
 
-If you want to use only the generated types, then Dapper.FSharp is a great fit since Dapper uses reflection out of the box to transform `IDataReader` query results into your generated entity records.
-See examples of using SqlHydra generated records with Dapper.FSharp [here](https://github.com/JordanMarr/SqlHydra/blob/main/src/SampleApp/DapperFSharpExample.fs).
+* If you like to meticulously craft your SQL by hand, then Donald with the SqlHydra generated `--readers` pairs very well together.
+* Alternatively, you can use any library that returns an `IDataReader` with the SqlHydra generated readers.
+* If you want to use only the generated types, then Dapper.FSharp is a great fit since Dapper uses reflection out of the box to transform `IDataReader` query results into your generated entity records.
 
-If you like to meticulously craft your SQL by hand, then Donald with the SqlHydra generated `--readers` pairs very well together.
-See examples of using SqlHydra generated records and data readers with Donald [here](https://github.com/JordanMarr/SqlHydra/blob/main/src/SampleApp/DonaldExample.fs).
+### Donald
+[Examples of using SqlHydra generated records and data readers with Donald](https://github.com/JordanMarr/SqlHydra/blob/main/src/SampleApp/DonaldExample.fs).
 
-Alternatively, you can use any library that returns an `IDataReader` with the SqlHydra generated readers.
-See examples of using SqlHydra generated records and data readers with ADO.NET [here](https://github.com/JordanMarr/SqlHydra/blob/main/src/SampleApp/ReaderExample.fs).
+### ADO.NET
+[Examples of using SqlHydra generated records and data readers with ADO.NET](https://github.com/JordanMarr/SqlHydra/blob/main/src/SampleApp/ReaderExample.fs).
 
 ### Dapper.FSharp
+[Examples of using SqlHydra generated records with Dapper.FSharp](https://github.com/JordanMarr/SqlHydra/blob/main/src/SampleApp/DapperFSharpExample.fs).
 
 After creating SqlHydra, I was trying to find the perfect ORM to complement SqlHyda's generated records.
 Ideally, I wanted to find a library with 
