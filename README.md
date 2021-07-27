@@ -301,9 +301,9 @@ dotnet sqlhydra-mssql -c "Data Source=localhost\SQLEXPRESS;Initial Catalog=Adven
 
 The answer is: it depends on how you like to design your data access code!
 
-* If you like to meticulously craft your SQL by hand, then Donald with the SqlHydra generated `--readers` pairs very well together.
-* Alternatively, you can use any library that returns an `IDataReader` with the SqlHydra generated readers.
-* If you want to use only the generated types, then Dapper.FSharp is a great fit since Dapper uses reflection out of the box to transform `IDataReader` query results into your generated entity records.
+* If you like to meticulously craft your SQL by hand, then [Donald](#donald) with the SqlHydra generated `--readers` pairs very well together.
+* Alternatively, you can use any [ADO.NET](#adonet) library that returns an `IDataReader` with the SqlHydra generated readers.
+* If you want to use only the generated types, then [Dapper.FSharp](#dapperfsharp) is a great fit since Dapper uses reflection out of the box to transform `IDataReader` query results into your generated entity records.
 
 ### Donald
 [Examples of using SqlHydra generated records and data readers with Donald](https://github.com/JordanMarr/SqlHydra/blob/main/src/SampleApp/DonaldExample.fs).
