@@ -7,7 +7,7 @@ Currently supported databases:
 
 Features
 - Generate a record for each table
-- Generate [Data Readers](https://github.com/JordanMarr/SqlHydra#) for each table
+- Generate [Data Readers](https://github.com/JordanMarr/SqlHydra#data-readers) for each table
 
 ## SqlHydra.SqlServer [![NuGet version (SqlHydra.SqlServer)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.SqlServer/)
 
