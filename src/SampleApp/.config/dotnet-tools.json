@@ -3,7 +3,7 @@
   "isRoot": true,
   "tools": {
     "sqlhydra.sqlserver": {
-      "version": "0.40.0",
+      "version": "0.70.0",
       "commands": [
         "sqlhydra-mssql"
       ]
