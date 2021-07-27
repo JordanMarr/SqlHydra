@@ -5,6 +5,10 @@ Currently supported databases:
 - [SQL Server](https://github.com/JordanMarr/SqlHydra#sqlhydrasqlserver-)
 - [SQLite](https://github.com/JordanMarr/SqlHydra#sqlhydrasqlite-)
 
+Features
+- Generate a record for each table
+- Generate [Data Readers](https://github.com/JordanMarr/SqlHydra#) for each table
+
 ## SqlHydra.SqlServer [![NuGet version (SqlHydra.SqlServer)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.SqlServer/)
 
 ### Local Install (recommended)
@@ -60,6 +64,112 @@ dotnet sqlhydra-sqlite -c "Data Source=C:\MyProject\AdventureWorksLT.db" -o "Adv
 
 ### Regenerate Records
 1) Run your `gen.bat` (or `gen.sh`) file to refresh the output .fs file.
+
+## Data Readers
+In addition to generating table reocrds, you can now also generate data readers for each table using the `--readers` option.
+The generated reader classes provide strongly typed access for each column, and also include helper methods for loading the entire table record.
+
+### Reading Generated Table Records
+
+The following example loads the generated AdventureWorks Customer and Address records using the `Read` and `ReadIfNotNull` methods.
+The `getCustomersLeftJoinAddresses` function returns a  `Task<(SalesLT.Customer * SalesLT.Address option) list>`.
+
+``` fsharp
+let getCustomersLeftJoinAddresses(conn: SqlConnection) = task {
+    let sql = 
+        """
+        SELECT TOP 20 * FROM SalesLT.Customer c
+        LEFT JOIN SalesLT.CustomerAddress ca ON c.CustomerID = ca.CustomerID
+        LEFT JOIN SalesLT.Address a on ca.AddressID = a.AddressID
+        WHERE c.CustomerID IN (
+            29485,29486, 29489, -- these have an a.AddressID, so LEFT JOIN should yield "Some"
+            1,2)                -- these do not have have an a.AddressID, so LEFT JOIN should yield "None"
+        ORDER BY c.CustomerID
+        """
+    use cmd = new SqlCommand(sql, conn)
+    use! reader = cmd.ExecuteReaderAsync()
+    let c = SalesLT.CustomerReader(reader)
+    let a = SalesLT.AddressReader(reader)
+
+    return [
+        while reader.Read() do
+            c.Read(), a.ReadIfNotNull(a.AddressID)
+    ]
+}
+```
+
+### Reading Individual Columns
+
+The next example loads individual columns using the property readers. This is useful for loading your own custom domain entities or for loading a subset of fields.
+The `getProductImages` function returns a `Task<(string * string * byte[] option) list>`.
+
+```fsharp
+let getProductImages(conn: SqlConnection) = task {
+    let sql = "SELECT TOP 10 [Name], [ProductNumber] FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
+    use cmd = new SqlCommand(sql, conn)
+    use! reader = cmd.ExecuteReaderAsync()
+    return [
+        let p = SalesLT.ProductReader(reader)
+        while reader.Read() do
+            p.Name.Read(), 
+            p.ProductNumber.Read(), 
+            p.ThumbNailPhoto.Read()
+    ]
+}
+
+```
+
+### Reading Individual Columns with Aliases
+
+When joining tables that have the same column name, it may be necessary to load an aliased column.
+There are two ways to do this:
+
+1) If you are reading individual columns, you can supply an optional `alias` argument to the `Read` method:
+
+```fsharp
+let getProductsAndCategories(conn: SqlConnection) = task {
+    let sql = 
+        """
+        SELECT p.Name as Product, c.Name as Category
+        FROM SalesLT.Product p
+        LEFT JOIN SalesLT.ProductCategory c ON p.ProductCategoryID = c.ProductCategoryID
+        """
+    use cmd = new SqlCommand(sql, conn)
+    use! reader = cmd.ExecuteReaderAsync()
+    let p = SalesLT.ProductReader(reader)
+    let c = SalesLT.ProductCategoryReader(reader)
+
+    return [
+        while reader.Read() do
+            p.Name.Read("Product"), 
+            c.Name.Read("Category")
+    ]
+}
+```
+
+2) If you reading entire table records that have shared columns, you can configure aliases in advance using the `As` method on an individual column property:
+
+```fsharp
+let getProductsAndCategories(conn: SqlConnection) = task {
+    let sql = 
+        """
+        SELECT *, c.Name as Category
+        FROM SalesLT.Product p
+        LEFT JOIN SalesLT.ProductCategory c ON p.ProductCategoryID = c.ProductCategoryID
+        """
+    use cmd = new SqlCommand(sql, conn)
+    use! reader = cmd.ExecuteReaderAsync()
+    let p = SalesLT.ProductReader(reader)
+    let c = SalesLT.ProductCategoryReader(reader)
+    c.Name.As "Category"
+
+    return [
+        while reader.Read() do
+            p.Read(), 
+            c.ReadIfNotNull(c.ProductCategoryID)
+    ]
+}
+```
 
 
 ## Example Output for AdventureWorks
@@ -121,12 +231,13 @@ module SalesLT =
 
 ### Arguments
 
-| Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Alias | Default | Description |
-| ---- | ----- | ------- | ----------- |
+| Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Alias | Default | Description |
+| -------- | ----- | ------- | ------- |
 | --connection | -c | *Required* | The database connection string |
 | --output | -o | *Required* | A path to the generated .fs output file (relative paths are valid) |
 | --namespace | -ns | *Required* | The namespace of the generated .fs output file |
 | --cli-mutable |  | false | If this argument exists, a `[<CLIMutable>]` attribute will be added to each record. |
+| --readers [IDataReader Type Override] |  |  | Generates data readers for each table. You can optionally override the default ADO.NET IDataReader type. Ex: `--readers "System.Data.SqlClient.SqlDataReader"`
 
 _Example:_
 
@@ -134,7 +245,7 @@ _Example:_
 dotnet sqlhydra-mssql -c "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI" -o "AdventureWorks.fs" -ns "SampleApp.AdventureWorks" --cli-mutable
 ```
 
-## Officially Recommended ORM: Dapper.FSharp
+## Recommended ORM: Dapper.FSharp
 
 After creating SqlHydra, I was trying to find the perfect ORM to complement SqlHyda's generated records.
 Ideally, I wanted to find a library with 
