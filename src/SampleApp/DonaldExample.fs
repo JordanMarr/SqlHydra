@@ -22,16 +22,28 @@ let getProductsWithThumbnail(conn: SqlConnection) = task {
     return [ while reader.Read() do p.Read() ]
 }
 
-let getProductNamesNumbers(conn: SqlConnection) = task {
+type ProductInfo = {
+    Product: string
+    ProductNumber: string
+    ThumbnailFileName: string option
+    Thumbnail: byte[] option
+}
+
+let loadCustomProductDomainEntity(conn: SqlConnection) = task {
     use! reader =
         conn
-        |> Db.newCommand "SELECT TOP 10 [Name], [ProductNumber] AS ProductNo FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
+        |> Db.newCommand "SELECT TOP 10 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
         |> Db.Async.read  
 
     let p = SalesLT.ProductReader(reader :?> SqlDataReader)
     return [ 
         while reader.Read() do 
-            p.Name.Read(), p.ProductNumber.Read("ProductNo") 
+            { 
+                ProductInfo.Product = p.Name.Read()
+                ProductInfo.ProductNumber = p.ProductNumber.Read()
+                ProductInfo.ThumbnailFileName = p.ThumbnailPhotoFileName.Read()
+                ProductInfo.Thumbnail = p.ThumbNailPhoto.Read()
+            }
     ]
 }
 
@@ -113,7 +125,7 @@ let runQueries() = task {
     let! products = getProductsWithThumbnail conn
     printfn "Products with Thumbnails Count: %i" (products |> Seq.length)
 
-    let! productNamesNumbers = getProductNamesNumbers conn
+    let! productNamesNumbers = loadCustomProductDomainEntity conn
     printfn "Product Names and Numbers: %A" productNamesNumbers
 
     let! customersAddresses = getCustomersJoinAddresses conn
