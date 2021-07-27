@@ -9,8 +9,6 @@ Features:
 - Generate a record for each table
 - Generate [Data Readers](#data-readers) for each table
 
-Also see: [CLI Reference](#cli-reference)
-
 
 ## SqlHydra.SqlServer [![NuGet version (SqlHydra.SqlServer)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.SqlServer/)
 
@@ -173,6 +171,11 @@ let getProductsAndCategories(conn: SqlConnection) = task {
 }
 ```
 
+### Overriding the Data Reader Type
+If you want to use a different ADO.NET provider, you can override the generated IDataReader by specifying an optional fully qualified IDataReader type.
+For example, if you want to use `System.Data.SqlClient` instead of the default `Microsoft.Data.SqlClient`:
+
+`--readers System.Data.SqlClient.SqlDataReader`.
 
 ## Example Output for AdventureWorks
 ```F#
