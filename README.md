@@ -9,6 +9,9 @@ Features:
 - Generate a record for each table
 - Generate [Data Readers](#data-readers) for each table
 
+Also see: [CLI Reference](#cli-reference)
+
+
 ## SqlHydra.SqlServer [![NuGet version (SqlHydra.SqlServer)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.SqlServer/)
 
 ### Local Install (recommended)
