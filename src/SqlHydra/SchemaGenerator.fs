@@ -70,12 +70,9 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
         )
         |> List.map (fun (col, readerMethod) ->
             let readerCall = 
-                SynExpr.App(
-                    ExprAtomicFlag.Atomic
-                    , false
-                    
+                SynExpr.CreateApp(
                     // Function:
-                    , SynExpr.LongIdent(
+                    SynExpr.CreateLongIdent(
                         false
                         , LongIdentWithDots.CreateString(
                             match col.TypeMapping.DbType, col.IsNullable with
@@ -85,37 +82,23 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                             | _, false -> "RequiredColumn"
                         )
                         , None
-                        , range0)
-                    
+                    )
                     // Args:
                     , SynExpr.CreateParenedTuple([
                         SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("reader"), None)
                         SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString($"reader.%s{readerMethod}"), None)
                         SynExpr.CreateConstString(col.Name)
                     ])
-
-                    , range0 
                 )
 
-            SynMemberDefn.AutoProperty(
-                []
-                , false
-                , Ident.Create(col.Name)
-                , None
-                , MemberKind.PropertyGet
-                , (fun mk -> 
-                    {
-                        MemberFlags.IsInstance = true
-                        MemberFlags.IsDispatchSlot = false
-                        MemberFlags.IsFinal = false
-                        MemberFlags.IsOverrideOrExplicitImpl = false
-                        MemberFlags.MemberKind = MemberKind.PropertyGet
-                    })
-                , XmlDoc.PreXmlDocEmpty
-                , None
-                , readerCall
-                , None
-                , range0)
+            SynMemberDefn.CreateMember(
+                { SynBindingRcd.Let with 
+                    Pattern = SynPatRcd.LongIdent(SynPatLongIdentRcd.Create(LongIdentWithDots.Create(["__"; col.Name]), SynArgPats.Empty))
+                    ValData = SynValData.SynValData(Some (MemberFlags.InstanceMember), SynValInfo.Empty, None)
+                    Expr = readerCall
+                }
+            )
+
         )
     
     /// Initializes a table record using the reader column properties.
