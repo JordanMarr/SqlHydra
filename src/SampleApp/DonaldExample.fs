@@ -18,8 +18,8 @@ let getProductsWithThumbnail(conn: SqlConnection) = task {
         |> Db.newCommand "SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
         |> Db.Async.read
 
-    let p = SalesLT.ProductReader(reader :?> SqlDataReader)
-    return [ while reader.Read() do p.Read() ]
+    let sr = SuperReader(reader :?> Microsoft.Data.SqlClient.SqlDataReader)
+    return [ while reader.Read() do sr.``SalesLT.Product``.Read() ]
 }
 
 type ProductInfo = {
@@ -35,14 +35,15 @@ let loadCustomProductDomainEntity(conn: SqlConnection) = task {
         |> Db.newCommand "SELECT TOP 10 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
         |> Db.Async.read  
 
-    let p = SalesLT.ProductReader(reader :?> SqlDataReader)
+    let sr = SuperReader(reader :?> Microsoft.Data.SqlClient.SqlDataReader)
+
     return [ 
-        while reader.Read() do 
+        while reader.Read() do
             { 
-                ProductInfo.Product = p.Name.Read()
-                ProductInfo.ProductNumber = p.ProductNumber.Read()
-                ProductInfo.ThumbnailFileName = p.ThumbnailPhotoFileName.Read()
-                ProductInfo.Thumbnail = p.ThumbNailPhoto.Read()
+                ProductInfo.Product = sr.``SalesLT.Product``.Name.Read()
+                ProductInfo.ProductNumber = sr.``SalesLT.Product``.ProductNumber.Read()
+                ProductInfo.ThumbnailFileName = sr.``SalesLT.Product``.ThumbnailPhotoFileName.Read()
+                ProductInfo.Thumbnail = sr.``SalesLT.Product``.ThumbNailPhoto.Read()
             }
     ]
 }
@@ -61,12 +62,11 @@ let getCustomersJoinAddresses(conn: SqlConnection) = task {
         |> Db.newCommand sql
         |> Db.Async.read
     
-    let c = SalesLT.CustomerReader(reader :?> SqlDataReader)
-    let a = SalesLT.AddressReader(reader :?> SqlDataReader)
+    let sr = SuperReader(reader :?> Microsoft.Data.SqlClient.SqlDataReader)
 
     return [
         while reader.Read() do
-            c.Read(), a.Read()
+            sr.``SalesLT.Customer``.Read(), sr.``SalesLT.Address``.Read()
     ]
 }
 
@@ -86,12 +86,12 @@ let getCustomersLeftJoinAddresses(conn: SqlConnection) = task {
         |> Db.newCommand sql
         |> Db.Async.read
 
-    let c = SalesLT.CustomerReader(reader :?> SqlDataReader)
-    let a = SalesLT.AddressReader(reader :?> SqlDataReader)
+    let sr = SuperReader(reader :?> Microsoft.Data.SqlClient.SqlDataReader)
 
     return [
         while reader.Read() do
-            c.Read(), a.ReadIfNotNull(a.AddressID)
+            sr.``SalesLT.Customer``.Read(),
+            sr.``SalesLT.Address``.ReadIfNotNull(sr.``SalesLT.Address``.AddressID)
     ]
 }
 
@@ -108,31 +108,29 @@ let getProductsAndCategories(conn: SqlConnection) = task {
         |> Db.newCommand sql
         |> Db.Async.read
     
-    let p = SalesLT.ProductReader(reader :?> SqlDataReader)
-    let c = SalesLT.ProductCategoryReader(reader :?> SqlDataReader)
-    c.Name.As "Category"
+    let sr = SuperReader(reader :?> Microsoft.Data.SqlClient.SqlDataReader)
 
     return [
         while reader.Read() do
-            p.Read(), 
-            c.ReadIfNotNull(c.ProductCategoryID)
+            sr.``SalesLT.Product``.Read(),
+            sr.``SalesLT.ProductCategory``.ReadIfNotNull(sr.``SalesLT.ProductCategory``.ProductCategoryID)
     ]
 }
 
 let runQueries() = task {
     use conn = connect()    
     
-    let! products = getProductsWithThumbnail conn
-    printfn "Products with Thumbnails Count: %i" (products |> Seq.length)
+    //let! products = getProductsWithThumbnail conn
+    //printfn "Products with Thumbnails Count: %i" (products |> Seq.length)
 
-    let! productNamesNumbers = loadCustomProductDomainEntity conn
-    printfn "Product Names and Numbers: %A" productNamesNumbers
+    //let! productNamesNumbers = loadCustomProductDomainEntity conn
+    //printfn "Product Names and Numbers: %A" productNamesNumbers
 
-    let! customersAddresses = getCustomersJoinAddresses conn
-    printfn "Customers-Join-Addresses: %A" customersAddresses
+    //let! customersAddresses = getCustomersJoinAddresses conn
+    //printfn "Customers-Join-Addresses: %A" customersAddresses
 
-    let! customerLeftJoinAddresses = getCustomersLeftJoinAddresses conn
-    printfn "Customer-LeftJoin-Addresses: %A" customerLeftJoinAddresses
+    //let! customerLeftJoinAddresses = getCustomersLeftJoinAddresses conn
+    //printfn "Customer-LeftJoin-Addresses: %A" customerLeftJoinAddresses
 
     let! productsCategories = getProductsAndCategories conn
     printfn "Products-Categories: %A" productsCategories
