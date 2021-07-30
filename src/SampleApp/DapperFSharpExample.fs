@@ -18,6 +18,8 @@ let connect() =
 let customerTable =         table<SalesLT.Customer>         |> inSchema (nameof SalesLT)
 let customerAddressTable =  table<SalesLT.CustomerAddress>  |> inSchema (nameof SalesLT)
 let addressTable =          table<SalesLT.Address>          |> inSchema (nameof SalesLT)
+let productTable =          table<SalesLT.Product>          |> inSchema (nameof SalesLT)
+let categoryTable =         table<SalesLT.ProductCategory>  |> inSchema (nameof SalesLT)
 
 let getAddressesForCity(conn: IDbConnection) (city: string) = 
     select {
@@ -40,11 +42,24 @@ let getCustomersWithAddresses(conn: IDbConnection) =
     
     query |> conn.SelectAsyncOption<SalesLT.Customer, SalesLT.CustomerAddress, SalesLT.Address>
 
+let getProductsCategories(conn: IDbConnection) =
+    select {
+        for p in productTable do
+        join c in categoryTable on (p.ProductCategoryID = Some c.ProductCategoryID)
+        selectAll
+    }
+    |> conn.SelectAsyncOption<SalesLT.Product, SalesLT.ProductCategory>
+
 let runQueries() = task {
-    use conn = connect()    
+    use conn = connect()
+
     let! addresses = getAddressesForCity conn "Dallas"
     printfn "Dallas Addresses: %A" addresses
     
     let! customers = getCustomersWithAddresses conn
     printfn "Customer Addresses: %A" customers
+
+    // Dapper.FSharp is unable to download the product Thumbnail `byte[] option`
+    //let! productsCategories = getProductsCategories conn
+    //printfn "Products-Categories: %A" productsCategories
 }
