@@ -55,6 +55,7 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
     let ctor = SynMemberDefn.CreateImplicitCtor([ 
         // Ex: (reader: Microsoft.Data.SqlClient.SqlDataReader)
         SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent(cfg.Readers.ReaderType)) 
+        SynSimplePat.Id(Ident.Create("getOrdinal"), None, false, false, false, range0)
     ])
 
     let memberFlags : MemberFlags = {IsInstance = true; IsDispatchSlot = false; IsOverrideOrExplicitImpl = false; IsFinal = false; MemberKind = MemberKind.Member}
@@ -86,6 +87,7 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                     // Args:
                     , SynExpr.CreateParenedTuple([
                         SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("reader"), None)
+                        SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("getOrdinal"), None)
                         SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString($"reader.%s{readerMethod}"), None)
                         SynExpr.CreateConstString(col.Name)
                     ])
@@ -267,31 +269,30 @@ let generateModule (cfg: Config) (db: Schema) =
 let substitutions = 
     [
         "open Substitute.Extensions",
-        """type Column(reader: System.Data.IDataReader, column) =
-        member val Name = column with get,set
-        member __.IsNull() = reader.GetOrdinal column |> reader.IsDBNull
-        member __.As(alias) = __.Name <- alias
+        """type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
+        member __.Name = column
+        member __.IsNull() = getOrdinal column |> reader.IsDBNull
         override __.ToString() = __.Name
 
-type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getter: int -> 'T, column) =
-        inherit Column(reader, column)
-        member __.Read(?alias) = alias |> Option.defaultValue __.Name |> reader.GetOrdinal |> getter
+type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+        inherit Column(reader, getOrdinal, column)
+        member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getter
 
-type OptionalColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getter: int -> 'T, column) =
-        inherit Column(reader, column)
+type OptionalColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+        inherit Column(reader, getOrdinal, column)
         member __.Read(?alias) = 
-            match alias |> Option.defaultValue __.Name |> reader.GetOrdinal with
+            match alias |> Option.defaultValue __.Name |> getOrdinal with
             | o when reader.IsDBNull o -> None
             | o -> Some (getter o)
 
-type RequiredBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getValue: int -> obj, column) =
-        inherit Column(reader, column)
-        member __.Read(?alias) = alias |> Option.defaultValue __.Name |> reader.GetOrdinal |> getValue :?> byte[]
+type RequiredBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getValue: int -> obj, column) =
+        inherit Column(reader, getOrdinal, column)
+        member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getValue :?> byte[]
 
-type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getValue: int -> obj, column) =
-        inherit Column(reader, column)
+type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getValue: int -> obj, column) =
+        inherit Column(reader, getOrdinal, column)
         member __.Read(?alias) = 
-            match alias |> Option.defaultValue __.Name |> reader.GetOrdinal with
+            match alias |> Option.defaultValue __.Name |> getOrdinal with
             | o when reader.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
         """
