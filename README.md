@@ -124,8 +124,11 @@ module SalesLT =
 
 
 ## Data Readers
-Using the `--readers` option will generate a data reader class for each table. 
-The generated reader classes provide strongly typed access for each column, and also include helper methods for loading the entire table record.
+Using the `--readers` option will generate a special `HydraReader` class that will provide strongly typed readers for each table in a given database schema. 
+- The `HydraReader` will contain a property for each table in the schema.
+- The generated record for a given table can be loaded in its entirety via the `Read` method.
+- Each table property in the `HydraReader` will contain a property for each column in the table to allow reading individual columns.
+
 
 ### Reading Generated Table Records
 
@@ -143,12 +146,13 @@ let getCustomersLeftJoinAddresses(conn: SqlConnection) = task {
         """
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
-    let c = SalesLT.CustomerReader(reader)
-    let a = SalesLT.AddressReader(reader)
+    
+    let hydra = SalesLT.HydraReader(reader)
 
     return [
         while reader.Read() do
-            c.Read(), a.ReadIfNotNull(a.AddressID)
+            hydra.Customer.Read(), 
+            hydra.Address.ReadIfNotNull(hydra.Address.AddressID)
     ]
 }
 ```
@@ -159,69 +163,56 @@ The next example loads individual columns using the property readers. This is us
 The `getProductImages` function returns a `Task<(string * string * byte[] option) list>`.
 
 ```fsharp
+/// A custom domain entity
+type ProductInfo = 
+    {
+        Product: string
+        ProductNumber: string
+        ThumbnailFileName: string option
+        Thumbnail: byte[] option
+    }
+
 let getProductImages(conn: SqlConnection) = task {
     let sql = "SELECT TOP 10 [Name], [ProductNumber] FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
-    return [
-        let p = SalesLT.ProductReader(reader)
+    
+    let hydra = SalesLT.HydraReader(reader)
+
+    return [ 
         while reader.Read() do
-            p.Name.Read(), 
-            p.ProductNumber.Read(), 
-            p.ThumbNailPhoto.Read()
+            { 
+                ProductInfo.Product = hydra.Product.Name.Read()
+                ProductInfo.ProductNumber = hydra.Product.ProductNumber.Read()
+                ProductInfo.ThumbnailFileName = hydra.Product.ThumbnailPhotoFileName.Read()
+                ProductInfo.Thumbnail = hydra.Product.ThumbNailPhoto.Read()
+            }
     ]
 }
 
 ```
 
-### Reading Individual Columns with Aliases
+### Automatic Resolution of Column Naming Conflicts
 
-When joining tables that have the same column name, it may be necessary to load an aliased column.
-There are two ways to do this:
-
-1) If you are reading individual columns, you can supply an optional `alias` argument to the `Read` method:
+When joining tables that have the same column name, the generated `HydraReader` will automatically resolve the conflicts with the assumption that you read tables in the same order that they are joined. 
 
 ```fsharp
 let getProductsAndCategories(conn: SqlConnection) = task {
     let sql = 
         """
-        SELECT p.Name as Product, c.Name as Category
+        SELECT p.Name, c.Name
         FROM SalesLT.Product p
         LEFT JOIN SalesLT.ProductCategory c ON p.ProductCategoryID = c.ProductCategoryID
         """
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
-    let p = SalesLT.ProductReader(reader)
-    let c = SalesLT.ProductCategoryReader(reader)
+    
+    let hydra = SalesLT.HydraReader(reader)
 
     return [
         while reader.Read() do
-            p.Name.Read("Product"), 
-            c.Name.Read("Category")
-    ]
-}
-```
-
-2) If you reading entire table records that have shared column names, you can configure aliases in advance using the `As` method on an individual column property:
-
-```fsharp
-let getProductsAndCategories(conn: SqlConnection) = task {
-    let sql = 
-        """
-        SELECT *, c.Name as Category
-        FROM SalesLT.Product p
-        LEFT JOIN SalesLT.ProductCategory c ON p.ProductCategoryID = c.ProductCategoryID
-        """
-    use cmd = new SqlCommand(sql, conn)
-    use! reader = cmd.ExecuteReaderAsync()
-    let p = SalesLT.ProductReader(reader)
-    let c = SalesLT.ProductCategoryReader(reader)
-    c.Name.As "Category"
-
-    return [
-        while reader.Read() do
-            p.Read(), 
-            c.ReadIfNotNull(c.ProductCategoryID)
+            hydra.Product.Name.Read(), 
+            hydra.ProductCategory.Name.Read()
     ]
 }
 ```
@@ -232,52 +223,6 @@ For example, if you want to use `System.Data.SqlClient` instead of the default `
 
 `--readers System.Data.SqlClient.SqlDataReader`.
 
-## Example Data Reader Output for AdventureWorks
-```F#
-    type ProductReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
-        member val ProductID = RequiredColumn(reader, reader.GetInt32, "ProductID")
-        member val Name = RequiredColumn(reader, reader.GetString, "Name")
-        member val ProductNumber = RequiredColumn(reader, reader.GetString, "ProductNumber")
-        member val StandardCost = RequiredColumn(reader, reader.GetDecimal, "StandardCost")
-        member val ListPrice = RequiredColumn(reader, reader.GetDecimal, "ListPrice")
-        member val SellStartDate = RequiredColumn(reader, reader.GetDateTime, "SellStartDate")
-        member val rowguid = RequiredColumn(reader, reader.GetGuid, "rowguid")
-        member val ModifiedDate = RequiredColumn(reader, reader.GetDateTime, "ModifiedDate")
-        member val SellEndDate = OptionalColumn(reader, reader.GetDateTime, "SellEndDate")
-        member val DiscontinuedDate = OptionalColumn(reader, reader.GetDateTime, "DiscontinuedDate")
-        member val ThumbNailPhoto = OptionalBinaryColumn(reader, reader.GetValue, "ThumbNailPhoto")
-        member val ThumbnailPhotoFileName = OptionalColumn(reader, reader.GetString, "ThumbnailPhotoFileName")
-        member val Size = OptionalColumn(reader, reader.GetString, "Size")
-        member val Weight = OptionalColumn(reader, reader.GetDecimal, "Weight")
-        member val ProductCategoryID = OptionalColumn(reader, reader.GetInt32, "ProductCategoryID")
-        member val ProductModelID = OptionalColumn(reader, reader.GetInt32, "ProductModelID")
-        member val Color = OptionalColumn(reader, reader.GetString, "Color")
-        member __.Read() =
-            { ProductID = __.ProductID.Read()
-              Name = __.Name.Read()
-              ProductNumber = __.ProductNumber.Read()
-              StandardCost = __.StandardCost.Read()
-              ListPrice = __.ListPrice.Read()
-              SellStartDate = __.SellStartDate.Read()
-              rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              SellEndDate = __.SellEndDate.Read()
-              DiscontinuedDate = __.DiscontinuedDate.Read()
-              ThumbNailPhoto = __.ThumbNailPhoto.Read()
-              ThumbnailPhotoFileName = __.ThumbnailPhotoFileName.Read()
-              Size = __.Size.Read()
-              Weight = __.Weight.Read()
-              ProductCategoryID = __.ProductCategoryID.Read()
-              ProductModelID = __.ProductModelID.Read()
-              Color = __.Color.Read() }
-
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then
-                None
-            else
-                Some(__.Read())
-
-```
 
 ## CLI Reference
 
