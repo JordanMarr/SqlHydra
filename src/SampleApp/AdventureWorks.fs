@@ -215,24 +215,24 @@ module SalesLT =
             else
                 Some(__.Read())
 
+    type HydraReader(reader: System.Data.IDataReader) =
+        let reader = reader :?> Microsoft.Data.SqlClient.SqlDataReader
+        let entities = System.Collections.Generic.Dictionary<string, string -> int>()
+        let buildGetOrdinal entity= 
+            if not (entities.ContainsKey(entity)) then 
+                let dictionary = 
+                    [0..reader.FieldCount-1] 
+                    |> List.mapi (fun i fieldIdx -> reader.GetName(fieldIdx), i)
+                    |> List.groupBy (fun (nm, i) -> nm) 
+                    |> List.map (fun (_, items) -> List.tryItem(entities.Count) items |> Option.defaultWith (fun () -> List.last items))
+                    |> dict
+                let getOrdinal = fun idx -> dictionary.Item idx
+                entities.Add(entity, getOrdinal)
+                getOrdinal
+            else
+                entities.[entity]
 
-type SuperReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
-    let entities = System.Collections.Generic.Dictionary<string, string -> int>()
-    let buildGetOrdinal entity= 
-        if not (entities.ContainsKey(entity)) then 
-            let dictionary = 
-                [0..reader.FieldCount-1] 
-                |> List.mapi (fun i fieldIdx -> reader.GetName(fieldIdx), i)
-                |> List.groupBy (fun (nm, i) -> nm) 
-                |> List.map (fun (_, items) -> List.tryItem(entities.Count) items |> Option.defaultWith (fun () -> List.last items))
-                |> dict
-            let getOrdinal = fun idx -> dictionary.Item idx
-            entities.Add(entity, getOrdinal)
-            getOrdinal
-        else
-            entities.[entity]
-
-    member __.``SalesLT.Product`` = SalesLT.ProductReader(reader, buildGetOrdinal "SalesLT.Product")
-    member __.``SalesLT.ProductCategory`` = SalesLT.ProductCategoryReader(reader, buildGetOrdinal "SalesLT.ProductCategory")
-    member __.``SalesLT.Customer`` = SalesLT.CustomerReader(reader, buildGetOrdinal "SalesLT.Customer")
-    member __.``SalesLT.Address`` = SalesLT.AddressReader(reader, buildGetOrdinal "SalesLT.Address")
+        member __.Product = ProductReader(reader, buildGetOrdinal "SalesLT.Product")
+        member __.ProductCategory = ProductCategoryReader(reader, buildGetOrdinal "SalesLT.ProductCategory")
+        member __.Customer = CustomerReader(reader, buildGetOrdinal "SalesLT.Customer")
+        member __.Address = AddressReader(reader, buildGetOrdinal "SalesLT.Address")

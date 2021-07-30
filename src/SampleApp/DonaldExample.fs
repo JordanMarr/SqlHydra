@@ -18,8 +18,8 @@ let getProductsWithThumbnail(conn: SqlConnection) = task {
         |> Db.newCommand "SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
         |> Db.Async.read
 
-    let sr = SuperReader(reader :?> Microsoft.Data.SqlClient.SqlDataReader)
-    return [ while reader.Read() do sr.``SalesLT.Product``.Read() ]
+    let sr = SalesLT.HydraReader(reader)
+    return [ while reader.Read() do sr.Product.Read() ]
 }
 
 type ProductInfo = {
@@ -35,15 +35,15 @@ let loadCustomProductDomainEntity(conn: SqlConnection) = task {
         |> Db.newCommand "SELECT TOP 10 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
         |> Db.Async.read  
 
-    let sr = SuperReader(reader :?> Microsoft.Data.SqlClient.SqlDataReader)
+    let sr = SalesLT.HydraReader(reader)
 
     return [ 
         while reader.Read() do
             { 
-                ProductInfo.Product = sr.``SalesLT.Product``.Name.Read()
-                ProductInfo.ProductNumber = sr.``SalesLT.Product``.ProductNumber.Read()
-                ProductInfo.ThumbnailFileName = sr.``SalesLT.Product``.ThumbnailPhotoFileName.Read()
-                ProductInfo.Thumbnail = sr.``SalesLT.Product``.ThumbNailPhoto.Read()
+                ProductInfo.Product = sr.Product.Name.Read()
+                ProductInfo.ProductNumber = sr.Product.ProductNumber.Read()
+                ProductInfo.ThumbnailFileName = sr.Product.ThumbnailPhotoFileName.Read()
+                ProductInfo.Thumbnail = sr.Product.ThumbNailPhoto.Read()
             }
     ]
 }
@@ -62,11 +62,11 @@ let getCustomersJoinAddresses(conn: SqlConnection) = task {
         |> Db.newCommand sql
         |> Db.Async.read
     
-    let sr = SuperReader(reader :?> Microsoft.Data.SqlClient.SqlDataReader)
+    let sr = SalesLT.HydraReader(reader)
 
     return [
         while reader.Read() do
-            sr.``SalesLT.Customer``.Read(), sr.``SalesLT.Address``.Read()
+            sr.Customer.Read(), sr.Address.Read()
     ]
 }
 
@@ -86,12 +86,12 @@ let getCustomersLeftJoinAddresses(conn: SqlConnection) = task {
         |> Db.newCommand sql
         |> Db.Async.read
 
-    let sr = SuperReader(reader :?> Microsoft.Data.SqlClient.SqlDataReader)
+    let sr = SalesLT.HydraReader(reader)
 
     return [
         while reader.Read() do
-            sr.``SalesLT.Customer``.Read(),
-            sr.``SalesLT.Address``.ReadIfNotNull(sr.``SalesLT.Address``.AddressID)
+            sr.Customer.Read(),
+            sr.Address.ReadIfNotNull(sr.Address.AddressID)
     ]
 }
 
@@ -108,12 +108,12 @@ let getProductsAndCategories(conn: SqlConnection) = task {
         |> Db.newCommand sql
         |> Db.Async.read
     
-    let sr = SuperReader(reader :?> Microsoft.Data.SqlClient.SqlDataReader)
+    let sr = SalesLT.HydraReader(reader)
 
     return [
         while reader.Read() do
-            sr.``SalesLT.Product``.Read(),
-            sr.``SalesLT.ProductCategory``.ReadIfNotNull(sr.``SalesLT.ProductCategory``.ProductCategoryID)
+            sr.Product.Read(),
+            sr.ProductCategory.ReadIfNotNull(sr.ProductCategory.ProductCategoryID)
     ]
 }
 
