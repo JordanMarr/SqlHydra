@@ -47,7 +47,7 @@ let tableRecord (tbl: Table) =
         
     SynModuleDecl.CreateSimpleType(recordCmpInfo, recordDef)
 
-/// Creates a "Reader" class that reads columns for a given table/record.
+/// Creates a "{tbl.Name}Reader" class that reads columns for a given table/record.
 let tableReaderClass (cfg: Config) (tbl: Table) = 
     let classId = Ident.CreateLong(tbl.Name + "Reader")
     let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, range0)
@@ -57,8 +57,6 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
         SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent(cfg.Readers.ReaderType)) 
         SynSimplePat.Id(Ident.Create("getOrdinal"), None, false, false, false, range0)
     ])
-
-    let memberFlags : MemberFlags = {IsInstance = true; IsDispatchSlot = false; IsOverrideOrExplicitImpl = false; IsFinal = false; MemberKind = MemberKind.Member}
 
     let readerProperties =
         tbl.Columns
@@ -100,7 +98,6 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                     Expr = readerCall
                 }
             )
-
         )
     
     /// Initializes a table record using the reader column properties.
@@ -219,6 +216,77 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
     
     SynModuleDecl.Types([ readerClass ], range0)
 
+/// Creates a "HydraReader" class with properties for each table in a given schema.
+let hydraReaderClass (cfg: Config) (tbls: Table seq) = 
+    let classId = Ident.CreateLong("HydraReader")
+    let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, range0)
+
+    let ctor = SynMemberDefn.CreateImplicitCtor([ 
+        // Ex: (reader: Microsoft.Data.SqlClient.SqlDataReader)
+        SynSimplePat.CreateTyped(Ident.Create("reader"), SynType.CreateLongIdent(cfg.Readers.ReaderType)) 
+    ])
+
+    let utilPlaceholder = 
+        SynMemberDefn.CreateMember(
+            { SynBindingRcd.Let with 
+                Pattern = SynPatRcd.CreateLongIdent(LongIdentWithDots.CreateString("HydraReader"), [])
+                ValData = SynValData.SynValData(Some (MemberFlags.InstanceMember), SynValInfo.Empty, None)
+                Expr = SynExpr.CreateConstString("placeholder")
+            }
+        )
+
+    let readerProperties =
+        tbls
+        |> Seq.toList
+        // Only create reader properties for columns that have a ReaderMethod specified
+        |> List.map (fun tbl ->
+            let readerCall = 
+                SynExpr.CreateApp(
+                    // Function:
+                    SynExpr.CreateLongIdent(
+                        false
+                        , LongIdentWithDots.CreateString($"{tbl.Name}Reader")
+                        , None
+                    )
+                    // Args:
+                    , SynExpr.CreateParenedTuple([
+                        SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("reader"), None)
+                        SynExpr.CreateApp(
+                            // Func
+                            SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("buildGetOrdinal"), None)
+                            // Args
+                            , SynExpr.CreateConstString(tbl.Name)
+                        )
+                    ])
+                )
+
+            SynMemberDefn.CreateMember(
+                { SynBindingRcd.Let with 
+                    Pattern = SynPatRcd.LongIdent(SynPatLongIdentRcd.Create(LongIdentWithDots.Create(["__"; tbl.Name]), SynArgPats.Empty))
+                    ValData = SynValData.SynValData(Some (MemberFlags.InstanceMember), SynValInfo.Empty, None)
+                    Expr = readerCall
+                }
+            )
+        )
+
+    let members = 
+        [ 
+            ctor
+            utilPlaceholder
+            yield! readerProperties
+        ]
+
+    let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range0)
+
+    let readerClass = 
+        SynTypeDefn.TypeDefn(
+            classCmpInfo,
+            typeRepr,
+            SynMemberDefns.Empty,
+            range0)
+    
+    SynModuleDecl.Types([ readerClass ], range0)
+
 /// Generates the outer module and table records.
 let generateModule (cfg: Config) (db: Schema) = 
     let schemas = db.Tables |> Array.map (fun t -> t.Schema) |> Array.distinct
@@ -238,12 +306,14 @@ let generateModule (cfg: Config) (db: Schema) =
                 [ 
                     for (record, recordReader) in zip do 
                         if cfg.IsCLIMutable then 
-                            yield cliMutableAttribute
+                            cliMutableAttribute
                         
-                        yield record
+                        record
                         
                         if cfg.Readers.IsEnabled then 
-                            yield recordReader
+                            recordReader
+
+                    hydraReaderClass cfg tables
                 ]
 
             SynModuleDecl.CreateNestedModule(schemaNestedModule, tableRecordDeclarations)
@@ -268,6 +338,7 @@ let generateModule (cfg: Config) (db: Schema) =
 /// A list of text substitutions to the generated file.
 let substitutions = 
     [
+        /// Reader classes at top of namespace
         "open Substitute.Extensions",
         """type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
         member __.Name = column
@@ -296,6 +367,24 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
             | o when reader.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
         """
+
+        /// HydraReader utility functions
+        "member HydraReader = \"placeholder\"",
+        """let entities = System.Collections.Generic.Dictionary<string, string -> int>()
+        let buildGetOrdinal entity= 
+            if not (entities.ContainsKey(entity)) then 
+                let dictionary = 
+                    [0..reader.FieldCount-1] 
+                    |> List.mapi (fun i fieldIdx -> reader.GetName(fieldIdx), i)
+                    |> List.groupBy (fun (nm, i) -> nm) 
+                    |> List.map (fun (_, items) -> List.tryItem(entities.Count) items |> Option.defaultWith (fun () -> List.last items))
+                    |> dict
+                let getOrdinal = fun idx -> dictionary.Item idx
+                entities.Add(entity, getOrdinal)
+                getOrdinal
+            else
+                entities.[entity]
+        """
     ]
 
 /// Formats the generated code using Fantomas.
@@ -309,6 +398,7 @@ let toFormattedCode (cfg: Config) (comment: string) (generatedModule: SynModuleO
                     StrictMode = true
                     MaxIfThenElseShortWidth = 400   // Forces ReadIfNotNull if/then to be on a single line
                     MaxValueBindingWidth = 400      // Ensure reader property/column bindings stay on one line
+                    MaxLineLength = 400             // Ensure reader property/column bindings stay on one line
             }
         let formattedCode = CodeFormatter.FormatASTAsync(parsedInput, "output.fs", [], None, cfg) |> Async.RunSynchronously
         let finalCode = substitutions |> List.fold (fun (code: string) (placeholder, sub) -> code.Replace(placeholder, sub)) formattedCode

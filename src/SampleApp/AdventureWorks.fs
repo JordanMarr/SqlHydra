@@ -27,6 +27,83 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
             match alias |> Option.defaultValue __.Name |> getOrdinal with
             | o when reader.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
+        
+module dbo =
+    [<CLIMutable>]
+    type ErrorLog =
+        { ErrorLogID: int
+          ErrorTime: System.DateTime
+          UserName: string
+          ErrorNumber: int
+          ErrorMessage: string
+          ErrorSeverity: Option<int>
+          ErrorState: Option<int>
+          ErrorProcedure: Option<string>
+          ErrorLine: Option<int> }
+
+    type ErrorLogReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.ErrorLogID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ErrorLogID")
+        member __.ErrorTime = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ErrorTime")
+        member __.UserName = RequiredColumn(reader, getOrdinal, reader.GetString, "UserName")
+        member __.ErrorNumber = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ErrorNumber")
+        member __.ErrorMessage = RequiredColumn(reader, getOrdinal, reader.GetString, "ErrorMessage")
+        member __.ErrorSeverity = OptionalColumn(reader, getOrdinal, reader.GetInt32, "ErrorSeverity")
+        member __.ErrorState = OptionalColumn(reader, getOrdinal, reader.GetInt32, "ErrorState")
+        member __.ErrorProcedure = OptionalColumn(reader, getOrdinal, reader.GetString, "ErrorProcedure")
+        member __.ErrorLine = OptionalColumn(reader, getOrdinal, reader.GetInt32, "ErrorLine")
+        member __.Read() =
+            { ErrorLogID = __.ErrorLogID.Read()
+              ErrorTime = __.ErrorTime.Read()
+              UserName = __.UserName.Read()
+              ErrorNumber = __.ErrorNumber.Read()
+              ErrorMessage = __.ErrorMessage.Read()
+              ErrorSeverity = __.ErrorSeverity.Read()
+              ErrorState = __.ErrorState.Read()
+              ErrorProcedure = __.ErrorProcedure.Read()
+              ErrorLine = __.ErrorLine.Read() }
+
+        member __.ReadIfNotNull(column: Column) =
+            if column.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type BuildVersion =
+        { SystemInformationID: byte
+          ``Database Version``: string
+          VersionDate: System.DateTime
+          ModifiedDate: System.DateTime }
+
+    type BuildVersionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.SystemInformationID = RequiredColumn(reader, getOrdinal, reader.GetByte, "SystemInformationID")
+        member __.``Database Version`` = RequiredColumn(reader, getOrdinal, reader.GetString, "Database Version")
+        member __.VersionDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "VersionDate")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
+        member __.Read() =
+            { SystemInformationID = __.SystemInformationID.Read()
+              ``Database Version`` = __.``Database Version``.Read()
+              VersionDate = __.VersionDate.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
+
+        member __.ReadIfNotNull(column: Column) =
+            if column.IsNull() then None else Some(__.Read())
+
+    type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+        let entities = System.Collections.Generic.Dictionary<string, string -> int>()
+        let buildGetOrdinal entity= 
+            if not (entities.ContainsKey(entity)) then 
+                let dictionary = 
+                    [0..reader.FieldCount-1] 
+                    |> List.mapi (fun i fieldIdx -> reader.GetName(fieldIdx), i)
+                    |> List.groupBy (fun (nm, i) -> nm) 
+                    |> List.map (fun (_, items) -> List.tryItem(entities.Count) items |> Option.defaultWith (fun () -> List.last items))
+                    |> dict
+                let getOrdinal = fun idx -> dictionary.Item idx
+                entities.Add(entity, getOrdinal)
+                getOrdinal
+            else
+                entities.[entity]
+        
+        member __.ErrorLog = ErrorLogReader(reader, buildGetOrdinal "ErrorLog")
+        member __.BuildVersion = BuildVersionReader(reader, buildGetOrdinal "BuildVersion")
 
 module SalesLT =
     [<CLIMutable>]
@@ -63,10 +140,7 @@ module SalesLT =
               AddressLine2 = __.AddressLine2.Read() }
 
         member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then
-                None
-            else
-                Some(__.Read())
+            if column.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type Customer =
@@ -120,10 +194,31 @@ module SalesLT =
               Phone = __.Phone.Read() }
 
         member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then
-                None
-            else
-                Some(__.Read())
+            if column.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type CustomerAddress =
+        { CustomerID: int
+          AddressID: int
+          AddressType: string
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
+
+    type CustomerAddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.CustomerID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "CustomerID")
+        member __.AddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "AddressID")
+        member __.AddressType = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressType")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
+        member __.Read() =
+            { CustomerID = __.CustomerID.Read()
+              AddressID = __.AddressID.Read()
+              AddressType = __.AddressType.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
+
+        member __.ReadIfNotNull(column: Column) =
+            if column.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type Product =
@@ -183,10 +278,7 @@ module SalesLT =
               Color = __.Color.Read() }
 
         member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then
-                None
-            else
-                Some(__.Read())
+            if column.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type ProductCategory =
@@ -210,13 +302,305 @@ module SalesLT =
               ParentProductCategoryID = __.ParentProductCategoryID.Read() }
 
         member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then
-                None
-            else
-                Some(__.Read())
+            if column.IsNull() then None else Some(__.Read())
 
-    type HydraReader(reader: System.Data.IDataReader) =
-        let reader = reader :?> Microsoft.Data.SqlClient.SqlDataReader
+    [<CLIMutable>]
+    type ProductDescription =
+        { ProductDescriptionID: int
+          Description: string
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
+
+    type ProductDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.ProductDescriptionID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductDescriptionID")
+        member __.Description = RequiredColumn(reader, getOrdinal, reader.GetString, "Description")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
+        member __.Read() =
+            { ProductDescriptionID = __.ProductDescriptionID.Read()
+              Description = __.Description.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
+
+        member __.ReadIfNotNull(column: Column) =
+            if column.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type ProductModel =
+        { ProductModelID: int
+          Name: string
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime
+          CatalogDescription: Option<System.Xml.Linq.XElement> }
+
+    type ProductModelReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
+        member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
+
+    [<CLIMutable>]
+    type ProductModelProductDescription =
+        { ProductModelID: int
+          ProductDescriptionID: int
+          Culture: string
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
+
+    type ProductModelProductDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
+        member __.ProductDescriptionID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductDescriptionID")
+        member __.Culture = RequiredColumn(reader, getOrdinal, reader.GetString, "Culture")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
+        member __.Read() =
+            { ProductModelID = __.ProductModelID.Read()
+              ProductDescriptionID = __.ProductDescriptionID.Read()
+              Culture = __.Culture.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
+
+        member __.ReadIfNotNull(column: Column) =
+            if column.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type SalesOrderDetail =
+        { SalesOrderID: int
+          SalesOrderDetailID: int
+          OrderQty: int16
+          ProductID: int
+          UnitPrice: decimal
+          UnitPriceDiscount: decimal
+          LineTotal: decimal
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
+
+    type SalesOrderDetailReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.SalesOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderID")
+        member __.SalesOrderDetailID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderDetailID")
+        member __.OrderQty = RequiredColumn(reader, getOrdinal, reader.GetInt16, "OrderQty")
+        member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
+        member __.UnitPrice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "UnitPrice")
+        member __.UnitPriceDiscount = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "UnitPriceDiscount")
+        member __.LineTotal = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "LineTotal")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
+        member __.Read() =
+            { SalesOrderID = __.SalesOrderID.Read()
+              SalesOrderDetailID = __.SalesOrderDetailID.Read()
+              OrderQty = __.OrderQty.Read()
+              ProductID = __.ProductID.Read()
+              UnitPrice = __.UnitPrice.Read()
+              UnitPriceDiscount = __.UnitPriceDiscount.Read()
+              LineTotal = __.LineTotal.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
+
+        member __.ReadIfNotNull(column: Column) =
+            if column.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type SalesOrderHeader =
+        { SalesOrderID: int
+          RevisionNumber: byte
+          OrderDate: System.DateTime
+          DueDate: System.DateTime
+          Status: byte
+          OnlineOrderFlag: bool
+          SalesOrderNumber: string
+          CustomerID: int
+          SubTotal: decimal
+          TaxAmt: decimal
+          Freight: decimal
+          TotalDue: decimal
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime
+          ShipMethod: string
+          CreditCardApprovalCode: Option<string>
+          Comment: Option<string>
+          ShipToAddressID: Option<int>
+          BillToAddressID: Option<int>
+          PurchaseOrderNumber: Option<string>
+          AccountNumber: Option<string>
+          ShipDate: Option<System.DateTime> }
+
+    type SalesOrderHeaderReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.SalesOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderID")
+        member __.RevisionNumber = RequiredColumn(reader, getOrdinal, reader.GetByte, "RevisionNumber")
+        member __.OrderDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "OrderDate")
+        member __.DueDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "DueDate")
+        member __.Status = RequiredColumn(reader, getOrdinal, reader.GetByte, "Status")
+        member __.OnlineOrderFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "OnlineOrderFlag")
+        member __.SalesOrderNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "SalesOrderNumber")
+        member __.CustomerID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "CustomerID")
+        member __.SubTotal = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SubTotal")
+        member __.TaxAmt = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TaxAmt")
+        member __.Freight = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "Freight")
+        member __.TotalDue = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TotalDue")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
+        member __.ShipMethod = RequiredColumn(reader, getOrdinal, reader.GetString, "ShipMethod")
+        member __.CreditCardApprovalCode = OptionalColumn(reader, getOrdinal, reader.GetString, "CreditCardApprovalCode")
+        member __.Comment = OptionalColumn(reader, getOrdinal, reader.GetString, "Comment")
+        member __.ShipToAddressID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "ShipToAddressID")
+        member __.BillToAddressID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "BillToAddressID")
+        member __.PurchaseOrderNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PurchaseOrderNumber")
+        member __.AccountNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "AccountNumber")
+        member __.ShipDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "ShipDate")
+        member __.Read() =
+            { SalesOrderID = __.SalesOrderID.Read()
+              RevisionNumber = __.RevisionNumber.Read()
+              OrderDate = __.OrderDate.Read()
+              DueDate = __.DueDate.Read()
+              Status = __.Status.Read()
+              OnlineOrderFlag = __.OnlineOrderFlag.Read()
+              SalesOrderNumber = __.SalesOrderNumber.Read()
+              CustomerID = __.CustomerID.Read()
+              SubTotal = __.SubTotal.Read()
+              TaxAmt = __.TaxAmt.Read()
+              Freight = __.Freight.Read()
+              TotalDue = __.TotalDue.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read()
+              ShipMethod = __.ShipMethod.Read()
+              CreditCardApprovalCode = __.CreditCardApprovalCode.Read()
+              Comment = __.Comment.Read()
+              ShipToAddressID = __.ShipToAddressID.Read()
+              BillToAddressID = __.BillToAddressID.Read()
+              PurchaseOrderNumber = __.PurchaseOrderNumber.Read()
+              AccountNumber = __.AccountNumber.Read()
+              ShipDate = __.ShipDate.Read() }
+
+        member __.ReadIfNotNull(column: Column) =
+            if column.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vProductAndDescription =
+        { ProductID: int
+          Name: string
+          ProductModel: string
+          Culture: string
+          Description: string }
+
+    type vProductAndDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
+        member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
+        member __.ProductModel = RequiredColumn(reader, getOrdinal, reader.GetString, "ProductModel")
+        member __.Culture = RequiredColumn(reader, getOrdinal, reader.GetString, "Culture")
+        member __.Description = RequiredColumn(reader, getOrdinal, reader.GetString, "Description")
+        member __.Read() =
+            { ProductID = __.ProductID.Read()
+              Name = __.Name.Read()
+              ProductModel = __.ProductModel.Read()
+              Culture = __.Culture.Read()
+              Description = __.Description.Read() }
+
+        member __.ReadIfNotNull(column: Column) =
+            if column.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vProductModelCatalogDescription =
+        { ProductModelID: int
+          Name: string
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime
+          Summary: Option<string>
+          Manufacturer: Option<string>
+          Copyright: Option<string>
+          ProductURL: Option<string>
+          WarrantyPeriod: Option<string>
+          WarrantyDescription: Option<string>
+          NoOfYears: Option<string>
+          MaintenanceDescription: Option<string>
+          Wheel: Option<string>
+          Saddle: Option<string>
+          Pedal: Option<string>
+          BikeFrame: Option<string>
+          Crankset: Option<string>
+          PictureAngle: Option<string>
+          PictureSize: Option<string>
+          ProductPhotoID: Option<string>
+          Material: Option<string>
+          Color: Option<string>
+          ProductLine: Option<string>
+          Style: Option<string>
+          RiderExperience: Option<string> }
+
+    type vProductModelCatalogDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
+        member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
+        member __.Summary = OptionalColumn(reader, getOrdinal, reader.GetString, "Summary")
+        member __.Manufacturer = OptionalColumn(reader, getOrdinal, reader.GetString, "Manufacturer")
+        member __.Copyright = OptionalColumn(reader, getOrdinal, reader.GetString, "Copyright")
+        member __.ProductURL = OptionalColumn(reader, getOrdinal, reader.GetString, "ProductURL")
+        member __.WarrantyPeriod = OptionalColumn(reader, getOrdinal, reader.GetString, "WarrantyPeriod")
+        member __.WarrantyDescription = OptionalColumn(reader, getOrdinal, reader.GetString, "WarrantyDescription")
+        member __.NoOfYears = OptionalColumn(reader, getOrdinal, reader.GetString, "NoOfYears")
+        member __.MaintenanceDescription = OptionalColumn(reader, getOrdinal, reader.GetString, "MaintenanceDescription")
+        member __.Wheel = OptionalColumn(reader, getOrdinal, reader.GetString, "Wheel")
+        member __.Saddle = OptionalColumn(reader, getOrdinal, reader.GetString, "Saddle")
+        member __.Pedal = OptionalColumn(reader, getOrdinal, reader.GetString, "Pedal")
+        member __.BikeFrame = OptionalColumn(reader, getOrdinal, reader.GetString, "BikeFrame")
+        member __.Crankset = OptionalColumn(reader, getOrdinal, reader.GetString, "Crankset")
+        member __.PictureAngle = OptionalColumn(reader, getOrdinal, reader.GetString, "PictureAngle")
+        member __.PictureSize = OptionalColumn(reader, getOrdinal, reader.GetString, "PictureSize")
+        member __.ProductPhotoID = OptionalColumn(reader, getOrdinal, reader.GetString, "ProductPhotoID")
+        member __.Material = OptionalColumn(reader, getOrdinal, reader.GetString, "Material")
+        member __.Color = OptionalColumn(reader, getOrdinal, reader.GetString, "Color")
+        member __.ProductLine = OptionalColumn(reader, getOrdinal, reader.GetString, "ProductLine")
+        member __.Style = OptionalColumn(reader, getOrdinal, reader.GetString, "Style")
+        member __.RiderExperience = OptionalColumn(reader, getOrdinal, reader.GetString, "RiderExperience")
+        member __.Read() =
+            { ProductModelID = __.ProductModelID.Read()
+              Name = __.Name.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read()
+              Summary = __.Summary.Read()
+              Manufacturer = __.Manufacturer.Read()
+              Copyright = __.Copyright.Read()
+              ProductURL = __.ProductURL.Read()
+              WarrantyPeriod = __.WarrantyPeriod.Read()
+              WarrantyDescription = __.WarrantyDescription.Read()
+              NoOfYears = __.NoOfYears.Read()
+              MaintenanceDescription = __.MaintenanceDescription.Read()
+              Wheel = __.Wheel.Read()
+              Saddle = __.Saddle.Read()
+              Pedal = __.Pedal.Read()
+              BikeFrame = __.BikeFrame.Read()
+              Crankset = __.Crankset.Read()
+              PictureAngle = __.PictureAngle.Read()
+              PictureSize = __.PictureSize.Read()
+              ProductPhotoID = __.ProductPhotoID.Read()
+              Material = __.Material.Read()
+              Color = __.Color.Read()
+              ProductLine = __.ProductLine.Read()
+              Style = __.Style.Read()
+              RiderExperience = __.RiderExperience.Read() }
+
+        member __.ReadIfNotNull(column: Column) =
+            if column.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vGetAllCategories =
+        { ParentProductCategoryName: string
+          ProductCategoryName: Option<string>
+          ProductCategoryID: Option<int> }
+
+    type vGetAllCategoriesReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.ParentProductCategoryName = RequiredColumn(reader, getOrdinal, reader.GetString, "ParentProductCategoryName")
+        member __.ProductCategoryName = OptionalColumn(reader, getOrdinal, reader.GetString, "ProductCategoryName")
+        member __.ProductCategoryID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "ProductCategoryID")
+        member __.Read() =
+            { ParentProductCategoryName = __.ParentProductCategoryName.Read()
+              ProductCategoryName = __.ProductCategoryName.Read()
+              ProductCategoryID = __.ProductCategoryID.Read() }
+
+        member __.ReadIfNotNull(column: Column) =
+            if column.IsNull() then None else Some(__.Read())
+
+    type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         let entities = System.Collections.Generic.Dictionary<string, string -> int>()
         let buildGetOrdinal entity= 
             if not (entities.ContainsKey(entity)) then 
@@ -231,8 +615,17 @@ module SalesLT =
                 getOrdinal
             else
                 entities.[entity]
-
-        member __.Product = ProductReader(reader, buildGetOrdinal "SalesLT.Product")
-        member __.ProductCategory = ProductCategoryReader(reader, buildGetOrdinal "SalesLT.ProductCategory")
-        member __.Customer = CustomerReader(reader, buildGetOrdinal "SalesLT.Customer")
-        member __.Address = AddressReader(reader, buildGetOrdinal "SalesLT.Address")
+        
+        member __.Address = AddressReader(reader, buildGetOrdinal "Address")
+        member __.Customer = CustomerReader(reader, buildGetOrdinal "Customer")
+        member __.CustomerAddress = CustomerAddressReader(reader, buildGetOrdinal "CustomerAddress")
+        member __.Product = ProductReader(reader, buildGetOrdinal "Product")
+        member __.ProductCategory = ProductCategoryReader(reader, buildGetOrdinal "ProductCategory")
+        member __.ProductDescription = ProductDescriptionReader(reader, buildGetOrdinal "ProductDescription")
+        member __.ProductModel = ProductModelReader(reader, buildGetOrdinal "ProductModel")
+        member __.ProductModelProductDescription = ProductModelProductDescriptionReader(reader, buildGetOrdinal "ProductModelProductDescription")
+        member __.SalesOrderDetail = SalesOrderDetailReader(reader, buildGetOrdinal "SalesOrderDetail")
+        member __.SalesOrderHeader = SalesOrderHeaderReader(reader, buildGetOrdinal "SalesOrderHeader")
+        member __.vProductAndDescription = vProductAndDescriptionReader (reader, buildGetOrdinal "vProductAndDescription")
+        member __.vProductModelCatalogDescription = vProductModelCatalogDescriptionReader (reader, buildGetOrdinal "vProductModelCatalogDescription")
+        member __.vGetAllCategories = vGetAllCategoriesReader (reader, buildGetOrdinal "vGetAllCategories")
