@@ -104,23 +104,16 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
     /// Initializes a table record using the reader column properties.
     let toRecordMethod = 
         SynMemberDefn.CreateMember(
-            {   
-                SynBindingRcd.Access = None
-                SynBindingRcd.Kind = SynBindingKind.NormalBinding
-                SynBindingRcd.IsInline = false
-                SynBindingRcd.IsMutable = false
-                SynBindingRcd.Attributes = SynAttributes.Empty
-                SynBindingRcd.XmlDoc = XmlDoc.PreXmlDocEmpty
-                SynBindingRcd.ValData = SynValData.SynValData(Some memberFlags, SynValInfo.Empty, None)
-                SynBindingRcd.Pattern = 
+            { SynBindingRcd.Let with 
+                Pattern = 
                     SynPatRcd.LongIdent(
                         SynPatLongIdentRcd.Create(
                             LongIdentWithDots.CreateString("__.Read")
                             , SynArgPats.Pats([ SynPat.Paren(SynPat.Const(SynConst.Unit, range0), range0) ])
                         )
                     )
-                SynBindingRcd.ReturnInfo = None
-                SynBindingRcd.Expr = 
+                ValData = SynValData.SynValData(Some (MemberFlags.InstanceMember), SynValInfo.Empty, None)
+                Expr = 
                     SynExpr.CreateRecord (
                         tbl.Columns
                         |> Array.map (fun col -> 
@@ -129,23 +122,14 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                         )
                         |> Array.toList
                     )
-                SynBindingRcd.Range = range0
-                SynBindingRcd.Bind = DebugPointForBinding.NoDebugPointAtInvisibleBinding
             }
         )
 
     /// Initializes an optional table record (Some if the given column is not null).
     let toRecordIfMethod = 
-        SynMemberDefn.CreateMember(
-            {   
-                SynBindingRcd.Access = None
-                SynBindingRcd.Kind = SynBindingKind.NormalBinding
-                SynBindingRcd.IsInline = false
-                SynBindingRcd.IsMutable = false
-                SynBindingRcd.Attributes = SynAttributes.Empty
-                SynBindingRcd.XmlDoc = XmlDoc.PreXmlDocEmpty
-                SynBindingRcd.ValData = SynValData.SynValData(Some memberFlags, SynValInfo.Empty, None)
-                SynBindingRcd.Pattern = 
+        SynMemberDefn.CreateMember(            
+            { SynBindingRcd.Let with 
+                Pattern = 
                     SynPatRcd.LongIdent(
                         SynPatLongIdentRcd.Create(
                             LongIdentWithDots.CreateString("__.ReadIfNotNull")
@@ -161,36 +145,27 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                             ])
                         )
                     )
-                SynBindingRcd.ReturnInfo = None
-                SynBindingRcd.Expr = 
+                ValData = SynValData.SynValData(Some (MemberFlags.InstanceMember), SynValInfo.Empty, None)
+                Expr = 
                     SynExpr.IfThenElse(
-                        SynExpr.App(
-                            ExprAtomicFlag.Atomic
-                            , false
-                            
+                        SynExpr.CreateApp(
                             // Function:
-                            , SynExpr.LongIdent(
+                            SynExpr.LongIdent(
                                 false
                                 , LongIdentWithDots.Create([ "column"; "IsNull" ])
                                 , None
                                 , range0)
-                            
                             // Args:
                             , SynExpr.CreateParenedTuple([])
-                            , range0 
                         )
                         , SynExpr.CreateIdentString("None")
-                        ,   SynExpr.App(
-                                ExprAtomicFlag.Atomic
-                                , false
-                            
+                        ,   SynExpr.CreateApp(
                                 // Function:
-                                , SynExpr.LongIdent(
+                                SynExpr.LongIdent(
                                     false
                                     , LongIdentWithDots.CreateString("Some")
                                     , None
                                     , range0)
-                            
                                 // Args:
                                 , SynExpr.CreateParenedTuple([
                                     SynExpr.App(
@@ -209,7 +184,6 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                                         , range0 
                                     )
                                 ])
-                                , range0 
                             ) 
                             |> Some
                         , DebugPointForBinding.DebugPointAtBinding(range0)
@@ -217,8 +191,6 @@ let tableReaderClass (cfg: Config) (tbl: Table) =
                         , range0
                         , range0
                     )
-                SynBindingRcd.Range = range0
-                SynBindingRcd.Bind = DebugPointForBinding.NoDebugPointAtInvisibleBinding
             }
         )
 
