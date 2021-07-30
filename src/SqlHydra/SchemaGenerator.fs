@@ -303,7 +303,12 @@ let toFormattedCode (cfg: Config) (comment: string) (generatedModule: SynModuleO
             ParsedInput.CreateImplFile(
                 ParsedImplFileInputRcd.CreateFs(cfg.OutputFile).AddModule generatedModule)
     
-        let cfg = { FormatConfig.FormatConfig.Default with StrictMode = true }
+        let cfg = { 
+                FormatConfig.FormatConfig.Default with 
+                    StrictMode = true
+                    MaxIfThenElseShortWidth = 400   // Forces ReadIfNotNull if/then to be on a single line
+                    MaxValueBindingWidth = 400      // Ensure reader property/column bindings stay on one line
+            }
         let formattedCode = CodeFormatter.FormatASTAsync(parsedInput, "output.fs", [], None, cfg) |> Async.RunSynchronously
         let finalCode = substitutions |> List.fold (fun (code: string) (placeholder, sub) -> code.Replace(placeholder, sub)) formattedCode
 
