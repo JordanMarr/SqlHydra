@@ -18,32 +18,38 @@ let getProductsWithThumbnail(conn: SqlConnection) = task {
         |> Db.newCommand "SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
         |> Db.Async.read
 
-    let sr = SalesLT.HydraReader(reader)
-    return [ while reader.Read() do sr.Product.Read() ]
+    let hydra = SalesLT.HydraReader(reader :?> SqlDataReader)
+    return [ 
+        while reader.Read() do
+            hydra.Product.Read() 
+    ]
 }
 
-type ProductInfo = {
-    Product: string
-    ProductNumber: string
-    ThumbnailFileName: string option
-    Thumbnail: byte[] option
-}
+type ProductInfo = 
+    {
+        Product: string
+        Category: string
+        ProductNumber: string
+        ThumbnailFileName: string option
+        Thumbnail: byte[] option
+    }
 
 let loadCustomProductDomainEntity(conn: SqlConnection) = task {
     use! reader =
         conn
-        |> Db.newCommand "SELECT TOP 10 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
+        |> Db.newCommand "SELECT TOP 4 * FROM SalesLT.Product p JOIN SalesLT.ProductCategory c ON p.ProductCategoryID = c.ProductCategoryID WHERE ThumbNailPhoto IS NOT NULL"
         |> Db.Async.read  
 
-    let sr = SalesLT.HydraReader(reader)
+    let hydra = SalesLT.HydraReader(reader :?> SqlDataReader)
 
     return [ 
         while reader.Read() do
             { 
-                ProductInfo.Product = sr.Product.Name.Read()
-                ProductInfo.ProductNumber = sr.Product.ProductNumber.Read()
-                ProductInfo.ThumbnailFileName = sr.Product.ThumbnailPhotoFileName.Read()
-                ProductInfo.Thumbnail = sr.Product.ThumbNailPhoto.Read()
+                ProductInfo.Product = hydra.Product.Name.Read()
+                ProductInfo.Category = hydra.ProductCategory.Name.Read()
+                ProductInfo.ProductNumber = hydra.Product.ProductNumber.Read()
+                ProductInfo.ThumbnailFileName = hydra.Product.ThumbnailPhotoFileName.Read()
+                ProductInfo.Thumbnail = hydra.Product.ThumbNailPhoto.Read()
             }
     ]
 }
@@ -62,11 +68,11 @@ let getCustomersJoinAddresses(conn: SqlConnection) = task {
         |> Db.newCommand sql
         |> Db.Async.read
     
-    let sr = SalesLT.HydraReader(reader)
+    let hydra = SalesLT.HydraReader(reader :?> SqlDataReader)
 
     return [
         while reader.Read() do
-            sr.Customer.Read(), sr.Address.Read()
+            hydra.Customer.Read(), hydra.Address.Read()
     ]
 }
 
@@ -86,12 +92,12 @@ let getCustomersLeftJoinAddresses(conn: SqlConnection) = task {
         |> Db.newCommand sql
         |> Db.Async.read
 
-    let sr = SalesLT.HydraReader(reader)
+    let hydra = SalesLT.HydraReader(reader :?> SqlDataReader)
 
     return [
         while reader.Read() do
-            sr.Customer.Read(),
-            sr.Address.ReadIfNotNull(sr.Address.AddressID)
+            hydra.Customer.Read(),
+            hydra.Address.ReadIfNotNull(hydra.Address.AddressID)
     ]
 }
 
@@ -108,29 +114,29 @@ let getProductsAndCategories(conn: SqlConnection) = task {
         |> Db.newCommand sql
         |> Db.Async.read
     
-    let sr = SalesLT.HydraReader(reader)
+    let hydra = SalesLT.HydraReader(reader :?> SqlDataReader)
 
     return [
         while reader.Read() do
-            sr.Product.Read(),
-            sr.ProductCategory.ReadIfNotNull(sr.ProductCategory.ProductCategoryID)
+            hydra.Product.Read(),
+            hydra.ProductCategory.ReadIfNotNull(hydra.ProductCategory.ProductCategoryID)
     ]
 }
 
 let runQueries() = task {
     use conn = connect()    
     
-    //let! products = getProductsWithThumbnail conn
-    //printfn "Products with Thumbnails Count: %i" (products |> Seq.length)
+    let! products = getProductsWithThumbnail conn
+    printfn "Products with Thumbnails Count: %i" (products |> Seq.length)
 
-    //let! productNamesNumbers = loadCustomProductDomainEntity conn
-    //printfn "Product Names and Numbers: %A" productNamesNumbers
+    let! productNamesNumbers = loadCustomProductDomainEntity conn
+    printfn "Product Names and Numbers: %A" productNamesNumbers
 
-    //let! customersAddresses = getCustomersJoinAddresses conn
-    //printfn "Customers-Join-Addresses: %A" customersAddresses
+    let! customersAddresses = getCustomersJoinAddresses conn
+    printfn "Customers-Join-Addresses: %A" customersAddresses
 
-    //let! customerLeftJoinAddresses = getCustomersLeftJoinAddresses conn
-    //printfn "Customer-LeftJoin-Addresses: %A" customerLeftJoinAddresses
+    let! customerLeftJoinAddresses = getCustomersLeftJoinAddresses conn
+    printfn "Customer-LeftJoin-Addresses: %A" customerLeftJoinAddresses
 
     let! productsCategories = getProductsAndCategories conn
     printfn "Products-Categories: %A" productsCategories
