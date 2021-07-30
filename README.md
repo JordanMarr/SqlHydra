@@ -129,6 +129,8 @@ Using the `--readers` option will generate a special `HydraReader` class that wi
 - The generated record for a given table can be loaded in its entirety via the `Read` method.
 - Each table property in the `HydraReader` will contain a property for each column in the table to allow reading individual columns.
 
+![HydraReader](https://user-images.githubusercontent.com/1030435/127605927-70cefaf3-f03f-42bd-a1e9-c5cfe509da8b.gif)
+
 
 ### Reading Generated Table Records
 
