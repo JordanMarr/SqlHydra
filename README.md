@@ -6,9 +6,14 @@ Currently supported databases:
 - [SQLite](#sqlhydrasqlite-)
 
 Features:
-- Generate a record for each table
-- Generate [Data Readers](#data-readers) for each table
+- generates a record for each table
+- (optional) generates a strongly typed data reader with the [--readers](#data-readers) feature
 
+
+### 🚧 CONSTRUCTION ZONE 🚧
+
+The API is still forming and is subject to change, especially now while the version # is 0.x.
+It will be upgraded to v1.0 once the dust has settled.
 
 ## SqlHydra.SqlServer [![NuGet version (SqlHydra.SqlServer)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.SqlServer/)
 
