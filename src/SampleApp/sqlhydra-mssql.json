@@ -4,7 +4,11 @@
   "Namespace": "SampleApp.AdventureWorks",
   "IsCLIMutable": true,
   "Readers": {
-    "IsEnabled": true,
-    "ReaderType": "Microsoft.Data.SqlClient.SqlDataReader"
+    "Case": "Some",
+    "Fields": [
+      {
+        "ReaderType": "Microsoft.Data.SqlClient.SqlDataReader"
+      }
+    ]
   }
 }

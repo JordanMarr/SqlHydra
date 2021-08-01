@@ -37,7 +37,6 @@ type Schema =
 
 type ReadersConfig = 
     {
-        IsEnabled: bool
         /// A fully qualified reader type. Ex: "Microsoft.Data.SqlClient.SqlDataReader"
         ReaderType: string
     }
@@ -48,5 +47,5 @@ type Config =
         OutputFile: string
         Namespace: string
         IsCLIMutable: bool
-        Readers: ReadersConfig
+        Readers: ReadersConfig option
     }

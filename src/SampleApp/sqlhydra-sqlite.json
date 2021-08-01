@@ -4,7 +4,11 @@
   "Namespace": "SampleApp.AdventureWorks",
   "IsCLIMutable": true,
   "Readers": {
-    "IsEnabled": true,
-    "ReaderType": "System.Data.IDataReader"
+    "Case": "Some",
+    "Fields": [
+      {
+        "ReaderType": "System.Data.IDataReader"
+      }
+    ]
   }
 }

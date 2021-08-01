@@ -12,6 +12,11 @@ type AppInfo = {
     Version: string
 }
 
+type JsonConfigResult = 
+    | Valid of Config
+    | Invalid of error: string
+    | NotFound
+
 let yesNo(title: string) = 
     let selection = SelectionPrompt<string>()
     selection.Title <- title
@@ -19,7 +24,7 @@ let yesNo(title: string) =
     AnsiConsole.Prompt(selection) = "Yes"
 
 let newConfigWizard(app: AppInfo) = 
-    let connStr = AnsiConsole.Ask<string>("Enter a database [green]Connection String[/]:")
+    let connection = AnsiConsole.Ask<string>("Enter a database [green]Connection String[/]:")
     let outputFile = AnsiConsole.Ask<string>("Enter an [green]Output Filename[/] (Ex: [yellow]AdventureWorks.fs[/]):")
     let ns = AnsiConsole.Ask<string>("Enter a [green]Namespace[/] (Ex: [yellow]MyApp.AdventureWorks[/]):")
     let isCLIMutable = yesNo "Add CLIMutable attribute to generated records?"
@@ -34,15 +39,14 @@ let newConfigWizard(app: AppInfo) =
         else app.DefaultReaderType
 
     { 
-        Config.ConnectionString = connStr
+        Config.ConnectionString = connection.Replace(@"\\", @"\") // Fix if user copies an escaped backslash from an existing json config
         Config.OutputFile = outputFile
         Config.Namespace = ns
         Config.IsCLIMutable = isCLIMutable
         Config.Readers = 
-            {
-                ReadersConfig.IsEnabled = enableReaders
-                ReadersConfig.ReaderType = readerType
-            }
+            if enableReaders 
+            then Some { ReadersConfig.ReaderType = readerType }
+            else None
     }
 
 /// Ex: "sqlhydra-mssql.json"
@@ -57,11 +61,11 @@ let tryLoadConfig(jsonFileName: string) =
     if IO.File.Exists(jsonFileName) then
         try
             let json = IO.File.ReadAllText(jsonFileName)
-            JsonConvert.DeserializeObject<SqlHydra.Schema.Config>(json) |> Some
+            Valid (JsonConvert.DeserializeObject<SqlHydra.Schema.Config>(json))
         with ex -> 
-            None
+            Invalid ex.Message
     else 
-        None
+        NotFound
 
 /// Creates hydra.json if necessary and then runs.
 let getConfig(app: AppInfo, argv: string array) = 
@@ -74,8 +78,12 @@ let getConfig(app: AppInfo, argv: string array) =
     match argv with 
     | [| |] ->
         match tryLoadConfig(jsonFileName) with
-        | Some cfg -> cfg
-        | None ->
+        | Valid cfg -> 
+            cfg
+        | Invalid exMsg -> 
+            AnsiConsole.MarkupLine($"[red]ERROR: [/]Unable to deserialize '{jsonFileName}'. \n{exMsg}")
+            failwith "Invalid json config."
+        | NotFound ->
             AnsiConsole.MarkupLine($"[yellow]\"{jsonFileName}\" not detected. Starting configuration wizard...[/]")
             let cfg = newConfigWizard(app)
             saveConfig(jsonFileName, cfg)
