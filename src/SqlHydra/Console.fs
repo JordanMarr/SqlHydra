@@ -18,7 +18,7 @@ let yesNo(title: string) =
     selection.AddChoices(["Yes"; "No"]) |> ignore
     AnsiConsole.Prompt(selection) = "Yes"
 
-let newConfigWizard(appInfo: AppInfo) = 
+let newConfigWizard(app: AppInfo) = 
     let connStr = AnsiConsole.Ask<string>("Enter a database [green]Connection String[/]:")
     let outputFile = AnsiConsole.Ask<string>("Enter an [green]Output Filename[/] (Ex: [yellow]AdventureWorks.fs[/]):")
     let ns = AnsiConsole.Ask<string>("Enter a [green]Namespace[/] (Ex: [yellow]MyApp.AdventureWorks[/]):")
@@ -26,12 +26,12 @@ let newConfigWizard(appInfo: AppInfo) =
     let enableReaders = yesNo "Generate HydraReader?"
     let useDefaultReaderType = 
         if enableReaders 
-        then yesNo $"Use the default Data Reader Type? (Default = {appInfo.DefaultReaderType}):"
+        then yesNo $"Use the default Data Reader Type? (Default = {app.DefaultReaderType}):"
         else false
     let readerType = 
         if not useDefaultReaderType
         then AnsiConsole.Ask<string>($"Enter [green]Data Reader Type[/]:")
-        else appInfo.DefaultReaderType
+        else app.DefaultReaderType
 
     { 
         Config.ConnectionString = connStr
@@ -61,9 +61,10 @@ let tryLoadConfig() =
         None
 
 /// Creates hydra.json if necessary and then runs.
-let getConfig(appInfo: AppInfo, argv: string array) = 
+let getConfig(app: AppInfo, argv: string array) = 
 
-    AnsiConsole.MarkupLine("[red]SqlHydra[/]")
+    AnsiConsole.MarkupLine($"{app.Name}")
+    AnsiConsole.MarkupLine($"v[yellow]{app.Version}[/]")
 
     match argv with 
     | [| |] ->
@@ -71,13 +72,13 @@ let getConfig(appInfo: AppInfo, argv: string array) =
         | Some cfg -> cfg
         | None ->
             AnsiConsole.MarkupLine("[yellow]\"hydra.json\" not detected. Starting configuration wizard...[/]")
-            let cfg = newConfigWizard(appInfo)
+            let cfg = newConfigWizard(app)
             saveConfig cfg
             cfg
 
     | [| "--create" |] -> 
         AnsiConsole.MarkupLine("[yellow]Creating a new configuration...[/]")
-        let cfg = newConfigWizard(appInfo)
+        let cfg = newConfigWizard(app)
         saveConfig cfg
         cfg
 
