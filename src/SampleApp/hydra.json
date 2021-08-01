@@ -1,0 +1,10 @@
+{
+  "ConnectionString": "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI",
+  "OutputFile": "AdventureWorks.fs",
+  "Namespace": "SampleApp.AdventureWorks",
+  "IsCLIMutable": true,
+  "Readers": {
+    "IsEnabled": true,
+    "ReaderType": "Microsoft.Data.SqlClient.SqlDataReader"
+  }
+}

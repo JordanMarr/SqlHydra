@@ -313,7 +313,8 @@ let generateModule (cfg: Config) (db: Schema) =
                         if cfg.Readers.IsEnabled then 
                             recordReader
 
-                    hydraReaderClass cfg tables
+                    if cfg.Readers.IsEnabled then
+                        hydraReaderClass cfg tables
                 ]
 
             SynModuleDecl.CreateNestedModule(schemaNestedModule, tableRecordDeclarations)
