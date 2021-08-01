@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
-    <Version>0.80.0</Version>
+    <Version>0.81.0</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.SqlServer is a dotnet tool that generates F# records for a SQL Server database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
