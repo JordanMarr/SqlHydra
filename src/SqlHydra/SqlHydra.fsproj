@@ -27,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Argu" Version="6.1.1" />
     <PackageReference Include="Fantomas" Version="4.4.0" />
     <PackageReference Include="FsAst" Version="0.9.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />

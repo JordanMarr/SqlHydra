@@ -1,1 +1,0 @@
-dotnet sqlhydra-mssql -c "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI" -o "AdventureWorks.fs" -ns "SampleApp.AdventureWorks" --cli-mutable --readers

@@ -45,18 +45,21 @@ let newConfigWizard(app: AppInfo) =
             }
     }
 
-let fileName = "hydra.json"
+/// Ex: "sqlhydra-mssql.json"
+let buildJsonFileName(app: AppInfo) =
+    $"{app.Command}.json"
 
-let saveConfig (cfg: Config) = 
+let saveConfig (jsonFileName: string, cfg: Config) = 
     let json = JsonConvert.SerializeObject(cfg, Formatting.Indented)
-    IO.File.WriteAllText(fileName, json)
+    IO.File.WriteAllText(jsonFileName, json)
 
-let tryLoadConfig() = 
-    if IO.File.Exists(fileName) then
+let tryLoadConfig(jsonFileName: string) = 
+    if IO.File.Exists(jsonFileName) then
         try
-            let json = IO.File.ReadAllText(fileName)
+            let json = IO.File.ReadAllText(jsonFileName)
             JsonConvert.DeserializeObject<SqlHydra.Schema.Config>(json) |> Some
-        with ex -> None
+        with ex -> 
+            None
     else 
         None
 
@@ -66,20 +69,22 @@ let getConfig(app: AppInfo, argv: string array) =
     AnsiConsole.MarkupLine($"{app.Name}")
     AnsiConsole.MarkupLine($"v[yellow]{app.Version}[/]")
 
+    let jsonFileName = buildJsonFileName(app)
+
     match argv with 
     | [| |] ->
-        match tryLoadConfig() with
+        match tryLoadConfig(jsonFileName) with
         | Some cfg -> cfg
         | None ->
-            AnsiConsole.MarkupLine("[yellow]\"hydra.json\" not detected. Starting configuration wizard...[/]")
+            AnsiConsole.MarkupLine($"[yellow]\"{jsonFileName}\" not detected. Starting configuration wizard...[/]")
             let cfg = newConfigWizard(app)
-            saveConfig cfg
+            saveConfig(jsonFileName, cfg)
             cfg
 
-    | [| "--create" |] -> 
+    | [| "--new" |] -> 
         AnsiConsole.MarkupLine("[yellow]Creating a new configuration...[/]")
         let cfg = newConfigWizard(app)
-        saveConfig cfg
+        saveConfig(jsonFileName, cfg)
         cfg
 
     | _ ->

@@ -1,0 +1,10 @@
+{
+  "ConnectionString": "Data Source=..\\Tests\\TestData\\AdventureWorksLT.db",
+  "OutputFile": "AdventureWorks.fs",
+  "Namespace": "SampleApp.AdventureWorks",
+  "IsCLIMutable": true,
+  "Readers": {
+    "IsEnabled": true,
+    "ReaderType": "System.Data.IDataReader"
+  }
+}
