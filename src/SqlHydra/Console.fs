@@ -3,7 +3,9 @@
 open Spectre.Console
 open SqlHydra.Schema
 open System
-open Newtonsoft.Json
+open Tomlyn
+open Tomlyn.Syntax
+open Tomlyn.Model
 
 type AppInfo = {
     Name: string
@@ -12,7 +14,7 @@ type AppInfo = {
     Version: string
 }
 
-type JsonConfigResult = 
+type TomlConfigResult = 
     | Valid of Config
     | Invalid of error: string
     | NotFound
@@ -39,7 +41,7 @@ let newConfigWizard(app: AppInfo) =
         else app.DefaultReaderType
 
     { 
-        Config.ConnectionString = connection.Replace(@"\\", @"\") // Fix if user copies an escaped backslash from an existing json config
+        Config.ConnectionString = connection.Replace(@"\\", @"\") // Fix if user copies an escaped backslash from an existing config
         Config.OutputFile = outputFile
         Config.Namespace = ns
         Config.IsCLIMutable = isCLIMutable
@@ -49,50 +51,86 @@ let newConfigWizard(app: AppInfo) =
             else None
     }
 
-/// Ex: "sqlhydra-mssql.json"
-let buildJsonFileName(app: AppInfo) =
-    $"{app.Command}.json"
+/// Ex: "sqlhydra-mssql.toml"
+let buildTomlFilename(app: AppInfo) =
+    $"{app.Command}.toml"
 
-let saveConfig (jsonFileName: string, cfg: Config) = 
-    let json = JsonConvert.SerializeObject(cfg, Formatting.Indented)
-    IO.File.WriteAllText(jsonFileName, json)
+let saveConfig (tomlFilename: string, cfg: Config) = 
+    let doc = DocumentSyntax()
 
-let tryLoadConfig(jsonFileName: string) = 
-    if IO.File.Exists(jsonFileName) then
+    let general = TableSyntax("general")        
+    general.Items.Add("connection", cfg.ConnectionString)
+    general.Items.Add("output", cfg.OutputFile)
+    general.Items.Add("namespace", cfg.Namespace)
+    general.Items.Add("cli_mutable", cfg.IsCLIMutable)
+    doc.Tables.Add(general)
+
+    if cfg.Readers.IsSome then
+        let readers = TableSyntax("readers")
+        readers.Items.Add("reader_type", cfg.Readers.Value.ReaderType)
+        doc.Tables.Add(readers)
+
+    let toml = doc.ToString()
+    IO.File.WriteAllText(tomlFilename, toml)
+
+let tryLoadConfig(tomlFileName: string) = 
+    if IO.File.Exists(tomlFileName) then
         try
-            let json = IO.File.ReadAllText(jsonFileName)
-            Valid (JsonConvert.DeserializeObject<SqlHydra.Schema.Config>(json))
+            let toml = IO.File.ReadAllText(tomlFileName)
+            let doc = Toml.Parse(toml)
+            let table = doc.ToModel()
+            let general = table.Item("general") :?> TomlTable
+            let readers = 
+                table.Item("readers") 
+                |> Option.ofObj
+                |> Option.map (fun o -> o :?> TomlTable)
+
+            {
+                Config.ConnectionString = general.["connection"] :?> string
+                Config.OutputFile = general.["output"] :?> string
+                Config.Namespace = general.["namespace"] :?> string
+                Config.IsCLIMutable = general.["cli_mutable"] :?> bool
+                Config.Readers = 
+                    readers
+                    |> Option.map (fun tbl -> 
+                        {
+                            ReadersConfig.ReaderType = tbl.["reader_type"] :?> string
+                        }
+                    )
+            }
+            |> Valid
+
         with ex -> 
             Invalid ex.Message
     else 
         NotFound
 
-/// Creates hydra.json if necessary and then runs.
+/// Creates hydra.toml if necessary and then runs.
 let getConfig(app: AppInfo, argv: string array) = 
 
     AnsiConsole.MarkupLine($"{app.Name}")
     AnsiConsole.MarkupLine($"v[yellow]{app.Version}[/]")
 
-    let jsonFileName = buildJsonFileName(app)
+    let tomlFilename = buildTomlFilename(app)
 
     match argv with 
     | [| |] ->
-        match tryLoadConfig(jsonFileName) with
+        match tryLoadConfig(tomlFilename) with
         | Valid cfg -> 
             cfg
         | Invalid exMsg -> 
-            AnsiConsole.MarkupLine($"[red]ERROR: [/]Unable to deserialize '{jsonFileName}'. \n{exMsg}")
-            failwith "Invalid json config."
+            AnsiConsole.MarkupLine($"[red]ERROR: [/]Unable to deserialize '{tomlFilename}'. \n{exMsg}")
+            failwith "Invalid toml config."
         | NotFound ->
-            AnsiConsole.MarkupLine($"[yellow]\"{jsonFileName}\" not detected. Starting configuration wizard...[/]")
+            AnsiConsole.MarkupLine($"[yellow]\"{tomlFilename}\" not detected. Starting configuration wizard...[/]")
             let cfg = newConfigWizard(app)
-            saveConfig(jsonFileName, cfg)
+            saveConfig(tomlFilename, cfg)
             cfg
 
     | [| "--new" |] -> 
         AnsiConsole.MarkupLine("[yellow]Creating a new configuration...[/]")
         let cfg = newConfigWizard(app)
-        saveConfig(jsonFileName, cfg)
+        saveConfig(tomlFilename, cfg)
         cfg
 
     | _ ->
