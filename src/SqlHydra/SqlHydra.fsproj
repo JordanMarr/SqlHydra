@@ -16,6 +16,7 @@
   <ItemGroup>
     <Compile Include="Schema.fs" />
     <Compile Include="SchemaGenerator.fs" />
+    <Compile Include="TomlConfigParser.fs" />
     <Compile Include="Console.fs" />
   </ItemGroup>
 

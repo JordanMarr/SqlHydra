@@ -1,17 +1,8 @@
-﻿module Console
+﻿module SqlHydra.Console
 
 open Spectre.Console
 open SqlHydra.Schema
 open System
-open Tomlyn
-open Tomlyn.Syntax
-open Tomlyn.Model
-
-type TomlTable with
-    member this.TryGetTable(name: string) =
-        if this.ContainsKey(name)
-        then Some (this.Item(name) :?> TomlTable)
-        else None
 
 type AppInfo = {
     Name: string
@@ -69,51 +60,16 @@ let buildTomlFilename(app: AppInfo) =
 
 /// Saves a config as toml.
 let saveConfig (tomlFilename: string, cfg: Config) = 
-    let doc = DocumentSyntax()
-
-    let general = TableSyntax("general")        
-    general.Items.Add("connection", cfg.ConnectionString)
-    general.Items.Add("output", cfg.OutputFile)
-    general.Items.Add("namespace", cfg.Namespace)
-    general.Items.Add("cli_mutable", cfg.IsCLIMutable)
-    doc.Tables.Add(general)
-
-    if cfg.Readers.IsSome then
-        let readers = TableSyntax("readers")
-        readers.Items.Add("reader_type", cfg.Readers.Value.ReaderType)
-        doc.Tables.Add(readers)
-
-    let toml = doc.ToString()
+    let toml = TomlConfigParser.serialize(cfg)
     IO.File.WriteAllText(tomlFilename, toml)
 
 /// Reads a config from toml.
 let tryLoadConfig(tomlFileName: string) = 
     if IO.File.Exists(tomlFileName) then
-        try
-            (*
-                NOTE: New configuration keys should be parsed gracefully so as to not break older versions!
-            *)
+        try            
             let toml = IO.File.ReadAllText(tomlFileName)
-            let doc = Toml.Parse(toml)
-            let table = doc.ToModel()
-            let general = table.Item("general") :?> TomlTable
-            let readersMaybe = table.TryGetTable("readers")
-
-            {
-                Config.ConnectionString = general.["connection"] :?> string
-                Config.OutputFile = general.["output"] :?> string
-                Config.Namespace = general.["namespace"] :?> string
-                Config.IsCLIMutable = general.["cli_mutable"] :?> bool
-                Config.Readers = 
-                    readersMaybe
-                    |> Option.map (fun tbl -> 
-                        {
-                            ReadersConfig.ReaderType = tbl.["reader_type"] :?> string
-                        }
-                    )
-            }
-            |> Valid
-
+            let config = TomlConfigParser.deserialize(toml)
+            Valid config
         with ex -> 
             Invalid ex.Message
     else 

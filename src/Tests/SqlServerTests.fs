@@ -15,9 +15,9 @@ let getSchema() =
             IsCLIMutable = true
             Readers = 
                 {
-                    ReadersConfig.IsEnabled = true
                     ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader"
                 } 
+                |> Some
         }
     let schema = SqlServerSchemaProvider.getSchema cfg
     printfn "Schema: %A" schema

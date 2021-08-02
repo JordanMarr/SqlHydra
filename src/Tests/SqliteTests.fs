@@ -14,9 +14,9 @@ let getSchema() =
             IsCLIMutable = true
             Readers = 
                 {
-                    ReadersConfig.IsEnabled = true
                     ReadersConfig.ReaderType = "System.Data.IDataReader"
                 } 
+                |> Some
         }
     let schema = SqliteSchemaProvider.getSchema cfg
     printfn "Schema: %A" schema
