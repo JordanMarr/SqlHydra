@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
-    <Version>0.81.0</Version>
+    <Version>0.90.0</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.Sqlite is a dotnet tool that generates F# records for a SQLite database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -11,7 +11,7 @@
     <ToolCommandName>sqlhydra-sqlite</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-    <PackageReleaseNotes>0.80.0 - Added "HydraReader" to "--readers" feature that automatically handles column name clashes in joined tables.</PackageReleaseNotes>
+    <PackageReleaseNotes>0.90.0 - Breaking change: replaces CLI arguments with a new CLI wizard and a .toml config file.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
