@@ -1,0 +1,7 @@
+[general]
+connection = "Data Source=..\\Tests\\TestData\\AdventureWorksLT.db"
+output = "AdventureWorks.fs"
+namespace = "SampleApp.AdventureWorks"
+cli_mutable = true
+[readers]
+reader_type = "System.Data.IDataReader"

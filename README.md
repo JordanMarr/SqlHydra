@@ -22,26 +22,16 @@ Run the following commands from your project directory:
 1) `dotnet new tool-manifest`
 2) `dotnet tool install SqlHydra.SqlServer`
 
-### Configure
+### Configure / Run
 
-Create a batch file or shell script (`gen.bat` or `gen.sh`) in your project directory with the following contents:
-
-```bat
-dotnet sqlhydra-mssql -c "{connection string}" -o "{output file}.fs" -ns "{namespace}"
-```
-
-_Example:_
+Run the tool from the command line (or add to a .bat/.sh file):
 
 ```bat
-dotnet sqlhydra-mssql -c "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI" -o "AdventureWorks.fs" -ns "SampleApp.AdventureWorks"
+dotnet sqlhydra-mssql
 ```
 
-### Generate Records
-1) Run your `gen.bat` (or `gen.sh`) file to generate the output .fs file.
-2) Manually add the .fs file to your project.
-
-### Regenerate Records
-1) Run your `gen.bat` (or `gen.sh`) file to refresh the output .fs file.
+* The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
+* If a configuration file already exists, it will just run that config.
 
 ## SqlHydra.Sqlite [![NuGet version (SqlHydra.Sqlite)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Sqlite/)
 
@@ -50,27 +40,16 @@ Run the following commands from your project directory:
 1) `dotnet new tool-manifest`
 2) `dotnet tool install SqlHydra.Sqlite`
 
-### Configure
+### Configure / Run
 
-Create a batch file or shell script (`gen.bat` or `gen.sh`) in your project directory with the following contents:
-
-```bat
-dotnet sqlhydra-sqlite -c "{connection string}" -o "{output file}.fs" -ns "{namespace}"
-```
-
-_Example:_
+Run the tool from the command line (or add to a .bat/.sh file):
 
 ```bat
-dotnet sqlhydra-sqlite -c "Data Source=C:\MyProject\AdventureWorksLT.db" -o "AdventureWorks.fs" -ns "SampleApp.AdventureWorks"
+dotnet sqlhydra-sqlite
 ```
 
-### Generate Records
-1) Run your `gen.bat` (or `gen.sh`) file to generate the output .fs file.
-2) Manually add the .fs file to your project.
-
-### Regenerate Records
-1) Run your `gen.bat` (or `gen.sh`) file to refresh the output .fs file.
-
+* The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
+* If a configuration file already exists, it will just run that config.
 
 ## Example Output for AdventureWorks
 ```F#
@@ -231,23 +210,19 @@ For example, if you want to use `System.Data.SqlClient` instead of the default `
 `--readers System.Data.SqlClient.SqlDataReader`.
 
 
-## CLI Reference
+## TOML Configuration Reference
 
-### Arguments
+### Options
 
-| Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Alias | Default | Description |
-| -------- | ----- | ------- | ------- |
-| --connection | -c | *Required* | The database connection string |
-| --output | -o | *Required* | A path to the generated .fs output file (relative paths are valid) |
-| --namespace | -ns | *Required* | The namespace of the generated .fs output file |
-| --cli-mutable |  | false | If this argument exists, a `[<CLIMutable>]` attribute will be added to each record. |
-| --readers [IDataReader Type Override] |  |  | Generates data readers for each table. You can optionally override the default ADO.NET IDataReader type. Ex: `--readers "System.Data.SqlClient.SqlDataReader"`
-
-_Example:_
-
-```bat
-dotnet sqlhydra-mssql -c "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI" -o "AdventureWorks.fs" -ns "SampleApp.AdventureWorks" --cli-mutable
-```
+| Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Required | Description |
+| -------- | ----- | ------- |
+| [general]  | Required | This section contains general settings. |
+| connection | Required | The database connection string |
+| output | Required | A path to the generated .fs output file (relative paths are valid) |
+| namespace | Required | The namespace of the generated .fs output file |
+| cli_mutable | Required | If this argument exists, a `[<CLIMutable>]` attribute will be added to each record. |
+| [readers]  | Optional | This optional section contains settings that apply to the data readers feature. |
+| reader_type | Optional | Generates data readers for each table. You can optionally override the default ADO.NET IDataReader type. Ex: "System.Data.SqlClient.SqlDataReader"
 
 ## Recommended 3rd Party Data Library?
 
