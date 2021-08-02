@@ -225,7 +225,7 @@ For example, if you want to use `System.Data.SqlClient` instead of the default `
 | namespace | Required | The namespace of the generated .fs output file |
 | cli_mutable | Required | If this argument exists, a `[<CLIMutable>]` attribute will be added to each record. |
 | [readers]  | Optional | This optional section contains settings that apply to the data readers feature. |
-| reader_type | Optional | Generates data readers for each table. You can optionally override the default ADO.NET IDataReader type. Ex: "System.Data.SqlClient.SqlDataReader"
+| reader_type | Required | Generates data readers for each table. You can optionally override the default ADO.NET IDataReader type. Ex: "System.Data.SqlClient.SqlDataReader"
 
 ## Recommended 3rd Party Data Library?
 
