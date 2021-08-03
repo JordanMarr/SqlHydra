@@ -15,6 +15,7 @@ type Column =
         Name: string
         TypeMapping: TypeMapping
         IsNullable: bool
+        IsPK: bool
     }
 
 type TableType = 

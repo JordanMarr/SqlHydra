@@ -23,12 +23,14 @@ let getSchema (cfg: Config) : Schema =
         sColumns.Rows
         |> Seq.cast<DataRow>
         |> Seq.map (fun col -> 
-            {| TableCatalog = col.["TABLE_CATALOG"] :?> string
-               TableSchema = defaultSchema // col.["TABLE_SCHEMA"] :?> string
-               TableName = col.["TABLE_NAME"] :?> string
-               ColumnName = col.["COLUMN_NAME"] :?> string
-               ProviderTypeName = col.["DATA_TYPE"] :?> string
-               IsNullable = col.["IS_NULLABLE"] :?> bool
+            {| 
+                TableCatalog = col.["TABLE_CATALOG"] :?> string
+                TableSchema = defaultSchema // col.["TABLE_SCHEMA"] :?> string
+                TableName = col.["TABLE_NAME"] :?> string
+                ColumnName = col.["COLUMN_NAME"] :?> string
+                ProviderTypeName = col.["DATA_TYPE"] :?> string
+                IsNullable = col.["IS_NULLABLE"] :?> bool
+                IsPK = col.["PRIMARY_KEY"] :?> bool
             |}
         )
 
@@ -36,10 +38,12 @@ let getSchema (cfg: Config) : Schema =
         sTables.Rows
         |> Seq.cast<DataRow>
         |> Seq.map (fun tbl -> 
-            {| TableCatalog = tbl.["TABLE_CATALOG"] :?> string
-               TableSchema = tbl.["TABLE_SCHEMA"] |> dbNullOpt<string> |> Option.defaultValue defaultSchema
-               TableName  = tbl.["TABLE_NAME"] :?> string
-               TableType = tbl.["TABLE_TYPE"] :?> string |}
+            {| 
+                TableCatalog = tbl.["TABLE_CATALOG"] :?> string
+                TableSchema = tbl.["TABLE_SCHEMA"] |> dbNullOpt<string> |> Option.defaultValue defaultSchema
+                TableName  = tbl.["TABLE_NAME"] :?> string
+                TableType = tbl.["TABLE_TYPE"] :?> string 
+            |}
         )
         |> Seq.filter (fun tbl -> tbl.TableType <> "SYSTEM_TABLE")
         |> Seq.map (fun tbl -> 
@@ -51,18 +55,21 @@ let getSchema (cfg: Config) : Schema =
                     col.TableName = tbl.TableName
                 )
                 |> Seq.map (fun col -> 
-                    { Column.Name = col.ColumnName
-                      Column.IsNullable = col.IsNullable
-                      Column.TypeMapping = SqliteDataTypes.findTypeMapping(col.ProviderTypeName)
+                    { 
+                        Column.Name = col.ColumnName
+                        Column.IsNullable = col.IsNullable
+                        Column.TypeMapping = SqliteDataTypes.findTypeMapping(col.ProviderTypeName)
+                        Column.IsPK = col.IsPK
                     }
                 )
                 |> Seq.toArray
 
-            { Table.Catalog = tbl.TableCatalog
-              Table.Schema = tbl.TableSchema
-              Table.Name =  tbl.TableName
-              Table.Type = if tbl.TableType = "table" then TableType.Table else TableType.View
-              Table.Columns = columns
+            { 
+                Table.Catalog = tbl.TableCatalog
+                Table.Schema = tbl.TableSchema
+                Table.Name =  tbl.TableName
+                Table.Type = if tbl.TableType = "table" then TableType.Table else TableType.View
+                Table.Columns = columns
             }
         )
         |> Seq.toArray
