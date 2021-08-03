@@ -13,18 +13,13 @@ let assertEqual (s1: string, s2: string) =
 
 [<Test>]
 let ``Parse: All``() =
-
     let cfg = 
         {
             Config.ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
             Config.OutputFile = "AdventureWorks.fs"
             Config.Namespace = "SampleApp.AdventureWorks"
             Config.IsCLIMutable = true
-            Config.Readers = 
-                {
-                    ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader"
-                }
-                |> Some
+            Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
         }
 
     let toml = TomlConfigParser.serialize(cfg)
@@ -61,11 +56,7 @@ let ``Read: All``() =
             Config.OutputFile = "AdventureWorks.fs"
             Config.Namespace = "SampleApp.AdventureWorks"
             Config.IsCLIMutable = true
-            Config.Readers = 
-                {
-                    ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader"
-                }
-                |> Some
+            Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
         }
 
     let cfg = TomlConfigParser.deserialize(toml)
