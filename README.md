@@ -7,7 +7,7 @@ Currently supported databases:
 
 Features:
 - generates a record for each table
-- (optional) generates a strongly typed data reader with the [--readers](#data-readers) feature
+- (optional) generates a strongly typed data reader with the [data readers](#data-readers) feature
 
 
 ### 🚧 CONSTRUCTION ZONE 🚧
@@ -111,7 +111,7 @@ module SalesLT =
 
 
 ## Data Readers
-Using the `--readers` option will generate a special `HydraReader` class that will provide strongly typed readers for each table in a given database schema. 
+Using the "generate data readers" option will generate a special `HydraReader` class that will provide strongly typed readers for each table in a given database schema. 
 - The `HydraReader` will contain a property for each table in the schema.
 - The generated record for a given table can be loaded in its entirety via the `Read` method.
 - Each table property in the `HydraReader` will contain a property for each column in the table to allow reading individual columns.
@@ -208,9 +208,7 @@ let getProductsAndCategories(conn: SqlConnection) = task {
 
 ### Overriding the Data Reader Type
 If you want to use a different ADO.NET provider, you can override the generated IDataReader by specifying an optional fully qualified IDataReader type.
-For example, if you want to use `System.Data.SqlClient` instead of the default `Microsoft.Data.SqlClient`:
-
-`--readers System.Data.SqlClient.SqlDataReader`.
+(The wizard will prompt you for this if you choose to not accept the default.)
 
 
 ## TOML Configuration Reference
@@ -231,7 +229,7 @@ For example, if you want to use `System.Data.SqlClient` instead of the default `
 
 The answer is: it depends on how you like to design your data access code!
 
-* If you like to meticulously craft your SQL by hand, then [Donald](#donald) with the SqlHydra generated `--readers` pairs very well together.
+* If you like to meticulously craft your SQL by hand, then [Donald](#donald) with the SqlHydra generated `HydraReader` pairs very well together.
 * Alternatively, you can use any [ADO.NET](#adonet) library that returns an `IDataReader` with the SqlHydra generated readers.
 * If you want to use only the generated types, then [Dapper.FSharp](#dapperfsharp) is a great fit since Dapper uses reflection out of the box to transform `IDataReader` query results into your generated entity records.
 
