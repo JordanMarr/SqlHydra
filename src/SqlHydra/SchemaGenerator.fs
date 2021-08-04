@@ -101,7 +101,7 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
         )
     
     /// Initializes a table record using the reader column properties.
-    let toRecordMethod = 
+    let readMethod = 
         SynMemberDefn.CreateMember(
             { SynBindingRcd.Let with 
                 Pattern = 
@@ -124,8 +124,12 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
             }
         )
 
-    /// Initializes an optional table record (Some if the given column is not null).
-    let toRecordIfMethod = 
+    /// Initializes an optional table record (based on the existence of a PK or user supplied column).
+    let readIfNotNullMethod = 
+
+        // Try to get the first PK...
+        let firstPK = tbl.Columns |> Array.tryFind (fun c -> c.IsPK) |> Option.map (fun c -> c.Name)
+
         SynMemberDefn.CreateMember(            
             { SynBindingRcd.Let with 
                 Pattern = 
@@ -133,14 +137,19 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
                         SynPatLongIdentRcd.Create(
                             LongIdentWithDots.CreateString("__.ReadIfNotNull")
                             , SynArgPats.Pats([ 
-                                SynPat.Paren(
-                                    SynPat.Typed(
-                                        SynPat.LongIdent(LongIdentWithDots.CreateString("column"), None, None, SynArgPats.Empty, None, range0)
-                                        , SynType.Create("Column")
+                                // If at least one PK column exists, no arg required; else allow caller to pass a `column: Column` arg
+                                match firstPK with
+                                | Some _ -> 
+                                    SynPat.Const(SynConst.Unit, range0)
+                                | None -> 
+                                    SynPat.Paren(
+                                        SynPat.Typed(
+                                            SynPat.LongIdent(LongIdentWithDots.CreateString("column"), None, None, SynArgPats.Empty, None, range0)
+                                            , SynType.Create("Column")
+                                            , range0
+                                        )
                                         , range0
                                     )
-                                    , range0
-                                )
                             ])
                         )
                     )
@@ -151,7 +160,11 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
                             // Function:
                             SynExpr.LongIdent(
                                 false
-                                , LongIdentWithDots.Create([ "column"; "IsNull" ])
+                                , 
+                                // If at least one PK column exists, check first PK for null; else check user supplied column arg for null.
+                                match firstPK with
+                                | Some col -> LongIdentWithDots.Create([ "__"; col; "IsNull" ])
+                                | None -> LongIdentWithDots.Create([ "column"; "IsNull" ]) 
                                 , None
                                 , range0)
                             // Args:
@@ -201,8 +214,8 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
             // Generate Read method only if all column types have a ReaderMethod specified;
             // otherwise, the record will be partially initialized and break the build.
             if tbl.Columns |> Array.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome) then 
-                toRecordMethod 
-                toRecordIfMethod
+                readMethod 
+                readIfNotNullMethod
         ]
 
     let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range0)

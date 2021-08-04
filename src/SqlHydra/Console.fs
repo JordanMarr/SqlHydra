@@ -104,5 +104,5 @@ let getConfig(app: AppInfo, argv: string array) =
         cfg
 
     | _ ->
-        AnsiConsole.MarkupLine($"Invalid args: '{argv}'. Expected no args, or \"--edit\".")
+        AnsiConsole.MarkupLine($"Invalid args: '{argv}'. Expected no args, or \"--new\".")
         failwith "Invalid args."

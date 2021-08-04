@@ -97,7 +97,7 @@ let getCustomersLeftJoinAddresses(conn: SqlConnection) = task {
     return [
         while reader.Read() do
             hydra.Customer.Read(),
-            hydra.Address.ReadIfNotNull(hydra.Address.AddressID)
+            hydra.Address.ReadIfNotNull()
     ]
 }
 
@@ -119,7 +119,7 @@ let getProductsAndCategories(conn: SqlConnection) = task {
     return [
         while reader.Read() do
             hydra.Product.Read(),
-            hydra.ProductCategory.ReadIfNotNull(hydra.ProductCategory.ProductCategoryID)
+            hydra.ProductCategory.ReadIfNotNull()
     ]
 }
 

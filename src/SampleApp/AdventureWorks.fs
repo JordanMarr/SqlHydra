@@ -62,8 +62,8 @@ module dbo =
               ErrorProcedure = __.ErrorProcedure.Read()
               ErrorLine = __.ErrorLine.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.ErrorLogID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type BuildVersion =
@@ -139,8 +139,8 @@ module SalesLT =
               AddressLine1 = __.AddressLine1.Read()
               AddressLine2 = __.AddressLine2.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.AddressID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type Customer =
@@ -193,8 +193,8 @@ module SalesLT =
               EmailAddress = __.EmailAddress.Read()
               Phone = __.Phone.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.CustomerID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type CustomerAddress =
@@ -217,8 +217,8 @@ module SalesLT =
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.CustomerID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type Product =
@@ -277,8 +277,8 @@ module SalesLT =
               ProductModelID = __.ProductModelID.Read()
               Color = __.Color.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.ProductID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type ProductCategory =
@@ -301,8 +301,8 @@ module SalesLT =
               ProductCategoryID = __.ProductCategoryID.Read()
               ParentProductCategoryID = __.ParentProductCategoryID.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.ProductCategoryID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type ProductDescription =
@@ -322,8 +322,8 @@ module SalesLT =
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.ProductDescriptionID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type ProductModel =
@@ -360,8 +360,8 @@ module SalesLT =
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.ProductModelID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type SalesOrderDetail =
@@ -396,8 +396,8 @@ module SalesLT =
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.SalesOrderID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type SalesOrderHeader =
@@ -471,8 +471,8 @@ module SalesLT =
               AccountNumber = __.AccountNumber.Read()
               ShipDate = __.ShipDate.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.SalesOrderID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vProductAndDescription =
