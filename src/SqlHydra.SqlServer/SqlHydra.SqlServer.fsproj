@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
-    <Version>0.90.0</Version>
+    <Version>0.100.0</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.SqlServer is a dotnet tool that generates F# records for a SQL Server database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -11,7 +11,7 @@
     <ToolCommandName>sqlhydra-mssql</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-    <PackageReleaseNotes>0.90.0 - Breaking change: replaces CLI arguments with a new CLI wizard and a .toml config file.</PackageReleaseNotes>
+    <PackageReleaseNotes>0.100.0 - Breaking change: ReadIfNotNull method now requires no column arg if a PK exists.</PackageReleaseNotes>
   </PropertyGroup>
   
   <ItemGroup>
