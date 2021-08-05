@@ -3,6 +3,7 @@ open System.Data
 open Microsoft.Data.SqlClient
 open SampleApp.AdventureWorks // Generated Types
 open FSharp.Control.Tasks.V2
+open SalesLT
 
 let connect() = 
     let cs = "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"
@@ -18,7 +19,8 @@ let getProductsWithThumbnail(conn: SqlConnection) = task {
 
     return [
         while reader.Read() do
-            hydra.Product.Read()
+            //hydra.Product.Read()
+            hydra.Read<Product>()
     ]
 }
 
@@ -30,7 +32,8 @@ let getProductNamesNumbers(conn: SqlConnection) = task {
 
     return [
         while reader.Read() do
-            hydra.Product.Name.Read(), hydra.Product.ProductNumber.Read("ProductNo")
+            hydra.Product.Name.Read(), 
+            hydra.Product.ProductNumber.Read("ProductNo")
     ]
 }
 
@@ -49,7 +52,8 @@ let getCustomersJoinAddresses(conn: SqlConnection) = task {
 
     return [
         while reader.Read() do
-            hydra.Customer.Read(), hydra.Address.Read()
+            hydra.Read<Customer>(),
+            hydra.Read<Address>()
     ]
 }
 
@@ -70,7 +74,8 @@ let getCustomersLeftJoinAddresses(conn: SqlConnection) = task {
 
     return [
         while reader.Read() do
-            hydra.Customer.Read(), hydra.Address.ReadIfNotNull()
+            hydra.Read<Customer>(),
+            hydra.ReadIfNotNull<Address>()
     ]
 }
 
@@ -95,18 +100,18 @@ let getProductsAndCategories(conn: SqlConnection) = task {
 let runQueries() = task {
     use conn = connect()    
     
-    let! products = getProductsWithThumbnail conn
-    printfn "Products with Thumbnails Count: %i" (products |> Seq.length)
+    //let! products = getProductsWithThumbnail conn
+    //printfn "Products with Thumbnails Count: %i" (products |> Seq.length)
 
-    let! productNamesNumbers = getProductNamesNumbers conn
-    printfn "Product Names and Numbers: %A" productNamesNumbers
+    //let! productNamesNumbers = getProductNamesNumbers conn
+    //printfn "Product Names and Numbers: %A" productNamesNumbers
 
-    let! customersAddresses = getCustomersJoinAddresses conn
-    printfn "Customers-Join-Addresses: %A" customersAddresses
+    //let! customersAddresses = getCustomersJoinAddresses conn
+    //printfn "Customers-Join-Addresses: %A" customersAddresses
 
     let! customerLeftJoinAddresses = getCustomersLeftJoinAddresses conn
     printfn "Customer-LeftJoin-Addresses: %A" customerLeftJoinAddresses
 
-    let! productsCategories = getProductsAndCategories conn
-    printfn "Products-Categories: %A" productsCategories
+    //let! productsCategories = getProductsAndCategories conn
+    //printfn "Products-Categories: %A" productsCategories
 }

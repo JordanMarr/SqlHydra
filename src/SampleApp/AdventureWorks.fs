@@ -602,7 +602,7 @@ module SalesLT =
 
     type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         let entities = System.Collections.Generic.Dictionary<string, string -> int>()
-        let buildGetOrdinal entity= 
+        let buildGetOrdinal entity = 
             if not (entities.ContainsKey(entity)) then 
                 let dictionary = 
                     [0..reader.FieldCount-1] 
@@ -629,3 +629,22 @@ module SalesLT =
         member __.vProductAndDescription = vProductAndDescriptionReader (reader, buildGetOrdinal "vProductAndDescription")
         member __.vProductModelCatalogDescription = vProductModelCatalogDescriptionReader (reader, buildGetOrdinal "vProductModelCatalogDescription")
         member __.vGetAllCategories = vGetAllCategoriesReader (reader, buildGetOrdinal "vGetAllCategories")
+
+        member __.Read<'T>() =
+            match typeof<'T>.Name with
+            | "Address" -> __.Address.Read() :> obj
+            | "Customer" -> __.Customer.Read() :> obj
+            | "Product" -> __.Product.Read() :> obj
+            | "ProductCategory" -> __.ProductCategory.Read() :> obj
+            | _ -> failwith "Invalid entity"
+            :?> 'T
+
+        member __.ReadIfNotNull<'T>() =
+            match typeof<'T>.Name with
+            | "Address" -> __.Address.ReadIfNotNull() :> obj
+            | "Customer" -> __.Customer.ReadIfNotNull() :> obj
+            | "Product" -> __.Product.ReadIfNotNull() :> obj
+            | "ProductCategory" -> __.ProductCategory.ReadIfNotNull() :> obj
+            | _ -> failwith "Invalid entity"
+            :?> 'T option
+
