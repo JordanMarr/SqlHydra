@@ -104,6 +104,12 @@ module dbo =
         
         member __.ErrorLog = ErrorLogReader(reader, buildGetOrdinal "ErrorLog")
         member __.BuildVersion = BuildVersionReader(reader, buildGetOrdinal "BuildVersion")
+        member __.Get (entity: string) (isOption: bool) =
+            match entity, isOption with
+            | "ErrorLog", false -> __.ErrorLog.Read() :> obj
+            | "ErrorLog", true -> __.ErrorLog.ReadIfNotNull() :> obj
+            | _ -> failwith "Invalid entity."
+            :?> _
 
 module SalesLT =
     [<CLIMutable>]
@@ -629,3 +635,25 @@ module SalesLT =
         member __.vProductAndDescription = vProductAndDescriptionReader (reader, buildGetOrdinal "vProductAndDescription")
         member __.vProductModelCatalogDescription = vProductModelCatalogDescriptionReader (reader, buildGetOrdinal "vProductModelCatalogDescription")
         member __.vGetAllCategories = vGetAllCategoriesReader (reader, buildGetOrdinal "vGetAllCategories")
+        member __.Get (entity: string) (isOption: bool) =
+            match entity, isOption with
+            | "Address", false -> __.Address.Read() :> obj
+            | "Address", true -> __.Address.ReadIfNotNull() :> obj
+            | "Customer", false -> __.Customer.Read() :> obj
+            | "Customer", true -> __.Customer.ReadIfNotNull() :> obj
+            | "CustomerAddress", false -> __.CustomerAddress.Read() :> obj
+            | "CustomerAddress", true -> __.CustomerAddress.ReadIfNotNull() :> obj
+            | "Product", false -> __.Product.Read() :> obj
+            | "Product", true -> __.Product.ReadIfNotNull() :> obj
+            | "ProductCategory", false -> __.ProductCategory.Read() :> obj
+            | "ProductCategory", true -> __.ProductCategory.ReadIfNotNull() :> obj
+            | "ProductDescription", false -> __.ProductDescription.Read() :> obj
+            | "ProductDescription", true -> __.ProductDescription.ReadIfNotNull() :> obj
+            | "ProductModelProductDescription", false -> __.ProductModelProductDescription.Read() :> obj
+            | "ProductModelProductDescription", true -> __.ProductModelProductDescription.ReadIfNotNull() :> obj
+            | "SalesOrderDetail", false -> __.SalesOrderDetail.Read() :> obj
+            | "SalesOrderDetail", true -> __.SalesOrderDetail.ReadIfNotNull() :> obj
+            | "SalesOrderHeader", false -> __.SalesOrderHeader.Read() :> obj
+            | "SalesOrderHeader", true -> __.SalesOrderHeader.ReadIfNotNull() :> obj
+            | _ -> failwith "Invalid entity."
+            :?> _

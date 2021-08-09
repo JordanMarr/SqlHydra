@@ -282,11 +282,103 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
             )
         )
 
+    let getMethod = 
+        SynMemberDefn.CreateMember(
+            { SynBindingRcd.Let with 
+                Pattern = 
+                    SynPatRcd.LongIdent(
+                        SynPatLongIdentRcd.Create(
+                            LongIdentWithDots.CreateString("__.Get")
+                            , SynArgPats.Pats([ 
+                                SynPat.Paren(
+                                    SynPat.Typed(
+                                        SynPat.LongIdent(LongIdentWithDots.CreateString("entity"), None, None, SynArgPats.Empty, None, range0)
+                                        , SynType.Create("string")
+                                        , range0
+                                    )
+                                    , range0
+                                )
+                                SynPat.Paren(
+                                    SynPat.Typed(
+                                        SynPat.LongIdent(LongIdentWithDots.CreateString("isOption"), None, None, SynArgPats.Empty, None, range0)
+                                        , SynType.Create("bool")
+                                        , range0
+                                    )
+                                    , range0
+                                )
+                            ])
+                        )
+                    )
+                ValData = SynValData.SynValData(Some (MemberFlags.InstanceMember), SynValInfo.Empty, None)
+                Expr = 
+                    let matchExpr = 
+                        SynExpr.CreateMatch(
+                            SynExpr.CreateTuple([
+                                SynExpr.CreateIdent(Ident.Create("entity"))
+                                SynExpr.CreateIdent(Ident.Create("isOption"))
+                            ]), [
+                                // Only match tables where all column types have a ReaderMethod specified;
+                                // otherwise, the record will be partially initialized and break the build.
+                                // Also ensure that a PK exists.
+                                let validTables = 
+                                    tbls 
+                                    |> Seq.filter(fun tbl -> 
+                                        tbl.Columns |> Array.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome) &&
+                                        tbl.Columns |> Array.exists(fun c -> c.IsPK)
+                                    )
+
+                                for tbl in validTables do
+                                    SynMatchClause.Clause(
+                                        SynPat.Tuple(false, [ SynPat.Const(SynConst.String(tbl.Name, range0), range0); SynPat.Const(SynConst.Bool(false), range0) ], range0)
+                                        , None
+                                        , SynExpr.Upcast(
+                                            SynExpr.CreateInstanceMethodCall(LongIdentWithDots.Create([ "__"; tbl.Name; "Read" ]))
+                                            , SynType.Create("obj")
+                                            , range0
+                                        )
+                                        , range0
+                                        , DebugPointForTarget.No
+                                    )
+                                    SynMatchClause.Clause(
+                                        SynPat.Tuple(false, [ SynPat.Const(SynConst.String(tbl.Name, range0), range0); SynPat.Const(SynConst.Bool(true), range0) ], range0)
+                                        , None
+                                        , SynExpr.Upcast(
+                                            SynExpr.CreateInstanceMethodCall(LongIdentWithDots.Create([ "__"; tbl.Name; "ReadIfNotNull" ]))
+                                            , SynType.Create("obj")
+                                            , range0
+                                        )
+                                        , range0
+                                        , DebugPointForTarget.No
+                                    )
+                            
+                                // Wildcard match
+                                SynMatchClause.Clause(
+                                    SynPat.Wild(range0)
+                                    , None
+                                    , SynExpr.CreateApp(
+                                        SynExpr.Ident(Ident.Create("failwith"))
+                                        , SynExpr.CreateConst(SynConst.CreateString("Invalid entity."))
+                                    )
+                                    , range0
+                                    , DebugPointForTarget.No
+                                )
+                            ]
+                        )
+
+                    SynExpr.Downcast(
+                        matchExpr
+                        , SynType.Anon(range0) // _
+                        , range0
+                    )
+            }
+        )
+
     let members = 
         [ 
             ctor
             utilPlaceholder
             yield! readerProperties
+            getMethod
         ]
 
     let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range0)
