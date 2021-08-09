@@ -111,6 +111,32 @@ module dbo =
             | _ -> failwith "Invalid entity."
             :?> _
 
+        static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
+            let hydra = HydraReader(reader)
+        
+            let getNameIsOption (t: System.Type) = 
+                if t.Name.StartsWith "FSharpOption"
+                then t.GenericTypeArguments.[0].Name, true
+                else t.Name, false
+
+            let t = typeof<'T>
+            let isTuple = t.Name.StartsWith "Tuple"
+
+            let entityInfos = 
+                if isTuple 
+                then t.GenericTypeArguments |> Array.map getNameIsOption
+                else [| getNameIsOption t |]
+
+            if isTuple then
+                fun () ->
+                    let values = entityInfos |> Array.map hydra.ReadByName
+                    let tuple = Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(values, t)
+                    tuple :?> 'T
+            else
+                fun () -> 
+                    entityInfos |> Array.head |> hydra.ReadByName |> box :?> 'T
+        
+
 module SalesLT =
     [<CLIMutable>]
     type Address =
@@ -657,3 +683,29 @@ module SalesLT =
             | "SalesOrderHeader", true -> __.SalesOrderHeader.ReadIfNotNull() :> obj
             | _ -> failwith "Invalid entity."
             :?> _
+
+        static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
+            let hydra = HydraReader(reader)
+        
+            let getNameIsOption (t: System.Type) = 
+                if t.Name.StartsWith "FSharpOption"
+                then t.GenericTypeArguments.[0].Name, true
+                else t.Name, false
+
+            let t = typeof<'T>
+            let isTuple = t.Name.StartsWith "Tuple"
+
+            let entityInfos = 
+                if isTuple 
+                then t.GenericTypeArguments |> Array.map getNameIsOption
+                else [| getNameIsOption t |]
+
+            if isTuple then
+                fun () ->
+                    let values = entityInfos |> Array.map hydra.ReadByName
+                    let tuple = Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(values, t)
+                    tuple :?> 'T
+            else
+                fun () -> 
+                    entityInfos |> Array.head |> hydra.ReadByName |> box :?> 'T
+        

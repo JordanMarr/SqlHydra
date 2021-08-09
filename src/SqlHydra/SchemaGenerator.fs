@@ -282,7 +282,7 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
             )
         )
 
-    let getMethod = 
+    let readByNameMethod = 
         SynMemberDefn.CreateMember(
             { SynBindingRcd.Let with 
                 Pattern = 
@@ -379,12 +379,52 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
             }
         )
 
+    let readMethod = 
+        SynMemberDefn.CreateMember(
+            { SynBindingRcd.Let with 
+                Pattern = 
+                    SynPatRcd.LongIdent(
+                        SynPatLongIdentRcd.Create(
+                            LongIdentWithDots.CreateString("Read")
+                            , SynArgPats.Pats(
+                                [
+                                    SynPat.Paren(
+                                        SynPat.Typed(
+                                            SynPat.LongIdent(LongIdentWithDots.CreateString("reader"), None, None, SynArgPats.Empty, None, range0)
+                                            , SynType.Create(rdrCfg.ReaderType)
+                                            , range0
+                                        )
+                                        , range0
+                                    )
+                                ]
+                            )
+                        )
+                    )
+                ValData = 
+                    SynValData.SynValData(
+                        Some (MemberFlags.StaticMember)
+                        , SynValInfo.SynValInfo(
+                            [
+                                [ SynArgInfo.SynArgInfo(SynAttributes.Empty, false, Some(Ident.Create("reader"))) ]
+                            ]
+                            , SynArgInfo.Empty
+                        )
+                        , None
+                    )
+                Expr = SynExpr.Ident(Ident.Create("// ReadMethodBodyPlaceholder"))
+                    
+                    
+                    
+            }
+        )
+
     let members = 
         [ 
             ctor
             utilPlaceholder
             yield! readerProperties
-            getMethod
+            readByNameMethod
+            readMethod
         ]
 
     let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range0)
@@ -446,7 +486,7 @@ let generateModule (cfg: Config) (db: Schema) =
 
     parentNamespace
 
-/// A list of text substitutions to the generated file.
+/// A list of static code text substitutions to the generated file.
 let substitutions = 
     [
         /// Reader classes at top of namespace
@@ -479,7 +519,7 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
             | o -> Some (getValue o :?> byte[])
         """
 
-        /// HydraReader utility functions
+        // HydraReader utility functions
         "member HydraReader = \"placeholder\"",
         """let entities = System.Collections.Generic.Dictionary<string, string -> int>()
         let buildGetOrdinal entity= 
@@ -495,6 +535,34 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
                 getOrdinal
             else
                 entities.[entity]
+        """
+
+        // HydraReader Read Method Body
+        "// ReadMethodBodyPlaceholder",
+        """
+            let hydra = HydraReader(reader)
+        
+            let getNameIsOption (t: System.Type) = 
+                if t.Name.StartsWith "FSharpOption"
+                then t.GenericTypeArguments.[0].Name, true
+                else t.Name, false
+
+            let t = typeof<'T>
+            let isTuple = t.Name.StartsWith "Tuple"
+
+            let entityInfos = 
+                if isTuple 
+                then t.GenericTypeArguments |> Array.map getNameIsOption
+                else [| getNameIsOption t |]
+
+            if isTuple then
+                fun () ->
+                    let values = entityInfos |> Array.map hydra.ReadByName
+                    let tuple = Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(values, t)
+                    tuple :?> 'T
+            else
+                fun () -> 
+                    entityInfos |> Array.head |> hydra.ReadByName |> box :?> 'T
         """
     ]
 
