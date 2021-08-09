@@ -108,7 +108,7 @@ module dbo =
             match entity, isOption with
             | "ErrorLog", false -> __.ErrorLog.Read() :> obj
             | "ErrorLog", true -> __.ErrorLog.ReadIfNotNull() :> obj
-            | _ -> failwith "Invalid entity."
+            | _ -> failwith $"Invalid entity: {entity}"
             :?> _
 
         static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
@@ -681,7 +681,7 @@ module SalesLT =
             | "SalesOrderDetail", true -> __.SalesOrderDetail.ReadIfNotNull() :> obj
             | "SalesOrderHeader", false -> __.SalesOrderHeader.Read() :> obj
             | "SalesOrderHeader", true -> __.SalesOrderHeader.ReadIfNotNull() :> obj
-            | _ -> failwith "Invalid entity."
+            | _ -> failwith $"Invalid entity: {entity}"
             :?> _
 
         static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 

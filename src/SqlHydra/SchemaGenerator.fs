@@ -363,7 +363,11 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
                                     , None
                                     , SynExpr.CreateApp(
                                         SynExpr.Ident(Ident.Create("failwith"))
-                                        , SynExpr.CreateConst(SynConst.CreateString("Invalid entity."))
+                                        , SynExpr.InterpolatedString([
+                                            SynInterpolatedStringPart.String("Invalid entity: ", range0)
+                                            SynInterpolatedStringPart.FillExpr(SynExpr.Ident(Ident.Create("entity")), None)
+                                        ]
+                                        , range0)
                                     )
                                     , range0
                                     , DebugPointForTarget.No
