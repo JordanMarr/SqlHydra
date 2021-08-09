@@ -288,25 +288,31 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
                 Pattern = 
                     SynPatRcd.LongIdent(
                         SynPatLongIdentRcd.Create(
-                            LongIdentWithDots.CreateString("__.Get")
-                            , SynArgPats.Pats([ 
-                                SynPat.Paren(
-                                    SynPat.Typed(
-                                        SynPat.LongIdent(LongIdentWithDots.CreateString("entity"), None, None, SynArgPats.Empty, None, range0)
-                                        , SynType.Create("string")
+                            LongIdentWithDots.CreateString("__.ReadByName")
+                            , SynArgPats.Pats(
+                                [
+                                    SynPat.Paren(
+                                        SynPat.Tuple(
+                                            false
+                                            , [
+                                                SynPat.Typed(
+                                                    SynPat.LongIdent(LongIdentWithDots.CreateString("entity"), None, None, SynArgPats.Empty, None, range0)
+                                                    , SynType.Create("string")
+                                                    , range0
+                                                )
+                                                SynPat.Typed(
+                                                    SynPat.LongIdent(LongIdentWithDots.CreateString("isOption"), None, None, SynArgPats.Empty, None, range0)
+                                                    , SynType.Create("bool")
+                                                    , range0
+                                                )
+                                            ]
+                                            , range0
+                                        )
                                         , range0
                                     )
-                                    , range0
-                                )
-                                SynPat.Paren(
-                                    SynPat.Typed(
-                                        SynPat.LongIdent(LongIdentWithDots.CreateString("isOption"), None, None, SynArgPats.Empty, None, range0)
-                                        , SynType.Create("bool")
-                                        , range0
-                                    )
-                                    , range0
-                                )
-                            ])
+                                ]
+                            )
+                            , access = SynAccess.Private
                         )
                     )
                 ValData = SynValData.SynValData(Some (MemberFlags.InstanceMember), SynValInfo.Empty, None)

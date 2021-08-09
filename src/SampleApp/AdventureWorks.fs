@@ -104,7 +104,7 @@ module dbo =
         
         member __.ErrorLog = ErrorLogReader(reader, buildGetOrdinal "ErrorLog")
         member __.BuildVersion = BuildVersionReader(reader, buildGetOrdinal "BuildVersion")
-        member __.Get (entity: string) (isOption: bool) =
+        member private __.ReadByName(entity: string, isOption: bool) =
             match entity, isOption with
             | "ErrorLog", false -> __.ErrorLog.Read() :> obj
             | "ErrorLog", true -> __.ErrorLog.ReadIfNotNull() :> obj
@@ -635,7 +635,7 @@ module SalesLT =
         member __.vProductAndDescription = vProductAndDescriptionReader (reader, buildGetOrdinal "vProductAndDescription")
         member __.vProductModelCatalogDescription = vProductModelCatalogDescriptionReader (reader, buildGetOrdinal "vProductModelCatalogDescription")
         member __.vGetAllCategories = vGetAllCategoriesReader (reader, buildGetOrdinal "vGetAllCategories")
-        member __.Get (entity: string) (isOption: bool) =
+        member private __.ReadByName(entity: string, isOption: bool) =
             match entity, isOption with
             | "Address", false -> __.Address.Read() :> obj
             | "Address", true -> __.Address.ReadIfNotNull() :> obj
