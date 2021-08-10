@@ -113,28 +113,22 @@ module dbo =
 
         static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
             let hydra = HydraReader(reader)
-        
+            
             let getNameIsOption (t: System.Type) = 
                 if t.Name.StartsWith "FSharpOption"
                 then t.GenericTypeArguments.[0].Name, true
                 else t.Name, false
-
+            
             let t = typeof<'T>
-            let isTuple = t.Name.StartsWith "Tuple"
-
-            let entityInfos = 
-                if isTuple 
-                then t.GenericTypeArguments |> Array.map getNameIsOption
-                else [| getNameIsOption t |]
-
-            if isTuple then
+            if t.Name.StartsWith "Tuple" then
+                let entityInfos = t.GenericTypeArguments |> Array.map getNameIsOption
                 fun () ->
                     let values = entityInfos |> Array.map hydra.ReadByName
                     let tuple = Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(values, t)
                     tuple :?> 'T
             else
                 fun () -> 
-                    entityInfos |> Array.head |> hydra.ReadByName |> box :?> 'T
+                    t |> getNameIsOption |> hydra.ReadByName |> box :?> 'T
         
 
 module SalesLT =
@@ -686,26 +680,20 @@ module SalesLT =
 
         static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
             let hydra = HydraReader(reader)
-        
+            
             let getNameIsOption (t: System.Type) = 
                 if t.Name.StartsWith "FSharpOption"
                 then t.GenericTypeArguments.[0].Name, true
                 else t.Name, false
-
+            
             let t = typeof<'T>
-            let isTuple = t.Name.StartsWith "Tuple"
-
-            let entityInfos = 
-                if isTuple 
-                then t.GenericTypeArguments |> Array.map getNameIsOption
-                else [| getNameIsOption t |]
-
-            if isTuple then
+            if t.Name.StartsWith "Tuple" then
+                let entityInfos = t.GenericTypeArguments |> Array.map getNameIsOption
                 fun () ->
                     let values = entityInfos |> Array.map hydra.ReadByName
                     let tuple = Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(values, t)
                     tuple :?> 'T
             else
                 fun () -> 
-                    entityInfos |> Array.head |> hydra.ReadByName |> box :?> 'T
+                    t |> getNameIsOption |> hydra.ReadByName |> box :?> 'T
         
