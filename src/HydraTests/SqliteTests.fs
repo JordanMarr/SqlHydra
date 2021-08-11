@@ -8,7 +8,7 @@ open SqlHydra.SchemaGenerator
 
 let cfg = 
     {
-        ConnectionString = @"Data Source=C:\_github\SqlHydra\src\Tests\TestData\AdventureWorksLT.db"
+        ConnectionString = @"Data Source=C:\_github\SqlHydra\src\HydraTests\TestData\AdventureWorksLT.db" // TODO: Make path relative
         OutputFile = ""
         Namespace = "TestNS"
         IsCLIMutable = true
