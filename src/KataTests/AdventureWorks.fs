@@ -709,10 +709,10 @@ module SalesLT =
                 | true, false -> getValue (getOrdinalAndIncrement())
                 | true, true -> tryGetValue (getOrdinalAndIncrement())
                 | _ -> hydra.GetReaderByName(tp.Name, isOpt)
-
+            
             // Return a fn that will hydrate 'T (which may be a tuple or a single primitive)
             // This fn will be called once per each record returned by the data reader.
-            let t = typeof<'T>
+            let t = typedefof<'T>
             if t.Name.StartsWith "Tuple" then
                 let readEntityFns = t.GenericTypeArguments |> Array.map buildEntityReadFn
                 fun () ->

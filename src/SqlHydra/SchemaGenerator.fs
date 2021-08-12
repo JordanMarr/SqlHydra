@@ -247,31 +247,58 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
                 Expr = SynExpr.CreateConstString("placeholder")
             }
         )
+    
+    let lazyReaders =
+        [ for tbl in tbls do
+            SynMemberDefn.LetBindings(
+                [ 
+                    SynBinding.Binding(
+                        None
+                        , SynBindingKind.NormalBinding
+                        , false
+                        , false
+                        , []
+                        , XmlDoc.PreXmlDocEmpty
+                        , SynValData.SynValData(None, SynValInfo.Empty, None)
+                        , SynPat.LongIdent(LongIdentWithDots.CreateString($"lazy{tbl.Name}"), None, None, SynArgPats.Empty, None, range0)
+                        , None
+                        , SynExpr.Lazy(
+                            SynExpr.CreateApp(
+                                // Function:
+                                SynExpr.CreateLongIdent(
+                                    false
+                                    , LongIdentWithDots.CreateString($"{tbl.Name}Reader")
+                                    , None
+                                )
+                                // Args:
+                                , SynExpr.CreateParenedTuple([
+                                    SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("reader"), None)
+                                    SynExpr.CreateApp(
+                                        // Func
+                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("buildGetOrdinal"), None)
+                                        // Args
+                                        , SynExpr.CreateConstString(tbl.Name)
+                                    )
+                                ])
+                            )
+                            , range0
+                        )
+                        , range0
+                        , DebugPointAtBinding(range0)
+                    )
+                ]
+                , false
+                , false
+                , range0
+            )
+        ]
+
 
     let readerProperties =
-        tbls
-        |> Seq.toList
         // Only create reader properties for columns that have a ReaderMethod specified
-        |> List.map (fun tbl ->
+        [ for tbl in tbls do
             let readerCall = 
-                SynExpr.CreateApp(
-                    // Function:
-                    SynExpr.CreateLongIdent(
-                        false
-                        , LongIdentWithDots.CreateString($"{tbl.Name}Reader")
-                        , None
-                    )
-                    // Args:
-                    , SynExpr.CreateParenedTuple([
-                        SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("reader"), None)
-                        SynExpr.CreateApp(
-                            // Func
-                            SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("buildGetOrdinal"), None)
-                            // Args
-                            , SynExpr.CreateConstString(tbl.Name)
-                        )
-                    ])
-                )
+                SynExpr.CreateLongIdent(LongIdentWithDots.Create([$"lazy{tbl.Name}"; "Value"]))
 
             SynMemberDefn.CreateMember(
                 { SynBindingRcd.Let with 
@@ -280,7 +307,7 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
                     Expr = readerCall
                 }
             )
-        )
+        ]
 
     let readByNameMethod = 
         SynMemberDefn.CreateMember(
@@ -426,6 +453,7 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
         [ 
             ctor
             utilPlaceholder
+            yield! lazyReaders
             yield! readerProperties
             readByNameMethod
             staticReadMethod

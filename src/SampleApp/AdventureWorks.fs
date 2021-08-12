@@ -102,8 +102,10 @@ module dbo =
             else
                 entities.[entity]
         
-        member __.ErrorLog = ErrorLogReader(reader, buildGetOrdinal "ErrorLog")
-        member __.BuildVersion = BuildVersionReader(reader, buildGetOrdinal "BuildVersion")
+        let lazyErrorLog = lazy (ErrorLogReader(reader, buildGetOrdinal "ErrorLog"))
+        let lazyBuildVersion = lazy (BuildVersionReader(reader, buildGetOrdinal "BuildVersion"))
+        member __.ErrorLog = lazyErrorLog.Value
+        member __.BuildVersion = lazyBuildVersion.Value
         member private __.ReadByName(entity: string, isOption: bool) =
             match entity, isOption with
             | "ErrorLog", false -> __.ErrorLog.Read() :> obj
@@ -655,19 +657,32 @@ module SalesLT =
             else
                 entities.[entity]
         
-        member __.Address = AddressReader(reader, buildGetOrdinal "Address")
-        member __.Customer = CustomerReader(reader, buildGetOrdinal "Customer")
-        member __.CustomerAddress = CustomerAddressReader(reader, buildGetOrdinal "CustomerAddress")
-        member __.Product = ProductReader(reader, buildGetOrdinal "Product")
-        member __.ProductCategory = ProductCategoryReader(reader, buildGetOrdinal "ProductCategory")
-        member __.ProductDescription = ProductDescriptionReader(reader, buildGetOrdinal "ProductDescription")
-        member __.ProductModel = ProductModelReader(reader, buildGetOrdinal "ProductModel")
-        member __.ProductModelProductDescription = ProductModelProductDescriptionReader(reader, buildGetOrdinal "ProductModelProductDescription")
-        member __.SalesOrderDetail = SalesOrderDetailReader(reader, buildGetOrdinal "SalesOrderDetail")
-        member __.SalesOrderHeader = SalesOrderHeaderReader(reader, buildGetOrdinal "SalesOrderHeader")
-        member __.vProductAndDescription = vProductAndDescriptionReader (reader, buildGetOrdinal "vProductAndDescription")
-        member __.vProductModelCatalogDescription = vProductModelCatalogDescriptionReader (reader, buildGetOrdinal "vProductModelCatalogDescription")
-        member __.vGetAllCategories = vGetAllCategoriesReader (reader, buildGetOrdinal "vGetAllCategories")
+        let lazyAddress = lazy (AddressReader(reader, buildGetOrdinal "Address"))
+        let lazyCustomer = lazy (CustomerReader(reader, buildGetOrdinal "Customer"))
+        let lazyCustomerAddress = lazy (CustomerAddressReader(reader, buildGetOrdinal "CustomerAddress"))
+        let lazyProduct = lazy (ProductReader(reader, buildGetOrdinal "Product"))
+        let lazyProductCategory = lazy (ProductCategoryReader(reader, buildGetOrdinal "ProductCategory"))
+        let lazyProductDescription = lazy (ProductDescriptionReader(reader, buildGetOrdinal "ProductDescription"))
+        let lazyProductModel = lazy (ProductModelReader(reader, buildGetOrdinal "ProductModel"))
+        let lazyProductModelProductDescription = lazy (ProductModelProductDescriptionReader(reader, buildGetOrdinal "ProductModelProductDescription"))
+        let lazySalesOrderDetail = lazy (SalesOrderDetailReader(reader, buildGetOrdinal "SalesOrderDetail"))
+        let lazySalesOrderHeader = lazy (SalesOrderHeaderReader(reader, buildGetOrdinal "SalesOrderHeader"))
+        let lazyvProductAndDescription = lazy (vProductAndDescriptionReader (reader, buildGetOrdinal "vProductAndDescription"))
+        let lazyvProductModelCatalogDescription = lazy (vProductModelCatalogDescriptionReader (reader, buildGetOrdinal "vProductModelCatalogDescription"))
+        let lazyvGetAllCategories = lazy (vGetAllCategoriesReader (reader, buildGetOrdinal "vGetAllCategories"))
+        member __.Address = lazyAddress.Value
+        member __.Customer = lazyCustomer.Value
+        member __.CustomerAddress = lazyCustomerAddress.Value
+        member __.Product = lazyProduct.Value
+        member __.ProductCategory = lazyProductCategory.Value
+        member __.ProductDescription = lazyProductDescription.Value
+        member __.ProductModel = lazyProductModel.Value
+        member __.ProductModelProductDescription = lazyProductModelProductDescription.Value
+        member __.SalesOrderDetail = lazySalesOrderDetail.Value
+        member __.SalesOrderHeader = lazySalesOrderHeader.Value
+        member __.vProductAndDescription = lazyvProductAndDescription.Value
+        member __.vProductModelCatalogDescription = lazyvProductModelCatalogDescription.Value
+        member __.vGetAllCategories = lazyvGetAllCategories.Value
         member private __.ReadByName(entity: string, isOption: bool) =
             match entity, isOption with
             | "Address", false -> __.Address.Read() :> obj
