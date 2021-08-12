@@ -277,7 +277,7 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
                                         // Func
                                         SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("buildGetOrdinal"), None)
                                         // Args
-                                        , SynExpr.CreateConstString(tbl.Name)
+                                        , SynExpr.CreateConst(SynConst.Int32(tbl.Columns.Length))
                                     )
                                 ])
                             )
@@ -293,29 +293,34 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
             )
         ]
 
-
     let readerProperties =
         // Only create reader properties for columns that have a ReaderMethod specified
         [ for tbl in tbls do
-            let readerCall = 
-                SynExpr.CreateLongIdent(LongIdentWithDots.Create([$"lazy{tbl.Name}"; "Value"]))
-
             SynMemberDefn.CreateMember(
                 { SynBindingRcd.Let with 
                     Pattern = SynPatRcd.LongIdent(SynPatLongIdentRcd.Create(LongIdentWithDots.Create(["__"; tbl.Name]), SynArgPats.Empty))
                     ValData = SynValData.SynValData(Some (MemberFlags.InstanceMember), SynValInfo.Empty, None)
-                    Expr = readerCall
+                    Expr = SynExpr.CreateLongIdent(LongIdentWithDots.Create([$"lazy{tbl.Name}"; "Value"]))
                 }
             )
         ]
 
-    let readByNameMethod = 
+    let accFieldCountProperty = 
+        SynMemberDefn.CreateMember(
+            { SynBindingRcd.Let with 
+                Pattern = SynPatRcd.LongIdent(SynPatLongIdentRcd.Create(LongIdentWithDots.Create(["__"; "AccFieldCount"]), SynArgPats.Empty, access=SynAccess.Private))
+                ValData = SynValData.SynValData(Some (MemberFlags.InstanceMember), SynValInfo.Empty, None)
+                Expr = SynExpr.CreateUnit
+            }
+        )
+
+    let getReaderByNameMethod = 
         SynMemberDefn.CreateMember(
             { SynBindingRcd.Let with 
                 Pattern = 
                     SynPatRcd.LongIdent(
                         SynPatLongIdentRcd.Create(
-                            LongIdentWithDots.CreateString("__.ReadByName")
+                            LongIdentWithDots.CreateString("__.GetReaderByName")
                             , SynArgPats.Pats(
                                 [
                                     SynPat.Paren(
@@ -344,68 +349,60 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
                     )
                 ValData = SynValData.SynValData(Some (MemberFlags.InstanceMember), SynValInfo.Empty, None)
                 Expr = 
-                    let matchExpr = 
-                        SynExpr.CreateMatch(
-                            SynExpr.CreateTuple([
-                                SynExpr.CreateIdent(Ident.Create("entity"))
-                                SynExpr.CreateIdent(Ident.Create("isOption"))
-                            ]), [
-                                // Only match tables where all column types have a ReaderMethod specified;
-                                // otherwise, the record will be partially initialized and break the build.
-                                // Also ensure that a PK exists.
-                                let validTables = 
-                                    tbls 
-                                    |> Seq.filter(fun tbl -> 
-                                        tbl.Columns |> Array.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome) &&
-                                        tbl.Columns |> Array.exists(fun c -> c.IsPK)
-                                    )
-
-                                for tbl in validTables do
-                                    SynMatchClause.Clause(
-                                        SynPat.Tuple(false, [ SynPat.Const(SynConst.String(tbl.Name, range0), range0); SynPat.Const(SynConst.Bool(false), range0) ], range0)
-                                        , None
-                                        , SynExpr.Upcast(
-                                            SynExpr.CreateInstanceMethodCall(LongIdentWithDots.Create([ "__"; tbl.Name; "Read" ]))
-                                            , SynType.Create("obj")
-                                            , range0
-                                        )
-                                        , range0
-                                        , DebugPointForTarget.No
-                                    )
-                                    SynMatchClause.Clause(
-                                        SynPat.Tuple(false, [ SynPat.Const(SynConst.String(tbl.Name, range0), range0); SynPat.Const(SynConst.Bool(true), range0) ], range0)
-                                        , None
-                                        , SynExpr.Upcast(
-                                            SynExpr.CreateInstanceMethodCall(LongIdentWithDots.Create([ "__"; tbl.Name; "ReadIfNotNull" ]))
-                                            , SynType.Create("obj")
-                                            , range0
-                                        )
-                                        , range0
-                                        , DebugPointForTarget.No
-                                    )
-                            
-                                // Wildcard match
+                    SynExpr.CreateMatch(
+                        SynExpr.CreateTuple([
+                            SynExpr.CreateIdent(Ident.Create("entity"))
+                            SynExpr.CreateIdent(Ident.Create("isOption"))
+                        ]), 
+                        [
+                            // Only match tables where all column types have a ReaderMethod specified;
+                            // otherwise, the record will be partially initialized and break the build.
+                            // Also ensure that a PK exists.
+                            let validTables = 
+                                tbls 
+                                |> Seq.filter(fun tbl -> 
+                                    tbl.Columns |> Array.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome) &&
+                                    tbl.Columns |> Array.exists(fun c -> c.IsPK)
+                                )
+                                
+                            for tbl in validTables do
                                 SynMatchClause.Clause(
-                                    SynPat.Wild(range0)
+                                    SynPat.Tuple(false, [ SynPat.Const(SynConst.String(tbl.Name, range0), range0); SynPat.Const(SynConst.Bool(false), range0) ], range0)
                                     , None
-                                    , SynExpr.CreateApp(
-                                        SynExpr.Ident(Ident.Create("failwith"))
-                                        , SynExpr.InterpolatedString([
-                                            SynInterpolatedStringPart.String("Invalid entity: ", range0)
-                                            SynInterpolatedStringPart.FillExpr(SynExpr.Ident(Ident.Create("entity")), None)
-                                        ]
-                                        , range0)
+                                    , SynExpr.CreateAppInfix(
+                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; tbl.Name; "Read" ]), None), 
+                                        SynExpr.CreateIdent(Ident.Create(">> box"))
                                     )
                                     , range0
                                     , DebugPointForTarget.No
                                 )
-                            ]
-                        )
-
-                    SynExpr.Downcast(
-                        matchExpr
-                        , SynType.Anon(range0) // _
-                        , range0
+                                SynMatchClause.Clause(
+                                    SynPat.Tuple(false, [ SynPat.Const(SynConst.String(tbl.Name, range0), range0); SynPat.Const(SynConst.Bool(true), range0) ], range0)
+                                    , None
+                                    , SynExpr.CreateAppInfix(
+                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; tbl.Name; "ReadIfNotNull" ]), None), 
+                                        SynExpr.CreateIdent(Ident.Create(">> box"))
+                                    )
+                                    , range0
+                                    , DebugPointForTarget.No
+                                )
+                            
+                            // Wildcard match
+                            SynMatchClause.Clause(
+                                SynPat.Wild(range0)
+                                , None
+                                , SynExpr.CreateApp(
+                                    SynExpr.Ident(Ident.Create("failwith"))
+                                    , SynExpr.InterpolatedString([
+                                        SynInterpolatedStringPart.String("Invalid entity: ", range0)
+                                        SynInterpolatedStringPart.FillExpr(SynExpr.Ident(Ident.Create("entity")), None)
+                                    ]
+                                    , range0)
+                                )
+                                , range0
+                                , DebugPointForTarget.No
+                            )
+                        ]
                     )
             }
         )
@@ -455,7 +452,8 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
             utilPlaceholder
             yield! lazyReaders
             yield! readerProperties
-            readByNameMethod
+            accFieldCountProperty
+            getReaderByNameMethod
             staticReadMethod
         ]
 
@@ -553,20 +551,17 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
 
         // HydraReader utility functions
         "member HydraReader = \"placeholder\"",
-        """let entities = System.Collections.Generic.Dictionary<string, string -> int>()
-        let buildGetOrdinal entity= 
-            if not (entities.ContainsKey(entity)) then 
-                let dictionary = 
-                    [0..reader.FieldCount-1] 
-                    |> List.mapi (fun i fieldIdx -> reader.GetName(fieldIdx), i)
-                    |> List.groupBy (fun (nm, i) -> nm) 
-                    |> List.map (fun (_, items) -> List.tryItem(entities.Count) items |> Option.defaultWith (fun () -> List.last items))
-                    |> dict
-                let getOrdinal = fun idx -> dictionary.Item idx
-                entities.Add(entity, getOrdinal)
-                getOrdinal
-            else
-                entities.[entity]
+        """let mutable accFieldCount = 0
+        let buildGetOrdinal fieldCount =
+            let dictionary = 
+                [0..reader.FieldCount-1] 
+                |> List.map (fun i -> reader.GetName(i), i)
+                |> List.sortBy snd
+                |> List.skip accFieldCount
+                |> List.take fieldCount
+                |> dict
+            accFieldCount <- accFieldCount + fieldCount
+            fun col -> dictionary.Item col
         """
 
         // HydraReader Read Method Body
@@ -575,34 +570,48 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
             let hydra = HydraReader(reader)
 
             let isPrimitive (t: System.Type) = t.IsPrimitive || t = typedefof<string>
-            let getPropCount (t: System.Type) = t.GetProperties().Length
-            let getTypeInfo (t: System.Type) = 
+            let getOrdinalAndIncrement() = 
+                let ordinal = hydra.AccFieldCount
+                hydra.AccFieldCount <- hydra.AccFieldCount + 1
+                ordinal
+
+            let getValue (ordinal) () = reader.GetValue(ordinal)
+
+            let tryGetValue (ordinal) () =
+                reader.GetValue(ordinal)
+                |> Option.ofObj
+                |> Option.bind (function :? System.DBNull -> None | o -> Some o)
+                |> box 
+
+            let buildEntityReadFn (t: System.Type) = 
                 let tp, isOpt = 
                     if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> 
                     then t.GenericTypeArguments.[0], true
                     else t, false
                 let isPrim = isPrimitive tp
-                let fieldCount = if isPrim then 1 else getPropCount tp
-                tp.Name, isOpt, isPrim, fieldCount
+                match isPrim, isOpt with
+                | true, false -> getValue (getOrdinalAndIncrement())
+                | true, true -> tryGetValue (getOrdinalAndIncrement())
+                | _ -> hydra.GetReaderByName(tp.Name, isOpt)
 
-            let hydrateEntities typeInfos = 
-                typeInfos 
-                |> Array.fold (fun (ordinal, values) (tNm, isOpt, isPrim, fieldCount) -> 
-                    let o = if isPrim then reader.GetValue(ordinal) else hydra.ReadByName(tNm, isOpt)                            
-                    (ordinal + fieldCount, values @ [o])
-                ) (0, []) |> snd |> List.toArray
-
-            let t = typeof<'T>
+            // Return a fn that will hydrate 'T (which may be a tuple or a single primitive)
+            // This fn will be called once per each record returned by the data reader.
+            let t = typedefof<'T>
             if t.Name.StartsWith "Tuple" then
-                let entityInfos = t.GenericTypeArguments |> Array.map getTypeInfo
+                let readEntityFns = t.GenericTypeArguments |> Array.map buildEntityReadFn
                 fun () ->
-                    let values = hydrateEntities entityInfos
-                    let tuple = Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(values, t)
+                    let entities = readEntityFns |> Array.map (fun read -> read())
+                    let tuple = Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(entities, t)
                     tuple :?> 'T
             else
+                let readEntityFn = t |> buildEntityReadFn
                 fun () -> 
-                    [| t |> getTypeInfo |] |> hydrateEntities |> Array.head :?> 'T
+                    readEntityFn() :?> 'T
         """
+
+        /// AccFieldCount property
+        "member private __.AccFieldCount = ()",
+        "member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value"
     ]
 
 /// Formats the generated code using Fantomas.

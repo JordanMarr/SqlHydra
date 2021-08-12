@@ -87,63 +87,70 @@ module dbo =
             if column.IsNull() then None else Some(__.Read())
 
     type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
-        let entities = System.Collections.Generic.Dictionary<string, string -> int>()
-        let buildGetOrdinal entity= 
-            if not (entities.ContainsKey(entity)) then 
-                let dictionary = 
-                    [0..reader.FieldCount-1] 
-                    |> List.mapi (fun i fieldIdx -> reader.GetName(fieldIdx), i)
-                    |> List.groupBy (fun (nm, i) -> nm) 
-                    |> List.map (fun (_, items) -> List.tryItem(entities.Count) items |> Option.defaultWith (fun () -> List.last items))
-                    |> dict
-                let getOrdinal = fun idx -> dictionary.Item idx
-                entities.Add(entity, getOrdinal)
-                getOrdinal
-            else
-                entities.[entity]
+        let mutable accFieldCount = 0
+        let buildGetOrdinal fieldCount =
+            let dictionary = 
+                [0..reader.FieldCount-1] 
+                |> List.map (fun i -> reader.GetName(i), i)
+                |> List.sortBy snd
+                |> List.skip accFieldCount
+                |> List.take fieldCount
+                |> dict
+            accFieldCount <- accFieldCount + fieldCount
+            fun col -> dictionary.Item col
         
-        let lazyErrorLog = lazy (ErrorLogReader(reader, buildGetOrdinal "ErrorLog"))
-        let lazyBuildVersion = lazy (BuildVersionReader(reader, buildGetOrdinal "BuildVersion"))
+        let lazyErrorLog = lazy (ErrorLogReader(reader, buildGetOrdinal 9))
+        let lazyBuildVersion = lazy (BuildVersionReader(reader, buildGetOrdinal 4))
         member __.ErrorLog = lazyErrorLog.Value
         member __.BuildVersion = lazyBuildVersion.Value
-        member private __.ReadByName(entity: string, isOption: bool) =
+        member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value
+        member private __.GetReaderByName(entity: string, isOption: bool) =
             match entity, isOption with
-            | "ErrorLog", false -> __.ErrorLog.Read() :> obj
-            | "ErrorLog", true -> __.ErrorLog.ReadIfNotNull() :> obj
+            | "ErrorLog", false -> __.ErrorLog.Read >> box
+            | "ErrorLog", true -> __.ErrorLog.ReadIfNotNull >> box
             | _ -> failwith $"Invalid entity: {entity}"
-            :?> _
 
         static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
             let hydra = HydraReader(reader)
 
             let isPrimitive (t: System.Type) = t.IsPrimitive || t = typedefof<string>
-            let getPropCount (t: System.Type) = t.GetProperties().Length
-            let getTypeInfo (t: System.Type) = 
+            let getOrdinalAndIncrement() = 
+                let ordinal = hydra.AccFieldCount
+                hydra.AccFieldCount <- hydra.AccFieldCount + 1
+                ordinal
+
+            let getValue (ordinal) () = reader.GetValue(ordinal)
+
+            let tryGetValue (ordinal) () =
+                reader.GetValue(ordinal)
+                |> Option.ofObj
+                |> Option.bind (function :? System.DBNull -> None | o -> Some o)
+                |> box 
+
+            let buildEntityReadFn (t: System.Type) = 
                 let tp, isOpt = 
                     if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> 
                     then t.GenericTypeArguments.[0], true
                     else t, false
                 let isPrim = isPrimitive tp
-                let fieldCount = if isPrim then 1 else getPropCount tp
-                tp.Name, isOpt, isPrim, fieldCount
+                match isPrim, isOpt with
+                | true, false -> getValue (getOrdinalAndIncrement())
+                | true, true -> tryGetValue (getOrdinalAndIncrement())
+                | _ -> hydra.GetReaderByName(tp.Name, isOpt)
 
-            let hydrateEntities typeInfos = 
-                typeInfos 
-                |> Array.fold (fun (ordinal, values) (tNm, isOpt, isPrim, fieldCount) -> 
-                    let o = if isPrim then reader.GetValue(ordinal) else hydra.ReadByName(tNm, isOpt)                            
-                    (ordinal + fieldCount, values @ [o])
-                ) (0, []) |> snd |> List.toArray
-
-            let t = typeof<'T>
+            // Return a fn that will hydrate 'T (which may be a tuple or a single primitive)
+            // This fn will be called once per each record returned by the data reader.
+            let t = typedefof<'T>
             if t.Name.StartsWith "Tuple" then
-                let entityInfos = t.GenericTypeArguments |> Array.map getTypeInfo
+                let readEntityFns = t.GenericTypeArguments |> Array.map buildEntityReadFn
                 fun () ->
-                    let values = hydrateEntities entityInfos
-                    let tuple = Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(values, t)
+                    let entities = readEntityFns |> Array.map (fun read -> read())
+                    let tuple = Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(entities, t)
                     tuple :?> 'T
             else
+                let readEntityFn = t |> buildEntityReadFn
                 fun () -> 
-                    [| t |> getTypeInfo |] |> hydrateEntities |> Array.head :?> 'T
+                    readEntityFn() :?> 'T
         
 
 module SalesLT =
@@ -642,34 +649,31 @@ module SalesLT =
             if column.IsNull() then None else Some(__.Read())
 
     type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
-        let entities = System.Collections.Generic.Dictionary<string, string -> int>()
-        let buildGetOrdinal entity= 
-            if not (entities.ContainsKey(entity)) then 
-                let dictionary = 
-                    [0..reader.FieldCount-1] 
-                    |> List.mapi (fun i fieldIdx -> reader.GetName(fieldIdx), i)
-                    |> List.groupBy (fun (nm, i) -> nm) 
-                    |> List.map (fun (_, items) -> List.tryItem(entities.Count) items |> Option.defaultWith (fun () -> List.last items))
-                    |> dict
-                let getOrdinal = fun idx -> dictionary.Item idx
-                entities.Add(entity, getOrdinal)
-                getOrdinal
-            else
-                entities.[entity]
+        let mutable accFieldCount = 0
+        let buildGetOrdinal fieldCount =
+            let dictionary = 
+                [0..reader.FieldCount-1] 
+                |> List.map (fun i -> reader.GetName(i), i)
+                |> List.sortBy snd
+                |> List.skip accFieldCount
+                |> List.take fieldCount
+                |> dict
+            accFieldCount <- accFieldCount + fieldCount
+            fun col -> dictionary.Item col
         
-        let lazyAddress = lazy (AddressReader(reader, buildGetOrdinal "Address"))
-        let lazyCustomer = lazy (CustomerReader(reader, buildGetOrdinal "Customer"))
-        let lazyCustomerAddress = lazy (CustomerAddressReader(reader, buildGetOrdinal "CustomerAddress"))
-        let lazyProduct = lazy (ProductReader(reader, buildGetOrdinal "Product"))
-        let lazyProductCategory = lazy (ProductCategoryReader(reader, buildGetOrdinal "ProductCategory"))
-        let lazyProductDescription = lazy (ProductDescriptionReader(reader, buildGetOrdinal "ProductDescription"))
-        let lazyProductModel = lazy (ProductModelReader(reader, buildGetOrdinal "ProductModel"))
-        let lazyProductModelProductDescription = lazy (ProductModelProductDescriptionReader(reader, buildGetOrdinal "ProductModelProductDescription"))
-        let lazySalesOrderDetail = lazy (SalesOrderDetailReader(reader, buildGetOrdinal "SalesOrderDetail"))
-        let lazySalesOrderHeader = lazy (SalesOrderHeaderReader(reader, buildGetOrdinal "SalesOrderHeader"))
-        let lazyvProductAndDescription = lazy (vProductAndDescriptionReader (reader, buildGetOrdinal "vProductAndDescription"))
-        let lazyvProductModelCatalogDescription = lazy (vProductModelCatalogDescriptionReader (reader, buildGetOrdinal "vProductModelCatalogDescription"))
-        let lazyvGetAllCategories = lazy (vGetAllCategoriesReader (reader, buildGetOrdinal "vGetAllCategories"))
+        let lazyAddress = lazy (AddressReader(reader, buildGetOrdinal 9))
+        let lazyCustomer = lazy (CustomerReader(reader, buildGetOrdinal 15))
+        let lazyCustomerAddress = lazy (CustomerAddressReader(reader, buildGetOrdinal 5))
+        let lazyProduct = lazy (ProductReader(reader, buildGetOrdinal 17))
+        let lazyProductCategory = lazy (ProductCategoryReader(reader, buildGetOrdinal 5))
+        let lazyProductDescription = lazy (ProductDescriptionReader(reader, buildGetOrdinal 4))
+        let lazyProductModel = lazy (ProductModelReader(reader, buildGetOrdinal 5))
+        let lazyProductModelProductDescription = lazy (ProductModelProductDescriptionReader(reader, buildGetOrdinal 5))
+        let lazySalesOrderDetail = lazy (SalesOrderDetailReader(reader, buildGetOrdinal 9))
+        let lazySalesOrderHeader = lazy (SalesOrderHeaderReader(reader, buildGetOrdinal 22))
+        let lazyvProductAndDescription = lazy (vProductAndDescriptionReader (reader, buildGetOrdinal 5))
+        let lazyvProductModelCatalogDescription = lazy (vProductModelCatalogDescriptionReader (reader, buildGetOrdinal 25))
+        let lazyvGetAllCategories = lazy (vGetAllCategoriesReader (reader, buildGetOrdinal 3))
         member __.Address = lazyAddress.Value
         member __.Customer = lazyCustomer.Value
         member __.CustomerAddress = lazyCustomerAddress.Value
@@ -683,58 +687,68 @@ module SalesLT =
         member __.vProductAndDescription = lazyvProductAndDescription.Value
         member __.vProductModelCatalogDescription = lazyvProductModelCatalogDescription.Value
         member __.vGetAllCategories = lazyvGetAllCategories.Value
-        member private __.ReadByName(entity: string, isOption: bool) =
+        member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value
+        member private __.GetReaderByName(entity: string, isOption: bool) =
             match entity, isOption with
-            | "Address", false -> __.Address.Read() :> obj
-            | "Address", true -> __.Address.ReadIfNotNull() :> obj
-            | "Customer", false -> __.Customer.Read() :> obj
-            | "Customer", true -> __.Customer.ReadIfNotNull() :> obj
-            | "CustomerAddress", false -> __.CustomerAddress.Read() :> obj
-            | "CustomerAddress", true -> __.CustomerAddress.ReadIfNotNull() :> obj
-            | "Product", false -> __.Product.Read() :> obj
-            | "Product", true -> __.Product.ReadIfNotNull() :> obj
-            | "ProductCategory", false -> __.ProductCategory.Read() :> obj
-            | "ProductCategory", true -> __.ProductCategory.ReadIfNotNull() :> obj
-            | "ProductDescription", false -> __.ProductDescription.Read() :> obj
-            | "ProductDescription", true -> __.ProductDescription.ReadIfNotNull() :> obj
-            | "ProductModelProductDescription", false -> __.ProductModelProductDescription.Read() :> obj
-            | "ProductModelProductDescription", true -> __.ProductModelProductDescription.ReadIfNotNull() :> obj
-            | "SalesOrderDetail", false -> __.SalesOrderDetail.Read() :> obj
-            | "SalesOrderDetail", true -> __.SalesOrderDetail.ReadIfNotNull() :> obj
-            | "SalesOrderHeader", false -> __.SalesOrderHeader.Read() :> obj
-            | "SalesOrderHeader", true -> __.SalesOrderHeader.ReadIfNotNull() :> obj
+            | "Address", false -> __.Address.Read >> box
+            | "Address", true -> __.Address.ReadIfNotNull >> box
+            | "Customer", false -> __.Customer.Read >> box
+            | "Customer", true -> __.Customer.ReadIfNotNull >> box
+            | "CustomerAddress", false -> __.CustomerAddress.Read >> box
+            | "CustomerAddress", true -> __.CustomerAddress.ReadIfNotNull >> box
+            | "Product", false -> __.Product.Read >> box
+            | "Product", true -> __.Product.ReadIfNotNull >> box
+            | "ProductCategory", false -> __.ProductCategory.Read >> box
+            | "ProductCategory", true -> __.ProductCategory.ReadIfNotNull >> box
+            | "ProductDescription", false -> __.ProductDescription.Read >> box
+            | "ProductDescription", true -> __.ProductDescription.ReadIfNotNull >> box
+            | "ProductModelProductDescription", false -> __.ProductModelProductDescription.Read >> box
+            | "ProductModelProductDescription", true -> __.ProductModelProductDescription.ReadIfNotNull >> box
+            | "SalesOrderDetail", false -> __.SalesOrderDetail.Read >> box
+            | "SalesOrderDetail", true -> __.SalesOrderDetail.ReadIfNotNull >> box
+            | "SalesOrderHeader", false -> __.SalesOrderHeader.Read >> box
+            | "SalesOrderHeader", true -> __.SalesOrderHeader.ReadIfNotNull >> box
             | _ -> failwith $"Invalid entity: {entity}"
-            :?> _
 
         static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
             let hydra = HydraReader(reader)
 
             let isPrimitive (t: System.Type) = t.IsPrimitive || t = typedefof<string>
-            let getPropCount (t: System.Type) = t.GetProperties().Length
-            let getTypeInfo (t: System.Type) = 
+            let getOrdinalAndIncrement() = 
+                let ordinal = hydra.AccFieldCount
+                hydra.AccFieldCount <- hydra.AccFieldCount + 1
+                ordinal
+
+            let getValue (ordinal) () = reader.GetValue(ordinal)
+
+            let tryGetValue (ordinal) () =
+                reader.GetValue(ordinal)
+                |> Option.ofObj
+                |> Option.bind (function :? System.DBNull -> None | o -> Some o)
+                |> box 
+
+            let buildEntityReadFn (t: System.Type) = 
                 let tp, isOpt = 
                     if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> 
                     then t.GenericTypeArguments.[0], true
                     else t, false
                 let isPrim = isPrimitive tp
-                let fieldCount = if isPrim then 1 else getPropCount tp
-                tp.Name, isOpt, isPrim, fieldCount
+                match isPrim, isOpt with
+                | true, false -> getValue (getOrdinalAndIncrement())
+                | true, true -> tryGetValue (getOrdinalAndIncrement())
+                | _ -> hydra.GetReaderByName(tp.Name, isOpt)
 
-            let hydrateEntities typeInfos = 
-                typeInfos 
-                |> Array.fold (fun (ordinal, values) (tNm, isOpt, isPrim, fieldCount) -> 
-                    let o = if isPrim then reader.GetValue(ordinal) else hydra.ReadByName(tNm, isOpt)                            
-                    (ordinal + fieldCount, values @ [o])
-                ) (0, []) |> snd |> List.toArray
-
-            let t = typeof<'T>
+            // Return a fn that will hydrate 'T (which may be a tuple or a single primitive)
+            // This fn will be called once per each record returned by the data reader.
+            let t = typedefof<'T>
             if t.Name.StartsWith "Tuple" then
-                let entityInfos = t.GenericTypeArguments |> Array.map getTypeInfo
+                let readEntityFns = t.GenericTypeArguments |> Array.map buildEntityReadFn
                 fun () ->
-                    let values = hydrateEntities entityInfos
-                    let tuple = Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(values, t)
+                    let entities = readEntityFns |> Array.map (fun read -> read())
+                    let tuple = Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(entities, t)
                     tuple :?> 'T
             else
+                let readEntityFn = t |> buildEntityReadFn
                 fun () -> 
-                    [| t |> getTypeInfo |] |> hydrateEntities |> Array.head :?> 'T
+                    readEntityFn() :?> 'T
         
