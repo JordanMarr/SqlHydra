@@ -383,7 +383,7 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
             }
         )
 
-    let readMethod = 
+    let staticReadMethod = 
         SynMemberDefn.CreateMember(
             { SynBindingRcd.Let with 
                 Pattern = 
@@ -428,7 +428,7 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
             utilPlaceholder
             yield! readerProperties
             readByNameMethod
-            readMethod
+            staticReadMethod
         ]
 
     let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range0)
@@ -545,22 +545,35 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
         "// ReadMethodBodyPlaceholder",
         """
             let hydra = HydraReader(reader)
-            
-            let getNameIsOption (t: System.Type) = 
-                if t.Name.StartsWith "FSharpOption"
-                then t.GenericTypeArguments.[0].Name, true
-                else t.Name, false
-            
+
+            let isPrimitive (t: System.Type) = t.IsPrimitive || t = typedefof<string>
+            let getPropCount (t: System.Type) = t.GetProperties().Length
+            let getTypeInfo (t: System.Type) = 
+                let tp, isOpt = 
+                    if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> 
+                    then t.GenericTypeArguments.[0], true
+                    else t, false
+                let isPrim = isPrimitive tp
+                let fieldCount = if isPrim then 1 else getPropCount tp
+                tp.Name, isOpt, isPrim, fieldCount
+
+            let hydrateEntities typeInfos = 
+                typeInfos 
+                |> Array.fold (fun (ordinal, values) (tNm, isOpt, isPrim, fieldCount) -> 
+                    let o = if isPrim then reader.GetValue(ordinal) else hydra.ReadByName(tNm, isOpt)                            
+                    (ordinal + fieldCount, values @ [o])
+                ) (0, []) |> snd |> List.toArray
+
             let t = typeof<'T>
             if t.Name.StartsWith "Tuple" then
-                let entityInfos = t.GenericTypeArguments |> Array.map getNameIsOption
+                let entityInfos = t.GenericTypeArguments |> Array.map getTypeInfo
                 fun () ->
-                    let values = entityInfos |> Array.map hydra.ReadByName
+                    let values = hydrateEntities entityInfos
                     let tuple = Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(values, t)
                     tuple :?> 'T
             else
                 fun () -> 
-                    t |> getNameIsOption |> hydra.ReadByName |> box :?> 'T
+                    [| t |> getTypeInfo |] |> hydrateEntities |> Array.head :?> 'T
         """
     ]
 

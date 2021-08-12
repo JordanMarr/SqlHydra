@@ -73,6 +73,24 @@ let ``Customers left join Addresses``() = task {
 }
 
 [<Test>]
+let ``Product with Category Name``() = task {
+    use ctx = openContext()
+
+    let query = 
+        select {
+            for p in productTable do
+            join c in categoryTable on (p.ProductCategoryID.Value = c.ProductCategoryID)
+            select (p.Name, c.Name)
+            take 10
+        }
+
+    let! rows = query |> ctx.ReadAsync HydraReader.Read
+    printfn "Results: %A" rows
+    query |> toSql |> printfn "%s"
+}
+
+
+[<Test>]
 let ``Customers inner join Addresses``() = task {
     use ctx = openContext()
 
