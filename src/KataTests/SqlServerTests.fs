@@ -80,7 +80,7 @@ let ``Product with Category Name``() = task {
         select {
             for p in productTable do
             join c in categoryTable on (p.ProductCategoryID.Value = c.ProductCategoryID)
-            select (p.Name, c.Name)
+            select (c.Name, p)
             take 10
         }
 
