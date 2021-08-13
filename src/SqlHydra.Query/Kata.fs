@@ -1,5 +1,6 @@
 ﻿namespace SqlHydra.Query
 
+open System
 open SqlKata
 
 module internal KataUtils = 
@@ -78,22 +79,8 @@ module internal KataUtils =
 
         Query(insertQuery.Table).AsInsert(preparedKvps, returnId = returnId)
 
-module Kata = 
-    let toEmbeddedSql (compiler: SqlKata.Compilers.Compiler) (kataQuery: Query) = 
-        let compiledQuery = compiler.Compile(kataQuery)
-        compiledQuery.NamedBindings
-        |> Seq.fold (fun (sql: string) binding -> 
-            sql.Replace(binding.Key, binding.Value |> string)
-        ) compiledQuery.Sql
-
 type Kata = 
     static member ToKataQuery (typedQuery: TypedQuery<'T>) = KataUtils.fromTypedQuery typedQuery
     static member ToKataQuery (updateQuery: UpdateQuerySpec<'T>) = KataUtils.fromUpdate updateQuery
     static member ToKataQuery (insertQuery: InsertQuerySpec<'T>) = KataUtils.fromInsert false insertQuery
-
-    static member ToEmbeddedSql (compiler: SqlKata.Compilers.Compiler, kataQuery: Query) = 
-        let compiledQuery = compiler.Compile(kataQuery)
-        compiledQuery.NamedBindings
-        |> Seq.fold (fun (sql: string) binding -> 
-            sql.Replace(binding.Key, binding.Value |> string)
-        ) compiledQuery.Sql
+    

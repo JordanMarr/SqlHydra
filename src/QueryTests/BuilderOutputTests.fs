@@ -226,18 +226,37 @@ let ``Multi Compiler Test``() =
     |> Seq.iter (fun (nm, sql) -> printfn "%s:\n%s" nm sql)
 
 [<Test>]
-let ``Build Query with Embedded Parameters``() =
+let ``Build Kata Queries``() =
     let compiler = new SqlKata.Compilers.SqlServerCompiler()
     
-    let scripts = 
+    let sampleErrors = [
+        for n in [1..3] do
+            {   dbo.ErrorLog.ErrorLogID = 0 // Exclude
+                dbo.ErrorLog.ErrorTime = System.DateTime.Now
+                dbo.ErrorLog.ErrorLine = None
+                dbo.ErrorLog.ErrorMessage = $"INSERT {n}"
+                dbo.ErrorLog.ErrorNumber = 400
+                dbo.ErrorLog.ErrorProcedure = None
+                dbo.ErrorLog.ErrorSeverity = None
+                dbo.ErrorLog.ErrorState = None
+                dbo.ErrorLog.UserName = "jmarr" }
+    ]
+
+    let kataQueries = 
         [
+            for record in sampleErrors do
+                insert {
+                    into table<dbo.ErrorLog>
+                    entity record
+                }
+                |> Kata.ToKataQuery
+
             update {
                 for e in table<dbo.ErrorLog> do
                 set e.ErrorMessage "Unauthorized"
                 where (e.ErrorNumber = 401)
             }
             |> Kata.ToKataQuery
-            |> Kata.toEmbeddedSql compiler
 
             update {
                 for e in table<dbo.ErrorLog> do
@@ -245,12 +264,13 @@ let ``Build Query with Embedded Parameters``() =
                 where (e.ErrorNumber = 404)
             }
             |> Kata.ToKataQuery
-            |> Kata.toEmbeddedSql compiler
-
-            "UPDATE ErrorLog SET ErrorMessage = 'Internal Error' WHERE ErrorNumber = 500"
         ]
 
-    scripts |> List.iter (printfn "script: \n%s\n")
+    kataQueries 
+    |> List.map compiler.Compile
+    |> List.iter (fun compiledQuery -> 
+        printfn "script: \n%s\n" compiledQuery.Sql
+    )
     
 
 
