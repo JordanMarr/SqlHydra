@@ -1,15 +1,8 @@
 ﻿module SqlHydra.Console
 
 open Spectre.Console
-open SqlHydra.Schema
+open SqlHydra.Domain
 open System
-
-type AppInfo = {
-    Name: string
-    Command: string
-    DefaultReaderType: string
-    Version: string
-}
 
 type LoadConfigResult = 
     | Valid of Config

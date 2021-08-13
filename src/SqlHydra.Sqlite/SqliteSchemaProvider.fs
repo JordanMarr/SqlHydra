@@ -2,7 +2,7 @@
 
 open System.Data
 open System.Data.SQLite
-open SqlHydra.Schema
+open SqlHydra.Domain
 
 let dbNullOpt<'T> (o: obj) : 'T option =
     match o with

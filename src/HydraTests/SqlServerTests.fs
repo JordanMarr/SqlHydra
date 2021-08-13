@@ -3,7 +3,7 @@
 open NUnit.Framework
 open SqlHydra
 open SqlHydra.SqlServer
-open SqlHydra.Schema
+open SqlHydra.Domain
 
 let cfg = 
     {
@@ -22,7 +22,7 @@ let ``Print Schema``() =
 let getCode cfg = 
     SqlServerSchemaProvider.getSchema cfg
     |> SchemaGenerator.generateModule cfg
-    |> SchemaGenerator.toFormattedCode cfg "SqlHydra.SqlServer"
+    |> SchemaGenerator.toFormattedCode cfg SqlHydra.SqlServer.Program.app
 
 let inCode (str: string) cfg = 
     let code = getCode cfg

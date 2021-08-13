@@ -4,7 +4,7 @@ open NUnit.Framework
 open System
 open SqlHydra
 open SqlHydra.SqlServer
-open SqlHydra.Schema
+open SqlHydra.Domain
 open System.Globalization
 
 /// Compare two strings ignoring white space and line breaks

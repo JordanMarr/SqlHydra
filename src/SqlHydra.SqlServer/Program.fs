@@ -1,13 +1,15 @@
-﻿open SqlHydra
+﻿module SqlHydra.SqlServer.Program
+
+open SqlHydra
 open SqlHydra.SqlServer
-open Schema
+open Domain
 
 let app = 
     {
-        Console.AppInfo.Name = "SqlHydra.SqlServer"
-        Console.AppInfo.Command = "sqlhydra-mssql"
-        Console.AppInfo.DefaultReaderType = "Microsoft.Data.SqlClient.SqlDataReader"
-        Console.AppInfo.Version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
+        AppInfo.Name = "SqlHydra.SqlServer"
+        AppInfo.Command = "sqlhydra-mssql"
+        AppInfo.DefaultReaderType = "Microsoft.Data.SqlClient.SqlDataReader"
+        AppInfo.Version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
     }
 
 [<EntryPoint>]
@@ -18,7 +20,7 @@ let main argv =
     let formattedCode = 
         SqlServerSchemaProvider.getSchema cfg
         |> SchemaGenerator.generateModule cfg
-        |> SchemaGenerator.toFormattedCode cfg app.Name
+        |> SchemaGenerator.toFormattedCode cfg app
 
     System.IO.File.WriteAllText(cfg.OutputFile, formattedCode)
     0

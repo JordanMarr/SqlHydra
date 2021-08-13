@@ -3,7 +3,7 @@ module SqliteTests
 open NUnit.Framework
 open SqlHydra.Sqlite
 open SqlHydra
-open SqlHydra.Schema
+open SqlHydra.Domain
 open SqlHydra.SchemaGenerator
 
 let cfg = 
@@ -23,7 +23,7 @@ let ``Print Schema``() =
 let getCode cfg = 
     SqliteSchemaProvider.getSchema cfg
     |> SchemaGenerator.generateModule cfg
-    |> SchemaGenerator.toFormattedCode cfg "SqlHydra.Sqlite"
+    |> SchemaGenerator.toFormattedCode cfg SqlHydra.Sqlite.Program.app
 
 let inCode (str: string) cfg = 
     let code = getCode cfg

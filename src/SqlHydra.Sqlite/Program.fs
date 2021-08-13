@@ -1,13 +1,15 @@
-﻿open SqlHydra
+﻿module SqlHydra.Sqlite.Program
+
+open SqlHydra
 open SqlHydra.Sqlite
-open Schema
+open Domain
 
 let app = 
     {
-        Console.AppInfo.Name = "SqlHydra.Sqlite"
-        Console.AppInfo.Command = "sqlhydra-sqlite"
-        Console.AppInfo.DefaultReaderType = "System.Data.IDataReader"
-        Console.AppInfo.Version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
+        AppInfo.Name = "SqlHydra.Sqlite"
+        AppInfo.Command = "sqlhydra-sqlite"
+        AppInfo.DefaultReaderType = "System.Data.IDataReader"
+        AppInfo.Version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
     }
 
 [<EntryPoint>]
@@ -18,7 +20,7 @@ let main argv =
     let formattedCode = 
         SqliteSchemaProvider.getSchema cfg
         |> SchemaGenerator.generateModule cfg
-        |> SchemaGenerator.toFormattedCode cfg app.Name
+        |> SchemaGenerator.toFormattedCode cfg app
 
     System.IO.File.WriteAllText(cfg.OutputFile, formattedCode)
     0

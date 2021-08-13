@@ -1,7 +1,7 @@
 ﻿module SqlHydra.SqlServer.SqlServerDataTypes
 
 open System.Data
-open SqlHydra.Schema
+open SqlHydra.Domain
 
 (* 
     Column types with a "ReaderMethod" will have a DataReader property generated if readers are enabled.

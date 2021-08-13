@@ -1,6 +1,13 @@
-﻿module SqlHydra.Schema
+﻿module SqlHydra.Domain
 
 open System.Data
+
+type AppInfo = {
+    Name: string
+    Command: string
+    DefaultReaderType: string
+    Version: string
+}
 
 type TypeMapping = 
     {

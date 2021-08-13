@@ -3,7 +3,7 @@
 open Tomlyn
 open Tomlyn.Model
 open Tomlyn.Syntax
-open Schema
+open Domain
 
 type TomlTable with
     member this.TryGetTable(name: string) =
