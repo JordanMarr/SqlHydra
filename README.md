@@ -377,6 +377,14 @@ let! customerAddresses =
     |> ctx.ReadAsync HydraReader.Read
 ```
 
+Special `where` filter operators:
+- `isIn` or `|=|`
+- `isNotIn` or `|<>|`
+- `like` or `=%`
+- `notLike` or `<>%`
+- `isNullValue`
+- `isNotNullValue`
+
 ### Insert Builder
 
 ```F#
