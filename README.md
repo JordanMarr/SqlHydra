@@ -292,6 +292,7 @@ let getCustomersWithAddresses(conn: IDbConnection) =
 
 ## SqlHydra.Query [![NuGet version (SqlHydra.Query)](https://img.shields.io/nuget/v/SqlHydra.Query.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Query/)
 SqlHydra.Query wraps the powerful [SqlKata](https://sqlkata.com/) query generator with F# computation expression builders for strongly typed query generation.
+It can create queries for the database dialects: SQL Server, SQLite, PostgreSql, MySql, Oracle, Firebird.
 SqlHydra.Query can be used with any library that accepts a data reader; however, is designed pair well with SqlHydra generated records and readers! 
 
 ### Setup
