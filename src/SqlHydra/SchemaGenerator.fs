@@ -569,7 +569,10 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
         """
             let hydra = HydraReader(reader)
 
-            let isPrimitive (t: System.Type) = t.IsPrimitive || t = typedefof<string>
+            let isPrimitive (t: System.Type) = 
+                t.IsPrimitive || t = typedefof<string> || t = typedefof<System.Guid> || 
+                t = typedefof<decimal> || t = typedefof<System.DateTime> || t = typedefof<System.DateTimeOffset>
+
             let getOrdinalAndIncrement() = 
                 let ordinal = hydra.AccFieldCount
                 hydra.AccFieldCount <- hydra.AccFieldCount + 1
