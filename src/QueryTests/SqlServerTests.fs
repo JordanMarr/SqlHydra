@@ -20,7 +20,7 @@ let errorLogTable =         table<dbo.ErrorLog>
 let openContext() = 
     let compiler = SqlKata.Compilers.SqlServerCompiler()
     let conn = openConnection()
-    new Context(conn, compiler)
+    new QueryContext(conn, compiler)
 
 [<Test>]
 let ``Where Like``() = 

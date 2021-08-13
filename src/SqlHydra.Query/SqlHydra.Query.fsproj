@@ -12,7 +12,7 @@
   <ItemGroup>
     <Compile Include="LinqExpressionVisitors.fs" />
     <Compile Include="KataBuilders.fs" />
-    <Compile Include="Context.fs" />
+    <Compile Include="QueryContext.fs" />
     <Compile Include="Extensions.fs" />
   </ItemGroup>
 

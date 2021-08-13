@@ -8,7 +8,7 @@ open System.Linq.Expressions
 open SqlKata
 
 /// Represents a typed SqlKata query.
-type Query<'T>(query: SqlKata.Query) =
+type TypedQuery<'T>(query: SqlKata.Query) =
     member this.Query = query
 
 [<AutoOpen>]
@@ -295,7 +295,7 @@ type SelectExpressionBuilder<'Output>() =
     /// Unwraps the query
     member this.Run (state: QuerySource<'T>) =
         let query = state |> getQueryOrDefault
-        Query<'T>(query)
+        TypedQuery<'T>(query)
 
 type DeleteExpressionBuilder<'T>() =
 
@@ -329,9 +329,9 @@ type DeleteExpressionBuilder<'T>() =
     /// Unwraps the query
     member this.Run (state: QuerySource<'T>) =
         let query  = state |> getQueryOrDefault
-        Query<'T>(query.AsDelete())
+        TypedQuery<'T>(query.AsDelete())
 
-type InsertQuery<'T> = 
+type InsertQuerySpec<'T> = 
     {
         Table: string
         Entity: 'T option
@@ -343,13 +343,13 @@ type InsertExpressionBuilder<'T>() =
 
     let getQueryOrDefault (state: QuerySource<'Result>) =
         match state with
-        | :? QuerySource<'Result, InsertQuery<'T>> as qs -> qs.Query
-        | _ -> InsertQuery.Default
+        | :? QuerySource<'Result, InsertQuerySpec<'T>> as qs -> qs.Query
+        | _ -> InsertQuerySpec.Default
 
     member this.For (state: QuerySource<'T>, f: 'T -> QuerySource<'T>) =
         let tbl = state.GetOuterTableMapping()
         let query = state |> getQueryOrDefault
-        QuerySource<'T, InsertQuery<'T>>(
+        QuerySource<'T, InsertQuerySpec<'T>>(
             { query with Table = match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name }
             , state.TableMappings)
 
@@ -358,24 +358,18 @@ type InsertExpressionBuilder<'T>() =
     member this.Into (state: QuerySource<'T>, table: QuerySource<'T>) =
         let tbl = table.GetOuterTableMapping()
         let query = state |> getQueryOrDefault
-        QuerySource<'T, InsertQuery<'T>>(
+        QuerySource<'T, InsertQuerySpec<'T>>(
             { query with Table = match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name }
             , state.TableMappings)
 
     member this.Yield _ =
         QuerySource<'T>(Map.empty)
 
-    ///// Sets multiple values for INSERT
-    //[<CustomOperation("values", MaintainsVariableSpace = true)>]
-    //member this.Value (state:QuerySource<'T>, values: 'T seq) = 
-    //    let query = state |> getQueryOrDefault
-    //    QuerySource<'T, Query>(query.AsInsert(values, returnId = false), state.TableMappings)
-
     /// Sets the single value for INSERT
     [<CustomOperation("entity", MaintainsVariableSpace = true)>]
     member this.Entity (state:QuerySource<'T>, value: 'T) = 
         let query = state |> getQueryOrDefault
-        QuerySource<'T, InsertQuery<'T>>(
+        QuerySource<'T, InsertQuerySpec<'T>>(
             { query with Entity = value |> Some}
             , state.TableMappings)
 
@@ -384,7 +378,7 @@ type InsertExpressionBuilder<'T>() =
     member this.IncludeColumn (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
         let prop = (propertySelector |> LinqExpressionVisitors.visitPropertySelector<'T, 'Prop>).Name
-        QuerySource<'T, InsertQuery<'T>>({ query with Fields = query.Fields @ [ prop ] }, state.TableMappings)
+        QuerySource<'T, InsertQuerySpec<'T>>({ query with Fields = query.Fields @ [ prop ] }, state.TableMappings)
 
     /// Excludes a column from the insert query.
     [<CustomOperation("excludeColumn", MaintainsVariableSpace = true)>]
@@ -398,13 +392,13 @@ type InsertExpressionBuilder<'T>() =
                 | fields -> fields
             |> List.filter (fun f -> f <> prop.Name)
             |> (fun x -> { query with Fields = x })
-        QuerySource<'T, InsertQuery<'T>>(newQuery, state.TableMappings)
+        QuerySource<'T, InsertQuerySpec<'T>>(newQuery, state.TableMappings)
 
     /// Unwraps the query
     member this.Run (state: QuerySource<'T>) =
         state |> getQueryOrDefault
 
-type UpdateQuery<'T> = 
+type UpdateQuerySpec<'T> = 
     {
         Table: string
         Entity: 'T option
@@ -420,13 +414,13 @@ type UpdateExpressionBuilder<'T>() =
     
     let getQueryOrDefault (state: QuerySource<'Result>) =
         match state with
-        | :? QuerySource<'Result, UpdateQuery<'T>> as qs -> qs.Query
-        | _ -> UpdateQuery.Default
+        | :? QuerySource<'Result, UpdateQuerySpec<'T>> as qs -> qs.Query
+        | _ -> UpdateQuerySpec.Default
 
     member this.For (state: QuerySource<'T>, f: 'T -> QuerySource<'T>) =
         let tbl = state.GetOuterTableMapping()
         let query = state |> getQueryOrDefault
-        QuerySource<'T, UpdateQuery<'T>>(
+        QuerySource<'T, UpdateQuerySpec<'T>>(
             { query with Table = match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name }
             , state.TableMappings)
 
@@ -437,7 +431,7 @@ type UpdateExpressionBuilder<'T>() =
     [<CustomOperation("entity", MaintainsVariableSpace = true)>]
     member this.Entity (state: QuerySource<'T>, value: 'T) = 
         let query = state |> getQueryOrDefault
-        QuerySource<'T, UpdateQuery<'T>>(
+        QuerySource<'T, UpdateQuerySpec<'T>>(
             { query with Entity = value |> Some}
             , state.TableMappings)
 
@@ -446,7 +440,7 @@ type UpdateExpressionBuilder<'T>() =
     member this.Set (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector: Expression<Func<'T, 'Prop>>, value: 'Prop) = 
         let query = state |> getQueryOrDefault
         let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector :?> Reflection.PropertyInfo
-        QuerySource<'T, UpdateQuery<'T>>(
+        QuerySource<'T, UpdateQuerySpec<'T>>(
             { query with SetValues = query.SetValues @ [ prop.Name, box value ] }
             , state.TableMappings)
 
@@ -455,7 +449,7 @@ type UpdateExpressionBuilder<'T>() =
     member this.IncludeColumn (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
         let prop = (propertySelector |> LinqExpressionVisitors.visitPropertySelector<'T, 'Prop>).Name
-        QuerySource<'T, UpdateQuery<'T>>({ query with Fields = query.Fields @ [ prop ] }, state.TableMappings)
+        QuerySource<'T, UpdateQuerySpec<'T>>({ query with Fields = query.Fields @ [ prop ] }, state.TableMappings)
 
     /// Excludes a column from the insert query.
     [<CustomOperation("excludeColumn", MaintainsVariableSpace = true)>]
@@ -469,20 +463,20 @@ type UpdateExpressionBuilder<'T>() =
                 | fields -> fields
             |> List.filter (fun f -> f <> prop.Name)
             |> (fun x -> { query with Fields = x })
-        QuerySource<'T, UpdateQuery<'T>>(newQuery, state.TableMappings)
+        QuerySource<'T, UpdateQuerySpec<'T>>(newQuery, state.TableMappings)
 
     /// Sets the WHERE condition
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
     member this.Where (state: QuerySource<'T>, [<ProjectionParameter>] whereExpression) = 
         let query = state |> getQueryOrDefault
         let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (fullyQualifyColumn state.TableMappings)
-        QuerySource<'T, UpdateQuery<'T>>({ query with Where = Some where }, state.TableMappings)
+        QuerySource<'T, UpdateQuerySpec<'T>>({ query with Where = Some where }, state.TableMappings)
 
     /// A safeguard that verifies that all records in the table should be updated.
     [<CustomOperation("updateAll", MaintainsVariableSpace = true)>]
     member this.UpdateAll (state:QuerySource<'T>) = 
         let query = state |> getQueryOrDefault
-        QuerySource<'T, UpdateQuery<'T>>({ query with UpdateAll = true }, state.TableMappings)
+        QuerySource<'T, UpdateQuerySpec<'T>>({ query with UpdateAll = true }, state.TableMappings)
 
     /// Unwraps the query
     member this.Run (state: QuerySource<'T>) =

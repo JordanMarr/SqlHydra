@@ -9,7 +9,7 @@ open SqlKata
 open System.Data.Common
 open FSharp.Control.Tasks.V2
 
-let toSql<'T> (query: Query<'T>) = 
+let toSql<'T> (query: TypedQuery<'T>) = 
     let compiler = SqlKata.Compilers.SqlServerCompiler()
     compiler.Compile(query.Query).Sql
 
@@ -20,7 +20,7 @@ let openConnection() =
     conn.Open()
     conn
 
-let get<'T>(query: Query<'T>) = 
+let get<'T>(query: TypedQuery<'T>) = 
     let compiler = SqlKata.Compilers.SqlServerCompiler()
     use connection = getConnection()
     use db = new QueryFactory(connection, compiler)
