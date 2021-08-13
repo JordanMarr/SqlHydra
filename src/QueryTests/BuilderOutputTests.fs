@@ -225,25 +225,32 @@ let ``Multi Compiler Test``() =
     |> Seq.map (fun (nm, compiler) -> nm, compiler.Compile(query.Query).Sql)
     |> Seq.iter (fun (nm, sql) -> printfn "%s:\n%s" nm sql)
 
-let toSql (compiler: SqlKata.Compilers.Compiler) (query: TypedQuery<'T>) =
-    let compiledQuery = compiler.Compile(query.Query)
-    compiledQuery.NamedBindings
-    |> Seq.fold (fun (sql: string) binding -> 
-        sql.Replace(binding.Key, binding.Value |> string)
-    ) compiledQuery.Sql
-
 [<Test>]
 let ``Build Query with Embedded Parameters``() =
     let compiler = new SqlKata.Compilers.SqlServerCompiler()
+    
+    let scripts = 
+        [
+            update {
+                for e in table<dbo.ErrorLog> do
+                set e.ErrorMessage "Unauthorized"
+                where (e.ErrorNumber = 401)
+            }
+            |> Kata.ToKataQuery
+            |> Kata.toEmbeddedSql compiler
 
-    let sql = 
-        select {
-            for c in customerTable do
-            join ca in customerAddressTable on (c.CustomerID = ca.CustomerID)
-            join a  in addressTable on (ca.AddressID = a.AddressID)
-            where (isIn c.CustomerID [30018;29545;29954;29897;29503;29559])
-            orderBy c.CustomerID
-        }
-        |> toSql compiler
+            update {
+                for e in table<dbo.ErrorLog> do
+                set e.ErrorMessage "Resource Not Found"
+                where (e.ErrorNumber = 404)
+            }
+            |> Kata.ToKataQuery
+            |> Kata.toEmbeddedSql compiler
 
-    printfn "SQL %s" sql
+            "UPDATE ErrorLog SET ErrorMessage = 'Internal Error' WHERE ErrorNumber = 500"
+        ]
+
+    scripts |> List.iter (printfn "script: \n%s\n")
+    
+
+

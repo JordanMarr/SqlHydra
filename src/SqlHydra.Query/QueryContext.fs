@@ -8,18 +8,6 @@ open KataBuilders
 /// Contains methods that compile and read a query.
 type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
 
-    let boxValue (value: obj) = 
-        if isNull value then 
-            box System.DBNull.Value
-        else
-            match value.GetType() with
-            | t when t.IsGenericType && t.Name.StartsWith("FSharpOption") -> 
-                t.GetProperty("Value").GetValue(value)
-            | _ -> value
-            |> function 
-                | null -> box System.DBNull.Value 
-                | o -> o
-
     interface System.IDisposable with
         member this.Dispose() = 
             conn.Dispose()
@@ -97,34 +85,9 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             return entities |> List.tryHead
         }
 
-    member private this.BuildInsertCommand (returnId: bool, query: InsertQuerySpec<'T>) = 
-        let kata = 
-            let kvps = 
-                match query.Entity with
-                | Some entity -> 
-                    match query.Fields with 
-                    | [] -> 
-                        FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
-                        |> Array.map (fun p -> p.Name, p.GetValue(entity))
-                        
-                    | fields -> 
-                        let included = fields |> Set.ofList
-                        FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
-                        |> Array.filter (fun p -> included.Contains(p.Name)) 
-                        |> Array.map (fun p -> p.Name, p.GetValue(entity))
-                | None -> 
-                    failwith "Value not set"
-
-            // Handle option values
-            let preparedKvps = 
-                kvps 
-                |> Seq.map (fun (key,value) -> key, boxValue value)
-                |> dict
-                |> Seq.map id
-
-            Query(query.Table).AsInsert(preparedKvps, returnId = returnId)
-
-        let compiledQuery = compiler.Compile kata
+    member private this.BuildInsertCommand (returnId: bool, insertQuerySpec: InsertQuerySpec<'T>) = 
+        let kataQuery = KataUtils.fromInsert returnId insertQuerySpec
+        let compiledQuery = compiler.Compile kataQuery
         this.BuildCommand(compiledQuery)
 
     member this.Insert (query: InsertQuerySpec<'T>) = 
@@ -146,40 +109,8 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         return System.Convert.ChangeType(identity, typeof<'Identity>) :?> 'Identity
     }
     
-    member private this.BuildUpdateCommand (updateQuery: UpdateQuerySpec<'T>) = 
-        let kata = 
-            let kvps = 
-                match updateQuery.Entity, updateQuery.SetValues with
-                | Some entity, [] -> 
-                    match updateQuery.Fields with 
-                    | [] -> 
-                        FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
-                        |> Array.map (fun p -> p.Name, p.GetValue(entity))
-                        
-                    | fields -> 
-                        let included = fields |> Set.ofList
-                        FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
-                        |> Array.filter (fun p -> included.Contains(p.Name)) 
-                        |> Array.map (fun p -> p.Name, p.GetValue(entity))
-
-                | Some _, _ -> failwith "Cannot have both `entity` and `set` operations in an `update` expression."
-                | None, [] -> failwith "Either an `entity` or `set` operations must be present in an `update` expression."
-                | None, setValues -> setValues |> List.toArray
-                    
-            // Handle option values
-            let preparedKvps = 
-                kvps 
-                |> Seq.map (fun (key,value) -> key, boxValue value)
-                |> dict
-                |> Seq.map id
-
-            let q = Query(updateQuery.Table).AsUpdate(preparedKvps)
-
-            // Apply `where` clause
-            match updateQuery.Where with
-            | Some where -> q.Where(fun w -> where)
-            | None -> q
-
+    member private this.BuildUpdateCommand (updateQuerySpec: UpdateQuerySpec<'T>) = 
+        let kata = KataUtils.fromUpdate updateQuerySpec
         let compiledQuery = compiler.Compile kata
         this.BuildCommand(compiledQuery)
 
@@ -191,11 +122,11 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         use cmd = this.BuildUpdateCommand(query)
         cmd.ExecuteNonQueryAsync()
 
-    member this.Delete (query: TypedQuery<'Entity>) = 
+    member this.Delete (query: TypedQuery<'T>) = 
         use cmd = this.BuildCommand(query.Query)
         cmd.ExecuteNonQuery()
 
-    member this.DeleteAsync (query: TypedQuery<'Entity>) = 
+    member this.DeleteAsync (query: TypedQuery<'T>) = 
         use cmd = this.BuildCommand(query.Query)
         cmd.ExecuteNonQueryAsync()
 

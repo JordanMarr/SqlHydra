@@ -18,6 +18,7 @@
     </None>
     <Compile Include="LinqExpressionVisitors.fs" />
     <Compile Include="KataBuilders.fs" />
+    <Compile Include="Kata.fs" />
     <Compile Include="QueryContext.fs" />
     <Compile Include="Extensions.fs" />
   </ItemGroup>
@@ -26,7 +27,5 @@
     <PackageReference Include="SqlKata" Version="2.3.7" />
     <PackageReference Include="TaskBuilder.fs" Version="2.1.0" />
   </ItemGroup>
-
-  <ItemGroup />
 
 </Project>
