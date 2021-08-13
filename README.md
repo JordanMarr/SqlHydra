@@ -222,19 +222,21 @@ If you want to use a different ADO.NET provider, you can override the generated 
 | [readers]  | Optional | This optional section contains settings that apply to the data readers feature. |
 | reader_type | Required | Generates data readers for each table. You can optionally override the default ADO.NET IDataReader type. Ex: "System.Data.SqlClient.SqlDataReader"
 
-## Recommended 3rd Party Data Library?
+## Recommended Data Library?
 
-The answer is: it depends on how you like to design your data access code!
-
+* SqlHydra.Query is made to complement SqlHydra.* generated types and data readers.
+* Or you can use any [ADO.NET](#adonet) library that returns an `IDataReader` with the SqlHydra generated readers.* 
 * If you like to meticulously craft your SQL by hand, then [Donald](#donald) with the SqlHydra generated `HydraReader` pairs very well together.
-* Alternatively, you can use any [ADO.NET](#adonet) library that returns an `IDataReader` with the SqlHydra generated readers.
 * If you want to use only the generated types, then [Dapper.FSharp](#dapperfsharp) is a great fit since Dapper uses reflection out of the box to transform `IDataReader` query results into your generated entity records.
 
-### Donald
-[Examples of using SqlHydra generated records and data readers with Donald](https://github.com/JordanMarr/SqlHydra/blob/main/src/SampleApp/DonaldExample.fs).
+### SqlHydra.Query
+[Examples of using SqlHydra generated records and data readers with SqlHydra.Query](#sqlhydraquery-).
 
 ### ADO.NET
 [Examples of using SqlHydra generated records and data readers with ADO.NET](https://github.com/JordanMarr/SqlHydra/blob/main/src/SampleApp/ReaderExample.fs).
+
+### Donald
+[Examples of using SqlHydra generated records and data readers with Donald](https://github.com/JordanMarr/SqlHydra/blob/main/src/SampleApp/DonaldExample.fs).
 
 ### Dapper.FSharp
 [Examples of using SqlHydra generated records with Dapper.FSharp](https://github.com/JordanMarr/SqlHydra/blob/main/src/SampleApp/DapperFSharpExample.fs).
@@ -246,9 +248,9 @@ Ideally, I wanted to find a library with
 
 [FSharp.Dapper](https://github.com/Dzoukr/Dapper.FSharp) met the first critera with flying colors. 
 As the name suggests, Dapper.FSharp was written specifically for F# with simplicity and ease-of-use as the driving design priorities.
-FSharp.Dapper features custom F# Computation Expressions for selecting, inserting, updating and deleting, and support for F# Option types and records (no need for `[<CLIMutable>]` attributes!).
+FSharp.Dapper features custom F# Computation Expressions for selecting, inserting, updating and deleting, and support for F# Option types and records.
 
-If only it had Linq queries, it would be the _perfect_ complement to SqlHydra...
+If only it had Linq queries, it would be the perfect complement to SqlHydra...
 
 So I submitted a [PR](https://github.com/Dzoukr/Dapper.FSharp/pull/26) to Dapper.FSharp that adds Linq query expressions (now in v2.0+)!
 
@@ -273,7 +275,8 @@ let getAddressesForCity(conn: IDbConnection) (city: string) =
     select {
         for a in addressTable do
         where (a.City = city)
-    } |> conn.SelectAsync<SalesLT.Address>
+    } 
+    |> conn.SelectAsync<SalesLT.Address>
     
 let getCustomersWithAddresses(conn: IDbConnection) =
     select {
@@ -282,10 +285,10 @@ let getCustomersWithAddresses(conn: IDbConnection) =
         leftJoin a  in addressTable on (ca.AddressID = a.AddressID)
         where (isIn c.CustomerID [30018;29545;29954;29897;29503;29559])
         orderBy c.CustomerID
-    } |> conn.SelectAsyncOption<Customer, CustomerAddress, Address>
+    } 
+    |> conn.SelectAsyncOption<Customer, CustomerAddress, Address>
 
 ```
-
 
 ## SqlHydra.Query [![NuGet version (SqlHydra.Query)](https://img.shields.io/nuget/v/SqlHydra.Query.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Query/)
 SqlHydra.Query wraps the powerful [SqlKata](https://sqlkata.com/) query generator with F# computation expression builders for strongly typed query generation.
