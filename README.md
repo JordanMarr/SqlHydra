@@ -371,3 +371,72 @@ let! customerAddresses =
     }
     |> ctx.ReadAsync HydraReader.Read
 ```
+
+### Insert Builder
+
+```F#
+let errorLog = 
+    {
+        dbo.ErrorLog.ErrorLogID = 0 // Exclude
+        dbo.ErrorLog.ErrorTime = System.DateTime.Now
+        dbo.ErrorLog.ErrorLine = None
+        dbo.ErrorLog.ErrorMessage = "TEST"
+        dbo.ErrorLog.ErrorNumber = 400
+        dbo.ErrorLog.ErrorProcedure = (Some "Procedure 400")
+        dbo.ErrorLog.ErrorSeverity = None
+        dbo.ErrorLog.ErrorState = None
+        dbo.ErrorLog.UserName = "jmarr"
+    }
+
+let result : int = 
+    insert {
+        for e in errorLogTable do
+        entity errorLog
+        excludeColumn e.ErrorLogID
+    }
+    |> ctx.InsertGetId
+
+printfn "Identity: %i" result
+```
+
+### Update Builder
+
+Update individual fields:
+```F#
+let result = 
+    update {
+        for e in errorLogTable do
+        set e.ErrorNumber 123
+        set e.ErrorMessage "ERROR #123"
+        set e.ErrorLine (Some 999)
+        set e.ErrorProcedure None
+        where (e.ErrorLogID = 1)
+    }
+    |> ctx.Update
+```
+
+Update an entity with fields excluded/included:
+```F#
+let result = 
+    update {
+        for e in errorLogTable do
+        entity errorLog
+        excludeColumn e.ErrorLogID
+        where (e.ErrorLogID = errorLog.ErrorLogID)
+    }
+    |> ctx.Update
+
+```
+
+### Delete Builder
+
+```F#
+let result = 
+    delete {
+        for e in errorLogTable do
+        where (e.ErrorLogID = 5)
+    }
+    |> ctx.Delete
+
+printfn "result: %i" result
+```
