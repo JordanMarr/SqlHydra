@@ -224,3 +224,26 @@ let ``Multi Compiler Test``() =
     ]
     |> Seq.map (fun (nm, compiler) -> nm, compiler.Compile(query.Query).Sql)
     |> Seq.iter (fun (nm, sql) -> printfn "%s:\n%s" nm sql)
+
+let toSql (compiler: SqlKata.Compilers.Compiler) (query: TypedQuery<'T>) =
+    let compiledQuery = compiler.Compile(query.Query)
+    compiledQuery.NamedBindings
+    |> Seq.fold (fun (sql: string) binding -> 
+        sql.Replace(binding.Key, binding.Value |> string)
+    ) compiledQuery.Sql
+
+[<Test>]
+let ``Build Query with Embedded Parameters``() =
+    let compiler = new SqlKata.Compilers.SqlServerCompiler()
+
+    let sql = 
+        select {
+            for c in customerTable do
+            join ca in customerAddressTable on (c.CustomerID = ca.CustomerID)
+            join a  in addressTable on (ca.AddressID = a.AddressID)
+            where (isIn c.CustomerID [30018;29545;29954;29897;29503;29559])
+            orderBy c.CustomerID
+        }
+        |> toSql compiler
+
+    printfn "SQL %s" sql
