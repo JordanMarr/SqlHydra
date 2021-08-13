@@ -262,30 +262,30 @@ let ``DeleteAsync Test``() = task {
     printfn "result: %i" result
 }
 
+let stubbedErrorLog = 
+    {
+        dbo.ErrorLog.ErrorLogID = 0 // Exclude
+        dbo.ErrorLog.ErrorTime = System.DateTime.Now
+        dbo.ErrorLog.ErrorLine = None
+        dbo.ErrorLog.ErrorMessage = "TEST INSERT ASYNC"
+        dbo.ErrorLog.ErrorNumber = 400
+        dbo.ErrorLog.ErrorProcedure = (Some "Procedure 400")
+        dbo.ErrorLog.ErrorSeverity = None
+        dbo.ErrorLog.ErrorState = None
+        dbo.ErrorLog.UserName = "jmarr"
+    }
+
 [<Test>]
 let ``Distinct Test``() = task {
     use ctx = openContext()
 
     ctx.BeginTransaction()
 
-    let errorLog = 
-        {
-            dbo.ErrorLog.ErrorLogID = 0 // Exclude
-            dbo.ErrorLog.ErrorTime = System.DateTime.Now
-            dbo.ErrorLog.ErrorLine = None
-            dbo.ErrorLog.ErrorMessage = "TEST INSERT ASYNC"
-            dbo.ErrorLog.ErrorNumber = 400
-            dbo.ErrorLog.ErrorProcedure = (Some "Procedure 400")
-            dbo.ErrorLog.ErrorSeverity = None
-            dbo.ErrorLog.ErrorState = None
-            dbo.ErrorLog.UserName = "jmarr"
-        }
-
     for i in [0..2] do
         let! result = 
             insert {
                 for e in errorLogTable do
-                entity errorLog
+                entity stubbedErrorLog
                 excludeColumn e.ErrorLogID
             }
             |> ctx.InsertGetIdAsync
@@ -314,6 +314,34 @@ let ``Distinct Test``() = task {
     printfn $"results: {results}; distinctResults: {distinctResults}"
 
     Assert.Greater(results.Length, distinctResults.Length, "`results` should be > `distinctResults`")
+
+    ctx.RollbackTransaction()
+}
+
+[<Test>]
+let ``Count Test``() = task {
+    use ctx = openContext()
+    ctx.BeginTransaction()
+
+    for i in [0..2] do
+        let! result = 
+            insert {
+                for e in errorLogTable do
+                entity stubbedErrorLog
+                excludeColumn e.ErrorLogID
+            }
+            |> ctx.InsertGetIdAsync
+        ()
+
+    let! count = 
+        select {
+            for e in errorLogTable do
+            count
+        }
+        |> ctx.CountAsync
+
+    printfn "Count: %i" count
+    Assert.Positive count
 
     ctx.RollbackTransaction()
 }
