@@ -336,8 +336,8 @@ let cities =
 
 ```
 
-**An important note about select:**
-SqlHydra.Query `select` operations currently only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
+**Important:**
+SqlHydra.Query `select` operation currently only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
 Transformations (i.e. `.ToString()` or calling any functions is _not supported_ and will throw an exception.
 
 Select `Address` entities where City starts with `S%`:
