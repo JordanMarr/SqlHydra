@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module SqlHydra.Katas.Extensions
+module SqlHydra.Query.Extensions
 
 open System.Data
 

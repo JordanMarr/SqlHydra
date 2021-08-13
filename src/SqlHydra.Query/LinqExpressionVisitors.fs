@@ -1,4 +1,4 @@
-﻿module internal SqlHydra.Katas.LinqExpressionVisitors
+﻿module internal SqlHydra.Query.LinqExpressionVisitors
 
 open System
 open System.Linq.Expressions

@@ -1,6 +1,6 @@
 ﻿module SqlServerTests
 
-open SqlHydra.Katas
+open SqlHydra.Query
 open SqlUtils
 open AdventureWorks
 open System.Data.SqlClient

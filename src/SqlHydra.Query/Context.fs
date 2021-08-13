@@ -1,9 +1,9 @@
-﻿namespace SqlHydra.Katas
+﻿namespace SqlHydra.Query
 
 open System.Data.Common
 open FSharp.Control.Tasks.V2
 open SqlKata
-open Builders
+open KataBuilders
 
 /// Contains methods that compile and read a query.
 type Context(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =

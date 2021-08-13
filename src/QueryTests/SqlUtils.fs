@@ -1,6 +1,6 @@
 ﻿module SqlUtils
 
-open SqlHydra.Katas
+open SqlHydra.Query
 open System.Data
 open System.Data.SqlClient
 open SqlKata.Execution

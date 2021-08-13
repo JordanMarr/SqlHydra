@@ -1,6 +1,6 @@
-﻿/// LINQ query builders
+﻿/// LINQ builders for SqlKata.Query
 [<AutoOpen>]
-module SqlHydra.Katas.Builders
+module SqlHydra.Query.KataBuilders
 
 open System
 open System.Collections.Generic
