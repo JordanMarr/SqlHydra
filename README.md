@@ -334,12 +334,13 @@ let cities =
     }
     |> ctx.Read HydraReader.Read
     |> List.map (fun (city, state) -> $"City, State: %s{city}, %s{state}")
-
 ```
 
 **Important:**
-SqlHydra.Query `select` operation currently only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
+:exclamation: SqlHydra.Query `select` clause currently only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
 Transformations (i.e. `.ToString()` or calling any functions is _not supported_ and will throw an exception.
+
+:exclamation: SqlHydra.Query `where` statements will automatically parameterize your input values. _However_, similar to the `select` clause, the `where` clause does not support calling an transformations (i.e. `.ToString()`). So you must prepare any parameter transformations before the builder. 
 
 Select `Address` entities where City starts with `S%`:
 ```F#
