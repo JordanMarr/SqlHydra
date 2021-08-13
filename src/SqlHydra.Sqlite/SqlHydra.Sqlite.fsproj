@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
-    <Version>0.100.0</Version>
+    <Version>0.200.0</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.Sqlite is a dotnet tool that generates F# records for a SQLite database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -11,7 +11,7 @@
     <ToolCommandName>sqlhydra-sqlite</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-    <PackageReleaseNotes>0.100.0 - Breaking change: ReadIfNotNull method now requires no column arg if a PK exists.</PackageReleaseNotes>
+    <PackageReleaseNotes>0.200.0 - `HydraReader.Read` static method updated to work with the new SqlHydra.Query package.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

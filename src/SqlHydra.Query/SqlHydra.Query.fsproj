@@ -4,12 +4,18 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <WarnOn>3390;$(WarnOn)</WarnOn>
-    <Version>0.1.0</Version>
-    <Description>SqlHydra.Katas is a set of F# query builders powered by SqlKata.</Description>
+    <Version>0.200.0-alpha1</Version>
+    <Description>SqlHydra.Query is a set of F# SqlKata.Query builders.</Description>
     <Authors>Jordan Marr</Authors>
+    <PackageTags>fsharp orm sql query sqlkata</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
     <Compile Include="LinqExpressionVisitors.fs" />
     <Compile Include="KataBuilders.fs" />
     <Compile Include="QueryContext.fs" />
@@ -20,5 +26,7 @@
     <PackageReference Include="SqlKata" Version="2.3.7" />
     <PackageReference Include="TaskBuilder.fs" Version="2.1.0" />
   </ItemGroup>
+
+  <ItemGroup />
 
 </Project>
