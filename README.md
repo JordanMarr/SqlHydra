@@ -337,6 +337,7 @@ let cities =
 ```
 
 **Important:**
+
 :exclamation: SqlHydra.Query `select` clause currently only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
 Transformations (i.e. `.ToString()` or calling any functions is _not supported_ and will throw an exception.
 
