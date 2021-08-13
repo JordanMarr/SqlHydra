@@ -596,13 +596,12 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
 
             // Return a fn that will hydrate 'T (which may be a tuple or a single primitive)
             // This fn will be called once per each record returned by the data reader.
-            let t = typedefof<'T>
-            if t.Name.StartsWith "Tuple" then
-                let readEntityFns = t.GenericTypeArguments |> Array.map buildEntityReadFn
+            let t = typeof<'T>
+            if FSharp.Reflection.FSharpType.IsTuple(t) then
+                let readEntityFns = FSharp.Reflection.FSharpType.GetTupleElements(t) |> Array.map buildEntityReadFn
                 fun () ->
                     let entities = readEntityFns |> Array.map (fun read -> read())
-                    let tuple = Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(entities, t)
-                    tuple :?> 'T
+                    Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(entities, t) :?> 'T
             else
                 let readEntityFn = t |> buildEntityReadFn
                 fun () -> 

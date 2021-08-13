@@ -108,11 +108,11 @@ let ``Customers inner join Addresses``() = task {
 
     let! customersWithAddresses = 
         query 
-        //|> ctx.HydrateAsync HydraReader.Read
-        |> ctx.ReadAsync (fun reader -> 
-            let hydra = HydraReader(reader)
-            fun () -> hydra.Customer.Read(), hydra.Address.Read()
-        )
+        |> ctx.ReadAsync HydraReader.Read
+        //|> ctx.ReadAsync (fun reader -> 
+        //    let hydra = HydraReader(reader)
+        //    fun () -> hydra.Customer.Read(), hydra.Address.Read()
+        //)
 
     printfn "Results: %A" customersWithAddresses
 }
