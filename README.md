@@ -29,6 +29,15 @@ dotnet sqlhydra-mssql
 
 * The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
 * If a configuration file already exists, it will just run that config.
+* 💡 If you want to re-gen on each build, you can add it to your .fsproj PreBuild or PostBuild event:
+```bat
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="dotnet sqlhydra-mssql" />
+  </Target>
+```
+
+![hydra-console](https://user-images.githubusercontent.com/1030435/127790303-a69ca6ea-f0a7-4216-aa5d-c292b0dc3229.gif)
+
 
 ## SqlHydra.Sqlite [![NuGet version (SqlHydra.Sqlite)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Sqlite/)
 
@@ -47,9 +56,12 @@ dotnet sqlhydra-sqlite
 
 * The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
 * If a configuration file already exists, it will just run that config.
-
-![hydra-console](https://user-images.githubusercontent.com/1030435/127790303-a69ca6ea-f0a7-4216-aa5d-c292b0dc3229.gif)
-
+* 💡 If you want to re-gen on each build, you can add it to your .fsproj PreBuild or PostBuild event:
+```bat
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="dotnet sqlhydra-sqlite" />
+  </Target>
+```
 
 ## Example Output for AdventureWorks
 ```F#
