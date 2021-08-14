@@ -25,5 +25,9 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.3" />
     <PackageReference Include="TaskBuilder.fs" Version="2.1.0" />
   </ItemGroup>
+    
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="sqlhydra-mssql.bat" />
+  </Target>
 
 </Project>
