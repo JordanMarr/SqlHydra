@@ -19,17 +19,21 @@ Run the following commands from your project directory:
 1) `dotnet new tool-manifest`
 2) `dotnet tool install SqlHydra.SqlServer`
 
-### Configure / Run
+### Configure and Run
 
-Run the tool from the command line (or add to a .bat/.sh file):
+Run the tool from the command line (or add to a .bat|.cmd|.sh file):
 
 ```bat
 dotnet sqlhydra-mssql
 ```
 
 * The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
-* If a configuration file already exists, it will just run that config.
-* 💡 If you want to re-gen on each build, you can add it to your .fsproj PreBuild or PostBuild event:
+* If a .toml configuration file already exists, it will run.
+
+### PreBuild Event (optional)
+If you want to regenerate on each build, you can run SqlHydra from your .fsproj PreBuild event. 
+
+💥 NOTE that this may fail if your build is running on a CI/CD pipeline where the build server does not have access to your database. In that case, you might choose to stick with manually regenerating, or adding an env variable to detect if it is running on your build server. However, it works well if you are running a local db like SQLite.
 ```bat
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="dotnet sqlhydra-mssql" />
@@ -48,20 +52,25 @@ Run the following commands from your project directory:
 
 ### Configure / Run
 
-Run the tool from the command line (or add to a .bat/.sh file):
+Run the tool from the command line (or add to a .bat|.cmd|.sh file):
 
 ```bat
 dotnet sqlhydra-sqlite
 ```
 
 * The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
-* If a configuration file already exists, it will just run that config.
-* 💡 If you want to re-gen on each build, you can add it to your .fsproj PreBuild or PostBuild event:
+* If a .toml configuration file already exists, it will run.
+
+### PreBuild Event (optional)
+If you want to regenerate on each build, you can run SqlHydra from your .fsproj PreBuild event. 
+
+💥 NOTE that this may fail if your build is running on a CI/CD pipeline where the build server does not have access to your database. In that case, you might choose to stick with manually regenerating, or adding an env variable to detect if it is running on your build server. However, it works well if you are running a local db like SQLite.
 ```bat
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="dotnet sqlhydra-sqlite" />
   </Target>
 ```
+
 
 ## Example Output for AdventureWorks
 ```F#
