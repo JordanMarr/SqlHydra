@@ -1,6 +1,5 @@
 ﻿namespace SqlHydra.Query
 
-open System
 open SqlKata
 
 module internal KataUtils = 
@@ -80,7 +79,7 @@ module internal KataUtils =
         Query(insertQuery.Table).AsInsert(preparedKvps, returnId = returnId)
 
 type Kata = 
-    static member ToKataQuery (typedQuery: TypedQuery<'T>) = KataUtils.fromTypedQuery typedQuery
-    static member ToKataQuery (updateQuery: UpdateQuerySpec<'T>) = KataUtils.fromUpdate updateQuery
-    static member ToKataQuery (insertQuery: InsertQuerySpec<'T>) = KataUtils.fromInsert false insertQuery
+    static member ToQuery (typedQuery: TypedQuery<'T>) = KataUtils.fromTypedQuery typedQuery
+    static member ToQuery (updateQuery: UpdateQuerySpec<'T>) = KataUtils.fromUpdate updateQuery
+    static member ToQuery (insertQuery: InsertQuerySpec<'T>) = KataUtils.fromInsert false insertQuery
     

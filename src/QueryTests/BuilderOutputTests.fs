@@ -249,21 +249,21 @@ let ``Build Kata Queries``() =
                     into table<dbo.ErrorLog>
                     entity record
                 }
-                |> Kata.ToKataQuery
+                |> Kata.ToQuery
 
             update {
                 for e in table<dbo.ErrorLog> do
                 set e.ErrorMessage "Unauthorized"
                 where (e.ErrorNumber = 401)
             }
-            |> Kata.ToKataQuery
+            |> Kata.ToQuery
 
             update {
                 for e in table<dbo.ErrorLog> do
                 set e.ErrorMessage "Resource Not Found"
                 where (e.ErrorNumber = 404)
             }
-            |> Kata.ToKataQuery
+            |> Kata.ToQuery
         ]
 
     kataQueries 
