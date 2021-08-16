@@ -45,7 +45,7 @@ let ``Where City Starts With S``() =
             where (a.City =% "S%")
         }
         |> ctx.Read HydraReader.Read
-        |> List.map (fun address -> $"City: {address.City}, {address.StateProvince}")
+        |> Seq.map (fun address -> $"City: {address.City}, {address.StateProvince}")
 
     printfn "Results: %A" cities
 
@@ -66,7 +66,7 @@ let ``Customers left join Addresses``() = task {
     query |> toSql |> printfn "%s"
 
     let! customersWithAddresses = query |> ctx.ReadAsync HydraReader.Read
-    printfn "Record Count: %i" customersWithAddresses.Length
+    printfn "Record Count: %i" (customersWithAddresses |> Seq.length)
 
     customersWithAddresses
     |> printfn "Results: %A"
@@ -313,7 +313,7 @@ let ``Distinct Test``() = task {
 
     printfn $"results: {results}; distinctResults: {distinctResults}"
 
-    Assert.Greater(results.Length, distinctResults.Length, "`results` should be > `distinctResults`")
+    Assert.Greater(results |> Seq.length, distinctResults |> Seq.length, "`results` should be > `distinctResults`")
 
     ctx.RollbackTransaction()
 }

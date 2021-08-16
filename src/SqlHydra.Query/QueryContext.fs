@@ -59,17 +59,20 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         use cmd = this.BuildCommand(query.Query)
         use reader = cmd.ExecuteReader() :?> 'Reader
         let read = getReaders reader
-        [ while reader.Read() do
-            read() ]
+        seq [| 
+            while reader.Read() do
+                read() 
+        |] 
 
     member this.ReadOne<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: TypedQuery<'Entity>) =
-        this.Read getReaders query |> List.tryHead
+        this.Read getReaders query |> Seq.tryHead
 
-    member this.GetReaderAsync<'T, 'Reader when 'Reader :> DbDataReader> (query: TypedQuery<'T>) = task {
-        use cmd = this.BuildCommand(query.Query)
-        let! reader = cmd.ExecuteReaderAsync()
-        return reader :?> 'Reader
-    }
+    member this.GetReaderAsync<'T, 'Reader when 'Reader :> DbDataReader> (query: TypedQuery<'T>) = 
+        task {
+            use cmd = this.BuildCommand(query.Query)
+            let! reader = cmd.ExecuteReaderAsync()
+            return reader :?> 'Reader
+        }
 
     member this.ReadAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: TypedQuery<'Entity>) = 
         task {
@@ -77,14 +80,16 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             use! reader = cmd.ExecuteReaderAsync()
             let read = getReaders (reader :?> 'Reader)
             return
-                [ while reader.Read() do
-                    read() ]
+                seq [| 
+                    while reader.Read() do
+                        read() 
+                |]
         }
 
     member this.ReadOneAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: TypedQuery<'Entity>) = 
         task {
             let! entities = this.ReadAsync getReaders query
-            return entities |> List.tryHead
+            return entities |> Seq.tryHead
         }
 
     member private this.BuildInsertCommand (returnId: bool, insertQuerySpec: InsertQuerySpec<'T>) = 
@@ -111,17 +116,12 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         return System.Convert.ChangeType(identity, typeof<'Identity>) :?> 'Identity
     }
     
-    member private this.BuildUpdateCommand (updateQuerySpec: UpdateQuerySpec<'T>) = 
-        let kata = KataUtils.fromUpdate updateQuerySpec
-        let compiledQuery = compiler.Compile kata
-        this.BuildCommand(compiledQuery)
-
     member this.Update (query: UpdateQuerySpec<'T>) = 
-        use cmd = this.BuildUpdateCommand(query)
+        use cmd = query |> KataUtils.fromUpdate |> compiler.Compile |> this.BuildCommand
         cmd.ExecuteNonQuery()
 
     member this.UpdateAsync (query: UpdateQuerySpec<'T>) = 
-        use cmd = this.BuildUpdateCommand(query)
+        use cmd = query |> KataUtils.fromUpdate |> compiler.Compile |> this.BuildCommand
         cmd.ExecuteNonQueryAsync()
 
     member this.Delete (query: TypedQuery<'T>) = 
