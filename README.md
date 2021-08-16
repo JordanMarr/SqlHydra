@@ -357,6 +357,25 @@ let cities =
     |> List.map (fun (city, state) -> $"City, State: %s{city}, %s{state}")
 ```
 
+### Read / ReadAsync
+:boom: The generated `HydraReader.Read` method currently expects tables to have a primary key defined; otherwise, an "Invalid entity" exception will be thrown. This limitation will be improved in an upcoming release. Until then, a work around for tables with no primary key is to manually read the entries:
+
+```F#
+use ctx = openContext()
+
+let cities =
+    select {
+        for a in addressTable do
+        where (a.City = "Seattle")
+        select a
+    }
+    |> ctx.Read (fun reader ->
+        let hydra = HydraReader(reader)
+        // This function will be called once per each record returned by the reader
+        fun () -> reader.Address.Read()
+    )
+```
+
 ### Select Clause ###
 
 :boom: The `select` clause currently only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
