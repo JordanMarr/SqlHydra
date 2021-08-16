@@ -4,12 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <WarnOn>3390;$(WarnOn)</WarnOn>
-    <Version>0.200.1</Version>
+    <Version>0.201.0</Version>
     <Description>SqlHydra.Query is an F# query builder powered by SqlKata.Query that supports Sql Server, MySql, PostgreSql, Oracle and Firebird.</Description>
     <Authors>Jordan Marr</Authors>
     <PackageTags>F# fsharp data database orm sql</PackageTags>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReleaseNotes>v0.200.1: Added `Kata.ToQuery` helpers to extract SqlKata.Query from select|insert|update|delete builders.</PackageReleaseNotes>
+    <PackageReleaseNotes>v0.201.0: BREAKING: Read and ReadAsync now return a seq instead of a list. Exposed Compiler and BuildCommand members on QueryContext.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
