@@ -15,6 +15,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             this.Transaction <- None
 
     member this.Connection = conn
+    member this.Compiler = compiler
 
     member val Transaction : DbTransaction option = None with get,set
 
@@ -34,7 +35,8 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
     member private this.TrySetTransaction(cmd: DbCommand) =
         this.Transaction |> Option.iter (fun t -> cmd.Transaction <- t)
 
-    member private this.BuildCommand(compiledQuery: SqlResult) =        
+    /// Builds a DbCommand with CommandText and Parameters from a SqlKata compiled query.
+    member this.BuildCommand(compiledQuery: SqlResult) =        
         let cmd = conn.CreateCommand()
         cmd |> this.TrySetTransaction
         cmd.CommandText <- compiledQuery.Sql
