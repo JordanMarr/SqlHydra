@@ -108,7 +108,9 @@ module dbo =
             match entity, isOption with
             | "ErrorLog", false -> __.ErrorLog.Read >> box
             | "ErrorLog", true -> __.ErrorLog.ReadIfNotNull >> box
-            | _ -> failwith $"Invalid entity: {entity}"
+            | "BuildVersion", false -> __.BuildVersion.Read >> box
+            | "BuildVersion", true -> failwith "Could not read type 'BuildVersion option' because no primary key exists."
+            | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
         static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
             let hydra = HydraReader(reader)
@@ -704,13 +706,21 @@ module SalesLT =
             | "ProductCategory", true -> __.ProductCategory.ReadIfNotNull >> box
             | "ProductDescription", false -> __.ProductDescription.Read >> box
             | "ProductDescription", true -> __.ProductDescription.ReadIfNotNull >> box
+            | "ProductModel", false -> failwith "Could not read type 'ProductModel' because not all column types are supported by SqlHydra.SqlServer."
+            | "ProductModel", true -> failwith "Could not read type 'ProductModel option' because not all column types are supported by SqlHydra.SqlServer."
             | "ProductModelProductDescription", false -> __.ProductModelProductDescription.Read >> box
             | "ProductModelProductDescription", true -> __.ProductModelProductDescription.ReadIfNotNull >> box
             | "SalesOrderDetail", false -> __.SalesOrderDetail.Read >> box
             | "SalesOrderDetail", true -> __.SalesOrderDetail.ReadIfNotNull >> box
             | "SalesOrderHeader", false -> __.SalesOrderHeader.Read >> box
             | "SalesOrderHeader", true -> __.SalesOrderHeader.ReadIfNotNull >> box
-            | _ -> failwith $"Invalid entity: {entity}"
+            | "vProductAndDescription", false -> __.vProductAndDescription.Read >> box
+            | "vProductAndDescription", true -> failwith "Could not read type 'vProductAndDescription option' because no primary key exists."
+            | "vProductModelCatalogDescription", false -> __.vProductModelCatalogDescription.Read >> box
+            | "vProductModelCatalogDescription", true -> failwith "Could not read type 'vProductModelCatalogDescription option' because no primary key exists."
+            | "vGetAllCategories", false -> __.vGetAllCategories.Read >> box
+            | "vGetAllCategories", true -> failwith "Could not read type 'vGetAllCategories option' because no primary key exists."
+            | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
         static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
             let hydra = HydraReader(reader)

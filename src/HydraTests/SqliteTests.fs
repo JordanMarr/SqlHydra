@@ -22,7 +22,7 @@ let ``Print Schema``() =
 
 let getCode cfg = 
     SqliteSchemaProvider.getSchema cfg
-    |> SchemaGenerator.generateModule cfg
+    |> SchemaGenerator.generateModule cfg SqlHydra.Sqlite.Program.app
     |> SchemaGenerator.toFormattedCode cfg SqlHydra.Sqlite.Program.app
 
 let inCode (str: string) cfg = 

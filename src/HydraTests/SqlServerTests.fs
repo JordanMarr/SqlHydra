@@ -21,7 +21,7 @@ let ``Print Schema``() =
 
 let getCode cfg = 
     SqlServerSchemaProvider.getSchema cfg
-    |> SchemaGenerator.generateModule cfg
+    |> SchemaGenerator.generateModule cfg SqlHydra.SqlServer.Program.app
     |> SchemaGenerator.toFormattedCode cfg SqlHydra.SqlServer.Program.app
 
 let inCode (str: string) cfg = 

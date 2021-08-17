@@ -8,6 +8,9 @@ open System.Data
 
 let range0 = Range.range.Zero
 
+type SynExpr with
+    static member FailWith msg = SynExpr.CreateApp(SynExpr.Ident(Ident.Create("failwith")), SynExpr.CreateConstString(msg))
+
 /// Generates a CLIMutable attribute.
 let cliMutableAttribute = 
     let attr =
@@ -230,7 +233,7 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
     SynModuleDecl.Types([ readerClass ], range0)
 
 /// Creates a "HydraReader" class with properties for each table in a given schema.
-let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) = 
+let createHydraReaderClass (rdrCfg: ReadersConfig) (app: AppInfo) (tbls: Table seq) = 
     let classId = Ident.CreateLong("HydraReader")
     let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, range0)
 
@@ -355,34 +358,45 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
                             SynExpr.CreateIdent(Ident.Create("isOption"))
                         ]), 
                         [
-                            // Only match tables where all column types have a ReaderMethod specified;
-                            // otherwise, the record will be partially initialized and break the build.
-                            // Also ensure that a PK exists.
-                            let validTables = 
-                                tbls 
-                                |> Seq.filter(fun tbl -> 
-                                    tbl.Columns |> Array.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome) &&
-                                    tbl.Columns |> Array.exists(fun c -> c.IsPK)
-                                )
-                                
-                            for tbl in validTables do
+                            for tbl in tbls do
+                                let canReadAllColumns = tbl.Columns |> Array.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome)
+                                let hasPK = tbl.Columns |> Array.exists(fun c -> c.IsPK)
+
                                 SynMatchClause.Clause(
-                                    SynPat.Tuple(false, [ SynPat.Const(SynConst.String(tbl.Name, range0), range0); SynPat.Const(SynConst.Bool(false), range0) ], range0)
+                                    SynPat.Tuple(false, [ 
+                                        SynPat.Const(SynConst.String(tbl.Name, range0), range0)
+                                        SynPat.Const(SynConst.Bool(false), range0) 
+                                    ], range0)
                                     , None
-                                    , SynExpr.CreateAppInfix(
-                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; tbl.Name; "Read" ]), None), 
-                                        SynExpr.CreateIdent(Ident.Create(">> box"))
-                                    )
+                                    , 
+                                    if canReadAllColumns then
+                                        SynExpr.CreateAppInfix(
+                                            SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; tbl.Name; "Read" ]), None), 
+                                            SynExpr.CreateIdent(Ident.Create(">> box"))
+                                        )
+                                    else
+                                        SynExpr.FailWith($"Could not read type '{tbl.Name}' because not all column types are supported by {app.Name}.")
                                     , range0
                                     , DebugPointForTarget.No
                                 )
+                                
                                 SynMatchClause.Clause(
-                                    SynPat.Tuple(false, [ SynPat.Const(SynConst.String(tbl.Name, range0), range0); SynPat.Const(SynConst.Bool(true), range0) ], range0)
+                                    SynPat.Tuple(false, [ 
+                                        SynPat.Const(SynConst.String(tbl.Name, range0), range0)
+                                        SynPat.Const(SynConst.Bool(true), range0) 
+                                    ], range0)
                                     , None
-                                    , SynExpr.CreateAppInfix(
-                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; tbl.Name; "ReadIfNotNull" ]), None), 
-                                        SynExpr.CreateIdent(Ident.Create(">> box"))
-                                    )
+                                    ,
+                                    match canReadAllColumns, hasPK with
+                                    | true, true -> 
+                                        SynExpr.CreateAppInfix(
+                                            SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; tbl.Name; "ReadIfNotNull" ]), None), 
+                                            SynExpr.CreateIdent(Ident.Create(">> box"))
+                                        )
+                                    | false, _ ->
+                                        SynExpr.FailWith($"Could not read type '{tbl.Name} option' because not all column types are supported by {app.Name}.")
+                                    | _, false -> 
+                                        SynExpr.FailWith($"Could not read type '{tbl.Name} option' because no primary key exists.")
                                     , range0
                                     , DebugPointForTarget.No
                                 )
@@ -394,8 +408,9 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
                                 , SynExpr.CreateApp(
                                     SynExpr.Ident(Ident.Create("failwith"))
                                     , SynExpr.InterpolatedString([
-                                        SynInterpolatedStringPart.String("Invalid entity: ", range0)
+                                        SynInterpolatedStringPart.String("Could not read type '", range0)
                                         SynInterpolatedStringPart.FillExpr(SynExpr.Ident(Ident.Create("entity")), None)
+                                        SynInterpolatedStringPart.String("' because no generated reader exists.", range0)
                                     ]
                                     , range0)
                                 )
@@ -469,7 +484,7 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (tbls: Table seq) =
     SynModuleDecl.Types([ readerClass ], range0)
 
 /// Generates the outer module and table records.
-let generateModule (cfg: Config) (db: Schema) = 
+let generateModule (cfg: Config) (app: AppInfo) (db: Schema) = 
     let schemas = db.Tables |> Array.map (fun t -> t.Schema) |> Array.distinct
     
     let nestedSchemaModules = 
@@ -494,7 +509,7 @@ let generateModule (cfg: Config) (db: Schema) =
 
                     // Create "HydraReader" below all generated tables/readers...
                     if cfg.Readers.IsSome then
-                        createHydraReaderClass cfg.Readers.Value tables
+                        createHydraReaderClass cfg.Readers.Value app tables
                 ]
 
             SynModuleDecl.CreateNestedModule(schemaNestedModule, tableRecordDeclarations)

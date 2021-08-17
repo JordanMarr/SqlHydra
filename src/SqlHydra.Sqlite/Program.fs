@@ -19,7 +19,7 @@ let main argv =
 
     let formattedCode = 
         SqliteSchemaProvider.getSchema cfg
-        |> SchemaGenerator.generateModule cfg
+        |> SchemaGenerator.generateModule cfg app
         |> SchemaGenerator.toFormattedCode cfg app
 
     System.IO.File.WriteAllText(cfg.OutputFile, formattedCode)
