@@ -357,15 +357,6 @@ let cities =
     |> List.map (fun (city, state) -> $"City, State: %s{city}, %s{state}")
 ```
 
-### Select Clause ###
-
-:boom: The `select` clause currently only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
-Transformations (i.e. `.ToString()` or calling any functions is _not supported_ and will throw an exception.
-
-### Where Clause ###
-
-:boom: The `where` clause will automatically parameterize your input values. _However_, similar to the `select` clause, the `where` clause does not support calling an transformations (i.e. `.ToString()`). So you must prepare any parameter transformations before the builder. 
-
 Select `Address` entities where City starts with `S%`:
 ```F#
 let addresses =
@@ -410,7 +401,6 @@ Special `where` filter operators:
 - `isNullValue`
 - `isNotNullValue`
 
-
 ### Manually Read / ReadAsync
 
 The generated `HydraReader.Read` method can also be used to manually read entities. This may be necessary if a table has a column type that is unsupported by the SqlHydra.* code generator.
@@ -429,6 +419,39 @@ let cities =
         // This function will be called once per each record returned by the reader
         fun () -> reader.Address.Read()
     )
+```
+
+### Dos and Don'ts
+
+:boom: The `select` clause currently only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
+Transformations (i.e. `.ToString()` or calling any functions is _not supported_ and will throw an exception.
+
+:boom: The `where` clause will automatically parameterize your input values. _However_, similar to the `select` clause, the `where` clause does not support calling an transformations (i.e. `.ToString()`). So you must prepare any parameter transformations before the builder. 
+
+✔️ CORRECT:
+```F#
+let city = getCity() // DO prepare where parameters above and then pass into the where clause
+
+let cities =
+    select {
+        for a in addressTable do
+        where (a.City = city)
+        select (a.City, a.StateProvince)
+    }
+    |> ctx.Read HydraReader.Read
+    |> List.map (fun (city, state) -> $"City: %s{city}, State: %s{state}") // DO transforms after data is queried
+```
+
+❌ INCORRECT:
+```F#
+let cities =
+    select {
+        for a in addressTable do
+        where (a.City = getCity()) // DO NOT perform calculations or translations within the builder
+        select ("City: " + a.City, "State: " + a.StateProvince) // DO NOT perform translations within the builder 
+    }
+    |> ctx.Read HydraReader.Read
+    |> List.map (fun (city, state) -> $"%s{city}, %s{state}")
 ```
 
 ### Insert Builder
