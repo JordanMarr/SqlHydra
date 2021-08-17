@@ -357,25 +357,6 @@ let cities =
     |> List.map (fun (city, state) -> $"City, State: %s{city}, %s{state}")
 ```
 
-### Read / ReadAsync
-:boom: The generated `HydraReader.Read` method currently expects tables to have a primary key defined; otherwise, an "Invalid entity" exception will be thrown. This limitation will be improved in an upcoming release. Until then, a work around for tables with no primary key is to manually read the entries:
-
-```F#
-use ctx = openContext()
-
-let cities =
-    select {
-        for a in addressTable do
-        where (a.City = "Seattle")
-        select a
-    }
-    |> ctx.Read (fun reader ->
-        let hydra = HydraReader(reader)
-        // This function will be called once per each record returned by the reader
-        fun () -> reader.Address.Read()
-    )
-```
-
 ### Select Clause ###
 
 :boom: The `select` clause currently only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
@@ -428,6 +409,27 @@ Special `where` filter operators:
 - `notLike` or `<>%`
 - `isNullValue`
 - `isNotNullValue`
+
+
+### Manually Read / ReadAsync
+
+The generated `HydraReader.Read` method can also be used to manually read entities. This may be necessary if a table has a column type that is unsupported by the SqlHydra.* code generator.
+
+```F#
+use ctx = openContext()
+
+let cities =
+    select {
+        for a in addressTable do
+        where (a.City = "Seattle")
+        select a
+    }
+    |> ctx.Read (fun reader ->
+        let hydra = HydraReader(reader)
+        // This function will be called once per each record returned by the reader
+        fun () -> reader.Address.Read()
+    )
+```
 
 ### Insert Builder
 
