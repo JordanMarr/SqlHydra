@@ -77,6 +77,12 @@ let getConfig(app: AppInfo, argv: string array) =
     let tomlFilename = buildTomlFilename(app)
 
     match argv with 
+    //| [| "--init" |] -> 
+    //    AnsiConsole.MarkupLine("[yellow]Creating a new configuration...[/]")
+    //    let cfg = newConfigWizard(app)
+    //    saveConfig(tomlFilename, cfg)
+    //    cfg
+
     | [| |] ->
         match tryLoadConfig(tomlFilename) with
         | Valid cfg -> 
@@ -89,12 +95,6 @@ let getConfig(app: AppInfo, argv: string array) =
             let cfg = newConfigWizard(app)
             saveConfig(tomlFilename, cfg)
             cfg
-
-    | [| "--new" |] -> 
-        AnsiConsole.MarkupLine("[yellow]Creating a new configuration...[/]")
-        let cfg = newConfigWizard(app)
-        saveConfig(tomlFilename, cfg)
-        cfg
 
     | _ ->
         AnsiConsole.MarkupLine($"Invalid args: '{argv}'. Expected no args, or \"--new\".")

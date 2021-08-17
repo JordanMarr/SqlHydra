@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
-    <Version>0.200.1</Version>
+    <Version>0.201.0</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.SqlServer is a dotnet tool that generates F# records for a SQL Server database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -11,7 +11,7 @@
     <ToolCommandName>sqlhydra-mssql</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-    <PackageReleaseNotes>0.200.0 - `HydraReader.Read` static method updated to work with the new SqlHydra.Query package.</PackageReleaseNotes>
+    <PackageReleaseNotes>v0.201.0: Greatly improved `HydraReader.Read` generated error messages.</PackageReleaseNotes>
   </PropertyGroup>
   
   <ItemGroup>
