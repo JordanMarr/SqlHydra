@@ -30,10 +30,11 @@ dotnet sqlhydra-mssql
 * The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
 * If a .toml configuration file already exists, it will run.
 
-### Build Event (optional)
-To regenerate on each build, you can run SqlHydra from a .fsproj PreBuild or PostBuild event. 
+![hydra-console](https://user-images.githubusercontent.com/1030435/127790303-a69ca6ea-f0a7-4216-aa5d-c292b0dc3229.gif)
 
-💥 NOTE that this will fail if your build is running on a CI/CD pipeline where the build server does not have access to your database. In that case, you might choose to stick with manually regenerating, or adding an env variable to detect if it is running on your build server. 
+### Build Event (optional)
+
+To regenerate on each build, you can run SqlHydra from a .fsproj PreBuild or PostBuild event. 
 ```bat
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="dotnet sqlhydra-mssql" />
@@ -46,8 +47,6 @@ To regenerate on each build, you can run SqlHydra from a .fsproj PreBuild or Pos
     <Exec Command="dotnet sqlhydra-mssql" />
   </Target>
 ```
-
-![hydra-console](https://user-images.githubusercontent.com/1030435/127790303-a69ca6ea-f0a7-4216-aa5d-c292b0dc3229.gif)
 
 
 ## SqlHydra.Sqlite [![NuGet version (SqlHydra.Sqlite)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Sqlite/)
