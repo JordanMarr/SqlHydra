@@ -468,7 +468,7 @@ let cities =
 
 ### Insert Builder
 
-Insert with no Identity Field:
+For simple inserts with no identity column and no included/excluded columns, use the `into _` syntax:
 
 ```F#
 let person = 
@@ -481,15 +481,15 @@ let person =
 
 let result = 
     insert {
-        into errorLogTable
-        entity errorLog
+        into personTable
+        entity person
     }
     |> ctx.Insert
 
 printfn "Result: %i" result
 ```
 
-Insert with Identity:
+If you have an Identity column or if you want to specify columns to include/exclude, use the `for _ in _ do` syntax.
 
 ```F#
 
