@@ -30,12 +30,19 @@ dotnet sqlhydra-mssql
 * The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
 * If a .toml configuration file already exists, it will run.
 
-### PreBuild Event (optional)
-If you want to regenerate on each build, you can run SqlHydra from your .fsproj PreBuild event. 
+### Build Event (optional)
+To regenerate on each build, you can run SqlHydra from a .fsproj PreBuild or PostBuild event. 
 
-💥 NOTE that this may fail if your build is running on a CI/CD pipeline where the build server does not have access to your database. In that case, you might choose to stick with manually regenerating, or adding an env variable to detect if it is running on your build server. However, it works well if you are running a local db like SQLite.
+💥 NOTE that this will fail if your build is running on a CI/CD pipeline where the build server does not have access to your database. In that case, you might choose to stick with manually regenerating, or adding an env variable to detect if it is running on your build server. 
 ```bat
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="dotnet sqlhydra-mssql" />
+  </Target>
+```
+
+⭐ To regenerate only after a Rebuild:
+```bat
+  <Target Name="SqlHydra" BeforeTargets="Clean">
     <Exec Command="dotnet sqlhydra-mssql" />
   </Target>
 ```
@@ -61,12 +68,18 @@ dotnet sqlhydra-sqlite
 * The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
 * If a .toml configuration file already exists, it will run.
 
-### PreBuild Event (optional)
-If you want to regenerate on each build, you can run SqlHydra from your .fsproj PreBuild event. 
+### Build Event (optional)
+To regenerate on each build, you can run SqlHydra from a .fsproj PreBuild or PostBuild event. 
 
-💥 NOTE that this may fail if your build is running on a CI/CD pipeline where the build server does not have access to your database. In that case, you might choose to stick with manually regenerating, or adding an env variable to detect if it is running on your build server. However, it works well if you are running a local db like SQLite.
 ```bat
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="dotnet sqlhydra-sqlite" />
+  </Target>
+```
+
+⭐ To regenerate only after a Rebuild:
+```bat
+  <Target Name="SqlHydra" BeforeTargets="Clean">
     <Exec Command="dotnet sqlhydra-sqlite" />
   </Target>
 ```
