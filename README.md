@@ -468,10 +468,34 @@ let cities =
 
 ### Insert Builder
 
+Insert with no Identity Field:
+
 ```F#
+let person = 
+    {
+        dbo.Person.ID = Guid.NewGuid()
+        dbo.Person.FirstName = "Bojack"
+        dbo.Person.LastName = "Horseman"
+        dbo.Person.LastUpdated = DateTime.Now
+    }
+
+let result = 
+    insert {
+        into errorLogTable
+        entity errorLog
+    }
+    |> ctx.Insert
+
+printfn "Result: %i" result
+```
+
+Insert with Identity:
+
+```F#
+
 let errorLog = 
     {
-        dbo.ErrorLog.ErrorLogID = 0 // Exclude
+        dbo.ErrorLog.ErrorLogID = 0 // Identity column
         dbo.ErrorLog.ErrorTime = System.DateTime.Now
         dbo.ErrorLog.ErrorLine = None
         dbo.ErrorLog.ErrorMessage = "TEST"
@@ -482,15 +506,15 @@ let errorLog =
         dbo.ErrorLog.UserName = "jmarr"
     }
 
-let result : int = 
+let errorID : int = // Specify 'Identity output is of type int
     insert {
         for e in errorLogTable do
         entity errorLog
-        excludeColumn e.ErrorLogID
+        excludeColumn e.ErrorLogID // Exclude the identity field
     }
     |> ctx.InsertGetId
 
-printfn "Identity: %i" result
+printfn "ErrorID Identity: %i" errorID
 ```
 
 ### Update Builder
