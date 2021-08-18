@@ -379,6 +379,14 @@ let addresses =
     |> ctx.Read HydraReader.Read
 ```
 
+_Special `where` filter operators:_
+- `isIn` or `|=|`
+- `isNotIn` or `|<>|`
+- `like` or `=%`
+- `notLike` or `<>%`
+- `isNullValue` or `= None`
+- `isNotNullValue` or `<> None`
+
 Select top 10 `Product` entities with inner joined category name:
 ```F#
 let! productsWithCategory = 
@@ -392,6 +400,8 @@ let! productsWithCategory =
 ```
 
 Select `Customer` with left joined `Address` where `CustomerID` is in a list of values:
+(Note that left joined tables will be of type `'T option`, so you will need to use the `.Value` property to access join columns.)
+
 ```F#
 let! customerAddresses =
     select {
@@ -405,13 +415,27 @@ let! customerAddresses =
     |> ctx.ReadAsync HydraReader.Read
 ```
 
-Special `where` filter operators:
-- `isIn` or `|=|`
-- `isNotIn` or `|<>|`
-- `like` or `=%`
-- `notLike` or `<>%`
-- `isNullValue`
-- `isNotNullValue`
+Distinct Query:
+```F#
+let! distinctCustomerNames = 
+    select {
+        for c in customerTable do
+        select (c.FirstName, c.LastName)
+        distinct
+    }
+    |> ctx.ReadAsync HydraReader.Read
+```
+
+Count Query:
+```F#
+let! customersWithNoSalesPersonCount =
+    select {
+        for c in customerTable do
+        where (c.SalesPerson = None)
+        count
+    }
+    |> ctx.CountAsync
+```
 
 ### Manually Read / ReadAsync
 
