@@ -3,58 +3,60 @@
 open System.Data
 open SqlHydra.Domain
 
+let private r : System.Data.Common.DbDataReader = null
+
 (* 
     Column types with a "ReaderMethod" will have a DataReader property generated if readers are enabled.
 *)
 let typeMappingsByName =
     [ 
-        "smallint",         "int16",            DbType.Int16,       Some "GetInt16"
-        "int",              "int",              DbType.Int32,       Some "GetInt32"
-        "real",             "double",           DbType.Double,      Some "GetDouble"
-        "single",           "System.Single",    DbType.Single,      Some "GetDouble"
-        "float",            "double",           DbType.Double,      Some "GetDouble"
-        "double",           "double",           DbType.Double,      Some "GetDouble"
-        "money",            "decimal",          DbType.Decimal,     Some "GetDecimal"
-        "currency",         "decimal",          DbType.Decimal,     Some "GetDecimal"
-        "decimal",          "decimal",          DbType.Decimal,     Some "GetDecimal"
-        "numeric",          "decimal",          DbType.Decimal,     Some "GetDecimal"
-        "bit",              "bool",             DbType.Boolean,     Some "GetBoolean"
-        "yesno",            "bool",             DbType.Boolean,     Some "GetBoolean"
-        "logical",          "bool",             DbType.Boolean,     Some "GetBoolean"
-        "bool",             "bool",             DbType.Boolean,     Some "GetBoolean"
-        "boolean",          "bool",             DbType.Boolean,     Some "GetBoolean"
-        "tinyint",          "byte",             DbType.Byte,        Some "GetByte"
-        "integer",          "int64",            DbType.Int64,       Some "GetInt64"
-        "identity",         "int64",            DbType.Int64,       Some "GetInt64"
-        "integer identity", "int64",            DbType.Int64,       Some "GetInt64"
-        "counter",          "int64",            DbType.Int64,       Some "GetInt64"
-        "autoincrement",    "int64",            DbType.Int64,       Some "GetInt64"
-        "long",             "int64",            DbType.Int64,       Some "GetInt64"
-        "bigint",           "int64",            DbType.Int64,       Some "GetInt64"
-        "binary",           "byte[]",           DbType.Binary,      Some "GetValue"
-        "varbinary",        "byte[]",           DbType.Binary,      Some "GetValue"
-        "blob",             "byte[]",           DbType.Binary,      Some "GetValue"
-        "image",            "byte[]",           DbType.Binary,      Some "GetValue"
-        "general",          "byte[]",           DbType.Binary,      Some "GetValue"
-        "oleobject",        "byte[]",           DbType.Binary,      Some "GetValue"
-        "varchar",          "string",           DbType.String,      Some "GetString"
-        "nvarchar",         "string",           DbType.String,      Some "GetString"
-        "memo",             "string",           DbType.String,      Some "GetString"
-        "longtext",         "string",           DbType.String,      Some "GetString"
-        "note",             "string",           DbType.String,      Some "GetString"
-        "text",             "string",           DbType.String,      Some "GetString"
-        "ntext",            "string",           DbType.String,      Some "GetString"
-        "string",           "string",           DbType.String,      Some "GetString"
-        "char",             "string",           DbType.String,      Some "GetString"
-        "nchar",            "string",           DbType.String,      Some "GetString"
-        "xml",              "string",           DbType.Xml,         Some "GetString"
-        "datetime",         "System.DateTime",  DbType.DateTime,    Some "GetDateTime"
-        "smalldate",        "System.DateTime",  DbType.DateTime,    Some "GetDateTime" 
-        "timestamp",        "System.DateTime",  DbType.DateTime,    Some "GetDateTime" 
-        "date",             "System.DateTime",  DbType.DateTime,    Some "GetDateTime" 
-        "time",             "System.DateTime",  DbType.DateTime,    Some "GetDateTime" 
-        "uniqueidentifier", "System.Guid",      DbType.Guid,        Some "GetGuid"
-        "guid",             "System.Guid",      DbType.Guid,        Some "GetGuid" 
+        "smallint",         "int16",            DbType.Int16,       Some <| nameof r.GetInt16
+        "int",              "int",              DbType.Int32,       Some <| nameof r.GetInt32
+        "real",             "double",           DbType.Double,      Some <| nameof r.GetDouble
+        "single",           "System.Single",    DbType.Single,      Some <| nameof r.GetDouble
+        "float",            "double",           DbType.Double,      Some <| nameof r.GetDouble
+        "double",           "double",           DbType.Double,      Some <| nameof r.GetDouble
+        "money",            "decimal",          DbType.Decimal,     Some <| nameof r.GetDecimal
+        "currency",         "decimal",          DbType.Decimal,     Some <| nameof r.GetDecimal
+        "decimal",          "decimal",          DbType.Decimal,     Some <| nameof r.GetDecimal
+        "numeric",          "decimal",          DbType.Decimal,     Some <| nameof r.GetDecimal
+        "bit",              "bool",             DbType.Boolean,     Some <| nameof r.GetBoolean
+        "yesno",            "bool",             DbType.Boolean,     Some <| nameof r.GetBoolean
+        "logical",          "bool",             DbType.Boolean,     Some <| nameof r.GetBoolean
+        "bool",             "bool",             DbType.Boolean,     Some <| nameof r.GetBoolean
+        "boolean",          "bool",             DbType.Boolean,     Some <| nameof r.GetBoolean
+        "tinyint",          "byte",             DbType.Byte,        Some <| nameof r.GetByte
+        "integer",          "int64",            DbType.Int64,       Some <| nameof r.GetInt64
+        "identity",         "int64",            DbType.Int64,       Some <| nameof r.GetInt64
+        "integer identity", "int64",            DbType.Int64,       Some <| nameof r.GetInt64
+        "counter",          "int64",            DbType.Int64,       Some <| nameof r.GetInt64
+        "autoincrement",    "int64",            DbType.Int64,       Some <| nameof r.GetInt64
+        "long",             "int64",            DbType.Int64,       Some <| nameof r.GetInt64
+        "bigint",           "int64",            DbType.Int64,       Some <| nameof r.GetInt64
+        "binary",           "byte[]",           DbType.Binary,      Some <| nameof r.GetValue
+        "varbinary",        "byte[]",           DbType.Binary,      Some <| nameof r.GetValue
+        "blob",             "byte[]",           DbType.Binary,      Some <| nameof r.GetValue
+        "image",            "byte[]",           DbType.Binary,      Some <| nameof r.GetValue
+        "general",          "byte[]",           DbType.Binary,      Some <| nameof r.GetValue
+        "oleobject",        "byte[]",           DbType.Binary,      Some <| nameof r.GetValue
+        "varchar",          "string",           DbType.String,      Some <| nameof r.GetString
+        "nvarchar",         "string",           DbType.String,      Some <| nameof r.GetString
+        "memo",             "string",           DbType.String,      Some <| nameof r.GetString
+        "longtext",         "string",           DbType.String,      Some <| nameof r.GetString
+        "note",             "string",           DbType.String,      Some <| nameof r.GetString
+        "text",             "string",           DbType.String,      Some <| nameof r.GetString
+        "ntext",            "string",           DbType.String,      Some <| nameof r.GetString
+        "string",           "string",           DbType.String,      Some <| nameof r.GetString
+        "char",             "string",           DbType.String,      Some <| nameof r.GetString
+        "nchar",            "string",           DbType.String,      Some <| nameof r.GetString
+        "xml",              "string",           DbType.Xml,         Some <| nameof r.GetString
+        "datetime",         "System.DateTime",  DbType.DateTime,    Some <| nameof r.GetDateTime
+        "smalldate",        "System.DateTime",  DbType.DateTime,    Some <| nameof r.GetDateTime 
+        "timestamp",        "System.DateTime",  DbType.DateTime,    Some <| nameof r.GetDateTime 
+        "date",             "System.DateTime",  DbType.DateTime,    Some <| nameof r.GetDateTime 
+        "time",             "System.DateTime",  DbType.DateTime,    Some <| nameof r.GetDateTime 
+        "uniqueidentifier", "System.Guid",      DbType.Guid,        Some <| nameof r.GetGuid
+        "guid",             "System.Guid",      DbType.Guid,        Some <| nameof r.GetGuid 
     ]
     |> List.map (fun (columnTypeAlias, clrType, dbType, readerMethod) ->
         columnTypeAlias,

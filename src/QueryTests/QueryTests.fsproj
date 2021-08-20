@@ -28,8 +28,7 @@
     <ProjectReference Include="..\SqlHydra.Query\SqlHydra.Query.fsproj" />
   </ItemGroup>
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+  <Target Name="SqlHydra" BeforeTargets="Clean">
     <Exec Command="sqlhydra-mssql.bat" />
   </Target>
-
 </Project>
