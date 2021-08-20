@@ -30,17 +30,23 @@ dotnet sqlhydra-mssql
 * The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
 * If a .toml configuration file already exists, it will run.
 
-### PreBuild Event (optional)
-If you want to regenerate on each build, you can run SqlHydra from your .fsproj PreBuild event. 
+![hydra-console](https://user-images.githubusercontent.com/1030435/127790303-a69ca6ea-f0a7-4216-aa5d-c292b0dc3229.gif)
 
-💥 NOTE that this may fail if your build is running on a CI/CD pipeline where the build server does not have access to your database. In that case, you might choose to stick with manually regenerating, or adding an env variable to detect if it is running on your build server. However, it works well if you are running a local db like SQLite.
+### Build Event (optional)
+
+To regenerate on each build, you can run SqlHydra from a .fsproj PreBuild or PostBuild event. 
 ```bat
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="dotnet sqlhydra-mssql" />
   </Target>
 ```
 
-![hydra-console](https://user-images.githubusercontent.com/1030435/127790303-a69ca6ea-f0a7-4216-aa5d-c292b0dc3229.gif)
+⭐ To regenerate only after a Rebuild:
+```bat
+  <Target Name="SqlHydra" BeforeTargets="Clean">
+    <Exec Command="dotnet sqlhydra-mssql" />
+  </Target>
+```
 
 
 ## SqlHydra.Sqlite [![NuGet version (SqlHydra.Sqlite)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Sqlite/)
@@ -61,12 +67,18 @@ dotnet sqlhydra-sqlite
 * The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
 * If a .toml configuration file already exists, it will run.
 
-### PreBuild Event (optional)
-If you want to regenerate on each build, you can run SqlHydra from your .fsproj PreBuild event. 
+### Build Event (optional)
+To regenerate on each build, you can run SqlHydra from a .fsproj PreBuild or PostBuild event. 
 
-💥 NOTE that this may fail if your build is running on a CI/CD pipeline where the build server does not have access to your database. In that case, you might choose to stick with manually regenerating, or adding an env variable to detect if it is running on your build server. However, it works well if you are running a local db like SQLite.
 ```bat
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="dotnet sqlhydra-sqlite" />
+  </Target>
+```
+
+⭐ To regenerate only after a Rebuild:
+```bat
+  <Target Name="SqlHydra" BeforeTargets="Clean">
     <Exec Command="dotnet sqlhydra-sqlite" />
   </Target>
 ```
@@ -357,8 +369,77 @@ let cities =
     |> List.map (fun (city, state) -> $"City, State: %s{city}, %s{state}")
 ```
 
-### Read / ReadAsync
-:boom: The generated `HydraReader.Read` method currently expects tables to have a primary key defined; otherwise, an "Invalid entity" exception will be thrown. This limitation will be improved in an upcoming release. Until then, a work around for tables with no primary key is to manually read the entries:
+Select `Address` entities where City starts with `S%`:
+```F#
+let addresses =
+    select {
+        for a in addressTable do
+        where (a.City =% "S%")
+    }
+    |> ctx.Read HydraReader.Read
+```
+
+_Special `where` filter operators:_
+- `isIn` or `|=|`
+- `isNotIn` or `|<>|`
+- `like` or `=%`
+- `notLike` or `<>%`
+- `isNullValue` or `= None`
+- `isNotNullValue` or `<> None`
+
+Select top 10 `Product` entities with inner joined category name:
+```F#
+let! productsWithCategory = 
+    select {
+        for p in productTable do
+        join c in categoryTable on (p.ProductCategoryID.Value = c.ProductCategoryID)
+        select (p, c.Name)
+        take 10
+    }
+    |> ctx.ReadAsync HydraReader.Read
+```
+
+Select `Customer` with left joined `Address` where `CustomerID` is in a list of values:
+(Note that left joined tables will be of type `'T option`, so you will need to use the `.Value` property to access join columns.)
+
+```F#
+let! customerAddresses =
+    select {
+        for c in customerTable do
+        leftJoin ca in customerAddressTable on (c.CustomerID = ca.Value.CustomerID)
+        leftJoin a  in addressTable on (ca.Value.AddressID = a.Value.AddressID)
+        where (c.CustomerID |=| [1;2;30018;29545]) // two without address, two with address
+        orderBy c.CustomerID
+        select (c, a)
+    }
+    |> ctx.ReadAsync HydraReader.Read
+```
+
+Distinct Query:
+```F#
+let! distinctCustomerNames = 
+    select {
+        for c in customerTable do
+        select (c.FirstName, c.LastName)
+        distinct
+    }
+    |> ctx.ReadAsync HydraReader.Read
+```
+
+Count Query:
+```F#
+let! customersWithNoSalesPersonCount =
+    select {
+        for c in customerTable do
+        where (c.SalesPerson = None)
+        count
+    }
+    |> ctx.CountAsync
+```
+
+### Manually Read / ReadAsync
+
+The generated `HydraReader.Read` method can also be used to manually read entities. This may be necessary if a table has a column type that is unsupported by the SqlHydra.* code generator.
 
 ```F#
 use ctx = openContext()
@@ -376,65 +457,69 @@ let cities =
     )
 ```
 
-### Select Clause ###
+### Dos and Don'ts
 
 :boom: The `select` clause currently only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
 Transformations (i.e. `.ToString()` or calling any functions is _not supported_ and will throw an exception.
 
-### Where Clause ###
-
 :boom: The `where` clause will automatically parameterize your input values. _However_, similar to the `select` clause, the `where` clause does not support calling an transformations (i.e. `.ToString()`). So you must prepare any parameter transformations before the builder. 
 
-Select `Address` entities where City starts with `S%`:
+✔️ CORRECT:
 ```F#
-let addresses =
+let city = getCity() // DO prepare where parameters above and then pass into the where clause
+
+let cities =
     select {
         for a in addressTable do
-        where (a.City =% "S%")
+        where (a.City = city)
+        select (a.City, a.StateProvince)
     }
     |> ctx.Read HydraReader.Read
+    |> List.map (fun (city, state) -> $"City: %s{city}, State: %s{state}") // DO transforms after data is queried
 ```
 
-Select top 10 `Product` entities with inner joined category name:
+❌ INCORRECT:
 ```F#
-let! productsWithCategory = 
+let cities =
     select {
-        for p in productTable do
-        join c in categoryTable on (p.ProductCategoryID.Value = c.ProductCategoryID)
-        select (p, c.Name)
-        take 10
+        for a in addressTable do
+        where (a.City = getCity()) // DO NOT perform calculations or translations within the builder
+        select ("City: " + a.City, "State: " + a.StateProvince) // DO NOT perform translations within the builder 
     }
-    |> ctx.ReadAsync HydraReader.Read
+    |> ctx.Read HydraReader.Read
+    |> List.map (fun (city, state) -> $"%s{city}, %s{state}")
 ```
-
-Select `Customer` with left joined `Address` where `CustomerID` is in a list of values:
-```F#
-let! customerAddresses =
-    select {
-        for c in customerTable do
-        leftJoin ca in customerAddressTable on (c.CustomerID = ca.Value.CustomerID)
-        leftJoin a  in addressTable on (ca.Value.AddressID = a.Value.AddressID)
-        where (c.CustomerID |=| [1;2;30018;29545]) // two without address, two with address
-        orderBy c.CustomerID
-        select (c, a)
-    }
-    |> ctx.ReadAsync HydraReader.Read
-```
-
-Special `where` filter operators:
-- `isIn` or `|=|`
-- `isNotIn` or `|<>|`
-- `like` or `=%`
-- `notLike` or `<>%`
-- `isNullValue`
-- `isNotNullValue`
 
 ### Insert Builder
 
+For simple inserts with no identity column and no included/excluded columns, use the `into _` syntax:
+
 ```F#
+let person = 
+    {
+        dbo.Person.ID = Guid.NewGuid()
+        dbo.Person.FirstName = "Bojack"
+        dbo.Person.LastName = "Horseman"
+        dbo.Person.LastUpdated = DateTime.Now
+    }
+
+let result = 
+    insert {
+        into personTable
+        entity person
+    }
+    |> ctx.Insert
+
+printfn "Result: %i" result
+```
+
+If you have an Identity column or if you want to specify columns to include/exclude, use the `for _ in _ do` syntax.
+
+```F#
+
 let errorLog = 
     {
-        dbo.ErrorLog.ErrorLogID = 0 // Exclude
+        dbo.ErrorLog.ErrorLogID = 0 // Identity column
         dbo.ErrorLog.ErrorTime = System.DateTime.Now
         dbo.ErrorLog.ErrorLine = None
         dbo.ErrorLog.ErrorMessage = "TEST"
@@ -445,15 +530,15 @@ let errorLog =
         dbo.ErrorLog.UserName = "jmarr"
     }
 
-let result : int = 
+let errorID : int = // Specify 'Identity output is of type int
     insert {
         for e in errorLogTable do
         entity errorLog
-        excludeColumn e.ErrorLogID
+        excludeColumn e.ErrorLogID // Exclude the identity field
     }
     |> ctx.InsertGetId
 
-printfn "Identity: %i" result
+printfn "ErrorID Identity: %i" errorID
 ```
 
 ### Update Builder
