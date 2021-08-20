@@ -52,8 +52,15 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         this.BuildCommand(compiledQuery)
 
     member this.GetReader<'T, 'Reader when 'Reader :> DbDataReader> (query: TypedQuery<'T>) = 
-        use cmd = this.BuildCommand(query.Query)
+        let cmd = this.BuildCommand(query.Query) // do not dispose cmd
         cmd.ExecuteReader() :?> 'Reader
+
+    member this.GetReaderAsync<'T, 'Reader when 'Reader :> DbDataReader> (query: TypedQuery<'T>) = 
+        task {
+            let cmd = this.BuildCommand(query.Query) // do not dispose cmd
+            let! reader = cmd.ExecuteReaderAsync()
+            return reader :?> 'Reader
+        }
 
     member this.Read<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: TypedQuery<'Entity>) =
         use cmd = this.BuildCommand(query.Query)
@@ -66,13 +73,6 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
 
     member this.ReadOne<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: TypedQuery<'Entity>) =
         this.Read getReaders query |> Seq.tryHead
-
-    member this.GetReaderAsync<'T, 'Reader when 'Reader :> DbDataReader> (query: TypedQuery<'T>) = 
-        task {
-            use cmd = this.BuildCommand(query.Query)
-            let! reader = cmd.ExecuteReaderAsync()
-            return reader :?> 'Reader
-        }
 
     member this.ReadAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: TypedQuery<'Entity>) = 
         task {
