@@ -144,7 +144,7 @@ module SalesLT =
 The generated `HydraReader` class works in tandem with SqlHydra.Query for reading queried entities, but they can also be used on their own with any query provider that returns an IDataReader.
 
 * [Using HydraReader automatically with SqlHydra.Query](#sqlhydraquery-)
-* [Using HydraReader manually with other query libraries](SqlHydra/wiki/DataReaders)
+* [Using HydraReader manually with other query libraries](https://github.com/JordanMarr/SqlHydra/wiki/DataReaders)
 
 ## TOML Configuration Reference
 
