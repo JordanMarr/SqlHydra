@@ -8,7 +8,7 @@ let private r : System.Data.Common.DbDataReader = null
 (* 
     Column types with a "ReaderMethod" will have a DataReader property generated if readers are enabled.
 *)
-let typeMappingsByName =
+let typeMappings =
     [   // https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql-server-data-type-mappings
         "UNIQUEIDENTIFIER",     "System.Guid",                              DbType.Guid,                Some <| nameof r.GetGuid
         "BIT",                  "bool",                                     DbType.Boolean,             Some <| nameof r.GetBoolean
@@ -44,6 +44,9 @@ let typeMappingsByName =
         "GEOMETRY",             "Microsoft.SqlServer.Types.SqlGeometry",    DbType.Object,              None
         "HIERARCHYID",          "Microsoft.SqlServer.Types.SqlHierarchyId", DbType.Object,              None 
     ]
+
+let typeMappingsByName =
+    typeMappings
     |> List.map (fun (columnTypeAlias, clrType, dbType, readerMethod) ->
         columnTypeAlias,
         { 
@@ -59,3 +62,11 @@ let findTypeMapping (providerTypeName: string) =
     typeMappingsByName.TryFind (providerTypeName.ToUpper())
     |> Option.defaultWith (fun () -> failwithf "Column type not handled: %s" providerTypeName)
         
+let primitiveTypeReaders = 
+    typeMappings
+    |> List.choose(fun (_, clrType, _, readerMethod) ->
+        match readerMethod with
+        | Some rm -> Some { PrimitiveTypeReader.ClrType = clrType; PrimitiveTypeReader.ReaderMethod = rm }
+        | None -> None
+    )
+    |> List.distinctBy (fun ptr -> ptr.ClrType)

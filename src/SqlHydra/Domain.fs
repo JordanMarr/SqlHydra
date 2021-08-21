@@ -35,12 +35,20 @@ type Table =
         Schema: string
         Name: string
         Type: TableType
-        Columns: Column array
+        Columns: Column list
+    }
+
+type PrimitiveTypeReader =
+    {
+        ClrType: string
+        ReaderMethod: string
     }
 
 type Schema = 
     {
-        Tables: Table array
+        Tables: Table list
+        /// A distinct list of ClrTypes that have an associated data reader method. Ex: `"int", "GetInt32"`
+        PrimitiveTypeReaders: PrimitiveTypeReader seq
     }
 
 type ReadersConfig = 

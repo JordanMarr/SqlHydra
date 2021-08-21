@@ -8,7 +8,7 @@ let private r : System.Data.Common.DbDataReader = null
 (* 
     Column types with a "ReaderMethod" will have a DataReader property generated if readers are enabled.
 *)
-let typeMappingsByName =
+let typeMappings =
     [ 
         "smallint",         "int16",            DbType.Int16,       Some <| nameof r.GetInt16
         "int",              "int",              DbType.Int32,       Some <| nameof r.GetInt32
@@ -58,6 +58,9 @@ let typeMappingsByName =
         "uniqueidentifier", "System.Guid",      DbType.Guid,        Some <| nameof r.GetGuid
         "guid",             "System.Guid",      DbType.Guid,        Some <| nameof r.GetGuid 
     ]
+
+let typeMappingsByName =
+    typeMappings
     |> List.map (fun (columnTypeAlias, clrType, dbType, readerMethod) ->
         columnTypeAlias,
         { 
@@ -73,3 +76,11 @@ let findTypeMapping (providerTypeName: string) =
     typeMappingsByName.TryFind(providerTypeName.ToLower().Trim())
     |> Option.defaultWith (fun () -> failwithf "Column type not handled: %s" providerTypeName)
 
+let primitiveTypeReaders = 
+    typeMappings
+    |> List.choose(fun (_, clrType, _, readerMethod) ->
+        match readerMethod with
+        | Some rm -> Some { PrimitiveTypeReader.ClrType = clrType; PrimitiveTypeReader.ReaderMethod = rm }
+        | None -> None
+    )
+    |> List.distinctBy (fun ptr -> ptr.ClrType)

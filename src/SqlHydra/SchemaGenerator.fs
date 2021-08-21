@@ -30,7 +30,7 @@ let createTableRecord (tbl: Table) =
     
     let recordDef =
         tbl.Columns
-        |> Array.map (fun col -> 
+        |> List.map (fun col -> 
             let field = 
                 if col.TypeMapping.ClrType = "byte[]" then 
                     let b = SynType.Create("byte")
@@ -44,7 +44,6 @@ let createTableRecord (tbl: Table) =
             else 
                 SynFieldRcd.Create(Ident.Create(col.Name), field)
         )
-        |> Array.toList
         |> SynTypeDefnSimpleReprRecordRcd.Create
         |> SynTypeDefnSimpleReprRcd.Record
         
@@ -63,7 +62,6 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
 
     let readerProperties =
         tbl.Columns
-        |> Array.toList
         // Only create reader properties for columns that have a ReaderMethod specified
         |> List.choose (fun col -> 
             match col.TypeMapping.ReaderMethod with
@@ -118,11 +116,10 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
                 Expr = 
                     SynExpr.CreateRecord (
                         tbl.Columns
-                        |> Array.map (fun col -> 
+                        |> List.map (fun col -> 
                             RecordFieldName(LongIdentWithDots.CreateString(col.Name), false)
                             , SynExpr.CreateInstanceMethodCall(LongIdentWithDots.Create([ "__"; col.Name; "Read" ])) |> Some
                         )
-                        |> Array.toList
                     )
             }
         )
@@ -131,7 +128,7 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
     let readIfNotNullMethod = 
 
         // Try to get the first PK...
-        let firstPK = tbl.Columns |> Array.tryFind (fun c -> c.IsPK) |> Option.map (fun c -> c.Name)
+        let firstPK = tbl.Columns |> List.tryFind (fun c -> c.IsPK) |> Option.map (fun c -> c.Name)
 
         SynMemberDefn.CreateMember(            
             { SynBindingRcd.Let with 
@@ -216,7 +213,7 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
 
             // Generate Read method only if all column types have a ReaderMethod specified;
             // otherwise, the record will be partially initialized and break the build.
-            if tbl.Columns |> Array.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome) then 
+            if tbl.Columns |> List.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome) then 
                 readMethod 
                 readIfNotNullMethod
         ]
@@ -233,7 +230,7 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
     SynModuleDecl.Types([ readerClass ], range0)
 
 /// Creates a "HydraReader" class with properties for each table in a given schema.
-let createHydraReaderClass (rdrCfg: ReadersConfig) (app: AppInfo) (tbls: Table seq) = 
+let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (tbls: Table seq) = 
     let classId = Ident.CreateLong("HydraReader")
     let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, range0)
 
@@ -359,8 +356,8 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (app: AppInfo) (tbls: Table s
                         ]), 
                         [
                             for tbl in tbls do
-                                let canReadAllColumns = tbl.Columns |> Array.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome)
-                                let hasPK = tbl.Columns |> Array.exists(fun c -> c.IsPK)
+                                let canReadAllColumns = tbl.Columns |> List.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome)
+                                let hasPK = tbl.Columns |> List.exists(fun c -> c.IsPK)
 
                                 SynMatchClause.Clause(
                                     SynPat.Tuple(false, [ 
@@ -455,9 +452,86 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (app: AppInfo) (tbls: Table s
                         , None
                     )
                 Expr = SynExpr.Ident(Ident.Create("// ReadMethodBodyPlaceholder"))
-                    
-                    
-                    
+            }
+        )
+
+    let staticGetPrimitiveReaderMethod = 
+        SynMemberDefn.CreateMember(
+            { SynBindingRcd.Let with 
+                Pattern = 
+                    SynPatRcd.LongIdent(
+                        SynPatLongIdentRcd.Create(
+                            LongIdentWithDots.CreateString("GetPrimitiveReader")
+                            , SynArgPats.Pats(
+                                [
+                                    SynPat.Paren(
+                                        SynPat.Tuple(
+                                            false, 
+                                            [
+                                                SynPat.Typed(
+                                                    SynPat.LongIdent(LongIdentWithDots.CreateString("t"), None, None, SynArgPats.Empty, None, range0)
+                                                    , SynType.Create("System.Type")
+                                                    , range0
+                                                )
+                                                SynPat.Typed(
+                                                    SynPat.LongIdent(LongIdentWithDots.CreateString("reader"), None, None, SynArgPats.Empty, None, range0)
+                                                    , SynType.Create(rdrCfg.ReaderType)
+                                                    , range0
+                                                )
+                                            ], range0
+                                        ), range0
+                                    )
+                                ]
+                            )
+                        )
+                    )
+                ValData = 
+                    SynValData.SynValData(
+                        Some (MemberFlags.StaticMember)
+                        , SynValInfo.SynValInfo(
+                            [
+                                [ SynArgInfo.SynArgInfo(SynAttributes.Empty, false, Some(Ident.Create("reader"))) ]
+                            ]
+                            , SynArgInfo.Empty
+                        )
+                        , None
+                    )
+                Expr = 
+                    let t = SynExpr.Ident(Ident.Create("t"))
+                    let eq = SynExpr.Ident(Ident.Create("="))
+                    let typeDef (typeNm: string) = 
+                        let synType = 
+                            if typeNm.EndsWith("[]") then 
+                                // Ex: "byte[]"
+                                let tn = typeNm.Replace("[]", "").Trim()
+                                SynType.Array(0, SynType.Create(tn), range0)
+                            else
+                                SynType.Create(typeNm)
+                        SynExpr.TypeApp(SynExpr.Ident(Ident.Create("typedefof")), range0, [ synType ], [], None, range0, range0)
+
+                    let buildIf elseClause (ptr: PrimitiveTypeReader) = 
+                        SynExpr.IfThenElse(
+                            SynExpr.CreateApp(t, SynExpr.CreateApp(eq, typeDef ptr.ClrType))
+                            , SynExpr.CreateApp(
+                                SynExpr.CreateIdentString("Some")
+                                , SynExpr.CreateParen(
+                                    SynExpr.CreateAppInfix(
+                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "reader"; ptr.ReaderMethod ]), None), 
+                                        SynExpr.CreateIdent(Ident.Create(">> box"))
+                                    )
+                                )
+                            )
+                            , Some elseClause
+                            , DebugPointForBinding.NoDebugPointAtDoBinding
+                            , false
+                            , range0
+                            , range0
+                        )
+
+                    // Recursively build if..elif..elif..else
+                    db.PrimitiveTypeReaders 
+                    |> Seq.rev
+                    |> Seq.fold (fun elifClause ptr -> buildIf elifClause ptr) (SynExpr.CreateIdentString("None"))
             }
         )
 
@@ -469,6 +543,7 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (app: AppInfo) (tbls: Table s
             yield! readerProperties
             accFieldCountProperty
             getReaderByNameMethod
+            staticGetPrimitiveReaderMethod
             staticReadMethod
         ]
 
@@ -485,15 +560,14 @@ let createHydraReaderClass (rdrCfg: ReadersConfig) (app: AppInfo) (tbls: Table s
 
 /// Generates the outer module and table records.
 let generateModule (cfg: Config) (app: AppInfo) (db: Schema) = 
-    let schemas = db.Tables |> Array.map (fun t -> t.Schema) |> Array.distinct
+    let schemas = db.Tables |> List.map (fun t -> t.Schema) |> List.distinct
     
     let nestedSchemaModules = 
         schemas
-        |> Array.toList
         |> List.map (fun schema -> 
             let schemaNestedModule = SynComponentInfoRcd.Create [ Ident.Create schema ]
 
-            let tables = db.Tables |> Array.filter (fun t -> t.Schema = schema)
+            let tables = db.Tables |> List.filter (fun t -> t.Schema = schema)
 
             let tableRecordDeclarations = 
                 [ 
@@ -509,7 +583,7 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
 
                     // Create "HydraReader" below all generated tables/readers...
                     if cfg.Readers.IsSome then
-                        createHydraReaderClass cfg.Readers.Value app tables
+                        createHydraReaderClass db cfg.Readers.Value app tables
                 ]
 
             SynModuleDecl.CreateNestedModule(schemaNestedModule, tableRecordDeclarations)
@@ -583,36 +657,28 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
         "// ReadMethodBodyPlaceholder",
         """
             let hydra = HydraReader(reader)
-
-            let isPrimitive (t: System.Type) = 
-                t.IsPrimitive || t = typedefof<string> || t = typedefof<System.Guid> || 
-                t = typedefof<decimal> || t = typedefof<System.DateTime> || t = typedefof<System.DateTimeOffset>
-
+            
             let getOrdinalAndIncrement() = 
                 let ordinal = hydra.AccFieldCount
                 hydra.AccFieldCount <- hydra.AccFieldCount + 1
                 ordinal
-
-            let getValue (ordinal) () = reader.GetValue(ordinal)
-
-            let tryGetValue (ordinal) () =
-                reader.GetValue(ordinal)
-                |> Option.ofObj
-                |> Option.bind (function :? System.DBNull -> None | o -> Some o)
-                |> box 
-
+            
             let buildEntityReadFn (t: System.Type) = 
-                let tp, isOpt = 
+                let t, isOpt = 
                     if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> 
                     then t.GenericTypeArguments.[0], true
                     else t, false
-                let isPrim = isPrimitive tp
-                match isPrim, isOpt with
-                | true, false -> getValue (getOrdinalAndIncrement())
-                | true, true -> tryGetValue (getOrdinalAndIncrement())
-                | _ -> hydra.GetReaderByName(tp.Name, isOpt)
-
-            // Return a fn that will hydrate 'T (which may be a tuple or a single primitive)
+            
+                match HydraReader.GetPrimitiveReader(t, reader) with
+                | Some primitiveReader -> 
+                    let ord = getOrdinalAndIncrement()
+                    if not isOpt 
+                    then fun () -> primitiveReader ord
+                    else fun () -> if reader.IsDBNull ord then box None else primitiveReader ord |> Some |> box
+                | None ->
+                    hydra.GetReaderByName(t.Name, isOpt)
+            
+            // Return a fn that will hydrate 'T (which may be a tuple)
             // This fn will be called once per each record returned by the data reader.
             let t = typeof<'T>
             if FSharp.Reflection.FSharpType.IsTuple(t) then

@@ -62,7 +62,7 @@ let getSchema (cfg: Config) : Schema =
                         Column.IsPK = col.IsPK
                     }
                 )
-                |> Seq.toArray
+                |> Seq.toList
 
             { 
                 Table.Catalog = tbl.TableCatalog
@@ -72,6 +72,9 @@ let getSchema (cfg: Config) : Schema =
                 Table.Columns = columns
             }
         )
-        |> Seq.toArray
+        |> Seq.toList
 
-    { Tables = tables }
+    { 
+        Tables = tables
+        PrimitiveTypeReaders = SqliteDataTypes.primitiveTypeReaders
+    }

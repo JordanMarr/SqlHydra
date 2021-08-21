@@ -75,7 +75,7 @@ let getSchema (cfg: Config) : Schema =
                         Column.IsPK = pks.Contains(col.TableSchema, col.TableName, col.ColumnName)
                     }
                 )
-                |> Seq.toArray
+                |> Seq.toList
 
             { 
                 Table.Catalog = tableCatalog
@@ -85,6 +85,9 @@ let getSchema (cfg: Config) : Schema =
                 Table.Columns = columns
             }
         )
-        |> Seq.toArray
+        |> Seq.toList
 
-    { Tables = tables }
+    { 
+        Tables = tables 
+        PrimitiveTypeReaders = SqlServerDataTypes.primitiveTypeReaders
+    }
