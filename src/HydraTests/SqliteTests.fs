@@ -6,9 +6,15 @@ open SqlHydra
 open SqlHydra.Domain
 open SqlHydra.SchemaGenerator
 
+let connectionString = 
+    let assembly = System.Reflection.Assembly.GetExecutingAssembly().Location |> System.IO.FileInfo
+    let thisDir = assembly.Directory.Parent.Parent.Parent.FullName
+    let relativeDbPath = System.IO.Path.Combine(thisDir, "TestData", "AdventureWorksLT.db")
+    $"Data Source={relativeDbPath}"
+
 let cfg = 
     {
-        ConnectionString = @"Data Source=C:\_github\SqlHydra\src\HydraTests\TestData\AdventureWorksLT.db" // TODO: Make path relative
+        ConnectionString = connectionString
         OutputFile = ""
         Namespace = "TestNS"
         IsCLIMutable = true

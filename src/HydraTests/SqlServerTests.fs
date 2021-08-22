@@ -1,13 +1,24 @@
 ﻿module SqlServerTests
 
+open System
 open NUnit.Framework
 open SqlHydra
 open SqlHydra.SqlServer
 open SqlHydra.Domain
 
+let dockerHostMachineIpAddress = // Is this running in a container?
+    try Net.Dns.GetHostAddresses(Uri("http://docker.for.win.localhost").Host).[0].ToString() |> Some
+    with ex -> None
+
+let connectionString = 
+    match dockerHostMachineIpAddress with
+    | Some dockerHostAddress -> @$"Server={dockerHostAddress},1433;Database=master;User=sa;Password=password123;"
+    | None -> @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"
+
 let cfg = 
     {
-        ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"
+        // Docker:
+        ConnectionString = connectionString
         OutputFile = ""
         Namespace = "TestNS"
         IsCLIMutable = true
