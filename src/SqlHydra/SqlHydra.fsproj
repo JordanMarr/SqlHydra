@@ -6,11 +6,6 @@
     <Version>1.0.0</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra is a set of Myriad plugins that generate F# records for a range of databases.</Description>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageProjectUrl>https://github.com/JordanMarr/SqlHydra</PackageProjectUrl>
-    <PackageTags>fsharp F# sqlserver ORM</PackageTags>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <!--<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,13 +13,6 @@
     <Compile Include="SchemaGenerator.fs" />
     <Compile Include="TomlConfigParser.fs" />
     <Compile Include="Console.fs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
   </ItemGroup>
 
   <ItemGroup>

@@ -7,7 +7,8 @@ open SqlHydra.SqlServer
 open SqlHydra.Domain
 
 //let connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"
-let connectionString = @"Server=localhost,1433;Database=master;User=sa;Password=password123;"
+// Docker: "mssql"
+let connectionString = @"Server=localhost,1433;Database=master;User=sa;Password=Password#123;"
 
 let cfg = 
     {
