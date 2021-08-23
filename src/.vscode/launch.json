@@ -4,8 +4,9 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
-            "name": ".NET Core Launch (console)",
+            "name": ".NET Core Launch (Tests)",
             "type": "coreclr",
             "request": "launch",
             "WARNING01": "*********************************************************************************",
@@ -26,7 +27,7 @@
             "WARNING16": "button at the bottom of this file.",
             "WARNING17": "*********************************************************************************",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/HydraTests/bin/Debug/net5.0/HydraTests.dll",
+            "program": "${workspaceFolder}/Tests/bin/Debug/net5.0/Tests.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",

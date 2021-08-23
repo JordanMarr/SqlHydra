@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <WarnOn>3390;$(WarnOn)</WarnOn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="TomlConfigParser.fs" />
+    <Compile Include="SqlServerTests.fs" />
+    <Compile Include="SqliteTests.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Expecto" Version="9.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SqlHydra.Query\SqlHydra.Query.fsproj" />
+    <ProjectReference Include="..\SqlHydra.Sqlite\SqlHydra.Sqlite.fsproj" />
+    <ProjectReference Include="..\SqlHydra.SqlServer\SqlHydra.SqlServer.fsproj" />
+    <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TestData\" />
+  </ItemGroup>
+
+</Project>
