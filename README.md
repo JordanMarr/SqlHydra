@@ -6,12 +6,6 @@ SqlHydra is a suite of NuGet packages for working with databases in F#.
 - [SqlHydra.Query](#sqlhydraquery-) is an F# query generator computation expression powered by [SqlKata](https://sqlkata.com/) that supports the following databases:
     - SQL Server, SQLite, PostgreSql, MySql, Oracle, Firebird
 
-
-### 🚧  🚧
-
-The API is still forming and is subject to change, especially now while the version # is 0.x.
-It will be upgraded to v1.0 once the dust has settled.
-
 ## SqlHydra.SqlServer [![NuGet version (SqlHydra.SqlServer)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.SqlServer/)
 
 ### Local Install (recommended)
