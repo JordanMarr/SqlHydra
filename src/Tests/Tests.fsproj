@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="AdventureWorks.fs" />
+    <Compile Include="SqlUtils.fs" />
+    <Compile Include="QuerySqlServer.fs" />
+    <Compile Include="QueryOutputTests.fs" />
     <Compile Include="TomlConfigParser.fs" />
     <Compile Include="SqlServerTests.fs" />
     <Compile Include="SqliteTests.fs" />
@@ -15,6 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Expecto" Version="9.0.4" />
+    <PackageReference Include="SqlKata.Execution" Version="2.3.7" />
   </ItemGroup>
 
   <ItemGroup>

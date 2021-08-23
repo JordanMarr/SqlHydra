@@ -25,9 +25,9 @@ let cfg =
 let tests = 
     testList "SqlHydra.Sqlite Integration Tests" [
 
-        testCase "Print Schema" <| fun _ ->
-            let schema = SqliteSchemaProvider.getSchema cfg
-            printfn "Schema: %A" schema
+        //testCase "Print Schema" <| fun _ ->
+        //    let schema = SqliteSchemaProvider.getSchema cfg
+        //    printfn "Schema: %A" schema
 
         let getCode cfg = 
             SqliteSchemaProvider.getSchema cfg
