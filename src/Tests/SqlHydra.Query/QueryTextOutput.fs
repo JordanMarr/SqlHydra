@@ -14,8 +14,6 @@ let addressTable =          table<SalesLT.Address>          |> inSchema (nameof 
 let productTable =          table<SalesLT.Product>          |> inSchema (nameof SalesLT)
 let categoryTable =         table<SalesLT.ProductCategory>  |> inSchema (nameof SalesLT)
 
-
-[<Tests>]
 let tests = 
     testList "SqlHydra.Query - Query Output Unit Tests" [
 

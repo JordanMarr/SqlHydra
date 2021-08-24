@@ -21,7 +21,6 @@ let cfg =
         Readers = Some { ReadersConfig.ReaderType = "System.Data.IDataReader" } 
     }
 
-[<Tests>]
 let tests = 
     testList "SqlHydra.Sqlite Integration Tests" [
 

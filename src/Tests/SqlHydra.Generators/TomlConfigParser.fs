@@ -11,9 +11,7 @@ open System.Globalization
 let assertEqual (s1: string, s2: string) = 
     Expect.isTrue (String.Compare(s1, s2, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) = 0) ""
 
-[<Tests>]
 let tests = 
-
     testList "TOML Config Parser" [
         testCase "Parse: All" <| fun _ ->
             let cfg = 

@@ -43,9 +43,10 @@ let productTable =          table<SalesLT.Product>          |> inSchema (nameof 
 let categoryTable =         table<SalesLT.ProductCategory>  |> inSchema (nameof SalesLT)
 let errorLogTable =         table<dbo.ErrorLog>
 
-[<Tests>]
+let sequencedTestList nm = testList nm >> testSequenced
+
 let tests = 
-    (testList "SqlHydra.Query - SQL Server"  >> testSequenced) [
+    sequencedTestList "SqlHydra.Query - SQL Server" [
         testTask "AdventureWorksLT Migration" {
             try do! 
                 Migration.migrate()

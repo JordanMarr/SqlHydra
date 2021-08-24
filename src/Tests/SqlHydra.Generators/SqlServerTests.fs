@@ -18,7 +18,6 @@ let cfg =
         Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" } 
     }
 
-[<Tests>]
 let tests = 
     testList "SqlHydra.SqlServer Integration Tests" [
 
