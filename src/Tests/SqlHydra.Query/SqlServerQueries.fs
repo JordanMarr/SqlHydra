@@ -27,11 +27,17 @@ module Migration =
 
     let migrate() = task {
         use conn = openConnection()
-        printfn "Creating AdventureWorksLT Database..."
-        let sql = readSqlFile()
-        let server = new Server(ServerConnection(conn))
-        let result = server.ConnectionContext.ExecuteNonQuery(sql)
-        printf "Migration Result: %i" result
+        use cmd = conn.CreateCommand()
+        cmd.CommandText <- "SELECT DB_ID('AdventureWorksLT2019')"
+        match cmd.ExecuteScalar() with
+        | :? System.DBNull -> 
+            printfn "Creating AdventureWorksLT Database..."
+            let sql = readSqlFile()
+            let server = new Server(ServerConnection(conn))
+            let result = server.ConnectionContext.ExecuteNonQuery(sql)
+            printfn "Migration Result: %i" result
+        | _ ->
+            printfn "AdventureWorksLT Database already exists"
     }
 
 
