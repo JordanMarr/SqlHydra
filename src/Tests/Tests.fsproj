@@ -31,7 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="SqlHydra.Sqlite\" />
     <Folder Include="TestData\" />
   </ItemGroup>
 
