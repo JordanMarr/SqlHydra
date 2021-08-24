@@ -20,10 +20,8 @@ let productTable =          table<SalesLT.Product>          |> inSchema (nameof 
 let categoryTable =         table<SalesLT.ProductCategory>  |> inSchema (nameof SalesLT)
 let errorLogTable =         table<dbo.ErrorLog>
 
-let sequencedTestList nm = testList nm >> testSequenced
-
 let tests = 
-    sequencedTestList "SqlHydra.Query - SQL Server" [
+    testList "SqlHydra.Query - SQL Server" [
 
         testTask "Where Like" {
             use ctx = openContext()

@@ -14,6 +14,11 @@ let openConnection() =
     conn.Open()
     conn
 
+let openMaster() = 
+    let conn = new SqlConnection(@"Server=localhost,1433;Database=master;User=sa;Password=Password#123;")
+    conn.Open()
+    conn
+
 let toSql<'T> (query: TypedQuery<'T>) = 
     let compiler = SqlKata.Compilers.SqlServerCompiler()
     compiler.Compile(query.Query).Sql

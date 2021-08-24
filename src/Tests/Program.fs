@@ -8,6 +8,8 @@ let main argv =
             parallelWorkers = 1
             verbosity = LogLevel.Debug }
 
+    let sequencedTestList nm = testList nm >> testSequenced
+
     let sqlServerTests = 
         [
             SqlServer.Migration.migration
@@ -15,24 +17,24 @@ let main argv =
             SqlServer.QueryTextOutput.tests
             SqlServer.Generation.tests
         ]
-        |> testList "Sql Server Tests"
+        |> sequencedTestList "Sql Server Tests"
     
     let sqliteTests = 
         [
             Sqlite.Generation.tests
         ]
-        |> testList "Sqlite Tests"
+        |> sequencedTestList "Sqlite Tests"
 
     let unitTests = 
         [
             UnitTests.TomlConfigParser.tests
         ]
-        |> testList "Unit Tests"
+        |> sequencedTestList "Unit Tests"
 
     [
         sqlServerTests
         sqliteTests
         unitTests
     ]
-    |> testList ""
+    |> sequencedTestList ""
     |> runTests testConfig

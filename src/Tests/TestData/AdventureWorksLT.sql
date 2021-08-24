@@ -11,11 +11,36 @@ SET ANSI_NULLS, ANSI_PADDING, ANSI_WARNINGS, ARITHABORT, CONCAT_NULL_YIELDS_NULL
 
 SET NUMERIC_ROUNDABORT OFF;
 
-IF DB_ID('AdventureWorksLT2019') IS NOT NULL
-RAISERROR ('Database exists -- exiting script.', 15, 10)
 
+GO
+/*
+Detect SQLCMD mode and disable script execution if SQLCMD mode is not supported.
+To re-enable the script after enabling SQLCMD mode, execute the following:
+SET NOEXEC OFF; 
+*/
+
+--IF EXISTS (SELECT 1
+--           FROM   [master].[dbo].[sysdatabases]
+--           WHERE  [name] = N'AdventureWorksLT2019')
+--    BEGIN
+--        ALTER DATABASE [AdventureWorksLT2019]
+--            SET AUTO_CLOSE OFF 
+--            WITH ROLLBACK IMMEDIATE;
+--    END
+
+
+--GO
 
 USE [AdventureWorksLT2019];
+
+
+GO
+PRINT N'Creating Schema [SalesLT]...';
+
+
+GO
+CREATE SCHEMA [SalesLT]
+    AUTHORIZATION [dbo];
 
 
 GO
@@ -140,34 +165,207 @@ CREATE XML SCHEMA COLLECTION [SalesLT].[ProductDescriptionSchemaCollection]
 
 
 GO
-PRINT N'Creating Table [dbo].[BuildVersion]...';
+PRINT N'Creating User-Defined Data Type [dbo].[AccountNumber]...';
 
 
 GO
-CREATE TABLE [dbo].[BuildVersion] (
-    [SystemInformationID] TINYINT       IDENTITY (1, 1) NOT NULL,
-    [Database Version]    NVARCHAR (25) NOT NULL,
-    [VersionDate]         DATETIME      NOT NULL,
-    [ModifiedDate]        DATETIME      NOT NULL
+CREATE TYPE [dbo].[AccountNumber]
+    FROM NVARCHAR (15) NULL;
+
+
+GO
+PRINT N'Creating User-Defined Data Type [dbo].[Flag]...';
+
+
+GO
+CREATE TYPE [dbo].[Flag]
+    FROM BIT NOT NULL;
+
+
+GO
+PRINT N'Creating User-Defined Data Type [dbo].[Name]...';
+
+
+GO
+CREATE TYPE [dbo].[Name]
+    FROM NVARCHAR (50) NULL;
+
+
+GO
+PRINT N'Creating User-Defined Data Type [dbo].[NameStyle]...';
+
+
+GO
+CREATE TYPE [dbo].[NameStyle]
+    FROM BIT NOT NULL;
+
+
+GO
+PRINT N'Creating User-Defined Data Type [dbo].[OrderNumber]...';
+
+
+GO
+CREATE TYPE [dbo].[OrderNumber]
+    FROM NVARCHAR (25) NULL;
+
+
+GO
+PRINT N'Creating User-Defined Data Type [dbo].[Phone]...';
+
+
+GO
+CREATE TYPE [dbo].[Phone]
+    FROM NVARCHAR (25) NULL;
+
+
+GO
+PRINT N'Creating Table [SalesLT].[Address]...';
+
+
+GO
+CREATE TABLE [SalesLT].[Address] (
+    [AddressID]     INT              IDENTITY (1, 1) NOT FOR REPLICATION NOT NULL,
+    [AddressLine1]  NVARCHAR (60)    NOT NULL,
+    [AddressLine2]  NVARCHAR (60)    NULL,
+    [City]          NVARCHAR (30)    NOT NULL,
+    [StateProvince] [dbo].[Name]     NOT NULL,
+    [CountryRegion] [dbo].[Name]     NOT NULL,
+    [PostalCode]    NVARCHAR (15)    NOT NULL,
+    [rowguid]       UNIQUEIDENTIFIER ROWGUIDCOL NOT NULL,
+    [ModifiedDate]  DATETIME         NOT NULL,
+    CONSTRAINT [PK_Address_AddressID] PRIMARY KEY CLUSTERED ([AddressID] ASC),
+    CONSTRAINT [AK_Address_rowguid] UNIQUE NONCLUSTERED ([rowguid] ASC)
 );
 
 
 GO
-PRINT N'Creating Table [dbo].[ErrorLog]...';
+PRINT N'Creating Index [SalesLT].[Address].[IX_Address_AddressLine1_AddressLine2_City_StateProvince_PostalCode_CountryRegion]...';
 
 
 GO
-CREATE TABLE [dbo].[ErrorLog] (
-    [ErrorLogID]     INT             IDENTITY (1, 1) NOT NULL,
-    [ErrorTime]      DATETIME        NOT NULL,
-    [UserName]       [sysname]       NOT NULL,
-    [ErrorNumber]    INT             NOT NULL,
-    [ErrorSeverity]  INT             NULL,
-    [ErrorState]     INT             NULL,
-    [ErrorProcedure] NVARCHAR (126)  NULL,
-    [ErrorLine]      INT             NULL,
-    [ErrorMessage]   NVARCHAR (4000) NOT NULL,
-    CONSTRAINT [PK_ErrorLog_ErrorLogID] PRIMARY KEY CLUSTERED ([ErrorLogID] ASC)
+CREATE NONCLUSTERED INDEX [IX_Address_AddressLine1_AddressLine2_City_StateProvince_PostalCode_CountryRegion]
+    ON [SalesLT].[Address]([AddressLine1] ASC, [AddressLine2] ASC, [City] ASC, [StateProvince] ASC, [PostalCode] ASC, [CountryRegion] ASC);
+
+
+GO
+PRINT N'Creating Index [SalesLT].[Address].[IX_Address_StateProvince]...';
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_Address_StateProvince]
+    ON [SalesLT].[Address]([StateProvince] ASC);
+
+
+GO
+PRINT N'Creating Table [SalesLT].[Customer]...';
+
+
+GO
+CREATE TABLE [SalesLT].[Customer] (
+    [CustomerID]   INT               IDENTITY (1, 1) NOT FOR REPLICATION NOT NULL,
+    [NameStyle]    [dbo].[NameStyle] NOT NULL,
+    [Title]        NVARCHAR (8)      NULL,
+    [FirstName]    [dbo].[Name]      NOT NULL,
+    [MiddleName]   [dbo].[Name]      NULL,
+    [LastName]     [dbo].[Name]      NOT NULL,
+    [Suffix]       NVARCHAR (10)     NULL,
+    [CompanyName]  NVARCHAR (128)    NULL,
+    [SalesPerson]  NVARCHAR (256)    NULL,
+    [EmailAddress] NVARCHAR (50)     NULL,
+    [Phone]        [dbo].[Phone]     NULL,
+    [PasswordHash] VARCHAR (128)     NOT NULL,
+    [PasswordSalt] VARCHAR (10)      NOT NULL,
+    [rowguid]      UNIQUEIDENTIFIER  ROWGUIDCOL NOT NULL,
+    [ModifiedDate] DATETIME          NOT NULL,
+    CONSTRAINT [PK_Customer_CustomerID] PRIMARY KEY CLUSTERED ([CustomerID] ASC),
+    CONSTRAINT [AK_Customer_rowguid] UNIQUE NONCLUSTERED ([rowguid] ASC)
+);
+
+
+GO
+PRINT N'Creating Index [SalesLT].[Customer].[IX_Customer_EmailAddress]...';
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_Customer_EmailAddress]
+    ON [SalesLT].[Customer]([EmailAddress] ASC);
+
+
+GO
+PRINT N'Creating Table [SalesLT].[CustomerAddress]...';
+
+
+GO
+CREATE TABLE [SalesLT].[CustomerAddress] (
+    [CustomerID]   INT              NOT NULL,
+    [AddressID]    INT              NOT NULL,
+    [AddressType]  [dbo].[Name]     NOT NULL,
+    [rowguid]      UNIQUEIDENTIFIER ROWGUIDCOL NOT NULL,
+    [ModifiedDate] DATETIME         NOT NULL,
+    CONSTRAINT [PK_CustomerAddress_CustomerID_AddressID] PRIMARY KEY CLUSTERED ([CustomerID] ASC, [AddressID] ASC),
+    CONSTRAINT [AK_CustomerAddress_rowguid] UNIQUE NONCLUSTERED ([rowguid] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [SalesLT].[Product]...';
+
+
+GO
+CREATE TABLE [SalesLT].[Product] (
+    [ProductID]              INT              IDENTITY (1, 1) NOT NULL,
+    [Name]                   [dbo].[Name]     NOT NULL,
+    [ProductNumber]          NVARCHAR (25)    NOT NULL,
+    [Color]                  NVARCHAR (15)    NULL,
+    [StandardCost]           MONEY            NOT NULL,
+    [ListPrice]              MONEY            NOT NULL,
+    [Size]                   NVARCHAR (5)     NULL,
+    [Weight]                 DECIMAL (8, 2)   NULL,
+    [ProductCategoryID]      INT              NULL,
+    [ProductModelID]         INT              NULL,
+    [SellStartDate]          DATETIME         NOT NULL,
+    [SellEndDate]            DATETIME         NULL,
+    [DiscontinuedDate]       DATETIME         NULL,
+    [ThumbNailPhoto]         VARBINARY (MAX)  NULL,
+    [ThumbnailPhotoFileName] NVARCHAR (50)    NULL,
+    [rowguid]                UNIQUEIDENTIFIER ROWGUIDCOL NOT NULL,
+    [ModifiedDate]           DATETIME         NOT NULL,
+    CONSTRAINT [PK_Product_ProductID] PRIMARY KEY CLUSTERED ([ProductID] ASC),
+    CONSTRAINT [AK_Product_Name] UNIQUE NONCLUSTERED ([Name] ASC),
+    CONSTRAINT [AK_Product_ProductNumber] UNIQUE NONCLUSTERED ([ProductNumber] ASC),
+    CONSTRAINT [AK_Product_rowguid] UNIQUE NONCLUSTERED ([rowguid] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [SalesLT].[ProductCategory]...';
+
+
+GO
+CREATE TABLE [SalesLT].[ProductCategory] (
+    [ProductCategoryID]       INT              IDENTITY (1, 1) NOT NULL,
+    [ParentProductCategoryID] INT              NULL,
+    [Name]                    [dbo].[Name]     NOT NULL,
+    [rowguid]                 UNIQUEIDENTIFIER ROWGUIDCOL NOT NULL,
+    [ModifiedDate]            DATETIME         NOT NULL,
+    CONSTRAINT [PK_ProductCategory_ProductCategoryID] PRIMARY KEY CLUSTERED ([ProductCategoryID] ASC),
+    CONSTRAINT [AK_ProductCategory_Name] UNIQUE NONCLUSTERED ([Name] ASC),
+    CONSTRAINT [AK_ProductCategory_rowguid] UNIQUE NONCLUSTERED ([rowguid] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [SalesLT].[ProductDescription]...';
+
+
+GO
+CREATE TABLE [SalesLT].[ProductDescription] (
+    [ProductDescriptionID] INT              IDENTITY (1, 1) NOT NULL,
+    [Description]          NVARCHAR (400)   NOT NULL,
+    [rowguid]              UNIQUEIDENTIFIER ROWGUIDCOL NOT NULL,
+    [ModifiedDate]         DATETIME         NOT NULL,
+    CONSTRAINT [PK_ProductDescription_ProductDescriptionID] PRIMARY KEY CLUSTERED ([ProductDescriptionID] ASC),
+    CONSTRAINT [AK_ProductDescription_rowguid] UNIQUE NONCLUSTERED ([rowguid] ASC)
 );
 
 
@@ -287,21 +485,152 @@ CREATE NONCLUSTERED INDEX [IX_SalesOrderHeader_CustomerID]
 
 
 GO
-PRINT N'Creating Default Constraint [dbo].[DF_BuildVersion_ModifiedDate]...';
+PRINT N'Creating Table [dbo].[BuildVersion]...';
 
 
 GO
-ALTER TABLE [dbo].[BuildVersion]
-    ADD CONSTRAINT [DF_BuildVersion_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+CREATE TABLE [dbo].[BuildVersion] (
+    [SystemInformationID] TINYINT       IDENTITY (1, 1) NOT NULL,
+    [Database Version]    NVARCHAR (25) NOT NULL,
+    [VersionDate]         DATETIME      NOT NULL,
+    [ModifiedDate]        DATETIME      NOT NULL
+);
 
 
 GO
-PRINT N'Creating Default Constraint [dbo].[DF_ErrorLog_ErrorTime]...';
+PRINT N'Creating Table [dbo].[ErrorLog]...';
 
 
 GO
-ALTER TABLE [dbo].[ErrorLog]
-    ADD CONSTRAINT [DF_ErrorLog_ErrorTime] DEFAULT (getdate()) FOR [ErrorTime];
+CREATE TABLE [dbo].[ErrorLog] (
+    [ErrorLogID]     INT             IDENTITY (1, 1) NOT NULL,
+    [ErrorTime]      DATETIME        NOT NULL,
+    [UserName]       [sysname]       NOT NULL,
+    [ErrorNumber]    INT             NOT NULL,
+    [ErrorSeverity]  INT             NULL,
+    [ErrorState]     INT             NULL,
+    [ErrorProcedure] NVARCHAR (126)  NULL,
+    [ErrorLine]      INT             NULL,
+    [ErrorMessage]   NVARCHAR (4000) NOT NULL,
+    CONSTRAINT [PK_ErrorLog_ErrorLogID] PRIMARY KEY CLUSTERED ([ErrorLogID] ASC)
+);
+
+
+GO
+PRINT N'Creating Default Constraint [SalesLT].[DF_Address_rowguid]...';
+
+
+GO
+ALTER TABLE [SalesLT].[Address]
+    ADD CONSTRAINT [DF_Address_rowguid] DEFAULT (newid()) FOR [rowguid];
+
+
+GO
+PRINT N'Creating Default Constraint [SalesLT].[DF_Address_ModifiedDate]...';
+
+
+GO
+ALTER TABLE [SalesLT].[Address]
+    ADD CONSTRAINT [DF_Address_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+
+GO
+PRINT N'Creating Default Constraint [SalesLT].[DF_Customer_NameStyle]...';
+
+
+GO
+ALTER TABLE [SalesLT].[Customer]
+    ADD CONSTRAINT [DF_Customer_NameStyle] DEFAULT ((0)) FOR [NameStyle];
+
+
+GO
+PRINT N'Creating Default Constraint [SalesLT].[DF_Customer_rowguid]...';
+
+
+GO
+ALTER TABLE [SalesLT].[Customer]
+    ADD CONSTRAINT [DF_Customer_rowguid] DEFAULT (newid()) FOR [rowguid];
+
+
+GO
+PRINT N'Creating Default Constraint [SalesLT].[DF_Customer_ModifiedDate]...';
+
+
+GO
+ALTER TABLE [SalesLT].[Customer]
+    ADD CONSTRAINT [DF_Customer_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+
+GO
+PRINT N'Creating Default Constraint [SalesLT].[DF_CustomerAddress_rowguid]...';
+
+
+GO
+ALTER TABLE [SalesLT].[CustomerAddress]
+    ADD CONSTRAINT [DF_CustomerAddress_rowguid] DEFAULT (newid()) FOR [rowguid];
+
+
+GO
+PRINT N'Creating Default Constraint [SalesLT].[DF_CustomerAddress_ModifiedDate]...';
+
+
+GO
+ALTER TABLE [SalesLT].[CustomerAddress]
+    ADD CONSTRAINT [DF_CustomerAddress_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+
+GO
+PRINT N'Creating Default Constraint [SalesLT].[DF_Product_rowguid]...';
+
+
+GO
+ALTER TABLE [SalesLT].[Product]
+    ADD CONSTRAINT [DF_Product_rowguid] DEFAULT (newid()) FOR [rowguid];
+
+
+GO
+PRINT N'Creating Default Constraint [SalesLT].[DF_Product_ModifiedDate]...';
+
+
+GO
+ALTER TABLE [SalesLT].[Product]
+    ADD CONSTRAINT [DF_Product_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+
+GO
+PRINT N'Creating Default Constraint [SalesLT].[DF_ProductCategory_rowguid]...';
+
+
+GO
+ALTER TABLE [SalesLT].[ProductCategory]
+    ADD CONSTRAINT [DF_ProductCategory_rowguid] DEFAULT (newid()) FOR [rowguid];
+
+
+GO
+PRINT N'Creating Default Constraint [SalesLT].[DF_ProductCategory_ModifiedDate]...';
+
+
+GO
+ALTER TABLE [SalesLT].[ProductCategory]
+    ADD CONSTRAINT [DF_ProductCategory_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+
+
+GO
+PRINT N'Creating Default Constraint [SalesLT].[DF_ProductDescription_rowguid]...';
+
+
+GO
+ALTER TABLE [SalesLT].[ProductDescription]
+    ADD CONSTRAINT [DF_ProductDescription_rowguid] DEFAULT (newid()) FOR [rowguid];
+
+
+GO
+PRINT N'Creating Default Constraint [SalesLT].[DF_ProductDescription_ModifiedDate]...';
+
+
+GO
+ALTER TABLE [SalesLT].[ProductDescription]
+    ADD CONSTRAINT [DF_ProductDescription_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
 
 
 GO
@@ -449,120 +778,66 @@ ALTER TABLE [SalesLT].[SalesOrderHeader]
 
 
 GO
-PRINT N'Creating Default Constraint [SalesLT].[DF_Address_ModifiedDate]...';
+PRINT N'Creating Default Constraint [dbo].[DF_BuildVersion_ModifiedDate]...';
 
 
 GO
-ALTER TABLE [SalesLT].[Address]
-    ADD CONSTRAINT [DF_Address_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [dbo].[BuildVersion]
+    ADD CONSTRAINT [DF_BuildVersion_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
 
 
 GO
-PRINT N'Creating Default Constraint [SalesLT].[DF_Address_rowguid]...';
+PRINT N'Creating Default Constraint [dbo].[DF_ErrorLog_ErrorTime]...';
 
 
 GO
-ALTER TABLE [SalesLT].[Address]
-    ADD CONSTRAINT [DF_Address_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [dbo].[ErrorLog]
+    ADD CONSTRAINT [DF_ErrorLog_ErrorTime] DEFAULT (getdate()) FOR [ErrorTime];
 
 
 GO
-PRINT N'Creating Default Constraint [SalesLT].[DF_Customer_ModifiedDate]...';
+PRINT N'Creating Foreign Key [SalesLT].[FK_CustomerAddress_Customer_CustomerID]...';
 
 
 GO
-ALTER TABLE [SalesLT].[Customer]
-    ADD CONSTRAINT [DF_Customer_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [SalesLT].[CustomerAddress] WITH NOCHECK
+    ADD CONSTRAINT [FK_CustomerAddress_Customer_CustomerID] FOREIGN KEY ([CustomerID]) REFERENCES [SalesLT].[Customer] ([CustomerID]);
 
 
 GO
-PRINT N'Creating Default Constraint [SalesLT].[DF_Customer_NameStyle]...';
+PRINT N'Creating Foreign Key [SalesLT].[FK_CustomerAddress_Address_AddressID]...';
 
 
 GO
-ALTER TABLE [SalesLT].[Customer]
-    ADD CONSTRAINT [DF_Customer_NameStyle] DEFAULT ((0)) FOR [NameStyle];
+ALTER TABLE [SalesLT].[CustomerAddress] WITH NOCHECK
+    ADD CONSTRAINT [FK_CustomerAddress_Address_AddressID] FOREIGN KEY ([AddressID]) REFERENCES [SalesLT].[Address] ([AddressID]);
 
 
 GO
-PRINT N'Creating Default Constraint [SalesLT].[DF_Customer_rowguid]...';
+PRINT N'Creating Foreign Key [SalesLT].[FK_Product_ProductModel_ProductModelID]...';
 
 
 GO
-ALTER TABLE [SalesLT].[Customer]
-    ADD CONSTRAINT [DF_Customer_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [SalesLT].[Product] WITH NOCHECK
+    ADD CONSTRAINT [FK_Product_ProductModel_ProductModelID] FOREIGN KEY ([ProductModelID]) REFERENCES [SalesLT].[ProductModel] ([ProductModelID]);
 
 
 GO
-PRINT N'Creating Default Constraint [SalesLT].[DF_CustomerAddress_ModifiedDate]...';
+PRINT N'Creating Foreign Key [SalesLT].[FK_Product_ProductCategory_ProductCategoryID]...';
 
 
 GO
-ALTER TABLE [SalesLT].[CustomerAddress]
-    ADD CONSTRAINT [DF_CustomerAddress_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
+ALTER TABLE [SalesLT].[Product] WITH NOCHECK
+    ADD CONSTRAINT [FK_Product_ProductCategory_ProductCategoryID] FOREIGN KEY ([ProductCategoryID]) REFERENCES [SalesLT].[ProductCategory] ([ProductCategoryID]);
 
 
 GO
-PRINT N'Creating Default Constraint [SalesLT].[DF_CustomerAddress_rowguid]...';
+PRINT N'Creating Foreign Key [SalesLT].[FK_ProductCategory_ProductCategory_ParentProductCategoryID_ProductCategoryID]...';
 
 
 GO
-ALTER TABLE [SalesLT].[CustomerAddress]
-    ADD CONSTRAINT [DF_CustomerAddress_rowguid] DEFAULT (newid()) FOR [rowguid];
-
-
-GO
-PRINT N'Creating Default Constraint [SalesLT].[DF_Product_ModifiedDate]...';
-
-
-GO
-ALTER TABLE [SalesLT].[Product]
-    ADD CONSTRAINT [DF_Product_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
-
-
-GO
-PRINT N'Creating Default Constraint [SalesLT].[DF_Product_rowguid]...';
-
-
-GO
-ALTER TABLE [SalesLT].[Product]
-    ADD CONSTRAINT [DF_Product_rowguid] DEFAULT (newid()) FOR [rowguid];
-
-
-GO
-PRINT N'Creating Default Constraint [SalesLT].[DF_ProductCategory_ModifiedDate]...';
-
-
-GO
-ALTER TABLE [SalesLT].[ProductCategory]
-    ADD CONSTRAINT [DF_ProductCategory_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
-
-
-GO
-PRINT N'Creating Default Constraint [SalesLT].[DF_ProductCategory_rowguid]...';
-
-
-GO
-ALTER TABLE [SalesLT].[ProductCategory]
-    ADD CONSTRAINT [DF_ProductCategory_rowguid] DEFAULT (newid()) FOR [rowguid];
-
-
-GO
-PRINT N'Creating Default Constraint [SalesLT].[DF_ProductDescription_ModifiedDate]...';
-
-
-GO
-ALTER TABLE [SalesLT].[ProductDescription]
-    ADD CONSTRAINT [DF_ProductDescription_ModifiedDate] DEFAULT (getdate()) FOR [ModifiedDate];
-
-
-GO
-PRINT N'Creating Default Constraint [SalesLT].[DF_ProductDescription_rowguid]...';
-
-
-GO
-ALTER TABLE [SalesLT].[ProductDescription]
-    ADD CONSTRAINT [DF_ProductDescription_rowguid] DEFAULT (newid()) FOR [rowguid];
+ALTER TABLE [SalesLT].[ProductCategory] WITH NOCHECK
+    ADD CONSTRAINT [FK_ProductCategory_ProductCategory_ParentProductCategoryID_ProductCategoryID] FOREIGN KEY ([ParentProductCategoryID]) REFERENCES [SalesLT].[ProductCategory] ([ProductCategoryID]);
 
 
 GO
@@ -629,48 +904,39 @@ ALTER TABLE [SalesLT].[SalesOrderHeader] WITH NOCHECK
 
 
 GO
-PRINT N'Creating Foreign Key [SalesLT].[FK_CustomerAddress_Address_AddressID]...';
-
-
-GO
-ALTER TABLE [SalesLT].[CustomerAddress] WITH NOCHECK
-    ADD CONSTRAINT [FK_CustomerAddress_Address_AddressID] FOREIGN KEY ([AddressID]) REFERENCES [SalesLT].[Address] ([AddressID]);
-
-
-GO
-PRINT N'Creating Foreign Key [SalesLT].[FK_CustomerAddress_Customer_CustomerID]...';
-
-
-GO
-ALTER TABLE [SalesLT].[CustomerAddress] WITH NOCHECK
-    ADD CONSTRAINT [FK_CustomerAddress_Customer_CustomerID] FOREIGN KEY ([CustomerID]) REFERENCES [SalesLT].[Customer] ([CustomerID]);
-
-
-GO
-PRINT N'Creating Foreign Key [SalesLT].[FK_Product_ProductCategory_ProductCategoryID]...';
+PRINT N'Creating Check Constraint [SalesLT].[CK_Product_StandardCost]...';
 
 
 GO
 ALTER TABLE [SalesLT].[Product] WITH NOCHECK
-    ADD CONSTRAINT [FK_Product_ProductCategory_ProductCategoryID] FOREIGN KEY ([ProductCategoryID]) REFERENCES [SalesLT].[ProductCategory] ([ProductCategoryID]);
+    ADD CONSTRAINT [CK_Product_StandardCost] CHECK ([StandardCost]>=(0.00));
 
 
 GO
-PRINT N'Creating Foreign Key [SalesLT].[FK_Product_ProductModel_ProductModelID]...';
+PRINT N'Creating Check Constraint [SalesLT].[CK_Product_ListPrice]...';
 
 
 GO
 ALTER TABLE [SalesLT].[Product] WITH NOCHECK
-    ADD CONSTRAINT [FK_Product_ProductModel_ProductModelID] FOREIGN KEY ([ProductModelID]) REFERENCES [SalesLT].[ProductModel] ([ProductModelID]);
+    ADD CONSTRAINT [CK_Product_ListPrice] CHECK ([ListPrice]>=(0.00));
 
 
 GO
-PRINT N'Creating Foreign Key [SalesLT].[FK_ProductCategory_ProductCategory_ParentProductCategoryID_ProductCategoryID]...';
+PRINT N'Creating Check Constraint [SalesLT].[CK_Product_Weight]...';
 
 
 GO
-ALTER TABLE [SalesLT].[ProductCategory] WITH NOCHECK
-    ADD CONSTRAINT [FK_ProductCategory_ProductCategory_ParentProductCategoryID_ProductCategoryID] FOREIGN KEY ([ParentProductCategoryID]) REFERENCES [SalesLT].[ProductCategory] ([ProductCategoryID]);
+ALTER TABLE [SalesLT].[Product] WITH NOCHECK
+    ADD CONSTRAINT [CK_Product_Weight] CHECK ([Weight]>(0.00));
+
+
+GO
+PRINT N'Creating Check Constraint [SalesLT].[CK_Product_SellEndDate]...';
+
+
+GO
+ALTER TABLE [SalesLT].[Product] WITH NOCHECK
+    ADD CONSTRAINT [CK_Product_SellEndDate] CHECK ([SellEndDate]>=[SellStartDate] OR [SellEndDate] IS NULL);
 
 
 GO
@@ -754,70 +1020,6 @@ ALTER TABLE [SalesLT].[SalesOrderHeader] WITH NOCHECK
     ADD CONSTRAINT [CK_SalesOrderHeader_Freight] CHECK ([Freight]>=(0.00));
 
 
-GO
-PRINT N'Creating Check Constraint [SalesLT].[CK_Product_ListPrice]...';
-
-
-GO
-ALTER TABLE [SalesLT].[Product] WITH NOCHECK
-    ADD CONSTRAINT [CK_Product_ListPrice] CHECK ([ListPrice]>=(0.00));
-
-
-GO
-PRINT N'Creating Check Constraint [SalesLT].[CK_Product_SellEndDate]...';
-
-
-GO
-ALTER TABLE [SalesLT].[Product] WITH NOCHECK
-    ADD CONSTRAINT [CK_Product_SellEndDate] CHECK ([SellEndDate]>=[SellStartDate] OR [SellEndDate] IS NULL);
-
-
-GO
-PRINT N'Creating Check Constraint [SalesLT].[CK_Product_StandardCost]...';
-
-
-GO
-ALTER TABLE [SalesLT].[Product] WITH NOCHECK
-    ADD CONSTRAINT [CK_Product_StandardCost] CHECK ([StandardCost]>=(0.00));
-
-
-GO
-PRINT N'Creating Check Constraint [SalesLT].[CK_Product_Weight]...';
-
-
-GO
-ALTER TABLE [SalesLT].[Product] WITH NOCHECK
-    ADD CONSTRAINT [CK_Product_Weight] CHECK ([Weight]>(0.00));
-
-
-GO
-PRINT N'Creating View [SalesLT].[vGetAllCategories]...';
-
-
-GO
-
-CREATE VIEW [SalesLT].[vGetAllCategories]
-WITH SCHEMABINDING 
-AS 
--- Returns the CustomerID, first name, and last name for the specified customer.
-
-WITH CategoryCTE([ParentProductCategoryID], [ProductCategoryID], [Name]) AS 
-(
-	SELECT [ParentProductCategoryID], [ProductCategoryID], [Name]
-	FROM SalesLT.ProductCategory
-	WHERE ParentProductCategoryID IS NULL
-
-UNION ALL
-
-	SELECT C.[ParentProductCategoryID], C.[ProductCategoryID], C.[Name]
-	FROM SalesLT.ProductCategory AS C
-	INNER JOIN CategoryCTE AS BC ON BC.ProductCategoryID = C.ParentProductCategoryID
-)
-
-SELECT PC.[Name] AS [ParentProductCategoryName], CCTE.[Name] as [ProductCategoryName], CCTE.[ProductCategoryID]  
-FROM CategoryCTE AS CCTE
-JOIN SalesLT.ProductCategory AS PC 
-ON PC.[ProductCategoryID] = CCTE.[ParentProductCategoryID]
 GO
 PRINT N'Creating View [SalesLT].[vProductAndDescription]...';
 
@@ -918,6 +1120,34 @@ SELECT
     ,[ModifiedDate]
 FROM [SalesLT].[ProductModel] 
 WHERE [CatalogDescription] IS NOT NULL;
+GO
+PRINT N'Creating View [SalesLT].[vGetAllCategories]...';
+
+
+GO
+
+CREATE VIEW [SalesLT].[vGetAllCategories]
+WITH SCHEMABINDING 
+AS 
+-- Returns the CustomerID, first name, and last name for the specified customer.
+
+WITH CategoryCTE([ParentProductCategoryID], [ProductCategoryID], [Name]) AS 
+(
+	SELECT [ParentProductCategoryID], [ProductCategoryID], [Name]
+	FROM SalesLT.ProductCategory
+	WHERE ParentProductCategoryID IS NULL
+
+UNION ALL
+
+	SELECT C.[ParentProductCategoryID], C.[ProductCategoryID], C.[Name]
+	FROM SalesLT.ProductCategory AS C
+	INNER JOIN CategoryCTE AS BC ON BC.ProductCategoryID = C.ParentProductCategoryID
+)
+
+SELECT PC.[Name] AS [ParentProductCategoryName], CCTE.[Name] as [ProductCategoryName], CCTE.[ProductCategoryID]  
+FROM CategoryCTE AS CCTE
+JOIN SalesLT.ProductCategory AS PC 
+ON PC.[ProductCategoryID] = CCTE.[ParentProductCategoryID]
 GO
 PRINT N'Creating Function [dbo].[ufnGetSalesOrderStatusText]...';
 
@@ -1186,6 +1416,16 @@ USE [AdventureWorksLT2019];
 
 
 GO
+ALTER TABLE [SalesLT].[CustomerAddress] WITH CHECK CHECK CONSTRAINT [FK_CustomerAddress_Customer_CustomerID];
+
+ALTER TABLE [SalesLT].[CustomerAddress] WITH CHECK CHECK CONSTRAINT [FK_CustomerAddress_Address_AddressID];
+
+ALTER TABLE [SalesLT].[Product] WITH CHECK CHECK CONSTRAINT [FK_Product_ProductModel_ProductModelID];
+
+ALTER TABLE [SalesLT].[Product] WITH CHECK CHECK CONSTRAINT [FK_Product_ProductCategory_ProductCategoryID];
+
+ALTER TABLE [SalesLT].[ProductCategory] WITH CHECK CHECK CONSTRAINT [FK_ProductCategory_ProductCategory_ParentProductCategoryID_ProductCategoryID];
+
 ALTER TABLE [SalesLT].[ProductModelProductDescription] WITH CHECK CHECK CONSTRAINT [FK_ProductModelProductDescription_ProductDescription_ProductDescriptionID];
 
 ALTER TABLE [SalesLT].[ProductModelProductDescription] WITH CHECK CHECK CONSTRAINT [FK_ProductModelProductDescription_ProductModel_ProductModelID];
@@ -1200,15 +1440,13 @@ ALTER TABLE [SalesLT].[SalesOrderHeader] WITH CHECK CHECK CONSTRAINT [FK_SalesOr
 
 ALTER TABLE [SalesLT].[SalesOrderHeader] WITH CHECK CHECK CONSTRAINT [FK_SalesOrderHeader_Address_BillTo_AddressID];
 
-ALTER TABLE [SalesLT].[CustomerAddress] WITH CHECK CHECK CONSTRAINT [FK_CustomerAddress_Address_AddressID];
+ALTER TABLE [SalesLT].[Product] WITH CHECK CHECK CONSTRAINT [CK_Product_StandardCost];
 
-ALTER TABLE [SalesLT].[CustomerAddress] WITH CHECK CHECK CONSTRAINT [FK_CustomerAddress_Customer_CustomerID];
+ALTER TABLE [SalesLT].[Product] WITH CHECK CHECK CONSTRAINT [CK_Product_ListPrice];
 
-ALTER TABLE [SalesLT].[Product] WITH CHECK CHECK CONSTRAINT [FK_Product_ProductCategory_ProductCategoryID];
+ALTER TABLE [SalesLT].[Product] WITH CHECK CHECK CONSTRAINT [CK_Product_Weight];
 
-ALTER TABLE [SalesLT].[Product] WITH CHECK CHECK CONSTRAINT [FK_Product_ProductModel_ProductModelID];
-
-ALTER TABLE [SalesLT].[ProductCategory] WITH CHECK CHECK CONSTRAINT [FK_ProductCategory_ProductCategory_ParentProductCategoryID_ProductCategoryID];
+ALTER TABLE [SalesLT].[Product] WITH CHECK CHECK CONSTRAINT [CK_Product_SellEndDate];
 
 ALTER TABLE [SalesLT].[SalesOrderDetail] WITH CHECK CHECK CONSTRAINT [CK_SalesOrderDetail_OrderQty];
 
@@ -1227,14 +1465,6 @@ ALTER TABLE [SalesLT].[SalesOrderHeader] WITH CHECK CHECK CONSTRAINT [CK_SalesOr
 ALTER TABLE [SalesLT].[SalesOrderHeader] WITH CHECK CHECK CONSTRAINT [CK_SalesOrderHeader_TaxAmt];
 
 ALTER TABLE [SalesLT].[SalesOrderHeader] WITH CHECK CHECK CONSTRAINT [CK_SalesOrderHeader_Freight];
-
-ALTER TABLE [SalesLT].[Product] WITH CHECK CHECK CONSTRAINT [CK_Product_ListPrice];
-
-ALTER TABLE [SalesLT].[Product] WITH CHECK CHECK CONSTRAINT [CK_Product_SellEndDate];
-
-ALTER TABLE [SalesLT].[Product] WITH CHECK CHECK CONSTRAINT [CK_Product_StandardCost];
-
-ALTER TABLE [SalesLT].[Product] WITH CHECK CHECK CONSTRAINT [CK_Product_Weight];
 
 
 GO

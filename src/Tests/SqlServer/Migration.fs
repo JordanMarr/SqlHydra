@@ -17,15 +17,20 @@ let readSqlFile() =
     System.IO.File.ReadAllText(sqlFile)
 
 let migrate() = task {
-    use conn = openConnection()
-    use cmd = conn.CreateCommand()
+    use masterConn = openMaster()
+    use cmd = masterConn.CreateCommand()
     cmd.CommandText <- "SELECT DB_ID('AdventureWorksLT2019')"
-    match cmd.ExecuteScalar() with
+    match! cmd.ExecuteScalarAsync() with
     | :? System.DBNull -> 
         printfn "Creating AdventureWorksLT Database..."
+        let masterServer = Server(ServerConnection(masterConn))
+        let _ = masterServer.ConnectionContext.ExecuteNonQuery("CREATE DATABASE [AdventureWorksLT2019]")
+
+        // Switch to Adventure Works DB
+        use advWorksConn = openConnection()
+        let advWorksServer = Server(ServerConnection(advWorksConn))
         let sql = readSqlFile()
-        let server = new Server(ServerConnection(conn))
-        let result = server.ConnectionContext.ExecuteNonQuery(sql)
+        let result = advWorksServer.ConnectionContext.ExecuteNonQuery(sql)
         printfn "Migration Result: %i" result
     | _ ->
         printfn "AdventureWorksLT Database already exists"
