@@ -1,15 +1,15 @@
 ﻿module SqlUtils
 
 open SqlHydra.Query
-open System.Data.SqlClient
+open Microsoft.Data.SqlClient
 open SqlKata.Execution
 open System.Collections.Generic
 open SqlKata
 
 let getConnection() = 
-    new SqlConnection(@"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;")
+    //new SqlConnection(@"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;")
     // Docker: "mssql"
-    //new SqlConnection(@"Server=localhost,1433;Database=master;User=sa;Password=Password#123;")
+    new SqlConnection(@"Server=localhost,1433;Database=AdventureWorksLT2019;User=sa;Password=Password#123;")
 
 let openConnection() = 
     let conn = getConnection()

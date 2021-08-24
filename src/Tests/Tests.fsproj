@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Expecto" Version="9.0.4" />
+    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.46437.65" />
     <PackageReference Include="SqlKata.Execution" Version="2.3.7" />
   </ItemGroup>
 

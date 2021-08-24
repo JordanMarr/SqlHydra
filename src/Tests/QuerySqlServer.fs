@@ -5,6 +5,35 @@ open SqlHydra.Query
 open SqlUtils
 open AdventureWorks
 open SalesLT
+open FSharp.Control.Tasks.V2
+
+let openContext() = 
+    let compiler = SqlKata.Compilers.SqlServerCompiler()
+    let conn = openConnection()
+    new QueryContext(conn, compiler)
+
+module Migration = 
+    open Microsoft.SqlServer.Management.Smo
+    open Microsoft.SqlServer.Management.Common
+
+    let sqlFile = 
+        let assembly = System.Reflection.Assembly.GetExecutingAssembly().Location |> System.IO.FileInfo
+        let thisDir = assembly.Directory.Parent.Parent.Parent.FullName
+        let relativePath = System.IO.Path.Combine(thisDir, "TestData", "AdventureWorksLT.sql")
+        relativePath
+       
+    let readSqlFile() = 
+        System.IO.File.ReadAllText(sqlFile)
+
+    let migrate() = task {
+        use conn = openConnection()
+        printfn "Creating AdventureWorksLT Database..."
+        let sql = readSqlFile()
+        let server = new Server(ServerConnection(conn))
+        let result = server.ConnectionContext.ExecuteNonQuery(sql)
+        printf "Migration Result: %i" result
+    }
+
 
 // Tables
 let customerTable =         table<SalesLT.Customer>         |> inSchema (nameof SalesLT)
@@ -14,14 +43,15 @@ let productTable =          table<SalesLT.Product>          |> inSchema (nameof 
 let categoryTable =         table<SalesLT.ProductCategory>  |> inSchema (nameof SalesLT)
 let errorLogTable =         table<dbo.ErrorLog>
 
-let openContext() = 
-    let compiler = SqlKata.Compilers.SqlServerCompiler()
-    let conn = openConnection()
-    new QueryContext(conn, compiler)
-
 [<Tests>]
 let tests = 
-    testList "SqlHydra.Query - SQL Server" [
+    (ftestList "SqlHydra.Query - SQL Server"  >> testSequenced) [
+        testTask "AdventureWorksLT Migration" {
+            try do! 
+                Migration.migrate()
+            with ex ->
+                printfn "Unable to create DB -- DB may already exist"
+        }
 
         testTask "Where Like" {
             use ctx = openContext()

@@ -41,7 +41,7 @@ module dbo =
           ErrorProcedure: Option<string>
           ErrorLine: Option<int> }
 
-    type ErrorLogReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type ErrorLogReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ErrorLogID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ErrorLogID")
         member __.ErrorTime = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ErrorTime")
         member __.UserName = RequiredColumn(reader, getOrdinal, reader.GetString, "UserName")
@@ -72,7 +72,7 @@ module dbo =
           VersionDate: System.DateTime
           ModifiedDate: System.DateTime }
 
-    type BuildVersionReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type BuildVersionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.SystemInformationID = RequiredColumn(reader, getOrdinal, reader.GetByte, "SystemInformationID")
         member __.``Database Version`` = RequiredColumn(reader, getOrdinal, reader.GetString, "Database Version")
         member __.VersionDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "VersionDate")
@@ -86,7 +86,7 @@ module dbo =
         member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then None else Some(__.Read())
 
-    type HydraReader(reader: System.Data.SqlClient.SqlDataReader) =
+    type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         let mutable accFieldCount = 0
         let buildGetOrdinal fieldCount =
             let dictionary = 
@@ -112,7 +112,7 @@ module dbo =
             | "BuildVersion", true -> failwith "Could not read type 'BuildVersion option' because no primary key exists."
             | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
-        static member Read(reader: System.Data.SqlClient.SqlDataReader) = 
+        static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
             let hydra = HydraReader(reader)
 
             let isPrimitive (t: System.Type) = 
@@ -170,7 +170,7 @@ module SalesLT =
           AddressLine1: string
           AddressLine2: Option<string> }
 
-    type AddressReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type AddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
         member __.StateProvince = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvince")
         member __.CountryRegion = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegion")
@@ -212,7 +212,7 @@ module SalesLT =
           EmailAddress: Option<string>
           Phone: Option<string> }
 
-    type CustomerReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type CustomerReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
         member __.PasswordHash = RequiredColumn(reader, getOrdinal, reader.GetString, "PasswordHash")
         member __.PasswordSalt = RequiredColumn(reader, getOrdinal, reader.GetString, "PasswordSalt")
@@ -256,7 +256,7 @@ module SalesLT =
           rowguid: System.Guid
           ModifiedDate: System.DateTime }
 
-    type CustomerAddressReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type CustomerAddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.CustomerID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "CustomerID")
         member __.AddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "AddressID")
         member __.AddressType = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressType")
@@ -292,7 +292,7 @@ module SalesLT =
           ProductModelID: Option<int>
           Color: Option<string> }
 
-    type ProductReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type ProductReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
         member __.ProductNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "ProductNumber")
@@ -340,7 +340,7 @@ module SalesLT =
           ProductCategoryID: int
           ParentProductCategoryID: Option<int> }
 
-    type ProductCategoryReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type ProductCategoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
@@ -363,7 +363,7 @@ module SalesLT =
           rowguid: System.Guid
           ModifiedDate: System.DateTime }
 
-    type ProductDescriptionReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type ProductDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ProductDescriptionID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductDescriptionID")
         member __.Description = RequiredColumn(reader, getOrdinal, reader.GetString, "Description")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
@@ -385,7 +385,7 @@ module SalesLT =
           ModifiedDate: System.DateTime
           CatalogDescription: Option<System.Xml.Linq.XElement> }
 
-    type ProductModelReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type ProductModelReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
@@ -399,7 +399,7 @@ module SalesLT =
           rowguid: System.Guid
           ModifiedDate: System.DateTime }
 
-    type ProductModelProductDescriptionReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type ProductModelProductDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
         member __.ProductDescriptionID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductDescriptionID")
         member __.Culture = RequiredColumn(reader, getOrdinal, reader.GetString, "Culture")
@@ -427,7 +427,7 @@ module SalesLT =
           rowguid: System.Guid
           ModifiedDate: System.DateTime }
 
-    type SalesOrderDetailReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type SalesOrderDetailReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.SalesOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderID")
         member __.SalesOrderDetailID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderDetailID")
         member __.OrderQty = RequiredColumn(reader, getOrdinal, reader.GetInt16, "OrderQty")
@@ -476,7 +476,7 @@ module SalesLT =
           AccountNumber: Option<string>
           ShipDate: Option<System.DateTime> }
 
-    type SalesOrderHeaderReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type SalesOrderHeaderReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.SalesOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderID")
         member __.RevisionNumber = RequiredColumn(reader, getOrdinal, reader.GetByte, "RevisionNumber")
         member __.OrderDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "OrderDate")
@@ -534,7 +534,7 @@ module SalesLT =
           Culture: string
           Description: string }
 
-    type vProductAndDescriptionReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type vProductAndDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
         member __.ProductModel = RequiredColumn(reader, getOrdinal, reader.GetString, "ProductModel")
@@ -578,7 +578,7 @@ module SalesLT =
           Style: Option<string>
           RiderExperience: Option<string> }
 
-    type vProductModelCatalogDescriptionReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type vProductModelCatalogDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
@@ -640,7 +640,7 @@ module SalesLT =
           ProductCategoryName: Option<string>
           ProductCategoryID: Option<int> }
 
-    type vGetAllCategoriesReader(reader: System.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type vGetAllCategoriesReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ParentProductCategoryName = RequiredColumn(reader, getOrdinal, reader.GetString, "ParentProductCategoryName")
         member __.ProductCategoryName = OptionalColumn(reader, getOrdinal, reader.GetString, "ProductCategoryName")
         member __.ProductCategoryID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "ProductCategoryID")
@@ -652,7 +652,7 @@ module SalesLT =
         member __.ReadIfNotNull(column: Column) =
             if column.IsNull() then None else Some(__.Read())
 
-    type HydraReader(reader: System.Data.SqlClient.SqlDataReader) =
+    type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         let mutable accFieldCount = 0
         let buildGetOrdinal fieldCount =
             let dictionary = 
@@ -722,7 +722,7 @@ module SalesLT =
             | "vGetAllCategories", true -> failwith "Could not read type 'vGetAllCategories option' because no primary key exists."
             | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
-        static member Read(reader: System.Data.SqlClient.SqlDataReader) = 
+        static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
             let hydra = HydraReader(reader)
 
             let isPrimitive (t: System.Type) = 
