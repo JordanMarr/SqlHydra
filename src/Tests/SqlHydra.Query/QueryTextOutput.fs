@@ -1,11 +1,9 @@
-﻿module QueryOutputTests
+﻿module QueryTextOutput
 
 open Expecto
 open SqlHydra.Query
 open SqlUtils
 open AdventureWorks
-open System.Data.SqlClient
-open System.Collections.Generic
 open FSharp.Control.Tasks.V2
 open SalesLT
 
@@ -79,8 +77,8 @@ let tests =
                 }
 
             query |> toSql |> printfn "%s"
-            let addresses = get query
-            printfn "Results: %A" addresses
+            //let addresses = get query
+            //printfn "Results: %A" addresses
 
         testCase "Where Not Like" <| fun _ ->
             let query =
@@ -100,8 +98,8 @@ let tests =
     
             query |> toSql |> printfn "%s"
 
-            let addresses = get query
-            printfn "Results: %A" addresses
+            //let addresses = get query
+            //printfn "Results: %A" addresses
 
         testCase "And Where" <| fun _ ->
             let query = 
@@ -130,8 +128,8 @@ let tests =
 
             query |> toSql |> printfn "%s"
 
-            let customers = get query
-            printfn "Results: %A" customers
+            //let customers = get query
+            //printfn "Results: %A" customers
 
         testCase "Where Customer |=| List" <| fun _ ->
             let query = 
@@ -142,8 +140,8 @@ let tests =
 
             query |> toSql |> printfn "%s"
 
-            let customers = get query
-            printfn "Results: %A" customers
+            //let customers = get query
+            //printfn "Results: %A" customers
 
         testCase "Where Customer |<>| List" <| fun _ ->
             let query = 
@@ -154,8 +152,8 @@ let tests =
 
             query |> toSql |> printfn "%s"
 
-            let customers = get query
-            printfn "Results: %A" customers
+            //let customers = get query
+            //printfn "Results: %A" customers
 
         testCase "Update should fail without where or updateAll" <| fun _ ->
             try 

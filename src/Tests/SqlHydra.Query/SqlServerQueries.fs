@@ -1,4 +1,4 @@
-﻿module QuerySqlServer
+﻿module SqlServerQueries
 
 open Expecto
 open SqlHydra.Query

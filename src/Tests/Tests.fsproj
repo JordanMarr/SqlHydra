@@ -7,13 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="AdventureWorks.fs" />
-    <Compile Include="SqlUtils.fs" />
-    <Compile Include="QuerySqlServer.fs" />
-    <Compile Include="QueryOutputTests.fs" />
-    <Compile Include="TomlConfigParser.fs" />
-    <Compile Include="SqlServerTests.fs" />
-    <Compile Include="SqliteTests.fs" />
+    <Compile Include="SqlHydra.Query\SqlUtils.fs" />
+    <Compile Include="SqlHydra.Query\AdventureWorks.fs" />
+    <Compile Include="SqlHydra.Query\SqlServerQueries.fs" />
+    <Compile Include="SqlHydra.Query\QueryTextOutput.fs" />
+    <Compile Include="SqlHydra.Generators\SqlServerTests.fs" />
+    <Compile Include="SqlHydra.Generators\SqliteTests.fs" />
+    <Compile Include="SqlHydra.Generators\TomlConfigParser.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -31,6 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="SqlHydra.Sqlite\" />
     <Folder Include="TestData\" />
   </ItemGroup>
 
