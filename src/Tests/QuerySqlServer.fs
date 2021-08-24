@@ -45,7 +45,7 @@ let errorLogTable =         table<dbo.ErrorLog>
 
 [<Tests>]
 let tests = 
-    (ftestList "SqlHydra.Query - SQL Server"  >> testSequenced) [
+    (testList "SqlHydra.Query - SQL Server"  >> testSequenced) [
         testTask "AdventureWorksLT Migration" {
             try do! 
                 Migration.migrate()
