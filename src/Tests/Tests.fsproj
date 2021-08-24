@@ -7,20 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="SqlHydra.Query\SqlUtils.fs" />
-    <Compile Include="SqlHydra.Query\AdventureWorks.fs" />
-    <Compile Include="SqlHydra.Query\SqlServerQueries.fs" />
-    <Compile Include="SqlHydra.Query\QueryTextOutput.fs" />
-    <Compile Include="SqlHydra.Generators\SqlServerTests.fs" />
-    <Compile Include="SqlHydra.Generators\SqliteTests.fs" />
-    <Compile Include="SqlHydra.Generators\TomlConfigParser.fs" />
+    <Compile Include="SqlServer\AdventureWorks.fs" />
+    <Compile Include="SqlServer\DB.fs" />
+    <Compile Include="SqlServer\Migration.fs" />
+    <Compile Include="SqlServer\Queries.fs" />
+    <Compile Include="SqlServer\QueryTextOutput.fs" />
+    <Compile Include="SqlServer\Generation.fs" />
+    <Compile Include="Sqlite\Generation.fs" />
+    <Compile Include="UnitTests\TomlConfigParser.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Expecto" Version="9.0.4" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.46437.65" />
-    <PackageReference Include="SqlKata.Execution" Version="2.3.7" />
   </ItemGroup>
 
   <ItemGroup>

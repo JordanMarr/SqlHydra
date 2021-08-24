@@ -1,9 +1,8 @@
-﻿module TomlConfigParser
+﻿module UnitTests.TomlConfigParser
 
 open Expecto
 open System
 open SqlHydra
-open SqlHydra.SqlServer
 open SqlHydra.Domain
 open System.Globalization
 

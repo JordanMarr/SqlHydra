@@ -1,17 +1,14 @@
-﻿module SqlServerTests
+﻿module SqlServer.Generation
 
 open Expecto
 open SqlHydra
 open SqlHydra.SqlServer
 open SqlHydra.Domain
 
-// Docker: "mssql"
-let connectionString = @"Server=localhost,1433;Database=master;User=sa;Password=Password#123;"
-
 let cfg = 
     {
         // Docker "mssql":
-        ConnectionString = connectionString
+        ConnectionString = DB.connectionString
         OutputFile = ""
         Namespace = "TestNS"
         IsCLIMutable = true

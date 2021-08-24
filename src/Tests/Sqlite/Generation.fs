@@ -1,4 +1,4 @@
-module SqliteTests
+module Sqlite.Generation
 
 open Expecto
 open SqlHydra.Sqlite

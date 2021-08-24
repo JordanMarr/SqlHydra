@@ -1,9 +1,9 @@
-﻿module QueryTextOutput
+﻿module SqlServer.QueryTextOutput
 
 open Expecto
 open SqlHydra.Query
-open SqlUtils
-open AdventureWorks
+open DB
+open SqlServer.AdventureWorks
 open FSharp.Control.Tasks.V2
 open SalesLT
 

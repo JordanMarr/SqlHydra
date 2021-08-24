@@ -8,24 +8,31 @@ let main argv =
             parallelWorkers = 1
             verbosity = LogLevel.Debug }
 
-    let sqlHydraQueryTests = 
+    let sqlServerTests = 
         [
-            SqlServerQueries.tests
-            QueryTextOutput.tests
+            SqlServer.Migration.migration
+            SqlServer.Queries.tests
+            SqlServer.QueryTextOutput.tests
+            SqlServer.Generation.tests
         ]
-        |> testList "SqlHydra.Query Tests"
+        |> testList "Sql Server Tests"
     
-    let sqlHydraGenerators = 
+    let sqliteTests = 
         [
-            SqlServerTests.tests
-            SqliteTests.tests
-            TomlConfigParser.tests
+            Sqlite.Generation.tests
         ]
-        |> testList "SqlHydra.Generators Tests"
+        |> testList "Sqlite Tests"
+
+    let unitTests = 
+        [
+            UnitTests.TomlConfigParser.tests
+        ]
+        |> testList "Unit Tests"
 
     [
-        sqlHydraQueryTests
-        sqlHydraGenerators
+        sqlServerTests
+        sqliteTests
+        unitTests
     ]
     |> testList ""
     |> runTests testConfig
