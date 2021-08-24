@@ -53,11 +53,9 @@ let sequencedTestList nm = testList nm >> testSequenced
 
 let tests = 
     sequencedTestList "SqlHydra.Query - SQL Server" [
+
         testTask "AdventureWorksLT Migration" {
-            try do! 
-                Migration.migrate()
-            with ex ->
-                printfn "Unable to create DB -- DB may already exist"
+            do! Migration.migrate()
         }
 
         testTask "Where Like" {
