@@ -35,4 +35,8 @@
     <Folder Include="TestData\" />
   </ItemGroup>
 
+  <!--<Target Name="SqlHydra" BeforeTargets="Clean">
+    <Exec Command="sqlhydra-mssql.bat" />
+  </Target>-->
+
 </Project>
