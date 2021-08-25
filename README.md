@@ -257,26 +257,6 @@ let! customersWithNoSalesPersonCount =
     |> ctx.CountAsync
 ```
 
-### Manually Read / ReadAsync
-
-The generated `HydraReader.Read` method can also be used to manually read entities. This may be necessary if a table has a column type that is unsupported by the SqlHydra.* code generator.
-
-```F#
-use ctx = openContext()
-
-let cities =
-    select {
-        for a in addressTable do
-        where (a.City = "Seattle")
-        select a
-    }
-    |> ctx.Read (fun reader ->
-        let hydra = HydraReader(reader)
-        // This function will be called once per each record returned by the reader
-        fun () -> reader.Address.Read()
-    )
-```
-
 ### Dos and Don'ts
 
 :boom: The `select` clause currently only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
