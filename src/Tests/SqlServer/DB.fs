@@ -4,7 +4,7 @@ open SqlHydra.Query
 open Microsoft.Data.SqlClient
 
 // Docker: "mssql"
-let connectionString = @"Server=localhost,1433;Database=AdventureWorksLT2019;User=sa;Password=Password#123;"
+let connectionString = @"Server=mssql;Database=AdventureWorksLT2019;User=sa;Password=Password#123;"
 
 let getConnection() = 
     new SqlConnection(connectionString)
@@ -15,7 +15,7 @@ let openConnection() =
     conn
 
 let openMaster() = 
-    let conn = new SqlConnection(@"Server=localhost,1433;Database=master;User=sa;Password=Password#123;")
+    let conn = new SqlConnection(@"Server=mssql;Database=master;User=sa;Password=Password#123;")
     conn.Open()
     conn
 
