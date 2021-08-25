@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   app:
+    container_name: app
     build: 
       context: .
       dockerfile: Dockerfile
@@ -38,3 +39,15 @@ services:
 
     #extra_hosts:
     #  - "localhost:192.168.1.123"
+  
+  postgresql:
+    hostname: postgresql
+    container_name: postgresql
+    build: 
+      context: ./postgresql
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "54320:5432"
