@@ -4,12 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <WarnOn>3390;$(WarnOn)</WarnOn>
-    <Version>0.203.0</Version>
+    <Version>0.210.0</Version>
     <Description>SqlHydra.Query is an F# query builder powered by SqlKata.Query that supports Sql Server, MySql, PostgreSql, Oracle and Firebird.</Description>
     <Authors>Jordan Marr</Authors>
     <PackageTags>F# fsharp data database orm sql</PackageTags>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReleaseNotes>v0.203.0: Improvements to SqlHydra.* packages.</PackageReleaseNotes>
+    <PackageReleaseNotes>v0.210.0: Added optional `isolationLevel` arg to `BeginTransaction`.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
