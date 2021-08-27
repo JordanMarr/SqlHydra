@@ -4,10 +4,10 @@ open System.Collections.Generic
 open Microsoft.Build.Construction
 open Domain
 
-/// Adds the generated .fs file to the fsproj as Hidden=True.
+/// Adds the generated .fs file to the fsproj as Visible=False.
 let addFileToProject (cfg: Config) = 
-    match Directory.EnumerateFiles(".", "*.fsproj") |> Seq.tryHead with
-    | Some fsprojPath ->
+    Directory.EnumerateFiles(".", "*.fsproj") |> Seq.tryHead
+    |> Option.iter (fun fsprojPath ->
         let root = ProjectRootElement.Open(fsprojPath)
 
         let fileAlreadyAdded = 
@@ -19,18 +19,13 @@ let addFileToProject (cfg: Config) =
                 item.Include = cfg.OutputFile.Replace("/", @"\")    // Handle "Folder\Files.fs"
             )
 
-        let firstGroupWithFiles =
-            root.ItemGroups
-            |> Seq.filter (fun g -> g.Items |> Seq.exists (fun item -> item.ItemType = "Compile"))
-            |> Seq.tryHead
-
-        match firstGroupWithFiles, fileAlreadyAdded with
-        | Some grp, false -> 
-            printfn $"Adding '{cfg.OutputFile}' to .fsproj."
-            grp.AddItem("Compile", cfg.OutputFile, [ KeyValuePair("Visible", "False") ]) |> ignore
-            root.Save()
-        | _ -> 
-            ()
-    
-    | None -> 
-        ()
+        root.ItemGroups
+        |> Seq.filter (fun g -> g.Items |> Seq.exists (fun item -> item.ItemType = "Compile"))
+        |> Seq.tryHead
+        |> Option.iter (fun fstCompileGrp ->
+            if not fileAlreadyAdded then
+                printfn $"Adding '{cfg.OutputFile}' to .fsproj."
+                fstCompileGrp.AddItem("Compile", cfg.OutputFile, [ KeyValuePair("Visible", "False") ]) |> ignore
+                root.Save()
+        )
+    )
