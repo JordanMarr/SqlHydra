@@ -3,8 +3,11 @@
 open SqlHydra.Query
 open Microsoft.Data.SqlClient
 
-// Docker: "mssql"
+// devcontainer: "mssql"
 let connectionString = @"Server=mssql;Database=AdventureWorksLT2019;User=sa;Password=Password#123;"
+
+// localhost
+//let connectionString = @"Server=localhost,12019;Database=AdventureWorksLT2019;User=sa;Password=Password#123;"
 
 let getConnection() = 
     new SqlConnection(connectionString)

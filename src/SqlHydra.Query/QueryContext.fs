@@ -19,8 +19,11 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
 
     member val Transaction : DbTransaction option = None with get,set
 
-    member this.BeginTransaction() = 
-        this.Transaction <- conn.BeginTransaction() |> Some
+    member this.BeginTransaction(?isolationLevel: System.Data.IsolationLevel) = 
+        this.Transaction <- 
+            match isolationLevel with
+            | Some il -> conn.BeginTransaction(il) |> Some
+            | None -> conn.BeginTransaction() |> Some
 
     member this.CommitTransaction() = 
         match this.Transaction with
