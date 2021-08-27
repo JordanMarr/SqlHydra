@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
-    <Version>0.202.0</Version>
+    <TargetFramework>net5.0</TargetFramework>
+    <Version>0.203.0</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.Sqlite is a dotnet tool that generates F# records for a SQLite database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -11,7 +11,7 @@
     <ToolCommandName>sqlhydra-sqlite</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-    <PackageReleaseNotes>v0.202.0: Improved HydraReader.Read for single column reads.</PackageReleaseNotes>
+    <PackageReleaseNotes>v0.203.0: SqlHydra.Sqlite now adds generated file to .fsproj file.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,6 +27,7 @@
   <ItemGroup>
     <PackageReference Include="Fantomas" Version="4.4.0" />
     <PackageReference Include="FsAst" Version="0.9.0" />
+    <PackageReference Include="Microsoft.Build" Version="16.11.0" />
     <PackageReference Include="Spectre.Console" Version="0.41.0" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.113.7" />
     <PackageReference Include="Tomlyn" Version="0.1.2" />

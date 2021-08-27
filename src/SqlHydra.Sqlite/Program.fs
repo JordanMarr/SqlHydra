@@ -1,7 +1,8 @@
 ﻿module SqlHydra.Sqlite.Program
 
-open SqlHydra
 open SqlHydra.Sqlite
+open SqlHydra
+open System.IO
 open Domain
 
 let app = 
@@ -22,5 +23,6 @@ let main argv =
         |> SchemaGenerator.generateModule cfg app
         |> SchemaGenerator.toFormattedCode cfg app
 
-    System.IO.File.WriteAllText(cfg.OutputFile, formattedCode)
+    File.WriteAllText(cfg.OutputFile, formattedCode)
+    Fsproj.addFileToProject(cfg)
     0

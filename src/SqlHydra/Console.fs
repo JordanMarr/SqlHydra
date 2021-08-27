@@ -68,7 +68,7 @@ let tryLoadConfig(tomlFileName: string) =
     else 
         NotFound
 
-/// Creates hydra.toml if necessary and then runs.
+/// Creates a sqlhydra-*.toml file if necessary and then runs.
 let getConfig(app: AppInfo, argv: string array) = 
 
     AnsiConsole.MarkupLine($"{app.Name}")
@@ -77,12 +77,6 @@ let getConfig(app: AppInfo, argv: string array) =
     let tomlFilename = buildTomlFilename(app)
 
     match argv with 
-    //| [| "--init" |] -> 
-    //    AnsiConsole.MarkupLine("[yellow]Creating a new configuration...[/]")
-    //    let cfg = newConfigWizard(app)
-    //    saveConfig(tomlFilename, cfg)
-    //    cfg
-
     | [| |] ->
         match tryLoadConfig(tomlFilename) with
         | Valid cfg -> 
@@ -99,3 +93,4 @@ let getConfig(app: AppInfo, argv: string array) =
     | _ ->
         AnsiConsole.MarkupLine($"Invalid args: '{argv}'. Expected no args, or \"--new\".")
         failwith "Invalid args."
+
