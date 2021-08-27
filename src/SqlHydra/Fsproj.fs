@@ -13,7 +13,11 @@ let addFileToProject (cfg: Config) =
         let fileAlreadyAdded = 
             root.ItemGroups 
             |> Seq.collect (fun grp -> grp.Items)
-            |> Seq.exists (fun item -> item.Include = cfg.OutputFile)
+            |> Seq.exists (fun item -> 
+                item.Include = cfg.OutputFile || 
+                item.Include = cfg.OutputFile.Replace(@"\", "/") || // Handle "Folder/File.fs"
+                item.Include = cfg.OutputFile.Replace("/", @"\")    // Handle "Folder\Files.fs"
+            )
 
         let firstGroupWithFiles =
             root.ItemGroups
