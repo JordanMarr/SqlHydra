@@ -19,6 +19,12 @@ let main argv =
         ]
         |> sequencedTestList "Sql Server Tests"
     
+    let npgsqlTests = 
+        [
+            Npgsql.Generation.tests
+        ]
+        |> sequencedTestList "Npgsql Tests"
+
     let sqliteTests = 
         [
             Sqlite.Generation.tests
@@ -32,9 +38,10 @@ let main argv =
         |> sequencedTestList "Unit Tests"
 
     [
-        sqlServerTests
-        sqliteTests
-        unitTests
+        //sqlServerTests
+        //sqliteTests
+        //unitTests
+        npgsqlTests
     ]
     |> sequencedTestList ""
     |> runTests testConfig

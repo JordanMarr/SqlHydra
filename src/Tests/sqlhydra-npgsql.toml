@@ -1,0 +1,7 @@
+[general]
+connection = "Server=localhost;Port=54320;Database=Adventureworks;User Id=postgres;Password=postgres;"
+output = "Npgsql/AdventureWorks.fs"
+namespace = "Npgsql.AdventureWorks"
+cli_mutable = true
+[readers]
+reader_type = "Npgsql.NpgsqlDataReader"

@@ -13,6 +13,9 @@
     <Compile Include="SqlServer\Queries.fs" />
     <Compile Include="SqlServer\QueryTextOutput.fs" />
     <Compile Include="SqlServer\Generation.fs" />
+    <Compile Include="Npgsql\AdventureWorks.fs" />
+    <Compile Include="Npgsql\DB.fs" />
+    <Compile Include="Npgsql\Generation.fs" />
     <Compile Include="Sqlite\Generation.fs" />
     <Compile Include="UnitTests\TomlConfigParser.fs" />
     <Compile Include="Program.fs" />
@@ -24,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SqlHydra.Npgsql\SqlHydra.Npgsql.fsproj" />
     <ProjectReference Include="..\SqlHydra.Query\SqlHydra.Query.fsproj" />
     <ProjectReference Include="..\SqlHydra.Sqlite\SqlHydra.Sqlite.fsproj" />
     <ProjectReference Include="..\SqlHydra.SqlServer\SqlHydra.SqlServer.fsproj" />
