@@ -75,6 +75,11 @@ module Table =
         let tables = qs.TableMappings.Add(fqn, { tbl with Schema = Some schemaName })
         QuerySource<'T>(tables)
 
+    let fromSubquery<'T> (subquery: TypedQuery<'T>) =
+        let ent = typeof<'T>
+        let tables = Map [fqName ent, { Name = ent.Name; Schema = None }]
+        QuerySource<'T, SqlKata.Query>(subquery.Query, tables)
+
 type SelectExpressionBuilder<'Output>() =
 
     let getQueryOrDefault (state: QuerySource<'Result>) = // 'Result allows 'T to vary as the result of joins
@@ -91,6 +96,14 @@ type SelectExpressionBuilder<'Output>() =
         QuerySource<'T, Query>(
             query.From(match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name), 
             state.TableMappings)
+
+    member this.For (state: TypedQuery<'T>, f: 'T -> QuerySource<'T>) =
+        let subquery = fromSubquery state
+        let tbl = subquery.GetOuterTableMapping()
+        let query = SqlKata.Query().From(match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name)
+        QuerySource<'T, Query>(
+            query.From(subquery.Query), 
+            subquery.TableMappings)
 
     member this.Yield _ =
         QuerySource<'T>(Map.empty)

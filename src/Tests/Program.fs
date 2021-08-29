@@ -12,10 +12,10 @@ let main argv =
 
     let sqlServerTests = 
         [
-            SqlServer.Migration.migration
-            SqlServer.Queries.tests
+            //SqlServer.Migration.migration
+            //SqlServer.Queries.tests
             SqlServer.QueryTextOutput.tests
-            SqlServer.Generation.tests
+            //SqlServer.Generation.tests
         ]
         |> sequencedTestList "Sql Server Tests"
     
@@ -33,8 +33,8 @@ let main argv =
 
     [
         sqlServerTests
-        sqliteTests
-        unitTests
+        //sqliteTests
+        //unitTests
     ]
     |> sequencedTestList ""
     |> runTests testConfig

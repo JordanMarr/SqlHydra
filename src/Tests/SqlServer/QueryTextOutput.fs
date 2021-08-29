@@ -153,6 +153,22 @@ let tests =
             //let customers = get query
             //printfn "Results: %A" customers
 
+        ftestTask "From Subquery" {
+            let redProducts = 
+                select {
+                    for p in productTable do
+                    where (p.Color = Some "Red")
+                }
+    
+            let query = 
+                select {
+                    for p in redProducts do
+                    select p
+                }
+    
+            query |> toSql |> printfn "%s"
+        }
+
         testCase "Update should fail without where or updateAll" <| fun _ ->
             try 
                 let query = 
