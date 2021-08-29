@@ -160,13 +160,17 @@ let tests =
                     where (p.Color = Some "Red")
                 }
     
-            let query = 
+            let redProductsThatStartWithS = 
                 select {
                     for p in redProducts do
+                    where (p.Name =% "S")
                     select p
                 }
     
-            query |> toSql |> printfn "%s"
+            let sql = redProductsThatStartWithS |> toSql 
+            sql |> printfn "%s" 
+            let expected = "SELECT [SalesLT].[Product].* FROM (SELECT * FROM [SalesLT].[Product] WHERE ([SalesLT].[Product].[Color] = @p0)) WHERE (LOWER([SalesLT].[Product].[Name]) like @p1)"
+            Expect.equal expected sql ""
         }
 
         testCase "Update should fail without where or updateAll" <| fun _ ->
