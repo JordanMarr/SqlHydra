@@ -7,10 +7,6 @@ open System.Collections.Generic
 open System.Linq.Expressions
 open SqlKata
 
-/// Represents a typed SqlKata query.
-type TypedQuery<'T>(query: SqlKata.Query) =
-    member this.Query = query
-
 [<AutoOpen>]
 module FQ = 
     /// Fully qualified entity type name
@@ -75,10 +71,10 @@ module Table =
         let tables = qs.TableMappings.Add(fqn, { tbl with Schema = Some schemaName })
         QuerySource<'T>(tables)
 
-    let fromSubquery<'T> (subquery: TypedQuery<'T>) =
-        let ent = typeof<'T>
-        let tables = Map [fqName ent, { Name = ent.Name; Schema = None }]
-        QuerySource<'T, SqlKata.Query>(subquery.Query, tables)
+/// Represents a typed SqlKata query.
+type TypedQuery<'T>(qs: QuerySource<'T>, query: SqlKata.Query) =
+    member internal this.QuerySource = qs 
+    member this.Query = query
 
 type SelectExpressionBuilder<'Output>() =
 
@@ -90,6 +86,7 @@ type SelectExpressionBuilder<'Output>() =
     let mergeTableMappings (a: Map<FQName, TableMapping>, b: Map<FQName, TableMapping>) =
         Map (Seq.concat [ (Map.toSeq a); (Map.toSeq b) ])
 
+    /// FROM {table}
     member this.For (state: QuerySource<'T>, f: 'T -> QuerySource<'T>) =
         let tbl = state.GetOuterTableMapping()
         let query = state |> getQueryOrDefault
@@ -97,13 +94,11 @@ type SelectExpressionBuilder<'Output>() =
             query.From(match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name), 
             state.TableMappings)
 
-    member this.For (state: TypedQuery<'T>, f: 'T -> QuerySource<'T>) =
-        let subquery = fromSubquery state
-        let tbl = subquery.GetOuterTableMapping()
-        let query = SqlKata.Query().From(match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name)
+    /// FROM ({subquery})
+    member this.For (subquery: TypedQuery<'T>, f: 'T -> QuerySource<'T>) =
         QuerySource<'T, Query>(
-            query.From(subquery.Query), 
-            subquery.TableMappings)
+            Query().From(subquery.Query), 
+            subquery.QuerySource.TableMappings)
 
     member this.Yield _ =
         QuerySource<'T>(Map.empty)
@@ -305,10 +300,10 @@ type SelectExpressionBuilder<'Output>() =
         let query = state |> getQueryOrDefault        
         QuerySource<'T, Query>(query.Distinct(), state.TableMappings)
 
-    /// Unwraps the query
+    /// Unwraps the SqlKata query
     member this.Run (state: QuerySource<'T>) =
         let query = state |> getQueryOrDefault
-        TypedQuery<'T>(query)
+        TypedQuery<'T>(state, query)
 
 type DeleteExpressionBuilder<'T>() =
 
@@ -342,7 +337,7 @@ type DeleteExpressionBuilder<'T>() =
     /// Unwraps the query
     member this.Run (state: QuerySource<'T>) =
         let query  = state |> getQueryOrDefault
-        TypedQuery<'T>(query.AsDelete())
+        TypedQuery<'T>(state, query.AsDelete())
 
 type InsertQuerySpec<'T> = 
     {
