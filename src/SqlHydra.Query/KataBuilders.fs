@@ -34,9 +34,9 @@ type QuerySource<'T>(tableMappings) =
         member this.GetEnumerator() = Seq.empty<'T>.GetEnumerator() :> Collections.IEnumerator
         member this.GetEnumerator() = Seq.empty<'T>.GetEnumerator()
     
-    member this.TableMappings : Map<FQName, TableMapping> = tableMappings
+    member internal this.TableMappings : Map<FQName, TableMapping> = tableMappings
     
-    member this.GetOuterTableMapping() = 
+    member internal this.GetOuterTableMapping() = 
         let outerEntity = typeof<'T>
         let fqn = 
             if outerEntity.Name.StartsWith "Tuple" // True for joined tables
@@ -71,11 +71,6 @@ module Table =
         let tables = qs.TableMappings.Add(fqn, { tbl with Schema = Some schemaName })
         QuerySource<'T>(tables)
 
-/// Represents a typed SqlKata query.
-type TypedQuery<'T>(qs: QuerySource<'T>, query: SqlKata.Query) =
-    member internal this.QuerySource = qs 
-    member this.Query = query
-
 type SelectExpressionBuilder<'Output>() =
 
     let getQueryOrDefault (state: QuerySource<'Result>) = // 'Result allows 'T to vary as the result of joins
@@ -86,19 +81,25 @@ type SelectExpressionBuilder<'Output>() =
     let mergeTableMappings (a: Map<FQName, TableMapping>, b: Map<FQName, TableMapping>) =
         Map (Seq.concat [ (Map.toSeq a); (Map.toSeq b) ])
 
-    /// FROM {table}
+    /// FROM {table} or {subquery}
     member this.For (state: QuerySource<'T>, f: 'T -> QuerySource<'T>) =
         let tbl = state.GetOuterTableMapping()
-        let query = state |> getQueryOrDefault
-        QuerySource<'T, Query>(
-            query.From(match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name), 
-            state.TableMappings)
-
-    /// FROM ({subquery})
-    member this.For (subquery: TypedQuery<'T>, f: 'T -> QuerySource<'T>) =
-        QuerySource<'T, Query>(
-            Query().From(subquery.Query), 
-            subquery.QuerySource.TableMappings)
+        match state with
+        // From subquery
+        | :? QuerySource<'T, Query> as qs when qs.Query.Clauses |> Seq.exists (fun c -> c :? FromClause) -> 
+            QuerySource<'T, Query>(
+                Query().From(qs.Query), 
+                qs.TableMappings)
+        // Join
+        | :? QuerySource<'T, Query> as qs ->
+            QuerySource<'T, Query>(
+                qs.Query.From(match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name), 
+                qs.TableMappings)
+        // Simple from table / no join
+        | _ -> 
+            QuerySource<'T, Query>(
+                Query().From(match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name), 
+                state.TableMappings)
 
     member this.Yield _ =
         QuerySource<'T>(Map.empty)
@@ -253,7 +254,7 @@ type SelectExpressionBuilder<'Output>() =
     member this.AvgBy (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
         let propertyName = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector |> fullyQualifyColumn state.TableMappings
-        QuerySource<int, Query>(query.AsAverage(propertyName), state.TableMappings)
+        QuerySource<'a, Query>(query.AsAverage(propertyName), state.TableMappings)
     
     ///// SUM aggregate function for COLNAME (or * symbol) and map it to ALIAS
     //[<CustomOperation("sum", MaintainsVariableSpace = true)>]
@@ -302,8 +303,7 @@ type SelectExpressionBuilder<'Output>() =
 
     /// Unwraps the SqlKata query
     member this.Run (state: QuerySource<'T>) =
-        let query = state |> getQueryOrDefault
-        TypedQuery<'T>(state, query)
+        state :?> QuerySource<'T, SqlKata.Query>
 
 type DeleteExpressionBuilder<'T>() =
 
@@ -336,8 +336,7 @@ type DeleteExpressionBuilder<'T>() =
 
     /// Unwraps the query
     member this.Run (state: QuerySource<'T>) =
-        let query  = state |> getQueryOrDefault
-        TypedQuery<'T>(state, query.AsDelete())
+        state :?> QuerySource<'T, SqlKata.Query>
 
 type InsertQuerySpec<'T> = 
     {

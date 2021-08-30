@@ -16,8 +16,8 @@ module internal KataUtils =
                 | null -> box System.DBNull.Value 
                 | o -> o
 
-    let fromTypedQuery (selectQuery: TypedQuery<'T>) = 
-        selectQuery.Query
+    let fromQuerySource (querySource: QuerySource<'T, Query>) = 
+        querySource.Query
     
     let fromUpdate (updateQuery: UpdateQuerySpec<'T>) = 
         let kvps = 
@@ -79,7 +79,7 @@ module internal KataUtils =
         Query(insertQuery.Table).AsInsert(preparedKvps, returnId = returnId)
 
 type Kata = 
-    static member ToQuery (typedQuery: TypedQuery<'T>) = KataUtils.fromTypedQuery typedQuery
+    static member ToQuery (typedQuery: QuerySource<'T, SqlKata.Query>) = KataUtils.fromQuerySource typedQuery
     static member ToQuery (updateQuery: UpdateQuerySpec<'T>) = KataUtils.fromUpdate updateQuery
     static member ToQuery (insertQuery: InsertQuerySpec<'T>) = KataUtils.fromInsert false insertQuery
     

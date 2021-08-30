@@ -22,6 +22,6 @@ let openMaster() =
     conn.Open()
     conn
 
-let toSql<'T> (query: TypedQuery<'T>) = 
+let toSql<'T> (query: QuerySource<'T, SqlKata.Query>) = 
     let compiler = SqlKata.Compilers.SqlServerCompiler()
     compiler.Compile(query.Query).Sql

@@ -153,13 +153,13 @@ let tests =
             //let customers = get query
             //printfn "Results: %A" customers
 
-        ftestTask "From Subquery" {
+        testTask "From Subquery" {
             let redProducts = 
                 select {
                     for p in productTable do
                     where (p.Color = Some "Red")
                 }
-    
+
             let redProductsThatStartWithS = 
                 select {
                     for p in redProducts do
@@ -172,6 +172,53 @@ let tests =
             let expected = "SELECT [SalesLT].[Product].* FROM (SELECT * FROM [SalesLT].[Product] WHERE ([SalesLT].[Product].[Color] = @p0)) WHERE (LOWER([SalesLT].[Product].[Name]) like @p1)"
             Expect.equal expected sql ""
         }
+
+        ftestTask "From Subquery with Join" {
+
+            let fewMonthsAgo = System.DateTime.UtcNow.AddMonths(-6)
+            let oldPostsQuery = SqlKata.Query("Posts").Where("Date", "<", fewMonthsAgo).As("old")
+            let query = SqlKata.Query().From(oldPostsQuery).OrderByDesc("Date")
+
+            let redProducts = 
+                select {
+                    for p in productTable do
+                    where (p.Color = Some "Red")
+                }
+
+            let redProductsThatStartWithS = 
+                select {
+                    for p in redProducts do
+                    join c in categoryTable on (p.ProductCategoryID.Value = c.ProductCategoryID)
+                    where (p.Name =% "S")
+                    select p
+                }
+    
+            let sql = redProductsThatStartWithS |> toSql 
+            sql |> printfn "%s" 
+            let expected = "SELECT [SalesLT].[Product].* FROM (SELECT * FROM [SalesLT].[Product] WHERE ([SalesLT].[Product].[Color] = @p0)) WHERE (LOWER([SalesLT].[Product].[Name]) like @p1)"
+            Expect.equal expected sql ""
+        }
+
+        //ftestTask "From Subquery Avg" {
+        //    let redProducts = 
+        //        select {
+        //            forSub p in productTable do
+        //            where (p.Color = Some "Red")
+        //            avgBy p.ListPrice
+        //        }
+    
+        //    let redProductsThatStartWithS = 
+        //        select {
+        //            for p in redProducts do
+        //            where (p.Name =% "S")
+        //            select p
+        //        }
+    
+        //    let sql = redProductsThatStartWithS |> toSql 
+        //    sql |> printfn "%s" 
+        //    let expected = "SELECT [SalesLT].[Product].* FROM (SELECT * FROM [SalesLT].[Product] WHERE ([SalesLT].[Product].[Color] = @p0)) WHERE (LOWER([SalesLT].[Product].[Name]) like @p1)"
+        //    Expect.equal expected sql ""
+        //}
 
         testCase "Update should fail without where or updateAll" <| fun _ ->
             try 
