@@ -174,17 +174,6 @@ let tests =
         }
 
         testTask "From Subquery with Join" {
-
-            let fewMonthsAgo = System.DateTime.UtcNow.AddMonths(-6)
-            let oldPostsQuery = SqlKata.Query("Posts").Where("Date", "<", fewMonthsAgo).As("old")
-            let query = 
-                SqlKata.Query()
-                    .From(oldPostsQuery)
-                    .Join("Authors", "Authors.Id", "Posts.AuthorId")
-                    .OrderByDesc("Date")
-
-            let sql1 = query |> toSql'
-
             let redProducts = 
                 select {
                     for p in productTable do
@@ -195,7 +184,7 @@ let tests =
                 select {
                     for p in redProducts do
                     join c in categoryTable on (p.ProductCategoryID.Value = c.ProductCategoryID)
-                    where (p.Name =% "S")
+                    where (p.Name =% "S%")
                     select p
                 }
     
