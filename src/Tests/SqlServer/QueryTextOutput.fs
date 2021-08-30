@@ -173,11 +173,17 @@ let tests =
             Expect.equal expected sql ""
         }
 
-        ftestTask "From Subquery with Join" {
+        testTask "From Subquery with Join" {
 
             let fewMonthsAgo = System.DateTime.UtcNow.AddMonths(-6)
             let oldPostsQuery = SqlKata.Query("Posts").Where("Date", "<", fewMonthsAgo).As("old")
-            let query = SqlKata.Query().From(oldPostsQuery).OrderByDesc("Date")
+            let query = 
+                SqlKata.Query()
+                    .From(oldPostsQuery)
+                    .Join("Authors", "Authors.Id", "Posts.AuthorId")
+                    .OrderByDesc("Date")
+
+            let sql1 = query |> toSql'
 
             let redProducts = 
                 select {
@@ -195,30 +201,10 @@ let tests =
     
             let sql = redProductsThatStartWithS |> toSql 
             sql |> printfn "%s" 
-            let expected = "SELECT [SalesLT].[Product].* FROM (SELECT * FROM [SalesLT].[Product] WHERE ([SalesLT].[Product].[Color] = @p0)) WHERE (LOWER([SalesLT].[Product].[Name]) like @p1)"
+            let expected = "SELECT [SalesLT].[Product].* FROM (SELECT * FROM [SalesLT].[Product] WHERE ([SalesLT].[Product].[Color] = @p0)) \n\
+                            INNER JOIN [SalesLT].[ProductCategory] ON [SalesLT].[ProductCategory].[ProductCategoryID] = [SalesLT].[Product].[ProductCategoryID] WHERE (LOWER([SalesLT].[Product].[Name]) like @p1)"
             Expect.equal expected sql ""
         }
-
-        //ftestTask "From Subquery Avg" {
-        //    let redProducts = 
-        //        select {
-        //            forSub p in productTable do
-        //            where (p.Color = Some "Red")
-        //            avgBy p.ListPrice
-        //        }
-    
-        //    let redProductsThatStartWithS = 
-        //        select {
-        //            for p in redProducts do
-        //            where (p.Name =% "S")
-        //            select p
-        //        }
-    
-        //    let sql = redProductsThatStartWithS |> toSql 
-        //    sql |> printfn "%s" 
-        //    let expected = "SELECT [SalesLT].[Product].* FROM (SELECT * FROM [SalesLT].[Product] WHERE ([SalesLT].[Product].[Color] = @p0)) WHERE (LOWER([SalesLT].[Product].[Name]) like @p1)"
-        //    Expect.equal expected sql ""
-        //}
 
         testCase "Update should fail without where or updateAll" <| fun _ ->
             try 
