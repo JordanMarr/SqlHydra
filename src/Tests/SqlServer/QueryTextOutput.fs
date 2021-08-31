@@ -163,21 +163,22 @@ let tests =
             //let customers = get query
             //printfn "Results: %A" customers
         }
+                
+        test "Select Column Aggregates" {
+            let query = 
+                select {
+                    for p in productTable do
+                    groupBy p.ProductCategoryID
+                    select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice, avgBy p.ListPrice, countBy p.ListPrice)
+                }
 
-        // Waiting for SqlKata to support multiple aggregate columns: https://github.com/sqlkata/querybuilder/pull/504
-        //test "Select Column Aggregates" {
-        //    let query = 
-        //        select {
-        //            for p in productTable do
-        //            groupBy p.ProductCategoryID
-        //            select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice, avgBy p.ListPrice)
-        //        }
-
-        //    let sql = query |> toSql 
-        //    sql |> printfn "%s" 
-        //    let expected = "SELECT [SalesLT].[Product].[ProductCategoryID], MIN([SalesLT].[Product].[ListPrice]), MAX([SalesLT].[Product].[ListPrice]), AVG([SalesLT].[Product].[ListPrice]) FROM [SalesLT].[Product] GROUP BY [SalesLT].[Product].[ProductCategoryID]"
-        //    Expect.equal expected sql ""
-        //}
+            let sql = query |> toSql 
+            sql |> printfn "%s" 
+            // Waiting for SqlKata to support multiple aggregate columns: https://github.com/sqlkata/querybuilder/pull/504
+            //let expected = "SELECT [SalesLT].[Product].[ProductCategoryID], MIN([SalesLT].[Product].[ListPrice]), MAX([SalesLT].[Product].[ListPrice]), AVG([SalesLT].[Product].[ListPrice]), COUNT([SalesLT].[Product].[ListPrice]) FROM [SalesLT].[Product] GROUP BY [SalesLT].[Product].[ProductCategoryID]"
+            let expected = "SELECT [SalesLT].[Product].[ProductCategoryID], MIN(SalesLT.Product.ListPrice), MAX(SalesLT.Product.ListPrice), AVG(SalesLT.Product.ListPrice), COUNT(SalesLT.Product.ListPrice) FROM [SalesLT].[Product] GROUP BY [SalesLT].[Product].[ProductCategoryID]"
+            Expect.equal expected sql ""
+        }
 
         test "From Subquery" {
             let redProducts = 

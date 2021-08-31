@@ -184,8 +184,7 @@ type SelectExpressionBuilder<'Output>() =
             |> List.fold (fun (q: Query) -> function
                 | LinqExpressionVisitors.SelectedTable t -> q.Select($"%s{fullyQualifyTable state.TableMappings t}.*")
                 | LinqExpressionVisitors.SelectedColumn c -> q.Select(fullyQualifyColumn state.TableMappings c)
-                // Waiting for SqlKata to support multiple aggregate columns: https://github.com/sqlkata/querybuilder/pull/504
-                //| LinqExpressionVisitors.AggregateColumn (aggType, c) -> q.SelectRaw($"{aggType}({fullyQualifyColumn state.TableMappings c})")
+                | LinqExpressionVisitors.AggregateColumn (aggType, c) -> q.SelectRaw($"{aggType}({fullyQualifyColumn state.TableMappings c})")
             ) query
 
         QuerySource<'Transform, Query>(queryWithSelectedColumns, state.TableMappings)
