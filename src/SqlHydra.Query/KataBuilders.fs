@@ -26,7 +26,7 @@ let private fullyQualifyColumn (tables: Map<FQName, TableMapping>) (property: Re
 let private fullyQualifyTable (tables: Map<FQName, TableMapping>) (tableRecord: Type) =
     let tbl = tables.[fqName tableRecord]
     match tbl.Schema with
-    | Some schema -> $"{schema}.{tbl.Name}"
+    | Some schema -> $"%s{schema}.%s{tbl.Name}"
     | None -> tbl.Name
 
 type QuerySource<'T>(tableMappings) =
@@ -177,17 +177,18 @@ type SelectExpressionBuilder<'Output>() =
         let query = state |> getQueryOrDefault
 
         // User should select one or more table records
-        let selectedTypes = LinqExpressionVisitors.visitSelect<'T,'Transform> selectExpression
+        let selections = LinqExpressionVisitors.visitSelect<'T,'Transform> selectExpression
 
-        let selections = 
-            selectedTypes
-            |> List.map (function
-                | LinqExpressionVisitors.SelectedTable t -> $"%s{fullyQualifyTable state.TableMappings t}.*"
-                | LinqExpressionVisitors.SelectedColumn c -> fullyQualifyColumn state.TableMappings c
-            )
-            |> List.toArray
-                  
-        QuerySource<'Transform, Query>(query.Select(selections), state.TableMappings)
+        let queryWithSelectedColumns =
+            selections
+            |> List.fold (fun (q: Query) -> function
+                | LinqExpressionVisitors.SelectedTable t -> q.Select($"%s{fullyQualifyTable state.TableMappings t}.*")
+                | LinqExpressionVisitors.SelectedColumn c -> q.Select(fullyQualifyColumn state.TableMappings c)
+                // Waiting for SqlKata to support multiple aggregate columns: https://github.com/sqlkata/querybuilder/pull/504
+                //| LinqExpressionVisitors.AggregateColumn (aggType, c) -> q.SelectRaw($"{aggType}({fullyQualifyColumn state.TableMappings c})")
+            ) query
+
+        QuerySource<'Transform, Query>(queryWithSelectedColumns, state.TableMappings)
 
     /// Sets the ORDER BY for single column
     [<CustomOperation("orderBy", MaintainsVariableSpace = true)>]

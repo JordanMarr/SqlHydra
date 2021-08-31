@@ -286,6 +286,8 @@ let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Pro
 type Selection =
     | SelectedTable of Type
     | SelectedColumn of MemberInfo
+    // Waiting for SqlKata to support multiple aggregate columns: https://github.com/sqlkata/querybuilder/pull/504
+    //| AggregateColumn of aggregateType: string * MemberInfo
 
 /// Returns a list of one or more fully qualified table names: ["{schema}.{table}"]
 let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
@@ -295,6 +297,12 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
         | MethodCall m when m.Method.Name = "Invoke" ->
             // Handle tuples
             visit m.Object
+
+        //| MethodCall m when List.contains m.Method.Name [ nameof minBy; nameof maxBy; nameof sumBy; nameof avgBy; nameof countBy; nameof avgByAs ] ->
+        //    match m.Arguments.[0] with
+        //    | Member me -> [ AggregateColumn (m.Method.Name.Substring(0, 3).ToUpper(), me.Member) ]
+        //    | _ -> notImplMsg("Invalid argument to aggregate function.")
+
         | New n -> 
             // Handle a tuple of multiple tables
             n.Arguments 
