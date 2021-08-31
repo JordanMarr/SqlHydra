@@ -17,6 +17,7 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+    <Compile Include="QueryFunctions.fs" />
     <Compile Include="LinqExpressionVisitors.fs" />
     <Compile Include="KataBuilders.fs" />
     <Compile Include="Kata.fs" />

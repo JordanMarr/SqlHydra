@@ -92,27 +92,20 @@ type SelectExpressionBuilder<'Output>() =
     /// FROM {table} or {subquery}
     member this.For (state: QuerySource<'T>, f: 'T -> QuerySource<'T>) =
         let outerTbl = state.GetOuterTableMapping()
+        let tableName = match outerTbl.Schema with Some schema -> $"{schema}.{outerTbl.Name}" | None -> outerTbl.Name
         
         match state with
         // No joins exist -- only a FROM subquery
-        | FromSubquery qs ->
-            QuerySource<'T, Query>(Query().From(qs.Query), qs.TableMappings)
+        | FromSubquery qs -> QuerySource<'T, Query>(Query().From(qs.Query), qs.TableMappings)
         
         // No joins exist -- only a `table<'T>`
-        | FromTable qs -> 
-            QuerySource<'T, Query>(
-                Query().From(match outerTbl.Schema with Some schema -> $"{schema}.{outerTbl.Name}" | None -> outerTbl.Name), 
-                qs.TableMappings)
+        | FromTable qs -> QuerySource<'T, Query>(Query().From(tableName), qs.TableMappings)
 
         // Joins exist and have already been called. Set query FROM to outer (first / left-most) table.
-        | FromJoinedTable qs ->
-            QuerySource<'T, Query>(
-                qs.Query.From(match outerTbl.Schema with Some schema -> $"{schema}.{outerTbl.Name}" | None -> outerTbl.Name), 
-                qs.TableMappings)
+        | FromJoinedTable qs -> QuerySource<'T, Query>(qs.Query.From(tableName), qs.TableMappings)
         
         // Joins exist and have already been called. Query FROM should have already been set to the subquery in the join/leftJoin.
-        | FromJoinedSubquery qs ->
-            qs
+        | FromJoinedSubquery qs -> qs
 
     /// INNER JOIN table where COLNAME equals to another COLUMN (including TABLE name)
     [<CustomOperation("join", MaintainsVariableSpace = true, IsLikeJoin = true, JoinConditionWord = "on")>]
@@ -235,12 +228,6 @@ type SelectExpressionBuilder<'Output>() =
     member this.Take (state:QuerySource<'T>, take) = 
         let query = state |> getQueryOrDefault
         QuerySource<'T, Query>(query.Take(take), state.TableMappings)
-
-    /// Sets the SKIP and TAKE value for query
-    [<CustomOperation("skipTake", MaintainsVariableSpace = true)>]
-    member this.SkipTake (state:QuerySource<'T>, skip, take) = 
-        let query = state |> getQueryOrDefault
-        QuerySource<'T, Query>(query.Skip(skip).Take(take), state.TableMappings)
 
     /// Sets the GROUP BY for one or more columns.
     [<CustomOperation("groupBy", MaintainsVariableSpace = true)>]
@@ -456,48 +443,3 @@ let select<'T> = SelectExpressionBuilder<'T>()
 let delete<'T> = DeleteExpressionBuilder<'T>()
 let insert<'T> = InsertExpressionBuilder<'T>()
 let update<'T> = UpdateExpressionBuilder<'T>()
-
-/// WHERE column is IN values
-let isIn<'P> (prop: 'P) (values: 'P list) = true
-/// WHERE column is IN values
-let inline (|=|) (prop: 'P) (values: 'P list) = true
-
-/// WHERE column is NOT IN values
-let isNotIn<'P> (prop: 'P) (values: 'P list) = true
-/// WHERE column is NOT IN values
-let inline (|<>|) (prop: 'P) (values: 'P list) = true
-
-/// WHERE column like value   
-let like<'P> (prop: 'P) (pattern: string) = true
-/// WHERE column like value   
-let inline (=%) (prop: 'P) (pattern: string) = true
-
-/// WHERE column not like value   
-let notLike<'P> (prop: 'P) (pattern: string) = true
-/// WHERE column not like value   
-let inline (<>%) (prop: 'P) (pattern: string) = true
-
-/// WHERE column IS NULL
-let isNullValue<'P> (prop: 'P) = true
-/// WHERE column IS NOT NULL
-let isNotNullValue<'P> (prop: 'P) = true
-
-(*
-Select Aggregates:
-
-countBy, avgBy, minBy, maxBy, sumBy
-
-select {
-    for p in productsTable do
-    join c in categoryTable on (p.ProductCategoryID.Value = c.ProductCategoryID)
-    groupBy p.Department
-    select p.Department, minBy p.Price, maxBy p.Price, countBy p.Price
-}
-
-SELECT [SalesLT].[Product].[Department], MIN([SalesLT].[Product].[Price]) AS MinPrice, MAX([SalesLT].[Product].[Price]) AS MaxPrice
-
-Should infer type of `minBy p.Price` to be `decimal`
-Should infer type of `maxBy p.Price` to be `decimal`
-Should set type of `countBy p.Price to be `int`
-Resulting type should be: `string * decimal * decimal * int`
-*)

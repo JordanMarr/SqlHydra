@@ -187,10 +187,10 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
         | MethodCall m when m.Method.Name = "Invoke" ->
             // Handle tuples
             visit m.Object (Query())
-        | MethodCall m when List.contains m.Method.Name [ "isIn"; "isNotIn"; "op_BarEqualsBar"; "op_BarLessGreaterBar" ] ->
+        | MethodCall m when List.contains m.Method.Name [ nameof isIn; nameof isNotIn; nameof op_BarEqualsBar; nameof op_BarLessGreaterBar ] ->
             let filter : (string * seq<obj>) -> Query = 
                 match m.Method.Name with
-                | "isIn" | "op_BarEqualsBar" -> query.WhereIn
+                | nameof isIn| nameof op_BarEqualsBar -> query.WhereIn
                 | _ -> query.WhereNotIn
 
             match m.Arguments.[0], m.Arguments.[1] with
@@ -201,18 +201,18 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
                 let lstValues = (value :?> System.Collections.IEnumerable) |> Seq.cast<obj> |> Seq.toList
                 filter(qualifyColumn p, lstValues)
             | _ -> notImpl()
-        | MethodCall m when List.contains m.Method.Name [ "like"; "notLike"; "op_EqualsPercent"; "op_LessGreaterPercent" ] ->
+        | MethodCall m when List.contains m.Method.Name [ nameof like; nameof notLike; nameof op_EqualsPercent; nameof op_LessGreaterPercent ] ->
             match m.Arguments.[0], m.Arguments.[1] with
             | Property p, Value value -> 
                 let pattern = string value
                 match m.Method.Name with
-                | "like" | "op_EqualsPercent" -> query.WhereLike(qualifyColumn p, pattern, false)
+                | nameof like | nameof op_EqualsPercent -> query.WhereLike(qualifyColumn p, pattern, false)
                 | _ -> query.WhereNotLike(qualifyColumn p, pattern, false)
             | _ -> notImpl()
-        | MethodCall m when m.Method.Name = "isNullValue" || m.Method.Name = "isNotNullValue" ->
+        | MethodCall m when m.Method.Name = nameof isNullValue || m.Method.Name = nameof isNotNullValue ->
             match m.Arguments.[0] with
             | Property p -> 
-                if m.Method.Name = "isNullValue" 
+                if m.Method.Name = nameof isNullValue
                 then query.WhereNull(qualifyColumn p)
                 else query.WhereNotNull(qualifyColumn p)
             | _ -> notImpl()
