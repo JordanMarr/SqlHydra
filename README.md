@@ -153,14 +153,6 @@ SqlHydra.Query can be used with any library that accepts a data reader; however,
 ### Setup
 
 ```F#
-/// Opens a connection and creates a QueryContext that will generate SQL Server dialect queries
-let openContext() = 
-    let compiler = SqlKata.Compilers.SqlServerCompiler()
-    let conn = openConnection()
-    new QueryContext(conn, compiler)
-```
-
-```F#
 open SqlHydra.Query
 
 // Tables
@@ -170,6 +162,14 @@ let addressTable =          table<SalesLT.Address>          |> inSchema (nameof 
 let productTable =          table<SalesLT.Product>          |> inSchema (nameof SalesLT)
 let categoryTable =         table<SalesLT.ProductCategory>  |> inSchema (nameof SalesLT)
 let errorLogTable =         table<dbo.ErrorLog>
+```
+
+```F#
+/// Opens a connection and creates a QueryContext that will generate SQL Server dialect queries
+let openContext() = 
+    let compiler = SqlKata.Compilers.SqlServerCompiler()
+    let conn = openConnection()
+    new QueryContext(conn, compiler)
 ```
 
 ### Select Builder
@@ -191,7 +191,7 @@ let cities =
     |> List.map (fun (city, state) -> $"City, State: %s{city}, %s{state}")
 ```
 
-Select `Address` entities where City starts with `S%`:
+Select `Address` entities where City starts with `S`:
 ```F#
 let addresses =
     select {
