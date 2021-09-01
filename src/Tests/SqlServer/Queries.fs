@@ -114,18 +114,22 @@ let tests =
             printfn "Results: %A" customersWithAddresses
         }
         
-        testTask "Select Columns with Option" {
+        testTask "Select Columns with None" {
             use ctx = openContext()
         
             let! values = 
                 select {
                     for p in productTable do
-                    where (p.ProductCategoryID <> None)
-                    select (p.ProductCategoryID, p.ListPrice)
+                    select (p.Name, p.Size)
                 }
                 |> ctx.ReadAsync HydraReader.Read
         
             printfn "Results: %A" values
+            
+            let withNone = values |> Seq.filter (fun (nm, size) -> size = None) |> Seq.length
+            let withSome = values |> Seq.filter (fun (nm, size) -> size <> None) |> Seq.length
+            Expect.isTrue (withNone > 0) ""
+            Expect.isTrue (withSome > 0) ""
         }
 
         testTask "Select Column Aggregates" {
