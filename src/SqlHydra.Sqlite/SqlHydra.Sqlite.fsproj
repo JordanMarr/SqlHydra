@@ -11,7 +11,7 @@
     <ToolCommandName>sqlhydra-sqlite</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-    <PackageReleaseNotes>v0.210.0: SqlHydra.Sqlite now adds generated file to .fsproj.</PackageReleaseNotes>
+    <PackageReleaseNotes>v0.220.0: bug fix in HydraReader.Read.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <Version>0.210.0</Version>
+    <Version>0.220.0</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.SqlServer is a dotnet tool that generates F# records for a SQL Server database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -11,7 +11,7 @@
     <ToolCommandName>sqlhydra-mssql</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-    <PackageReleaseNotes>v0.210.0: SqlHydra.SqlServer now adds generated file to .fsproj.</PackageReleaseNotes>
+    <PackageReleaseNotes>v0.220.0: bug fix in HydraReader.Read.</PackageReleaseNotes>
   </PropertyGroup>
   
   <ItemGroup>
