@@ -521,9 +521,9 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                             , SynExpr.CreateApp(
                                 SynExpr.CreateIdentString("Some")
                                 , SynExpr.CreateParen(
-                                    SynExpr.CreateAppInfix(
-                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "reader"; ptr.ReaderMethod ]), None), 
-                                        SynExpr.CreateIdent(Ident.Create(">> wrap"))
+                                    SynExpr.CreateApp(
+                                        SynExpr.CreateIdent(Ident.Create("wrap")),
+                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "reader"; ptr.ReaderMethod ]), None)
                                     )
                                 )
                             )
@@ -689,7 +689,11 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
 
         // "wrap" fn in GetPrimitiveReader
         "let wrap = \"wrap-placeholder\"",
-        "let wrap (v: 'V) = if isOpt then v |> Some |> box else v |> id |> box"
+        """let wrap get (ord: int) = 
+                if isOpt 
+                then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+                else get ord |> box 
+        """
 
         // HydraReader Read Method Body
         "// ReadMethodBodyPlaceholder",
