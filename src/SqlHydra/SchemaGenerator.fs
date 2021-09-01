@@ -455,7 +455,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
             }
         )
 
-    let staticGetPrimitiveReaderMethod = 
+    let staticGetPrimitiveReaderMethod =         
         SynMemberDefn.CreateMember(
             { SynBindingRcd.Let with 
                 Pattern = 
@@ -478,11 +478,17 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                                     , SynType.Create(rdrCfg.ReaderType)
                                                     , range0
                                                 )
+                                                SynPat.Typed(
+                                                    SynPat.LongIdent(LongIdentWithDots.CreateString("isOpt"), None, None, SynArgPats.Empty, None, range0)
+                                                    , SynType.Create("bool")
+                                                    , range0
+                                                )
                                             ], range0
                                         ), range0
                                     )
                                 ]
                             )
+                            , access = SynAccess.Private
                         )
                     )
                 ValData = 
@@ -517,7 +523,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                 , SynExpr.CreateParen(
                                     SynExpr.CreateAppInfix(
                                         SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "reader"; ptr.ReaderMethod ]), None), 
-                                        SynExpr.CreateIdent(Ident.Create(">> box"))
+                                        SynExpr.CreateIdent(Ident.Create(">> wrap"))
                                     )
                                 )
                             )
@@ -529,9 +535,37 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                         )
 
                     // Recursively build if..elif..elif..else
-                    db.PrimitiveTypeReaders 
-                    |> Seq.rev
-                    |> Seq.fold (fun elifClause ptr -> buildIf elifClause ptr) (SynExpr.CreateIdentString("None"))
+                    let ifExpression = 
+                        db.PrimitiveTypeReaders 
+                        |> Seq.rev
+                        |> Seq.fold (fun elifClause ptr -> buildIf elifClause ptr) (SynExpr.CreateIdentString("None"))
+
+                    let wrapFnPlaceholderBinding = 
+                        SynBinding.Binding(
+                            None
+                            , SynBindingKind.NormalBinding
+                            , false
+                            , false
+                            , []
+                            , XmlDoc.PreXmlDocEmpty
+                            , SynValData.SynValData(None, SynValInfo.Empty, None)
+                            , SynPat.LongIdent(LongIdentWithDots.CreateString("wrap"), None, None, SynArgPats.Empty, None, range0)
+                            , None
+                            , SynExpr.LetOrUse(false, false, [], SynExpr.CreateConstString("wrap-placeholder"), range0)
+                            , range0
+                            , DebugPointForBinding.NoDebugPointAtDoBinding
+                        )
+                    
+                    SynExpr.LetOrUse(
+                        false
+                        , false
+                        , [ 
+                            wrapFnPlaceholderBinding
+                        ]
+                        , ifExpression
+                        , range0
+                    )
+                    
             }
         )
 
@@ -653,6 +687,10 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
             fun col -> dictionary.Item col
         """
 
+        // "wrap" fn in GetPrimitiveReader
+        "let wrap = \"wrap-placeholder\"",
+        "let wrap (v: 'V) = if isOpt then v |> Some |> box else v |> id |> box"
+
         // HydraReader Read Method Body
         "// ReadMethodBodyPlaceholder",
         """
@@ -669,12 +707,10 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
                     then t.GenericTypeArguments.[0], true
                     else t, false
             
-                match HydraReader.GetPrimitiveReader(t, reader) with
+                match HydraReader.GetPrimitiveReader(t, reader, isOpt) with
                 | Some primitiveReader -> 
                     let ord = getOrdinalAndIncrement()
-                    if not isOpt 
-                    then fun () -> primitiveReader ord
-                    else fun () -> if reader.IsDBNull ord then box None else primitiveReader ord |> Some |> box
+                    fun () -> primitiveReader ord
                 | None ->
                     hydra.GetReaderByName(t.Name, isOpt)
             
