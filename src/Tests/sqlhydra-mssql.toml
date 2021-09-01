@@ -1,7 +1,7 @@
 [general]
-connection = "Server=localhost,1433;Database=AdventureWorksLT2019;User=sa;Password=Password#123;"
-output = "AdventureWorks.fs"
-namespace = "AdventureWorks"
+connection = "Server=localhost,12019;Database=AdventureWorksLT2019;User=sa;Password=Password#123;"
+output = "SqlServer\\AdventureWorks.fs"
+namespace = "SqlServer.AdventureWorks"
 cli_mutable = true
 [readers]
-reader_type = "System.Data.SqlClient.SqlDataReader"
+reader_type = "Microsoft.Data.SqlClient.SqlDataReader"
