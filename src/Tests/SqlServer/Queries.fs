@@ -88,7 +88,6 @@ let tests =
             query |> toSql |> printfn "%s"
         }
 
-
         testTask "Customers inner join Addresses" {
             use ctx = openContext()
 
@@ -114,6 +113,20 @@ let tests =
 
             printfn "Results: %A" customersWithAddresses
         }
+        
+        testTask "Select Columns with Option" {
+            use ctx = openContext()
+        
+            let! values = 
+                select {
+                    for p in productTable do
+                    where (p.ProductCategoryID <> None)
+                    select (p.ProductCategoryID, p.ListPrice)
+                }
+                |> ctx.ReadAsync HydraReader.Read
+        
+            printfn "Results: %A" values
+        }
 
         testTask "Select Column Aggregates" {
             use ctx = openContext()
@@ -130,18 +143,39 @@ let tests =
             printfn "Results: %A" aggregates
         }
 
-        testTask "Select Columns with Option" {
-            use ctx = openContext()
+        // IN PROGRESS
+        ptestTask "Aggregate From Subquery with Join" {
+            (* Trying to simulate this:
 
-            let! values = 
+                SELECT c.Name, subquery.AVG
+                FROM ( -- subquery
+                    SELECT p.ProductCategoryID, AVG(p.ListPrice) as AVG
+                    FROM SalesLT.Product p
+                    WHERE p.ProductCategoryID IS NOT NULL
+                    GROUP BY p.ProductCategoryID
+                ) AS subquery
+                JOIN SalesLT.ProductCategory c ON subquery.ProductCategoryID = c.ProductCategoryID
+            *)
+
+            use ctx = openContext()
+            
+            let avgPriceByCatIdSubquery = 
                 select {
                     for p in productTable do
                     where (p.ProductCategoryID <> None)
-                    select (p.ProductCategoryID, p.ListPrice)
+                    groupBy p.ProductCategoryID
+                    select (p.ProductCategoryID, avgBy p.ListPrice) // AS avgByListPrice
+                }
+
+            let! results = 
+                select {
+                    for (catId, avgPrice) in avgPriceByCatIdSubquery do // AS subquery
+                    join c in categoryTable on (catId.Value = c.ProductCategoryID) // map to subquery.ProductCategoryID (lookup by select index)
+                    select (c.Name, avgPrice) // map to subquery.avgByListPrice
                 }
                 |> ctx.ReadAsync HydraReader.Read
 
-            printfn "Results: %A" values
+            printfn "Results: %A" results
         }
 
         testTask "InsertGetId Test" {
