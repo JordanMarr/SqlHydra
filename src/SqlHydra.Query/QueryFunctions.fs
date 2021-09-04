@@ -51,6 +51,13 @@ module Where =
     /// WHERE column IS NOT NULL
     let isNotNullValue<'P> (prop: 'P) = true
 
+    /// Creates a subquery that returns a single value to be used with column comparisons.
+    let subqueryOne (query: SelectQuery<'T>) : 'T = Unchecked.defaultof<'T>
+
+    /// Creates a subquery that returns many values to be used with "isIn", "isNotIn", "|=|" or "|<>|".
+    let subqueryMany (query: SelectQuery<'T>) : 'T list = []
+
+
 (*
 Select Aggregates:
 

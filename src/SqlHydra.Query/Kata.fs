@@ -138,8 +138,13 @@ module private KataUtils =
         Query(insertQuery.Table).AsInsert(preparedKvps, returnId = returnId)
 
 
+[<AbstractClass>]
+type SelectQuery() = 
+    abstract member ToKataQuery : unit -> SqlKata.Query
+
 type SelectQuery<'T>(query: SqlKata.Query) = 
-    member this.ToKataQuery() = query
+    inherit SelectQuery()
+    override this.ToKataQuery() = query
 
 type DeleteQuery<'T>(query: SqlKata.Query) = 
     member this.ToKataQuery() = query

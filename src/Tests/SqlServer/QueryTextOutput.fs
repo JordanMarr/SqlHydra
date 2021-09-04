@@ -153,6 +153,31 @@ let tests =
             //let customers = get query
             //printfn "Results: %A" customers
 
+        test "SqlKata SubQuery" {
+            let averageQuery = SqlKata.Query("Posts").AsAverage("score")
+            let query = SqlKata.Query("Posts").Where("Score", ">", averageQuery)
+            let sql = query |> toSql
+            sql |> printfn "%s"
+        }
+
+        test "Where subqueryOne" {
+            let customerIds = 
+                select {
+                    for c in customerTable do
+                    where (c.CustomerID |<>| [30018;29545;29954;29897;29503;29559])
+                    select c.CustomerID
+                } 
+
+            let query =
+                select {
+                    for c in customerTable do
+                    where (c.CustomerID |=| subqueryMany customerIds)
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            sql |> printfn "%s"
+        }
+
         testCase "Update should fail without where or updateAll" <| fun _ ->
             try 
                 let query = 

@@ -194,9 +194,20 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
                 | _ -> query.WhereNotIn
 
             match m.Arguments.[0], m.Arguments.[1] with
+            // Column is IN / NOT IN a subquery of values
+            | Property p, MethodCall lst when lst.Method.Name = nameof subqueryMany ->
+                let subqueryExpr = lst.Arguments.[0]
+                let subquery = match subqueryExpr with | Constant c -> c | _ -> notImpl()
+                let fqCol = qualifyColumn p
+                let selectQuery = subquery.Value :?> SelectQuery
+                match m.Method.Name with
+                | nameof isIn | nameof op_BarEqualsBar -> query.WhereIn(fqCol, selectQuery.ToKataQuery())
+                | _ -> query.WhereNotIn(fqCol, selectQuery.ToKataQuery())
+            // Column is IN / NOT IN a list of values
             | Property p, MethodCall lst ->
                 let lstValues = unwrapListExpr ([], lst)                
                 filter(qualifyColumn p, lstValues)
+            // Column is IN / NOT IN an IEnumerable of values
             | Property p, Value value -> 
                 let lstValues = (value :?> System.Collections.IEnumerable) |> Seq.cast<obj> |> Seq.toList
                 filter(qualifyColumn p, lstValues)
