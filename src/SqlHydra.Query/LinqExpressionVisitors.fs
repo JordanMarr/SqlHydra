@@ -61,7 +61,6 @@ module VisitorPatterns =
         match exp.NodeType with
         | ExpressionType.Call -> Some (exp :?> MethodCallExpression)    
         | _ -> None
-
     let (|New|_|) (exp: Expression) =
         match exp.NodeType with
         | ExpressionType.New -> Some (exp :?> NewExpression)
@@ -70,6 +69,28 @@ module VisitorPatterns =
     let (|Constant|_|) (exp: Expression) =
         match exp.NodeType with
         | ExpressionType.Constant -> Some (exp :?> ConstantExpression)
+        | _ -> None
+
+    let (|ArrayInit|_|) (exp: Expression) =
+        match exp.NodeType with
+        | ExpressionType.NewArrayInit -> 
+            let arrayExp = exp :?> NewArrayExpression
+            Some (arrayExp.Expressions |> Seq.map (function | Constant c -> c.Value | _ -> notImplMsg "Unable to unwrap array value."))
+        | _ -> None
+
+    let rec unwrapListExpr (lstValues: obj list, lstExp: MethodCallExpression) =
+        if lstExp.Arguments.Count > 0 then
+            match lstExp.Arguments.[0] with
+            | Constant c -> unwrapListExpr (lstValues @ [c.Value], (lstExp.Arguments.[1] :?> MethodCallExpression))
+            | _ -> notImpl()
+        else 
+            lstValues    
+
+    let (|ListInit|_|) (exp: Expression) = 
+        match exp with
+        | MethodCall c when c.Method.Name = "Cons" ->
+            let values = unwrapListExpr ([], c)
+            Some values
         | _ -> None
 
     let (|Member|_|) (exp: Expression) =
@@ -169,14 +190,6 @@ let getComparison (expType: ExpressionType) =
     | ExpressionType.LessThanOrEqual -> "<="
     | _ -> notImplMsg "Unsupported comparison type"
 
-let rec unwrapListExpr (lstValues: obj list, lstExp: MethodCallExpression) =
-    if lstExp.Arguments.Count > 0 then
-        match lstExp.Arguments.[0] with
-        | Constant c -> unwrapListExpr (lstValues @ [c.Value], (lstExp.Arguments.[1] :?> MethodCallExpression))
-        | _ -> notImpl()
-    else 
-        lstValues
-
 let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberInfo -> string) =
     let rec visit (exp: Expression) (query: Query) : Query =
         match exp with
@@ -204,13 +217,18 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
                 | nameof isIn | nameof op_BarEqualsBar -> query.WhereIn(fqCol, selectQuery.ToKataQuery())
                 | _ -> query.WhereNotIn(fqCol, selectQuery.ToKataQuery())
             // Column is IN / NOT IN a list of values
-            | Property p, MethodCall lst ->
-                let lstValues = unwrapListExpr ([], lst)                
-                filter(qualifyColumn p, lstValues)
+            | Property p, ListInit values ->
+                filter(qualifyColumn p, values)
+            // Column is IN / NOT IN an array of values
+            | Property p, ArrayInit values -> 
+                filter(qualifyColumn p, values)
             // Column is IN / NOT IN an IEnumerable of values
             | Property p, Value value -> 
                 let lstValues = (value :?> System.Collections.IEnumerable) |> Seq.cast<obj> |> Seq.toList
                 filter(qualifyColumn p, lstValues)
+            // Column is IN / NOT IN a sequence expression of values
+            | Property p, MethodCall c when c.Method.Name = "CreateSequence" ->
+                notImplMsg "Unable to unwrap sequence expression. Please use a list or array instead."
             | _ -> notImpl()
         | MethodCall m when List.contains m.Method.Name [ nameof like; nameof notLike; nameof op_EqualsPercent; nameof op_LessGreaterPercent ] ->
             match m.Arguments.[0], m.Arguments.[1] with

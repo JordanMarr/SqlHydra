@@ -27,14 +27,14 @@ module Table =
 module Where = 
 
     /// WHERE column is IN values
-    let isIn<'P> (prop: 'P) (values: 'P list) = true
+    let isIn<'P> (prop: 'P) (values: 'P seq) = true
     /// WHERE column is IN values
-    let inline (|=|) (prop: 'P) (values: 'P list) = true
+    let inline (|=|) (prop: 'P) (values: 'P seq) = true
 
     /// WHERE column is NOT IN values
-    let isNotIn<'P> (prop: 'P) (values: 'P list) = true
+    let isNotIn<'P> (prop: 'P) (values: 'P seq) = true
     /// WHERE column is NOT IN values
-    let inline (|<>|) (prop: 'P) (values: 'P list) = true
+    let inline (|<>|) (prop: 'P) (values: 'P seq) = true
 
     /// WHERE column like value   
     let like<'P> (prop: 'P) (pattern: string) = true

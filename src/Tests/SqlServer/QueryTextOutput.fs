@@ -129,17 +129,40 @@ let tests =
             //let customers = get query
             //printfn "Results: %A" customers
 
-        testCase "Where Customer |=| List" <| fun _ ->
+        test "Where Customer |=| List" {
             let query = 
                 select {
                     for c in customerTable do
                     where (c.CustomerID |=| [30018;29545;29954;29897;29503;29559])
                 }
 
-            query.ToKataQuery() |> toSql |> printfn "%s"
+            let sql = query.ToKataQuery() |> toSql 
+            sql |> printfn "%s"
+        }
 
-            //let customers = get query
-            //printfn "Results: %A" customers
+        test "Where Customer |=| Array" {
+            let query = 
+                select {
+                    for c in customerTable do
+                    where (c.CustomerID |=| [|30018;29545;29954;29897;29503;29559|])
+                }
+
+            let sql = query.ToKataQuery() |> toSql 
+            sql |> printfn "%s"
+        }
+        
+        test "Where Customer |=| Seq" {            
+            let buildQuery (values: int seq) =                
+                select {
+                    for c in customerTable do
+                    where (c.CustomerID |=| values)
+                }
+
+            let query = buildQuery([ 30018;29545;29954;29897;29503;29559 ])
+
+            let sql = query.ToKataQuery() |> toSql 
+            sql |> printfn "%s"
+        }
 
         testCase "Where Customer |<>| List" <| fun _ ->
             let query = 
