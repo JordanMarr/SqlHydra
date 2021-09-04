@@ -63,7 +63,7 @@ let tests =
                     select (c, a)
                 }
 
-            query |> toSql |> printfn "%s"
+            query.ToKataQuery() |> toSql |> printfn "%s"
 
             let! customersWithAddresses = query |> ctx.ReadAsync HydraReader.Read
             printfn "Record Count: %i" (customersWithAddresses |> Seq.length)
@@ -85,7 +85,7 @@ let tests =
 
             let! rows = query |> ctx.ReadAsync HydraReader.Read
             printfn "Results: %A" rows
-            query |> toSql |> printfn "%s"
+            query.ToKataQuery() |> toSql |> printfn "%s"
         }
 
 
@@ -102,7 +102,7 @@ let tests =
                     select (c,a)
                 }
         
-            query |> toSql |> printfn "%s"
+            query.ToKataQuery() |> toSql |> printfn "%s"
 
             let! customersWithAddresses = 
                 query 

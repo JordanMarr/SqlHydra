@@ -18,8 +18,8 @@
       <PackagePath></PackagePath>
     </None>
     <Compile Include="LinqExpressionVisitors.fs" />
-    <Compile Include="KataBuilders.fs" />
     <Compile Include="Kata.fs" />
+    <Compile Include="KataBuilders.fs" />
     <Compile Include="QueryContext.fs" />
     <Compile Include="Extensions.fs" />
   </ItemGroup>

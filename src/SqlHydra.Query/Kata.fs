@@ -1,8 +1,95 @@
 ﻿namespace SqlHydra.Query
 
 open SqlKata
+open System.Collections.Generic
+open System
 
-module internal KataUtils = 
+[<AutoOpen>]
+module FQ = 
+    /// Fully qualified entity type name
+    type [<Struct>] FQName = private FQName of string
+    let fqName (t: Type) = FQName t.FullName
+
+    type TableMapping = { Name: string; Schema: string option }
+
+    /// Fully qualifies a column with: {?schema}.{table}.{column}
+    let internal fullyQualifyColumn (tables: Map<FQName, TableMapping>) (property: Reflection.MemberInfo) =
+        let tbl = tables.[fqName property.DeclaringType]
+        match tbl.Schema with
+        | Some schema -> $"%s{schema}.%s{tbl.Name}.%s{property.Name}"
+        | None -> $"%s{tbl.Name}.%s{property.Name}"
+
+    /// Tries to find a table mapping for a given table record type. 
+    let internal fullyQualifyTable (tables: Map<FQName, TableMapping>) (tableRecord: Type) =
+        let tbl = tables.[fqName tableRecord]
+        match tbl.Schema with
+        | Some schema -> $"{schema}.{tbl.Name}"
+        | None -> tbl.Name
+
+
+type InsertQuerySpec<'T> = 
+    {
+        Table: string
+        Entity: 'T option
+        Fields: string list
+        ReturnId: bool
+    }
+    static member Default = { Table = ""; Entity = Option<'T>.None; Fields = []; ReturnId = false }
+
+type UpdateQuerySpec<'T> = 
+    {
+        Table: string
+        Entity: 'T option
+        Fields: string list
+        SetValues: (string * obj) list
+        Where: Query option
+        UpdateAll: bool
+    }
+    static member Default = 
+        { Table = ""; Entity = Option<'T>.None; Fields = []; SetValues = []; Where = None; UpdateAll = false }
+
+type QuerySource<'T>(tableMappings) =
+    interface IEnumerable<'T> with
+        member this.GetEnumerator() = Seq.empty<'T>.GetEnumerator() :> Collections.IEnumerator
+        member this.GetEnumerator() = Seq.empty<'T>.GetEnumerator()
+    
+    member this.TableMappings : Map<FQName, TableMapping> = tableMappings
+    member this.GetOuterTableMapping() = 
+        let outerEntity = typeof<'T>
+        let fqn = 
+            if outerEntity.Name.StartsWith "Tuple" // True for joined tables
+            then outerEntity.GetGenericArguments() |> Array.head |> fqName
+            else outerEntity |> fqName
+        this.TableMappings.[fqn]
+
+type QuerySource<'T, 'Query>(query, tableMappings) = 
+    inherit QuerySource<'T>(tableMappings)
+    member this.Query : 'Query = query
+
+[<AutoOpen>]
+module Table = 
+
+    /// Maps the entity 'T to a table of the exact same name.
+    let table<'T> = 
+        let ent = typeof<'T>
+        let tables = Map [fqName ent, { Name = ent.Name; Schema = None }]
+        QuerySource<'T>(tables)
+
+    /// Maps the entity 'T to a table of the given name.
+    let table'<'T> (tableName: string) = 
+        let ent = typeof<'T>
+        let tables = Map [fqName ent, { Name = tableName; Schema = None }]
+        QuerySource<'T>(tables)
+
+    /// Maps the entity 'T to a schema of the given name.
+    let inSchema<'T> (schemaName: string) (qs: QuerySource<'T>) =
+        let ent = typeof<'T>
+        let fqn = fqName ent
+        let tbl = qs.TableMappings.[fqn]
+        let tables = qs.TableMappings.Add(fqn, { tbl with Schema = Some schemaName })
+        QuerySource<'T>(tables)
+
+module private KataUtils = 
 
     let boxValue (value: obj) = 
         if isNull value then 
@@ -16,9 +103,6 @@ module internal KataUtils =
                 | null -> box System.DBNull.Value 
                 | o -> o
 
-    let fromTypedQuery (selectQuery: TypedQuery<'T>) = 
-        selectQuery.Query
-    
     let fromUpdate (updateQuery: UpdateQuerySpec<'T>) = 
         let kvps = 
             match updateQuery.Entity, updateQuery.SetValues with
@@ -78,8 +162,15 @@ module internal KataUtils =
 
         Query(insertQuery.Table).AsInsert(preparedKvps, returnId = returnId)
 
-type Kata = 
-    static member ToQuery (typedQuery: TypedQuery<'T>) = KataUtils.fromTypedQuery typedQuery
-    static member ToQuery (updateQuery: UpdateQuerySpec<'T>) = KataUtils.fromUpdate updateQuery
-    static member ToQuery (insertQuery: InsertQuerySpec<'T>) = KataUtils.fromInsert false insertQuery
-    
+
+type SelectQuery<'T>(query: SqlKata.Query) = 
+    member this.ToKataQuery() = query
+
+type DeleteQuery<'T>(query: SqlKata.Query) = 
+    member this.ToKataQuery() = query
+
+type UpdateQuery<'T>(spec: UpdateQuerySpec<'T>) =
+    member this.ToKataQuery() = spec |> KataUtils.fromUpdate
+
+type InsertQuery<'T>(spec: InsertQuerySpec<'T>) =
+    member this.ToKataQuery(returnId: bool) = spec |> KataUtils.fromInsert returnId

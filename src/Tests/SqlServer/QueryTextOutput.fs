@@ -27,7 +27,7 @@ let tests =
                     thenByDescending a.City
                 }
 
-            let sql = toSql query
+            let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
             Expect.isTrue (sql.Contains("WHERE")) ""
 
@@ -38,7 +38,7 @@ let tests =
                     select (a.City)
                 }
 
-            let sql = toSql query
+            let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
             Expect.isTrue (sql.Contains("SELECT [SalesLT].[Address].[City] FROM")) ""
 
@@ -50,7 +50,7 @@ let tests =
                     select (a.City, a.StateProvince)
                 }
 
-            let sql = toSql query
+            let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
             Expect.isTrue (sql.Contains("SELECT [SalesLT].[Address].[City], [SalesLT].[Address].[StateProvince] FROM")) ""
 
@@ -63,7 +63,7 @@ let tests =
                     select (c, a.City)
                 }
 
-            let sql = toSql query
+            let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
             Expect.isTrue (sql.Contains("SELECT [SalesLT].[Customer].*, [SalesLT].[Address].[City] FROM")) ""
 
@@ -74,7 +74,7 @@ let tests =
                     where (a.AddressLine2 <> None)
                 }
 
-            query |> toSql |> printfn "%s"
+            query.ToKataQuery() |> toSql |> printfn "%s"
             //let addresses = get query
             //printfn "Results: %A" addresses
 
@@ -85,7 +85,7 @@ let tests =
                     where (a.City <>% "S%")
                 }
 
-            query |> toSql |> printfn "%s"
+            query.ToKataQuery() |> toSql |> printfn "%s"
         
         testCase "Or Where" <| fun _ ->
             let query = 
@@ -94,7 +94,7 @@ let tests =
                     where (a.City = "Chicago" || a.City = "Dallas")
                 }
     
-            query |> toSql |> printfn "%s"
+            query.ToKataQuery() |> toSql |> printfn "%s"
 
             //let addresses = get query
             //printfn "Results: %A" addresses
@@ -106,7 +106,7 @@ let tests =
                     where (a.City = "Chicago" && a.City = "Dallas")
                 }
     
-            query |> toSql |> printfn "%s"
+            query.ToKataQuery() |> toSql |> printfn "%s"
 
         testCase "Where Not Binary" <| fun _ ->
             let query = 
@@ -115,7 +115,7 @@ let tests =
                     where (not (a.City = "Chicago" && a.City = "Dallas"))
                 }
     
-            query |> toSql |> printfn "%s"
+            query.ToKataQuery() |> toSql |> printfn "%s"
 
         testCase "Where Customer isIn List" <| fun _ ->
             let query = 
@@ -124,7 +124,7 @@ let tests =
                     where (isIn c.CustomerID [30018;29545;29954;29897;29503;29559])
                 }
 
-            query |> toSql |> printfn "%s"
+            query.ToKataQuery() |> toSql |> printfn "%s"
 
             //let customers = get query
             //printfn "Results: %A" customers
@@ -136,7 +136,7 @@ let tests =
                     where (c.CustomerID |=| [30018;29545;29954;29897;29503;29559])
                 }
 
-            query |> toSql |> printfn "%s"
+            query.ToKataQuery() |> toSql |> printfn "%s"
 
             //let customers = get query
             //printfn "Results: %A" customers
@@ -148,7 +148,7 @@ let tests =
                     where (c.CustomerID |<>| [30018;29545;29954;29897;29503;29559])
                 }
 
-            query |> toSql |> printfn "%s"
+            query.ToKataQuery() |> toSql |> printfn "%s"
 
             //let customers = get query
             //printfn "Results: %A" customers
@@ -206,7 +206,7 @@ let tests =
                 "OracleCompiler", SqlKata.Compilers.OracleCompiler() :> SqlKata.Compilers.Compiler
                 "SqliteCompiler", SqlKata.Compilers.SqliteCompiler() :> SqlKata.Compilers.Compiler
             ]
-            |> Seq.map (fun (nm, compiler) -> nm, compiler.Compile(query.Query).Sql)
+            |> Seq.map (fun (nm, compiler) -> nm, compiler.Compile(query.ToKataQuery()).Sql)
             |> Seq.iter (fun (nm, sql) -> printfn "%s:\n%s" nm sql)
 
         testCase "Build Kata Queries" <| fun _ ->
@@ -232,21 +232,21 @@ let tests =
                             into table<dbo.ErrorLog>
                             entity record
                         }
-                        |> Kata.ToQuery
+                        |> fun query -> query.ToKataQuery(returnId = false)
 
                     update {
                         for e in table<dbo.ErrorLog> do
                         set e.ErrorMessage "Unauthorized"
                         where (e.ErrorNumber = 401)
                     }
-                    |> Kata.ToQuery
+                    |> fun query -> query.ToKataQuery()
 
                     update {
                         for e in table<dbo.ErrorLog> do
                         set e.ErrorMessage "Resource Not Found"
                         where (e.ErrorNumber = 404)
                     }
-                    |> Kata.ToQuery
+                    |> fun query -> query.ToKataQuery()
                 ]
 
             kataQueries 

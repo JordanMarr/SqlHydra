@@ -1,13 +1,11 @@
 ﻿module SqlServer.DB
 
-open SqlHydra.Query
 open Microsoft.Data.SqlClient
 
-// devcontainer: "mssql"
-let connectionString = @"Server=mssql;Database=AdventureWorksLT2019;User=sa;Password=Password#123;"
+let server = "mssql"                // devcontainer
+//let server = "localhost,12019"    // localhost
 
-// localhost
-//let connectionString = @"Server=localhost,12019;Database=AdventureWorksLT2019;User=sa;Password=Password#123;"
+let connectionString = $@"Server={server};Database=AdventureWorksLT2019;User=sa;Password=Password#123;"
 
 let getConnection() = 
     new SqlConnection(connectionString)
@@ -18,10 +16,10 @@ let openConnection() =
     conn
 
 let openMaster() = 
-    let conn = new SqlConnection(@"Server=mssql;Database=master;User=sa;Password=Password#123;")
+    let conn = new SqlConnection($@"Server={server};Database=master;User=sa;Password=Password#123;")
     conn.Open()
     conn
 
-let toSql<'T> (query: TypedQuery<'T>) = 
+let toSql (query: SqlKata.Query) = 
     let compiler = SqlKata.Compilers.SqlServerCompiler()
-    compiler.Compile(query.Query).Sql
+    compiler.Compile(query).Sql
