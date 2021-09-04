@@ -1,30 +1,55 @@
-﻿[<AutoOpen>]
-module SqlHydra.Query.QueryFunctions
+﻿namespace SqlHydra.Query
 
-/// WHERE column is IN values
-let isIn<'P> (prop: 'P) (values: 'P list) = true
-/// WHERE column is IN values
-let inline (|=|) (prop: 'P) (values: 'P list) = true
+[<AutoOpen>]
+module Table = 
 
-/// WHERE column is NOT IN values
-let isNotIn<'P> (prop: 'P) (values: 'P list) = true
-/// WHERE column is NOT IN values
-let inline (|<>|) (prop: 'P) (values: 'P list) = true
+    /// Maps the entity 'T to a table of the exact same name.
+    let table<'T> = 
+        let ent = typeof<'T>
+        let tables = Map [FQ.fqName ent, { Name = ent.Name; Schema = None }]
+        QuerySource<'T>(tables)
 
-/// WHERE column like value   
-let like<'P> (prop: 'P) (pattern: string) = true
-/// WHERE column like value   
-let inline (=%) (prop: 'P) (pattern: string) = true
+    /// Maps the entity 'T to a table of the given name.
+    let table'<'T> (tableName: string) = 
+        let ent = typeof<'T>
+        let tables = Map [FQ.fqName ent, { Name = tableName; Schema = None }]
+        QuerySource<'T>(tables)
 
-/// WHERE column not like value   
-let notLike<'P> (prop: 'P) (pattern: string) = true
-/// WHERE column not like value   
-let inline (<>%) (prop: 'P) (pattern: string) = true
+    /// Maps the entity 'T to a schema of the given name.
+    let inSchema<'T> (schemaName: string) (qs: QuerySource<'T>) =
+        let ent = typeof<'T>
+        let fqn = FQ.fqName ent
+        let tbl = qs.TableMappings.[fqn]
+        let tables = qs.TableMappings.Add(fqn, { tbl with Schema = Some schemaName })
+        QuerySource<'T>(tables)
 
-/// WHERE column IS NULL
-let isNullValue<'P> (prop: 'P) = true
-/// WHERE column IS NOT NULL
-let isNotNullValue<'P> (prop: 'P) = true
+[<AutoOpen>]
+module Where = 
+
+    /// WHERE column is IN values
+    let isIn<'P> (prop: 'P) (values: 'P list) = true
+    /// WHERE column is IN values
+    let inline (|=|) (prop: 'P) (values: 'P list) = true
+
+    /// WHERE column is NOT IN values
+    let isNotIn<'P> (prop: 'P) (values: 'P list) = true
+    /// WHERE column is NOT IN values
+    let inline (|<>|) (prop: 'P) (values: 'P list) = true
+
+    /// WHERE column like value   
+    let like<'P> (prop: 'P) (pattern: string) = true
+    /// WHERE column like value   
+    let inline (=%) (prop: 'P) (pattern: string) = true
+
+    /// WHERE column not like value   
+    let notLike<'P> (prop: 'P) (pattern: string) = true
+    /// WHERE column not like value   
+    let inline (<>%) (prop: 'P) (pattern: string) = true
+
+    /// WHERE column IS NULL
+    let isNullValue<'P> (prop: 'P) = true
+    /// WHERE column IS NOT NULL
+    let isNotNullValue<'P> (prop: 'P) = true
 
 (*
 Select Aggregates:
@@ -41,20 +66,23 @@ select {
 SELECT [SalesLT].[Product].[Department], MIN([SalesLT].[Product].[Price]) AS MinPrice, MAX([SalesLT].[Product].[Price]) AS MaxPrice
 *)
 
-///// Gets the COUNT of the given column
-//let countBy (prop: 'P) = int
+//[<AutoOpen>]
+//module Aggregates =
 
-///// Gets the MIN of the given column
-//let minBy (prop: 'P) = Unchecked.defaultof<'P>
+//    /// Gets the COUNT of the given column
+//    let countBy (prop: 'P) = int
 
-///// Gets the MAX of the given column
-//let maxBy (prop: 'P) = Unchecked.defaultof<'P>
+//    /// Gets the MIN of the given column
+//    let minBy (prop: 'P) = Unchecked.defaultof<'P>
 
-///// Gets the SUM of the given column
-//let sumBy (prop: 'P when 'P : struct) = Unchecked.defaultof<'P>
+//    /// Gets the MAX of the given column
+//    let maxBy (prop: 'P) = Unchecked.defaultof<'P>
 
-///// Gets the AVG of the given column
-//let avgBy (prop: 'P when 'P : struct) = Unchecked.defaultof<'P>
+//    /// Gets the SUM of the given column
+//    let sumBy (prop: 'P when 'P : struct) = Unchecked.defaultof<'P>
 
-///// Gets the AVG of the given column and returns 'Result.
-//let avgByAs<'P, 'Result when 'P : struct and 'Result : struct> (prop: 'P) : 'Result = Unchecked.defaultof<'Result>
+//    /// Gets the AVG of the given column
+//    let avgBy (prop: 'P when 'P : struct) = Unchecked.defaultof<'P>
+
+//    /// Gets the AVG of the given column and returns 'Result.
+//    let avgByAs<'P, 'Result when 'P : struct and 'Result : struct> (prop: 'P) : 'Result = Unchecked.defaultof<'Result>

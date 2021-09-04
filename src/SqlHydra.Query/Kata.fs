@@ -4,13 +4,12 @@ open SqlKata
 open System.Collections.Generic
 open System
 
-[<AutoOpen>]
+type TableMapping = { Name: string; Schema: string option }
+
 module FQ = 
     /// Fully qualified entity type name
     type [<Struct>] FQName = private FQName of string
     let fqName (t: Type) = FQName t.FullName
-
-    type TableMapping = { Name: string; Schema: string option }
 
     /// Fully qualifies a column with: {?schema}.{table}.{column}
     let internal fullyQualifyColumn (tables: Map<FQName, TableMapping>) (property: Reflection.MemberInfo) =
@@ -25,7 +24,6 @@ module FQ =
         match tbl.Schema with
         | Some schema -> $"{schema}.{tbl.Name}"
         | None -> tbl.Name
-
 
 type InsertQuerySpec<'T> = 
     {
@@ -53,41 +51,18 @@ type QuerySource<'T>(tableMappings) =
         member this.GetEnumerator() = Seq.empty<'T>.GetEnumerator() :> Collections.IEnumerator
         member this.GetEnumerator() = Seq.empty<'T>.GetEnumerator()
     
-    member this.TableMappings : Map<FQName, TableMapping> = tableMappings
+    member this.TableMappings : Map<FQ.FQName, TableMapping> = tableMappings
     member this.GetOuterTableMapping() = 
         let outerEntity = typeof<'T>
         let fqn = 
             if outerEntity.Name.StartsWith "Tuple" // True for joined tables
-            then outerEntity.GetGenericArguments() |> Array.head |> fqName
-            else outerEntity |> fqName
+            then outerEntity.GetGenericArguments() |> Array.head |> FQ.fqName
+            else outerEntity |> FQ.fqName
         this.TableMappings.[fqn]
 
 type QuerySource<'T, 'Query>(query, tableMappings) = 
     inherit QuerySource<'T>(tableMappings)
     member this.Query : 'Query = query
-
-[<AutoOpen>]
-module Table = 
-
-    /// Maps the entity 'T to a table of the exact same name.
-    let table<'T> = 
-        let ent = typeof<'T>
-        let tables = Map [fqName ent, { Name = ent.Name; Schema = None }]
-        QuerySource<'T>(tables)
-
-    /// Maps the entity 'T to a table of the given name.
-    let table'<'T> (tableName: string) = 
-        let ent = typeof<'T>
-        let tables = Map [fqName ent, { Name = tableName; Schema = None }]
-        QuerySource<'T>(tables)
-
-    /// Maps the entity 'T to a schema of the given name.
-    let inSchema<'T> (schemaName: string) (qs: QuerySource<'T>) =
-        let ent = typeof<'T>
-        let fqn = fqName ent
-        let tbl = qs.TableMappings.[fqn]
-        let tables = qs.TableMappings.Add(fqn, { tbl with Schema = Some schemaName })
-        QuerySource<'T>(tables)
 
 module private KataUtils = 
 

@@ -13,7 +13,7 @@ type SelectExpressionBuilder<'Output>() =
         | :? QuerySource<'Result, Query> as qs -> qs.Query
         | _ -> Query()            
 
-    let mergeTableMappings (a: Map<FQName, TableMapping>, b: Map<FQName, TableMapping>) =
+    let mergeTableMappings (a: Map<FQ.FQName, TableMapping>, b: Map<FQ.FQName, TableMapping>) =
         Map (Seq.concat [ (Map.toSeq a); (Map.toSeq b) ])
 
     member this.For (state: QuerySource<'T>, f: 'T -> QuerySource<'T>) =
@@ -34,7 +34,7 @@ type SelectExpressionBuilder<'Output>() =
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
     member this.Where (state:QuerySource<'T>, [<ProjectionParameter>] whereExpression) = 
         let query = state |> getQueryOrDefault
-        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (fullyQualifyColumn state.TableMappings)
+        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
         QuerySource<'T, Query>(query.Where(fun w -> where), state.TableMappings)
 
     /// Sets the SELECT statement and filters the query to include only the selected tables
@@ -48,8 +48,8 @@ type SelectExpressionBuilder<'Output>() =
         let selections = 
             selectedTypes
             |> List.map (function
-                | LinqExpressionVisitors.SelectedTable t -> $"%s{fullyQualifyTable state.TableMappings t}.*"
-                | LinqExpressionVisitors.SelectedColumn c -> fullyQualifyColumn state.TableMappings c
+                | LinqExpressionVisitors.SelectedTable t -> $"%s{FQ.fullyQualifyTable state.TableMappings t}.*"
+                | LinqExpressionVisitors.SelectedColumn c -> FQ.fullyQualifyColumn state.TableMappings c
             )
             |> List.toArray
                   
@@ -59,28 +59,28 @@ type SelectExpressionBuilder<'Output>() =
     [<CustomOperation("orderBy", MaintainsVariableSpace = true)>]
     member this.OrderBy (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
-        let propertyName = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector |> fullyQualifyColumn state.TableMappings
+        let propertyName = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector |> FQ.fullyQualifyColumn state.TableMappings
         QuerySource<'T, Query>(query.OrderBy(propertyName), state.TableMappings)
 
     /// Sets the ORDER BY for single column
     [<CustomOperation("thenBy", MaintainsVariableSpace = true)>]
     member this.ThenBy (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
-        let propertyName = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector |> fullyQualifyColumn state.TableMappings
+        let propertyName = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector |> FQ.fullyQualifyColumn state.TableMappings
         QuerySource<'T, Query>(query.OrderBy(propertyName), state.TableMappings)
 
     /// Sets the ORDER BY DESC for single column
     [<CustomOperation("orderByDescending", MaintainsVariableSpace = true)>]
     member this.OrderByDescending (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
-        let propertyName = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector |> fullyQualifyColumn state.TableMappings
+        let propertyName = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector |> FQ.fullyQualifyColumn state.TableMappings
         QuerySource<'T, Query>(query.OrderByDesc(propertyName), state.TableMappings)
 
     /// Sets the ORDER BY DESC for single column
     [<CustomOperation("thenByDescending", MaintainsVariableSpace = true)>]
     member this.ThenByDescending (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
-        let propertyName = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector |> fullyQualifyColumn state.TableMappings
+        let propertyName = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector |> FQ.fullyQualifyColumn state.TableMappings
         QuerySource<'T, Query>(query.OrderByDesc(propertyName), state.TableMappings)
 
     /// Sets the SKIP value for query
@@ -104,12 +104,12 @@ type SelectExpressionBuilder<'Output>() =
                       resultSelector: Expression<Func<'TOuter,'TInner,'Result>> ) = 
 
         let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
-        let outerPropertyName = LinqExpressionVisitors.visitPropertySelector<'TOuter, 'Key> outerKeySelector |> fullyQualifyColumn mergedTables
+        let outerPropertyName = LinqExpressionVisitors.visitPropertySelector<'TOuter, 'Key> outerKeySelector |> FQ.fullyQualifyColumn mergedTables
         
         let innerProperty = LinqExpressionVisitors.visitPropertySelector<'TInner, 'Key> innerKeySelector 
-        let innerPropertyName = innerProperty |> fullyQualifyColumn mergedTables
+        let innerPropertyName = innerProperty |> FQ.fullyQualifyColumn mergedTables
         let innerTableName = 
-            let tbl = mergedTables.[fqName innerProperty.DeclaringType]
+            let tbl = mergedTables.[FQ.fqName innerProperty.DeclaringType]
             match tbl.Schema with
             | Some schema -> sprintf "%s.%s" schema tbl.Name
             | None -> tbl.Name
@@ -126,12 +126,12 @@ type SelectExpressionBuilder<'Output>() =
                           resultSelector: Expression<Func<'TOuter,'TInner option,'Result>> ) = 
 
         let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
-        let outerPropertyName = LinqExpressionVisitors.visitPropertySelector<'TOuter, 'Key> outerKeySelector |> fullyQualifyColumn mergedTables
+        let outerPropertyName = LinqExpressionVisitors.visitPropertySelector<'TOuter, 'Key> outerKeySelector |> FQ.fullyQualifyColumn mergedTables
         
         let innerProperty = LinqExpressionVisitors.visitPropertySelector<'TInner option, 'Key> innerKeySelector
-        let innerPropertyName = innerProperty |> fullyQualifyColumn mergedTables
+        let innerPropertyName = innerProperty |> FQ.fullyQualifyColumn mergedTables
         let innerTableName = 
-            let tbl = mergedTables.[fqName innerProperty.DeclaringType]
+            let tbl = mergedTables.[FQ.fqName innerProperty.DeclaringType]
             match tbl.Schema with
             | Some schema -> sprintf "%s.%s" schema tbl.Name
             | None -> tbl.Name
@@ -143,7 +143,7 @@ type SelectExpressionBuilder<'Output>() =
     [<CustomOperation("groupBy", MaintainsVariableSpace = true)>]
     member this.GroupBy (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
-        let properties = LinqExpressionVisitors.visitGroupBy<'T, 'Prop> propertySelector (fullyQualifyColumn state.TableMappings)
+        let properties = LinqExpressionVisitors.visitGroupBy<'T, 'Prop> propertySelector (FQ.fullyQualifyColumn state.TableMappings)
         QuerySource<'T, Query>(query.GroupBy(properties |> List.toArray), state.TableMappings)
 
     /// COUNT aggregate function
@@ -184,7 +184,7 @@ type DeleteExpressionBuilder<'T>() =
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
     member this.Where (state:QuerySource<'T>, [<ProjectionParameter>] whereExpression) = 
         let query = state |> getQueryOrDefault
-        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (fullyQualifyColumn state.TableMappings)
+        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
         QuerySource<'T, Query>(query.Where(fun w -> where), state.TableMappings)
 
     /// Deletes all records in the table (only when there are is no where clause)
@@ -316,7 +316,7 @@ type UpdateExpressionBuilder<'T>() =
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
     member this.Where (state: QuerySource<'T>, [<ProjectionParameter>] whereExpression) = 
         let query = state |> getQueryOrDefault
-        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (fullyQualifyColumn state.TableMappings)
+        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
         QuerySource<'T, UpdateQuerySpec<'T>>({ query with Where = Some where }, state.TableMappings)
 
     /// A safeguard that verifies that all records in the table should be updated.
