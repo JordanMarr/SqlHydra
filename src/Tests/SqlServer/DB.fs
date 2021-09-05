@@ -9,6 +9,7 @@ let server = "mssql"
 #endif
 
 let connectionString = $@"Server={server};Database=AdventureWorksLT2019;User=sa;Password=Password#123;"
+//let connectionString = @"Server=localhost\SQLEXPRESS;Database=AdventureWorksLT2019;Trusted_Connection=True"
 
 let getConnection() = 
     new SqlConnection(connectionString)

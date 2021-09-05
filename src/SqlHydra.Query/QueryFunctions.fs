@@ -73,23 +73,23 @@ select {
 SELECT [SalesLT].[Product].[Department], MIN([SalesLT].[Product].[Price]) AS MinPrice, MAX([SalesLT].[Product].[Price]) AS MaxPrice
 *)
 
-//[<AutoOpen>]
-//module Aggregates =
+[<AutoOpen>]
+module Aggregates =
 
-//    /// Gets the COUNT of the given column
-//    let countBy (prop: 'P) = int
+    /// Gets the COUNT of the given column
+    let countBy (prop: 'P) = Unchecked.defaultof<int>
 
-//    /// Gets the MIN of the given column
-//    let minBy (prop: 'P) = Unchecked.defaultof<'P>
+    /// Gets the MIN of the given column
+    let minBy (prop: 'P) = Unchecked.defaultof<'P>
 
-//    /// Gets the MAX of the given column
-//    let maxBy (prop: 'P) = Unchecked.defaultof<'P>
+    /// Gets the MAX of the given column
+    let maxBy (prop: 'P) = Unchecked.defaultof<'P>
 
-//    /// Gets the SUM of the given column
-//    let sumBy (prop: 'P when 'P : struct) = Unchecked.defaultof<'P>
+    /// Gets the SUM of the given column
+    let sumBy (prop: 'P when 'P : struct) = Unchecked.defaultof<'P>
 
-//    /// Gets the AVG of the given column
-//    let avgBy (prop: 'P when 'P : struct) = Unchecked.defaultof<'P>
+    /// Gets the AVG of the given column
+    let avgBy (prop: 'P when 'P : struct) = Unchecked.defaultof<'P>
 
-//    /// Gets the AVG of the given column and returns 'Result.
-//    let avgByAs<'P, 'Result when 'P : struct and 'Result : struct> (prop: 'P) : 'Result = Unchecked.defaultof<'Result>
+    /// Gets the AVG of the given column and returns 'Result.
+    let avgByAs<'P, 'Result when 'P : struct and 'Result : struct> (prop: 'P) : 'Result = Unchecked.defaultof<'Result>

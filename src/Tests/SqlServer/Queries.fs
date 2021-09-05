@@ -115,6 +115,57 @@ let tests =
             printfn "Results: %A" customersWithAddresses
         }
 
+        testTask "Select Column Aggregates" {
+            use ctx = openContext()
+
+            let! aggregates = 
+                select {
+                    for p in productTable do
+                    where (p.ProductCategoryID <> None)
+                    groupBy p.ProductCategoryID
+                    select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice, avgBy p.ListPrice, countBy p.ListPrice, sumBy p.ListPrice)
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            printfn "Results: %A" aggregates
+        }
+
+        testTask "Aggregate Subquery One" {
+            use ctx = openContext()
+
+            let avgListPrice = 
+                select {
+                    for p in productTable do
+                    where (p.ProductCategoryID <> None)
+                    select (avgBy p.ListPrice)
+                }
+
+            let! productsWithHigherThanAvgListPrice = 
+                select {
+                    for p in productTable do
+                    where (p.ListPrice > subqueryOne avgListPrice)
+                    orderByDescending p.ListPrice
+                    select (p.Name, p.ListPrice)
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            printfn "Results %A" productsWithHigherThanAvgListPrice
+        }
+
+        testTask "Select Columns with Option" {
+            use ctx = openContext()
+
+            let! values = 
+                select {
+                    for p in productTable do
+                    where (p.ProductCategoryID <> None)
+                    select (p.ProductCategoryID, p.ListPrice)
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            printfn "Results: %A" values
+        }
+
         testTask "InsertGetId Test" {
             use ctx = openContext()
 

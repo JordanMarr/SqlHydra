@@ -42,18 +42,24 @@ type SelectExpressionBuilder<'Output>() =
     member this.Select (state: QuerySource<'T>, [<ProjectionParameter>] selectExpression: Expression<Func<'T, 'Transform>>) =
         let query = state |> getQueryOrDefault
 
-        // User should select one or more table records
-        let selectedTypes = LinqExpressionVisitors.visitSelect<'T,'Transform> selectExpression
+        let selections = LinqExpressionVisitors.visitSelect<'T,'Transform> selectExpression
 
-        let selections = 
-            selectedTypes
-            |> List.map (function
-                | LinqExpressionVisitors.SelectedTable t -> $"%s{FQ.fullyQualifyTable state.TableMappings t}.*"
-                | LinqExpressionVisitors.SelectedColumn c -> FQ.fullyQualifyColumn state.TableMappings c
-            )
-            |> List.toArray
+        let queryWithSelectedColumns =
+            selections
+            |> List.fold (fun (q: Query) -> function
+                | LinqExpressionVisitors.SelectedTable tbl -> 
+                    // Select all columns in table
+                    q.Select($"%s{FQ.fullyQualifyTable state.TableMappings tbl}.*")
+                | LinqExpressionVisitors.SelectedColumn col -> 
+                    // Select a single column
+                    q.Select(FQ.fullyQualifyColumn state.TableMappings col)
+                | LinqExpressionVisitors.AggregateColumn (aggType, col) -> 
+                    // Use SelectRaw as a workaround until SqlKata supports multiple aggregates
+                    // https://github.com/sqlkata/querybuilder/pull/504
+                    q.SelectRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings col})")
+            ) query
                   
-        QuerySource<'Transform, Query>(query.Select(selections), state.TableMappings)
+        QuerySource<'Transform, Query>(queryWithSelectedColumns, state.TableMappings)
 
     /// Sets the ORDER BY for single column
     [<CustomOperation("orderBy", MaintainsVariableSpace = true)>]
