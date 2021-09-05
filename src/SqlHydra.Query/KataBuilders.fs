@@ -53,7 +53,7 @@ type SelectExpressionBuilder<'Output>() =
                 | LinqExpressionVisitors.SelectedColumn col -> 
                     // Select a single column
                     q.Select(FQ.fullyQualifyColumn state.TableMappings col)
-                | LinqExpressionVisitors.AggregateColumn (aggType, col) -> 
+                | LinqExpressionVisitors.SelectedAggregateColumn (aggType, col) -> 
                     // Use SelectRaw as a workaround until SqlKata supports multiple aggregates
                     // https://github.com/sqlkata/querybuilder/pull/504
                     q.SelectRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings col})")
@@ -151,6 +151,13 @@ type SelectExpressionBuilder<'Output>() =
         let query = state |> getQueryOrDefault
         let properties = LinqExpressionVisitors.visitGroupBy<'T, 'Prop> propertySelector (FQ.fullyQualifyColumn state.TableMappings)
         QuerySource<'T, Query>(query.GroupBy(properties |> List.toArray), state.TableMappings)
+
+    /// Sets the HAVING condition.
+    [<CustomOperation("having", MaintainsVariableSpace = true)>]
+    member this.Having (state:QuerySource<'T>, [<ProjectionParameter>] havingExpression) = 
+        let query = state |> getQueryOrDefault
+        let having = LinqExpressionVisitors.visitHaving<'T> havingExpression (FQ.fullyQualifyColumn state.TableMappings)
+        QuerySource<'T, Query>(query.Having(fun w -> having), state.TableMappings)
 
     /// COUNT aggregate function
     [<CustomOperation("count", MaintainsVariableSpace = true)>]

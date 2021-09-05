@@ -184,6 +184,20 @@ let tests =
             //printfn "Results: %A" customers
         }
 
+        test "Select Column Aggregates" {
+            let query = 
+                select {
+                    for p in productTable do
+                    where (p.ProductCategoryID <> None)
+                    groupBy p.ProductCategoryID
+                    having (minBy p.ListPrice > 500M && maxBy p.ListPrice < 1000M)
+                    select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice)
+                }
+
+            let sql = query.ToKataQuery() |> toSql 
+            sql |> printfn "%s"
+        }
+
         test "SqlKata SubQuery" {
             let averageQuery = SqlKata.Query("Posts").AsAverage("score")
             let query = SqlKata.Query("Posts").Where("Score", ">", averageQuery)

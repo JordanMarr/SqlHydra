@@ -180,6 +180,13 @@ module SqlPatterns =
                 Some null
         | _ -> None
 
+    let (|AggregateColumn|_|) (exp: Expression) =
+        match exp with
+        | MethodCall m when List.contains m.Method.Name [ nameof minBy; nameof maxBy; nameof sumBy; nameof avgBy; nameof countBy; nameof avgByAs ] ->
+            let aggType = m.Method.Name.Replace("By", "").Replace("As", "").ToUpper()
+            Some (aggType, m.Arguments.[0])
+        | _ -> None
+
 let getComparison (expType: ExpressionType) =
     match expType with
     | ExpressionType.Equal -> "="
@@ -281,6 +288,111 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
 
     visit (filter :> Expression) (Query())
 
+let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberInfo -> string) =
+    let rec visit (exp: Expression) (query: Query) : Query =
+        match exp with
+        | Lambda x -> visit x.Body query
+        | Not x -> 
+            let operand = visit x.Operand (Query())
+            query.HavingNot(fun q -> operand)
+        | MethodCall m when m.Method.Name = "Invoke" ->
+            // Handle tuples
+            visit m.Object (Query())
+        | MethodCall m when List.contains m.Method.Name [ nameof isIn; nameof isNotIn; nameof op_BarEqualsBar; nameof op_BarLessGreaterBar ] ->
+            let filter : (string * seq<obj>) -> Query = 
+                match m.Method.Name with
+                | nameof isIn | nameof op_BarEqualsBar -> query.HavingIn
+                | _ -> query.HavingNotIn
+
+            match m.Arguments.[0], m.Arguments.[1] with
+            // Column is IN / NOT IN a subquery of values
+            | Property p, MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryMany ->
+                let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
+                let fqCol = qualifyColumn p
+                let selectSubquery = subqueryConst.Value :?> SelectQuery
+                match m.Method.Name with
+                | nameof isIn | nameof op_BarEqualsBar -> query.HavingIn(fqCol, selectSubquery.ToKataQuery())
+                | _ -> query.HavingNotIn(fqCol, selectSubquery.ToKataQuery())
+            // Column is IN / NOT IN a list of values
+            | Property p, ListInit values ->
+                filter(qualifyColumn p, values)
+            // Column is IN / NOT IN an array of values
+            | Property p, ArrayInit values -> 
+                filter(qualifyColumn p, values)
+            // Column is IN / NOT IN an IEnumerable of values
+            | Property p, Value value -> 
+                let lstValues = (value :?> System.Collections.IEnumerable) |> Seq.cast<obj> |> Seq.toList
+                filter(qualifyColumn p, lstValues)
+            // Column is IN / NOT IN a sequence expression of values
+            | Property p, MethodCall c when c.Method.Name = "CreateSequence" ->
+                notImplMsg "Unable to unwrap sequence expression. Please use a list or array instead."
+            | _ -> notImpl()
+        | MethodCall m when List.contains m.Method.Name [ nameof like; nameof notLike; nameof op_EqualsPercent; nameof op_LessGreaterPercent ] ->
+            match m.Arguments.[0], m.Arguments.[1] with
+            | Property p, Value value -> 
+                let pattern = string value
+                match m.Method.Name with
+                | nameof like | nameof op_EqualsPercent -> query.HavingLike(qualifyColumn p, pattern, false)
+                | _ -> query.HavingNotLike(qualifyColumn p, pattern, false)
+            | _ -> notImpl()
+        | MethodCall m when m.Method.Name = nameof isNullValue || m.Method.Name = nameof isNotNullValue ->
+            match m.Arguments.[0] with
+            | Property p -> 
+                if m.Method.Name = nameof isNullValue
+                then query.HavingNull(qualifyColumn p)
+                else query.HavingNotNull(qualifyColumn p)
+            | _ -> notImpl()
+        | MethodCall m when List.contains m.Method.Name [ nameof minBy; nameof maxBy; nameof sumBy; nameof avgBy; nameof countBy; nameof avgByAs ] ->
+            // Handle aggregate columns
+            visit m.Arguments.[0] query
+        | BinaryAnd x ->
+            let lt = visit x.Left (Query())
+            let rt = visit x.Right (Query())
+            query.Having(fun q -> lt).Having(fun q -> rt)
+        | BinaryOr x -> 
+            let lt = visit x.Left (Query())
+            let rt = visit x.Right (Query())
+            query.OrHaving(fun q -> lt).OrHaving(fun q -> rt)
+        | BinaryCompare x ->
+            match x.Left, x.Right with            
+            | Property p1, MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryOne ->
+                // Handle property to subquery comparisons
+                let comparison = getComparison exp.NodeType
+                let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
+                let selectSubquery = subqueryConst.Value :?> SelectQuery
+                query.Having(qualifyColumn p1, comparison, selectSubquery.ToKataQuery())
+            | AggregateColumn (aggType, Property p1), Property p2 ->
+                // Handle aggregate col to col comparisons
+                let lt = qualifyColumn p1
+                let comparison = getComparison exp.NodeType
+                let rt = qualifyColumn p2
+                query.HavingRaw($"{aggType}({lt}) {comparison} {rt}")
+            | AggregateColumn (aggType, Property p), Value value ->
+                // Handle aggregate column to value comparisons
+                let lt = qualifyColumn p
+                let comparison = getComparison(exp.NodeType)
+                query.HavingRaw($"{aggType}({lt}) {comparison} ?", [value])
+            | Property p1, Property p2 ->
+                // Handle col to col comparisons
+                let lt = qualifyColumn p1
+                let comparison = getComparison exp.NodeType
+                let rt = qualifyColumn p2
+                query.HavingColumns(lt, comparison, rt)
+            | Property p, Value value ->
+                // Handle column to value comparisons
+                let comparison = getComparison(exp.NodeType)
+                query.Having(qualifyColumn p, comparison, value)
+            | Value v1, Value v2 ->
+                // Not implemented because I didn't want to embed logic to properly format strings, dates, etc.
+                // This can be easily added later if it is implemented in Dapper.FSharp.
+                notImplMsg("Value to value comparisons are not currently supported. Ex: having (1 = 1)")
+            | _ ->
+                notImpl()
+        | _ ->
+            notImpl()
+
+    visit (filter :> Expression) (Query())
+
 /// Returns a list of one or more fully qualified column names: ["{schema}.{table}.{column}"]
 let visitGroupBy<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) (qualifyColumn: MemberInfo -> string) =
     let rec visit (exp: Expression) : string list =
@@ -300,7 +412,7 @@ let visitGroupBy<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) (qua
 
     visit (propertySelector :> Expression)
 
-/// Returns a fully qualified column name: "{schema}.{table}.{column}"
+/// Returns a column MemberInfo.
 let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
     let rec visit (exp: Expression) : MemberInfo =
         match exp with
@@ -320,8 +432,7 @@ let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Pro
 type Selection =
     | SelectedTable of Type
     | SelectedColumn of MemberInfo
-    | AggregateColumn of aggregateType: string * MemberInfo
-
+    | SelectedAggregateColumn of aggregateType: string * MemberInfo
 
 /// Returns a list of one or more fully qualified table names: ["{schema}.{table}"]
 let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
@@ -331,9 +442,9 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
         | MethodCall m when m.Method.Name = "Invoke" ->
             // Handle tuples
             visit m.Object
-        | MethodCall m when List.contains m.Method.Name [ nameof minBy; nameof maxBy; nameof sumBy; nameof avgBy; nameof countBy; nameof avgByAs ] ->
-            match m.Arguments.[0] with
-            | Member me -> [ AggregateColumn (m.Method.Name.Replace("By", "").Replace("As", "").ToUpper(), me.Member) ]
+        | AggregateColumn (aggType, colExpr) -> 
+            match colExpr with
+            | Member me -> [ SelectedAggregateColumn (aggType, me.Member) ]
             | _ -> notImplMsg("Invalid argument to aggregate function.")
         | New n -> 
             // Handle a tuple of multiple tables
