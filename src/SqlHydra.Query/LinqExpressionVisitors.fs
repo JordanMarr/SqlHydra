@@ -208,14 +208,13 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
 
             match m.Arguments.[0], m.Arguments.[1] with
             // Column is IN / NOT IN a subquery of values
-            | Property p, MethodCall lst when lst.Method.Name = nameof subqueryMany ->
-                let subqueryExpr = lst.Arguments.[0]
-                let subquery = match subqueryExpr with | Constant c -> c | _ -> notImpl()
+            | Property p, MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryMany ->
+                let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
                 let fqCol = qualifyColumn p
-                let selectQuery = subquery.Value :?> SelectQuery
+                let selectSubquery = subqueryConst.Value :?> SelectQuery
                 match m.Method.Name with
-                | nameof isIn | nameof op_BarEqualsBar -> query.WhereIn(fqCol, selectQuery.ToKataQuery())
-                | _ -> query.WhereNotIn(fqCol, selectQuery.ToKataQuery())
+                | nameof isIn | nameof op_BarEqualsBar -> query.WhereIn(fqCol, selectSubquery.ToKataQuery())
+                | _ -> query.WhereNotIn(fqCol, selectSubquery.ToKataQuery())
             // Column is IN / NOT IN a list of values
             | Property p, ListInit values ->
                 filter(qualifyColumn p, values)
@@ -255,12 +254,18 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
             query.OrWhere(fun q -> lt).OrWhere(fun q -> rt)
         | BinaryCompare x ->
             match x.Left, x.Right with            
+            | Property p1, MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryOne ->
+                // Handle property to subquery comparisons
+                let comparison = getComparison exp.NodeType
+                let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
+                let selectSubquery = subqueryConst.Value :?> SelectQuery
+                query.Where(qualifyColumn p1, comparison, selectSubquery.ToKataQuery())
             | Property p1, Property p2 ->
                 // Handle col to col comparisons
                 let lt = qualifyColumn p1
-                let cp = getComparison exp.NodeType
+                let comparison = getComparison exp.NodeType
                 let rt = qualifyColumn p2
-                query.WhereColumns(lt, cp, rt)
+                query.WhereColumns(lt, comparison, rt)
             | Property p, Value value ->
                 // Handle column to value comparisons
                 let comparison = getComparison(exp.NodeType)

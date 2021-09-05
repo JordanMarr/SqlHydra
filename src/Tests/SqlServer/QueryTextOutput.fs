@@ -191,7 +191,7 @@ let tests =
             sql |> printfn "%s"
         }
 
-        test "Where subqueryOne" {
+        test "Where subqueryMany" {
             let customerIds = 
                 select {
                     for c in customerTable do
@@ -203,6 +203,24 @@ let tests =
                 select {
                     for c in customerTable do
                     where (c.CustomerID |=| subqueryMany customerIds)
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            sql |> printfn "%s"
+        }
+
+        test "Where subqueryOne" {
+            let customerCount = 
+                select {
+                    for c in customerTable do
+                    where (c.CustomerID |<>| [30018;29545;29954;29897;29503;29559])
+                    count
+                } 
+
+            let query =
+                select {
+                    for c in customerTable do
+                    where (c.CustomerID > subqueryOne customerCount)
                 }
 
             let sql = query.ToKataQuery() |> toSql
