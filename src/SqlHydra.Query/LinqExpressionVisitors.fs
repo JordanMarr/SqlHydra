@@ -184,7 +184,9 @@ module SqlPatterns =
         match exp with
         | MethodCall m when List.contains m.Method.Name [ nameof minBy; nameof maxBy; nameof sumBy; nameof avgBy; nameof countBy; nameof avgByAs ] ->
             let aggType = m.Method.Name.Replace("By", "").Replace("As", "").ToUpper()
-            Some (aggType, m.Arguments.[0])
+            match m.Arguments.[0] with
+            | Property p -> Some (aggType, p)
+            | _ -> notImplMsg "Invalid argument to aggregate function."
         | _ -> None
 
 let getComparison (expType: ExpressionType) =
@@ -361,13 +363,13 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberI
                 let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
                 let selectSubquery = subqueryConst.Value :?> SelectQuery
                 query.Having(qualifyColumn p1, comparison, selectSubquery.ToKataQuery())
-            | AggregateColumn (aggType, Property p1), Property p2 ->
+            | AggregateColumn (aggType, p1), Property p2 ->
                 // Handle aggregate col to col comparisons
                 let lt = qualifyColumn p1
                 let comparison = getComparison exp.NodeType
                 let rt = qualifyColumn p2
                 query.HavingRaw($"{aggType}({lt}) {comparison} {rt}")
-            | AggregateColumn (aggType, Property p), Value value ->
+            | AggregateColumn (aggType, p), Value value ->
                 // Handle aggregate column to value comparisons
                 let lt = qualifyColumn p
                 let comparison = getComparison(exp.NodeType)
@@ -412,6 +414,28 @@ let visitGroupBy<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) (qua
 
     visit (propertySelector :> Expression)
 
+type OrderBy =
+    | OrderByColumn of MemberInfo
+    | OrderByAggregateColumn of aggregateType: string * MemberInfo
+
+/// Returns a column MemberInfo.
+let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
+    let rec visit (exp: Expression) : OrderBy =
+        match exp with
+        | Lambda x -> visit x.Body
+        | MethodCall m when m.Method.Name = "Invoke" ->
+            // Handle tuples
+            visit m.Object
+        | AggregateColumn (aggType, p) -> OrderByAggregateColumn (aggType, p)
+        | Member m -> 
+            if m.Member.DeclaringType |> isOptionType
+            then visit m.Expression
+            else OrderByColumn m.Member
+        | Property p -> OrderByColumn p
+        | _ -> notImpl()
+
+    visit (propertySelector :> Expression)
+
 /// Returns a column MemberInfo.
 let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
     let rec visit (exp: Expression) : MemberInfo =
@@ -429,6 +453,7 @@ let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Pro
 
     visit (propertySelector :> Expression)
 
+
 type Selection =
     | SelectedTable of Type
     | SelectedColumn of MemberInfo
@@ -442,10 +467,7 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
         | MethodCall m when m.Method.Name = "Invoke" ->
             // Handle tuples
             visit m.Object
-        | AggregateColumn (aggType, colExpr) -> 
-            match colExpr with
-            | Member me -> [ SelectedAggregateColumn (aggType, me.Member) ]
-            | _ -> notImplMsg("Invalid argument to aggregate function.")
+        | AggregateColumn (aggType, p) -> [ SelectedAggregateColumn (aggType, p) ]            
         | New n -> 
             // Handle a tuple of multiple tables
             n.Arguments 

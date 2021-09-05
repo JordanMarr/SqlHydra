@@ -65,29 +65,53 @@ type SelectExpressionBuilder<'Output>() =
     [<CustomOperation("orderBy", MaintainsVariableSpace = true)>]
     member this.OrderBy (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
-        let propertyName = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector |> FQ.fullyQualifyColumn state.TableMappings
-        QuerySource<'T, Query>(query.OrderBy(propertyName), state.TableMappings)
+        let orderedQuery = 
+            LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
+            |> function 
+                | LinqExpressionVisitors.OrderByColumn p -> 
+                    query.OrderBy(FQ.fullyQualifyColumn state.TableMappings p)
+                | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
+                    query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p})")        
+        QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the ORDER BY for single column
     [<CustomOperation("thenBy", MaintainsVariableSpace = true)>]
     member this.ThenBy (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
-        let propertyName = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector |> FQ.fullyQualifyColumn state.TableMappings
-        QuerySource<'T, Query>(query.OrderBy(propertyName), state.TableMappings)
+        let orderedQuery = 
+            LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
+            |> function 
+                | LinqExpressionVisitors.OrderByColumn p -> 
+                    query.OrderBy(FQ.fullyQualifyColumn state.TableMappings p)
+                | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
+                    query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p})")        
+        QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the ORDER BY DESC for single column
     [<CustomOperation("orderByDescending", MaintainsVariableSpace = true)>]
     member this.OrderByDescending (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
-        let propertyName = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector |> FQ.fullyQualifyColumn state.TableMappings
-        QuerySource<'T, Query>(query.OrderByDesc(propertyName), state.TableMappings)
+        let orderedQuery = 
+            LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
+            |> function 
+                | LinqExpressionVisitors.OrderByColumn p -> 
+                    query.OrderByDesc(FQ.fullyQualifyColumn state.TableMappings p)
+                | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
+                    query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p}) DESC")        
+        QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the ORDER BY DESC for single column
     [<CustomOperation("thenByDescending", MaintainsVariableSpace = true)>]
     member this.ThenByDescending (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
-        let propertyName = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector |> FQ.fullyQualifyColumn state.TableMappings
-        QuerySource<'T, Query>(query.OrderByDesc(propertyName), state.TableMappings)
+        let orderedQuery = 
+            LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
+            |> function 
+                | LinqExpressionVisitors.OrderByColumn p -> 
+                    query.OrderByDesc(FQ.fullyQualifyColumn state.TableMappings p)
+                | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
+                    query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p}) DESC")        
+        QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the SKIP value for query
     [<CustomOperation("skip", MaintainsVariableSpace = true)>]

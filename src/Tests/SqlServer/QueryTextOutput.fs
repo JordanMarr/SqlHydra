@@ -198,6 +198,21 @@ let tests =
             sql |> printfn "%s"
         }
 
+        test "Sorted Aggregates - Top 5 categories with highest avg price products" {
+            let query = 
+                select {
+                    for p in productTable do
+                    where (p.ProductCategoryID <> None)
+                    groupBy p.ProductCategoryID
+                    orderByDescending (avgBy p.ListPrice)
+                    select (p.ProductCategoryID, avgBy p.ListPrice)
+                    take 5
+                }
+
+            let sql = query.ToKataQuery() |> toSql 
+            sql |> printfn "%s"
+        }
+
         test "SqlKata SubQuery" {
             let averageQuery = SqlKata.Query("Posts").AsAverage("score")
             let query = SqlKata.Query("Posts").Where("Score", ">", averageQuery)
