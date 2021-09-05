@@ -18,7 +18,7 @@ let tests =
     testList "SqlHydra.Query - Query Output Unit Tests" [
 
         /// String comparisons against generated queries.
-        testCase "Simple Where" <| fun _ ->
+        test "Simple Where" {
             let query = 
                 select {
                     for a in addressTable do
@@ -30,8 +30,9 @@ let tests =
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
             Expect.isTrue (sql.Contains("WHERE")) ""
+        }
 
-        testCase "Select 1 Column" <| fun _ ->
+        test "Select 1 Column" {
             let query =
                 select {
                     for a in addressTable do
@@ -41,9 +42,9 @@ let tests =
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
             Expect.isTrue (sql.Contains("SELECT [SalesLT].[Address].[City] FROM")) ""
+        }
 
-
-        testCase "Select 2 Columns" <| fun _ ->
+        test "Select 2 Columns" {
             let query =
                 select {
                     for a in addressTable do
@@ -53,8 +54,9 @@ let tests =
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
             Expect.isTrue (sql.Contains("SELECT [SalesLT].[Address].[City], [SalesLT].[Address].[StateProvince] FROM")) ""
+        }
 
-        testCase "Select 1 Table and 1 Column" <| fun _ ->
+        test "Select 1 Table and 1 Column" {
             let query =
                 select {
                     for c in customerTable do
@@ -66,8 +68,9 @@ let tests =
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
             Expect.isTrue (sql.Contains("SELECT [SalesLT].[Customer].*, [SalesLT].[Address].[City] FROM")) ""
+        }
 
-        testCase "Where with Option Type" <| fun _ ->
+        test "Where with Option Type" {
             let query = 
                 select {
                     for a in addressTable do
@@ -75,10 +78,9 @@ let tests =
                 }
 
             query.ToKataQuery() |> toSql |> printfn "%s"
-            //let addresses = get query
-            //printfn "Results: %A" addresses
+        }
 
-        testCase "Where Not Like" <| fun _ ->
+        test "Where Not Like" {
             let query =
                 select {
                     for a in addressTable do
@@ -86,8 +88,9 @@ let tests =
                 }
 
             query.ToKataQuery() |> toSql |> printfn "%s"
-        
-        testCase "Or Where" <| fun _ ->
+        }
+
+        test "Or Where" {
             let query = 
                 select {
                     for a in addressTable do
@@ -98,8 +101,9 @@ let tests =
 
             //let addresses = get query
             //printfn "Results: %A" addresses
+        }
 
-        testCase "And Where" <| fun _ ->
+        test "And Where" {
             let query = 
                 select {
                     for a in addressTable do
@@ -107,8 +111,9 @@ let tests =
                 }
     
             query.ToKataQuery() |> toSql |> printfn "%s"
+        }
 
-        testCase "Where Not Binary" <| fun _ ->
+        test "Where Not Binary" {
             let query = 
                 select {
                     for a in addressTable do
@@ -116,8 +121,9 @@ let tests =
                 }
     
             query.ToKataQuery() |> toSql |> printfn "%s"
+        }
 
-        testCase "Where Customer isIn List" <| fun _ ->
+        test "Where Customer isIn List" {
             let query = 
                 select {
                     for c in customerTable do
@@ -128,6 +134,7 @@ let tests =
 
             //let customers = get query
             //printfn "Results: %A" customers
+        }
 
         test "Where Customer |=| List" {
             let query = 
@@ -164,7 +171,7 @@ let tests =
             sql |> printfn "%s"
         }
 
-        testCase "Where Customer |<>| List" <| fun _ ->
+        test "Where Customer |<>| List" {
             let query = 
                 select {
                     for c in customerTable do
@@ -175,6 +182,7 @@ let tests =
 
             //let customers = get query
             //printfn "Results: %A" customers
+        }
 
         test "SqlKata SubQuery" {
             let averageQuery = SqlKata.Query("Posts").AsAverage("score")
@@ -201,7 +209,7 @@ let tests =
             sql |> printfn "%s"
         }
 
-        testCase "Update should fail without where or updateAll" <| fun _ ->
+        test "Update should fail without where or updateAll" {
             try 
                 let query = 
                     update {
@@ -211,8 +219,9 @@ let tests =
                 failwith "Should fail because no `where` or `updateAll` exists."
             with ex ->
                 () // Pass
+        }
 
-        testCase "Update should pass because where exists" <| fun _ ->
+        test "Update should pass because where exists" {
             try 
                 let query = 
                     update {
@@ -223,8 +232,9 @@ let tests =
                 () //Assert.Pass()
             with ex ->
                 () //Assert.Pass("Should not fail because `where` is present.")
+        }
 
-        testCase "Update should pass because updateAll exists" <| fun _ ->
+        test "Update should pass because updateAll exists" {
             try 
                 let query = 
                     update {
@@ -235,8 +245,9 @@ let tests =
                 () //Assert.Pass()
             with ex ->
                 () //Assert.Pass("Should not fail because `where` is present.")
+        }
 
-        testCase "Multi Compiler Test" <| fun _ ->
+        test "Multi Compiler Test" {
             let query = 
                 select {
                     for c in customerTable do
@@ -256,8 +267,9 @@ let tests =
             ]
             |> Seq.map (fun (nm, compiler) -> nm, compiler.Compile(query.ToKataQuery()).Sql)
             |> Seq.iter (fun (nm, sql) -> printfn "%s:\n%s" nm sql)
+        }
 
-        testCase "Build Kata Queries" <| fun _ ->
+        test "Build Kata Queries" {
             let compiler = new SqlKata.Compilers.SqlServerCompiler()
     
             let sampleErrors = [
@@ -302,6 +314,5 @@ let tests =
             |> List.iter (fun compiledQuery -> 
                 printfn "script: \n%s\n" compiledQuery.Sql
             )
+        }
     ]
-
-

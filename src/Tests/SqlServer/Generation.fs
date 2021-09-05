@@ -7,7 +7,6 @@ open SqlHydra.Domain
 
 let cfg = 
     {
-        // Docker "mssql":
         ConnectionString = DB.connectionString
         OutputFile = ""
         Namespace = "TestNS"
@@ -18,9 +17,10 @@ let cfg =
 let tests = 
     testList "SqlHydra.SqlServer Integration Tests" [
 
-        testCase "Print Schema" <| fun _ ->
+        test "Print Schema" {
             let schema = SqlServerSchemaProvider.getSchema cfg
             printfn "Schema: %A" schema
+        }
 
         let getCode cfg = 
             SqlServerSchemaProvider.getSchema cfg
@@ -35,22 +35,28 @@ let tests =
             let code = getCode cfg
             Expect.isFalse (code.Contains str) ""
 
-        testCase "Print Code"  <| fun _ ->
+        test "Print Code"  {
             getCode cfg |> printfn "%s"
+        }
     
-        testCase "Code Should Have Reader"  <| fun _ ->
+        test "Code Should Have Reader"  {
             cfg |> inCode "type HydraReader"
+        }
     
-        testCase "Code Should Not Have Reader"  <| fun _ ->
+        test "Code Should Not Have Reader"  {
             { cfg with Readers = None } |> notInCode "type HydraReader"
+        }
 
-        testCase "Code Should Have CLIMutable"  <| fun _ ->
+        test "Code Should Have CLIMutable"  {
             { cfg with IsCLIMutable = true } |> inCode "[<CLIMutable>]"
+        }
 
-        testCase "Code Should Not Have CLIMutable"  <| fun _ ->
+        test "Code Should Not Have CLIMutable"  {
             { cfg with IsCLIMutable = false } |> notInCode "[<CLIMutable>]"
+        }
 
-        testCase "Code Should Have Namespace" <| fun _ ->
+        test "Code Should Have Namespace" {
             cfg |> inCode "namespace TestNS"
+        }
 
     ]
