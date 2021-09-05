@@ -4,6 +4,11 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <WarnOn>3390;$(WarnOn)</WarnOn>
+    <Configurations>Debug;Release;DebugLocal</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLocal|AnyCPU'">
+    <DefineConstants>TRACE;LOCALHOST</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
