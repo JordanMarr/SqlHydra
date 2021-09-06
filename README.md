@@ -260,7 +260,20 @@ select {
     having (minBy p.ListPrice > 500M && maxBy p.ListPrice < 1000M)
     select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice)
 }
-|> ctx.ReadAsync HydraReader.Read
+|> ctx.Read HydraReader.Read
+|> Seq.map (fun (catId, minPrice, maxPrice) -> $"CatID: {catId}, MinPrice: {minPrice}, MaxPrice: {maxPrice}")
+|> Seq.iter (printfn "%s")
+```
+
+Alternative Row Count Query:
+```F#
+let! customersWithNoSalesPersonCount =
+    select {
+        for c in customerTable do
+        where (c.SalesPerson = None)
+        count
+    }
+    |> ctx.CountAsync
 ```
 
 #### WHERE Subqueries
@@ -318,17 +331,6 @@ let! distinctCustomerNames =
         distinct
     }
     |> ctx.ReadAsync HydraReader.Read
-```
-
-Count Query:
-```F#
-let! customersWithNoSalesPersonCount =
-    select {
-        for c in customerTable do
-        where (c.SalesPerson = None)
-        count
-    }
-    |> ctx.CountAsync
 ```
 
 ### Dos and Don'ts
