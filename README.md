@@ -292,7 +292,7 @@ let top5CategoryIdsWithHighestAvgPrices =
         take 5
     }
 
-// Use the subquery via the `subqueryMany` function:
+// Get category names where the category ID is "IN" the subquery:
 let top5Categories =
     select {
         for c in categoryTable do
@@ -312,7 +312,7 @@ let avgListPrice =
         select (avgBy p.ListPrice)
     } 
 
-// Use the subquery via the `subqueryOne` function:
+// Get products with a price > the average price
 let productsWithAboveAveragePrice =
     select {
         for p in productTable do
