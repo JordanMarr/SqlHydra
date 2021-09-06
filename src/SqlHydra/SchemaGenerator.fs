@@ -117,7 +117,7 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
                     SynExpr.CreateRecord (
                         tbl.Columns
                         |> List.map (fun col -> 
-                            RecordFieldName(LongIdentWithDots.CreateString(col.Name), false)
+                            RecordFieldName(LongIdentWithDots.Create([col.Name]), false)
                             , SynExpr.CreateInstanceMethodCall(LongIdentWithDots.Create([ "__"; col.Name; "Read" ])) |> Some
                         )
                     )
