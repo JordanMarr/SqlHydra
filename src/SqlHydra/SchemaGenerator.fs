@@ -267,7 +267,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                 // Function:
                                 SynExpr.CreateLongIdent(
                                     false
-                                    , LongIdentWithDots.CreateString($"{tbl.Name}Reader")
+                                    , LongIdentWithDots.CreateString($"{tbl.Schema}.{tbl.Name}Reader")
                                     , None
                                 )
                                 // Args:
@@ -614,10 +614,6 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                         
                         if cfg.Readers.IsSome then 
                             createTableReaderClass cfg.Readers.Value tbl
-
-                    // Create "HydraReader" below all generated tables/readers...
-                    if cfg.Readers.IsSome then
-                        createHydraReaderClass db cfg.Readers.Value app tables
                 ]
 
             SynModuleDecl.CreateNestedModule(schemaNestedModule, tableRecordDeclarations)
@@ -625,12 +621,19 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
 
     let readerExtensionsPlaceholder = SynModuleDecl.CreateOpen("Substitute.Extensions")
 
+    let allTables = schemas |> List.collect (fun schema -> db.Tables |> List.filter (fun t -> t.Schema = schema))
+    // TODO: Handle duplicate table names between schemas
+
     let declarations = 
         [ 
             if cfg.Readers.IsSome then
                 readerExtensionsPlaceholder 
 
             yield! nestedSchemaModules
+
+            // Create "HydraReader" below all generated tables/readers...
+            if cfg.Readers.IsSome then
+                createHydraReaderClass db cfg.Readers.Value app allTables
         ]
 
     let parentNamespace =
@@ -675,16 +678,16 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
         // HydraReader utility functions
         "member HydraReader = \"placeholder\"",
         """let mutable accFieldCount = 0
-        let buildGetOrdinal fieldCount =
-            let dictionary = 
-                [0..reader.FieldCount-1] 
-                |> List.map (fun i -> reader.GetName(i), i)
-                |> List.sortBy snd
-                |> List.skip accFieldCount
-                |> List.take fieldCount
-                |> dict
-            accFieldCount <- accFieldCount + fieldCount
-            fun col -> dictionary.Item col
+    let buildGetOrdinal fieldCount =
+        let dictionary = 
+            [0..reader.FieldCount-1] 
+            |> List.map (fun i -> reader.GetName(i), i)
+            |> List.sortBy snd
+            |> List.skip accFieldCount
+            |> List.take fieldCount
+            |> dict
+        accFieldCount <- accFieldCount + fieldCount
+        fun col -> dictionary.Item col
         """
 
         // "wrap" fn in GetPrimitiveReader

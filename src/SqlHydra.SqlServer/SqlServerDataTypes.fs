@@ -40,9 +40,12 @@ let typeMappings =
         "ROWVERSION",           "byte[]",                                   DbType.Binary,              Some <| nameof r.GetValue
         "SQL_VARIANT",          "obj",                                      DbType.Object,              Some <| nameof r.GetValue
         "XML",                  "System.Xml.Linq.XElement",                 DbType.Xml,                 None
-        "GEOGRAPHY",            "Microsoft.SqlServer.Types.SqlGeography",   DbType.Object,              None
-        "GEOMETRY",             "Microsoft.SqlServer.Types.SqlGeometry",    DbType.Object,              None
-        "HIERARCHYID",          "Microsoft.SqlServer.Types.SqlHierarchyId", DbType.Object,              None 
+        "GEOGRAPHY",            "obj",                                      DbType.Object,              None
+        "GEOMETRY",             "obj",                                      DbType.Object,              None
+        "HIERARCHYID",          "obj",                                      DbType.Object,              None 
+        //"GEOGRAPHY",            "Microsoft.SqlServer.Types.SqlGeography",   DbType.Object,              None
+        //"GEOMETRY",             "Microsoft.SqlServer.Types.SqlGeometry",    DbType.Object,              None
+        //"HIERARCHYID",          "Microsoft.SqlServer.Types.SqlHierarchyId", DbType.Object,              None 
     ]
 
 let typeMappingsByName =
