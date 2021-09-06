@@ -220,21 +220,25 @@ let tests =
             sql |> printfn "%s"
         }
 
-        test "Where subqueryMany" {
-            let customerIds = 
+        ftest "Where subqueryMany" {
+            let top5CategoryIdsWithHighestAvgPrices = 
                 select {
-                    for c in customerTable do
-                    where (c.CustomerID |<>| [30018;29545;29954;29897;29503;29559])
-                    select c.CustomerID
-                } 
-
-            let query =
-                select {
-                    for c in customerTable do
-                    where (c.CustomerID |=| subqueryMany customerIds)
+                    for p in productTable do
+                    where (p.ProductCategoryID <> None)
+                    groupBy p.ProductCategoryID
+                    orderByDescending (avgBy p.ListPrice)
+                    select (p.ProductCategoryID)
+                    take 5
                 }
 
-            let sql = query.ToKataQuery() |> toSql
+            let top5Categories =
+                select {
+                    for c in categoryTable do
+                    where (Some c.ProductCategoryID |=| subqueryMany top5CategoryIdsWithHighestAvgPrices)
+                    select c.Name
+                }
+
+            let sql = top5Categories.ToKataQuery() |> toSql
             sql |> printfn "%s"
         }
 
