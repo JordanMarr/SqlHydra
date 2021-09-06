@@ -275,7 +275,7 @@ let top5CategoryIdsWithHighestAvgPrices =
         where (p.ProductCategoryID <> None)
         groupBy p.ProductCategoryID
         orderByDescending (avgBy p.ListPrice)
-        select (p.ProductCategoryID)
+        select p.ProductCategoryID
         take 5
     }
 
