@@ -191,6 +191,17 @@ let cities =
     |> List.map (fun (city, state) -> $"City, State: %s{city}, %s{state}")
 ```
 
+_Special `where` filter operators:_
+- `isIn` or `|=|`
+- `isNotIn` or `|<>|`
+- `like` or `=%`
+- `notLike` or `<>%`
+- `isNullValue` or `= None`
+- `isNotNullValue` or `<> None`
+- `subqueryMany`
+- `subqueryOne`
+
+
 Select `Address` entities where City starts with `S`:
 ```F#
 let addresses =
@@ -201,13 +212,7 @@ let addresses =
     |> ctx.Read HydraReader.Read
 ```
 
-_Special `where` filter operators:_
-- `isIn` or `|=|`
-- `isNotIn` or `|<>|`
-- `like` or `=%`
-- `notLike` or `<>%`
-- `isNullValue` or `= None`
-- `isNotNullValue` or `<> None`
+#### Joins
 
 Select top 10 `Product` entities with inner joined category name:
 ```F#
@@ -233,6 +238,73 @@ let! customerAddresses =
         where (c.CustomerID |=| [1;2;30018;29545]) // two without address, two with address
         orderBy c.CustomerID
         select (c, a)
+    }
+    |> ctx.ReadAsync HydraReader.Read
+```
+
+#### Aggregates
+
+_Aggregate functions (can be used in `select`, `having` and `orderBy` clauses):_
+- `countBy`
+- `sumBy`
+- `minBy`
+- `maxBy`
+- `avgBy`
+
+```F#
+// Select categories with an avg product price > 500 and < 1000
+select {
+    for p in productTable do
+    where (p.ProductCategoryID <> None)
+    groupBy p.ProductCategoryID
+    having (minBy p.ListPrice > 500M && maxBy p.ListPrice < 1000M)
+    select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice)
+}
+|> ctx.ReadAsync HydraReader.Read
+```
+
+#### WHERE Subqueries
+
+_Use the `subqueryMany` function for subqueries that return multiple rows for comparison:_
+
+```F#
+// Create a subquery that gets top 5 avg prices by category ID:
+let top5CategoryIdsWithHighestAvgPrices = 
+    select {
+        for p in productTable do
+        where (p.ProductCategoryID <> None)
+        groupBy p.ProductCategoryID
+        orderByDescending (avgBy p.ListPrice)
+        select (p.ProductCategoryID)
+        take 5
+    }
+
+// Use the subquery via the `subqueryMany` function:
+let top5Categories =
+    select {
+        for c in categoryTable do
+        where (Some c.ProductCategoryID |=| subqueryMany top5CategoryIdsWithHighestAvgPrices)
+        select c.Name
+    }
+    |> ctx.ReadAsync HydraReader.Read
+```
+
+_Use the `subqueryOne` function for subqueries that return a single value for comparison:_
+
+```F#
+// Create a subquery that gets the avg list price (a single value):
+let avgListPrice = 
+    select {
+        for p in productTable do
+        select (avgBy p.ListPrice)
+    } 
+
+// Use the subquery via the `subqueryOne` function:
+let productsWithAboveAveragePrice =
+    select {
+        for p in productTable do
+        where (p.ListPrice > subqueryOne avgListPrice)
+        select (p.Name, p.ListPrice)
     }
     |> ctx.ReadAsync HydraReader.Read
 ```
