@@ -7,8 +7,8 @@ SqlHydra is a suite of NuGet packages for working with databases in F#.
     - SQL Server, SQLite, PostgreSql, MySql, Oracle, Firebird
 
 ## Contributing
-This project uses the vs-code Remote-Containers extension to spin up a dev environment that includes databases for running the Tests project.
-To initialize SQL Server after the `mssql` container spins up, open the CLI and run `bash install.sh`.
+* This project uses the vs-code Remote-Containers extension to spin up a dev environment that includes databases for running the Tests project.
+* To initialize SQL Server after the `mssql` container spins up, open the CLI and run `bash install.sh`.
 
 ## SqlHydra.SqlServer [![NuGet version (SqlHydra.SqlServer)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.SqlServer/)
 
