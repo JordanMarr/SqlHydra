@@ -18,7 +18,7 @@ let categoryTable =         table<Production.ProductCategory>       |> inSchema 
 let errorLogTable =         table<dbo.ErrorLog>
 
 let tests = 
-    testList "SqlHydra.Query - Query Output Unit Tests" [
+    testList "SQL Server Query Unit Tests" [
 
         /// String comparisons against generated queries.
         test "Simple Where" {

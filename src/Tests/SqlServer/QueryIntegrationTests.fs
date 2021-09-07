@@ -26,7 +26,7 @@ let gt0 (items: 'Item seq) =
     Expect.isTrue (items |> Seq.length > 0) "Expected more than 0."
 
 let tests = 
-    testList "SqlHydra.Query - SQL Server" [
+    testList "SQL Server Query Integration Tests" [
 
         testTask "Where City Starts With S" {
             use ctx = openContext()
@@ -142,7 +142,7 @@ let tests =
             Expect.isTrue (productsWithHigherThanAvgPrice |> Seq.forall (fun (nm, price) -> price > avgListPrice)) "Expected all prices to be > than avg price of $438.67."
         }
 
-        ftestTask "Select Column Aggregates" {
+        testTask "Select Column Aggregates" {
             use ctx = openContext()
 
             let! aggregates = 
