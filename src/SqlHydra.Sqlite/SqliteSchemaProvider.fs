@@ -47,20 +47,26 @@ let getSchema (cfg: Config) : Schema =
         )
         |> Seq.filter (fun tbl -> tbl.TableType <> "SYSTEM_TABLE")
         |> Seq.map (fun tbl -> 
-            let columns = 
+            let tableColumns = 
                 allColumns
                 |> Seq.filter (fun col -> 
                     col.TableCatalog = tbl.TableCatalog && 
                     col.TableSchema = tbl.TableSchema &&
                     col.TableName = tbl.TableName
                 )
-                |> Seq.map (fun col -> 
-                    { 
-                        Column.Name = col.ColumnName
-                        Column.IsNullable = col.IsNullable
-                        Column.TypeMapping = SqliteDataTypes.findTypeMapping(col.ProviderTypeName)
-                        Column.IsPK = col.IsPK
-                    }
+
+            let supportedColumns = 
+                tableColumns
+                |> Seq.choose (fun col -> 
+                    SqliteDataTypes.tryFindTypeMapping(col.ProviderTypeName)
+                    |> Option.map (fun typeMapping -> 
+                        { 
+                            Column.Name = col.ColumnName
+                            Column.IsNullable = col.IsNullable
+                            Column.TypeMapping = typeMapping
+                            Column.IsPK = col.IsPK
+                        }
+                    )
                 )
                 |> Seq.toList
 
@@ -69,7 +75,8 @@ let getSchema (cfg: Config) : Schema =
                 Table.Schema = tbl.TableSchema
                 Table.Name =  tbl.TableName
                 Table.Type = if tbl.TableType = "table" then TableType.Table else TableType.View
-                Table.Columns = columns
+                Table.Columns = supportedColumns
+                Table.TotalColumns = tableColumns |> Seq.length
             }
         )
         |> Seq.toList

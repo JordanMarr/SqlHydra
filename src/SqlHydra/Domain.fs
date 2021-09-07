@@ -14,7 +14,7 @@ type TypeMapping =
         ClrType: string
         DbType: DbType
         ColumnTypeAlias: string
-        ReaderMethod: string option
+        ReaderMethod: string
     }
 
 type Column = 
@@ -36,6 +36,7 @@ type Table =
         Name: string
         Type: TableType
         Columns: Column list
+        TotalColumns: int
     }
 
 type PrimitiveTypeReader =
