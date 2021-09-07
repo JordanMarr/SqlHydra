@@ -1,18 +1,21 @@
-﻿module SqlServer.QueryTextOutput
+﻿module SqlServer.QueryUnitTests
 
 open Expecto
 open SqlHydra.Query
 open DB
 open SqlServer.AdventureWorks
 open FSharp.Control.Tasks.V2
-open SalesLT
 
 // Tables
-let customerTable =         table<SalesLT.Customer>         |> inSchema (nameof SalesLT)
-let customerAddressTable =  table<SalesLT.CustomerAddress>  |> inSchema (nameof SalesLT)
-let addressTable =          table<SalesLT.Address>          |> inSchema (nameof SalesLT)
-let productTable =          table<SalesLT.Product>          |> inSchema (nameof SalesLT)
-let categoryTable =         table<SalesLT.ProductCategory>  |> inSchema (nameof SalesLT)
+let personTable =           table<Person.Person>                    |> inSchema (nameof Person)
+let addressTable =          table<Person.Address>                   |> inSchema (nameof Person)
+let customerTable =         table<Sales.Customer>                   |> inSchema (nameof Sales)
+let orderHeaderTable =      table<Sales.SalesOrderHeader>           |> inSchema (nameof Sales)
+let orderDetailTable =      table<Sales.SalesOrderDetail>           |> inSchema (nameof Sales)
+let productTable =          table<Production.Product>               |> inSchema (nameof Production)
+let subCategoryTable =      table<Production.ProductSubcategory>    |> inSchema (nameof Production)
+let categoryTable =         table<Production.ProductCategory>       |> inSchema (nameof Production)
+let errorLogTable =         table<dbo.ErrorLog>
 
 let tests = 
     testList "SqlHydra.Query - Query Output Unit Tests" [
@@ -23,8 +26,7 @@ let tests =
                 select {
                     for a in addressTable do
                     where (a.City = "Dallas")
-                    orderBy a.StateProvince
-                    thenByDescending a.City
+                    orderBy a.City
                 }
 
             let sql = query.ToKataQuery() |> toSql
@@ -41,33 +43,33 @@ let tests =
 
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
-            Expect.isTrue (sql.Contains("SELECT [SalesLT].[Address].[City] FROM")) ""
+            Expect.isTrue (sql.Contains("SELECT [Person].[Address].[City] FROM")) ""
         }
 
         test "Select 2 Columns" {
             let query =
                 select {
-                    for a in addressTable do
-                    select (a.City, a.StateProvince)
+                    for h in orderHeaderTable do
+                    select (h.CustomerID, h.OnlineOrderFlag)
                 }
 
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
-            Expect.isTrue (sql.Contains("SELECT [SalesLT].[Address].[City], [SalesLT].[Address].[StateProvince] FROM")) ""
+            Expect.isTrue (sql.Contains("SELECT [Sales].[SalesOrderHeader].[CustomerID], [Sales].[SalesOrderHeader].[OnlineOrderFlag] FROM")) ""
         }
 
         test "Select 1 Table and 1 Column" {
             let query =
                 select {
-                    for c in customerTable do
-                    join ca in customerAddressTable on (c.CustomerID = ca.CustomerID)
-                    join a  in addressTable on (ca.AddressID = a.AddressID)
-                    select (c, a.City)
+                    for o in orderHeaderTable do
+                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+                    where (o.OnlineOrderFlag = true)
+                    select (o, d.LineTotal)
                 }
 
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
-            Expect.isTrue (sql.Contains("SELECT [SalesLT].[Customer].*, [SalesLT].[Address].[City] FROM")) ""
+            Expect.isTrue (sql.Contains("SELECT [Sales].[SalesOrderHeader].*, [Sales].[SalesOrderDetail].[LineTotal] FROM")) ""
         }
 
         test "Where with Option Type" {
@@ -97,10 +99,8 @@ let tests =
                     where (a.City = "Chicago" || a.City = "Dallas")
                 }
     
-            query.ToKataQuery() |> toSql |> printfn "%s"
-
-            //let addresses = get query
-            //printfn "Results: %A" addresses
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE (([Person].[Address].[City] = @p0) OR ([Person].[Address].[City] = @p1))")) ""
         }
 
         test "And Where" {
@@ -110,7 +110,8 @@ let tests =
                     where (a.City = "Chicago" && a.City = "Dallas")
                 }
     
-            query.ToKataQuery() |> toSql |> printfn "%s"
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE (([Person].[Address].[City] = @p0) AND ([Person].[Address].[City] = @p1))")) ""
         }
 
         test "Where Not Binary" {
@@ -120,42 +121,41 @@ let tests =
                     where (not (a.City = "Chicago" && a.City = "Dallas"))
                 }
     
-            query.ToKataQuery() |> toSql |> printfn "%s"
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE (NOT (([Person].[Address].[City] = @p0) AND ([Person].[Address].[City] = @p1)))")) ""
         }
 
         test "Where Customer isIn List" {
             let query = 
                 select {
                     for c in customerTable do
-                    where (isIn c.CustomerID [30018;29545;29954;29897;29503;29559])
+                    where (isIn c.CustomerID [30018;29545;29954])
                 }
 
-            query.ToKataQuery() |> toSql |> printfn "%s"
-
-            //let customers = get query
-            //printfn "Results: %A" customers
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE ([Sales].[Customer].[CustomerID] IN (@p0, @p1, @p2))")) ""
         }
 
         test "Where Customer |=| List" {
             let query = 
                 select {
                     for c in customerTable do
-                    where (c.CustomerID |=| [30018;29545;29954;29897;29503;29559])
+                    where (c.CustomerID |=| [30018;29545;29954])
                 }
 
-            let sql = query.ToKataQuery() |> toSql 
-            sql |> printfn "%s"
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE ([Sales].[Customer].[CustomerID] IN (@p0, @p1, @p2))")) ""
         }
 
         test "Where Customer |=| Array" {
             let query = 
                 select {
                     for c in customerTable do
-                    where (c.CustomerID |=| [|30018;29545;29954;29897;29503;29559|])
+                    where (c.CustomerID |=| [| 30018;29545;29954 |])
                 }
 
-            let sql = query.ToKataQuery() |> toSql 
-            sql |> printfn "%s"
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE ([Sales].[Customer].[CustomerID] IN (@p0, @p1, @p2))")) ""
         }
         
         test "Where Customer |=| Seq" {            
@@ -165,99 +165,21 @@ let tests =
                     where (c.CustomerID |=| values)
                 }
 
-            let query = buildQuery([ 30018;29545;29954;29897;29503;29559 ])
+            let query = buildQuery([ 30018;29545;29954 ])
 
-            let sql = query.ToKataQuery() |> toSql 
-            sql |> printfn "%s"
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE ([Sales].[Customer].[CustomerID] IN (@p0, @p1, @p2))")) ""
         }
 
         test "Where Customer |<>| List" {
             let query = 
                 select {
                     for c in customerTable do
-                    where (c.CustomerID |<>| [30018;29545;29954;29897;29503;29559])
+                    where (c.CustomerID |<>| [ 30018;29545;29954 ])
                 }
 
-            query.ToKataQuery() |> toSql |> printfn "%s"
-
-            //let customers = get query
-            //printfn "Results: %A" customers
-        }
-
-        test "Select Column Aggregates" {
-            let query = 
-                select {
-                    for p in productTable do
-                    where (p.ProductCategoryID <> None)
-                    groupBy p.ProductCategoryID
-                    having (minBy p.ListPrice > 500M && maxBy p.ListPrice < 1000M)
-                    select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice)
-                }
-
-            let sql = query.ToKataQuery() |> toSql 
-            sql |> printfn "%s"
-        }
-
-        test "Sorted Aggregates - Top 5 categories with highest avg price products" {
-            let query = 
-                select {
-                    for p in productTable do
-                    where (p.ProductCategoryID <> None)
-                    groupBy p.ProductCategoryID
-                    orderByDescending (avgBy p.ListPrice)
-                    select (p.ProductCategoryID, avgBy p.ListPrice)
-                    take 5
-                }
-
-            let sql = query.ToKataQuery() |> toSql 
-            sql |> printfn "%s"
-        }
-
-        test "SqlKata SubQuery" {
-            let averageQuery = SqlKata.Query("Posts").AsAverage("score")
-            let query = SqlKata.Query("Posts").Where("Score", ">", averageQuery)
-            let sql = query |> toSql
-            sql |> printfn "%s"
-        }
-
-        test "Where subqueryMany" {
-            let top5CategoryIdsWithHighestAvgPrices = 
-                select {
-                    for p in productTable do
-                    where (p.ProductCategoryID <> None)
-                    groupBy p.ProductCategoryID
-                    orderByDescending (avgBy p.ListPrice)
-                    select (p.ProductCategoryID)
-                    take 5
-                }
-
-            let top5Categories =
-                select {
-                    for c in categoryTable do
-                    where (Some c.ProductCategoryID |=| subqueryMany top5CategoryIdsWithHighestAvgPrices)
-                    select c.Name
-                }
-
-            let sql = top5Categories.ToKataQuery() |> toSql
-            sql |> printfn "%s"
-        }
-
-        ftest "Where subqueryOne" {
-            let avgListPrice = 
-                select {
-                    for p in productTable do
-                    select (avgBy p.ListPrice)
-                } 
-
-            let productsWithAboveAveragePrice =
-                select {
-                    for p in productTable do
-                    where (p.ListPrice > subqueryOne avgListPrice)
-                    select (p.Name, p.ListPrice)
-                }
-
-            let sql = productsWithAboveAveragePrice.ToKataQuery() |> toSql
-            sql |> printfn "%s"
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE ([Sales].[Customer].[CustomerID] NOT IN (@p0, @p1, @p2))")) ""
         }
 
         test "Update should fail without where or updateAll" {
@@ -265,7 +187,7 @@ let tests =
                 let query = 
                     update {
                         for c in customerTable do
-                        set c.FirstName "blah"
+                        set c.AccountNumber "123"
                     }
                 failwith "Should fail because no `where` or `updateAll` exists."
             with ex ->
@@ -277,8 +199,8 @@ let tests =
                 let query = 
                     update {
                         for c in customerTable do
-                        set c.FirstName "blah"
-                        where (c.CustomerID = 123)
+                        set c.AccountNumber "123"
+                        where (c.CustomerID = 1)
                     }
                 () //Assert.Pass()
             with ex ->
@@ -290,7 +212,7 @@ let tests =
                 let query = 
                     update {
                         for c in customerTable do
-                        set c.FirstName "blah"
+                        set c.AccountNumber "123"
                         updateAll
                     }
                 () //Assert.Pass()
@@ -301,11 +223,10 @@ let tests =
         test "Multi Compiler Test" {
             let query = 
                 select {
-                    for c in customerTable do
-                    join ca in customerAddressTable on (c.CustomerID = ca.CustomerID)
-                    join a  in addressTable on (ca.AddressID = a.AddressID)
-                    where (isIn c.CustomerID [30018;29545;29954;29897;29503;29559])
-                    orderBy c.CustomerID
+                    for o in orderHeaderTable do
+                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+                    where (o.OnlineOrderFlag = true)
+                    select (o, d.LineTotal)
                 }
 
             seq [

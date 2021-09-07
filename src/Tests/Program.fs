@@ -12,9 +12,8 @@ let main argv =
 
     let sqlServerTests = 
         [
-            SqlServer.Migration.migration
-            SqlServer.Queries.tests
-            SqlServer.QueryTextOutput.tests
+            SqlServer.QueryUnitTests.tests
+            SqlServer.QueryIntegrationTests.tests
             SqlServer.Generation.tests
         ]
         |> sequencedTestList "Sql Server Tests"

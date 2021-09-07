@@ -8,19 +8,13 @@ let server = "localhost,12019"
 let server = "mssql"
 #endif
 
-let connectionString = $@"Server={server};Database=AdventureWorksLT2019;User=sa;Password=Password#123;"
-//let connectionString = @"Server=localhost\SQLEXPRESS;Database=AdventureWorksLT2019;Trusted_Connection=True"
+let connectionString = $@"Server={server};Database=AdventureWorks;User=sa;Password=Password#123;"
 
 let getConnection() = 
     new SqlConnection(connectionString)
 
 let openConnection() = 
     let conn = getConnection()
-    conn.Open()
-    conn
-
-let openMaster() = 
-    let conn = new SqlConnection($@"Server={server};Database=master;User=sa;Password=Password#123;")
     conn.Open()
     conn
 

@@ -16,9 +16,8 @@
   <ItemGroup>
     <Compile Include="SqlServer\AdventureWorks.fs" />
     <Compile Include="SqlServer\DB.fs" />
-    <Compile Include="SqlServer\Migration.fs" />
-    <Compile Include="SqlServer\Queries.fs" />
-    <Compile Include="SqlServer\QueryTextOutput.fs" />
+    <Compile Include="SqlServer\QueryUnitTests.fs" />
+    <Compile Include="SqlServer\QueryIntegrationTests.fs" />
     <Compile Include="SqlServer\Generation.fs" />
     <Compile Include="Sqlite\Generation.fs" />
     <Compile Include="UnitTests\TomlConfigParser.fs" />
@@ -27,7 +26,6 @@
 
   <ItemGroup>
     <PackageReference Include="Expecto" Version="9.0.4" />
-    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.46437.65" />
   </ItemGroup>
 
   <ItemGroup>

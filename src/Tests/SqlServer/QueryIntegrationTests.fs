@@ -1,11 +1,9 @@
-﻿module SqlServer.Queries
+﻿module SqlServer.QueryIntegrationTests
 
 open Expecto
 open SqlHydra.Query
 open DB
 open SqlServer.AdventureWorks
-open SalesLT
-open FSharp.Control.Tasks.V2
 
 let openContext() = 
     let compiler = SqlKata.Compilers.SqlServerCompiler()
@@ -13,63 +11,67 @@ let openContext() =
     new QueryContext(conn, compiler)
 
 // Tables
-let customerTable =         table<SalesLT.Customer>         |> inSchema (nameof SalesLT)
-let customerAddressTable =  table<SalesLT.CustomerAddress>  |> inSchema (nameof SalesLT)
-let addressTable =          table<SalesLT.Address>          |> inSchema (nameof SalesLT)
-let productTable =          table<SalesLT.Product>          |> inSchema (nameof SalesLT)
-let categoryTable =         table<SalesLT.ProductCategory>  |> inSchema (nameof SalesLT)
+let personTable =           table<Person.Person>                    |> inSchema (nameof Person)
+let addressTable =          table<Person.Address>                   |> inSchema (nameof Person)
+let customerTable =         table<Sales.Customer>                   |> inSchema (nameof Sales)
+let orderHeaderTable =      table<Sales.SalesOrderHeader>           |> inSchema (nameof Sales)
+let orderDetailTable =      table<Sales.SalesOrderDetail>           |> inSchema (nameof Sales)
+let productTable =          table<Production.Product>               |> inSchema (nameof Production)
+let subCategoryTable =      table<Production.ProductSubcategory>    |> inSchema (nameof Production)
+let categoryTable =         table<Production.ProductCategory>       |> inSchema (nameof Production)
 let errorLogTable =         table<dbo.ErrorLog>
+
+/// Sequence length is > 0.
+let gt0 (items: 'Item seq) =
+    Expect.isTrue (items |> Seq.length > 0) "Expected more than 0."
 
 let tests = 
     testList "SqlHydra.Query - SQL Server" [
 
-        testTask "Where Like" {
+        testTask "Where City Starts With S" {
             use ctx = openContext()
-
+            
             let addresses =
                 select {
                     for a in addressTable do
-                    where (a.City =% "S%")
+                    where (a.City |=| [ "Seattle"; "Santa Cruz" ])
                 }
                 |> ctx.Read HydraReader.Read
 
-            printfn "Results: %A" addresses
+            gt0 addresses
+            Expect.isTrue (addresses |> Seq.forall (fun a -> a.City = "Seattle" || a.City = "Santa Cruz")) "Expected only 'Seattle' or 'Santa Cruz'."
         }
 
-        testTask "Where City Starts With S" {
+        testTask "Select City Column Where City Starts with S" {
             use ctx = openContext()
 
             let cities =
                 select {
                     for a in addressTable do
                     where (a.City =% "S%")
+                    select a.City
                 }
                 |> ctx.Read HydraReader.Read
-                |> Seq.map (fun address -> $"City: {address.City}, {address.StateProvince}")
 
-            printfn "Results: %A" cities
+            gt0 cities
+            Expect.isTrue (cities |> Seq.forall (fun city -> city.StartsWith "S")) "Expected all cities to start with 'S'."
         }
 
-        testTask "Customers left join Addresses" {
+        testTask "Inner Join Orders-Details" {
             use ctx = openContext()
 
             let query =
                 select {
-                    for c in customerTable do
-                    leftJoin ca in customerAddressTable on (c.CustomerID = ca.Value.CustomerID)
-                    leftJoin a  in addressTable on (ca.Value.AddressID = a.Value.AddressID)
-                    where (c.CustomerID |=| [1;2;30018;29545]) // two without address, two with address
-                    orderBy c.CustomerID
-                    select (c, a)
+                    for o in orderHeaderTable do
+                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+                    where (o.OnlineOrderFlag = true)
+                    select (o, d)
                 }
 
             query.ToKataQuery() |> toSql |> printfn "%s"
 
-            let! customersWithAddresses = query |> ctx.ReadAsync HydraReader.Read
-            printfn "Record Count: %i" (customersWithAddresses |> Seq.length)
-
-            customersWithAddresses
-            |> printfn "Results: %A"
+            let! results = query |> ctx.ReadAsync HydraReader.Read
+            gt0 results
         }
 
         testTask "Product with Category Name" {
@@ -78,56 +80,42 @@ let tests =
             let query = 
                 select {
                     for p in productTable do
-                    join c in categoryTable on (p.ProductCategoryID.Value = c.ProductCategoryID)
+                    join sc in subCategoryTable on (p.ProductSubcategoryID = Some sc.ProductSubcategoryID)
+                    join c in categoryTable on (sc.ProductCategoryID = c.ProductCategoryID)
                     select (c.Name, p)
-                    take 10
+                    take 5
                 }
 
             let! rows = query |> ctx.ReadAsync HydraReader.Read
             printfn "Results: %A" rows
             query.ToKataQuery() |> toSql |> printfn "%s"
+            gt0 rows
         }
 
-
-        testTask "Customers inner join Addresses" {
+        testTask "Select Column Aggregates From Product IDs 1-3" {
             use ctx = openContext()
 
             let query =
                 select {
-                    for c in customerTable do
-                    join ca in customerAddressTable on (c.CustomerID = ca.CustomerID)
-                    join a  in addressTable on (ca.AddressID = a.AddressID)
-                    where (c.CustomerID |=| [30018;29545;29954;29897;29503;29559])
-                    orderBy c.CustomerID
-                    select (c,a)
+                    for p in productTable do
+                    where (p.ProductSubcategoryID <> None)
+                    groupBy p.ProductSubcategoryID
+                    where (p.ProductSubcategoryID.Value |=| [ 1; 2; 3 ])
+                    select (p.ProductSubcategoryID, minBy p.ListPrice, maxBy p.ListPrice, avgBy p.ListPrice, countBy p.ListPrice, sumBy p.ListPrice)
                 }
-        
+
+            let! aggregates = query |> ctx.ReadAsync HydraReader.Read
             query.ToKataQuery() |> toSql |> printfn "%s"
 
-            let! customersWithAddresses = 
-                query 
-                |> ctx.ReadAsync HydraReader.Read
-                //|> ctx.ReadAsync (fun reader -> 
-                //    let hydra = HydraReader(reader)
-                //    fun () -> hydra.Customer.Read(), hydra.Address.Read()
-                //)
-
-            printfn "Results: %A" customersWithAddresses
-        }
-
-        testTask "Select Column Aggregates" {
-            use ctx = openContext()
-
-            let! aggregates = 
-                select {
-                    for p in productTable do
-                    where (p.ProductCategoryID <> None)
-                    groupBy p.ProductCategoryID
-                    select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice, avgBy p.ListPrice, countBy p.ListPrice, sumBy p.ListPrice)
-                }
-                |> ctx.ReadAsync HydraReader.Read
-
-            printfn "Results: %A" aggregates
+            gt0 aggregates
+            
+            let aggByCatID = 
+                aggregates 
+                |> Seq.map (fun (catId, minPrice, maxPrice, avgPrice, priceCount, sumPrice) -> catId, (minPrice, maxPrice, avgPrice, priceCount, sumPrice)) 
+                |> Map.ofSeq
+            Expect.equal (539.99M, 3399.99M, 1683.365M, 32, 53867.6800M) aggByCatID.[Some 1] "Expected CatID: 1 aggregates to match."
+            Expect.equal (539.99M, 3578.2700M, 1597.4500M, 43, 68690.3500M) aggByCatID.[Some 2] "Expected CatID: 2 aggregates to match."
+            Expect.equal (742.3500M, 2384.0700M, 1425.2481M, 22, 31355.4600M) aggByCatID.[Some 3] "Expected CatID: 3 aggregates to match."
         }
 
         testTask "Aggregate Subquery One" {
@@ -136,11 +124,10 @@ let tests =
             let avgListPrice = 
                 select {
                     for p in productTable do
-                    where (p.ProductCategoryID <> None)
                     select (avgBy p.ListPrice)
                 }
 
-            let! productsWithHigherThanAvgListPrice = 
+            let! productsWithHigherThanAvgPrice = 
                 select {
                     for p in productTable do
                     where (p.ListPrice > subqueryOne avgListPrice)
@@ -149,7 +136,87 @@ let tests =
                 }
                 |> ctx.ReadAsync HydraReader.Read
 
-            printfn "Results %A" productsWithHigherThanAvgListPrice
+            let avgListPrice = 438.6662M
+            
+            gt0 productsWithHigherThanAvgPrice
+            Expect.isTrue (productsWithHigherThanAvgPrice |> Seq.forall (fun (nm, price) -> price > avgListPrice)) "Expected all prices to be > than avg price of $438.67."
+        }
+
+        ftestTask "Select Column Aggregates" {
+            use ctx = openContext()
+
+            let! aggregates = 
+                select {
+                    for p in productTable do
+                    where (p.ProductSubcategoryID <> None)
+                    groupBy p.ProductSubcategoryID
+                    having (minBy p.ListPrice > 50M && maxBy p.ListPrice < 1000M)
+                    select (p.ProductSubcategoryID, minBy p.ListPrice, maxBy p.ListPrice)
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            gt0 aggregates
+        }
+
+        testTask "Sorted Aggregates - Top 5 categories with highest avg price products" {
+            use ctx = openContext()
+
+            let! aggregates = 
+                select {
+                    for p in productTable do
+                    where (p.ProductSubcategoryID <> None)
+                    groupBy p.ProductSubcategoryID
+                    orderByDescending (avgBy p.ListPrice)
+                    select (p.ProductSubcategoryID, avgBy p.ListPrice)
+                    take 5
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            gt0 aggregates
+        }
+
+        testTask "Where subqueryMany" {
+            use ctx = openContext()
+
+            let top5CategoryIdsWithHighestAvgPrices = 
+                select {
+                    for p in productTable do
+                    where (p.ProductSubcategoryID <> None)
+                    groupBy p.ProductSubcategoryID
+                    orderByDescending (avgBy p.ListPrice)
+                    select (p.ProductSubcategoryID)
+                    take 5
+                }
+
+            let! top5Categories =
+                select {
+                    for c in categoryTable do
+                    where (Some c.ProductCategoryID |=| subqueryMany top5CategoryIdsWithHighestAvgPrices)
+                    select c.Name
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            gt0 top5Categories
+        }
+
+        testTask "Where subqueryOne" {
+            use ctx = openContext()
+
+            let avgListPrice = 
+                select {
+                    for p in productTable do
+                    select (avgBy p.ListPrice)
+                } 
+
+            let! productsWithAboveAveragePrice =
+                select {
+                    for p in productTable do
+                    where (p.ListPrice > subqueryOne avgListPrice)
+                    select (p.Name, p.ListPrice)
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            gt0 productsWithAboveAveragePrice
         }
 
         testTask "Select Columns with Option" {
@@ -158,12 +225,13 @@ let tests =
             let! values = 
                 select {
                     for p in productTable do
-                    where (p.ProductCategoryID <> None)
-                    select (p.ProductCategoryID, p.ListPrice)
+                    where (p.ProductSubcategoryID <> None)
+                    select (p.ProductSubcategoryID, p.ListPrice)
                 }
                 |> ctx.ReadAsync HydraReader.Read
 
-            printfn "Results: %A" values
+            gt0 values
+            Expect.isTrue (values |> Seq.forall (fun (catId, price) -> catId <> None)) "Expected subcategories to all have a value."
         }
 
         testTask "InsertGetId Test" {
@@ -191,6 +259,7 @@ let tests =
                 |> ctx.InsertGetId
 
             printfn "Identity: %i" result
+            Expect.isTrue (result > 0) "Expected returned ID to be > 0"
         }
 
         testTask "InsertGetIdAsync Test" {
