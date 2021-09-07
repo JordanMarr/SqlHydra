@@ -4,12 +4,18 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <WarnOn>3390;$(WarnOn)</WarnOn>
-    <Version>0.225.0</Version>
+    <Version>0.300.0</Version>
     <Description>SqlHydra.Query is an F# query builder powered by SqlKata.Query that supports Sql Server, MySql, PostgreSql, Oracle and Firebird.</Description>
     <Authors>Jordan Marr</Authors>
     <PackageTags>F# fsharp data database orm sql</PackageTags>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReleaseNotes>v0.225.0: bug fix in generated HydraReader.Read when reading loose option columns.</PackageReleaseNotes>
+      <PackageReleaseNotes>
+          v0.300.0
+          Query: 
+          - New Features: where subqueries; having clause; select/having/order aggregate functions.
+          Gen: 
+          - Breaking Change: There is now only one HydraReader for all schemas instead of one per schema.
+      </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
