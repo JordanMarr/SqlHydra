@@ -447,7 +447,15 @@ let result =
         where (e.ErrorLogID = errorLog.ErrorLogID)
     }
     |> ctx.Update
+```
 
+If you want to apply an update to all records in a table, you must use the `updateAll` keyword or else it will throw an exception (it's a safety precaution that may save you some trouble. 😊):
+```F#
+update {
+    for c in customerTable do
+    set c.AccountNumber "123"
+    updateAll
+}
 ```
 
 ### Delete Builder
@@ -461,4 +469,12 @@ let result =
     |> ctx.Delete
 
 printfn "result: %i" result
+```
+
+If you want to delete all records in a table, you must use the `deleteAll` keyword in lieu of a `where` statement or else it will not compile:
+```F#
+delete {
+    for c in customerTable do
+    deleteAll
+}
 ```
