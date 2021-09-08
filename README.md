@@ -6,6 +6,10 @@ SqlHydra is a suite of NuGet packages for working with databases in F#.
 - [SqlHydra.Query](#sqlhydraquery-) is an F# query generator computation expression powered by [SqlKata](https://sqlkata.com/) that supports the following databases:
     - SQL Server, SQLite, PostgreSql, MySql, Oracle, Firebird
 
+## Contributing
+* This project uses the vs-code Remote-Containers extension to spin up a dev environment that includes databases for running the Tests project.
+* To initialize SQL Server after the `mssql` container spins up, open the CLI and run `bash install.sh`.
+
 ## SqlHydra.SqlServer [![NuGet version (SqlHydra.SqlServer)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.SqlServer/)
 
 ### Local Install (recommended)
@@ -443,7 +447,15 @@ let result =
         where (e.ErrorLogID = errorLog.ErrorLogID)
     }
     |> ctx.Update
+```
 
+If you want to apply an update to all records in a table, you must use the `updateAll` keyword or else it will throw an exception (it's a safety precaution that may save you some trouble. 😊):
+```F#
+update {
+    for c in customerTable do
+    set c.AccountNumber "123"
+    updateAll
+}
 ```
 
 ### Delete Builder
@@ -457,4 +469,12 @@ let result =
     |> ctx.Delete
 
 printfn "result: %i" result
+```
+
+If you want to delete all records in a table, you must use the `deleteAll` keyword in lieu of a `where` statement or else it will not compile:
+```F#
+delete {
+    for c in customerTable do
+    deleteAll
+}
 ```
