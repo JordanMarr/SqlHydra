@@ -232,7 +232,7 @@ type DeleteExpressionBuilder<'T>() =
     /// Unwraps the query
     member this.Run (state: QuerySource<'T>) =
         let query = state |> getQueryOrDefault
-        DeleteQuery(query)
+        DeleteQuery(query.AsDelete())
 
 type InsertExpressionBuilder<'T>() =
 

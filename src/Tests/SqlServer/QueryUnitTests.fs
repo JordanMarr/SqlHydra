@@ -182,6 +182,53 @@ let tests =
             Expect.isTrue (sql.Contains("WHERE ([Sales].[Customer].[CustomerID] NOT IN (@p0, @p1, @p2))")) ""
         }
 
+        test "Delete Query with Where" {
+            let query = 
+                delete {
+                    for c in customerTable do
+                    where (c.CustomerID |<>| [ 30018;29545;29954 ])
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("DELETE FROM [Sales].[Customer]")) ""
+            Expect.isTrue (sql.Contains("WHERE ([Sales].[Customer].[CustomerID] NOT IN (@p0, @p1, @p2))")) ""
+        }
+
+        test "Delete All" {
+            let query = 
+                delete {
+                    for c in customerTable do
+                    deleteAll
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal "DELETE FROM [Sales].[Customer]" sql ""
+        }
+
+        test "Update Query with Where" {
+            let query = 
+                update {
+                    for c in customerTable do
+                    set c.AccountNumber "123"
+                    where (c.AccountNumber = "000")
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal "UPDATE [Sales].[Customer] SET [AccountNumber] = @p0 WHERE ([Sales].[Customer].[AccountNumber] = @p1)" sql ""
+        }
+
+        test "Update Query with No Where" {
+            let query = 
+                update {
+                    for c in customerTable do
+                    set c.AccountNumber "123"
+                    updateAll
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal "UPDATE [Sales].[Customer] SET [AccountNumber] = @p0" sql ""
+        }
+
         test "Update should fail without where or updateAll" {
             try 
                 let query = 
@@ -218,6 +265,29 @@ let tests =
                 () //Assert.Pass()
             with ex ->
                 () //Assert.Pass("Should not fail because `where` is present.")
+        }
+                
+        test "Insert Query" {
+            let query = 
+                insert {
+                    into customerTable
+                    entity 
+                        { 
+                            Sales.Customer.CustomerID = 0
+                            Sales.Customer.AccountNumber = "123"
+                            Sales.Customer.ModifiedDate = System.DateTime.Now
+                            Sales.Customer.PersonID = None
+                            Sales.Customer.rowguid = System.Guid.NewGuid()
+                            Sales.Customer.StoreID = None
+                            Sales.Customer.TerritoryID = None
+                        }
+                }
+
+            let sql = query.ToKataQuery(false) |> toSql
+            Expect.equal 
+                "INSERT INTO [Sales].[Customer] ([CustomerID], [AccountNumber], [rowguid], [ModifiedDate], [PersonID], [StoreID], [TerritoryID]) VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)" 
+                sql 
+                ""
         }
 
         test "Multi Compiler Test" {

@@ -49,7 +49,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             cmd.Parameters.Add(p) |> ignore
         cmd
 
-    member private this.BuildCommand(query: Query) =
+    member this.BuildCommand(query: Query) =
         let compiledQuery = query |> compiler.Compile
         this.BuildCommand(compiledQuery)
 
