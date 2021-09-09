@@ -114,6 +114,19 @@ let tests =
             Expect.isTrue (sql.Contains("WHERE (([Person].[Address].[City] = @p0) AND ([Person].[Address].[City] = @p1))")) ""
         }
 
+        ftest "Where with AND and OR in Parenthesis" {
+            let query = 
+                select {
+                    for a in addressTable do
+                    where (a.City = "Chicago" && (a.AddressLine2 = Some "abc" || isNullValue a.AddressLine2))
+                }
+    
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue 
+                (sql.Contains("WHERE (([Person].[Address].[City] = @p0) AND (([Person].[Address].[AddressLine2] = @p1) OR ([Person].[Address].[AddressLine2] IS NULL)))")) 
+                "Should wrap OR clause in parenthesis and each individual where clause in parenthesis."
+        }
+
         test "Where Not Binary" {
             let query = 
                 select {
