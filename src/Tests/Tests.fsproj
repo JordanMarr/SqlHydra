@@ -19,6 +19,8 @@
     <Compile Include="SqlServer\Generation.fs" />
     <Compile Include="Npgsql\AdventureWorks.fs" />
     <Compile Include="Npgsql\DB.fs" />
+    <Compile Include="Npgsql\QueryUnitTests.fs" />
+    <Compile Include="Npgsql\QueryIntegrationTests.fs" />
     <Compile Include="Npgsql\Generation.fs" />
     <Compile Include="Sqlite\Generation.fs" />
     <Compile Include="UnitTests\TomlConfigParser.fs" />

@@ -9,6 +9,7 @@ let main argv =
             verbosity = LogLevel.Debug }
 
     let sequencedTestList nm = testList nm >> testSequenced
+    let fsequencedTestList nm = ftestList nm >> testSequenced
 
     let sqlServerTests = 
         [
@@ -20,9 +21,11 @@ let main argv =
     
     let npgsqlTests = 
         [
+            Npgsql.QueryUnitTests.tests
+            Npgsql.QueryIntegrationTests.tests
             Npgsql.Generation.tests
         ]
-        |> sequencedTestList "Npgsql Tests"
+        |> fsequencedTestList "Npgsql Tests"
 
     let sqliteTests = 
         [
@@ -37,9 +40,9 @@ let main argv =
         |> sequencedTestList "Unit Tests"
 
     [
-        //sqlServerTests
-        //sqliteTests
-        //unitTests
+        sqlServerTests
+        sqliteTests
+        unitTests
         npgsqlTests
     ]
     |> sequencedTestList ""

@@ -114,7 +114,7 @@ let tests =
             Expect.isTrue (sql.Contains("WHERE (([Person].[Address].[City] = @p0) AND ([Person].[Address].[City] = @p1))")) ""
         }
 
-        ftest "Where with AND and OR in Parenthesis" {
+        test "Where with AND and OR in Parenthesis" {
             let query = 
                 select {
                     for a in addressTable do

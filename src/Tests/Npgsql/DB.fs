@@ -5,3 +5,7 @@ let connectionString = @"Server=localhost;Port=54320;Database=Adventureworks;Use
 #else // devcontainer: "npgsql"
 let connectionString = @"Server=npgsql;Port=5432;Database=Adventureworks;User Id=postgres;Password=postgres;"
 #endif
+
+let toSql (query: SqlKata.Query) = 
+    let compiler = SqlKata.Compilers.SqlServerCompiler()
+    compiler.Compile(query).Sql
