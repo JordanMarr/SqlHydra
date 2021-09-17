@@ -1,8 +1,7 @@
 {
   "profiles": {
     "SqlHydra.Sqlite": {
-      "commandName": "Project",
-      "commandLineArgs": "-c \"Data Source=$(ProjectDir)\\..\\Tests\\TestData\\AdventureWorksLT.db\" -o \"$(ProjectDir)/../SampleApp/AdventureWorks.fs\" -ns \"SampleApp.AdventureWorks\" --cli-mutable --readers"
+      "commandName": "Project"
     }
   }
 }

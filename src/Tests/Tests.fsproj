@@ -1,19 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <WarnOn>3390;$(WarnOn)</WarnOn>
     <Configurations>Debug;Release;DebugLocal</Configurations>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLocal|AnyCPU'">
     <DefineConstants>TRACE;LOCALHOST</DefineConstants>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
   </PropertyGroup>
-
   <ItemGroup>
+    <Compile Include="Sqlite\AdventureWorks.fs" />
     <Compile Include="SqlServer\AdventureWorks.fs" />
     <Compile Include="SqlServer\DB.fs" />
     <Compile Include="SqlServer\QueryUnitTests.fs" />
@@ -26,11 +24,9 @@
     <Compile Include="UnitTests\TomlConfigParser.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Expecto" Version="9.0.4" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\SqlHydra.Npgsql\SqlHydra.Npgsql.fsproj" />
     <ProjectReference Include="..\SqlHydra.Query\SqlHydra.Query.fsproj" />
@@ -38,13 +34,10 @@
     <ProjectReference Include="..\SqlHydra.SqlServer\SqlHydra.SqlServer.fsproj" />
     <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="TestData\" />
   </ItemGroup>
-
   <!--<Target Name="SqlHydra" BeforeTargets="Clean">
     <Exec Command="sqlhydra-mssql.bat" />
   </Target>-->
-
 </Project>

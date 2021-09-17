@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <WarnOn>3390;$(WarnOn)</WarnOn>
-    <Version>0.210.0-alpha</Version>
+    <Version>0.300.0</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.Npgsql is a dotnet tool that generates F# records for a PostgreSQL database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
