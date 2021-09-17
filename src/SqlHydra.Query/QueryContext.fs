@@ -3,7 +3,6 @@
 open System.Data.Common
 open FSharp.Control.Tasks.V2
 open SqlKata
-open KataBuilders
 
 /// Contains methods that compile and read a query.
 type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
@@ -50,23 +49,23 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             cmd.Parameters.Add(p) |> ignore
         cmd
 
-    member private this.BuildCommand(query: Query) =
+    member this.BuildCommand(query: Query) =
         let compiledQuery = query |> compiler.Compile
         this.BuildCommand(compiledQuery)
 
-    member this.GetReader<'T, 'Reader when 'Reader :> DbDataReader> (query: TypedQuery<'T>) = 
-        let cmd = this.BuildCommand(query.Query) // do not dispose cmd
+    member this.GetReader<'T, 'Reader when 'Reader :> DbDataReader> (query: SelectQuery<'T>) = 
+        let cmd = this.BuildCommand(query.ToKataQuery()) // do not dispose cmd
         cmd.ExecuteReader() :?> 'Reader
 
-    member this.GetReaderAsync<'T, 'Reader when 'Reader :> DbDataReader> (query: TypedQuery<'T>) = 
+    member this.GetReaderAsync<'T, 'Reader when 'Reader :> DbDataReader> (query: SelectQuery<'T>) = 
         task {
-            let cmd = this.BuildCommand(query.Query) // do not dispose cmd
+            let cmd = this.BuildCommand(query.ToKataQuery()) // do not dispose cmd
             let! reader = cmd.ExecuteReaderAsync()
             return reader :?> 'Reader
         }
 
-    member this.Read<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: TypedQuery<'Entity>) =
-        use cmd = this.BuildCommand(query.Query)
+    member this.Read<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
+        use cmd = this.BuildCommand(query.ToKataQuery())
         use reader = cmd.ExecuteReader() :?> 'Reader
         let read = getReaders reader
         seq [| 
@@ -74,12 +73,12 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 read() 
         |] 
 
-    member this.ReadOne<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: TypedQuery<'Entity>) =
+    member this.ReadOne<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
         this.Read getReaders query |> Seq.tryHead
 
-    member this.ReadAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: TypedQuery<'Entity>) = 
+    member this.ReadAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) = 
         task {
-            use cmd = this.BuildCommand(query.Query)
+            use cmd = this.BuildCommand(query.ToKataQuery())
             use! reader = cmd.ExecuteReaderAsync()
             let read = getReaders (reader :?> 'Reader)
             return
@@ -89,59 +88,54 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 |]
         }
 
-    member this.ReadOneAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: TypedQuery<'Entity>) = 
+    member this.ReadOneAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) = 
         task {
             let! entities = this.ReadAsync getReaders query
             return entities |> Seq.tryHead
         }
 
-    member private this.BuildInsertCommand (returnId: bool, insertQuerySpec: InsertQuerySpec<'T>) = 
-        let kataQuery = KataUtils.fromInsert returnId insertQuerySpec
-        let compiledQuery = compiler.Compile kataQuery
-        this.BuildCommand(compiledQuery)
-
-    member this.Insert (query: InsertQuerySpec<'T>) = 
-        use cmd = this.BuildInsertCommand(false, query)
+    member this.Insert (query: InsertQuery<'T>) = 
+        use cmd = this.BuildCommand(query.ToKataQuery(returnId = false))
         cmd.ExecuteNonQuery()
 
-    member this.InsertAsync (query: InsertQuerySpec<'T>) = 
-        use cmd = this.BuildInsertCommand(false, query)
+    member this.InsertAsync (query: InsertQuery<'T>) = 
+        use cmd = this.BuildCommand(query.ToKataQuery(returnId = false))
         cmd.ExecuteNonQueryAsync()
 
-    member this.InsertGetId<'T, 'Identity> (query: InsertQuerySpec<'T>) =
-        use cmd = this.BuildInsertCommand(true, query)
+    member this.InsertGetId<'T, 'Identity> (query: InsertQuery<'T>) =
+        use cmd = this.BuildCommand(query.ToKataQuery(returnId = true))
         let identity = cmd.ExecuteScalar()
         System.Convert.ChangeType(identity, typeof<'Identity>) :?> 'Identity
 
-    member this.InsertGetIdAsync<'T, 'Identity> (query: InsertQuerySpec<'T>) = task {
-        use cmd = this.BuildInsertCommand(true, query)
+    member this.InsertGetIdAsync<'T, 'Identity> (query: InsertQuery<'T>) = task {
+        use cmd = this.BuildCommand(query.ToKataQuery(returnId = true))
         let! identity = cmd.ExecuteScalarAsync()
         return System.Convert.ChangeType(identity, typeof<'Identity>) :?> 'Identity
     }
     
-    member this.Update (query: UpdateQuerySpec<'T>) = 
-        use cmd = query |> KataUtils.fromUpdate |> compiler.Compile |> this.BuildCommand
+    member this.Update (query: UpdateQuery<'T>) = 
+        use cmd = this.BuildCommand(query.ToKataQuery())
         cmd.ExecuteNonQuery()
 
-    member this.UpdateAsync (query: UpdateQuerySpec<'T>) = 
-        use cmd = query |> KataUtils.fromUpdate |> compiler.Compile |> this.BuildCommand
+    member this.UpdateAsync (query: UpdateQuery<'T>) = 
+        use cmd = this.BuildCommand(query.ToKataQuery())
         cmd.ExecuteNonQueryAsync()
 
-    member this.Delete (query: TypedQuery<'T>) = 
-        use cmd = this.BuildCommand(query.Query)
+    member this.Delete (query: DeleteQuery<'T>) = 
+        use cmd = this.BuildCommand(query.ToKataQuery())
         cmd.ExecuteNonQuery()
 
-    member this.DeleteAsync (query: TypedQuery<'T>) = 
-        use cmd = this.BuildCommand(query.Query)
+    member this.DeleteAsync (query: DeleteQuery<'T>) = 
+        use cmd = this.BuildCommand(query.ToKataQuery())
         cmd.ExecuteNonQueryAsync()
 
-    member this.Count (query: TypedQuery<int>) = 
-        use cmd = this.BuildCommand(query.Query)
+    member this.Count (query: SelectQuery<int>) = 
+        use cmd = this.BuildCommand(query.ToKataQuery())
         let count = cmd.ExecuteScalar()
         count :?> int
 
-    member this.CountAsync (query: TypedQuery<int>) = task {
-        use cmd = this.BuildCommand(query.Query)
+    member this.CountAsync (query: SelectQuery<int>) = task {
+        use cmd = this.BuildCommand(query.ToKataQuery())
         let! count = cmd.ExecuteScalarAsync()
         return count :?> int
     }

@@ -4,14 +4,20 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <WarnOn>3390;$(WarnOn)</WarnOn>
+    <Configurations>Debug;Release;DebugLocal</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLocal|AnyCPU'">
+    <DefineConstants>TRACE;LOCALHOST</DefineConstants>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="SqlServer\AdventureWorks.fs" />
     <Compile Include="SqlServer\DB.fs" />
-    <Compile Include="SqlServer\Migration.fs" />
-    <Compile Include="SqlServer\Queries.fs" />
-    <Compile Include="SqlServer\QueryTextOutput.fs" />
+    <Compile Include="SqlServer\QueryUnitTests.fs" />
+    <Compile Include="SqlServer\QueryIntegrationTests.fs" />
     <Compile Include="SqlServer\Generation.fs" />
     <Compile Include="Npgsql\AdventureWorks.fs" />
     <Compile Include="Npgsql\DB.fs" />
@@ -23,7 +29,6 @@
 
   <ItemGroup>
     <PackageReference Include="Expecto" Version="9.0.4" />
-    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.46437.65" />
   </ItemGroup>
 
   <ItemGroup>

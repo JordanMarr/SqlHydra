@@ -27,9 +27,12 @@ services:
     # (Adding the "ports" property to this file will not forward from a Codespace.)
         
   mssql:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    #image: mcr.microsoft.com/mssql/server:2019-latest
     hostname: mssql
     container_name: mssql
+    build: 
+      context: ./mssql
+      dockerfile: Dockerfile
     ports:
       - "12019:1433"    
     environment:

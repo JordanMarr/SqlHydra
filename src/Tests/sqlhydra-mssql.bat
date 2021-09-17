@@ -1,1 +1,1 @@
-dotnet run --project ..\SqlHydra.SqlServer --framework net5.0
+dotnet run --project ..\SqlHydra.SqlServer

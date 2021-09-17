@@ -4,12 +4,18 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <WarnOn>3390;$(WarnOn)</WarnOn>
-    <Version>0.210.0</Version>
+    <Version>0.300.1</Version>
     <Description>SqlHydra.Query is an F# query builder powered by SqlKata.Query that supports Sql Server, MySql, PostgreSql, Oracle and Firebird.</Description>
     <Authors>Jordan Marr</Authors>
     <PackageTags>F# fsharp data database orm sql</PackageTags>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReleaseNotes>v0.210.0: Added optional `isolationLevel` arg to `BeginTransaction`.</PackageReleaseNotes>
+      <PackageReleaseNotes>
+          v0.300.*
+          Query: 
+          - New Features: where subqueries; having clause; select/having/order aggregate functions.
+          Gen: 
+          - Breaking Change: There is now only one HydraReader for all schemas instead of one per schema.
+      </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,9 +23,10 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+    <Compile Include="Kata.fs" />
+    <Compile Include="QueryFunctions.fs" />
     <Compile Include="LinqExpressionVisitors.fs" />
     <Compile Include="KataBuilders.fs" />
-    <Compile Include="Kata.fs" />
     <Compile Include="QueryContext.fs" />
     <Compile Include="Extensions.fs" />
   </ItemGroup>

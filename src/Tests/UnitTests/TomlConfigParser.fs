@@ -12,7 +12,7 @@ let assertEqual (s1: string, s2: string) =
 
 let tests = 
     testList "TOML Config Parser" [
-        testCase "Parse: All" <| fun _ ->
+        test "Parse: All" {
             let cfg = 
                 {
                     Config.ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
@@ -36,8 +36,9 @@ let tests =
                 """
 
             assertEqual(expected, toml)
+        }
     
-        testCase "Read: All" <| fun _ ->
+        test "Read: All" {
             let toml = 
                 """
                 [general]
@@ -61,8 +62,9 @@ let tests =
             let cfg = TomlConfigParser.deserialize(toml)
     
             Expect.equal expected cfg ""
+        }
 
-        testCase "Read: when no readers section should be None"  <| fun _ ->
+        test "Read: when no readers section should be None"  {
             let toml = 
                 """
                 [general]
@@ -84,4 +86,5 @@ let tests =
             let cfg = TomlConfigParser.deserialize(toml)
     
             Expect.equal expected cfg ""
+        }
     ]

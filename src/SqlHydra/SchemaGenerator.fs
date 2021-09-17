@@ -63,12 +63,7 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
     let readerProperties =
         tbl.Columns
         // Only create reader properties for columns that have a ReaderMethod specified
-        |> List.choose (fun col -> 
-            match col.TypeMapping.ReaderMethod with
-            | Some readerMethod -> Some (col, readerMethod)
-            | None -> None
-        )
-        |> List.map (fun (col, readerMethod) ->
+        |> List.map (fun col ->
             let readerCall = 
                 SynExpr.CreateApp(
                     // Function:
@@ -87,7 +82,7 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
                     , SynExpr.CreateParenedTuple([
                         SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("reader"), None)
                         SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("getOrdinal"), None)
-                        SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString($"reader.%s{readerMethod}"), None)
+                        SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString($"reader.%s{col.TypeMapping.ReaderMethod}"), None)
                         SynExpr.CreateConstString(col.Name)
                     ])
                 )
@@ -117,7 +112,7 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
                     SynExpr.CreateRecord (
                         tbl.Columns
                         |> List.map (fun col -> 
-                            RecordFieldName(LongIdentWithDots.CreateString(col.Name), false)
+                            RecordFieldName(LongIdentWithDots.Create([col.Name]), false)
                             , SynExpr.CreateInstanceMethodCall(LongIdentWithDots.Create([ "__"; col.Name; "Read" ])) |> Some
                         )
                     )
@@ -210,12 +205,8 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
         [ 
             ctor
             yield! readerProperties
-
-            // Generate Read method only if all column types have a ReaderMethod specified;
-            // otherwise, the record will be partially initialized and break the build.
-            if tbl.Columns |> List.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome) then 
-                readMethod 
-                readIfNotNullMethod
+            readMethod 
+            readIfNotNullMethod
         ]
 
     let typeRepr = SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, range0)
@@ -267,7 +258,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                 // Function:
                                 SynExpr.CreateLongIdent(
                                     false
-                                    , LongIdentWithDots.CreateString($"{tbl.Name}Reader")
+                                    , LongIdentWithDots.CreateString($"{tbl.Schema}.{tbl.Name}Reader")
                                     , None
                                 )
                                 // Args:
@@ -277,7 +268,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                         // Func
                                         SynExpr.CreateLongIdent(false, LongIdentWithDots.CreateString("buildGetOrdinal"), None)
                                         // Args
-                                        , SynExpr.CreateConst(SynConst.Int32(tbl.Columns.Length))
+                                        , SynExpr.CreateConst(SynConst.Int32(tbl.TotalColumns)) // The total number of columns (includes unsupported columns)
                                     )
                                 ])
                             )
@@ -356,7 +347,6 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                         ]), 
                         [
                             for tbl in tbls do
-                                let canReadAllColumns = tbl.Columns |> List.forall(fun c -> c.TypeMapping.ReaderMethod.IsSome)
                                 let hasPK = tbl.Columns |> List.exists(fun c -> c.IsPK)
 
                                 SynMatchClause.Clause(
@@ -366,13 +356,10 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                     ], range0)
                                     , None
                                     , 
-                                    if canReadAllColumns then
-                                        SynExpr.CreateAppInfix(
-                                            SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; tbl.Name; "Read" ]), None), 
-                                            SynExpr.CreateIdent(Ident.Create(">> box"))
-                                        )
-                                    else
-                                        SynExpr.FailWith($"Could not read type '{tbl.Name}' because not all column types are supported by {app.Name}.")
+                                    SynExpr.CreateAppInfix(
+                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; tbl.Name; "Read" ]), None), 
+                                        SynExpr.CreateIdent(Ident.Create(">> box"))
+                                    )
                                     , range0
                                     , DebugPointForTarget.No
                                 )
@@ -384,15 +371,12 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                     ], range0)
                                     , None
                                     ,
-                                    match canReadAllColumns, hasPK with
-                                    | true, true -> 
+                                    if hasPK then
                                         SynExpr.CreateAppInfix(
                                             SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; tbl.Name; "ReadIfNotNull" ]), None), 
                                             SynExpr.CreateIdent(Ident.Create(">> box"))
                                         )
-                                    | false, _ ->
-                                        SynExpr.FailWith($"Could not read type '{tbl.Name} option' because not all column types are supported by {app.Name}.")
-                                    | _, false -> 
+                                    else
                                         SynExpr.FailWith($"Could not read type '{tbl.Name} option' because no primary key exists.")
                                     , range0
                                     , DebugPointForTarget.No
@@ -455,7 +439,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
             }
         )
 
-    let staticGetPrimitiveReaderMethod = 
+    let staticGetPrimitiveReaderMethod =         
         SynMemberDefn.CreateMember(
             { SynBindingRcd.Let with 
                 Pattern = 
@@ -478,11 +462,17 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                                     , SynType.Create(rdrCfg.ReaderType)
                                                     , range0
                                                 )
+                                                SynPat.Typed(
+                                                    SynPat.LongIdent(LongIdentWithDots.CreateString("isOpt"), None, None, SynArgPats.Empty, None, range0)
+                                                    , SynType.Create("bool")
+                                                    , range0
+                                                )
                                             ], range0
                                         ), range0
                                     )
                                 ]
                             )
+                            , access = SynAccess.Private
                         )
                     )
                 ValData = 
@@ -515,9 +505,9 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                             , SynExpr.CreateApp(
                                 SynExpr.CreateIdentString("Some")
                                 , SynExpr.CreateParen(
-                                    SynExpr.CreateAppInfix(
-                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "reader"; ptr.ReaderMethod ]), None), 
-                                        SynExpr.CreateIdent(Ident.Create(">> box"))
+                                    SynExpr.CreateApp(
+                                        SynExpr.CreateIdent(Ident.Create("wrap")),
+                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "reader"; ptr.ReaderMethod ]), None)
                                     )
                                 )
                             )
@@ -529,9 +519,37 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                         )
 
                     // Recursively build if..elif..elif..else
-                    db.PrimitiveTypeReaders 
-                    |> Seq.rev
-                    |> Seq.fold (fun elifClause ptr -> buildIf elifClause ptr) (SynExpr.CreateIdentString("None"))
+                    let ifExpression = 
+                        db.PrimitiveTypeReaders 
+                        |> Seq.rev
+                        |> Seq.fold (fun elifClause ptr -> buildIf elifClause ptr) (SynExpr.CreateIdentString("None"))
+
+                    let wrapFnPlaceholderBinding = 
+                        SynBinding.Binding(
+                            None
+                            , SynBindingKind.NormalBinding
+                            , false
+                            , false
+                            , []
+                            , XmlDoc.PreXmlDocEmpty
+                            , SynValData.SynValData(None, SynValInfo.Empty, None)
+                            , SynPat.LongIdent(LongIdentWithDots.CreateString("wrap"), None, None, SynArgPats.Empty, None, range0)
+                            , None
+                            , SynExpr.LetOrUse(false, false, [], SynExpr.CreateConstString("wrap-placeholder"), range0)
+                            , range0
+                            , DebugPointForBinding.NoDebugPointAtDoBinding
+                        )
+                    
+                    SynExpr.LetOrUse(
+                        false
+                        , false
+                        , [ 
+                            wrapFnPlaceholderBinding
+                        ]
+                        , ifExpression
+                        , range0
+                    )
+                    
             }
         )
 
@@ -580,10 +598,6 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                         
                         if cfg.Readers.IsSome then 
                             createTableReaderClass cfg.Readers.Value tbl
-
-                    // Create "HydraReader" below all generated tables/readers...
-                    if cfg.Readers.IsSome then
-                        createHydraReaderClass db cfg.Readers.Value app tables
                 ]
 
             SynModuleDecl.CreateNestedModule(schemaNestedModule, tableRecordDeclarations)
@@ -591,12 +605,19 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
 
     let readerExtensionsPlaceholder = SynModuleDecl.CreateOpen("Substitute.Extensions")
 
+    let allTables = schemas |> List.collect (fun schema -> db.Tables |> List.filter (fun t -> t.Schema = schema))
+    // TODO: Handle duplicate table names between schemas
+
     let declarations = 
         [ 
             if cfg.Readers.IsSome then
                 readerExtensionsPlaceholder 
 
             yield! nestedSchemaModules
+
+            // Create "HydraReader" below all generated tables/readers...
+            if cfg.Readers.IsSome then
+                createHydraReaderClass db cfg.Readers.Value app allTables
         ]
 
     let parentNamespace =
@@ -641,16 +662,24 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
         // HydraReader utility functions
         "member HydraReader = \"placeholder\"",
         """let mutable accFieldCount = 0
-        let buildGetOrdinal fieldCount =
-            let dictionary = 
-                [0..reader.FieldCount-1] 
-                |> List.map (fun i -> reader.GetName(i), i)
-                |> List.sortBy snd
-                |> List.skip accFieldCount
-                |> List.take fieldCount
-                |> dict
-            accFieldCount <- accFieldCount + fieldCount
-            fun col -> dictionary.Item col
+    let buildGetOrdinal fieldCount =
+        let dictionary = 
+            [0..reader.FieldCount-1] 
+            |> List.map (fun i -> reader.GetName(i), i)
+            |> List.sortBy snd
+            |> List.skip accFieldCount
+            |> List.take fieldCount
+            |> dict
+        accFieldCount <- accFieldCount + fieldCount
+        fun col -> dictionary.Item col
+        """
+
+        // "wrap" fn in GetPrimitiveReader
+        "let wrap = \"wrap-placeholder\"",
+        """let wrap get (ord: int) = 
+                if isOpt 
+                then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+                else get ord |> box 
         """
 
         // HydraReader Read Method Body
@@ -669,12 +698,10 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
                     then t.GenericTypeArguments.[0], true
                     else t, false
             
-                match HydraReader.GetPrimitiveReader(t, reader) with
+                match HydraReader.GetPrimitiveReader(t, reader, isOpt) with
                 | Some primitiveReader -> 
                     let ord = getOrdinalAndIncrement()
-                    if not isOpt 
-                    then fun () -> primitiveReader ord
-                    else fun () -> if reader.IsDBNull ord then box None else primitiveReader ord |> Some |> box
+                    fun () -> primitiveReader ord
                 | None ->
                     hydra.GetReaderByName(t.Name, isOpt)
             

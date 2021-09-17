@@ -60,20 +60,26 @@ let getSchema (cfg: Config) : Schema =
             let tableName  = tbl.["TABLE_NAME"] :?> string
             let tableType = tbl.["TABLE_TYPE"] :?> string
 
-            let columns = 
+            let tableColumns = 
                 allColumns
                 |> Seq.filter (fun col -> 
                     col.TableCatalog = tableCatalog && 
                     col.TableSchema = tableSchema &&
                     col.TableName = tableName
                 )
-                |> Seq.map (fun col -> 
-                    { 
-                        Column.Name = col.ColumnName
-                        Column.IsNullable = col.IsNullable
-                        Column.TypeMapping = SqlServerDataTypes.findTypeMapping(col.ProviderTypeName)
-                        Column.IsPK = pks.Contains(col.TableSchema, col.TableName, col.ColumnName)
-                    }
+
+            let supportedColumns = 
+                tableColumns
+                |> Seq.choose (fun col -> 
+                    SqlServerDataTypes.tryFindTypeMapping(col.ProviderTypeName)
+                    |> Option.map (fun typeMapping -> 
+                        { 
+                            Column.Name = col.ColumnName
+                            Column.IsNullable = col.IsNullable
+                            Column.TypeMapping = typeMapping
+                            Column.IsPK = pks.Contains(col.TableSchema, col.TableName, col.ColumnName)
+                        }
+                    )
                 )
                 |> Seq.toList
 
@@ -82,7 +88,8 @@ let getSchema (cfg: Config) : Schema =
                 Table.Schema = tableSchema
                 Table.Name =  tableName
                 Table.Type = if tableType = "BASE TABLE" then TableType.Table else TableType.View
-                Table.Columns = columns
+                Table.Columns = supportedColumns
+                Table.TotalColumns = tableColumns |> Seq.length
             }
         )
         |> Seq.toList

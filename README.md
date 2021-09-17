@@ -6,6 +6,10 @@ SqlHydra is a suite of NuGet packages for working with databases in F#.
 - [SqlHydra.Query](#sqlhydraquery-) is an F# query generator computation expression powered by [SqlKata](https://sqlkata.com/) that supports the following databases:
     - SQL Server, SQLite, PostgreSql, MySql, Oracle, Firebird
 
+## Contributing
+* This project uses the vs-code Remote-Containers extension to spin up a dev environment that includes databases for running the Tests project.
+* To initialize SQL Server after the `mssql` container spins up, open the CLI and run `bash install.sh`.
+
 ## SqlHydra.SqlServer [![NuGet version (SqlHydra.SqlServer)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.SqlServer/)
 
 ### Local Install (recommended)
@@ -153,14 +157,6 @@ SqlHydra.Query can be used with any library that accepts a data reader; however,
 ### Setup
 
 ```F#
-/// Opens a connection and creates a QueryContext that will generate SQL Server dialect queries
-let openContext() = 
-    let compiler = SqlKata.Compilers.SqlServerCompiler()
-    let conn = openConnection()
-    new QueryContext(conn, compiler)
-```
-
-```F#
 open SqlHydra.Query
 
 // Tables
@@ -170,6 +166,14 @@ let addressTable =          table<SalesLT.Address>          |> inSchema (nameof 
 let productTable =          table<SalesLT.Product>          |> inSchema (nameof SalesLT)
 let categoryTable =         table<SalesLT.ProductCategory>  |> inSchema (nameof SalesLT)
 let errorLogTable =         table<dbo.ErrorLog>
+```
+
+```F#
+/// Opens a connection and creates a QueryContext that will generate SQL Server dialect queries
+let openContext() = 
+    let compiler = SqlKata.Compilers.SqlServerCompiler()
+    let conn = openConnection()
+    new QueryContext(conn, compiler)
 ```
 
 ### Select Builder
@@ -191,7 +195,18 @@ let cities =
     |> List.map (fun (city, state) -> $"City, State: %s{city}, %s{state}")
 ```
 
-Select `Address` entities where City starts with `S%`:
+_Special `where` filter operators:_
+- `isIn` or `|=|`
+- `isNotIn` or `|<>|`
+- `like` or `=%`
+- `notLike` or `<>%`
+- `isNullValue` or `= None`
+- `isNotNullValue` or `<> None`
+- `subqueryMany`
+- `subqueryOne`
+
+
+Select `Address` entities where City starts with `S`:
 ```F#
 let addresses =
     select {
@@ -201,13 +216,7 @@ let addresses =
     |> ctx.Read HydraReader.Read
 ```
 
-_Special `where` filter operators:_
-- `isIn` or `|=|`
-- `isNotIn` or `|<>|`
-- `like` or `=%`
-- `notLike` or `<>%`
-- `isNullValue` or `= None`
-- `isNotNullValue` or `<> None`
+#### Joins
 
 Select top 10 `Product` entities with inner joined category name:
 ```F#
@@ -237,6 +246,86 @@ let! customerAddresses =
     |> ctx.ReadAsync HydraReader.Read
 ```
 
+#### Aggregates
+
+_Aggregate functions (can be used in `select`, `having` and `orderBy` clauses):_
+- `countBy`
+- `sumBy`
+- `minBy`
+- `maxBy`
+- `avgBy`
+
+```F#
+// Select categories with an avg product price > 500 and < 1000
+select {
+    for p in productTable do
+    where (p.ProductCategoryID <> None)
+    groupBy p.ProductCategoryID
+    having (minBy p.ListPrice > 500M && maxBy p.ListPrice < 1000M)
+    select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice)
+}
+|> ctx.Read HydraReader.Read
+|> Seq.map (fun (catId, minPrice, maxPrice) -> $"CatID: {catId}, MinPrice: {minPrice}, MaxPrice: {maxPrice}")
+|> Seq.iter (printfn "%s")
+```
+
+Alternative Row Count Query:
+```F#
+let! customersWithNoSalesPersonCount =
+    select {
+        for c in customerTable do
+        where (c.SalesPerson = None)
+        count
+    }
+    |> ctx.CountAsync
+```
+
+#### WHERE Subqueries
+
+_Use the `subqueryMany` function for subqueries that return multiple rows for comparison:_
+
+```F#
+// Create a subquery that gets top 5 avg prices by category ID:
+let top5CategoryIdsWithHighestAvgPrices = 
+    select {
+        for p in productTable do
+        where (p.ProductCategoryID <> None)
+        groupBy p.ProductCategoryID
+        orderByDescending (avgBy p.ListPrice)
+        select p.ProductCategoryID
+        take 5
+    }
+
+// Get category names where the category ID is "IN" the subquery:
+let top5Categories =
+    select {
+        for c in categoryTable do
+        where (Some c.ProductCategoryID |=| subqueryMany top5CategoryIdsWithHighestAvgPrices)
+        select c.Name
+    }
+    |> ctx.ReadAsync HydraReader.Read
+```
+
+_Use the `subqueryOne` function for subqueries that return a single value for comparison:_
+
+```F#
+// Create a subquery that gets the avg list price (a single value):
+let avgListPrice = 
+    select {
+        for p in productTable do
+        select (avgBy p.ListPrice)
+    } 
+
+// Get products with a price > the average price
+let productsWithAboveAveragePrice =
+    select {
+        for p in productTable do
+        where (p.ListPrice > subqueryOne avgListPrice)
+        select (p.Name, p.ListPrice)
+    }
+    |> ctx.ReadAsync HydraReader.Read
+```
+
 Distinct Query:
 ```F#
 let! distinctCustomerNames = 
@@ -246,17 +335,6 @@ let! distinctCustomerNames =
         distinct
     }
     |> ctx.ReadAsync HydraReader.Read
-```
-
-Count Query:
-```F#
-let! customersWithNoSalesPersonCount =
-    select {
-        for c in customerTable do
-        where (c.SalesPerson = None)
-        count
-    }
-    |> ctx.CountAsync
 ```
 
 ### Dos and Don'ts
@@ -369,7 +447,15 @@ let result =
         where (e.ErrorLogID = errorLog.ErrorLogID)
     }
     |> ctx.Update
+```
 
+If you want to apply an update to all records in a table, you must use the `updateAll` keyword or else it will throw an exception (it's a safety precaution that may save you some trouble. 😊):
+```F#
+update {
+    for c in customerTable do
+    set c.AccountNumber "123"
+    updateAll
+}
 ```
 
 ### Delete Builder
@@ -383,4 +469,12 @@ let result =
     |> ctx.Delete
 
 printfn "result: %i" result
+```
+
+If you want to delete all records in a table, you must use the `deleteAll` keyword in lieu of a `where` statement or else it will not compile:
+```F#
+delete {
+    for c in customerTable do
+    deleteAll
+}
 ```
