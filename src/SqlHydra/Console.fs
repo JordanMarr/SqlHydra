@@ -82,10 +82,10 @@ let getConfig(app: AppInfo, argv: string array) =
         | Valid cfg -> 
             cfg
         | Invalid exMsg -> 
-            AnsiConsole.MarkupLine($"[red]ERROR: [/]Unable to deserialize '{tomlFilename}'. \n{exMsg}")
+            Console.WriteLine($"Unable to deserialize '{tomlFilename}'. \n{exMsg}")
             failwith "Invalid toml config."
         | NotFound ->
-            AnsiConsole.MarkupLine($"[yellow]\"{tomlFilename}\" not detected. Starting configuration wizard...[/]")
+            Console.WriteLine($"'{tomlFilename}' not detected. Starting configuration wizard...")
             let cfg = newConfigWizard(app)
             saveConfig(tomlFilename, cfg)
             cfg
