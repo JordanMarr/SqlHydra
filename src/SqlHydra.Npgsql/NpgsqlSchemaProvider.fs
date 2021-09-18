@@ -10,6 +10,38 @@ let getSchema (cfg: Config) : Schema =
     let sTables = conn.GetSchema("Tables")
     let sColumns = conn.GetSchema("Columns")
 
+    let pks = 
+        let sql =
+            """
+            SELECT
+                tc.table_schema, 
+                tc.constraint_name, 
+                tc.table_name, 
+                kcu.column_name, 
+                ccu.table_schema AS foreign_table_schema,
+                ccu.table_name AS foreign_table_name,
+                ccu.column_name AS foreign_column_name 
+            FROM 
+                information_schema.table_constraints AS tc 
+            JOIN information_schema.key_column_usage AS kcu
+                ON tc.constraint_name = kcu.constraint_name
+                AND tc.table_schema = kcu.table_schema
+            JOIN information_schema.constraint_column_usage AS ccu
+                ON ccu.constraint_name = tc.constraint_name
+                AND ccu.table_schema = tc.table_schema
+            WHERE tc.constraint_type = 'PRIMARY KEY';
+            """
+
+        use cmd = new Npgsql.NpgsqlCommand(sql, conn)
+        use rdr = cmd.ExecuteReader()
+        [
+            while rdr.Read() do
+                rdr.["TABLE_SCHEMA"] :?> string,
+                rdr.["TABLE_NAME"] :?> string,
+                rdr.["COLUMN_NAME"] :?> string
+        ]
+        |> Set.ofList
+
     let allColumns = 
         sColumns.Rows
         |> Seq.cast<DataRow>
@@ -24,7 +56,6 @@ let getSchema (cfg: Config) : Schema =
                     match col.["IS_NULLABLE"] :?> string with 
                     | "YES" -> true
                     | _ -> false
-                IsPK = false
             |}
         )
 
@@ -58,7 +89,7 @@ let getSchema (cfg: Config) : Schema =
                             Column.Name = col.ColumnName
                             Column.IsNullable = col.IsNullable
                             Column.TypeMapping = typeMapping
-                            Column.IsPK = col.IsPK
+                            Column.IsPK = pks.Contains(col.TableSchema, col.TableName, col.ColumnName)
                         }
                     )
                 )

@@ -20,12 +20,15 @@ let cfg =
 let tests = 
     categoryList "Npgsql" "Generation Integration Tests" [
 
-        testCase "Print Schema" <| fun _ ->
+        test "Print Schema" {
             let schema = NpgsqlSchemaProvider.getSchema cfg
             printfn "Schema: %A" schema
+        }
 
-        let getCode cfg = 
-            NpgsqlSchemaProvider.getSchema cfg
+        let lazySchema = lazy NpgsqlSchemaProvider.getSchema cfg
+
+        let getCode cfg =
+            lazySchema.Value
             |> SchemaGenerator.generateModule cfg SqlHydra.SqlServer.Program.app
             |> SchemaGenerator.toFormattedCode cfg SqlHydra.SqlServer.Program.app
 
@@ -37,22 +40,41 @@ let tests =
             let code = getCode cfg
             Expect.isFalse (code.Contains str) ""
 
-        testCase "Print Code"  <| fun _ ->
+        test "Print Code" {
             getCode cfg |> printfn "%s"
+        }
     
-        testCase "Code Should Have Reader"  <| fun _ ->
+        test "Code Should Have Reader" {
             cfg |> inCode "type HydraReader"
+        }
     
-        testCase "Code Should Not Have Reader"  <| fun _ ->
+        test "Code Should Not Have Reader" {
             { cfg with Readers = None } |> notInCode "type HydraReader"
+        }
 
-        testCase "Code Should Have CLIMutable"  <| fun _ ->
+        test "Code Should Have CLIMutable" {
             { cfg with IsCLIMutable = true } |> inCode "[<CLIMutable>]"
+        }
 
-        testCase "Code Should Not Have CLIMutable"  <| fun _ ->
+        test "Code Should Not Have CLIMutable" {
             { cfg with IsCLIMutable = false } |> notInCode "[<CLIMutable>]"
+        }
 
-        testCase "Code Should Have Namespace" <| fun _ ->
+        test "Code Should Have Namespace" {
             cfg |> inCode "namespace TestNS"
+        }
 
+        test "Should have Tables and PKs" {
+            let schema = lazySchema.Value
+            
+            let allColumns = 
+                schema.Tables 
+                |> List.collect (fun t -> t.Columns)
+
+            let pks = allColumns |> List.filter (fun c -> c.IsPK)
+            
+            Expect.equal schema.Tables.Length 68 ""
+            Expect.isTrue (pks.Length > schema.Tables.Length) "Expected at least one pk per table"
+            Expect.isTrue (pks.Length < allColumns.Length) "Every column should not be a PK"
+        }
     ]
