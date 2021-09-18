@@ -23,8 +23,10 @@ let tests =
             printfn "Schema: %A" schema
         }
 
+        let lazySchema = lazy SqlServerSchemaProvider.getSchema cfg
+
         let getCode cfg = 
-            SqlServerSchemaProvider.getSchema cfg
+            lazySchema.Value
             |> SchemaGenerator.generateModule cfg SqlHydra.SqlServer.Program.app
             |> SchemaGenerator.toFormattedCode cfg SqlHydra.SqlServer.Program.app
 

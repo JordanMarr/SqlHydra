@@ -25,12 +25,10 @@ let cfg =
 let tests = 
     categoryList "Sqlite" "Generation Integration Tests" [
 
-        //test "Print Schema" {
-        //    let schema = SqliteSchemaProvider.getSchema cfg
-        //    printfn "Schema: %A" schema
+        let lazySchema = lazy SqliteSchemaProvider.getSchema cfg
 
         let getCode cfg = 
-            SqliteSchemaProvider.getSchema cfg
+            lazySchema.Value
             |> SchemaGenerator.generateModule cfg SqlHydra.Sqlite.Program.app
             |> SchemaGenerator.toFormattedCode cfg SqlHydra.Sqlite.Program.app
 
