@@ -14,8 +14,9 @@ let cfg =
         Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" } 
     }
 
+[<Tests>]
 let tests = 
-    testList "SqlHydra.SqlServer Integration Tests" [
+    testList "SqlServer Generation Integration Tests" [
 
         test "Print Schema" {
             let schema = SqlServerSchemaProvider.getSchema cfg

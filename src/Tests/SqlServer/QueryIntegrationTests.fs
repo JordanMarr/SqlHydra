@@ -25,8 +25,9 @@ let errorLogTable =         table<dbo.ErrorLog>
 let gt0 (items: 'Item seq) =
     Expect.isTrue (items |> Seq.length > 0) "Expected more than 0."
 
+[<Tests>]
 let tests = 
-    testList "SQL Server Query Integration Tests" [
+    sequencedTestList "SqlServer Query Integration Tests" [
 
         testTask "Where City Starts With S" {
             use ctx = openContext()

@@ -25,8 +25,9 @@ let categoryTable =         table<production.productcategory>       |> inSchema 
 let gt0 (items: 'Item seq) =
     Expect.isTrue (items |> Seq.length > 0) "Expected more than 0."
 
+[<Tests>]
 let tests = 
-    testList "Npgsql Query Integration Tests" [
+    sequencedTestList "Npgsql Query Integration Tests" [
 
         testTask "Where City Starts With S" {
             use ctx = openContext()

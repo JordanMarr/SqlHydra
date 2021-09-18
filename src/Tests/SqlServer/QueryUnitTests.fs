@@ -17,8 +17,9 @@ let subCategoryTable =      table<Production.ProductSubcategory>    |> inSchema 
 let categoryTable =         table<Production.ProductCategory>       |> inSchema (nameof Production)
 let errorLogTable =         table<dbo.ErrorLog>
 
+[<Tests>]
 let tests = 
-    testList "SQL Server Query Unit Tests" [
+    testList "SqlServer Query Unit Tests" [
 
         /// String comparisons against generated queries.
         test "Simple Where" {

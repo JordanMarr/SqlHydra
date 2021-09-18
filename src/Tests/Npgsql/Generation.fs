@@ -16,8 +16,9 @@ let cfg =
         Readers = Some { ReadersConfig.ReaderType = Program.app.DefaultReaderType } 
     }
 
+[<Tests>]
 let tests = 
-    testList "SqlHydra.Npgsql Integration Tests" [
+    testList "Npgsql Generation Integration Tests" [
 
         testCase "Print Schema" <| fun _ ->
             let schema = NpgsqlSchemaProvider.getSchema cfg

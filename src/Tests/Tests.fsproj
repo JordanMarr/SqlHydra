@@ -4,6 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <WarnOn>3390;$(WarnOn)</WarnOn>
     <Configurations>Debug;Release;DebugLocal</Configurations>
+    <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLocal|AnyCPU'">
     <DefineConstants>TRACE;LOCALHOST</DefineConstants>
@@ -11,6 +12,7 @@
     <Tailcalls>false</Tailcalls>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Util.fs" />
     <Compile Include="Sqlite\AdventureWorks.fs" />
     <Compile Include="SqlServer\AdventureWorks.fs" />
     <Compile Include="SqlServer\DB.fs" />
@@ -28,6 +30,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Expecto" Version="9.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.12.8" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SqlHydra.Npgsql\SqlHydra.Npgsql.fsproj" />

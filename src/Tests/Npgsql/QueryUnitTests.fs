@@ -16,6 +16,7 @@ let productTable =          table<production.product>               |> inSchema 
 let subCategoryTable =      table<production.productsubcategory>    |> inSchema (nameof production)
 let categoryTable =         table<production.productcategory>       |> inSchema (nameof production)
 
+[<Tests>]
 let tests = 
     testList "Npgsql Query Unit Tests" [
 
