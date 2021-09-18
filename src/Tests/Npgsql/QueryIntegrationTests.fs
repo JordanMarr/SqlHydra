@@ -27,7 +27,7 @@ let gt0 (items: 'Item seq) =
 
 [<Tests>]
 let tests = 
-    sequencedTestList "Npgsql Query Integration Tests" [
+    categoryList "Npgsql" "Query Integration Tests" [
 
         testTask "Where City Starts With S" {
             use ctx = openContext()

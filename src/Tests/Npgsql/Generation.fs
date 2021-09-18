@@ -18,7 +18,7 @@ let cfg =
 
 [<Tests>]
 let tests = 
-    testList "Npgsql Generation Integration Tests" [
+    categoryList "Npgsql" "Generation Integration Tests" [
 
         testCase "Print Schema" <| fun _ ->
             let schema = NpgsqlSchemaProvider.getSchema cfg

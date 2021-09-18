@@ -18,7 +18,7 @@ let categoryTable =         table<production.productcategory>       |> inSchema 
 
 [<Tests>]
 let tests = 
-    testList "Npgsql Query Unit Tests" [
+    categoryList "Npgsql" "Query Unit Tests" [
 
         /// String comparisons against generated queries.
         test "Simple Where" {

@@ -23,7 +23,7 @@ let cfg =
 
 [<Tests>]
 let tests = 
-    testList "Sqlite Generation Integration Tests" [
+    categoryList "Sqlite" "Generation Integration Tests" [
 
         //test "Print Schema" {
         //    let schema = SqliteSchemaProvider.getSchema cfg

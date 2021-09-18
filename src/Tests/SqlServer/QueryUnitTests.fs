@@ -19,7 +19,7 @@ let errorLogTable =         table<dbo.ErrorLog>
 
 [<Tests>]
 let tests = 
-    testList "SqlServer Query Unit Tests" [
+    categoryList "SqlServer" "Query Unit Tests" [
 
         /// String comparisons against generated queries.
         test "Simple Where" {

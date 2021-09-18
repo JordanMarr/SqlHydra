@@ -27,7 +27,7 @@ let gt0 (items: 'Item seq) =
 
 [<Tests>]
 let tests = 
-    sequencedTestList "SqlServer Query Integration Tests" [
+    categoryList "SqlServer" "Query Integration Tests" [
 
         testTask "Where City Starts With S" {
             use ctx = openContext()

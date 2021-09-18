@@ -16,7 +16,7 @@ let cfg =
 
 [<Tests>]
 let tests = 
-    testList "SqlServer Generation Integration Tests" [
+    categoryList "SqlServer" "Generation Integration Tests" [
 
         test "Print Schema" {
             let schema = SqlServerSchemaProvider.getSchema cfg

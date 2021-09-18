@@ -12,7 +12,7 @@ let assertEqual (s1: string, s2: string) =
 
 [<Tests>]
 let tests = 
-    testList "TOML Config Parser" [
+    categoryList "Unit Tests" "TOML Config Parser" [
         test "Parse: All" {
             let cfg = 
                 {
