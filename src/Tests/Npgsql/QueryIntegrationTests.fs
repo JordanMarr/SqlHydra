@@ -29,7 +29,7 @@ let gt0 (items: 'Item seq) =
 let tests = 
     categoryList "Npgsql" "Query Integration Tests" [
 
-        testTask "Where City Starts With S" {
+        testTask "Where city Starts With S" {
             use ctx = openContext()
             
             let addresses =
@@ -42,4 +42,205 @@ let tests =
             gt0 addresses
             Expect.isTrue (addresses |> Seq.forall (fun a -> a.city = "Seattle" || a.city = "Santa Cruz")) "Expected only 'Seattle' or 'Santa Cruz'."
         }
+
+        testTask "Select city Column Where city Starts with S" {
+            use ctx = openContext()
+
+            let cities =
+                select {
+                    for a in addressTable do
+                    where (a.city =% "S%")
+                    select a.city
+                }
+                |> ctx.Read HydraReader.Read
+
+            gt0 cities
+            Expect.isTrue (cities |> Seq.forall (fun city -> city.StartsWith "S")) "Expected all cities to start with 'S'."
+        }
+
+        testTask "Inner Join Orders-Details" {
+            use ctx = openContext()
+
+            let query =
+                select {
+                    for o in orderHeaderTable do
+                    join d in orderDetailTable on (o.salesorderid = d.salesorderid)
+                    where (o.onlineorderflag = true)
+                    select (o, d)
+                }
+
+            query.ToKataQuery() |> toSql |> printfn "%s"
+
+            let! results = query |> ctx.ReadAsync HydraReader.Read
+            gt0 results
+        }
+
+        testTask "Product with Category name" {
+            use ctx = openContext()
+
+            let query = 
+                select {
+                    for p in productTable do
+                    join sc in subCategoryTable on (p.productsubcategoryid = Some sc.productsubcategoryid)
+                    join c in categoryTable on (sc.productcategoryid = c.productcategoryid)
+                    select (c.name, p)
+                    take 5
+                }
+
+            let! rows = query |> ctx.ReadAsync HydraReader.Read
+            printfn "Results: %A" rows
+            query.ToKataQuery() |> toSql |> printfn "%s"
+            gt0 rows
+        }
+
+        testTask "Select Column Aggregates From Product IDs 1-3" {
+            use ctx = openContext()
+
+            let query =
+                select {
+                    for p in productTable do
+                    where (p.productsubcategoryid <> None)
+                    groupBy p.productsubcategoryid
+                    where (p.productsubcategoryid.Value |=| [ 1L; 2L; 3L ])
+                    select (p.productsubcategoryid, minBy p.listprice, maxBy p.listprice, avgBy p.listprice, countBy p.listprice, sumBy p.listprice)
+                }
+
+            let! aggregates = query |> ctx.ReadAsync HydraReader.Read
+            let sql = query.ToKataQuery() |> toSql 
+            sql |> printfn "%s"
+
+            gt0 aggregates
+    
+            let aggByCatID = 
+                aggregates 
+                |> Seq.map (fun (catId, minPrice, maxPrice, avgPrice, priceCount, sumPrice) -> catId, (minPrice, maxPrice, avgPrice, priceCount, sumPrice)) 
+                |> Map.ofSeq
+            
+            let dc (actual: decimal) (expected: decimal) = Expect.floatClose Accuracy.medium (float actual) (float expected) "Expected values to be close"
+
+            let verifyAggregateValuesFor (catId: int64) (xMinPrice, xMaxPrice, xAvgPrice, xPriceCount, xSumPrice) =
+                let aMinPrice, aMaxPrice, aAvgPrice, aPriceCount, aSumPrice = aggByCatID.[Some catId]
+                dc aMinPrice xMinPrice; dc aMaxPrice xMaxPrice; dc aAvgPrice xAvgPrice; Expect.equal aPriceCount xPriceCount ""; dc aSumPrice xSumPrice
+            
+            verifyAggregateValuesFor 1L (539.99M, 3399.99M, 1683.365M, 32, 53867.6800M)
+            verifyAggregateValuesFor 2L (539.99M, 3578.2700M, 1597.4500M, 43, 68690.3500M)
+            verifyAggregateValuesFor 3L (742.3500M, 2384.0700M, 1425.2481M, 22, 31355.4600M)
+        }
+
+        testTask "Aggregate Subquery One" {
+            use ctx = openContext()
+
+            let avgListPrice = 
+                select {
+                    for p in productTable do
+                    select (avgBy p.listprice)
+                }
+
+            let! productsWithHigherThanAvgPrice = 
+                select {
+                    for p in productTable do
+                    where (p.listprice > subqueryOne avgListPrice)
+                    orderByDescending p.listprice
+                    select (p.name, p.listprice)
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            let avgListPrice = 438.6662M
+    
+            gt0 productsWithHigherThanAvgPrice
+            Expect.isTrue (productsWithHigherThanAvgPrice |> Seq.forall (fun (nm, price) -> price > avgListPrice)) "Expected all prices to be > than avg price of $438.67."
+        }
+
+        testTask "Select Column Aggregates" {
+            use ctx = openContext()
+
+            let! aggregates = 
+                select {
+                    for p in productTable do
+                    where (p.productsubcategoryid <> None)
+                    groupBy p.productsubcategoryid
+                    having (minBy p.listprice > 50M && maxBy p.listprice < 1000M)
+                    select (p.productsubcategoryid, minBy p.listprice, maxBy p.listprice)
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            gt0 aggregates
+        }
+
+        testTask "Sorted Aggregates - Top 5 categories with highest avg price products" {
+            use ctx = openContext()
+
+            let! aggregates = 
+                select {
+                    for p in productTable do
+                    where (p.productsubcategoryid <> None)
+                    groupBy p.productsubcategoryid
+                    orderByDescending (avgBy p.listprice)
+                    select (p.productsubcategoryid, avgBy p.listprice)
+                    take 5
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            gt0 aggregates
+        }
+
+        testTask "Where subqueryMany" {
+            use ctx = openContext()
+
+            let top5CategoryIdsWithHighestAvgPrices = 
+                select {
+                    for p in productTable do
+                    where (p.productsubcategoryid <> None)
+                    groupBy p.productsubcategoryid
+                    orderByDescending (avgBy p.listprice)
+                    select (p.productsubcategoryid)
+                    take 5
+                }
+
+            let! top5Categories =
+                select {
+                    for c in categoryTable do
+                    where (Some c.productcategoryid |=| subqueryMany top5CategoryIdsWithHighestAvgPrices)
+                    select c.name
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            gt0 top5Categories
+        }
+
+        testTask "Where subqueryOne" {
+            use ctx = openContext()
+
+            let avgListPrice = 
+                select {
+                    for p in productTable do
+                    select (avgBy p.listprice)
+                } 
+
+            let! productsWithAboveAveragePrice =
+                select {
+                    for p in productTable do
+                    where (p.listprice > subqueryOne avgListPrice)
+                    select (p.name, p.listprice)
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            gt0 productsWithAboveAveragePrice
+        }
+
+        testTask "Select Columns with Option" {
+            use ctx = openContext()
+
+            let! values = 
+                select {
+                    for p in productTable do
+                    where (p.productsubcategoryid <> None)
+                    select (p.productsubcategoryid, p.listprice)
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            gt0 values
+            Expect.isTrue (values |> Seq.forall (fun (catId, price) -> catId <> None)) "Expected subcategories to all have a value."
+        }
+
     ]
