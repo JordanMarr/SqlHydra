@@ -1888,7 +1888,20 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
                 then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
                 else get ord |> box 
         
-        None
+        if t = typedefof<bool> then Some(wrap reader.GetBoolean)
+        else if t = typedefof<int16> then Some(wrap reader.GetInt16)
+        else if t = typedefof<int> then Some(wrap reader.GetInt32)
+        else if t = typedefof<int64> then Some(wrap reader.GetInt64)
+        else if t = typedefof<double> then Some(wrap reader.GetDouble)
+        else if t = typedefof<decimal> then Some(wrap reader.GetDecimal)
+        else if t = typedefof<string> then Some(wrap reader.GetString)
+        else if t = typedefof<System.DateTime> then Some(wrap reader.GetDateTime)
+        else if t = typedefof<System.TimeSpan> then Some(wrap reader.GetTimeSpan)
+        else if t = typedefof<System.Single> then Some(wrap reader.GetDouble)
+        else if t = typedefof<byte> then Some(wrap reader.GetByte)
+        else if t = typedefof<byte []> then Some(wrap reader.GetValue)
+        else if t = typedefof<System.Guid> then Some(wrap reader.GetGuid)
+        else None
 
     static member Read(reader: Npgsql.NpgsqlDataReader) = 
             let hydra = HydraReader(reader)

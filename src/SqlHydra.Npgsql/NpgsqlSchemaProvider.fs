@@ -108,5 +108,5 @@ let getSchema (cfg: Config) : Schema =
 
     { 
         Tables = tables
-        PrimitiveTypeReaders = seq []
+        PrimitiveTypeReaders = NpgsqlDataTypes.primitiveTypeReaders
     }
