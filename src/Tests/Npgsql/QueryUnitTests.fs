@@ -15,6 +15,7 @@ let orderDetailTable =      table<sales.salesorderdetail>           |> inSchema 
 let productTable =          table<production.product>               |> inSchema (nameof production)
 let subCategoryTable =      table<production.productsubcategory>    |> inSchema (nameof production)
 let categoryTable =         table<production.productcategory>       |> inSchema (nameof production)
+let productReviewTable =    table<production.productreview>         |> inSchema (nameof production)
 
 [<Tests>]
 let tests = 
@@ -142,7 +143,7 @@ let tests =
             let query = 
                 select {
                     for c in customerTable do
-                    where (isIn c.customerid [30018L;29545L;29954L])
+                    where (isIn c.customerid [30018;29545;29954])
                 }
 
             let sql = query.ToKataQuery() |> toSql
@@ -153,7 +154,7 @@ let tests =
             let query = 
                 select {
                     for c in customerTable do
-                    where (c.customerid |=| [30018L;29545L;29954L])
+                    where (c.customerid |=| [30018;29545;29954])
                 }
 
             let sql = query.ToKataQuery() |> toSql
@@ -164,7 +165,7 @@ let tests =
             let query = 
                 select {
                     for c in customerTable do
-                    where (c.customerid |=| [| 30018L;29545L;29954L |])
+                    where (c.customerid |=| [| 30018;29545;29954 |])
                 }
 
             let sql = query.ToKataQuery() |> toSql
@@ -172,13 +173,13 @@ let tests =
         }
         
         test "Where customer |=| Seq" {            
-            let buildQuery (values: int64 seq) =                
+            let buildQuery (values: int seq) =                
                 select {
                     for c in customerTable do
                     where (c.customerid |=| values)
                 }
 
-            let query = buildQuery([ 30018L;29545L;29954L ])
+            let query = buildQuery([ 30018;29545;29954 ])
 
             let sql = query.ToKataQuery() |> toSql
             Expect.isTrue (sql.Contains("WHERE ([sales].[customer].[customerid] IN (@p0, @p1, @p2))")) ""
@@ -188,7 +189,7 @@ let tests =
             let query = 
                 select {
                     for c in customerTable do
-                    where (c.customerid |<>| [ 30018L;29545L;29954L ])
+                    where (c.customerid |<>| [ 30018;29545;29954 ])
                 }
 
             let sql = query.ToKataQuery() |> toSql
@@ -199,7 +200,7 @@ let tests =
             let query = 
                 delete {
                     for c in customerTable do
-                    where (c.customerid |<>| [ 30018L;29545L;29954L ])
+                    where (c.customerid |<>| [ 30018;29545;29954 ])
                 }
 
             let sql = query.ToKataQuery() |> toSql
@@ -222,8 +223,8 @@ let tests =
             let query = 
                 update {
                     for c in customerTable do
-                    set c.personid (Some 123L)
-                    where (c.personid = Some 456L)
+                    set c.personid (Some 123)
+                    where (c.personid = Some 456)
                 }
 
             let sql = query.ToKataQuery() |> toSql
@@ -234,7 +235,7 @@ let tests =
             let query = 
                 update {
                     for c in customerTable do
-                    set c.customerid 123L
+                    set c.customerid 123
                     updateAll
                 }
 
@@ -247,7 +248,7 @@ let tests =
                 let query = 
                     update {
                         for c in customerTable do
-                        set c.customerid 123L
+                        set c.customerid 123
                     }
                 failwith "Should fail because no `where` or `updateAll` exists."
             with ex ->
@@ -259,8 +260,8 @@ let tests =
                 let query = 
                     update {
                         for c in customerTable do
-                        set c.customerid 123L
-                        where (c.customerid = 1L)
+                        set c.customerid 123
+                        where (c.customerid = 1)
                     }
                 () //Assert.Pass()
             with ex ->
@@ -272,7 +273,7 @@ let tests =
                 let query = 
                     update {
                         for c in customerTable do
-                        set c.customerid 123L
+                        set c.customerid 123
                         updateAll
                     }
                 () //Assert.Pass()
@@ -286,19 +287,42 @@ let tests =
                     into customerTable
                     entity 
                         { 
+                            sales.customer.modifieddate = System.DateTime.Now
                             sales.customer.territoryid = None
                             sales.customer.storeid = None
-                            sales.customer.personid = Some 1L
-                            sales.customer.customerid = 0L
+                            sales.customer.personid = Some 1
+                            sales.customer.rowguid = System.Guid.NewGuid()
+                            sales.customer.customerid = 0
                         }
                 }
 
             let sql = query.ToKataQuery(false) |> toSql
             Expect.equal 
                 sql 
-                "INSERT INTO [sales].[customer] ([territoryid], [storeid], [personid], [customerid]) VALUES (@p0, @p1, @p2, @p3)" 
+                "INSERT INTO [sales].[customer] ([modifieddate], [territoryid], [storeid], [personid], [rowguid], [customerid]) VALUES (@p0, @p1, @p2, @p3, @p4, @p5)" 
                 ""
         }
 
+        test "Insert and Get Id Query" {
+            let query = 
+                insert {
+                    for r in productReviewTable do
+                    entity 
+                        {
+                            production.productreview.productreviewid = 0 // PK
+                            production.productreview.comments = Some "The ML Fork makes for a plush ride."
+                            production.productreview.emailaddress = "gfisher@askjeeves.com"
+                            production.productreview.modifieddate = System.DateTime.Today
+                            production.productreview.productid = 803 //ML Fork
+                            production.productreview.rating = 5
+                            production.productreview.reviewdate = System.DateTime.Today
+                            production.productreview.reviewername = "Gary Fisher"
+                        }
+                    //excludeColumn r.productreviewid
+                }
+
+            let sql = query.ToKataQuery(true) |> toSql
+            Expect.isFalse (sql.Contains("scope_identity()")) ""
+        }
     ]
 

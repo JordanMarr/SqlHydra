@@ -4,6 +4,7 @@ open Expecto
 open SqlHydra.Query
 open DB
 open Npgsql.AdventureWorks
+open System.Threading.Tasks
 
 let openContext() = 
     let compiler = SqlKata.Compilers.PostgresCompiler()
@@ -20,6 +21,8 @@ let orderDetailTable =      table<sales.salesorderdetail>           |> inSchema 
 let productTable =          table<production.product>               |> inSchema (nameof production)
 let subCategoryTable =      table<production.productsubcategory>    |> inSchema (nameof production)
 let categoryTable =         table<production.productcategory>       |> inSchema (nameof production)
+let currencyTable =         table<sales.currency>                   |> inSchema (nameof sales)
+let productReviewTable =    table<production.productreview>         |> inSchema (nameof production)
 
 /// Sequence length is > 0.
 let gt0 (items: 'Item seq) =
@@ -101,7 +104,7 @@ let tests =
                     for p in productTable do
                     where (p.productsubcategoryid <> None)
                     groupBy p.productsubcategoryid
-                    where (p.productsubcategoryid.Value |=| [ 1L; 2L; 3L ])
+                    where (p.productsubcategoryid.Value |=| [ 1; 2; 3 ])
                     select (p.productsubcategoryid, minBy p.listprice, maxBy p.listprice, avgBy p.listprice, countBy p.listprice, sumBy p.listprice)
                 }
 
@@ -118,13 +121,13 @@ let tests =
             
             let dc (actual: decimal) (expected: decimal) = Expect.floatClose Accuracy.medium (float actual) (float expected) "Expected values to be close"
 
-            let verifyAggregateValuesFor (catId: int64) (xMinPrice, xMaxPrice, xAvgPrice, xPriceCount, xSumPrice) =
+            let verifyAggregateValuesFor (catId: int) (xMinPrice, xMaxPrice, xAvgPrice, xPriceCount, xSumPrice) =
                 let aMinPrice, aMaxPrice, aAvgPrice, aPriceCount, aSumPrice = aggByCatID.[Some catId]
                 dc aMinPrice xMinPrice; dc aMaxPrice xMaxPrice; dc aAvgPrice xAvgPrice; Expect.equal aPriceCount xPriceCount ""; dc aSumPrice xSumPrice
             
-            verifyAggregateValuesFor 1L (539.99M, 3399.99M, 1683.365M, 32, 53867.6800M)
-            verifyAggregateValuesFor 2L (539.99M, 3578.2700M, 1597.4500M, 43, 68690.3500M)
-            verifyAggregateValuesFor 3L (742.3500M, 2384.0700M, 1425.2481M, 22, 31355.4600M)
+            verifyAggregateValuesFor 1 (539.99M, 3399.99M, 1683.365M, 32, 53867.6800M)
+            verifyAggregateValuesFor 2 (539.99M, 3578.2700M, 1597.4500M, 43, 68690.3500M)
+            verifyAggregateValuesFor 3 (742.3500M, 2384.0700M, 1425.2481M, 22, 31355.4600M)
         }
 
         testTask "Aggregate Subquery One" {
@@ -243,4 +246,115 @@ let tests =
             Expect.isTrue (values |> Seq.forall (fun (catId, price) -> catId <> None)) "Expected subcategories to all have a value."
         }
 
+        testTask "Insert Currency" {
+            use ctx = openContext()
+
+            let! results = 
+                insert {
+                    into currencyTable
+                    entity 
+                        {
+                            sales.currency.currencycode = "BTC"
+                            sales.currency.name = "BitCoin"
+                            sales.currency.modifieddate = System.DateTime.Now
+                        }
+                }
+                |> ctx.InsertAsync
+
+            Expect.isTrue (results > 0) ""
+
+            let! btc = 
+                select {
+                    for c in currencyTable do
+                    where (c.currencycode = "BTC")
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            gt0 btc
+        }
+
+        testTask "Update Currency" {
+            use ctx = openContext()
+
+            let! results = 
+                update {
+                    for c in currencyTable do
+                    set c.name "BitCoinzz"
+                    where (c.currencycode = "BTC")
+                }
+                |> ctx.UpdateAsync
+
+            Expect.isTrue (results > 0) ""
+
+            let! btc = 
+                select {
+                    for c in currencyTable do
+                    where (c.name = "BitCoinzz")
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            gt0 btc
+        }
+
+        testTask "Delete Currency" {
+            use ctx = openContext()
+
+            let! _ = 
+                delete {
+                    for c in currencyTable do
+                    where (c.currencycode = "BTC")
+                }
+                |> ctx.DeleteAsync
+
+            let! btc = 
+                select {
+                    for c in currencyTable do
+                    where (c.currencycode = "BTC")
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            Expect.isTrue (btc |> Seq.length = 0) "Should be deleted"
+        }
+
+        testTask "Insert and Get Id" {
+            use ctx = openContext()
+            ctx.BeginTransaction()
+
+            let! prodReviewIdObj = 
+                insert {
+                    for r in productReviewTable do
+                    entity 
+                        {
+                            production.productreview.productreviewid = 0 // PK
+                            production.productreview.comments = Some "The ML Fork makes for a plush ride."
+                            production.productreview.emailaddress = "gfisher@askjeeves.com"
+                            production.productreview.modifieddate = System.DateTime.Today
+                            production.productreview.productid = 803 //ML Fork
+                            production.productreview.rating = 5
+                            production.productreview.reviewdate = System.DateTime.Today
+                            production.productreview.reviewername = "Gary Fisher"
+                        }
+                    //excludeColumn r.productreviewid
+                }
+                |> ctx.InsertGetIdAsync
+
+            let prodReviewId : int = prodReviewIdObj
+
+            Expect.isTrue (prodReviewId > 0) "Expected productreviewid to be greater than 0"
+
+            let! review = 
+                select {
+                    for r in productReviewTable do
+                    where (r.reviewername = "Gary Fisher")
+                }
+                |> ctx.ReadOneAsync HydraReader.Read
+            
+            match review with
+            | Some (rev : production.productreview) -> 
+                Expect.isTrue (rev.productreviewid = prodReviewId) ""
+            | None -> 
+                failwith "Expected to query a review row."
+            
+            ctx.CommitTransaction()
+        }
     ]
