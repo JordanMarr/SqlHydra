@@ -33,17 +33,39 @@ dotnet sqlhydra-mssql
 
 ### Build Event (optional)
 
-To regenerate on each build, you can run SqlHydra from a .fsproj PreBuild or PostBuild event. 
+To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
+
 ```bat
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+  <Target Name="SqlHydra" BeforeTargets="Clean">
     <Exec Command="dotnet sqlhydra-mssql" />
   </Target>
 ```
 
-⭐ To regenerate only after a Rebuild:
+## SqlHydra.Npgsql [![NuGet version (SqlHydra.Npgsql)](https://img.shields.io/nuget/v/SqlHydra.Npgsql.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Npgsql/)
+
+### Local Install (recommended)
+Run the following commands from your project directory:
+1) `dotnet new tool-manifest`
+2) `dotnet tool install SqlHydra.Npgsql`
+
+### Configure / Run
+
+Run the tool from the command line (or add to a .bat|.cmd|.sh file):
+
+```bat
+dotnet sqlhydra-npgsql
+```
+
+* The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
+* If a .toml configuration file already exists, it will run.
+* The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
+
+### Build Event (optional)
+To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
+
 ```bat
   <Target Name="SqlHydra" BeforeTargets="Clean">
-    <Exec Command="dotnet sqlhydra-mssql" />
+    <Exec Command="dotnet sqlhydra-npgsql" />
   </Target>
 ```
 
@@ -68,15 +90,8 @@ dotnet sqlhydra-sqlite
 * The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
 
 ### Build Event (optional)
-To regenerate on each build, you can run SqlHydra from a .fsproj PreBuild or PostBuild event. 
+To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
 
-```bat
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="dotnet sqlhydra-sqlite" />
-  </Target>
-```
-
-⭐ To regenerate only after a Rebuild:
 ```bat
   <Target Name="SqlHydra" BeforeTargets="Clean">
     <Exec Command="dotnet sqlhydra-sqlite" />
