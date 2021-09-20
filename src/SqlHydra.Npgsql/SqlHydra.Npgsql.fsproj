@@ -4,10 +4,23 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <WarnOn>3390;$(WarnOn)</WarnOn>
-    <Version>0.300.0</Version>
+    <Version>0.400.0</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.Npgsql is a dotnet tool that generates F# records for a PostgreSQL database.</Description>
+    <PackageTags>F# fsharp data database orm sql</PackageTags>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>sqlhydra-npgsql</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReleaseNotes>
+      v0.400.0
+      SqlHydra.Query:
+        - Breaking Change: Removed `InsertGetId` and `InsertGetIdAsync` methods on QueryContext.
+        - Added `getId` operation to `insert` builder
+      SqlHydra.Npgsql:
+        - PostgreSQL is now supported!
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <Version>0.300.0</Version>
+    <Version>0.400.0</Version>
     <Authors>Jordan Marr</Authors>
     <Description>SqlHydra.Sqlite is a dotnet tool that generates F# records for a SQLite database.</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -11,13 +11,14 @@
     <ToolCommandName>sqlhydra-sqlite</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-      <PackageReleaseNotes>
-          v0.300.0:
-          Query:
-          - New Features: where subqueries; having clause; select/having/order aggregate functions.
-          Gen:
-          - Breaking Change: There is now only one HydraReader for all schemas instead of one per schema.
-      </PackageReleaseNotes>
+    <PackageReleaseNotes>
+      v0.400.0
+      SqlHydra.Query:
+        - Breaking Change: Removed `InsertGetId` and `InsertGetIdAsync` methods on QueryContext.
+        - Added `getId` operation to `insert` builder
+      SqlHydra.Npgsql:
+        - PostgreSQL is now supported!
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
