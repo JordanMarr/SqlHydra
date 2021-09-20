@@ -170,7 +170,7 @@ The generated `HydraReader` class works in tandem with SqlHydra.Query for readin
 * [Using HydraReader automatically with SqlHydra.Query](#sqlhydraquery-)
 * [Using HydraReader manually with other query libraries](https://github.com/JordanMarr/SqlHydra/wiki/DataReaders)
 
-### TOML Configuration Reference
+## TOML Configuration Reference
 * [View TOML Configuration Reference](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration)
 
 ## SqlHydra.Query [![NuGet version (SqlHydra.Query)](https://img.shields.io/nuget/v/SqlHydra.Query.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Query/)
