@@ -390,18 +390,16 @@ let cities =
 For simple inserts with no identity column and no included/excluded columns, use the `into _` syntax:
 
 ```F#
-let person = 
-    {
-        dbo.Person.ID = Guid.NewGuid()
-        dbo.Person.FirstName = "Bojack"
-        dbo.Person.LastName = "Horseman"
-        dbo.Person.LastUpdated = DateTime.Now
-    }
-
 let result = 
     insert {
         into personTable
-        entity person
+        entity 
+            {
+                dbo.Person.ID = Guid.NewGuid()
+                dbo.Person.FirstName = "Bojack"
+                dbo.Person.LastName = "Horseman"
+                dbo.Person.LastUpdated = DateTime.Now
+            }
     }
     |> ctx.Insert
 
@@ -409,29 +407,28 @@ printfn "Result: %i" result
 ```
 
 If you have an Identity column or if you want to specify columns to include/exclude, use the `for _ in _ do` syntax.
+Use `getId` to select and return the identity field.
 
 ```F#
 
-let errorLog = 
-    {
-        dbo.ErrorLog.ErrorLogID = 0 // Identity column
-        dbo.ErrorLog.ErrorTime = System.DateTime.Now
-        dbo.ErrorLog.ErrorLine = None
-        dbo.ErrorLog.ErrorMessage = "TEST"
-        dbo.ErrorLog.ErrorNumber = 400
-        dbo.ErrorLog.ErrorProcedure = (Some "Procedure 400")
-        dbo.ErrorLog.ErrorSeverity = None
-        dbo.ErrorLog.ErrorState = None
-        dbo.ErrorLog.UserName = "jmarr"
-    }
-
-let errorID : int = // Specify 'Identity output is of type int
+let errorID =
     insert {
         for e in errorLogTable do
-        entity errorLog
-        excludeColumn e.ErrorLogID // Exclude the identity field
+        entity 
+            {
+                dbo.ErrorLog.ErrorLogID = 0 // Identity column
+                dbo.ErrorLog.ErrorTime = System.DateTime.Now
+                dbo.ErrorLog.ErrorLine = None
+                dbo.ErrorLog.ErrorMessage = "TEST"
+                dbo.ErrorLog.ErrorNumber = 400
+                dbo.ErrorLog.ErrorProcedure = (Some "Procedure 400")
+                dbo.ErrorLog.ErrorSeverity = None
+                dbo.ErrorLog.ErrorState = None
+                dbo.ErrorLog.UserName = "jmarr"
+            }
+        getId e.ErrorLogID
     }
-    |> ctx.InsertGetId
+    |> ctx.Insert
 
 printfn "ErrorID Identity: %i" errorID
 ```
