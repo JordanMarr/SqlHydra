@@ -96,7 +96,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
 
     member this.Insert<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
-        // Did the user select an `identity` field?
+        // Did the user select an identity field?
         match query.Spec.IdentityField with
         | Some identityField -> 
             if compiler :? SqlKata.Compilers.PostgresCompiler then 
@@ -104,7 +104,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 cmd.CommandText <- cmd.CommandText.Replace(";SELECT lastval() AS id", $" RETURNING {identityField};")
 
             let identity = cmd.ExecuteScalar()
-            // `InsertReturn type is whatever `identity` was set to in the builder
+            // 'InsertReturn type set via `getId` in the builder
             System.Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
         | None ->
@@ -114,7 +114,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
 
     member this.InsertAsync<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>) = task {
         use cmd = this.BuildCommand(query.ToKataQuery())
-        // Did the user select an `identity` field?
+        // Did the user select an identity field?
         match query.Spec.IdentityField with
         | Some identityField -> 
             if compiler :? SqlKata.Compilers.PostgresCompiler then 
@@ -122,7 +122,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 cmd.CommandText <- cmd.CommandText.Replace(";SELECT lastval() AS id", $" RETURNING {identityField};")
 
             let! identity = cmd.ExecuteScalarAsync()
-            // `InsertReturn type is whatever `identity` was set to in the builder
+            // 'InsertReturn type set via `getId` in the builder
             return System.Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
         | None ->

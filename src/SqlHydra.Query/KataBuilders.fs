@@ -289,9 +289,9 @@ type InsertExpressionBuilder<'T, 'InsertReturn when 'InsertReturn : struct>() =
             |> (fun x -> { query with Fields = x })
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newQuery, state.TableMappings)
     
-    /// Sets the identity field that should be returned from the insert.
-    [<CustomOperation("identity", MaintainsVariableSpace = true)>]
-    member this.Identity (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
+    /// Sets the identity field that should be returned from the insert and excludes it from the insert columns.
+    [<CustomOperation("getId", MaintainsVariableSpace = true)>]
+    member this.GetId (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         // Exclude the identity column from the query
         let state = this.ExcludeColumn(state, propertySelector)
         
@@ -304,7 +304,7 @@ type InsertExpressionBuilder<'T, 'InsertReturn when 'InsertReturn : struct>() =
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(identitySpec, state.TableMappings)
 
     member this.Run (state: QuerySource<'T>) =
-        let spec = state |> getQueryOrDefault
+        let spec = getQueryOrDefault state
         InsertQuery<'T, 'InsertReturn>(spec)
 
 type UpdateExpressionBuilder<'T>() =

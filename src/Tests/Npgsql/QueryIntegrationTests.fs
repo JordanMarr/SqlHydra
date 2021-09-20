@@ -261,7 +261,7 @@ let tests =
                 }
                 |> ctx.InsertAsync
 
-            Expect.isTrue (results > 0) ""
+            Expect.isTrue (results = 1) ""
 
             let! btc = 
                 select {
@@ -334,7 +334,7 @@ let tests =
                             production.productreview.reviewdate = System.DateTime.Today
                             production.productreview.reviewername = "Gary Fisher"
                         }
-                    identity r.productreviewid
+                    getId r.productreviewid
                 }
                 |> ctx.InsertAsync
 

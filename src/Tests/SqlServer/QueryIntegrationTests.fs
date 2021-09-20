@@ -251,16 +251,16 @@ let tests =
                     dbo.ErrorLog.UserName = "jmarr"
                 }
 
-            let result : int = 
+            let errorLogId = 
                 insert {
                     for e in errorLogTable do
                     entity errorLog
-                    identity e.ErrorLogID
+                    getId e.ErrorLogID
                 }
                 |> ctx.Insert
 
-            printfn "Identity: %i" result
-            Expect.isTrue (result > 0) "Expected returned ID to be > 0"
+            printfn "Identity: %i" errorLogId
+            Expect.isTrue (errorLogId > 0) "Expected returned ID to be > 0"
         }
 
         testTask "InsertGetIdAsync Test" {
@@ -283,7 +283,7 @@ let tests =
                 insert {
                     for e in errorLogTable do
                     entity errorLog
-                    identity e.ErrorLogID
+                    getId e.ErrorLogID
                 }
                 |> ctx.InsertAsync
 
@@ -401,7 +401,7 @@ let tests =
                     insert {
                         for e in errorLogTable do
                         entity stubbedErrorLog
-                        identity e.ErrorLogID
+                        getId e.ErrorLogID
                     }
                     |> ctx.InsertAsync
 
@@ -442,7 +442,7 @@ let tests =
                     insert {
                         for e in errorLogTable do
                         entity stubbedErrorLog
-                        identity e.ErrorLogID
+                        getId e.ErrorLogID
                     }
                     |> ctx.InsertAsync
                 ()

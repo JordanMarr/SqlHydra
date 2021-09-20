@@ -318,7 +318,7 @@ let tests =
                             Sales.Customer.TerritoryID = None
                             Sales.Customer.CustomerID = 0
                         }
-                    identity c.CustomerID
+                    getId c.CustomerID
                 }
 
             let sql = query.ToKataQuery() |> toSql
