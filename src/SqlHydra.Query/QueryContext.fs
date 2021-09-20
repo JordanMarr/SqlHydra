@@ -94,23 +94,41 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             return entities |> Seq.tryHead
         }
 
-    member this.Insert (query: InsertQuery<'T>) = 
-        use cmd = this.BuildCommand(query.ToKataQuery(returnId = false))
-        cmd.ExecuteNonQuery()
+    member this.Insert<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>) = 
+        use cmd = this.BuildCommand(query.ToKataQuery())
+        // Did the user select an `identity` field?
+        match query.Spec.IdentityField with
+        | Some identityField -> 
+            if compiler :? SqlKata.Compilers.PostgresCompiler then 
+                // Replace PostgreSQL identity query
+                cmd.CommandText <- cmd.CommandText.Replace(";SELECT lastval() AS id", $" RETURNING {identityField};")
 
-    member this.InsertAsync (query: InsertQuery<'T>) = 
-        use cmd = this.BuildCommand(query.ToKataQuery(returnId = false))
-        cmd.ExecuteNonQueryAsync()
+            let identity = cmd.ExecuteScalar()
+            // `InsertReturn type is whatever `identity` was set to in the builder
+            System.Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
+        
+        | None ->
+            let results = cmd.ExecuteNonQuery()
+            // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
+            System.Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
 
-    member this.InsertGetId<'T, 'Identity> (query: InsertQuery<'T>) =
-        use cmd = this.BuildCommand(query.ToKataQuery(returnId = true))
-        let identity = cmd.ExecuteScalar()
-        System.Convert.ChangeType(identity, typeof<'Identity>) :?> 'Identity
+    member this.InsertAsync<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>) = task {
+        use cmd = this.BuildCommand(query.ToKataQuery())
+        // Did the user select an `identity` field?
+        match query.Spec.IdentityField with
+        | Some identityField -> 
+            if compiler :? SqlKata.Compilers.PostgresCompiler then 
+                // Replace PostgreSQL identity query
+                cmd.CommandText <- cmd.CommandText.Replace(";SELECT lastval() AS id", $" RETURNING {identityField};")
 
-    member this.InsertGetIdAsync<'T, 'Identity> (query: InsertQuery<'T>) = task {
-        use cmd = this.BuildCommand(query.ToKataQuery(returnId = true))
-        let! identity = cmd.ExecuteScalarAsync()
-        return System.Convert.ChangeType(identity, typeof<'Identity>) :?> 'Identity
+            let! identity = cmd.ExecuteScalarAsync()
+            // `InsertReturn type is whatever `identity` was set to in the builder
+            return System.Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
+        
+        | None ->
+            let! results = cmd.ExecuteNonQueryAsync()
+            // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
+            return System.Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
     }
     
     member this.Update (query: UpdateQuery<'T>) = 

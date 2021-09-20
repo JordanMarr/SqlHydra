@@ -234,17 +234,17 @@ type DeleteExpressionBuilder<'T>() =
         let query = state |> getQueryOrDefault
         DeleteQuery(query.AsDelete())
 
-type InsertExpressionBuilder<'T>() =
+type InsertExpressionBuilder<'T, 'InsertReturn when 'InsertReturn : struct>() =
 
-    let getQueryOrDefault (state: QuerySource<'Result>) =
+    let getQueryOrDefault (state: QuerySource<'T>) =
         match state with
-        | :? QuerySource<'Result, InsertQuerySpec<'T>> as qs -> qs.Query
+        | :? QuerySource<'T, InsertQuerySpec<'T, 'IdentityReturn>> as qs -> qs.Query
         | _ -> InsertQuerySpec.Default
 
     member this.For (state: QuerySource<'T>, f: 'T -> QuerySource<'T>) =
         let tbl = state.GetOuterTableMapping()
         let query = state |> getQueryOrDefault
-        QuerySource<'T, InsertQuerySpec<'T>>(
+        QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
             { query with Table = match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name }
             , state.TableMappings)
 
@@ -253,7 +253,7 @@ type InsertExpressionBuilder<'T>() =
     member this.Into (state: QuerySource<'T>, table: QuerySource<'T>) =
         let tbl = table.GetOuterTableMapping()
         let query = state |> getQueryOrDefault
-        QuerySource<'T, InsertQuerySpec<'T>>(
+        QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
             { query with Table = match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name }
             , state.TableMappings)
 
@@ -264,7 +264,7 @@ type InsertExpressionBuilder<'T>() =
     [<CustomOperation("entity", MaintainsVariableSpace = true)>]
     member this.Entity (state:QuerySource<'T>, value: 'T) = 
         let query = state |> getQueryOrDefault
-        QuerySource<'T, InsertQuerySpec<'T>>(
+        QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
             { query with Entity = value |> Some}
             , state.TableMappings)
 
@@ -273,7 +273,7 @@ type InsertExpressionBuilder<'T>() =
     member this.IncludeColumn (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
         let prop = (propertySelector |> LinqExpressionVisitors.visitPropertySelector<'T, 'Prop>).Name
-        QuerySource<'T, InsertQuerySpec<'T>>({ query with Fields = query.Fields @ [ prop ] }, state.TableMappings)
+        QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>({ query with Fields = query.Fields @ [ prop ] }, state.TableMappings)
 
     /// Excludes a column from the insert query.
     [<CustomOperation("excludeColumn", MaintainsVariableSpace = true)>]
@@ -287,12 +287,25 @@ type InsertExpressionBuilder<'T>() =
                 | fields -> fields
             |> List.filter (fun f -> f <> prop.Name)
             |> (fun x -> { query with Fields = x })
-        QuerySource<'T, InsertQuerySpec<'T>>(newQuery, state.TableMappings)
+        QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newQuery, state.TableMappings)
+    
+    /// Sets the identity field that should be returned from the insert.
+    [<CustomOperation("identity", MaintainsVariableSpace = true)>]
+    member this.Identity (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
+        // Exclude the identity column from the query
+        let state = this.ExcludeColumn(state, propertySelector)
+        
+        // Set the identity property and the 'InsertReturn type
+        let spec = state.Query
+        let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'InsertReturn> propertySelector :?> Reflection.PropertyInfo
+        let identitySpec = { Table = spec.Table; Entity = spec.Entity; Fields = spec.Fields; IdentityField = Some prop.Name }
+        
+        // Sets both the identity field name (prop.Name) and its type ('InsertReturn)
+        QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(identitySpec, state.TableMappings)
 
-    /// Unwraps the query
     member this.Run (state: QuerySource<'T>) =
-        let spec = getQueryOrDefault state
-        InsertQuery<'T>(spec)
+        let spec = state |> getQueryOrDefault
+        InsertQuery<'T, 'InsertReturn>(spec)
 
 type UpdateExpressionBuilder<'T>() =
     
@@ -372,6 +385,6 @@ type UpdateExpressionBuilder<'T>() =
 
 let select<'T> = SelectExpressionBuilder<'T>()
 let delete<'T> = DeleteExpressionBuilder<'T>()
-let insert<'T> = InsertExpressionBuilder<'T>()
+let insert<'T, 'InsertReturn when 'InsertReturn : struct> = InsertExpressionBuilder<'T, 'InsertReturn>()
 let update<'T> = UpdateExpressionBuilder<'T>()
 

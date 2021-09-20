@@ -280,95 +280,51 @@ let tests =
             with ex ->
                 () //Assert.Pass("Should not fail because `where` is present.")
         }
-                
-        test "Insert Query" {
+
+        test "Insert Query without Identity" {
             let query = 
                 insert {
                     into customerTable
                     entity 
                         { 
-                            Sales.Customer.CustomerID = 0
                             Sales.Customer.AccountNumber = "123"
+                            Sales.Customer.rowguid = System.Guid.NewGuid()
                             Sales.Customer.ModifiedDate = System.DateTime.Now
                             Sales.Customer.PersonID = None
-                            Sales.Customer.rowguid = System.Guid.NewGuid()
                             Sales.Customer.StoreID = None
                             Sales.Customer.TerritoryID = None
+                            Sales.Customer.CustomerID = 0
                         }
                 }
-
-            let sql = query.ToKataQuery(false) |> toSql
+            
+            let sql = query.ToKataQuery() |> toSql
             Expect.equal 
                 "INSERT INTO [Sales].[Customer] ([CustomerID], [AccountNumber], [rowguid], [ModifiedDate], [PersonID], [StoreID], [TerritoryID]) VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)" 
                 sql 
                 ""
         }
 
-        test "Multi Compiler Test" {
+        test "Insert Query with Identity" {
             let query = 
-                select {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
-                    where (o.OnlineOrderFlag = true)
-                    select (o, d.LineTotal)
+                insert {
+                    for c in customerTable do
+                    entity 
+                        { 
+                            Sales.Customer.AccountNumber = "123"
+                            Sales.Customer.rowguid = System.Guid.NewGuid()
+                            Sales.Customer.ModifiedDate = System.DateTime.Now
+                            Sales.Customer.PersonID = None
+                            Sales.Customer.StoreID = None
+                            Sales.Customer.TerritoryID = None
+                            Sales.Customer.CustomerID = 0
+                        }
+                    identity c.CustomerID
                 }
 
-            seq [
-                "SqlServerCompiler", SqlKata.Compilers.SqlServerCompiler() :> SqlKata.Compilers.Compiler
-                "PostgresCompiler", SqlKata.Compilers.PostgresCompiler() :> SqlKata.Compilers.Compiler
-                "FirebirdCompiler", SqlKata.Compilers.FirebirdCompiler() :> SqlKata.Compilers.Compiler
-                "MySqlCompiler", SqlKata.Compilers.MySqlCompiler() :> SqlKata.Compilers.Compiler
-                "OracleCompiler", SqlKata.Compilers.OracleCompiler() :> SqlKata.Compilers.Compiler
-                "SqliteCompiler", SqlKata.Compilers.SqliteCompiler() :> SqlKata.Compilers.Compiler
-            ]
-            |> Seq.map (fun (nm, compiler) -> nm, compiler.Compile(query.ToKataQuery()).Sql)
-            |> Seq.iter (fun (nm, sql) -> printfn "%s:\n%s" nm sql)
-        }
-
-        test "Build Kata Queries" {
-            let compiler = new SqlKata.Compilers.SqlServerCompiler()
-    
-            let sampleErrors = [
-                for n in [1..3] do
-                    {   dbo.ErrorLog.ErrorLogID = 0 // Exclude
-                        dbo.ErrorLog.ErrorTime = System.DateTime.Now
-                        dbo.ErrorLog.ErrorLine = None
-                        dbo.ErrorLog.ErrorMessage = $"INSERT {n}"
-                        dbo.ErrorLog.ErrorNumber = 400
-                        dbo.ErrorLog.ErrorProcedure = None
-                        dbo.ErrorLog.ErrorSeverity = None
-                        dbo.ErrorLog.ErrorState = None
-                        dbo.ErrorLog.UserName = "jmarr" }
-            ]
-
-            let kataQueries = 
-                [
-                    for record in sampleErrors do
-                        insert {
-                            into table<dbo.ErrorLog>
-                            entity record
-                        }
-                        |> fun query -> query.ToKataQuery(returnId = false)
-
-                    update {
-                        for e in table<dbo.ErrorLog> do
-                        set e.ErrorMessage "Unauthorized"
-                        where (e.ErrorNumber = 401)
-                    }
-                    |> fun query -> query.ToKataQuery()
-
-                    update {
-                        for e in table<dbo.ErrorLog> do
-                        set e.ErrorMessage "Resource Not Found"
-                        where (e.ErrorNumber = 404)
-                    }
-                    |> fun query -> query.ToKataQuery()
-                ]
-
-            kataQueries 
-            |> List.map compiler.Compile
-            |> List.iter (fun compiledQuery -> 
-                printfn "script: \n%s\n" compiledQuery.Sql
-            )
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal 
+                sql 
+                "INSERT INTO [Sales].[Customer] ([AccountNumber], [rowguid], [ModifiedDate], [PersonID], [StoreID], [TerritoryID]) VALUES (@p0, @p1, @p2, @p3, @p4, @p5);SELECT scope_identity() as Id" 
+                ""
         }
     ]

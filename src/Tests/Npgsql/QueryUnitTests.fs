@@ -296,33 +296,11 @@ let tests =
                         }
                 }
 
-            let sql = query.ToKataQuery(false) |> toSql
+            let sql = query.ToKataQuery() |> toSql
             Expect.equal 
                 sql 
                 "INSERT INTO [sales].[customer] ([modifieddate], [territoryid], [storeid], [personid], [rowguid], [customerid]) VALUES (@p0, @p1, @p2, @p3, @p4, @p5)" 
                 ""
-        }
-
-        test "Insert and Get Id Query" {
-            let query = 
-                insert {
-                    for r in productReviewTable do
-                    entity 
-                        {
-                            production.productreview.productreviewid = 0 // PK
-                            production.productreview.comments = Some "The ML Fork makes for a plush ride."
-                            production.productreview.emailaddress = "gfisher@askjeeves.com"
-                            production.productreview.modifieddate = System.DateTime.Today
-                            production.productreview.productid = 803 //ML Fork
-                            production.productreview.rating = 5
-                            production.productreview.reviewdate = System.DateTime.Today
-                            production.productreview.reviewername = "Gary Fisher"
-                        }
-                    //excludeColumn r.productreviewid
-                }
-
-            let sql = query.ToKataQuery(true) |> toSql
-            Expect.isFalse (sql.Contains("scope_identity()")) ""
         }
     ]
 

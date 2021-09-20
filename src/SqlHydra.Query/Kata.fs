@@ -25,14 +25,15 @@ module FQ =
         | Some schema -> $"{schema}.{tbl.Name}"
         | None -> tbl.Name
 
-type InsertQuerySpec<'T> = 
+type InsertQuerySpec<'T, 'Identity> = 
     {
         Table: string
         Entity: 'T option
         Fields: string list
-        ReturnId: bool
+        IdentityField: string option
     }
-    static member Default = { Table = ""; Entity = Option<'T>.None; Fields = []; ReturnId = false }
+    static member Default : InsertQuerySpec<'T, 'Identity> = 
+        { Table = ""; Entity = Option<'T>.None; Fields = []; IdentityField = None }
 
 type UpdateQuerySpec<'T> = 
     {
@@ -78,11 +79,11 @@ module private KataUtils =
                 | null -> box System.DBNull.Value 
                 | o -> o
 
-    let fromUpdate (updateQuery: UpdateQuerySpec<'T>) = 
+    let fromUpdate (spec: UpdateQuerySpec<'T>) = 
         let kvps = 
-            match updateQuery.Entity, updateQuery.SetValues with
+            match spec.Entity, spec.SetValues with
             | Some entity, [] -> 
-                match updateQuery.Fields with 
+                match spec.Fields with 
                 | [] -> 
                     FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
                     |> Array.map (fun p -> p.Name, p.GetValue(entity))
@@ -104,18 +105,18 @@ module private KataUtils =
             |> dict
             |> Seq.map id
 
-        let q = Query(updateQuery.Table).AsUpdate(preparedKvps)
+        let q = Query(spec.Table).AsUpdate(preparedKvps)
 
         // Apply `where` clause
-        match updateQuery.Where with
+        match spec.Where with
         | Some where -> q.Where(fun w -> where)
         | None -> q
 
-    let fromInsert (returnId: bool) (insertQuery: InsertQuerySpec<'T>) =
+    let fromInsert (spec: InsertQuerySpec<'T, 'InsertReturn>) =
         let kvps = 
-            match insertQuery.Entity with
+            match spec.Entity with
             | Some entity -> 
-                match insertQuery.Fields with 
+                match spec.Fields with 
                 | [] -> 
                     FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
                     |> Array.map (fun p -> p.Name, p.GetValue(entity))
@@ -135,7 +136,7 @@ module private KataUtils =
             |> dict
             |> Seq.map id
 
-        Query(insertQuery.Table).AsInsert(preparedKvps, returnId = returnId)
+        Query(spec.Table).AsInsert(preparedKvps, returnId = spec.IdentityField.IsSome)
 
 
 [<AbstractClass>]
@@ -150,7 +151,9 @@ type DeleteQuery<'T>(query: SqlKata.Query) =
     member this.ToKataQuery() = query
 
 type UpdateQuery<'T>(spec: UpdateQuerySpec<'T>) =
+    member internal this.Spec = spec
     member this.ToKataQuery() = spec |> KataUtils.fromUpdate
 
-type InsertQuery<'T>(spec: InsertQuerySpec<'T>) =
-    member this.ToKataQuery(returnId: bool) = spec |> KataUtils.fromInsert returnId
+type InsertQuery<'T, 'Identity>(spec: InsertQuerySpec<'T, 'Identity>) =
+    member internal this.Spec = spec
+    member this.ToKataQuery() = spec |> KataUtils.fromInsert

@@ -255,9 +255,9 @@ let tests =
                 insert {
                     for e in errorLogTable do
                     entity errorLog
-                    excludeColumn e.ErrorLogID
+                    identity e.ErrorLogID
                 }
-                |> ctx.InsertGetId
+                |> ctx.Insert
 
             printfn "Identity: %i" result
             Expect.isTrue (result > 0) "Expected returned ID to be > 0"
@@ -283,9 +283,9 @@ let tests =
                 insert {
                     for e in errorLogTable do
                     entity errorLog
-                    excludeColumn e.ErrorLogID
+                    identity e.ErrorLogID
                 }
-                |> ctx.InsertGetIdAsync
+                |> ctx.InsertAsync
 
             printfn "Identity: %i" result
         }
@@ -401,9 +401,9 @@ let tests =
                     insert {
                         for e in errorLogTable do
                         entity stubbedErrorLog
-                        excludeColumn e.ErrorLogID
+                        identity e.ErrorLogID
                     }
-                    |> ctx.InsertGetIdAsync
+                    |> ctx.InsertAsync
 
                 printfn "Identity: %i" result
 
@@ -442,9 +442,9 @@ let tests =
                     insert {
                         for e in errorLogTable do
                         entity stubbedErrorLog
-                        excludeColumn e.ErrorLogID
+                        identity e.ErrorLogID
                     }
-                    |> ctx.InsertGetIdAsync
+                    |> ctx.InsertAsync
                 ()
 
             let! count = 

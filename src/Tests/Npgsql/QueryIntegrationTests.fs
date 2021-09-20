@@ -320,7 +320,7 @@ let tests =
             use ctx = openContext()
             ctx.BeginTransaction()
 
-            let! prodReviewIdObj = 
+            let! prodReviewId = 
                 insert {
                     for r in productReviewTable do
                     entity 
@@ -334,13 +334,9 @@ let tests =
                             production.productreview.reviewdate = System.DateTime.Today
                             production.productreview.reviewername = "Gary Fisher"
                         }
-                    //excludeColumn r.productreviewid
+                    identity r.productreviewid
                 }
-                |> ctx.InsertGetIdAsync
-
-            let prodReviewId : int = prodReviewIdObj
-
-            Expect.isTrue (prodReviewId > 0) "Expected productreviewid to be greater than 0"
+                |> ctx.InsertAsync
 
             let! review = 
                 select {
@@ -351,10 +347,28 @@ let tests =
             
             match review with
             | Some (rev : production.productreview) -> 
-                Expect.isTrue (rev.productreviewid = prodReviewId) ""
+                Expect.isTrue (prodReviewId > 0) "Expected productreviewid to be greater than 0"
             | None -> 
                 failwith "Expected to query a review row."
-            
+
+            let! deletedCount = 
+                delete {
+                    for r in productReviewTable do
+                    where (r.productreviewid = prodReviewId)
+                }
+                |> ctx.DeleteAsync
+
+            Expect.equal deletedCount 1 "Expected exactly one review to be deleted"
+
+            let! reviews = 
+                select {
+                    for r in productReviewTable do
+                    where (r.reviewername = "Gary Fisher")
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            Expect.equal (reviews |> Seq.length) 0 "Expected no reviews to be queryable"
+
             ctx.CommitTransaction()
         }
     ]
