@@ -125,7 +125,7 @@ type SelectExpressionBuilder<'Output>() =
         let query = state |> getQueryOrDefault
         QuerySource<'T, Query>(query.Take(take), state.TableMappings)
 
-    /// INNER JOIN table where COLNAME equals to another COLUMN (including TABLE name)
+    /// INNER JOIN table on one or more columns
     [<CustomOperation("join", MaintainsVariableSpace = true, IsLikeJoin = true, JoinConditionWord = "on")>]
     member this.Join (outerSource: QuerySource<'TOuter>, 
                       innerSource: QuerySource<'TInner>, 
@@ -134,40 +134,28 @@ type SelectExpressionBuilder<'Output>() =
                       resultSelector: Expression<Func<'TOuter,'TInner,'Result>> ) = 
 
         let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
-        let innerProperties = LinqExpressionVisitors.visitJoin<'TInner, 'Key> innerKeySelector
         let outerProperties = LinqExpressionVisitors.visitJoin<'TOuter, 'Key> outerKeySelector
-        let outerQuery = outerSource |> getQueryOrDefault
+        let innerProperties = LinqExpressionVisitors.visitJoin<'TInner, 'Key> innerKeySelector
 
+        let outerQuery = outerSource |> getQueryOrDefault
         let innerTableName = 
             innerProperties 
-            |> List.map (fun p -> mergedTables.[FQ.fqName p.DeclaringType])
-            |> List.map (fun tbl -> 
+            |> Seq.map (fun p -> mergedTables.[FQ.fqName p.DeclaringType])
+            |> Seq.map (fun tbl -> 
                 match tbl.Schema with
                 | Some schema -> sprintf "%s.%s" schema tbl.Name
                 | None -> tbl.Name
             )
-            |> List.head
-
-        match innerProperties, outerProperties with
-        | [innerProperty], [outerProperty] -> 
-            // Single column join criteria
-            QuerySource<'Result, Query>(
-                outerQuery.Join(
-                    innerTableName, 
-                    innerProperty |> FQ.fullyQualifyColumn mergedTables, 
-                    outerProperty |> FQ.fullyQualifyColumn mergedTables), 
-                mergedTables
-            )
-        | _ -> 
-            // Multiple column join criteria
-            let multiColumnJoin = 
-                List.zip innerProperties outerProperties 
-                |> List.map (fun (innerProp, outerProp) -> innerProp.Name, outerProp |> FQ.fullyQualifyColumn mergedTables)
-                |> List.fold (fun (j: Join) (innerProp, outerProp) -> j.On(innerProp, outerProp)) (Join())
+            |> Seq.head
+        
+        let joinOn = 
+            let fq = FQ.fullyQualifyColumn mergedTables
+            List.zip outerProperties innerProperties
+            |> List.fold (fun (j: Join) (outerProp, innerProp) -> j.On(fq outerProp, fq innerProp)) (Join())
             
-            QuerySource<'Result, Query>(outerQuery.Join(innerTableName, fun j -> multiColumnJoin), mergedTables)
+        QuerySource<'Result, Query>(outerQuery.Join(innerTableName, fun j -> joinOn), mergedTables)
 
-    /// LEFT JOIN table where COLNAME equals to another COLUMN (including TABLE name)
+    /// LEFT JOIN table on one or more columns
     [<CustomOperation("leftJoin", MaintainsVariableSpace = true, IsLikeJoin = true, JoinConditionWord = "on")>]
     member this.LeftJoin (outerSource: QuerySource<'TOuter>, 
                           innerSource: QuerySource<'TInner>, 
@@ -176,38 +164,26 @@ type SelectExpressionBuilder<'Output>() =
                           resultSelector: Expression<Func<'TOuter,'TInner option,'Result>> ) = 
 
         let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
-        let innerProperties = LinqExpressionVisitors.visitJoin<'TInner option, 'Key> innerKeySelector
         let outerProperties = LinqExpressionVisitors.visitJoin<'TOuter, 'Key> outerKeySelector
-        let outerQuery = outerSource |> getQueryOrDefault
+        let innerProperties = LinqExpressionVisitors.visitJoin<'TInner option, 'Key> innerKeySelector
 
+        let outerQuery = outerSource |> getQueryOrDefault
         let innerTableName = 
             innerProperties 
-            |> List.map (fun p -> mergedTables.[FQ.fqName p.DeclaringType])
-            |> List.map (fun tbl -> 
+            |> Seq.map (fun p -> mergedTables.[FQ.fqName p.DeclaringType])
+            |> Seq.map (fun tbl -> 
                 match tbl.Schema with
                 | Some schema -> sprintf "%s.%s" schema tbl.Name
                 | None -> tbl.Name
             )
-            |> List.head
+            |> Seq.head
 
-        match innerProperties, outerProperties with
-        | [innerProperty], [outerProperty] -> 
-            // Single column join criteria
-            QuerySource<'Result, Query>(
-                outerQuery.LeftJoin(
-                    innerTableName, 
-                    innerProperty |> FQ.fullyQualifyColumn mergedTables, 
-                    outerProperty |> FQ.fullyQualifyColumn mergedTables), 
-                mergedTables
-            )
-        | _ -> 
-            // Multiple column join criteria
-            let multiColumnJoin = 
-                List.zip innerProperties outerProperties 
-                |> List.map (fun (innerProp, outerProp) -> innerProp.Name, outerProp |> FQ.fullyQualifyColumn mergedTables)
-                |> List.fold (fun (j: Join) (innerProp, outerProp) -> j.On(innerProp, outerProp)) (Join())
+        let joinOn = 
+            let fq = FQ.fullyQualifyColumn mergedTables
+            List.zip outerProperties innerProperties
+            |> List.fold (fun (j: Join) (outerProp, innerProp) -> j.On(fq outerProp, fq innerProp)) (Join())
             
-            QuerySource<'Result, Query>(outerQuery.LeftJoin(innerTableName, fun j -> multiColumnJoin), mergedTables)
+        QuerySource<'Result, Query>(outerQuery.LeftJoin(innerTableName, fun j -> joinOn), mergedTables)
 
     /// Sets the GROUP BY for one or more columns.
     [<CustomOperation("groupBy", MaintainsVariableSpace = true)>]

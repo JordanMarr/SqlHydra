@@ -206,7 +206,8 @@ let tests =
 
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
-            Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] ON [Sales].[SalesOrderDetail].[SalesOrderID] = [Sales].[SalesOrderHeader].[SalesOrderID]")) ""
+            //Expect.equal sql "" ""
+            Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID])")) ""
         }
 
         test "Left Join" {
@@ -219,7 +220,8 @@ let tests =
 
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
-            Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON [Sales].[SalesOrderDetail].[SalesOrderID] = [Sales].[SalesOrderHeader].[SalesOrderID]")) ""
+            //Expect.equal sql "" ""
+            Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID])")) ""
         }
         
         test "Inner Join - Multi Column" {
@@ -232,7 +234,8 @@ let tests =
         
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
-            Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] ON ([SalesOrderID] = [Sales].[SalesOrderHeader].[SalesOrderID] AND [ModifiedDate] = [Sales].[SalesOrderHeader].[ModifiedDate]")) ""
+            //Expect.equal sql "" ""
+            Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID] AND [Sales].[SalesOrderHeader].[ModifiedDate] = [Sales].[SalesOrderDetail].[ModifiedDate])")) ""
         }
         
         test "Left Join - Multi Column" {
@@ -245,7 +248,8 @@ let tests =
         
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
-            Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON ([SalesOrderID] = [Sales].[SalesOrderHeader].[SalesOrderID] AND [ModifiedDate] = [Sales].[SalesOrderHeader].[ModifiedDate]")) ""
+            //Expect.equal sql "" ""
+            Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID] AND [Sales].[SalesOrderHeader].[ModifiedDate] = [Sales].[SalesOrderDetail].[ModifiedDate])")) ""
         }
 
         test "Delete Query with Where" {
