@@ -3242,187 +3242,187 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     member private __.GetReaderByName(entity: string, isOption: bool) =
         match entity, isOption with
         | "HumanResources.EmployeePayHistory", false -> __.``HumanResources.EmployeePayHistory``.Read >> box
-        | "EmployeePayHistory", true -> __.``HumanResources.EmployeePayHistory``.ReadIfNotNull >> box
+        | "HumanResources.EmployeePayHistory", true -> __.``HumanResources.EmployeePayHistory``.ReadIfNotNull >> box
         | "HumanResources.JobCandidate", false -> __.``HumanResources.JobCandidate``.Read >> box
-        | "JobCandidate", true -> __.``HumanResources.JobCandidate``.ReadIfNotNull >> box
+        | "HumanResources.JobCandidate", true -> __.``HumanResources.JobCandidate``.ReadIfNotNull >> box
         | "HumanResources.vEmployee", false -> __.``HumanResources.vEmployee``.Read >> box
-        | "vEmployee", true -> failwith "Could not read type 'vEmployee option' because no primary key exists."
+        | "HumanResources.vEmployee", true -> failwith "Could not read type 'vEmployee option' because no primary key exists."
         | "HumanResources.vEmployeeDepartment", false -> __.``HumanResources.vEmployeeDepartment``.Read >> box
-        | "vEmployeeDepartment", true -> failwith "Could not read type 'vEmployeeDepartment option' because no primary key exists."
+        | "HumanResources.vEmployeeDepartment", true -> failwith "Could not read type 'vEmployeeDepartment option' because no primary key exists."
         | "HumanResources.vEmployeeDepartmentHistory", false -> __.``HumanResources.vEmployeeDepartmentHistory``.Read >> box
-        | "vEmployeeDepartmentHistory", true -> failwith "Could not read type 'vEmployeeDepartmentHistory option' because no primary key exists."
+        | "HumanResources.vEmployeeDepartmentHistory", true -> failwith "Could not read type 'vEmployeeDepartmentHistory option' because no primary key exists."
         | "HumanResources.vJobCandidate", false -> __.``HumanResources.vJobCandidate``.Read >> box
-        | "vJobCandidate", true -> failwith "Could not read type 'vJobCandidate option' because no primary key exists."
+        | "HumanResources.vJobCandidate", true -> failwith "Could not read type 'vJobCandidate option' because no primary key exists."
         | "HumanResources.vJobCandidateEmployment", false -> __.``HumanResources.vJobCandidateEmployment``.Read >> box
-        | "vJobCandidateEmployment", true -> failwith "Could not read type 'vJobCandidateEmployment option' because no primary key exists."
+        | "HumanResources.vJobCandidateEmployment", true -> failwith "Could not read type 'vJobCandidateEmployment option' because no primary key exists."
         | "HumanResources.vJobCandidateEducation", false -> __.``HumanResources.vJobCandidateEducation``.Read >> box
-        | "vJobCandidateEducation", true -> failwith "Could not read type 'vJobCandidateEducation option' because no primary key exists."
+        | "HumanResources.vJobCandidateEducation", true -> failwith "Could not read type 'vJobCandidateEducation option' because no primary key exists."
         | "HumanResources.Shift", false -> __.``HumanResources.Shift``.Read >> box
-        | "Shift", true -> __.``HumanResources.Shift``.ReadIfNotNull >> box
+        | "HumanResources.Shift", true -> __.``HumanResources.Shift``.ReadIfNotNull >> box
         | "HumanResources.Department", false -> __.``HumanResources.Department``.Read >> box
-        | "Department", true -> __.``HumanResources.Department``.ReadIfNotNull >> box
+        | "HumanResources.Department", true -> __.``HumanResources.Department``.ReadIfNotNull >> box
         | "HumanResources.Employee", false -> __.``HumanResources.Employee``.Read >> box
-        | "Employee", true -> __.``HumanResources.Employee``.ReadIfNotNull >> box
+        | "HumanResources.Employee", true -> __.``HumanResources.Employee``.ReadIfNotNull >> box
         | "HumanResources.EmployeeDepartmentHistory", false -> __.``HumanResources.EmployeeDepartmentHistory``.Read >> box
-        | "EmployeeDepartmentHistory", true -> __.``HumanResources.EmployeeDepartmentHistory``.ReadIfNotNull >> box
+        | "HumanResources.EmployeeDepartmentHistory", true -> __.``HumanResources.EmployeeDepartmentHistory``.ReadIfNotNull >> box
         | "Sales.SalesOrderHeaderSalesReason", false -> __.``Sales.SalesOrderHeaderSalesReason``.Read >> box
-        | "SalesOrderHeaderSalesReason", true -> __.``Sales.SalesOrderHeaderSalesReason``.ReadIfNotNull >> box
+        | "Sales.SalesOrderHeaderSalesReason", true -> __.``Sales.SalesOrderHeaderSalesReason``.ReadIfNotNull >> box
         | "Sales.SalesPerson", false -> __.``Sales.SalesPerson``.Read >> box
-        | "SalesPerson", true -> __.``Sales.SalesPerson``.ReadIfNotNull >> box
+        | "Sales.SalesPerson", true -> __.``Sales.SalesPerson``.ReadIfNotNull >> box
         | "Sales.SalesPersonQuotaHistory", false -> __.``Sales.SalesPersonQuotaHistory``.Read >> box
-        | "SalesPersonQuotaHistory", true -> __.``Sales.SalesPersonQuotaHistory``.ReadIfNotNull >> box
+        | "Sales.SalesPersonQuotaHistory", true -> __.``Sales.SalesPersonQuotaHistory``.ReadIfNotNull >> box
         | "Sales.SalesReason", false -> __.``Sales.SalesReason``.Read >> box
-        | "SalesReason", true -> __.``Sales.SalesReason``.ReadIfNotNull >> box
+        | "Sales.SalesReason", true -> __.``Sales.SalesReason``.ReadIfNotNull >> box
         | "Sales.SalesTaxRate", false -> __.``Sales.SalesTaxRate``.Read >> box
-        | "SalesTaxRate", true -> __.``Sales.SalesTaxRate``.ReadIfNotNull >> box
+        | "Sales.SalesTaxRate", true -> __.``Sales.SalesTaxRate``.ReadIfNotNull >> box
         | "Sales.PersonCreditCard", false -> __.``Sales.PersonCreditCard``.Read >> box
-        | "PersonCreditCard", true -> __.``Sales.PersonCreditCard``.ReadIfNotNull >> box
+        | "Sales.PersonCreditCard", true -> __.``Sales.PersonCreditCard``.ReadIfNotNull >> box
         | "Sales.SalesTerritory", false -> __.``Sales.SalesTerritory``.Read >> box
-        | "SalesTerritory", true -> __.``Sales.SalesTerritory``.ReadIfNotNull >> box
+        | "Sales.SalesTerritory", true -> __.``Sales.SalesTerritory``.ReadIfNotNull >> box
         | "Sales.vIndividualCustomer", false -> __.``Sales.vIndividualCustomer``.Read >> box
-        | "vIndividualCustomer", true -> failwith "Could not read type 'vIndividualCustomer option' because no primary key exists."
+        | "Sales.vIndividualCustomer", true -> failwith "Could not read type 'vIndividualCustomer option' because no primary key exists."
         | "Sales.vPersonDemographics", false -> __.``Sales.vPersonDemographics``.Read >> box
-        | "vPersonDemographics", true -> failwith "Could not read type 'vPersonDemographics option' because no primary key exists."
+        | "Sales.vPersonDemographics", true -> failwith "Could not read type 'vPersonDemographics option' because no primary key exists."
         | "Sales.vSalesPerson", false -> __.``Sales.vSalesPerson``.Read >> box
-        | "vSalesPerson", true -> failwith "Could not read type 'vSalesPerson option' because no primary key exists."
+        | "Sales.vSalesPerson", true -> failwith "Could not read type 'vSalesPerson option' because no primary key exists."
         | "Sales.SalesTerritoryHistory", false -> __.``Sales.SalesTerritoryHistory``.Read >> box
-        | "SalesTerritoryHistory", true -> __.``Sales.SalesTerritoryHistory``.ReadIfNotNull >> box
+        | "Sales.SalesTerritoryHistory", true -> __.``Sales.SalesTerritoryHistory``.ReadIfNotNull >> box
         | "Sales.vSalesPersonSalesByFiscalYears", false -> __.``Sales.vSalesPersonSalesByFiscalYears``.Read >> box
-        | "vSalesPersonSalesByFiscalYears", true -> failwith "Could not read type 'vSalesPersonSalesByFiscalYears option' because no primary key exists."
+        | "Sales.vSalesPersonSalesByFiscalYears", true -> failwith "Could not read type 'vSalesPersonSalesByFiscalYears option' because no primary key exists."
         | "Sales.vStoreWithDemographics", false -> __.``Sales.vStoreWithDemographics``.Read >> box
-        | "vStoreWithDemographics", true -> failwith "Could not read type 'vStoreWithDemographics option' because no primary key exists."
+        | "Sales.vStoreWithDemographics", true -> failwith "Could not read type 'vStoreWithDemographics option' because no primary key exists."
         | "Sales.vStoreWithContacts", false -> __.``Sales.vStoreWithContacts``.Read >> box
-        | "vStoreWithContacts", true -> failwith "Could not read type 'vStoreWithContacts option' because no primary key exists."
+        | "Sales.vStoreWithContacts", true -> failwith "Could not read type 'vStoreWithContacts option' because no primary key exists."
         | "Sales.vStoreWithAddresses", false -> __.``Sales.vStoreWithAddresses``.Read >> box
-        | "vStoreWithAddresses", true -> failwith "Could not read type 'vStoreWithAddresses option' because no primary key exists."
+        | "Sales.vStoreWithAddresses", true -> failwith "Could not read type 'vStoreWithAddresses option' because no primary key exists."
         | "Sales.ShoppingCartItem", false -> __.``Sales.ShoppingCartItem``.Read >> box
-        | "ShoppingCartItem", true -> __.``Sales.ShoppingCartItem``.ReadIfNotNull >> box
+        | "Sales.ShoppingCartItem", true -> __.``Sales.ShoppingCartItem``.ReadIfNotNull >> box
         | "Sales.SpecialOffer", false -> __.``Sales.SpecialOffer``.Read >> box
-        | "SpecialOffer", true -> __.``Sales.SpecialOffer``.ReadIfNotNull >> box
+        | "Sales.SpecialOffer", true -> __.``Sales.SpecialOffer``.ReadIfNotNull >> box
         | "Sales.SpecialOfferProduct", false -> __.``Sales.SpecialOfferProduct``.Read >> box
-        | "SpecialOfferProduct", true -> __.``Sales.SpecialOfferProduct``.ReadIfNotNull >> box
+        | "Sales.SpecialOfferProduct", true -> __.``Sales.SpecialOfferProduct``.ReadIfNotNull >> box
         | "Sales.Store", false -> __.``Sales.Store``.Read >> box
-        | "Store", true -> __.``Sales.Store``.ReadIfNotNull >> box
+        | "Sales.Store", true -> __.``Sales.Store``.ReadIfNotNull >> box
         | "Sales.CountryRegionCurrency", false -> __.``Sales.CountryRegionCurrency``.Read >> box
-        | "CountryRegionCurrency", true -> __.``Sales.CountryRegionCurrency``.ReadIfNotNull >> box
+        | "Sales.CountryRegionCurrency", true -> __.``Sales.CountryRegionCurrency``.ReadIfNotNull >> box
         | "Sales.CreditCard", false -> __.``Sales.CreditCard``.Read >> box
-        | "CreditCard", true -> __.``Sales.CreditCard``.ReadIfNotNull >> box
+        | "Sales.CreditCard", true -> __.``Sales.CreditCard``.ReadIfNotNull >> box
         | "Sales.Currency", false -> __.``Sales.Currency``.Read >> box
-        | "Currency", true -> __.``Sales.Currency``.ReadIfNotNull >> box
+        | "Sales.Currency", true -> __.``Sales.Currency``.ReadIfNotNull >> box
         | "Sales.CurrencyRate", false -> __.``Sales.CurrencyRate``.Read >> box
-        | "CurrencyRate", true -> __.``Sales.CurrencyRate``.ReadIfNotNull >> box
+        | "Sales.CurrencyRate", true -> __.``Sales.CurrencyRate``.ReadIfNotNull >> box
         | "Sales.Customer", false -> __.``Sales.Customer``.Read >> box
-        | "Customer", true -> __.``Sales.Customer``.ReadIfNotNull >> box
+        | "Sales.Customer", true -> __.``Sales.Customer``.ReadIfNotNull >> box
         | "Sales.SalesOrderDetail", false -> __.``Sales.SalesOrderDetail``.Read >> box
-        | "SalesOrderDetail", true -> __.``Sales.SalesOrderDetail``.ReadIfNotNull >> box
+        | "Sales.SalesOrderDetail", true -> __.``Sales.SalesOrderDetail``.ReadIfNotNull >> box
         | "Sales.SalesOrderHeader", false -> __.``Sales.SalesOrderHeader``.Read >> box
-        | "SalesOrderHeader", true -> __.``Sales.SalesOrderHeader``.ReadIfNotNull >> box
+        | "Sales.SalesOrderHeader", true -> __.``Sales.SalesOrderHeader``.ReadIfNotNull >> box
         | "Production.Illustration", false -> __.``Production.Illustration``.Read >> box
-        | "Illustration", true -> __.``Production.Illustration``.ReadIfNotNull >> box
+        | "Production.Illustration", true -> __.``Production.Illustration``.ReadIfNotNull >> box
         | "Production.Location", false -> __.``Production.Location``.Read >> box
-        | "Location", true -> __.``Production.Location``.ReadIfNotNull >> box
+        | "Production.Location", true -> __.``Production.Location``.ReadIfNotNull >> box
         | "Production.Product", false -> __.``Production.Product``.Read >> box
-        | "Product", true -> __.``Production.Product``.ReadIfNotNull >> box
+        | "Production.Product", true -> __.``Production.Product``.ReadIfNotNull >> box
         | "Production.vProductAndDescription", false -> __.``Production.vProductAndDescription``.Read >> box
-        | "vProductAndDescription", true -> failwith "Could not read type 'vProductAndDescription option' because no primary key exists."
+        | "Production.vProductAndDescription", true -> failwith "Could not read type 'vProductAndDescription option' because no primary key exists."
         | "Production.vProductModelCatalogDescription", false -> __.``Production.vProductModelCatalogDescription``.Read >> box
-        | "vProductModelCatalogDescription", true -> failwith "Could not read type 'vProductModelCatalogDescription option' because no primary key exists."
+        | "Production.vProductModelCatalogDescription", true -> failwith "Could not read type 'vProductModelCatalogDescription option' because no primary key exists."
         | "Production.vProductModelInstructions", false -> __.``Production.vProductModelInstructions``.Read >> box
-        | "vProductModelInstructions", true -> failwith "Could not read type 'vProductModelInstructions option' because no primary key exists."
+        | "Production.vProductModelInstructions", true -> failwith "Could not read type 'vProductModelInstructions option' because no primary key exists."
         | "Production.ScrapReason", false -> __.``Production.ScrapReason``.Read >> box
-        | "ScrapReason", true -> __.``Production.ScrapReason``.ReadIfNotNull >> box
+        | "Production.ScrapReason", true -> __.``Production.ScrapReason``.ReadIfNotNull >> box
         | "Production.ProductCategory", false -> __.``Production.ProductCategory``.Read >> box
-        | "ProductCategory", true -> __.``Production.ProductCategory``.ReadIfNotNull >> box
+        | "Production.ProductCategory", true -> __.``Production.ProductCategory``.ReadIfNotNull >> box
         | "Production.ProductCostHistory", false -> __.``Production.ProductCostHistory``.Read >> box
-        | "ProductCostHistory", true -> __.``Production.ProductCostHistory``.ReadIfNotNull >> box
+        | "Production.ProductCostHistory", true -> __.``Production.ProductCostHistory``.ReadIfNotNull >> box
         | "Production.ProductDescription", false -> __.``Production.ProductDescription``.Read >> box
-        | "ProductDescription", true -> __.``Production.ProductDescription``.ReadIfNotNull >> box
+        | "Production.ProductDescription", true -> __.``Production.ProductDescription``.ReadIfNotNull >> box
         | "Production.ProductDocument", false -> __.``Production.ProductDocument``.Read >> box
-        | "ProductDocument", true -> __.``Production.ProductDocument``.ReadIfNotNull >> box
+        | "Production.ProductDocument", true -> __.``Production.ProductDocument``.ReadIfNotNull >> box
         | "Production.ProductInventory", false -> __.``Production.ProductInventory``.Read >> box
-        | "ProductInventory", true -> __.``Production.ProductInventory``.ReadIfNotNull >> box
+        | "Production.ProductInventory", true -> __.``Production.ProductInventory``.ReadIfNotNull >> box
         | "Production.ProductListPriceHistory", false -> __.``Production.ProductListPriceHistory``.Read >> box
-        | "ProductListPriceHistory", true -> __.``Production.ProductListPriceHistory``.ReadIfNotNull >> box
+        | "Production.ProductListPriceHistory", true -> __.``Production.ProductListPriceHistory``.ReadIfNotNull >> box
         | "Production.ProductModel", false -> __.``Production.ProductModel``.Read >> box
-        | "ProductModel", true -> __.``Production.ProductModel``.ReadIfNotNull >> box
+        | "Production.ProductModel", true -> __.``Production.ProductModel``.ReadIfNotNull >> box
         | "Production.ProductModelIllustration", false -> __.``Production.ProductModelIllustration``.Read >> box
-        | "ProductModelIllustration", true -> __.``Production.ProductModelIllustration``.ReadIfNotNull >> box
+        | "Production.ProductModelIllustration", true -> __.``Production.ProductModelIllustration``.ReadIfNotNull >> box
         | "Production.ProductModelProductDescriptionCulture", false -> __.``Production.ProductModelProductDescriptionCulture``.Read >> box
-        | "ProductModelProductDescriptionCulture", true -> __.``Production.ProductModelProductDescriptionCulture``.ReadIfNotNull >> box
+        | "Production.ProductModelProductDescriptionCulture", true -> __.``Production.ProductModelProductDescriptionCulture``.ReadIfNotNull >> box
         | "Production.BillOfMaterials", false -> __.``Production.BillOfMaterials``.Read >> box
-        | "BillOfMaterials", true -> __.``Production.BillOfMaterials``.ReadIfNotNull >> box
+        | "Production.BillOfMaterials", true -> __.``Production.BillOfMaterials``.ReadIfNotNull >> box
         | "Production.ProductPhoto", false -> __.``Production.ProductPhoto``.Read >> box
-        | "ProductPhoto", true -> __.``Production.ProductPhoto``.ReadIfNotNull >> box
+        | "Production.ProductPhoto", true -> __.``Production.ProductPhoto``.ReadIfNotNull >> box
         | "Production.ProductProductPhoto", false -> __.``Production.ProductProductPhoto``.Read >> box
-        | "ProductProductPhoto", true -> __.``Production.ProductProductPhoto``.ReadIfNotNull >> box
+        | "Production.ProductProductPhoto", true -> __.``Production.ProductProductPhoto``.ReadIfNotNull >> box
         | "Production.TransactionHistory", false -> __.``Production.TransactionHistory``.Read >> box
-        | "TransactionHistory", true -> __.``Production.TransactionHistory``.ReadIfNotNull >> box
+        | "Production.TransactionHistory", true -> __.``Production.TransactionHistory``.ReadIfNotNull >> box
         | "Production.ProductReview", false -> __.``Production.ProductReview``.Read >> box
-        | "ProductReview", true -> __.``Production.ProductReview``.ReadIfNotNull >> box
+        | "Production.ProductReview", true -> __.``Production.ProductReview``.ReadIfNotNull >> box
         | "Production.TransactionHistoryArchive", false -> __.``Production.TransactionHistoryArchive``.Read >> box
-        | "TransactionHistoryArchive", true -> __.``Production.TransactionHistoryArchive``.ReadIfNotNull >> box
+        | "Production.TransactionHistoryArchive", true -> __.``Production.TransactionHistoryArchive``.ReadIfNotNull >> box
         | "Production.ProductSubcategory", false -> __.``Production.ProductSubcategory``.Read >> box
-        | "ProductSubcategory", true -> __.``Production.ProductSubcategory``.ReadIfNotNull >> box
+        | "Production.ProductSubcategory", true -> __.``Production.ProductSubcategory``.ReadIfNotNull >> box
         | "Production.UnitMeasure", false -> __.``Production.UnitMeasure``.Read >> box
-        | "UnitMeasure", true -> __.``Production.UnitMeasure``.ReadIfNotNull >> box
+        | "Production.UnitMeasure", true -> __.``Production.UnitMeasure``.ReadIfNotNull >> box
         | "Production.WorkOrder", false -> __.``Production.WorkOrder``.Read >> box
-        | "WorkOrder", true -> __.``Production.WorkOrder``.ReadIfNotNull >> box
+        | "Production.WorkOrder", true -> __.``Production.WorkOrder``.ReadIfNotNull >> box
         | "Production.Culture", false -> __.``Production.Culture``.Read >> box
-        | "Culture", true -> __.``Production.Culture``.ReadIfNotNull >> box
+        | "Production.Culture", true -> __.``Production.Culture``.ReadIfNotNull >> box
         | "Production.WorkOrderRouting", false -> __.``Production.WorkOrderRouting``.Read >> box
-        | "WorkOrderRouting", true -> __.``Production.WorkOrderRouting``.ReadIfNotNull >> box
+        | "Production.WorkOrderRouting", true -> __.``Production.WorkOrderRouting``.ReadIfNotNull >> box
         | "Production.Document", false -> __.``Production.Document``.Read >> box
-        | "Document", true -> failwith "Could not read type 'Document option' because no primary key exists."
+        | "Production.Document", true -> failwith "Could not read type 'Document option' because no primary key exists."
         | "Person.Password", false -> __.``Person.Password``.Read >> box
-        | "Password", true -> __.``Person.Password``.ReadIfNotNull >> box
+        | "Person.Password", true -> __.``Person.Password``.ReadIfNotNull >> box
         | "Person.Person", false -> __.``Person.Person``.Read >> box
-        | "Person", true -> __.``Person.Person``.ReadIfNotNull >> box
+        | "Person.Person", true -> __.``Person.Person``.ReadIfNotNull >> box
         | "Person.vAdditionalContactInfo", false -> __.``Person.vAdditionalContactInfo``.Read >> box
-        | "vAdditionalContactInfo", true -> failwith "Could not read type 'vAdditionalContactInfo option' because no primary key exists."
+        | "Person.vAdditionalContactInfo", true -> failwith "Could not read type 'vAdditionalContactInfo option' because no primary key exists."
         | "Person.PersonPhone", false -> __.``Person.PersonPhone``.Read >> box
-        | "PersonPhone", true -> __.``Person.PersonPhone``.ReadIfNotNull >> box
+        | "Person.PersonPhone", true -> __.``Person.PersonPhone``.ReadIfNotNull >> box
         | "Person.PhoneNumberType", false -> __.``Person.PhoneNumberType``.Read >> box
-        | "PhoneNumberType", true -> __.``Person.PhoneNumberType``.ReadIfNotNull >> box
+        | "Person.PhoneNumberType", true -> __.``Person.PhoneNumberType``.ReadIfNotNull >> box
         | "Person.vStateProvinceCountryRegion", false -> __.``Person.vStateProvinceCountryRegion``.Read >> box
-        | "vStateProvinceCountryRegion", true -> failwith "Could not read type 'vStateProvinceCountryRegion option' because no primary key exists."
+        | "Person.vStateProvinceCountryRegion", true -> failwith "Could not read type 'vStateProvinceCountryRegion option' because no primary key exists."
         | "Person.Address", false -> __.``Person.Address``.Read >> box
-        | "Address", true -> __.``Person.Address``.ReadIfNotNull >> box
+        | "Person.Address", true -> __.``Person.Address``.ReadIfNotNull >> box
         | "Person.AddressType", false -> __.``Person.AddressType``.Read >> box
-        | "AddressType", true -> __.``Person.AddressType``.ReadIfNotNull >> box
+        | "Person.AddressType", true -> __.``Person.AddressType``.ReadIfNotNull >> box
         | "Person.StateProvince", false -> __.``Person.StateProvince``.Read >> box
-        | "StateProvince", true -> __.``Person.StateProvince``.ReadIfNotNull >> box
+        | "Person.StateProvince", true -> __.``Person.StateProvince``.ReadIfNotNull >> box
         | "Person.BusinessEntity", false -> __.``Person.BusinessEntity``.Read >> box
-        | "BusinessEntity", true -> __.``Person.BusinessEntity``.ReadIfNotNull >> box
+        | "Person.BusinessEntity", true -> __.``Person.BusinessEntity``.ReadIfNotNull >> box
         | "Person.BusinessEntityAddress", false -> __.``Person.BusinessEntityAddress``.Read >> box
-        | "BusinessEntityAddress", true -> __.``Person.BusinessEntityAddress``.ReadIfNotNull >> box
+        | "Person.BusinessEntityAddress", true -> __.``Person.BusinessEntityAddress``.ReadIfNotNull >> box
         | "Person.BusinessEntityContact", false -> __.``Person.BusinessEntityContact``.Read >> box
-        | "BusinessEntityContact", true -> __.``Person.BusinessEntityContact``.ReadIfNotNull >> box
+        | "Person.BusinessEntityContact", true -> __.``Person.BusinessEntityContact``.ReadIfNotNull >> box
         | "Person.ContactType", false -> __.``Person.ContactType``.Read >> box
-        | "ContactType", true -> __.``Person.ContactType``.ReadIfNotNull >> box
+        | "Person.ContactType", true -> __.``Person.ContactType``.ReadIfNotNull >> box
         | "Person.CountryRegion", false -> __.``Person.CountryRegion``.Read >> box
-        | "CountryRegion", true -> __.``Person.CountryRegion``.ReadIfNotNull >> box
+        | "Person.CountryRegion", true -> __.``Person.CountryRegion``.ReadIfNotNull >> box
         | "Person.EmailAddress", false -> __.``Person.EmailAddress``.Read >> box
-        | "EmailAddress", true -> __.``Person.EmailAddress``.ReadIfNotNull >> box
+        | "Person.EmailAddress", true -> __.``Person.EmailAddress``.ReadIfNotNull >> box
         | "Purchasing.vVendorWithContacts", false -> __.``Purchasing.vVendorWithContacts``.Read >> box
-        | "vVendorWithContacts", true -> failwith "Could not read type 'vVendorWithContacts option' because no primary key exists."
+        | "Purchasing.vVendorWithContacts", true -> failwith "Could not read type 'vVendorWithContacts option' because no primary key exists."
         | "Purchasing.vVendorWithAddresses", false -> __.``Purchasing.vVendorWithAddresses``.Read >> box
-        | "vVendorWithAddresses", true -> failwith "Could not read type 'vVendorWithAddresses option' because no primary key exists."
+        | "Purchasing.vVendorWithAddresses", true -> failwith "Could not read type 'vVendorWithAddresses option' because no primary key exists."
         | "Purchasing.ShipMethod", false -> __.``Purchasing.ShipMethod``.Read >> box
-        | "ShipMethod", true -> __.``Purchasing.ShipMethod``.ReadIfNotNull >> box
+        | "Purchasing.ShipMethod", true -> __.``Purchasing.ShipMethod``.ReadIfNotNull >> box
         | "Purchasing.ProductVendor", false -> __.``Purchasing.ProductVendor``.Read >> box
-        | "ProductVendor", true -> __.``Purchasing.ProductVendor``.ReadIfNotNull >> box
+        | "Purchasing.ProductVendor", true -> __.``Purchasing.ProductVendor``.ReadIfNotNull >> box
         | "Purchasing.Vendor", false -> __.``Purchasing.Vendor``.Read >> box
-        | "Vendor", true -> __.``Purchasing.Vendor``.ReadIfNotNull >> box
+        | "Purchasing.Vendor", true -> __.``Purchasing.Vendor``.ReadIfNotNull >> box
         | "Purchasing.PurchaseOrderDetail", false -> __.``Purchasing.PurchaseOrderDetail``.Read >> box
-        | "PurchaseOrderDetail", true -> __.``Purchasing.PurchaseOrderDetail``.ReadIfNotNull >> box
+        | "Purchasing.PurchaseOrderDetail", true -> __.``Purchasing.PurchaseOrderDetail``.ReadIfNotNull >> box
         | "Purchasing.PurchaseOrderHeader", false -> __.``Purchasing.PurchaseOrderHeader``.Read >> box
-        | "PurchaseOrderHeader", true -> __.``Purchasing.PurchaseOrderHeader``.ReadIfNotNull >> box
+        | "Purchasing.PurchaseOrderHeader", true -> __.``Purchasing.PurchaseOrderHeader``.ReadIfNotNull >> box
         | "dbo.DatabaseLog", false -> __.``dbo.DatabaseLog``.Read >> box
-        | "DatabaseLog", true -> __.``dbo.DatabaseLog``.ReadIfNotNull >> box
+        | "dbo.DatabaseLog", true -> __.``dbo.DatabaseLog``.ReadIfNotNull >> box
         | "dbo.ErrorLog", false -> __.``dbo.ErrorLog``.Read >> box
-        | "ErrorLog", true -> __.``dbo.ErrorLog``.ReadIfNotNull >> box
+        | "dbo.ErrorLog", true -> __.``dbo.ErrorLog``.ReadIfNotNull >> box
         | "dbo.AWBuildVersion", false -> __.``dbo.AWBuildVersion``.Read >> box
-        | "AWBuildVersion", true -> __.``dbo.AWBuildVersion``.ReadIfNotNull >> box
+        | "dbo.AWBuildVersion", true -> __.``dbo.AWBuildVersion``.ReadIfNotNull >> box
         | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
     static member private GetPrimitiveReader(t: System.Type, reader: Microsoft.Data.SqlClient.SqlDataReader, isOpt: bool) =

@@ -349,6 +349,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                             for tbl in tbls do
                                 let hasPK = tbl.Columns |> List.exists(fun c -> c.IsPK)
                                 
+                                // match case: isOption = false
                                 SynMatchClause.Clause(
                                     SynPat.Tuple(false, [ 
                                         SynPat.Const(SynConst.String($"{tbl.Schema}.{tbl.Name}", range0), range0)
@@ -364,9 +365,10 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                     , DebugPointForTarget.No
                                 )
                                 
+                                // match case: isOption = true
                                 SynMatchClause.Clause(
                                     SynPat.Tuple(false, [ 
-                                        SynPat.Const(SynConst.String(tbl.Name, range0), range0)
+                                        SynPat.Const(SynConst.String($"{tbl.Schema}.{tbl.Name}", range0), range0)
                                         SynPat.Const(SynConst.Bool(true), range0) 
                                     ], range0)
                                     , None
@@ -382,7 +384,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                     , DebugPointForTarget.No
                                 )
                             
-                            // Wildcard match
+                            // match case: wildcard
                             SynMatchClause.Clause(
                                 SynPat.Wild(range0)
                                 , None
