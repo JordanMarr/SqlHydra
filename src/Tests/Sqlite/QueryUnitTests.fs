@@ -193,6 +193,58 @@ let tests =
             Expect.isTrue (sql.Contains("WHERE (\"Customer\".\"CustomerID\" NOT IN (@p0, @p1, @p2))")) ""
         }
 
+        test "Inner Join" {
+            let query =
+                select {
+                    for o in orderHeaderTable do
+                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+                    select o
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            printfn "%s" sql
+            Expect.isTrue (sql.Contains("INNER JOIN \"SalesOrderDetail\" ON (\"SalesOrderHeader\".\"SalesOrderID\" = \"SalesOrderDetail\".\"SalesOrderID\")")) ""
+        }
+
+        test "Left Join" {
+            let query =
+                select {
+                    for o in orderHeaderTable do
+                    leftJoin d in orderDetailTable on (o.SalesOrderID = d.Value.SalesOrderID)
+                    select o
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            printfn "%s" sql
+            Expect.isTrue (sql.Contains("LEFT JOIN \"SalesOrderDetail\" ON (\"SalesOrderHeader\".\"SalesOrderID\" = \"SalesOrderDetail\".\"SalesOrderID\")")) ""
+        }
+        
+        test "Inner Join - Multi Column" {
+            let query =
+                select {
+                    for o in orderHeaderTable do
+                    join d in orderDetailTable on ((o.SalesOrderID, o.ModifiedDate) = (d.SalesOrderID, d.ModifiedDate))
+                    select o
+                }
+        
+            let sql = query.ToKataQuery() |> toSql
+            printfn "%s" sql
+            Expect.isTrue (sql.Contains("INNER JOIN \"SalesOrderDetail\" ON (\"SalesOrderHeader\".\"SalesOrderID\" = \"SalesOrderDetail\".\"SalesOrderID\" AND \"SalesOrderHeader\".\"ModifiedDate\" = \"SalesOrderDetail\".\"ModifiedDate\")")) ""
+        }
+        
+        test "Left Join - Multi Column" {
+            let query =
+                select {
+                    for o in orderHeaderTable do
+                    leftJoin d in orderDetailTable on ((o.SalesOrderID, o.ModifiedDate) = (d.Value.SalesOrderID, d.Value.ModifiedDate))
+                    select o
+                }
+        
+            let sql = query.ToKataQuery() |> toSql
+            printfn "%s" sql
+            Expect.isTrue (sql.Contains("LEFT JOIN \"SalesOrderDetail\" ON (\"SalesOrderHeader\".\"SalesOrderID\" = \"SalesOrderDetail\".\"SalesOrderID\" AND \"SalesOrderHeader\".\"ModifiedDate\" = \"SalesOrderDetail\".\"ModifiedDate\")")) ""
+        }
+
         test "Delete Query with Where" {
             let query = 
                 delete {

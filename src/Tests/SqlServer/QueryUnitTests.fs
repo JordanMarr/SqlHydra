@@ -206,7 +206,6 @@ let tests =
 
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
-            //Expect.equal sql "" ""
             Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID])")) ""
         }
 
@@ -220,7 +219,6 @@ let tests =
 
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
-            //Expect.equal sql "" ""
             Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID])")) ""
         }
         
@@ -234,7 +232,6 @@ let tests =
         
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
-            //Expect.equal sql "" ""
             Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID] AND [Sales].[SalesOrderHeader].[ModifiedDate] = [Sales].[SalesOrderDetail].[ModifiedDate])")) ""
         }
         
@@ -248,7 +245,6 @@ let tests =
         
             let sql = query.ToKataQuery() |> toSql
             printfn "%s" sql
-            //Expect.equal sql "" ""
             Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID] AND [Sales].[SalesOrderHeader].[ModifiedDate] = [Sales].[SalesOrderDetail].[ModifiedDate])")) ""
         }
 
