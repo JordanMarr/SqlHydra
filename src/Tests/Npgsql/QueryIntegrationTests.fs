@@ -4,7 +4,6 @@ open Expecto
 open SqlHydra.Query
 open DB
 open Npgsql.AdventureWorks
-open System.Threading.Tasks
 
 let openContext() = 
     let compiler = SqlKata.Compilers.PostgresCompiler()
@@ -23,10 +22,6 @@ let subCategoryTable =      table<production.productsubcategory>    |> inSchema 
 let categoryTable =         table<production.productcategory>       |> inSchema (nameof production)
 let currencyTable =         table<sales.currency>                   |> inSchema (nameof sales)
 let productReviewTable =    table<production.productreview>         |> inSchema (nameof production)
-
-/// Sequence length is > 0.
-let gt0 (items: 'Item seq) =
-    Expect.isTrue (items |> Seq.length > 0) "Expected more than 0."
 
 [<Tests>]
 let tests = 

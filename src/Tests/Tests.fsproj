@@ -14,6 +14,8 @@
   <ItemGroup>
     <Compile Include="Util.fs" />
     <Compile Include="Sqlite\AdventureWorks.fs" />
+    <Compile Include="Sqlite\DB.fs" />
+    <Compile Include="Sqlite\QueryUnitTests.fs" />
     <Compile Include="SqlServer\AdventureWorks.fs" />
     <Compile Include="SqlServer\DB.fs" />
     <Compile Include="SqlServer\QueryUnitTests.fs" />

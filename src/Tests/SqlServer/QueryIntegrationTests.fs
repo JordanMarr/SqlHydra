@@ -1,9 +1,9 @@
 ﻿module SqlServer.QueryIntegrationTests
 
-open Expecto
-open SqlHydra.Query
-open DB
 open SqlServer.AdventureWorks
+open SqlHydra.Query
+open Expecto
+open DB
 
 let openContext() = 
     let compiler = SqlKata.Compilers.SqlServerCompiler()
@@ -20,10 +20,6 @@ let productTable =          table<Production.Product>               |> inSchema 
 let subCategoryTable =      table<Production.ProductSubcategory>    |> inSchema (nameof Production)
 let categoryTable =         table<Production.ProductCategory>       |> inSchema (nameof Production)
 let errorLogTable =         table<dbo.ErrorLog>
-
-/// Sequence length is > 0.
-let gt0 (items: 'Item seq) =
-    Expect.isTrue (items |> Seq.length > 0) "Expected more than 0."
 
 [<Tests>]
 let tests = 
