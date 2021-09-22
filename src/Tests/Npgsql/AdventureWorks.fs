@@ -2026,281 +2026,281 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         accFieldCount <- accFieldCount + fieldCount
         fun col -> dictionary.Item col
         
-    let lazyaddress = lazy (person.addressReader (reader, buildGetOrdinal 9))
-    let lazystateprovince = lazy (person.stateprovinceReader (reader, buildGetOrdinal 8))
-    let lazybusinessentityaddress = lazy (person.businessentityaddressReader (reader, buildGetOrdinal 5))
-    let lazyaddresstype = lazy (person.addresstypeReader (reader, buildGetOrdinal 4))
-    let lazybusinessentity = lazy (person.businessentityReader (reader, buildGetOrdinal 3))
-    let lazyperson = lazy (person.personReader (reader, buildGetOrdinal 13))
-    let lazybusinessentitycontact = lazy (person.businessentitycontactReader (reader, buildGetOrdinal 5))
-    let lazycontacttype = lazy (person.contacttypeReader (reader, buildGetOrdinal 3))
-    let lazyemailaddress = lazy (person.emailaddressReader (reader, buildGetOrdinal 5))
-    let lazypassword = lazy (person.passwordReader (reader, buildGetOrdinal 5))
-    let lazypersonphone = lazy (person.personphoneReader (reader, buildGetOrdinal 4))
-    let lazyphonenumbertype = lazy (person.phonenumbertypeReader (reader, buildGetOrdinal 3))
-    let lazycountryregion = lazy (person.countryregionReader (reader, buildGetOrdinal 3))
-    let lazyemployee = lazy (humanresources.employeeReader (reader, buildGetOrdinal 15))
-    let lazydepartment = lazy (humanresources.departmentReader (reader, buildGetOrdinal 4))
-    let lazyemployeedepartmenthistory = lazy (humanresources.employeedepartmenthistoryReader (reader, buildGetOrdinal 6))
-    let lazyshift = lazy (humanresources.shiftReader (reader, buildGetOrdinal 5))
-    let lazyemployeepayhistory = lazy (humanresources.employeepayhistoryReader (reader, buildGetOrdinal 5))
-    let lazyjobcandidate = lazy (humanresources.jobcandidateReader (reader, buildGetOrdinal 4))
-    let lazybillofmaterials = lazy (production.billofmaterialsReader (reader, buildGetOrdinal 9))
-    let lazyculture = lazy (production.cultureReader (reader, buildGetOrdinal 3))
-    let lazydocument = lazy (production.documentReader (reader, buildGetOrdinal 13))
-    let lazyproductmodel = lazy (production.productmodelReader (reader, buildGetOrdinal 6))
-    let lazyproduct = lazy (production.productReader (reader, buildGetOrdinal 25))
-    let lazyproductsubcategory = lazy (production.productsubcategoryReader (reader, buildGetOrdinal 5))
-    let lazyproductcosthistory = lazy (production.productcosthistoryReader (reader, buildGetOrdinal 5))
-    let lazyproductdocument = lazy (production.productdocumentReader (reader, buildGetOrdinal 3))
-    let lazyproductdescription = lazy (production.productdescriptionReader (reader, buildGetOrdinal 4))
-    let lazyproductcategory = lazy (production.productcategoryReader (reader, buildGetOrdinal 4))
-    let lazylocation = lazy (production.locationReader (reader, buildGetOrdinal 5))
-    let lazyproductlistpricehistory = lazy (production.productlistpricehistoryReader (reader, buildGetOrdinal 5))
-    let lazyproductmodelillustration = lazy (production.productmodelillustrationReader (reader, buildGetOrdinal 3))
-    let lazyillustration = lazy (production.illustrationReader (reader, buildGetOrdinal 3))
-    let lazyproductmodelproductdescriptionculture = lazy (production.productmodelproductdescriptioncultureReader (reader, buildGetOrdinal 4))
-    let lazyproductproductphoto = lazy (production.productproductphotoReader (reader, buildGetOrdinal 4))
-    let lazyproductphoto = lazy (production.productphotoReader (reader, buildGetOrdinal 6))
-    let lazyunitmeasure = lazy (production.unitmeasureReader (reader, buildGetOrdinal 3))
-    let lazyproductreview = lazy (production.productreviewReader (reader, buildGetOrdinal 8))
-    let lazytransactionhistoryarchive = lazy (production.transactionhistoryarchiveReader (reader, buildGetOrdinal 9))
-    let lazytransactionhistory = lazy (production.transactionhistoryReader (reader, buildGetOrdinal 9))
-    let lazyworkorder = lazy (production.workorderReader (reader, buildGetOrdinal 9))
-    let lazyscrapreason = lazy (production.scrapreasonReader (reader, buildGetOrdinal 3))
-    let lazyworkorderrouting = lazy (production.workorderroutingReader (reader, buildGetOrdinal 12))
-    let lazyproductinventory = lazy (production.productinventoryReader (reader, buildGetOrdinal 7))
-    let lazyproductvendor = lazy (purchasing.productvendorReader (reader, buildGetOrdinal 11))
-    let lazypurchaseorderdetail = lazy (purchasing.purchaseorderdetailReader (reader, buildGetOrdinal 9))
-    let lazypurchaseorderheader = lazy (purchasing.purchaseorderheaderReader (reader, buildGetOrdinal 12))
-    let lazyshipmethod = lazy (purchasing.shipmethodReader (reader, buildGetOrdinal 6))
-    let lazyvendor = lazy (purchasing.vendorReader (reader, buildGetOrdinal 8))
-    let lazycountryregioncurrency = lazy (sales.countryregioncurrencyReader (reader, buildGetOrdinal 3))
-    let lazycurrency = lazy (sales.currencyReader (reader, buildGetOrdinal 3))
-    let lazycurrencyrate = lazy (sales.currencyrateReader (reader, buildGetOrdinal 7))
-    let lazycustomer = lazy (sales.customerReader (reader, buildGetOrdinal 6))
-    let lazypersoncreditcard = lazy (sales.personcreditcardReader (reader, buildGetOrdinal 3))
-    let lazycreditcard = lazy (sales.creditcardReader (reader, buildGetOrdinal 6))
-    let lazysalesorderheader = lazy (sales.salesorderheaderReader (reader, buildGetOrdinal 25))
-    let lazysalesorderdetail = lazy (sales.salesorderdetailReader (reader, buildGetOrdinal 10))
-    let lazysalesperson = lazy (sales.salespersonReader (reader, buildGetOrdinal 9))
-    let lazysalesorderheadersalesreason = lazy (sales.salesorderheadersalesreasonReader (reader, buildGetOrdinal 3))
-    let lazysalespersonquotahistory = lazy (sales.salespersonquotahistoryReader (reader, buildGetOrdinal 5))
-    let lazysalesterritory = lazy (sales.salesterritoryReader (reader, buildGetOrdinal 10))
-    let lazystore = lazy (sales.storeReader (reader, buildGetOrdinal 6))
-    let lazyspecialofferproduct = lazy (sales.specialofferproductReader (reader, buildGetOrdinal 4))
-    let lazysalesreason = lazy (sales.salesreasonReader (reader, buildGetOrdinal 4))
-    let lazysalestaxrate = lazy (sales.salestaxrateReader (reader, buildGetOrdinal 7))
-    let lazysalesterritoryhistory = lazy (sales.salesterritoryhistoryReader (reader, buildGetOrdinal 6))
-    let lazyshoppingcartitem = lazy (sales.shoppingcartitemReader (reader, buildGetOrdinal 6))
-    let lazyspecialoffer = lazy (sales.specialofferReader (reader, buildGetOrdinal 11))
-    member __.address = lazyaddress.Value
-    member __.stateprovince = lazystateprovince.Value
-    member __.businessentityaddress = lazybusinessentityaddress.Value
-    member __.addresstype = lazyaddresstype.Value
-    member __.businessentity = lazybusinessentity.Value
-    member __.person = lazyperson.Value
-    member __.businessentitycontact = lazybusinessentitycontact.Value
-    member __.contacttype = lazycontacttype.Value
-    member __.emailaddress = lazyemailaddress.Value
-    member __.password = lazypassword.Value
-    member __.personphone = lazypersonphone.Value
-    member __.phonenumbertype = lazyphonenumbertype.Value
-    member __.countryregion = lazycountryregion.Value
-    member __.employee = lazyemployee.Value
-    member __.department = lazydepartment.Value
-    member __.employeedepartmenthistory = lazyemployeedepartmenthistory.Value
-    member __.shift = lazyshift.Value
-    member __.employeepayhistory = lazyemployeepayhistory.Value
-    member __.jobcandidate = lazyjobcandidate.Value
-    member __.billofmaterials = lazybillofmaterials.Value
-    member __.culture = lazyculture.Value
-    member __.document = lazydocument.Value
-    member __.productmodel = lazyproductmodel.Value
-    member __.product = lazyproduct.Value
-    member __.productsubcategory = lazyproductsubcategory.Value
-    member __.productcosthistory = lazyproductcosthistory.Value
-    member __.productdocument = lazyproductdocument.Value
-    member __.productdescription = lazyproductdescription.Value
-    member __.productcategory = lazyproductcategory.Value
-    member __.location = lazylocation.Value
-    member __.productlistpricehistory = lazyproductlistpricehistory.Value
-    member __.productmodelillustration = lazyproductmodelillustration.Value
-    member __.illustration = lazyillustration.Value
-    member __.productmodelproductdescriptionculture = lazyproductmodelproductdescriptionculture.Value
-    member __.productproductphoto = lazyproductproductphoto.Value
-    member __.productphoto = lazyproductphoto.Value
-    member __.unitmeasure = lazyunitmeasure.Value
-    member __.productreview = lazyproductreview.Value
-    member __.transactionhistoryarchive = lazytransactionhistoryarchive.Value
-    member __.transactionhistory = lazytransactionhistory.Value
-    member __.workorder = lazyworkorder.Value
-    member __.scrapreason = lazyscrapreason.Value
-    member __.workorderrouting = lazyworkorderrouting.Value
-    member __.productinventory = lazyproductinventory.Value
-    member __.productvendor = lazyproductvendor.Value
-    member __.purchaseorderdetail = lazypurchaseorderdetail.Value
-    member __.purchaseorderheader = lazypurchaseorderheader.Value
-    member __.shipmethod = lazyshipmethod.Value
-    member __.vendor = lazyvendor.Value
-    member __.countryregioncurrency = lazycountryregioncurrency.Value
-    member __.currency = lazycurrency.Value
-    member __.currencyrate = lazycurrencyrate.Value
-    member __.customer = lazycustomer.Value
-    member __.personcreditcard = lazypersoncreditcard.Value
-    member __.creditcard = lazycreditcard.Value
-    member __.salesorderheader = lazysalesorderheader.Value
-    member __.salesorderdetail = lazysalesorderdetail.Value
-    member __.salesperson = lazysalesperson.Value
-    member __.salesorderheadersalesreason = lazysalesorderheadersalesreason.Value
-    member __.salespersonquotahistory = lazysalespersonquotahistory.Value
-    member __.salesterritory = lazysalesterritory.Value
-    member __.store = lazystore.Value
-    member __.specialofferproduct = lazyspecialofferproduct.Value
-    member __.salesreason = lazysalesreason.Value
-    member __.salestaxrate = lazysalestaxrate.Value
-    member __.salesterritoryhistory = lazysalesterritoryhistory.Value
-    member __.shoppingcartitem = lazyshoppingcartitem.Value
-    member __.specialoffer = lazyspecialoffer.Value
+    let lazypersonaddress = lazy (person.addressReader (reader, buildGetOrdinal 9))
+    let lazypersonstateprovince = lazy (person.stateprovinceReader (reader, buildGetOrdinal 8))
+    let lazypersonbusinessentityaddress = lazy (person.businessentityaddressReader (reader, buildGetOrdinal 5))
+    let lazypersonaddresstype = lazy (person.addresstypeReader (reader, buildGetOrdinal 4))
+    let lazypersonbusinessentity = lazy (person.businessentityReader (reader, buildGetOrdinal 3))
+    let lazypersonperson = lazy (person.personReader (reader, buildGetOrdinal 13))
+    let lazypersonbusinessentitycontact = lazy (person.businessentitycontactReader (reader, buildGetOrdinal 5))
+    let lazypersoncontacttype = lazy (person.contacttypeReader (reader, buildGetOrdinal 3))
+    let lazypersonemailaddress = lazy (person.emailaddressReader (reader, buildGetOrdinal 5))
+    let lazypersonpassword = lazy (person.passwordReader (reader, buildGetOrdinal 5))
+    let lazypersonpersonphone = lazy (person.personphoneReader (reader, buildGetOrdinal 4))
+    let lazypersonphonenumbertype = lazy (person.phonenumbertypeReader (reader, buildGetOrdinal 3))
+    let lazypersoncountryregion = lazy (person.countryregionReader (reader, buildGetOrdinal 3))
+    let lazyhumanresourcesemployee = lazy (humanresources.employeeReader (reader, buildGetOrdinal 15))
+    let lazyhumanresourcesdepartment = lazy (humanresources.departmentReader (reader, buildGetOrdinal 4))
+    let lazyhumanresourcesemployeedepartmenthistory = lazy (humanresources.employeedepartmenthistoryReader (reader, buildGetOrdinal 6))
+    let lazyhumanresourcesshift = lazy (humanresources.shiftReader (reader, buildGetOrdinal 5))
+    let lazyhumanresourcesemployeepayhistory = lazy (humanresources.employeepayhistoryReader (reader, buildGetOrdinal 5))
+    let lazyhumanresourcesjobcandidate = lazy (humanresources.jobcandidateReader (reader, buildGetOrdinal 4))
+    let lazyproductionbillofmaterials = lazy (production.billofmaterialsReader (reader, buildGetOrdinal 9))
+    let lazyproductionculture = lazy (production.cultureReader (reader, buildGetOrdinal 3))
+    let lazyproductiondocument = lazy (production.documentReader (reader, buildGetOrdinal 13))
+    let lazyproductionproductmodel = lazy (production.productmodelReader (reader, buildGetOrdinal 6))
+    let lazyproductionproduct = lazy (production.productReader (reader, buildGetOrdinal 25))
+    let lazyproductionproductsubcategory = lazy (production.productsubcategoryReader (reader, buildGetOrdinal 5))
+    let lazyproductionproductcosthistory = lazy (production.productcosthistoryReader (reader, buildGetOrdinal 5))
+    let lazyproductionproductdocument = lazy (production.productdocumentReader (reader, buildGetOrdinal 3))
+    let lazyproductionproductdescription = lazy (production.productdescriptionReader (reader, buildGetOrdinal 4))
+    let lazyproductionproductcategory = lazy (production.productcategoryReader (reader, buildGetOrdinal 4))
+    let lazyproductionlocation = lazy (production.locationReader (reader, buildGetOrdinal 5))
+    let lazyproductionproductlistpricehistory = lazy (production.productlistpricehistoryReader (reader, buildGetOrdinal 5))
+    let lazyproductionproductmodelillustration = lazy (production.productmodelillustrationReader (reader, buildGetOrdinal 3))
+    let lazyproductionillustration = lazy (production.illustrationReader (reader, buildGetOrdinal 3))
+    let lazyproductionproductmodelproductdescriptionculture = lazy (production.productmodelproductdescriptioncultureReader (reader, buildGetOrdinal 4))
+    let lazyproductionproductproductphoto = lazy (production.productproductphotoReader (reader, buildGetOrdinal 4))
+    let lazyproductionproductphoto = lazy (production.productphotoReader (reader, buildGetOrdinal 6))
+    let lazyproductionunitmeasure = lazy (production.unitmeasureReader (reader, buildGetOrdinal 3))
+    let lazyproductionproductreview = lazy (production.productreviewReader (reader, buildGetOrdinal 8))
+    let lazyproductiontransactionhistoryarchive = lazy (production.transactionhistoryarchiveReader (reader, buildGetOrdinal 9))
+    let lazyproductiontransactionhistory = lazy (production.transactionhistoryReader (reader, buildGetOrdinal 9))
+    let lazyproductionworkorder = lazy (production.workorderReader (reader, buildGetOrdinal 9))
+    let lazyproductionscrapreason = lazy (production.scrapreasonReader (reader, buildGetOrdinal 3))
+    let lazyproductionworkorderrouting = lazy (production.workorderroutingReader (reader, buildGetOrdinal 12))
+    let lazyproductionproductinventory = lazy (production.productinventoryReader (reader, buildGetOrdinal 7))
+    let lazypurchasingproductvendor = lazy (purchasing.productvendorReader (reader, buildGetOrdinal 11))
+    let lazypurchasingpurchaseorderdetail = lazy (purchasing.purchaseorderdetailReader (reader, buildGetOrdinal 9))
+    let lazypurchasingpurchaseorderheader = lazy (purchasing.purchaseorderheaderReader (reader, buildGetOrdinal 12))
+    let lazypurchasingshipmethod = lazy (purchasing.shipmethodReader (reader, buildGetOrdinal 6))
+    let lazypurchasingvendor = lazy (purchasing.vendorReader (reader, buildGetOrdinal 8))
+    let lazysalescountryregioncurrency = lazy (sales.countryregioncurrencyReader (reader, buildGetOrdinal 3))
+    let lazysalescurrency = lazy (sales.currencyReader (reader, buildGetOrdinal 3))
+    let lazysalescurrencyrate = lazy (sales.currencyrateReader (reader, buildGetOrdinal 7))
+    let lazysalescustomer = lazy (sales.customerReader (reader, buildGetOrdinal 6))
+    let lazysalespersoncreditcard = lazy (sales.personcreditcardReader (reader, buildGetOrdinal 3))
+    let lazysalescreditcard = lazy (sales.creditcardReader (reader, buildGetOrdinal 6))
+    let lazysalessalesorderheader = lazy (sales.salesorderheaderReader (reader, buildGetOrdinal 25))
+    let lazysalessalesorderdetail = lazy (sales.salesorderdetailReader (reader, buildGetOrdinal 10))
+    let lazysalessalesperson = lazy (sales.salespersonReader (reader, buildGetOrdinal 9))
+    let lazysalessalesorderheadersalesreason = lazy (sales.salesorderheadersalesreasonReader (reader, buildGetOrdinal 3))
+    let lazysalessalespersonquotahistory = lazy (sales.salespersonquotahistoryReader (reader, buildGetOrdinal 5))
+    let lazysalessalesterritory = lazy (sales.salesterritoryReader (reader, buildGetOrdinal 10))
+    let lazysalesstore = lazy (sales.storeReader (reader, buildGetOrdinal 6))
+    let lazysalesspecialofferproduct = lazy (sales.specialofferproductReader (reader, buildGetOrdinal 4))
+    let lazysalessalesreason = lazy (sales.salesreasonReader (reader, buildGetOrdinal 4))
+    let lazysalessalestaxrate = lazy (sales.salestaxrateReader (reader, buildGetOrdinal 7))
+    let lazysalessalesterritoryhistory = lazy (sales.salesterritoryhistoryReader (reader, buildGetOrdinal 6))
+    let lazysalesshoppingcartitem = lazy (sales.shoppingcartitemReader (reader, buildGetOrdinal 6))
+    let lazysalesspecialoffer = lazy (sales.specialofferReader (reader, buildGetOrdinal 11))
+    member __.``person.address`` = lazypersonaddress.Value
+    member __.``person.stateprovince`` = lazypersonstateprovince.Value
+    member __.``person.businessentityaddress`` = lazypersonbusinessentityaddress.Value
+    member __.``person.addresstype`` = lazypersonaddresstype.Value
+    member __.``person.businessentity`` = lazypersonbusinessentity.Value
+    member __.``person.person`` = lazypersonperson.Value
+    member __.``person.businessentitycontact`` = lazypersonbusinessentitycontact.Value
+    member __.``person.contacttype`` = lazypersoncontacttype.Value
+    member __.``person.emailaddress`` = lazypersonemailaddress.Value
+    member __.``person.password`` = lazypersonpassword.Value
+    member __.``person.personphone`` = lazypersonpersonphone.Value
+    member __.``person.phonenumbertype`` = lazypersonphonenumbertype.Value
+    member __.``person.countryregion`` = lazypersoncountryregion.Value
+    member __.``humanresources.employee`` = lazyhumanresourcesemployee.Value
+    member __.``humanresources.department`` = lazyhumanresourcesdepartment.Value
+    member __.``humanresources.employeedepartmenthistory`` = lazyhumanresourcesemployeedepartmenthistory.Value
+    member __.``humanresources.shift`` = lazyhumanresourcesshift.Value
+    member __.``humanresources.employeepayhistory`` = lazyhumanresourcesemployeepayhistory.Value
+    member __.``humanresources.jobcandidate`` = lazyhumanresourcesjobcandidate.Value
+    member __.``production.billofmaterials`` = lazyproductionbillofmaterials.Value
+    member __.``production.culture`` = lazyproductionculture.Value
+    member __.``production.document`` = lazyproductiondocument.Value
+    member __.``production.productmodel`` = lazyproductionproductmodel.Value
+    member __.``production.product`` = lazyproductionproduct.Value
+    member __.``production.productsubcategory`` = lazyproductionproductsubcategory.Value
+    member __.``production.productcosthistory`` = lazyproductionproductcosthistory.Value
+    member __.``production.productdocument`` = lazyproductionproductdocument.Value
+    member __.``production.productdescription`` = lazyproductionproductdescription.Value
+    member __.``production.productcategory`` = lazyproductionproductcategory.Value
+    member __.``production.location`` = lazyproductionlocation.Value
+    member __.``production.productlistpricehistory`` = lazyproductionproductlistpricehistory.Value
+    member __.``production.productmodelillustration`` = lazyproductionproductmodelillustration.Value
+    member __.``production.illustration`` = lazyproductionillustration.Value
+    member __.``production.productmodelproductdescriptionculture`` = lazyproductionproductmodelproductdescriptionculture.Value
+    member __.``production.productproductphoto`` = lazyproductionproductproductphoto.Value
+    member __.``production.productphoto`` = lazyproductionproductphoto.Value
+    member __.``production.unitmeasure`` = lazyproductionunitmeasure.Value
+    member __.``production.productreview`` = lazyproductionproductreview.Value
+    member __.``production.transactionhistoryarchive`` = lazyproductiontransactionhistoryarchive.Value
+    member __.``production.transactionhistory`` = lazyproductiontransactionhistory.Value
+    member __.``production.workorder`` = lazyproductionworkorder.Value
+    member __.``production.scrapreason`` = lazyproductionscrapreason.Value
+    member __.``production.workorderrouting`` = lazyproductionworkorderrouting.Value
+    member __.``production.productinventory`` = lazyproductionproductinventory.Value
+    member __.``purchasing.productvendor`` = lazypurchasingproductvendor.Value
+    member __.``purchasing.purchaseorderdetail`` = lazypurchasingpurchaseorderdetail.Value
+    member __.``purchasing.purchaseorderheader`` = lazypurchasingpurchaseorderheader.Value
+    member __.``purchasing.shipmethod`` = lazypurchasingshipmethod.Value
+    member __.``purchasing.vendor`` = lazypurchasingvendor.Value
+    member __.``sales.countryregioncurrency`` = lazysalescountryregioncurrency.Value
+    member __.``sales.currency`` = lazysalescurrency.Value
+    member __.``sales.currencyrate`` = lazysalescurrencyrate.Value
+    member __.``sales.customer`` = lazysalescustomer.Value
+    member __.``sales.personcreditcard`` = lazysalespersoncreditcard.Value
+    member __.``sales.creditcard`` = lazysalescreditcard.Value
+    member __.``sales.salesorderheader`` = lazysalessalesorderheader.Value
+    member __.``sales.salesorderdetail`` = lazysalessalesorderdetail.Value
+    member __.``sales.salesperson`` = lazysalessalesperson.Value
+    member __.``sales.salesorderheadersalesreason`` = lazysalessalesorderheadersalesreason.Value
+    member __.``sales.salespersonquotahistory`` = lazysalessalespersonquotahistory.Value
+    member __.``sales.salesterritory`` = lazysalessalesterritory.Value
+    member __.``sales.store`` = lazysalesstore.Value
+    member __.``sales.specialofferproduct`` = lazysalesspecialofferproduct.Value
+    member __.``sales.salesreason`` = lazysalessalesreason.Value
+    member __.``sales.salestaxrate`` = lazysalessalestaxrate.Value
+    member __.``sales.salesterritoryhistory`` = lazysalessalesterritoryhistory.Value
+    member __.``sales.shoppingcartitem`` = lazysalesshoppingcartitem.Value
+    member __.``sales.specialoffer`` = lazysalesspecialoffer.Value
     member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value
     member private __.GetReaderByName(entity: string, isOption: bool) =
         match entity, isOption with
-        | "address", false -> __.address.Read >> box
-        | "address", true -> __.address.ReadIfNotNull >> box
-        | "stateprovince", false -> __.stateprovince.Read >> box
-        | "stateprovince", true -> __.stateprovince.ReadIfNotNull >> box
-        | "businessentityaddress", false -> __.businessentityaddress.Read >> box
-        | "businessentityaddress", true -> __.businessentityaddress.ReadIfNotNull >> box
-        | "addresstype", false -> __.addresstype.Read >> box
-        | "addresstype", true -> __.addresstype.ReadIfNotNull >> box
-        | "businessentity", false -> __.businessentity.Read >> box
-        | "businessentity", true -> __.businessentity.ReadIfNotNull >> box
-        | "person", false -> __.person.Read >> box
-        | "person", true -> __.person.ReadIfNotNull >> box
-        | "businessentitycontact", false -> __.businessentitycontact.Read >> box
-        | "businessentitycontact", true -> __.businessentitycontact.ReadIfNotNull >> box
-        | "contacttype", false -> __.contacttype.Read >> box
-        | "contacttype", true -> __.contacttype.ReadIfNotNull >> box
-        | "emailaddress", false -> __.emailaddress.Read >> box
-        | "emailaddress", true -> __.emailaddress.ReadIfNotNull >> box
-        | "password", false -> __.password.Read >> box
-        | "password", true -> __.password.ReadIfNotNull >> box
-        | "personphone", false -> __.personphone.Read >> box
-        | "personphone", true -> __.personphone.ReadIfNotNull >> box
-        | "phonenumbertype", false -> __.phonenumbertype.Read >> box
-        | "phonenumbertype", true -> __.phonenumbertype.ReadIfNotNull >> box
-        | "countryregion", false -> __.countryregion.Read >> box
-        | "countryregion", true -> __.countryregion.ReadIfNotNull >> box
-        | "employee", false -> __.employee.Read >> box
-        | "employee", true -> __.employee.ReadIfNotNull >> box
-        | "department", false -> __.department.Read >> box
-        | "department", true -> __.department.ReadIfNotNull >> box
-        | "employeedepartmenthistory", false -> __.employeedepartmenthistory.Read >> box
-        | "employeedepartmenthistory", true -> __.employeedepartmenthistory.ReadIfNotNull >> box
-        | "shift", false -> __.shift.Read >> box
-        | "shift", true -> __.shift.ReadIfNotNull >> box
-        | "employeepayhistory", false -> __.employeepayhistory.Read >> box
-        | "employeepayhistory", true -> __.employeepayhistory.ReadIfNotNull >> box
-        | "jobcandidate", false -> __.jobcandidate.Read >> box
-        | "jobcandidate", true -> __.jobcandidate.ReadIfNotNull >> box
-        | "billofmaterials", false -> __.billofmaterials.Read >> box
-        | "billofmaterials", true -> __.billofmaterials.ReadIfNotNull >> box
-        | "culture", false -> __.culture.Read >> box
-        | "culture", true -> __.culture.ReadIfNotNull >> box
-        | "document", false -> __.document.Read >> box
-        | "document", true -> __.document.ReadIfNotNull >> box
-        | "productmodel", false -> __.productmodel.Read >> box
-        | "productmodel", true -> __.productmodel.ReadIfNotNull >> box
-        | "product", false -> __.product.Read >> box
-        | "product", true -> __.product.ReadIfNotNull >> box
-        | "productsubcategory", false -> __.productsubcategory.Read >> box
-        | "productsubcategory", true -> __.productsubcategory.ReadIfNotNull >> box
-        | "productcosthistory", false -> __.productcosthistory.Read >> box
-        | "productcosthistory", true -> __.productcosthistory.ReadIfNotNull >> box
-        | "productdocument", false -> __.productdocument.Read >> box
-        | "productdocument", true -> __.productdocument.ReadIfNotNull >> box
-        | "productdescription", false -> __.productdescription.Read >> box
-        | "productdescription", true -> __.productdescription.ReadIfNotNull >> box
-        | "productcategory", false -> __.productcategory.Read >> box
-        | "productcategory", true -> __.productcategory.ReadIfNotNull >> box
-        | "location", false -> __.location.Read >> box
-        | "location", true -> __.location.ReadIfNotNull >> box
-        | "productlistpricehistory", false -> __.productlistpricehistory.Read >> box
-        | "productlistpricehistory", true -> __.productlistpricehistory.ReadIfNotNull >> box
-        | "productmodelillustration", false -> __.productmodelillustration.Read >> box
-        | "productmodelillustration", true -> __.productmodelillustration.ReadIfNotNull >> box
-        | "illustration", false -> __.illustration.Read >> box
-        | "illustration", true -> __.illustration.ReadIfNotNull >> box
-        | "productmodelproductdescriptionculture", false -> __.productmodelproductdescriptionculture.Read >> box
-        | "productmodelproductdescriptionculture", true -> __.productmodelproductdescriptionculture.ReadIfNotNull >> box
-        | "productproductphoto", false -> __.productproductphoto.Read >> box
-        | "productproductphoto", true -> __.productproductphoto.ReadIfNotNull >> box
-        | "productphoto", false -> __.productphoto.Read >> box
-        | "productphoto", true -> __.productphoto.ReadIfNotNull >> box
-        | "unitmeasure", false -> __.unitmeasure.Read >> box
-        | "unitmeasure", true -> __.unitmeasure.ReadIfNotNull >> box
-        | "productreview", false -> __.productreview.Read >> box
-        | "productreview", true -> __.productreview.ReadIfNotNull >> box
-        | "transactionhistoryarchive", false -> __.transactionhistoryarchive.Read >> box
-        | "transactionhistoryarchive", true -> __.transactionhistoryarchive.ReadIfNotNull >> box
-        | "transactionhistory", false -> __.transactionhistory.Read >> box
-        | "transactionhistory", true -> __.transactionhistory.ReadIfNotNull >> box
-        | "workorder", false -> __.workorder.Read >> box
-        | "workorder", true -> __.workorder.ReadIfNotNull >> box
-        | "scrapreason", false -> __.scrapreason.Read >> box
-        | "scrapreason", true -> __.scrapreason.ReadIfNotNull >> box
-        | "workorderrouting", false -> __.workorderrouting.Read >> box
-        | "workorderrouting", true -> __.workorderrouting.ReadIfNotNull >> box
-        | "productinventory", false -> __.productinventory.Read >> box
-        | "productinventory", true -> __.productinventory.ReadIfNotNull >> box
-        | "productvendor", false -> __.productvendor.Read >> box
-        | "productvendor", true -> __.productvendor.ReadIfNotNull >> box
-        | "purchaseorderdetail", false -> __.purchaseorderdetail.Read >> box
-        | "purchaseorderdetail", true -> __.purchaseorderdetail.ReadIfNotNull >> box
-        | "purchaseorderheader", false -> __.purchaseorderheader.Read >> box
-        | "purchaseorderheader", true -> __.purchaseorderheader.ReadIfNotNull >> box
-        | "shipmethod", false -> __.shipmethod.Read >> box
-        | "shipmethod", true -> __.shipmethod.ReadIfNotNull >> box
-        | "vendor", false -> __.vendor.Read >> box
-        | "vendor", true -> __.vendor.ReadIfNotNull >> box
-        | "countryregioncurrency", false -> __.countryregioncurrency.Read >> box
-        | "countryregioncurrency", true -> __.countryregioncurrency.ReadIfNotNull >> box
-        | "currency", false -> __.currency.Read >> box
-        | "currency", true -> __.currency.ReadIfNotNull >> box
-        | "currencyrate", false -> __.currencyrate.Read >> box
-        | "currencyrate", true -> __.currencyrate.ReadIfNotNull >> box
-        | "customer", false -> __.customer.Read >> box
-        | "customer", true -> __.customer.ReadIfNotNull >> box
-        | "personcreditcard", false -> __.personcreditcard.Read >> box
-        | "personcreditcard", true -> __.personcreditcard.ReadIfNotNull >> box
-        | "creditcard", false -> __.creditcard.Read >> box
-        | "creditcard", true -> __.creditcard.ReadIfNotNull >> box
-        | "salesorderheader", false -> __.salesorderheader.Read >> box
-        | "salesorderheader", true -> __.salesorderheader.ReadIfNotNull >> box
-        | "salesorderdetail", false -> __.salesorderdetail.Read >> box
-        | "salesorderdetail", true -> __.salesorderdetail.ReadIfNotNull >> box
-        | "salesperson", false -> __.salesperson.Read >> box
-        | "salesperson", true -> __.salesperson.ReadIfNotNull >> box
-        | "salesorderheadersalesreason", false -> __.salesorderheadersalesreason.Read >> box
-        | "salesorderheadersalesreason", true -> __.salesorderheadersalesreason.ReadIfNotNull >> box
-        | "salespersonquotahistory", false -> __.salespersonquotahistory.Read >> box
-        | "salespersonquotahistory", true -> __.salespersonquotahistory.ReadIfNotNull >> box
-        | "salesterritory", false -> __.salesterritory.Read >> box
-        | "salesterritory", true -> __.salesterritory.ReadIfNotNull >> box
-        | "store", false -> __.store.Read >> box
-        | "store", true -> __.store.ReadIfNotNull >> box
-        | "specialofferproduct", false -> __.specialofferproduct.Read >> box
-        | "specialofferproduct", true -> __.specialofferproduct.ReadIfNotNull >> box
-        | "salesreason", false -> __.salesreason.Read >> box
-        | "salesreason", true -> __.salesreason.ReadIfNotNull >> box
-        | "salestaxrate", false -> __.salestaxrate.Read >> box
-        | "salestaxrate", true -> __.salestaxrate.ReadIfNotNull >> box
-        | "salesterritoryhistory", false -> __.salesterritoryhistory.Read >> box
-        | "salesterritoryhistory", true -> __.salesterritoryhistory.ReadIfNotNull >> box
-        | "shoppingcartitem", false -> __.shoppingcartitem.Read >> box
-        | "shoppingcartitem", true -> __.shoppingcartitem.ReadIfNotNull >> box
-        | "specialoffer", false -> __.specialoffer.Read >> box
-        | "specialoffer", true -> __.specialoffer.ReadIfNotNull >> box
+        | "person.address", false -> __.``person.address``.Read >> box
+        | "address", true -> __.``person.address``.ReadIfNotNull >> box
+        | "person.stateprovince", false -> __.``person.stateprovince``.Read >> box
+        | "stateprovince", true -> __.``person.stateprovince``.ReadIfNotNull >> box
+        | "person.businessentityaddress", false -> __.``person.businessentityaddress``.Read >> box
+        | "businessentityaddress", true -> __.``person.businessentityaddress``.ReadIfNotNull >> box
+        | "person.addresstype", false -> __.``person.addresstype``.Read >> box
+        | "addresstype", true -> __.``person.addresstype``.ReadIfNotNull >> box
+        | "person.businessentity", false -> __.``person.businessentity``.Read >> box
+        | "businessentity", true -> __.``person.businessentity``.ReadIfNotNull >> box
+        | "person.person", false -> __.``person.person``.Read >> box
+        | "person", true -> __.``person.person``.ReadIfNotNull >> box
+        | "person.businessentitycontact", false -> __.``person.businessentitycontact``.Read >> box
+        | "businessentitycontact", true -> __.``person.businessentitycontact``.ReadIfNotNull >> box
+        | "person.contacttype", false -> __.``person.contacttype``.Read >> box
+        | "contacttype", true -> __.``person.contacttype``.ReadIfNotNull >> box
+        | "person.emailaddress", false -> __.``person.emailaddress``.Read >> box
+        | "emailaddress", true -> __.``person.emailaddress``.ReadIfNotNull >> box
+        | "person.password", false -> __.``person.password``.Read >> box
+        | "password", true -> __.``person.password``.ReadIfNotNull >> box
+        | "person.personphone", false -> __.``person.personphone``.Read >> box
+        | "personphone", true -> __.``person.personphone``.ReadIfNotNull >> box
+        | "person.phonenumbertype", false -> __.``person.phonenumbertype``.Read >> box
+        | "phonenumbertype", true -> __.``person.phonenumbertype``.ReadIfNotNull >> box
+        | "person.countryregion", false -> __.``person.countryregion``.Read >> box
+        | "countryregion", true -> __.``person.countryregion``.ReadIfNotNull >> box
+        | "humanresources.employee", false -> __.``humanresources.employee``.Read >> box
+        | "employee", true -> __.``humanresources.employee``.ReadIfNotNull >> box
+        | "humanresources.department", false -> __.``humanresources.department``.Read >> box
+        | "department", true -> __.``humanresources.department``.ReadIfNotNull >> box
+        | "humanresources.employeedepartmenthistory", false -> __.``humanresources.employeedepartmenthistory``.Read >> box
+        | "employeedepartmenthistory", true -> __.``humanresources.employeedepartmenthistory``.ReadIfNotNull >> box
+        | "humanresources.shift", false -> __.``humanresources.shift``.Read >> box
+        | "shift", true -> __.``humanresources.shift``.ReadIfNotNull >> box
+        | "humanresources.employeepayhistory", false -> __.``humanresources.employeepayhistory``.Read >> box
+        | "employeepayhistory", true -> __.``humanresources.employeepayhistory``.ReadIfNotNull >> box
+        | "humanresources.jobcandidate", false -> __.``humanresources.jobcandidate``.Read >> box
+        | "jobcandidate", true -> __.``humanresources.jobcandidate``.ReadIfNotNull >> box
+        | "production.billofmaterials", false -> __.``production.billofmaterials``.Read >> box
+        | "billofmaterials", true -> __.``production.billofmaterials``.ReadIfNotNull >> box
+        | "production.culture", false -> __.``production.culture``.Read >> box
+        | "culture", true -> __.``production.culture``.ReadIfNotNull >> box
+        | "production.document", false -> __.``production.document``.Read >> box
+        | "document", true -> __.``production.document``.ReadIfNotNull >> box
+        | "production.productmodel", false -> __.``production.productmodel``.Read >> box
+        | "productmodel", true -> __.``production.productmodel``.ReadIfNotNull >> box
+        | "production.product", false -> __.``production.product``.Read >> box
+        | "product", true -> __.``production.product``.ReadIfNotNull >> box
+        | "production.productsubcategory", false -> __.``production.productsubcategory``.Read >> box
+        | "productsubcategory", true -> __.``production.productsubcategory``.ReadIfNotNull >> box
+        | "production.productcosthistory", false -> __.``production.productcosthistory``.Read >> box
+        | "productcosthistory", true -> __.``production.productcosthistory``.ReadIfNotNull >> box
+        | "production.productdocument", false -> __.``production.productdocument``.Read >> box
+        | "productdocument", true -> __.``production.productdocument``.ReadIfNotNull >> box
+        | "production.productdescription", false -> __.``production.productdescription``.Read >> box
+        | "productdescription", true -> __.``production.productdescription``.ReadIfNotNull >> box
+        | "production.productcategory", false -> __.``production.productcategory``.Read >> box
+        | "productcategory", true -> __.``production.productcategory``.ReadIfNotNull >> box
+        | "production.location", false -> __.``production.location``.Read >> box
+        | "location", true -> __.``production.location``.ReadIfNotNull >> box
+        | "production.productlistpricehistory", false -> __.``production.productlistpricehistory``.Read >> box
+        | "productlistpricehistory", true -> __.``production.productlistpricehistory``.ReadIfNotNull >> box
+        | "production.productmodelillustration", false -> __.``production.productmodelillustration``.Read >> box
+        | "productmodelillustration", true -> __.``production.productmodelillustration``.ReadIfNotNull >> box
+        | "production.illustration", false -> __.``production.illustration``.Read >> box
+        | "illustration", true -> __.``production.illustration``.ReadIfNotNull >> box
+        | "production.productmodelproductdescriptionculture", false -> __.``production.productmodelproductdescriptionculture``.Read >> box
+        | "productmodelproductdescriptionculture", true -> __.``production.productmodelproductdescriptionculture``.ReadIfNotNull >> box
+        | "production.productproductphoto", false -> __.``production.productproductphoto``.Read >> box
+        | "productproductphoto", true -> __.``production.productproductphoto``.ReadIfNotNull >> box
+        | "production.productphoto", false -> __.``production.productphoto``.Read >> box
+        | "productphoto", true -> __.``production.productphoto``.ReadIfNotNull >> box
+        | "production.unitmeasure", false -> __.``production.unitmeasure``.Read >> box
+        | "unitmeasure", true -> __.``production.unitmeasure``.ReadIfNotNull >> box
+        | "production.productreview", false -> __.``production.productreview``.Read >> box
+        | "productreview", true -> __.``production.productreview``.ReadIfNotNull >> box
+        | "production.transactionhistoryarchive", false -> __.``production.transactionhistoryarchive``.Read >> box
+        | "transactionhistoryarchive", true -> __.``production.transactionhistoryarchive``.ReadIfNotNull >> box
+        | "production.transactionhistory", false -> __.``production.transactionhistory``.Read >> box
+        | "transactionhistory", true -> __.``production.transactionhistory``.ReadIfNotNull >> box
+        | "production.workorder", false -> __.``production.workorder``.Read >> box
+        | "workorder", true -> __.``production.workorder``.ReadIfNotNull >> box
+        | "production.scrapreason", false -> __.``production.scrapreason``.Read >> box
+        | "scrapreason", true -> __.``production.scrapreason``.ReadIfNotNull >> box
+        | "production.workorderrouting", false -> __.``production.workorderrouting``.Read >> box
+        | "workorderrouting", true -> __.``production.workorderrouting``.ReadIfNotNull >> box
+        | "production.productinventory", false -> __.``production.productinventory``.Read >> box
+        | "productinventory", true -> __.``production.productinventory``.ReadIfNotNull >> box
+        | "purchasing.productvendor", false -> __.``purchasing.productvendor``.Read >> box
+        | "productvendor", true -> __.``purchasing.productvendor``.ReadIfNotNull >> box
+        | "purchasing.purchaseorderdetail", false -> __.``purchasing.purchaseorderdetail``.Read >> box
+        | "purchaseorderdetail", true -> __.``purchasing.purchaseorderdetail``.ReadIfNotNull >> box
+        | "purchasing.purchaseorderheader", false -> __.``purchasing.purchaseorderheader``.Read >> box
+        | "purchaseorderheader", true -> __.``purchasing.purchaseorderheader``.ReadIfNotNull >> box
+        | "purchasing.shipmethod", false -> __.``purchasing.shipmethod``.Read >> box
+        | "shipmethod", true -> __.``purchasing.shipmethod``.ReadIfNotNull >> box
+        | "purchasing.vendor", false -> __.``purchasing.vendor``.Read >> box
+        | "vendor", true -> __.``purchasing.vendor``.ReadIfNotNull >> box
+        | "sales.countryregioncurrency", false -> __.``sales.countryregioncurrency``.Read >> box
+        | "countryregioncurrency", true -> __.``sales.countryregioncurrency``.ReadIfNotNull >> box
+        | "sales.currency", false -> __.``sales.currency``.Read >> box
+        | "currency", true -> __.``sales.currency``.ReadIfNotNull >> box
+        | "sales.currencyrate", false -> __.``sales.currencyrate``.Read >> box
+        | "currencyrate", true -> __.``sales.currencyrate``.ReadIfNotNull >> box
+        | "sales.customer", false -> __.``sales.customer``.Read >> box
+        | "customer", true -> __.``sales.customer``.ReadIfNotNull >> box
+        | "sales.personcreditcard", false -> __.``sales.personcreditcard``.Read >> box
+        | "personcreditcard", true -> __.``sales.personcreditcard``.ReadIfNotNull >> box
+        | "sales.creditcard", false -> __.``sales.creditcard``.Read >> box
+        | "creditcard", true -> __.``sales.creditcard``.ReadIfNotNull >> box
+        | "sales.salesorderheader", false -> __.``sales.salesorderheader``.Read >> box
+        | "salesorderheader", true -> __.``sales.salesorderheader``.ReadIfNotNull >> box
+        | "sales.salesorderdetail", false -> __.``sales.salesorderdetail``.Read >> box
+        | "salesorderdetail", true -> __.``sales.salesorderdetail``.ReadIfNotNull >> box
+        | "sales.salesperson", false -> __.``sales.salesperson``.Read >> box
+        | "salesperson", true -> __.``sales.salesperson``.ReadIfNotNull >> box
+        | "sales.salesorderheadersalesreason", false -> __.``sales.salesorderheadersalesreason``.Read >> box
+        | "salesorderheadersalesreason", true -> __.``sales.salesorderheadersalesreason``.ReadIfNotNull >> box
+        | "sales.salespersonquotahistory", false -> __.``sales.salespersonquotahistory``.Read >> box
+        | "salespersonquotahistory", true -> __.``sales.salespersonquotahistory``.ReadIfNotNull >> box
+        | "sales.salesterritory", false -> __.``sales.salesterritory``.Read >> box
+        | "salesterritory", true -> __.``sales.salesterritory``.ReadIfNotNull >> box
+        | "sales.store", false -> __.``sales.store``.Read >> box
+        | "store", true -> __.``sales.store``.ReadIfNotNull >> box
+        | "sales.specialofferproduct", false -> __.``sales.specialofferproduct``.Read >> box
+        | "specialofferproduct", true -> __.``sales.specialofferproduct``.ReadIfNotNull >> box
+        | "sales.salesreason", false -> __.``sales.salesreason``.Read >> box
+        | "salesreason", true -> __.``sales.salesreason``.ReadIfNotNull >> box
+        | "sales.salestaxrate", false -> __.``sales.salestaxrate``.Read >> box
+        | "salestaxrate", true -> __.``sales.salestaxrate``.ReadIfNotNull >> box
+        | "sales.salesterritoryhistory", false -> __.``sales.salesterritoryhistory``.Read >> box
+        | "salesterritoryhistory", true -> __.``sales.salesterritoryhistory``.ReadIfNotNull >> box
+        | "sales.shoppingcartitem", false -> __.``sales.shoppingcartitem``.Read >> box
+        | "shoppingcartitem", true -> __.``sales.shoppingcartitem``.ReadIfNotNull >> box
+        | "sales.specialoffer", false -> __.``sales.specialoffer``.Read >> box
+        | "specialoffer", true -> __.``sales.specialoffer``.ReadIfNotNull >> box
         | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
     static member private GetPrimitiveReader(t: System.Type, reader: Npgsql.NpgsqlDataReader, isOpt: bool) =
@@ -2342,7 +2342,9 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
                     let ord = getOrdinalAndIncrement()
                     fun () -> primitiveReader ord
                 | None ->
-                    hydra.GetReaderByName(t.Name, isOpt)
+                    let nameParts = t.FullName.Split([| '.'; '+' |])
+                    let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join('.', parts)
+                    hydra.GetReaderByName(schemaAndType, isOpt)
             
             // Return a fn that will hydrate 'T (which may be a tuple)
             // This fn will be called once per each record returned by the data reader.

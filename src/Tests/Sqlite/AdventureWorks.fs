@@ -477,57 +477,57 @@ type HydraReader(reader: System.Data.IDataReader) =
         accFieldCount <- accFieldCount + fieldCount
         fun col -> dictionary.Item col
         
-    let lazyErrorLog = lazy (main.ErrorLogReader(reader, buildGetOrdinal 9))
-    let lazyBuildVersion = lazy (main.BuildVersionReader(reader, buildGetOrdinal 4))
-    let lazyAddress = lazy (main.AddressReader(reader, buildGetOrdinal 9))
-    let lazyCustomer = lazy (main.CustomerReader(reader, buildGetOrdinal 15))
-    let lazyCustomerAddress = lazy (main.CustomerAddressReader(reader, buildGetOrdinal 5))
-    let lazyProduct = lazy (main.ProductReader(reader, buildGetOrdinal 17))
-    let lazyProductCategory = lazy (main.ProductCategoryReader(reader, buildGetOrdinal 5))
-    let lazyProductDescription = lazy (main.ProductDescriptionReader(reader, buildGetOrdinal 4))
-    let lazyProductModel = lazy (main.ProductModelReader(reader, buildGetOrdinal 5))
-    let lazyProductModelProductDescription = lazy (main.ProductModelProductDescriptionReader(reader, buildGetOrdinal 5))
-    let lazySalesOrderDetail = lazy (main.SalesOrderDetailReader(reader, buildGetOrdinal 9))
-    let lazySalesOrderHeader = lazy (main.SalesOrderHeaderReader(reader, buildGetOrdinal 22))
-    member __.ErrorLog = lazyErrorLog.Value
-    member __.BuildVersion = lazyBuildVersion.Value
-    member __.Address = lazyAddress.Value
-    member __.Customer = lazyCustomer.Value
-    member __.CustomerAddress = lazyCustomerAddress.Value
-    member __.Product = lazyProduct.Value
-    member __.ProductCategory = lazyProductCategory.Value
-    member __.ProductDescription = lazyProductDescription.Value
-    member __.ProductModel = lazyProductModel.Value
-    member __.ProductModelProductDescription = lazyProductModelProductDescription.Value
-    member __.SalesOrderDetail = lazySalesOrderDetail.Value
-    member __.SalesOrderHeader = lazySalesOrderHeader.Value
+    let lazymainErrorLog = lazy (main.ErrorLogReader(reader, buildGetOrdinal 9))
+    let lazymainBuildVersion = lazy (main.BuildVersionReader(reader, buildGetOrdinal 4))
+    let lazymainAddress = lazy (main.AddressReader(reader, buildGetOrdinal 9))
+    let lazymainCustomer = lazy (main.CustomerReader(reader, buildGetOrdinal 15))
+    let lazymainCustomerAddress = lazy (main.CustomerAddressReader(reader, buildGetOrdinal 5))
+    let lazymainProduct = lazy (main.ProductReader(reader, buildGetOrdinal 17))
+    let lazymainProductCategory = lazy (main.ProductCategoryReader(reader, buildGetOrdinal 5))
+    let lazymainProductDescription = lazy (main.ProductDescriptionReader(reader, buildGetOrdinal 4))
+    let lazymainProductModel = lazy (main.ProductModelReader(reader, buildGetOrdinal 5))
+    let lazymainProductModelProductDescription = lazy (main.ProductModelProductDescriptionReader(reader, buildGetOrdinal 5))
+    let lazymainSalesOrderDetail = lazy (main.SalesOrderDetailReader(reader, buildGetOrdinal 9))
+    let lazymainSalesOrderHeader = lazy (main.SalesOrderHeaderReader(reader, buildGetOrdinal 22))
+    member __.``main.ErrorLog`` = lazymainErrorLog.Value
+    member __.``main.BuildVersion`` = lazymainBuildVersion.Value
+    member __.``main.Address`` = lazymainAddress.Value
+    member __.``main.Customer`` = lazymainCustomer.Value
+    member __.``main.CustomerAddress`` = lazymainCustomerAddress.Value
+    member __.``main.Product`` = lazymainProduct.Value
+    member __.``main.ProductCategory`` = lazymainProductCategory.Value
+    member __.``main.ProductDescription`` = lazymainProductDescription.Value
+    member __.``main.ProductModel`` = lazymainProductModel.Value
+    member __.``main.ProductModelProductDescription`` = lazymainProductModelProductDescription.Value
+    member __.``main.SalesOrderDetail`` = lazymainSalesOrderDetail.Value
+    member __.``main.SalesOrderHeader`` = lazymainSalesOrderHeader.Value
     member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value
     member private __.GetReaderByName(entity: string, isOption: bool) =
         match entity, isOption with
-        | "ErrorLog", false -> __.ErrorLog.Read >> box
-        | "ErrorLog", true -> __.ErrorLog.ReadIfNotNull >> box
-        | "BuildVersion", false -> __.BuildVersion.Read >> box
-        | "BuildVersion", true -> __.BuildVersion.ReadIfNotNull >> box
-        | "Address", false -> __.Address.Read >> box
-        | "Address", true -> __.Address.ReadIfNotNull >> box
-        | "Customer", false -> __.Customer.Read >> box
-        | "Customer", true -> __.Customer.ReadIfNotNull >> box
-        | "CustomerAddress", false -> __.CustomerAddress.Read >> box
-        | "CustomerAddress", true -> __.CustomerAddress.ReadIfNotNull >> box
-        | "Product", false -> __.Product.Read >> box
-        | "Product", true -> __.Product.ReadIfNotNull >> box
-        | "ProductCategory", false -> __.ProductCategory.Read >> box
-        | "ProductCategory", true -> __.ProductCategory.ReadIfNotNull >> box
-        | "ProductDescription", false -> __.ProductDescription.Read >> box
-        | "ProductDescription", true -> __.ProductDescription.ReadIfNotNull >> box
-        | "ProductModel", false -> __.ProductModel.Read >> box
-        | "ProductModel", true -> __.ProductModel.ReadIfNotNull >> box
-        | "ProductModelProductDescription", false -> __.ProductModelProductDescription.Read >> box
-        | "ProductModelProductDescription", true -> __.ProductModelProductDescription.ReadIfNotNull >> box
-        | "SalesOrderDetail", false -> __.SalesOrderDetail.Read >> box
-        | "SalesOrderDetail", true -> __.SalesOrderDetail.ReadIfNotNull >> box
-        | "SalesOrderHeader", false -> __.SalesOrderHeader.Read >> box
-        | "SalesOrderHeader", true -> __.SalesOrderHeader.ReadIfNotNull >> box
+        | "main.ErrorLog", false -> __.``main.ErrorLog``.Read >> box
+        | "ErrorLog", true -> __.``main.ErrorLog``.ReadIfNotNull >> box
+        | "main.BuildVersion", false -> __.``main.BuildVersion``.Read >> box
+        | "BuildVersion", true -> __.``main.BuildVersion``.ReadIfNotNull >> box
+        | "main.Address", false -> __.``main.Address``.Read >> box
+        | "Address", true -> __.``main.Address``.ReadIfNotNull >> box
+        | "main.Customer", false -> __.``main.Customer``.Read >> box
+        | "Customer", true -> __.``main.Customer``.ReadIfNotNull >> box
+        | "main.CustomerAddress", false -> __.``main.CustomerAddress``.Read >> box
+        | "CustomerAddress", true -> __.``main.CustomerAddress``.ReadIfNotNull >> box
+        | "main.Product", false -> __.``main.Product``.Read >> box
+        | "Product", true -> __.``main.Product``.ReadIfNotNull >> box
+        | "main.ProductCategory", false -> __.``main.ProductCategory``.Read >> box
+        | "ProductCategory", true -> __.``main.ProductCategory``.ReadIfNotNull >> box
+        | "main.ProductDescription", false -> __.``main.ProductDescription``.Read >> box
+        | "ProductDescription", true -> __.``main.ProductDescription``.ReadIfNotNull >> box
+        | "main.ProductModel", false -> __.``main.ProductModel``.Read >> box
+        | "ProductModel", true -> __.``main.ProductModel``.ReadIfNotNull >> box
+        | "main.ProductModelProductDescription", false -> __.``main.ProductModelProductDescription``.Read >> box
+        | "ProductModelProductDescription", true -> __.``main.ProductModelProductDescription``.ReadIfNotNull >> box
+        | "main.SalesOrderDetail", false -> __.``main.SalesOrderDetail``.Read >> box
+        | "SalesOrderDetail", true -> __.``main.SalesOrderDetail``.ReadIfNotNull >> box
+        | "main.SalesOrderHeader", false -> __.``main.SalesOrderHeader``.Read >> box
+        | "SalesOrderHeader", true -> __.``main.SalesOrderHeader``.ReadIfNotNull >> box
         | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
     static member private GetPrimitiveReader(t: System.Type, reader: System.Data.IDataReader, isOpt: bool) =
@@ -569,7 +569,9 @@ type HydraReader(reader: System.Data.IDataReader) =
                     let ord = getOrdinalAndIncrement()
                     fun () -> primitiveReader ord
                 | None ->
-                    hydra.GetReaderByName(t.Name, isOpt)
+                    let nameParts = t.FullName.Split([| '.'; '+' |])
+                    let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join('.', parts)
+                    hydra.GetReaderByName(schemaAndType, isOpt)
             
             // Return a fn that will hydrate 'T (which may be a tuple)
             // This fn will be called once per each record returned by the data reader.

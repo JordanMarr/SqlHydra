@@ -251,7 +251,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                         , []
                         , XmlDoc.PreXmlDocEmpty
                         , SynValData.SynValData(None, SynValInfo.Empty, None)
-                        , SynPat.LongIdent(LongIdentWithDots.CreateString($"lazy{tbl.Name}"), None, None, SynArgPats.Empty, None, range0)
+                        , SynPat.LongIdent(LongIdentWithDots.CreateString($"lazy{tbl.Schema}{tbl.Name}"), None, None, SynArgPats.Empty, None, range0)
                         , None
                         , SynExpr.Lazy(
                             SynExpr.CreateApp(
@@ -289,9 +289,9 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
         [ for tbl in tbls do
             SynMemberDefn.CreateMember(
                 { SynBindingRcd.Let with 
-                    Pattern = SynPatRcd.LongIdent(SynPatLongIdentRcd.Create(LongIdentWithDots.Create(["__"; tbl.Name]), SynArgPats.Empty))
+                    Pattern = SynPatRcd.LongIdent(SynPatLongIdentRcd.Create(LongIdentWithDots.Create([ "__"; $"{tbl.Schema}.{tbl.Name}"]), SynArgPats.Empty))
                     ValData = SynValData.SynValData(Some (MemberFlags.InstanceMember), SynValInfo.Empty, None)
-                    Expr = SynExpr.CreateLongIdent(LongIdentWithDots.Create([$"lazy{tbl.Name}"; "Value"]))
+                    Expr = SynExpr.CreateLongIdent(LongIdentWithDots.Create([$"lazy{tbl.Schema}{tbl.Name}"; "Value"]))
                 }
             )
         ]
@@ -348,16 +348,16 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                         [
                             for tbl in tbls do
                                 let hasPK = tbl.Columns |> List.exists(fun c -> c.IsPK)
-
+                                
                                 SynMatchClause.Clause(
                                     SynPat.Tuple(false, [ 
-                                        SynPat.Const(SynConst.String(tbl.Name, range0), range0)
+                                        SynPat.Const(SynConst.String($"{tbl.Schema}.{tbl.Name}", range0), range0)
                                         SynPat.Const(SynConst.Bool(false), range0) 
                                     ], range0)
                                     , None
                                     , 
                                     SynExpr.CreateAppInfix(
-                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; tbl.Name; "Read" ]), None), 
+                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; $"{tbl.Schema}.{tbl.Name}"; "Read" ]), None), 
                                         SynExpr.CreateIdent(Ident.Create(">> box"))
                                     )
                                     , range0
@@ -373,7 +373,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                     ,
                                     if hasPK then
                                         SynExpr.CreateAppInfix(
-                                            SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; tbl.Name; "ReadIfNotNull" ]), None), 
+                                            SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; $"{tbl.Schema}.{tbl.Name}"; "ReadIfNotNull" ]), None), 
                                             SynExpr.CreateIdent(Ident.Create(">> box"))
                                         )
                                     else
@@ -703,7 +703,9 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
                     let ord = getOrdinalAndIncrement()
                     fun () -> primitiveReader ord
                 | None ->
-                    hydra.GetReaderByName(t.Name, isOpt)
+                    let nameParts = t.FullName.Split([| '.'; '+' |])
+                    let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join('.', parts)
+                    hydra.GetReaderByName(schemaAndType, isOpt)
             
             // Return a fn that will hydrate 'T (which may be a tuple)
             // This fn will be called once per each record returned by the data reader.

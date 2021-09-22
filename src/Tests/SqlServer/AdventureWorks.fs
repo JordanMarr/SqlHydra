@@ -3056,373 +3056,373 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         accFieldCount <- accFieldCount + fieldCount
         fun col -> dictionary.Item col
         
-    let lazyEmployeePayHistory = lazy (HumanResources.EmployeePayHistoryReader(reader, buildGetOrdinal 5))
-    let lazyJobCandidate = lazy (HumanResources.JobCandidateReader(reader, buildGetOrdinal 4))
-    let lazyvEmployee = lazy (HumanResources.vEmployeeReader (reader, buildGetOrdinal 18))
-    let lazyvEmployeeDepartment = lazy (HumanResources.vEmployeeDepartmentReader (reader, buildGetOrdinal 10))
-    let lazyvEmployeeDepartmentHistory = lazy (HumanResources.vEmployeeDepartmentHistoryReader (reader, buildGetOrdinal 11))
-    let lazyvJobCandidate = lazy (HumanResources.vJobCandidateReader (reader, buildGetOrdinal 16))
-    let lazyvJobCandidateEmployment = lazy (HumanResources.vJobCandidateEmploymentReader (reader, buildGetOrdinal 11))
-    let lazyvJobCandidateEducation = lazy (HumanResources.vJobCandidateEducationReader (reader, buildGetOrdinal 13))
-    let lazyShift = lazy (HumanResources.ShiftReader(reader, buildGetOrdinal 5))
-    let lazyDepartment = lazy (HumanResources.DepartmentReader(reader, buildGetOrdinal 4))
-    let lazyEmployee = lazy (HumanResources.EmployeeReader(reader, buildGetOrdinal 16))
-    let lazyEmployeeDepartmentHistory = lazy (HumanResources.EmployeeDepartmentHistoryReader(reader, buildGetOrdinal 6))
-    let lazySalesOrderHeaderSalesReason = lazy (Sales.SalesOrderHeaderSalesReasonReader(reader, buildGetOrdinal 3))
-    let lazySalesPerson = lazy (Sales.SalesPersonReader(reader, buildGetOrdinal 9))
-    let lazySalesPersonQuotaHistory = lazy (Sales.SalesPersonQuotaHistoryReader(reader, buildGetOrdinal 5))
-    let lazySalesReason = lazy (Sales.SalesReasonReader(reader, buildGetOrdinal 4))
-    let lazySalesTaxRate = lazy (Sales.SalesTaxRateReader(reader, buildGetOrdinal 7))
-    let lazyPersonCreditCard = lazy (Sales.PersonCreditCardReader(reader, buildGetOrdinal 3))
-    let lazySalesTerritory = lazy (Sales.SalesTerritoryReader(reader, buildGetOrdinal 10))
-    let lazyvIndividualCustomer = lazy (Sales.vIndividualCustomerReader (reader, buildGetOrdinal 18))
-    let lazyvPersonDemographics = lazy (Sales.vPersonDemographicsReader (reader, buildGetOrdinal 13))
-    let lazyvSalesPerson = lazy (Sales.vSalesPersonReader (reader, buildGetOrdinal 22))
-    let lazySalesTerritoryHistory = lazy (Sales.SalesTerritoryHistoryReader(reader, buildGetOrdinal 6))
-    let lazyvSalesPersonSalesByFiscalYears = lazy (Sales.vSalesPersonSalesByFiscalYearsReader (reader, buildGetOrdinal 7))
-    let lazyvStoreWithDemographics = lazy (Sales.vStoreWithDemographicsReader (reader, buildGetOrdinal 12))
-    let lazyvStoreWithContacts = lazy (Sales.vStoreWithContactsReader (reader, buildGetOrdinal 12))
-    let lazyvStoreWithAddresses = lazy (Sales.vStoreWithAddressesReader (reader, buildGetOrdinal 9))
-    let lazyShoppingCartItem = lazy (Sales.ShoppingCartItemReader(reader, buildGetOrdinal 6))
-    let lazySpecialOffer = lazy (Sales.SpecialOfferReader(reader, buildGetOrdinal 11))
-    let lazySpecialOfferProduct = lazy (Sales.SpecialOfferProductReader(reader, buildGetOrdinal 4))
-    let lazyStore = lazy (Sales.StoreReader(reader, buildGetOrdinal 6))
-    let lazyCountryRegionCurrency = lazy (Sales.CountryRegionCurrencyReader(reader, buildGetOrdinal 3))
-    let lazyCreditCard = lazy (Sales.CreditCardReader(reader, buildGetOrdinal 6))
-    let lazyCurrency = lazy (Sales.CurrencyReader(reader, buildGetOrdinal 3))
-    let lazyCurrencyRate = lazy (Sales.CurrencyRateReader(reader, buildGetOrdinal 7))
-    let lazyCustomer = lazy (Sales.CustomerReader(reader, buildGetOrdinal 7))
-    let lazySalesOrderDetail = lazy (Sales.SalesOrderDetailReader(reader, buildGetOrdinal 11))
-    let lazySalesOrderHeader = lazy (Sales.SalesOrderHeaderReader(reader, buildGetOrdinal 26))
-    let lazyIllustration = lazy (Production.IllustrationReader(reader, buildGetOrdinal 3))
-    let lazyLocation = lazy (Production.LocationReader(reader, buildGetOrdinal 5))
-    let lazyProduct = lazy (Production.ProductReader(reader, buildGetOrdinal 25))
-    let lazyvProductAndDescription = lazy (Production.vProductAndDescriptionReader (reader, buildGetOrdinal 5))
-    let lazyvProductModelCatalogDescription = lazy (Production.vProductModelCatalogDescriptionReader (reader, buildGetOrdinal 25))
-    let lazyvProductModelInstructions = lazy (Production.vProductModelInstructionsReader (reader, buildGetOrdinal 11))
-    let lazyScrapReason = lazy (Production.ScrapReasonReader(reader, buildGetOrdinal 3))
-    let lazyProductCategory = lazy (Production.ProductCategoryReader(reader, buildGetOrdinal 4))
-    let lazyProductCostHistory = lazy (Production.ProductCostHistoryReader(reader, buildGetOrdinal 5))
-    let lazyProductDescription = lazy (Production.ProductDescriptionReader(reader, buildGetOrdinal 4))
-    let lazyProductDocument = lazy (Production.ProductDocumentReader(reader, buildGetOrdinal 3))
-    let lazyProductInventory = lazy (Production.ProductInventoryReader(reader, buildGetOrdinal 7))
-    let lazyProductListPriceHistory = lazy (Production.ProductListPriceHistoryReader(reader, buildGetOrdinal 5))
-    let lazyProductModel = lazy (Production.ProductModelReader(reader, buildGetOrdinal 6))
-    let lazyProductModelIllustration = lazy (Production.ProductModelIllustrationReader(reader, buildGetOrdinal 3))
-    let lazyProductModelProductDescriptionCulture = lazy (Production.ProductModelProductDescriptionCultureReader(reader, buildGetOrdinal 4))
-    let lazyBillOfMaterials = lazy (Production.BillOfMaterialsReader(reader, buildGetOrdinal 9))
-    let lazyProductPhoto = lazy (Production.ProductPhotoReader(reader, buildGetOrdinal 6))
-    let lazyProductProductPhoto = lazy (Production.ProductProductPhotoReader(reader, buildGetOrdinal 4))
-    let lazyTransactionHistory = lazy (Production.TransactionHistoryReader(reader, buildGetOrdinal 9))
-    let lazyProductReview = lazy (Production.ProductReviewReader(reader, buildGetOrdinal 8))
-    let lazyTransactionHistoryArchive = lazy (Production.TransactionHistoryArchiveReader(reader, buildGetOrdinal 9))
-    let lazyProductSubcategory = lazy (Production.ProductSubcategoryReader(reader, buildGetOrdinal 5))
-    let lazyUnitMeasure = lazy (Production.UnitMeasureReader(reader, buildGetOrdinal 3))
-    let lazyWorkOrder = lazy (Production.WorkOrderReader(reader, buildGetOrdinal 10))
-    let lazyCulture = lazy (Production.CultureReader(reader, buildGetOrdinal 3))
-    let lazyWorkOrderRouting = lazy (Production.WorkOrderRoutingReader(reader, buildGetOrdinal 12))
-    let lazyDocument = lazy (Production.DocumentReader(reader, buildGetOrdinal 14))
-    let lazyPassword = lazy (Person.PasswordReader(reader, buildGetOrdinal 5))
-    let lazyPerson = lazy (Person.PersonReader(reader, buildGetOrdinal 13))
-    let lazyvAdditionalContactInfo = lazy (Person.vAdditionalContactInfoReader (reader, buildGetOrdinal 17))
-    let lazyPersonPhone = lazy (Person.PersonPhoneReader(reader, buildGetOrdinal 4))
-    let lazyPhoneNumberType = lazy (Person.PhoneNumberTypeReader(reader, buildGetOrdinal 3))
-    let lazyvStateProvinceCountryRegion = lazy (Person.vStateProvinceCountryRegionReader (reader, buildGetOrdinal 7))
-    let lazyAddress = lazy (Person.AddressReader(reader, buildGetOrdinal 9))
-    let lazyAddressType = lazy (Person.AddressTypeReader(reader, buildGetOrdinal 4))
-    let lazyStateProvince = lazy (Person.StateProvinceReader(reader, buildGetOrdinal 8))
-    let lazyBusinessEntity = lazy (Person.BusinessEntityReader(reader, buildGetOrdinal 3))
-    let lazyBusinessEntityAddress = lazy (Person.BusinessEntityAddressReader(reader, buildGetOrdinal 5))
-    let lazyBusinessEntityContact = lazy (Person.BusinessEntityContactReader(reader, buildGetOrdinal 5))
-    let lazyContactType = lazy (Person.ContactTypeReader(reader, buildGetOrdinal 3))
-    let lazyCountryRegion = lazy (Person.CountryRegionReader(reader, buildGetOrdinal 3))
-    let lazyEmailAddress = lazy (Person.EmailAddressReader(reader, buildGetOrdinal 5))
-    let lazyvVendorWithContacts = lazy (Purchasing.vVendorWithContactsReader (reader, buildGetOrdinal 12))
-    let lazyvVendorWithAddresses = lazy (Purchasing.vVendorWithAddressesReader (reader, buildGetOrdinal 9))
-    let lazyShipMethod = lazy (Purchasing.ShipMethodReader(reader, buildGetOrdinal 6))
-    let lazyProductVendor = lazy (Purchasing.ProductVendorReader(reader, buildGetOrdinal 11))
-    let lazyVendor = lazy (Purchasing.VendorReader(reader, buildGetOrdinal 8))
-    let lazyPurchaseOrderDetail = lazy (Purchasing.PurchaseOrderDetailReader(reader, buildGetOrdinal 11))
-    let lazyPurchaseOrderHeader = lazy (Purchasing.PurchaseOrderHeaderReader(reader, buildGetOrdinal 13))
-    let lazyDatabaseLog = lazy (dbo.DatabaseLogReader(reader, buildGetOrdinal 8))
-    let lazyErrorLog = lazy (dbo.ErrorLogReader(reader, buildGetOrdinal 9))
-    let lazyAWBuildVersion = lazy (dbo.AWBuildVersionReader(reader, buildGetOrdinal 4))
-    member __.EmployeePayHistory = lazyEmployeePayHistory.Value
-    member __.JobCandidate = lazyJobCandidate.Value
-    member __.vEmployee = lazyvEmployee.Value
-    member __.vEmployeeDepartment = lazyvEmployeeDepartment.Value
-    member __.vEmployeeDepartmentHistory = lazyvEmployeeDepartmentHistory.Value
-    member __.vJobCandidate = lazyvJobCandidate.Value
-    member __.vJobCandidateEmployment = lazyvJobCandidateEmployment.Value
-    member __.vJobCandidateEducation = lazyvJobCandidateEducation.Value
-    member __.Shift = lazyShift.Value
-    member __.Department = lazyDepartment.Value
-    member __.Employee = lazyEmployee.Value
-    member __.EmployeeDepartmentHistory = lazyEmployeeDepartmentHistory.Value
-    member __.SalesOrderHeaderSalesReason = lazySalesOrderHeaderSalesReason.Value
-    member __.SalesPerson = lazySalesPerson.Value
-    member __.SalesPersonQuotaHistory = lazySalesPersonQuotaHistory.Value
-    member __.SalesReason = lazySalesReason.Value
-    member __.SalesTaxRate = lazySalesTaxRate.Value
-    member __.PersonCreditCard = lazyPersonCreditCard.Value
-    member __.SalesTerritory = lazySalesTerritory.Value
-    member __.vIndividualCustomer = lazyvIndividualCustomer.Value
-    member __.vPersonDemographics = lazyvPersonDemographics.Value
-    member __.vSalesPerson = lazyvSalesPerson.Value
-    member __.SalesTerritoryHistory = lazySalesTerritoryHistory.Value
-    member __.vSalesPersonSalesByFiscalYears = lazyvSalesPersonSalesByFiscalYears.Value
-    member __.vStoreWithDemographics = lazyvStoreWithDemographics.Value
-    member __.vStoreWithContacts = lazyvStoreWithContacts.Value
-    member __.vStoreWithAddresses = lazyvStoreWithAddresses.Value
-    member __.ShoppingCartItem = lazyShoppingCartItem.Value
-    member __.SpecialOffer = lazySpecialOffer.Value
-    member __.SpecialOfferProduct = lazySpecialOfferProduct.Value
-    member __.Store = lazyStore.Value
-    member __.CountryRegionCurrency = lazyCountryRegionCurrency.Value
-    member __.CreditCard = lazyCreditCard.Value
-    member __.Currency = lazyCurrency.Value
-    member __.CurrencyRate = lazyCurrencyRate.Value
-    member __.Customer = lazyCustomer.Value
-    member __.SalesOrderDetail = lazySalesOrderDetail.Value
-    member __.SalesOrderHeader = lazySalesOrderHeader.Value
-    member __.Illustration = lazyIllustration.Value
-    member __.Location = lazyLocation.Value
-    member __.Product = lazyProduct.Value
-    member __.vProductAndDescription = lazyvProductAndDescription.Value
-    member __.vProductModelCatalogDescription = lazyvProductModelCatalogDescription.Value
-    member __.vProductModelInstructions = lazyvProductModelInstructions.Value
-    member __.ScrapReason = lazyScrapReason.Value
-    member __.ProductCategory = lazyProductCategory.Value
-    member __.ProductCostHistory = lazyProductCostHistory.Value
-    member __.ProductDescription = lazyProductDescription.Value
-    member __.ProductDocument = lazyProductDocument.Value
-    member __.ProductInventory = lazyProductInventory.Value
-    member __.ProductListPriceHistory = lazyProductListPriceHistory.Value
-    member __.ProductModel = lazyProductModel.Value
-    member __.ProductModelIllustration = lazyProductModelIllustration.Value
-    member __.ProductModelProductDescriptionCulture = lazyProductModelProductDescriptionCulture.Value
-    member __.BillOfMaterials = lazyBillOfMaterials.Value
-    member __.ProductPhoto = lazyProductPhoto.Value
-    member __.ProductProductPhoto = lazyProductProductPhoto.Value
-    member __.TransactionHistory = lazyTransactionHistory.Value
-    member __.ProductReview = lazyProductReview.Value
-    member __.TransactionHistoryArchive = lazyTransactionHistoryArchive.Value
-    member __.ProductSubcategory = lazyProductSubcategory.Value
-    member __.UnitMeasure = lazyUnitMeasure.Value
-    member __.WorkOrder = lazyWorkOrder.Value
-    member __.Culture = lazyCulture.Value
-    member __.WorkOrderRouting = lazyWorkOrderRouting.Value
-    member __.Document = lazyDocument.Value
-    member __.Password = lazyPassword.Value
-    member __.Person = lazyPerson.Value
-    member __.vAdditionalContactInfo = lazyvAdditionalContactInfo.Value
-    member __.PersonPhone = lazyPersonPhone.Value
-    member __.PhoneNumberType = lazyPhoneNumberType.Value
-    member __.vStateProvinceCountryRegion = lazyvStateProvinceCountryRegion.Value
-    member __.Address = lazyAddress.Value
-    member __.AddressType = lazyAddressType.Value
-    member __.StateProvince = lazyStateProvince.Value
-    member __.BusinessEntity = lazyBusinessEntity.Value
-    member __.BusinessEntityAddress = lazyBusinessEntityAddress.Value
-    member __.BusinessEntityContact = lazyBusinessEntityContact.Value
-    member __.ContactType = lazyContactType.Value
-    member __.CountryRegion = lazyCountryRegion.Value
-    member __.EmailAddress = lazyEmailAddress.Value
-    member __.vVendorWithContacts = lazyvVendorWithContacts.Value
-    member __.vVendorWithAddresses = lazyvVendorWithAddresses.Value
-    member __.ShipMethod = lazyShipMethod.Value
-    member __.ProductVendor = lazyProductVendor.Value
-    member __.Vendor = lazyVendor.Value
-    member __.PurchaseOrderDetail = lazyPurchaseOrderDetail.Value
-    member __.PurchaseOrderHeader = lazyPurchaseOrderHeader.Value
-    member __.DatabaseLog = lazyDatabaseLog.Value
-    member __.ErrorLog = lazyErrorLog.Value
-    member __.AWBuildVersion = lazyAWBuildVersion.Value
+    let lazyHumanResourcesEmployeePayHistory = lazy (HumanResources.EmployeePayHistoryReader(reader, buildGetOrdinal 5))
+    let lazyHumanResourcesJobCandidate = lazy (HumanResources.JobCandidateReader(reader, buildGetOrdinal 4))
+    let lazyHumanResourcesvEmployee = lazy (HumanResources.vEmployeeReader (reader, buildGetOrdinal 18))
+    let lazyHumanResourcesvEmployeeDepartment = lazy (HumanResources.vEmployeeDepartmentReader (reader, buildGetOrdinal 10))
+    let lazyHumanResourcesvEmployeeDepartmentHistory = lazy (HumanResources.vEmployeeDepartmentHistoryReader (reader, buildGetOrdinal 11))
+    let lazyHumanResourcesvJobCandidate = lazy (HumanResources.vJobCandidateReader (reader, buildGetOrdinal 16))
+    let lazyHumanResourcesvJobCandidateEmployment = lazy (HumanResources.vJobCandidateEmploymentReader (reader, buildGetOrdinal 11))
+    let lazyHumanResourcesvJobCandidateEducation = lazy (HumanResources.vJobCandidateEducationReader (reader, buildGetOrdinal 13))
+    let lazyHumanResourcesShift = lazy (HumanResources.ShiftReader(reader, buildGetOrdinal 5))
+    let lazyHumanResourcesDepartment = lazy (HumanResources.DepartmentReader(reader, buildGetOrdinal 4))
+    let lazyHumanResourcesEmployee = lazy (HumanResources.EmployeeReader(reader, buildGetOrdinal 16))
+    let lazyHumanResourcesEmployeeDepartmentHistory = lazy (HumanResources.EmployeeDepartmentHistoryReader(reader, buildGetOrdinal 6))
+    let lazySalesSalesOrderHeaderSalesReason = lazy (Sales.SalesOrderHeaderSalesReasonReader(reader, buildGetOrdinal 3))
+    let lazySalesSalesPerson = lazy (Sales.SalesPersonReader(reader, buildGetOrdinal 9))
+    let lazySalesSalesPersonQuotaHistory = lazy (Sales.SalesPersonQuotaHistoryReader(reader, buildGetOrdinal 5))
+    let lazySalesSalesReason = lazy (Sales.SalesReasonReader(reader, buildGetOrdinal 4))
+    let lazySalesSalesTaxRate = lazy (Sales.SalesTaxRateReader(reader, buildGetOrdinal 7))
+    let lazySalesPersonCreditCard = lazy (Sales.PersonCreditCardReader(reader, buildGetOrdinal 3))
+    let lazySalesSalesTerritory = lazy (Sales.SalesTerritoryReader(reader, buildGetOrdinal 10))
+    let lazySalesvIndividualCustomer = lazy (Sales.vIndividualCustomerReader (reader, buildGetOrdinal 18))
+    let lazySalesvPersonDemographics = lazy (Sales.vPersonDemographicsReader (reader, buildGetOrdinal 13))
+    let lazySalesvSalesPerson = lazy (Sales.vSalesPersonReader (reader, buildGetOrdinal 22))
+    let lazySalesSalesTerritoryHistory = lazy (Sales.SalesTerritoryHistoryReader(reader, buildGetOrdinal 6))
+    let lazySalesvSalesPersonSalesByFiscalYears = lazy (Sales.vSalesPersonSalesByFiscalYearsReader (reader, buildGetOrdinal 7))
+    let lazySalesvStoreWithDemographics = lazy (Sales.vStoreWithDemographicsReader (reader, buildGetOrdinal 12))
+    let lazySalesvStoreWithContacts = lazy (Sales.vStoreWithContactsReader (reader, buildGetOrdinal 12))
+    let lazySalesvStoreWithAddresses = lazy (Sales.vStoreWithAddressesReader (reader, buildGetOrdinal 9))
+    let lazySalesShoppingCartItem = lazy (Sales.ShoppingCartItemReader(reader, buildGetOrdinal 6))
+    let lazySalesSpecialOffer = lazy (Sales.SpecialOfferReader(reader, buildGetOrdinal 11))
+    let lazySalesSpecialOfferProduct = lazy (Sales.SpecialOfferProductReader(reader, buildGetOrdinal 4))
+    let lazySalesStore = lazy (Sales.StoreReader(reader, buildGetOrdinal 6))
+    let lazySalesCountryRegionCurrency = lazy (Sales.CountryRegionCurrencyReader(reader, buildGetOrdinal 3))
+    let lazySalesCreditCard = lazy (Sales.CreditCardReader(reader, buildGetOrdinal 6))
+    let lazySalesCurrency = lazy (Sales.CurrencyReader(reader, buildGetOrdinal 3))
+    let lazySalesCurrencyRate = lazy (Sales.CurrencyRateReader(reader, buildGetOrdinal 7))
+    let lazySalesCustomer = lazy (Sales.CustomerReader(reader, buildGetOrdinal 7))
+    let lazySalesSalesOrderDetail = lazy (Sales.SalesOrderDetailReader(reader, buildGetOrdinal 11))
+    let lazySalesSalesOrderHeader = lazy (Sales.SalesOrderHeaderReader(reader, buildGetOrdinal 26))
+    let lazyProductionIllustration = lazy (Production.IllustrationReader(reader, buildGetOrdinal 3))
+    let lazyProductionLocation = lazy (Production.LocationReader(reader, buildGetOrdinal 5))
+    let lazyProductionProduct = lazy (Production.ProductReader(reader, buildGetOrdinal 25))
+    let lazyProductionvProductAndDescription = lazy (Production.vProductAndDescriptionReader (reader, buildGetOrdinal 5))
+    let lazyProductionvProductModelCatalogDescription = lazy (Production.vProductModelCatalogDescriptionReader (reader, buildGetOrdinal 25))
+    let lazyProductionvProductModelInstructions = lazy (Production.vProductModelInstructionsReader (reader, buildGetOrdinal 11))
+    let lazyProductionScrapReason = lazy (Production.ScrapReasonReader(reader, buildGetOrdinal 3))
+    let lazyProductionProductCategory = lazy (Production.ProductCategoryReader(reader, buildGetOrdinal 4))
+    let lazyProductionProductCostHistory = lazy (Production.ProductCostHistoryReader(reader, buildGetOrdinal 5))
+    let lazyProductionProductDescription = lazy (Production.ProductDescriptionReader(reader, buildGetOrdinal 4))
+    let lazyProductionProductDocument = lazy (Production.ProductDocumentReader(reader, buildGetOrdinal 3))
+    let lazyProductionProductInventory = lazy (Production.ProductInventoryReader(reader, buildGetOrdinal 7))
+    let lazyProductionProductListPriceHistory = lazy (Production.ProductListPriceHistoryReader(reader, buildGetOrdinal 5))
+    let lazyProductionProductModel = lazy (Production.ProductModelReader(reader, buildGetOrdinal 6))
+    let lazyProductionProductModelIllustration = lazy (Production.ProductModelIllustrationReader(reader, buildGetOrdinal 3))
+    let lazyProductionProductModelProductDescriptionCulture = lazy (Production.ProductModelProductDescriptionCultureReader(reader, buildGetOrdinal 4))
+    let lazyProductionBillOfMaterials = lazy (Production.BillOfMaterialsReader(reader, buildGetOrdinal 9))
+    let lazyProductionProductPhoto = lazy (Production.ProductPhotoReader(reader, buildGetOrdinal 6))
+    let lazyProductionProductProductPhoto = lazy (Production.ProductProductPhotoReader(reader, buildGetOrdinal 4))
+    let lazyProductionTransactionHistory = lazy (Production.TransactionHistoryReader(reader, buildGetOrdinal 9))
+    let lazyProductionProductReview = lazy (Production.ProductReviewReader(reader, buildGetOrdinal 8))
+    let lazyProductionTransactionHistoryArchive = lazy (Production.TransactionHistoryArchiveReader(reader, buildGetOrdinal 9))
+    let lazyProductionProductSubcategory = lazy (Production.ProductSubcategoryReader(reader, buildGetOrdinal 5))
+    let lazyProductionUnitMeasure = lazy (Production.UnitMeasureReader(reader, buildGetOrdinal 3))
+    let lazyProductionWorkOrder = lazy (Production.WorkOrderReader(reader, buildGetOrdinal 10))
+    let lazyProductionCulture = lazy (Production.CultureReader(reader, buildGetOrdinal 3))
+    let lazyProductionWorkOrderRouting = lazy (Production.WorkOrderRoutingReader(reader, buildGetOrdinal 12))
+    let lazyProductionDocument = lazy (Production.DocumentReader(reader, buildGetOrdinal 14))
+    let lazyPersonPassword = lazy (Person.PasswordReader(reader, buildGetOrdinal 5))
+    let lazyPersonPerson = lazy (Person.PersonReader(reader, buildGetOrdinal 13))
+    let lazyPersonvAdditionalContactInfo = lazy (Person.vAdditionalContactInfoReader (reader, buildGetOrdinal 17))
+    let lazyPersonPersonPhone = lazy (Person.PersonPhoneReader(reader, buildGetOrdinal 4))
+    let lazyPersonPhoneNumberType = lazy (Person.PhoneNumberTypeReader(reader, buildGetOrdinal 3))
+    let lazyPersonvStateProvinceCountryRegion = lazy (Person.vStateProvinceCountryRegionReader (reader, buildGetOrdinal 7))
+    let lazyPersonAddress = lazy (Person.AddressReader(reader, buildGetOrdinal 9))
+    let lazyPersonAddressType = lazy (Person.AddressTypeReader(reader, buildGetOrdinal 4))
+    let lazyPersonStateProvince = lazy (Person.StateProvinceReader(reader, buildGetOrdinal 8))
+    let lazyPersonBusinessEntity = lazy (Person.BusinessEntityReader(reader, buildGetOrdinal 3))
+    let lazyPersonBusinessEntityAddress = lazy (Person.BusinessEntityAddressReader(reader, buildGetOrdinal 5))
+    let lazyPersonBusinessEntityContact = lazy (Person.BusinessEntityContactReader(reader, buildGetOrdinal 5))
+    let lazyPersonContactType = lazy (Person.ContactTypeReader(reader, buildGetOrdinal 3))
+    let lazyPersonCountryRegion = lazy (Person.CountryRegionReader(reader, buildGetOrdinal 3))
+    let lazyPersonEmailAddress = lazy (Person.EmailAddressReader(reader, buildGetOrdinal 5))
+    let lazyPurchasingvVendorWithContacts = lazy (Purchasing.vVendorWithContactsReader (reader, buildGetOrdinal 12))
+    let lazyPurchasingvVendorWithAddresses = lazy (Purchasing.vVendorWithAddressesReader (reader, buildGetOrdinal 9))
+    let lazyPurchasingShipMethod = lazy (Purchasing.ShipMethodReader(reader, buildGetOrdinal 6))
+    let lazyPurchasingProductVendor = lazy (Purchasing.ProductVendorReader(reader, buildGetOrdinal 11))
+    let lazyPurchasingVendor = lazy (Purchasing.VendorReader(reader, buildGetOrdinal 8))
+    let lazyPurchasingPurchaseOrderDetail = lazy (Purchasing.PurchaseOrderDetailReader(reader, buildGetOrdinal 11))
+    let lazyPurchasingPurchaseOrderHeader = lazy (Purchasing.PurchaseOrderHeaderReader(reader, buildGetOrdinal 13))
+    let lazydboDatabaseLog = lazy (dbo.DatabaseLogReader(reader, buildGetOrdinal 8))
+    let lazydboErrorLog = lazy (dbo.ErrorLogReader(reader, buildGetOrdinal 9))
+    let lazydboAWBuildVersion = lazy (dbo.AWBuildVersionReader(reader, buildGetOrdinal 4))
+    member __.``HumanResources.EmployeePayHistory`` = lazyHumanResourcesEmployeePayHistory.Value
+    member __.``HumanResources.JobCandidate`` = lazyHumanResourcesJobCandidate.Value
+    member __.``HumanResources.vEmployee`` = lazyHumanResourcesvEmployee.Value
+    member __.``HumanResources.vEmployeeDepartment`` = lazyHumanResourcesvEmployeeDepartment.Value
+    member __.``HumanResources.vEmployeeDepartmentHistory`` = lazyHumanResourcesvEmployeeDepartmentHistory.Value
+    member __.``HumanResources.vJobCandidate`` = lazyHumanResourcesvJobCandidate.Value
+    member __.``HumanResources.vJobCandidateEmployment`` = lazyHumanResourcesvJobCandidateEmployment.Value
+    member __.``HumanResources.vJobCandidateEducation`` = lazyHumanResourcesvJobCandidateEducation.Value
+    member __.``HumanResources.Shift`` = lazyHumanResourcesShift.Value
+    member __.``HumanResources.Department`` = lazyHumanResourcesDepartment.Value
+    member __.``HumanResources.Employee`` = lazyHumanResourcesEmployee.Value
+    member __.``HumanResources.EmployeeDepartmentHistory`` = lazyHumanResourcesEmployeeDepartmentHistory.Value
+    member __.``Sales.SalesOrderHeaderSalesReason`` = lazySalesSalesOrderHeaderSalesReason.Value
+    member __.``Sales.SalesPerson`` = lazySalesSalesPerson.Value
+    member __.``Sales.SalesPersonQuotaHistory`` = lazySalesSalesPersonQuotaHistory.Value
+    member __.``Sales.SalesReason`` = lazySalesSalesReason.Value
+    member __.``Sales.SalesTaxRate`` = lazySalesSalesTaxRate.Value
+    member __.``Sales.PersonCreditCard`` = lazySalesPersonCreditCard.Value
+    member __.``Sales.SalesTerritory`` = lazySalesSalesTerritory.Value
+    member __.``Sales.vIndividualCustomer`` = lazySalesvIndividualCustomer.Value
+    member __.``Sales.vPersonDemographics`` = lazySalesvPersonDemographics.Value
+    member __.``Sales.vSalesPerson`` = lazySalesvSalesPerson.Value
+    member __.``Sales.SalesTerritoryHistory`` = lazySalesSalesTerritoryHistory.Value
+    member __.``Sales.vSalesPersonSalesByFiscalYears`` = lazySalesvSalesPersonSalesByFiscalYears.Value
+    member __.``Sales.vStoreWithDemographics`` = lazySalesvStoreWithDemographics.Value
+    member __.``Sales.vStoreWithContacts`` = lazySalesvStoreWithContacts.Value
+    member __.``Sales.vStoreWithAddresses`` = lazySalesvStoreWithAddresses.Value
+    member __.``Sales.ShoppingCartItem`` = lazySalesShoppingCartItem.Value
+    member __.``Sales.SpecialOffer`` = lazySalesSpecialOffer.Value
+    member __.``Sales.SpecialOfferProduct`` = lazySalesSpecialOfferProduct.Value
+    member __.``Sales.Store`` = lazySalesStore.Value
+    member __.``Sales.CountryRegionCurrency`` = lazySalesCountryRegionCurrency.Value
+    member __.``Sales.CreditCard`` = lazySalesCreditCard.Value
+    member __.``Sales.Currency`` = lazySalesCurrency.Value
+    member __.``Sales.CurrencyRate`` = lazySalesCurrencyRate.Value
+    member __.``Sales.Customer`` = lazySalesCustomer.Value
+    member __.``Sales.SalesOrderDetail`` = lazySalesSalesOrderDetail.Value
+    member __.``Sales.SalesOrderHeader`` = lazySalesSalesOrderHeader.Value
+    member __.``Production.Illustration`` = lazyProductionIllustration.Value
+    member __.``Production.Location`` = lazyProductionLocation.Value
+    member __.``Production.Product`` = lazyProductionProduct.Value
+    member __.``Production.vProductAndDescription`` = lazyProductionvProductAndDescription.Value
+    member __.``Production.vProductModelCatalogDescription`` = lazyProductionvProductModelCatalogDescription.Value
+    member __.``Production.vProductModelInstructions`` = lazyProductionvProductModelInstructions.Value
+    member __.``Production.ScrapReason`` = lazyProductionScrapReason.Value
+    member __.``Production.ProductCategory`` = lazyProductionProductCategory.Value
+    member __.``Production.ProductCostHistory`` = lazyProductionProductCostHistory.Value
+    member __.``Production.ProductDescription`` = lazyProductionProductDescription.Value
+    member __.``Production.ProductDocument`` = lazyProductionProductDocument.Value
+    member __.``Production.ProductInventory`` = lazyProductionProductInventory.Value
+    member __.``Production.ProductListPriceHistory`` = lazyProductionProductListPriceHistory.Value
+    member __.``Production.ProductModel`` = lazyProductionProductModel.Value
+    member __.``Production.ProductModelIllustration`` = lazyProductionProductModelIllustration.Value
+    member __.``Production.ProductModelProductDescriptionCulture`` = lazyProductionProductModelProductDescriptionCulture.Value
+    member __.``Production.BillOfMaterials`` = lazyProductionBillOfMaterials.Value
+    member __.``Production.ProductPhoto`` = lazyProductionProductPhoto.Value
+    member __.``Production.ProductProductPhoto`` = lazyProductionProductProductPhoto.Value
+    member __.``Production.TransactionHistory`` = lazyProductionTransactionHistory.Value
+    member __.``Production.ProductReview`` = lazyProductionProductReview.Value
+    member __.``Production.TransactionHistoryArchive`` = lazyProductionTransactionHistoryArchive.Value
+    member __.``Production.ProductSubcategory`` = lazyProductionProductSubcategory.Value
+    member __.``Production.UnitMeasure`` = lazyProductionUnitMeasure.Value
+    member __.``Production.WorkOrder`` = lazyProductionWorkOrder.Value
+    member __.``Production.Culture`` = lazyProductionCulture.Value
+    member __.``Production.WorkOrderRouting`` = lazyProductionWorkOrderRouting.Value
+    member __.``Production.Document`` = lazyProductionDocument.Value
+    member __.``Person.Password`` = lazyPersonPassword.Value
+    member __.``Person.Person`` = lazyPersonPerson.Value
+    member __.``Person.vAdditionalContactInfo`` = lazyPersonvAdditionalContactInfo.Value
+    member __.``Person.PersonPhone`` = lazyPersonPersonPhone.Value
+    member __.``Person.PhoneNumberType`` = lazyPersonPhoneNumberType.Value
+    member __.``Person.vStateProvinceCountryRegion`` = lazyPersonvStateProvinceCountryRegion.Value
+    member __.``Person.Address`` = lazyPersonAddress.Value
+    member __.``Person.AddressType`` = lazyPersonAddressType.Value
+    member __.``Person.StateProvince`` = lazyPersonStateProvince.Value
+    member __.``Person.BusinessEntity`` = lazyPersonBusinessEntity.Value
+    member __.``Person.BusinessEntityAddress`` = lazyPersonBusinessEntityAddress.Value
+    member __.``Person.BusinessEntityContact`` = lazyPersonBusinessEntityContact.Value
+    member __.``Person.ContactType`` = lazyPersonContactType.Value
+    member __.``Person.CountryRegion`` = lazyPersonCountryRegion.Value
+    member __.``Person.EmailAddress`` = lazyPersonEmailAddress.Value
+    member __.``Purchasing.vVendorWithContacts`` = lazyPurchasingvVendorWithContacts.Value
+    member __.``Purchasing.vVendorWithAddresses`` = lazyPurchasingvVendorWithAddresses.Value
+    member __.``Purchasing.ShipMethod`` = lazyPurchasingShipMethod.Value
+    member __.``Purchasing.ProductVendor`` = lazyPurchasingProductVendor.Value
+    member __.``Purchasing.Vendor`` = lazyPurchasingVendor.Value
+    member __.``Purchasing.PurchaseOrderDetail`` = lazyPurchasingPurchaseOrderDetail.Value
+    member __.``Purchasing.PurchaseOrderHeader`` = lazyPurchasingPurchaseOrderHeader.Value
+    member __.``dbo.DatabaseLog`` = lazydboDatabaseLog.Value
+    member __.``dbo.ErrorLog`` = lazydboErrorLog.Value
+    member __.``dbo.AWBuildVersion`` = lazydboAWBuildVersion.Value
     member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value
     member private __.GetReaderByName(entity: string, isOption: bool) =
         match entity, isOption with
-        | "EmployeePayHistory", false -> __.EmployeePayHistory.Read >> box
-        | "EmployeePayHistory", true -> __.EmployeePayHistory.ReadIfNotNull >> box
-        | "JobCandidate", false -> __.JobCandidate.Read >> box
-        | "JobCandidate", true -> __.JobCandidate.ReadIfNotNull >> box
-        | "vEmployee", false -> __.vEmployee.Read >> box
+        | "HumanResources.EmployeePayHistory", false -> __.``HumanResources.EmployeePayHistory``.Read >> box
+        | "EmployeePayHistory", true -> __.``HumanResources.EmployeePayHistory``.ReadIfNotNull >> box
+        | "HumanResources.JobCandidate", false -> __.``HumanResources.JobCandidate``.Read >> box
+        | "JobCandidate", true -> __.``HumanResources.JobCandidate``.ReadIfNotNull >> box
+        | "HumanResources.vEmployee", false -> __.``HumanResources.vEmployee``.Read >> box
         | "vEmployee", true -> failwith "Could not read type 'vEmployee option' because no primary key exists."
-        | "vEmployeeDepartment", false -> __.vEmployeeDepartment.Read >> box
+        | "HumanResources.vEmployeeDepartment", false -> __.``HumanResources.vEmployeeDepartment``.Read >> box
         | "vEmployeeDepartment", true -> failwith "Could not read type 'vEmployeeDepartment option' because no primary key exists."
-        | "vEmployeeDepartmentHistory", false -> __.vEmployeeDepartmentHistory.Read >> box
+        | "HumanResources.vEmployeeDepartmentHistory", false -> __.``HumanResources.vEmployeeDepartmentHistory``.Read >> box
         | "vEmployeeDepartmentHistory", true -> failwith "Could not read type 'vEmployeeDepartmentHistory option' because no primary key exists."
-        | "vJobCandidate", false -> __.vJobCandidate.Read >> box
+        | "HumanResources.vJobCandidate", false -> __.``HumanResources.vJobCandidate``.Read >> box
         | "vJobCandidate", true -> failwith "Could not read type 'vJobCandidate option' because no primary key exists."
-        | "vJobCandidateEmployment", false -> __.vJobCandidateEmployment.Read >> box
+        | "HumanResources.vJobCandidateEmployment", false -> __.``HumanResources.vJobCandidateEmployment``.Read >> box
         | "vJobCandidateEmployment", true -> failwith "Could not read type 'vJobCandidateEmployment option' because no primary key exists."
-        | "vJobCandidateEducation", false -> __.vJobCandidateEducation.Read >> box
+        | "HumanResources.vJobCandidateEducation", false -> __.``HumanResources.vJobCandidateEducation``.Read >> box
         | "vJobCandidateEducation", true -> failwith "Could not read type 'vJobCandidateEducation option' because no primary key exists."
-        | "Shift", false -> __.Shift.Read >> box
-        | "Shift", true -> __.Shift.ReadIfNotNull >> box
-        | "Department", false -> __.Department.Read >> box
-        | "Department", true -> __.Department.ReadIfNotNull >> box
-        | "Employee", false -> __.Employee.Read >> box
-        | "Employee", true -> __.Employee.ReadIfNotNull >> box
-        | "EmployeeDepartmentHistory", false -> __.EmployeeDepartmentHistory.Read >> box
-        | "EmployeeDepartmentHistory", true -> __.EmployeeDepartmentHistory.ReadIfNotNull >> box
-        | "SalesOrderHeaderSalesReason", false -> __.SalesOrderHeaderSalesReason.Read >> box
-        | "SalesOrderHeaderSalesReason", true -> __.SalesOrderHeaderSalesReason.ReadIfNotNull >> box
-        | "SalesPerson", false -> __.SalesPerson.Read >> box
-        | "SalesPerson", true -> __.SalesPerson.ReadIfNotNull >> box
-        | "SalesPersonQuotaHistory", false -> __.SalesPersonQuotaHistory.Read >> box
-        | "SalesPersonQuotaHistory", true -> __.SalesPersonQuotaHistory.ReadIfNotNull >> box
-        | "SalesReason", false -> __.SalesReason.Read >> box
-        | "SalesReason", true -> __.SalesReason.ReadIfNotNull >> box
-        | "SalesTaxRate", false -> __.SalesTaxRate.Read >> box
-        | "SalesTaxRate", true -> __.SalesTaxRate.ReadIfNotNull >> box
-        | "PersonCreditCard", false -> __.PersonCreditCard.Read >> box
-        | "PersonCreditCard", true -> __.PersonCreditCard.ReadIfNotNull >> box
-        | "SalesTerritory", false -> __.SalesTerritory.Read >> box
-        | "SalesTerritory", true -> __.SalesTerritory.ReadIfNotNull >> box
-        | "vIndividualCustomer", false -> __.vIndividualCustomer.Read >> box
+        | "HumanResources.Shift", false -> __.``HumanResources.Shift``.Read >> box
+        | "Shift", true -> __.``HumanResources.Shift``.ReadIfNotNull >> box
+        | "HumanResources.Department", false -> __.``HumanResources.Department``.Read >> box
+        | "Department", true -> __.``HumanResources.Department``.ReadIfNotNull >> box
+        | "HumanResources.Employee", false -> __.``HumanResources.Employee``.Read >> box
+        | "Employee", true -> __.``HumanResources.Employee``.ReadIfNotNull >> box
+        | "HumanResources.EmployeeDepartmentHistory", false -> __.``HumanResources.EmployeeDepartmentHistory``.Read >> box
+        | "EmployeeDepartmentHistory", true -> __.``HumanResources.EmployeeDepartmentHistory``.ReadIfNotNull >> box
+        | "Sales.SalesOrderHeaderSalesReason", false -> __.``Sales.SalesOrderHeaderSalesReason``.Read >> box
+        | "SalesOrderHeaderSalesReason", true -> __.``Sales.SalesOrderHeaderSalesReason``.ReadIfNotNull >> box
+        | "Sales.SalesPerson", false -> __.``Sales.SalesPerson``.Read >> box
+        | "SalesPerson", true -> __.``Sales.SalesPerson``.ReadIfNotNull >> box
+        | "Sales.SalesPersonQuotaHistory", false -> __.``Sales.SalesPersonQuotaHistory``.Read >> box
+        | "SalesPersonQuotaHistory", true -> __.``Sales.SalesPersonQuotaHistory``.ReadIfNotNull >> box
+        | "Sales.SalesReason", false -> __.``Sales.SalesReason``.Read >> box
+        | "SalesReason", true -> __.``Sales.SalesReason``.ReadIfNotNull >> box
+        | "Sales.SalesTaxRate", false -> __.``Sales.SalesTaxRate``.Read >> box
+        | "SalesTaxRate", true -> __.``Sales.SalesTaxRate``.ReadIfNotNull >> box
+        | "Sales.PersonCreditCard", false -> __.``Sales.PersonCreditCard``.Read >> box
+        | "PersonCreditCard", true -> __.``Sales.PersonCreditCard``.ReadIfNotNull >> box
+        | "Sales.SalesTerritory", false -> __.``Sales.SalesTerritory``.Read >> box
+        | "SalesTerritory", true -> __.``Sales.SalesTerritory``.ReadIfNotNull >> box
+        | "Sales.vIndividualCustomer", false -> __.``Sales.vIndividualCustomer``.Read >> box
         | "vIndividualCustomer", true -> failwith "Could not read type 'vIndividualCustomer option' because no primary key exists."
-        | "vPersonDemographics", false -> __.vPersonDemographics.Read >> box
+        | "Sales.vPersonDemographics", false -> __.``Sales.vPersonDemographics``.Read >> box
         | "vPersonDemographics", true -> failwith "Could not read type 'vPersonDemographics option' because no primary key exists."
-        | "vSalesPerson", false -> __.vSalesPerson.Read >> box
+        | "Sales.vSalesPerson", false -> __.``Sales.vSalesPerson``.Read >> box
         | "vSalesPerson", true -> failwith "Could not read type 'vSalesPerson option' because no primary key exists."
-        | "SalesTerritoryHistory", false -> __.SalesTerritoryHistory.Read >> box
-        | "SalesTerritoryHistory", true -> __.SalesTerritoryHistory.ReadIfNotNull >> box
-        | "vSalesPersonSalesByFiscalYears", false -> __.vSalesPersonSalesByFiscalYears.Read >> box
+        | "Sales.SalesTerritoryHistory", false -> __.``Sales.SalesTerritoryHistory``.Read >> box
+        | "SalesTerritoryHistory", true -> __.``Sales.SalesTerritoryHistory``.ReadIfNotNull >> box
+        | "Sales.vSalesPersonSalesByFiscalYears", false -> __.``Sales.vSalesPersonSalesByFiscalYears``.Read >> box
         | "vSalesPersonSalesByFiscalYears", true -> failwith "Could not read type 'vSalesPersonSalesByFiscalYears option' because no primary key exists."
-        | "vStoreWithDemographics", false -> __.vStoreWithDemographics.Read >> box
+        | "Sales.vStoreWithDemographics", false -> __.``Sales.vStoreWithDemographics``.Read >> box
         | "vStoreWithDemographics", true -> failwith "Could not read type 'vStoreWithDemographics option' because no primary key exists."
-        | "vStoreWithContacts", false -> __.vStoreWithContacts.Read >> box
+        | "Sales.vStoreWithContacts", false -> __.``Sales.vStoreWithContacts``.Read >> box
         | "vStoreWithContacts", true -> failwith "Could not read type 'vStoreWithContacts option' because no primary key exists."
-        | "vStoreWithAddresses", false -> __.vStoreWithAddresses.Read >> box
+        | "Sales.vStoreWithAddresses", false -> __.``Sales.vStoreWithAddresses``.Read >> box
         | "vStoreWithAddresses", true -> failwith "Could not read type 'vStoreWithAddresses option' because no primary key exists."
-        | "ShoppingCartItem", false -> __.ShoppingCartItem.Read >> box
-        | "ShoppingCartItem", true -> __.ShoppingCartItem.ReadIfNotNull >> box
-        | "SpecialOffer", false -> __.SpecialOffer.Read >> box
-        | "SpecialOffer", true -> __.SpecialOffer.ReadIfNotNull >> box
-        | "SpecialOfferProduct", false -> __.SpecialOfferProduct.Read >> box
-        | "SpecialOfferProduct", true -> __.SpecialOfferProduct.ReadIfNotNull >> box
-        | "Store", false -> __.Store.Read >> box
-        | "Store", true -> __.Store.ReadIfNotNull >> box
-        | "CountryRegionCurrency", false -> __.CountryRegionCurrency.Read >> box
-        | "CountryRegionCurrency", true -> __.CountryRegionCurrency.ReadIfNotNull >> box
-        | "CreditCard", false -> __.CreditCard.Read >> box
-        | "CreditCard", true -> __.CreditCard.ReadIfNotNull >> box
-        | "Currency", false -> __.Currency.Read >> box
-        | "Currency", true -> __.Currency.ReadIfNotNull >> box
-        | "CurrencyRate", false -> __.CurrencyRate.Read >> box
-        | "CurrencyRate", true -> __.CurrencyRate.ReadIfNotNull >> box
-        | "Customer", false -> __.Customer.Read >> box
-        | "Customer", true -> __.Customer.ReadIfNotNull >> box
-        | "SalesOrderDetail", false -> __.SalesOrderDetail.Read >> box
-        | "SalesOrderDetail", true -> __.SalesOrderDetail.ReadIfNotNull >> box
-        | "SalesOrderHeader", false -> __.SalesOrderHeader.Read >> box
-        | "SalesOrderHeader", true -> __.SalesOrderHeader.ReadIfNotNull >> box
-        | "Illustration", false -> __.Illustration.Read >> box
-        | "Illustration", true -> __.Illustration.ReadIfNotNull >> box
-        | "Location", false -> __.Location.Read >> box
-        | "Location", true -> __.Location.ReadIfNotNull >> box
-        | "Product", false -> __.Product.Read >> box
-        | "Product", true -> __.Product.ReadIfNotNull >> box
-        | "vProductAndDescription", false -> __.vProductAndDescription.Read >> box
+        | "Sales.ShoppingCartItem", false -> __.``Sales.ShoppingCartItem``.Read >> box
+        | "ShoppingCartItem", true -> __.``Sales.ShoppingCartItem``.ReadIfNotNull >> box
+        | "Sales.SpecialOffer", false -> __.``Sales.SpecialOffer``.Read >> box
+        | "SpecialOffer", true -> __.``Sales.SpecialOffer``.ReadIfNotNull >> box
+        | "Sales.SpecialOfferProduct", false -> __.``Sales.SpecialOfferProduct``.Read >> box
+        | "SpecialOfferProduct", true -> __.``Sales.SpecialOfferProduct``.ReadIfNotNull >> box
+        | "Sales.Store", false -> __.``Sales.Store``.Read >> box
+        | "Store", true -> __.``Sales.Store``.ReadIfNotNull >> box
+        | "Sales.CountryRegionCurrency", false -> __.``Sales.CountryRegionCurrency``.Read >> box
+        | "CountryRegionCurrency", true -> __.``Sales.CountryRegionCurrency``.ReadIfNotNull >> box
+        | "Sales.CreditCard", false -> __.``Sales.CreditCard``.Read >> box
+        | "CreditCard", true -> __.``Sales.CreditCard``.ReadIfNotNull >> box
+        | "Sales.Currency", false -> __.``Sales.Currency``.Read >> box
+        | "Currency", true -> __.``Sales.Currency``.ReadIfNotNull >> box
+        | "Sales.CurrencyRate", false -> __.``Sales.CurrencyRate``.Read >> box
+        | "CurrencyRate", true -> __.``Sales.CurrencyRate``.ReadIfNotNull >> box
+        | "Sales.Customer", false -> __.``Sales.Customer``.Read >> box
+        | "Customer", true -> __.``Sales.Customer``.ReadIfNotNull >> box
+        | "Sales.SalesOrderDetail", false -> __.``Sales.SalesOrderDetail``.Read >> box
+        | "SalesOrderDetail", true -> __.``Sales.SalesOrderDetail``.ReadIfNotNull >> box
+        | "Sales.SalesOrderHeader", false -> __.``Sales.SalesOrderHeader``.Read >> box
+        | "SalesOrderHeader", true -> __.``Sales.SalesOrderHeader``.ReadIfNotNull >> box
+        | "Production.Illustration", false -> __.``Production.Illustration``.Read >> box
+        | "Illustration", true -> __.``Production.Illustration``.ReadIfNotNull >> box
+        | "Production.Location", false -> __.``Production.Location``.Read >> box
+        | "Location", true -> __.``Production.Location``.ReadIfNotNull >> box
+        | "Production.Product", false -> __.``Production.Product``.Read >> box
+        | "Product", true -> __.``Production.Product``.ReadIfNotNull >> box
+        | "Production.vProductAndDescription", false -> __.``Production.vProductAndDescription``.Read >> box
         | "vProductAndDescription", true -> failwith "Could not read type 'vProductAndDescription option' because no primary key exists."
-        | "vProductModelCatalogDescription", false -> __.vProductModelCatalogDescription.Read >> box
+        | "Production.vProductModelCatalogDescription", false -> __.``Production.vProductModelCatalogDescription``.Read >> box
         | "vProductModelCatalogDescription", true -> failwith "Could not read type 'vProductModelCatalogDescription option' because no primary key exists."
-        | "vProductModelInstructions", false -> __.vProductModelInstructions.Read >> box
+        | "Production.vProductModelInstructions", false -> __.``Production.vProductModelInstructions``.Read >> box
         | "vProductModelInstructions", true -> failwith "Could not read type 'vProductModelInstructions option' because no primary key exists."
-        | "ScrapReason", false -> __.ScrapReason.Read >> box
-        | "ScrapReason", true -> __.ScrapReason.ReadIfNotNull >> box
-        | "ProductCategory", false -> __.ProductCategory.Read >> box
-        | "ProductCategory", true -> __.ProductCategory.ReadIfNotNull >> box
-        | "ProductCostHistory", false -> __.ProductCostHistory.Read >> box
-        | "ProductCostHistory", true -> __.ProductCostHistory.ReadIfNotNull >> box
-        | "ProductDescription", false -> __.ProductDescription.Read >> box
-        | "ProductDescription", true -> __.ProductDescription.ReadIfNotNull >> box
-        | "ProductDocument", false -> __.ProductDocument.Read >> box
-        | "ProductDocument", true -> __.ProductDocument.ReadIfNotNull >> box
-        | "ProductInventory", false -> __.ProductInventory.Read >> box
-        | "ProductInventory", true -> __.ProductInventory.ReadIfNotNull >> box
-        | "ProductListPriceHistory", false -> __.ProductListPriceHistory.Read >> box
-        | "ProductListPriceHistory", true -> __.ProductListPriceHistory.ReadIfNotNull >> box
-        | "ProductModel", false -> __.ProductModel.Read >> box
-        | "ProductModel", true -> __.ProductModel.ReadIfNotNull >> box
-        | "ProductModelIllustration", false -> __.ProductModelIllustration.Read >> box
-        | "ProductModelIllustration", true -> __.ProductModelIllustration.ReadIfNotNull >> box
-        | "ProductModelProductDescriptionCulture", false -> __.ProductModelProductDescriptionCulture.Read >> box
-        | "ProductModelProductDescriptionCulture", true -> __.ProductModelProductDescriptionCulture.ReadIfNotNull >> box
-        | "BillOfMaterials", false -> __.BillOfMaterials.Read >> box
-        | "BillOfMaterials", true -> __.BillOfMaterials.ReadIfNotNull >> box
-        | "ProductPhoto", false -> __.ProductPhoto.Read >> box
-        | "ProductPhoto", true -> __.ProductPhoto.ReadIfNotNull >> box
-        | "ProductProductPhoto", false -> __.ProductProductPhoto.Read >> box
-        | "ProductProductPhoto", true -> __.ProductProductPhoto.ReadIfNotNull >> box
-        | "TransactionHistory", false -> __.TransactionHistory.Read >> box
-        | "TransactionHistory", true -> __.TransactionHistory.ReadIfNotNull >> box
-        | "ProductReview", false -> __.ProductReview.Read >> box
-        | "ProductReview", true -> __.ProductReview.ReadIfNotNull >> box
-        | "TransactionHistoryArchive", false -> __.TransactionHistoryArchive.Read >> box
-        | "TransactionHistoryArchive", true -> __.TransactionHistoryArchive.ReadIfNotNull >> box
-        | "ProductSubcategory", false -> __.ProductSubcategory.Read >> box
-        | "ProductSubcategory", true -> __.ProductSubcategory.ReadIfNotNull >> box
-        | "UnitMeasure", false -> __.UnitMeasure.Read >> box
-        | "UnitMeasure", true -> __.UnitMeasure.ReadIfNotNull >> box
-        | "WorkOrder", false -> __.WorkOrder.Read >> box
-        | "WorkOrder", true -> __.WorkOrder.ReadIfNotNull >> box
-        | "Culture", false -> __.Culture.Read >> box
-        | "Culture", true -> __.Culture.ReadIfNotNull >> box
-        | "WorkOrderRouting", false -> __.WorkOrderRouting.Read >> box
-        | "WorkOrderRouting", true -> __.WorkOrderRouting.ReadIfNotNull >> box
-        | "Document", false -> __.Document.Read >> box
+        | "Production.ScrapReason", false -> __.``Production.ScrapReason``.Read >> box
+        | "ScrapReason", true -> __.``Production.ScrapReason``.ReadIfNotNull >> box
+        | "Production.ProductCategory", false -> __.``Production.ProductCategory``.Read >> box
+        | "ProductCategory", true -> __.``Production.ProductCategory``.ReadIfNotNull >> box
+        | "Production.ProductCostHistory", false -> __.``Production.ProductCostHistory``.Read >> box
+        | "ProductCostHistory", true -> __.``Production.ProductCostHistory``.ReadIfNotNull >> box
+        | "Production.ProductDescription", false -> __.``Production.ProductDescription``.Read >> box
+        | "ProductDescription", true -> __.``Production.ProductDescription``.ReadIfNotNull >> box
+        | "Production.ProductDocument", false -> __.``Production.ProductDocument``.Read >> box
+        | "ProductDocument", true -> __.``Production.ProductDocument``.ReadIfNotNull >> box
+        | "Production.ProductInventory", false -> __.``Production.ProductInventory``.Read >> box
+        | "ProductInventory", true -> __.``Production.ProductInventory``.ReadIfNotNull >> box
+        | "Production.ProductListPriceHistory", false -> __.``Production.ProductListPriceHistory``.Read >> box
+        | "ProductListPriceHistory", true -> __.``Production.ProductListPriceHistory``.ReadIfNotNull >> box
+        | "Production.ProductModel", false -> __.``Production.ProductModel``.Read >> box
+        | "ProductModel", true -> __.``Production.ProductModel``.ReadIfNotNull >> box
+        | "Production.ProductModelIllustration", false -> __.``Production.ProductModelIllustration``.Read >> box
+        | "ProductModelIllustration", true -> __.``Production.ProductModelIllustration``.ReadIfNotNull >> box
+        | "Production.ProductModelProductDescriptionCulture", false -> __.``Production.ProductModelProductDescriptionCulture``.Read >> box
+        | "ProductModelProductDescriptionCulture", true -> __.``Production.ProductModelProductDescriptionCulture``.ReadIfNotNull >> box
+        | "Production.BillOfMaterials", false -> __.``Production.BillOfMaterials``.Read >> box
+        | "BillOfMaterials", true -> __.``Production.BillOfMaterials``.ReadIfNotNull >> box
+        | "Production.ProductPhoto", false -> __.``Production.ProductPhoto``.Read >> box
+        | "ProductPhoto", true -> __.``Production.ProductPhoto``.ReadIfNotNull >> box
+        | "Production.ProductProductPhoto", false -> __.``Production.ProductProductPhoto``.Read >> box
+        | "ProductProductPhoto", true -> __.``Production.ProductProductPhoto``.ReadIfNotNull >> box
+        | "Production.TransactionHistory", false -> __.``Production.TransactionHistory``.Read >> box
+        | "TransactionHistory", true -> __.``Production.TransactionHistory``.ReadIfNotNull >> box
+        | "Production.ProductReview", false -> __.``Production.ProductReview``.Read >> box
+        | "ProductReview", true -> __.``Production.ProductReview``.ReadIfNotNull >> box
+        | "Production.TransactionHistoryArchive", false -> __.``Production.TransactionHistoryArchive``.Read >> box
+        | "TransactionHistoryArchive", true -> __.``Production.TransactionHistoryArchive``.ReadIfNotNull >> box
+        | "Production.ProductSubcategory", false -> __.``Production.ProductSubcategory``.Read >> box
+        | "ProductSubcategory", true -> __.``Production.ProductSubcategory``.ReadIfNotNull >> box
+        | "Production.UnitMeasure", false -> __.``Production.UnitMeasure``.Read >> box
+        | "UnitMeasure", true -> __.``Production.UnitMeasure``.ReadIfNotNull >> box
+        | "Production.WorkOrder", false -> __.``Production.WorkOrder``.Read >> box
+        | "WorkOrder", true -> __.``Production.WorkOrder``.ReadIfNotNull >> box
+        | "Production.Culture", false -> __.``Production.Culture``.Read >> box
+        | "Culture", true -> __.``Production.Culture``.ReadIfNotNull >> box
+        | "Production.WorkOrderRouting", false -> __.``Production.WorkOrderRouting``.Read >> box
+        | "WorkOrderRouting", true -> __.``Production.WorkOrderRouting``.ReadIfNotNull >> box
+        | "Production.Document", false -> __.``Production.Document``.Read >> box
         | "Document", true -> failwith "Could not read type 'Document option' because no primary key exists."
-        | "Password", false -> __.Password.Read >> box
-        | "Password", true -> __.Password.ReadIfNotNull >> box
-        | "Person", false -> __.Person.Read >> box
-        | "Person", true -> __.Person.ReadIfNotNull >> box
-        | "vAdditionalContactInfo", false -> __.vAdditionalContactInfo.Read >> box
+        | "Person.Password", false -> __.``Person.Password``.Read >> box
+        | "Password", true -> __.``Person.Password``.ReadIfNotNull >> box
+        | "Person.Person", false -> __.``Person.Person``.Read >> box
+        | "Person", true -> __.``Person.Person``.ReadIfNotNull >> box
+        | "Person.vAdditionalContactInfo", false -> __.``Person.vAdditionalContactInfo``.Read >> box
         | "vAdditionalContactInfo", true -> failwith "Could not read type 'vAdditionalContactInfo option' because no primary key exists."
-        | "PersonPhone", false -> __.PersonPhone.Read >> box
-        | "PersonPhone", true -> __.PersonPhone.ReadIfNotNull >> box
-        | "PhoneNumberType", false -> __.PhoneNumberType.Read >> box
-        | "PhoneNumberType", true -> __.PhoneNumberType.ReadIfNotNull >> box
-        | "vStateProvinceCountryRegion", false -> __.vStateProvinceCountryRegion.Read >> box
+        | "Person.PersonPhone", false -> __.``Person.PersonPhone``.Read >> box
+        | "PersonPhone", true -> __.``Person.PersonPhone``.ReadIfNotNull >> box
+        | "Person.PhoneNumberType", false -> __.``Person.PhoneNumberType``.Read >> box
+        | "PhoneNumberType", true -> __.``Person.PhoneNumberType``.ReadIfNotNull >> box
+        | "Person.vStateProvinceCountryRegion", false -> __.``Person.vStateProvinceCountryRegion``.Read >> box
         | "vStateProvinceCountryRegion", true -> failwith "Could not read type 'vStateProvinceCountryRegion option' because no primary key exists."
-        | "Address", false -> __.Address.Read >> box
-        | "Address", true -> __.Address.ReadIfNotNull >> box
-        | "AddressType", false -> __.AddressType.Read >> box
-        | "AddressType", true -> __.AddressType.ReadIfNotNull >> box
-        | "StateProvince", false -> __.StateProvince.Read >> box
-        | "StateProvince", true -> __.StateProvince.ReadIfNotNull >> box
-        | "BusinessEntity", false -> __.BusinessEntity.Read >> box
-        | "BusinessEntity", true -> __.BusinessEntity.ReadIfNotNull >> box
-        | "BusinessEntityAddress", false -> __.BusinessEntityAddress.Read >> box
-        | "BusinessEntityAddress", true -> __.BusinessEntityAddress.ReadIfNotNull >> box
-        | "BusinessEntityContact", false -> __.BusinessEntityContact.Read >> box
-        | "BusinessEntityContact", true -> __.BusinessEntityContact.ReadIfNotNull >> box
-        | "ContactType", false -> __.ContactType.Read >> box
-        | "ContactType", true -> __.ContactType.ReadIfNotNull >> box
-        | "CountryRegion", false -> __.CountryRegion.Read >> box
-        | "CountryRegion", true -> __.CountryRegion.ReadIfNotNull >> box
-        | "EmailAddress", false -> __.EmailAddress.Read >> box
-        | "EmailAddress", true -> __.EmailAddress.ReadIfNotNull >> box
-        | "vVendorWithContacts", false -> __.vVendorWithContacts.Read >> box
+        | "Person.Address", false -> __.``Person.Address``.Read >> box
+        | "Address", true -> __.``Person.Address``.ReadIfNotNull >> box
+        | "Person.AddressType", false -> __.``Person.AddressType``.Read >> box
+        | "AddressType", true -> __.``Person.AddressType``.ReadIfNotNull >> box
+        | "Person.StateProvince", false -> __.``Person.StateProvince``.Read >> box
+        | "StateProvince", true -> __.``Person.StateProvince``.ReadIfNotNull >> box
+        | "Person.BusinessEntity", false -> __.``Person.BusinessEntity``.Read >> box
+        | "BusinessEntity", true -> __.``Person.BusinessEntity``.ReadIfNotNull >> box
+        | "Person.BusinessEntityAddress", false -> __.``Person.BusinessEntityAddress``.Read >> box
+        | "BusinessEntityAddress", true -> __.``Person.BusinessEntityAddress``.ReadIfNotNull >> box
+        | "Person.BusinessEntityContact", false -> __.``Person.BusinessEntityContact``.Read >> box
+        | "BusinessEntityContact", true -> __.``Person.BusinessEntityContact``.ReadIfNotNull >> box
+        | "Person.ContactType", false -> __.``Person.ContactType``.Read >> box
+        | "ContactType", true -> __.``Person.ContactType``.ReadIfNotNull >> box
+        | "Person.CountryRegion", false -> __.``Person.CountryRegion``.Read >> box
+        | "CountryRegion", true -> __.``Person.CountryRegion``.ReadIfNotNull >> box
+        | "Person.EmailAddress", false -> __.``Person.EmailAddress``.Read >> box
+        | "EmailAddress", true -> __.``Person.EmailAddress``.ReadIfNotNull >> box
+        | "Purchasing.vVendorWithContacts", false -> __.``Purchasing.vVendorWithContacts``.Read >> box
         | "vVendorWithContacts", true -> failwith "Could not read type 'vVendorWithContacts option' because no primary key exists."
-        | "vVendorWithAddresses", false -> __.vVendorWithAddresses.Read >> box
+        | "Purchasing.vVendorWithAddresses", false -> __.``Purchasing.vVendorWithAddresses``.Read >> box
         | "vVendorWithAddresses", true -> failwith "Could not read type 'vVendorWithAddresses option' because no primary key exists."
-        | "ShipMethod", false -> __.ShipMethod.Read >> box
-        | "ShipMethod", true -> __.ShipMethod.ReadIfNotNull >> box
-        | "ProductVendor", false -> __.ProductVendor.Read >> box
-        | "ProductVendor", true -> __.ProductVendor.ReadIfNotNull >> box
-        | "Vendor", false -> __.Vendor.Read >> box
-        | "Vendor", true -> __.Vendor.ReadIfNotNull >> box
-        | "PurchaseOrderDetail", false -> __.PurchaseOrderDetail.Read >> box
-        | "PurchaseOrderDetail", true -> __.PurchaseOrderDetail.ReadIfNotNull >> box
-        | "PurchaseOrderHeader", false -> __.PurchaseOrderHeader.Read >> box
-        | "PurchaseOrderHeader", true -> __.PurchaseOrderHeader.ReadIfNotNull >> box
-        | "DatabaseLog", false -> __.DatabaseLog.Read >> box
-        | "DatabaseLog", true -> __.DatabaseLog.ReadIfNotNull >> box
-        | "ErrorLog", false -> __.ErrorLog.Read >> box
-        | "ErrorLog", true -> __.ErrorLog.ReadIfNotNull >> box
-        | "AWBuildVersion", false -> __.AWBuildVersion.Read >> box
-        | "AWBuildVersion", true -> __.AWBuildVersion.ReadIfNotNull >> box
+        | "Purchasing.ShipMethod", false -> __.``Purchasing.ShipMethod``.Read >> box
+        | "ShipMethod", true -> __.``Purchasing.ShipMethod``.ReadIfNotNull >> box
+        | "Purchasing.ProductVendor", false -> __.``Purchasing.ProductVendor``.Read >> box
+        | "ProductVendor", true -> __.``Purchasing.ProductVendor``.ReadIfNotNull >> box
+        | "Purchasing.Vendor", false -> __.``Purchasing.Vendor``.Read >> box
+        | "Vendor", true -> __.``Purchasing.Vendor``.ReadIfNotNull >> box
+        | "Purchasing.PurchaseOrderDetail", false -> __.``Purchasing.PurchaseOrderDetail``.Read >> box
+        | "PurchaseOrderDetail", true -> __.``Purchasing.PurchaseOrderDetail``.ReadIfNotNull >> box
+        | "Purchasing.PurchaseOrderHeader", false -> __.``Purchasing.PurchaseOrderHeader``.Read >> box
+        | "PurchaseOrderHeader", true -> __.``Purchasing.PurchaseOrderHeader``.ReadIfNotNull >> box
+        | "dbo.DatabaseLog", false -> __.``dbo.DatabaseLog``.Read >> box
+        | "DatabaseLog", true -> __.``dbo.DatabaseLog``.ReadIfNotNull >> box
+        | "dbo.ErrorLog", false -> __.``dbo.ErrorLog``.Read >> box
+        | "ErrorLog", true -> __.``dbo.ErrorLog``.ReadIfNotNull >> box
+        | "dbo.AWBuildVersion", false -> __.``dbo.AWBuildVersion``.Read >> box
+        | "AWBuildVersion", true -> __.``dbo.AWBuildVersion``.ReadIfNotNull >> box
         | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
     static member private GetPrimitiveReader(t: System.Type, reader: Microsoft.Data.SqlClient.SqlDataReader, isOpt: bool) =
@@ -3467,7 +3467,9 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
                     let ord = getOrdinalAndIncrement()
                     fun () -> primitiveReader ord
                 | None ->
-                    hydra.GetReaderByName(t.Name, isOpt)
+                    let nameParts = t.FullName.Split([| '.'; '+' |])
+                    let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join('.', parts)
+                    hydra.GetReaderByName(schemaAndType, isOpt)
             
             // Return a fn that will hydrate 'T (which may be a tuple)
             // This fn will be called once per each record returned by the data reader.
