@@ -128,8 +128,8 @@ module HumanResources =
               MiddleName = __.MiddleName.Read()
               Title = __.Title.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vEmployeeDepartment =
@@ -167,8 +167,8 @@ module HumanResources =
               MiddleName = __.MiddleName.Read()
               Title = __.Title.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vEmployeeDepartmentHistory =
@@ -209,8 +209,8 @@ module HumanResources =
               MiddleName = __.MiddleName.Read()
               Title = __.Title.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vJobCandidate =
@@ -266,8 +266,8 @@ module HumanResources =
               EMail = __.EMail.Read()
               WebSite = __.WebSite.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.JobCandidateID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vJobCandidateEmployment =
@@ -308,8 +308,8 @@ module HumanResources =
               ``Emp.Loc.State`` = __.``Emp.Loc.State``.Read()
               ``Emp.Loc.City`` = __.``Emp.Loc.City``.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.JobCandidateID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vJobCandidateEducation =
@@ -356,8 +356,8 @@ module HumanResources =
               ``Edu.Loc.State`` = __.``Edu.Loc.State``.Read()
               ``Edu.Loc.City`` = __.``Edu.Loc.City``.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.JobCandidateID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type Shift =
@@ -729,8 +729,8 @@ module Sales =
               Title = __.Title.Read()
               MiddleName = __.MiddleName.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.FirstName.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vPersonDemographics =
@@ -777,8 +777,8 @@ module Sales =
               HomeOwnerFlag = __.HomeOwnerFlag.Read()
               NumberCarsOwned = __.NumberCarsOwned.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vSalesPerson =
@@ -852,8 +852,8 @@ module Sales =
               EmailAddress = __.EmailAddress.Read()
               AddressLine2 = __.AddressLine2.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.EmailPromotion.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type SalesTerritoryHistory =
@@ -909,8 +909,8 @@ module Sales =
               SalesPersonID = __.SalesPersonID.Read()
               FullName = __.FullName.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.JobTitle.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vStoreWithDemographics =
@@ -954,8 +954,8 @@ module Sales =
               Internet = __.Internet.Read()
               NumberEmployees = __.NumberEmployees.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vStoreWithContacts =
@@ -999,8 +999,8 @@ module Sales =
               Title = __.Title.Read()
               MiddleName = __.MiddleName.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.EmailPromotion.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vStoreWithAddresses =
@@ -1035,8 +1035,8 @@ module Sales =
               CountryRegionName = __.CountryRegionName.Read()
               AddressLine2 = __.AddressLine2.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type ShoppingCartItem =
@@ -1549,8 +1549,8 @@ module Production =
               CultureID = __.CultureID.Read()
               Description = __.Description.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.ProductID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vProductModelCatalogDescription =
@@ -1633,8 +1633,8 @@ module Production =
               Style = __.Style.Read()
               RiderExperience = __.RiderExperience.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.ProductModelID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vProductModelInstructions =
@@ -1675,8 +1675,8 @@ module Production =
               LotSize = __.LotSize.Read()
               Step = __.Step.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.ProductModelID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type ScrapReason =
@@ -2269,8 +2269,8 @@ module Production =
               Document = __.Document.Read()
               DocumentLevel = __.DocumentLevel.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.rowguid.IsNull() then None else Some(__.Read())
 
 module Person =
     [<CLIMutable>]
@@ -2396,8 +2396,8 @@ module Person =
               EMailTelephoneNumber = __.EMailTelephoneNumber.Read()
               MiddleName = __.MiddleName.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type PersonPhone =
@@ -2465,8 +2465,8 @@ module Person =
               CountryRegionCode = __.CountryRegionCode.Read()
               CountryRegionName = __.CountryRegionName.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.StateProvinceID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type Address =
@@ -2724,8 +2724,8 @@ module Purchasing =
               EmailAddress = __.EmailAddress.Read()
               Title = __.Title.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vVendorWithAddresses =
@@ -2760,8 +2760,8 @@ module Purchasing =
               AddressLine1 = __.AddressLine1.Read()
               AddressLine2 = __.AddressLine2.Read() }
 
-        member __.ReadIfNotNull(column: Column) =
-            if column.IsNull() then None else Some(__.Read())
+        member __.ReadIfNotNull() =
+            if __.City.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type ShipMethod =
@@ -3246,17 +3246,17 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "HumanResources.JobCandidate", false -> __.``HumanResources.JobCandidate``.Read >> box
         | "HumanResources.JobCandidate", true -> __.``HumanResources.JobCandidate``.ReadIfNotNull >> box
         | "HumanResources.vEmployee", false -> __.``HumanResources.vEmployee``.Read >> box
-        | "HumanResources.vEmployee", true -> failwith "Could not read type 'vEmployee option' because no primary key exists."
+        | "HumanResources.vEmployee", true -> __.``HumanResources.vEmployee``.ReadIfNotNull >> box
         | "HumanResources.vEmployeeDepartment", false -> __.``HumanResources.vEmployeeDepartment``.Read >> box
-        | "HumanResources.vEmployeeDepartment", true -> failwith "Could not read type 'vEmployeeDepartment option' because no primary key exists."
+        | "HumanResources.vEmployeeDepartment", true -> __.``HumanResources.vEmployeeDepartment``.ReadIfNotNull >> box
         | "HumanResources.vEmployeeDepartmentHistory", false -> __.``HumanResources.vEmployeeDepartmentHistory``.Read >> box
-        | "HumanResources.vEmployeeDepartmentHistory", true -> failwith "Could not read type 'vEmployeeDepartmentHistory option' because no primary key exists."
+        | "HumanResources.vEmployeeDepartmentHistory", true -> __.``HumanResources.vEmployeeDepartmentHistory``.ReadIfNotNull >> box
         | "HumanResources.vJobCandidate", false -> __.``HumanResources.vJobCandidate``.Read >> box
-        | "HumanResources.vJobCandidate", true -> failwith "Could not read type 'vJobCandidate option' because no primary key exists."
+        | "HumanResources.vJobCandidate", true -> __.``HumanResources.vJobCandidate``.ReadIfNotNull >> box
         | "HumanResources.vJobCandidateEmployment", false -> __.``HumanResources.vJobCandidateEmployment``.Read >> box
-        | "HumanResources.vJobCandidateEmployment", true -> failwith "Could not read type 'vJobCandidateEmployment option' because no primary key exists."
+        | "HumanResources.vJobCandidateEmployment", true -> __.``HumanResources.vJobCandidateEmployment``.ReadIfNotNull >> box
         | "HumanResources.vJobCandidateEducation", false -> __.``HumanResources.vJobCandidateEducation``.Read >> box
-        | "HumanResources.vJobCandidateEducation", true -> failwith "Could not read type 'vJobCandidateEducation option' because no primary key exists."
+        | "HumanResources.vJobCandidateEducation", true -> __.``HumanResources.vJobCandidateEducation``.ReadIfNotNull >> box
         | "HumanResources.Shift", false -> __.``HumanResources.Shift``.Read >> box
         | "HumanResources.Shift", true -> __.``HumanResources.Shift``.ReadIfNotNull >> box
         | "HumanResources.Department", false -> __.``HumanResources.Department``.Read >> box
@@ -3280,21 +3280,21 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "Sales.SalesTerritory", false -> __.``Sales.SalesTerritory``.Read >> box
         | "Sales.SalesTerritory", true -> __.``Sales.SalesTerritory``.ReadIfNotNull >> box
         | "Sales.vIndividualCustomer", false -> __.``Sales.vIndividualCustomer``.Read >> box
-        | "Sales.vIndividualCustomer", true -> failwith "Could not read type 'vIndividualCustomer option' because no primary key exists."
+        | "Sales.vIndividualCustomer", true -> __.``Sales.vIndividualCustomer``.ReadIfNotNull >> box
         | "Sales.vPersonDemographics", false -> __.``Sales.vPersonDemographics``.Read >> box
-        | "Sales.vPersonDemographics", true -> failwith "Could not read type 'vPersonDemographics option' because no primary key exists."
+        | "Sales.vPersonDemographics", true -> __.``Sales.vPersonDemographics``.ReadIfNotNull >> box
         | "Sales.vSalesPerson", false -> __.``Sales.vSalesPerson``.Read >> box
-        | "Sales.vSalesPerson", true -> failwith "Could not read type 'vSalesPerson option' because no primary key exists."
+        | "Sales.vSalesPerson", true -> __.``Sales.vSalesPerson``.ReadIfNotNull >> box
         | "Sales.SalesTerritoryHistory", false -> __.``Sales.SalesTerritoryHistory``.Read >> box
         | "Sales.SalesTerritoryHistory", true -> __.``Sales.SalesTerritoryHistory``.ReadIfNotNull >> box
         | "Sales.vSalesPersonSalesByFiscalYears", false -> __.``Sales.vSalesPersonSalesByFiscalYears``.Read >> box
-        | "Sales.vSalesPersonSalesByFiscalYears", true -> failwith "Could not read type 'vSalesPersonSalesByFiscalYears option' because no primary key exists."
+        | "Sales.vSalesPersonSalesByFiscalYears", true -> __.``Sales.vSalesPersonSalesByFiscalYears``.ReadIfNotNull >> box
         | "Sales.vStoreWithDemographics", false -> __.``Sales.vStoreWithDemographics``.Read >> box
-        | "Sales.vStoreWithDemographics", true -> failwith "Could not read type 'vStoreWithDemographics option' because no primary key exists."
+        | "Sales.vStoreWithDemographics", true -> __.``Sales.vStoreWithDemographics``.ReadIfNotNull >> box
         | "Sales.vStoreWithContacts", false -> __.``Sales.vStoreWithContacts``.Read >> box
-        | "Sales.vStoreWithContacts", true -> failwith "Could not read type 'vStoreWithContacts option' because no primary key exists."
+        | "Sales.vStoreWithContacts", true -> __.``Sales.vStoreWithContacts``.ReadIfNotNull >> box
         | "Sales.vStoreWithAddresses", false -> __.``Sales.vStoreWithAddresses``.Read >> box
-        | "Sales.vStoreWithAddresses", true -> failwith "Could not read type 'vStoreWithAddresses option' because no primary key exists."
+        | "Sales.vStoreWithAddresses", true -> __.``Sales.vStoreWithAddresses``.ReadIfNotNull >> box
         | "Sales.ShoppingCartItem", false -> __.``Sales.ShoppingCartItem``.Read >> box
         | "Sales.ShoppingCartItem", true -> __.``Sales.ShoppingCartItem``.ReadIfNotNull >> box
         | "Sales.SpecialOffer", false -> __.``Sales.SpecialOffer``.Read >> box
@@ -3324,11 +3324,11 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "Production.Product", false -> __.``Production.Product``.Read >> box
         | "Production.Product", true -> __.``Production.Product``.ReadIfNotNull >> box
         | "Production.vProductAndDescription", false -> __.``Production.vProductAndDescription``.Read >> box
-        | "Production.vProductAndDescription", true -> failwith "Could not read type 'vProductAndDescription option' because no primary key exists."
+        | "Production.vProductAndDescription", true -> __.``Production.vProductAndDescription``.ReadIfNotNull >> box
         | "Production.vProductModelCatalogDescription", false -> __.``Production.vProductModelCatalogDescription``.Read >> box
-        | "Production.vProductModelCatalogDescription", true -> failwith "Could not read type 'vProductModelCatalogDescription option' because no primary key exists."
+        | "Production.vProductModelCatalogDescription", true -> __.``Production.vProductModelCatalogDescription``.ReadIfNotNull >> box
         | "Production.vProductModelInstructions", false -> __.``Production.vProductModelInstructions``.Read >> box
-        | "Production.vProductModelInstructions", true -> failwith "Could not read type 'vProductModelInstructions option' because no primary key exists."
+        | "Production.vProductModelInstructions", true -> __.``Production.vProductModelInstructions``.ReadIfNotNull >> box
         | "Production.ScrapReason", false -> __.``Production.ScrapReason``.Read >> box
         | "Production.ScrapReason", true -> __.``Production.ScrapReason``.ReadIfNotNull >> box
         | "Production.ProductCategory", false -> __.``Production.ProductCategory``.Read >> box
@@ -3372,19 +3372,19 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "Production.WorkOrderRouting", false -> __.``Production.WorkOrderRouting``.Read >> box
         | "Production.WorkOrderRouting", true -> __.``Production.WorkOrderRouting``.ReadIfNotNull >> box
         | "Production.Document", false -> __.``Production.Document``.Read >> box
-        | "Production.Document", true -> failwith "Could not read type 'Document option' because no primary key exists."
+        | "Production.Document", true -> __.``Production.Document``.ReadIfNotNull >> box
         | "Person.Password", false -> __.``Person.Password``.Read >> box
         | "Person.Password", true -> __.``Person.Password``.ReadIfNotNull >> box
         | "Person.Person", false -> __.``Person.Person``.Read >> box
         | "Person.Person", true -> __.``Person.Person``.ReadIfNotNull >> box
         | "Person.vAdditionalContactInfo", false -> __.``Person.vAdditionalContactInfo``.Read >> box
-        | "Person.vAdditionalContactInfo", true -> failwith "Could not read type 'vAdditionalContactInfo option' because no primary key exists."
+        | "Person.vAdditionalContactInfo", true -> __.``Person.vAdditionalContactInfo``.ReadIfNotNull >> box
         | "Person.PersonPhone", false -> __.``Person.PersonPhone``.Read >> box
         | "Person.PersonPhone", true -> __.``Person.PersonPhone``.ReadIfNotNull >> box
         | "Person.PhoneNumberType", false -> __.``Person.PhoneNumberType``.Read >> box
         | "Person.PhoneNumberType", true -> __.``Person.PhoneNumberType``.ReadIfNotNull >> box
         | "Person.vStateProvinceCountryRegion", false -> __.``Person.vStateProvinceCountryRegion``.Read >> box
-        | "Person.vStateProvinceCountryRegion", true -> failwith "Could not read type 'vStateProvinceCountryRegion option' because no primary key exists."
+        | "Person.vStateProvinceCountryRegion", true -> __.``Person.vStateProvinceCountryRegion``.ReadIfNotNull >> box
         | "Person.Address", false -> __.``Person.Address``.Read >> box
         | "Person.Address", true -> __.``Person.Address``.ReadIfNotNull >> box
         | "Person.AddressType", false -> __.``Person.AddressType``.Read >> box
@@ -3404,9 +3404,9 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "Person.EmailAddress", false -> __.``Person.EmailAddress``.Read >> box
         | "Person.EmailAddress", true -> __.``Person.EmailAddress``.ReadIfNotNull >> box
         | "Purchasing.vVendorWithContacts", false -> __.``Purchasing.vVendorWithContacts``.Read >> box
-        | "Purchasing.vVendorWithContacts", true -> failwith "Could not read type 'vVendorWithContacts option' because no primary key exists."
+        | "Purchasing.vVendorWithContacts", true -> __.``Purchasing.vVendorWithContacts``.ReadIfNotNull >> box
         | "Purchasing.vVendorWithAddresses", false -> __.``Purchasing.vVendorWithAddresses``.Read >> box
-        | "Purchasing.vVendorWithAddresses", true -> failwith "Could not read type 'vVendorWithAddresses option' because no primary key exists."
+        | "Purchasing.vVendorWithAddresses", true -> __.``Purchasing.vVendorWithAddresses``.ReadIfNotNull >> box
         | "Purchasing.ShipMethod", false -> __.``Purchasing.ShipMethod``.Read >> box
         | "Purchasing.ShipMethod", true -> __.``Purchasing.ShipMethod``.ReadIfNotNull >> box
         | "Purchasing.ProductVendor", false -> __.``Purchasing.ProductVendor``.Read >> box

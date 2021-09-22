@@ -505,29 +505,29 @@ type HydraReader(reader: System.Data.IDataReader) =
     member private __.GetReaderByName(entity: string, isOption: bool) =
         match entity, isOption with
         | "main.ErrorLog", false -> __.``main.ErrorLog``.Read >> box
-        | "ErrorLog", true -> __.``main.ErrorLog``.ReadIfNotNull >> box
+        | "main.ErrorLog", true -> __.``main.ErrorLog``.ReadIfNotNull >> box
         | "main.BuildVersion", false -> __.``main.BuildVersion``.Read >> box
-        | "BuildVersion", true -> __.``main.BuildVersion``.ReadIfNotNull >> box
+        | "main.BuildVersion", true -> __.``main.BuildVersion``.ReadIfNotNull >> box
         | "main.Address", false -> __.``main.Address``.Read >> box
-        | "Address", true -> __.``main.Address``.ReadIfNotNull >> box
+        | "main.Address", true -> __.``main.Address``.ReadIfNotNull >> box
         | "main.Customer", false -> __.``main.Customer``.Read >> box
-        | "Customer", true -> __.``main.Customer``.ReadIfNotNull >> box
+        | "main.Customer", true -> __.``main.Customer``.ReadIfNotNull >> box
         | "main.CustomerAddress", false -> __.``main.CustomerAddress``.Read >> box
-        | "CustomerAddress", true -> __.``main.CustomerAddress``.ReadIfNotNull >> box
+        | "main.CustomerAddress", true -> __.``main.CustomerAddress``.ReadIfNotNull >> box
         | "main.Product", false -> __.``main.Product``.Read >> box
-        | "Product", true -> __.``main.Product``.ReadIfNotNull >> box
+        | "main.Product", true -> __.``main.Product``.ReadIfNotNull >> box
         | "main.ProductCategory", false -> __.``main.ProductCategory``.Read >> box
-        | "ProductCategory", true -> __.``main.ProductCategory``.ReadIfNotNull >> box
+        | "main.ProductCategory", true -> __.``main.ProductCategory``.ReadIfNotNull >> box
         | "main.ProductDescription", false -> __.``main.ProductDescription``.Read >> box
-        | "ProductDescription", true -> __.``main.ProductDescription``.ReadIfNotNull >> box
+        | "main.ProductDescription", true -> __.``main.ProductDescription``.ReadIfNotNull >> box
         | "main.ProductModel", false -> __.``main.ProductModel``.Read >> box
-        | "ProductModel", true -> __.``main.ProductModel``.ReadIfNotNull >> box
+        | "main.ProductModel", true -> __.``main.ProductModel``.ReadIfNotNull >> box
         | "main.ProductModelProductDescription", false -> __.``main.ProductModelProductDescription``.Read >> box
-        | "ProductModelProductDescription", true -> __.``main.ProductModelProductDescription``.ReadIfNotNull >> box
+        | "main.ProductModelProductDescription", true -> __.``main.ProductModelProductDescription``.ReadIfNotNull >> box
         | "main.SalesOrderDetail", false -> __.``main.SalesOrderDetail``.Read >> box
-        | "SalesOrderDetail", true -> __.``main.SalesOrderDetail``.ReadIfNotNull >> box
+        | "main.SalesOrderDetail", true -> __.``main.SalesOrderDetail``.ReadIfNotNull >> box
         | "main.SalesOrderHeader", false -> __.``main.SalesOrderHeader``.Read >> box
-        | "SalesOrderHeader", true -> __.``main.SalesOrderHeader``.ReadIfNotNull >> box
+        | "main.SalesOrderHeader", true -> __.``main.SalesOrderHeader``.ReadIfNotNull >> box
         | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
     static member private GetPrimitiveReader(t: System.Type, reader: System.Data.IDataReader, isOpt: bool) =

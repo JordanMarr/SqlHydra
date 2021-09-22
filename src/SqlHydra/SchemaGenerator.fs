@@ -122,8 +122,17 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
     /// Initializes an optional table record (based on the existence of a PK or user supplied column).
     let readIfNotNullMethod = 
 
-        // Try to get the first PK...
-        let firstPK = tbl.Columns |> List.tryFind (fun c -> c.IsPK) |> Option.map (fun c -> c.Name)
+        let firstRequiredField =
+            tbl.Columns
+            |> Seq.tryFind (fun c -> c.IsNullable = false)
+            |> Option.map (fun c -> c.Name)
+
+        // Try to get the first PK, or else the first required field...
+        let firstPkOrFirstRequiredField = 
+            tbl.Columns 
+            |> List.tryFind (fun c -> c.IsPK)
+            |> Option.map (fun c -> c.Name)
+            |> Option.orElse firstRequiredField
 
         SynMemberDefn.CreateMember(            
             { SynBindingRcd.Let with 
@@ -132,19 +141,7 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
                         SynPatLongIdentRcd.Create(
                             LongIdentWithDots.CreateString("__.ReadIfNotNull")
                             , SynArgPats.Pats([ 
-                                // If at least one PK column exists, no arg required; else allow caller to pass a `column: Column` arg
-                                match firstPK with
-                                | Some _ -> 
-                                    SynPat.Const(SynConst.Unit, range0)
-                                | None -> 
-                                    SynPat.Paren(
-                                        SynPat.Typed(
-                                            SynPat.LongIdent(LongIdentWithDots.CreateString("column"), None, None, SynArgPats.Empty, None, range0)
-                                            , SynType.Create("Column")
-                                            , range0
-                                        )
-                                        , range0
-                                    )
+                                SynPat.Const(SynConst.Unit, range0)
                             ])
                         )
                     )
@@ -157,7 +154,7 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
                                 false
                                 , 
                                 // If at least one PK column exists, check first PK for null; else check user supplied column arg for null.
-                                match firstPK with
+                                match firstPkOrFirstRequiredField with
                                 | Some col -> LongIdentWithDots.Create([ "__"; col; "IsNull" ])
                                 | None -> LongIdentWithDots.Create([ "column"; "IsNull" ]) 
                                 , None
@@ -347,7 +344,6 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                         ]), 
                         [
                             for tbl in tbls do
-                                let hasPK = tbl.Columns |> List.exists(fun c -> c.IsPK)
                                 
                                 // match case: isOption = false
                                 SynMatchClause.Clause(
@@ -373,13 +369,11 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                     ], range0)
                                     , None
                                     ,
-                                    if hasPK then
-                                        SynExpr.CreateAppInfix(
-                                            SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; $"{tbl.Schema}.{tbl.Name}"; "ReadIfNotNull" ]), None), 
-                                            SynExpr.CreateIdent(Ident.Create(">> box"))
-                                        )
-                                    else
-                                        SynExpr.FailWith($"Could not read type '{tbl.Name} option' because no primary key exists.")
+                                    
+                                    SynExpr.CreateAppInfix(
+                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "__"; $"{tbl.Schema}.{tbl.Name}"; "ReadIfNotNull" ]), None), 
+                                        SynExpr.CreateIdent(Ident.Create(">> box"))
+                                    )
                                     , range0
                                     , DebugPointForTarget.No
                                 )
