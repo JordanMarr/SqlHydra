@@ -1,7 +1,7 @@
 ﻿open Expecto
 open Expecto.Logging
 
-//[<EntryPoint>]
+[<EntryPoint>]
 let main argv =
     let testConfig =
         { defaultConfig with

@@ -7,5 +7,5 @@ let connectionString = @"Server=npgsql;Port=5432;Database=Adventureworks;User Id
 #endif
 
 let toSql (query: SqlKata.Query) = 
-    let compiler = SqlKata.Compilers.SqlServerCompiler()
+    let compiler = SqlKata.Compilers.PostgresCompiler()
     compiler.Compile(query).Sql
