@@ -570,7 +570,7 @@ type HydraReader(reader: System.Data.IDataReader) =
                     fun () -> primitiveReader ord
                 | None ->
                     let nameParts = t.FullName.Split([| '.'; '+' |])
-                    let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join('.', parts)
+                    let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join(".", parts)
                     hydra.GetReaderByName(schemaAndType, isOpt)
             
             // Return a fn that will hydrate 'T (which may be a tuple)

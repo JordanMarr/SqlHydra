@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
-        <Version>0.500.0</Version>
+        <Version>0.500.1</Version>
         <Authors>Jordan Marr</Authors>
         <Description>SqlHydra.SqlServer is a dotnet tool that generates F# records for a SQL Server database.</Description>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -25,6 +25,8 @@
             v0.500.0
             - Breaking change (only if using HydraReader manually): Generated HydraReader properties are now fully qualified as ``{Schema}.{Table}``
             - Removed "Could not read type '___ option' because no primary key exists." exception.
+            v0.500.1
+            - Fixed build error that affected only netstandard projects
         </PackageReleaseNotes>
     </PropertyGroup>
 
