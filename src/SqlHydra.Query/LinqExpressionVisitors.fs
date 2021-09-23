@@ -456,8 +456,11 @@ let visitJoin<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
         | New n -> 
             // Handle groupBy that returns a tuple of multiple columns
             n.Arguments |> Seq.map visit |> Seq.toList |> List.collect id
-        | Member m -> [ m.Member ] // Handle simple properties
-        | Property mi -> [ mi ]     // Handle options
+        | Member m -> 
+            if m.Member.DeclaringType |> isOptionType
+            then visit m.Expression
+            else [ m.Member ]
+        | Property mi -> [ mi ]
         | _ -> notImpl()
 
     visit (propertySelector :> Expression)
@@ -474,11 +477,10 @@ let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Pro
             if m.Member.DeclaringType |> isOptionType
             then visit m.Expression
             else m.Member
-        | Property mi -> mi     // Handle options
+        | Property mi -> mi
         | _ -> notImpl()
 
     visit (propertySelector :> Expression)
-
 
 type Selection =
     | SelectedTable of Type

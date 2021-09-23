@@ -248,6 +248,18 @@ let tests =
             Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID] AND [Sales].[SalesOrderHeader].[ModifiedDate] = [Sales].[SalesOrderDetail].[ModifiedDate])")) ""
         }
 
+        test "Join On Value Bug Fix Test" {
+            let query = 
+                select {
+                    for o in orderHeaderTable do
+                    leftJoin d in orderHeaderTable on (o.AccountNumber.Value = d.Value.AccountNumber.Value)
+                    select o
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isNotNull sql "Shouldn't fail with exception"
+        }
+
         test "Delete Query with Where" {
             let query = 
                 delete {
