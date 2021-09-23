@@ -270,6 +270,16 @@ let! customerAddresses =
     |> ctx.ReadAsync HydraReader.Read
 ```
 
+To perform a join with multi-columns, use tuples:
+
+```F#
+select {
+    for o in orderHeaderTable do
+    join d in orderDetailTable on ((o.SalesOrderID, o.ModifiedDate) = (d.SalesOrderID, d.ModifiedDate))
+    select o
+}
+```
+
 #### Aggregates
 
 _Aggregate functions (can be used in `select`, `having` and `orderBy` clauses):_
