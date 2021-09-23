@@ -5,7 +5,7 @@ open Expecto.Logging
 let main argv =
     let testConfig =
         { defaultConfig with
-            parallelWorkers = 1
+            parallelWorkers = 4
             verbosity = LogLevel.Debug }
 
     Tests.runTestsInAssembly testConfig argv
