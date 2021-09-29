@@ -41,6 +41,7 @@ let newConfigWizard(app: AppInfo) =
         Config.OutputFile = outputFile
         Config.Namespace = ns
         Config.IsCLIMutable = isCLIMutable
+        Config.Filter = None // User must manually configure filter in .toml file
         Config.Readers = 
             if enableReaders 
             then Some { ReadersConfig.ReaderType = readerType }
@@ -53,7 +54,7 @@ let buildTomlFilename(app: AppInfo) =
 
 /// Saves a config as toml.
 let saveConfig (tomlFilename: string, cfg: Config) = 
-    let toml = TomlConfigParser.serialize(cfg)
+    let toml = TomlConfigParser.save(cfg)
     IO.File.WriteAllText(tomlFilename, toml)
 
 /// Reads a config from toml.
@@ -61,7 +62,7 @@ let tryLoadConfig(tomlFileName: string) =
     if IO.File.Exists(tomlFileName) then
         try            
             let toml = IO.File.ReadAllText(tomlFileName)
-            let config = TomlConfigParser.deserialize(toml)
+            let config = TomlConfigParser.read(toml)
             Valid config
         with ex -> 
             Invalid ex.Message

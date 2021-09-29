@@ -64,5 +64,6 @@ type Config =
         OutputFile: string
         Namespace: string
         IsCLIMutable: bool
+        Filter: string option
         Readers: ReadersConfig option
     }

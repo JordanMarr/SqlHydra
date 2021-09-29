@@ -23,7 +23,7 @@ let tests =
                     Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
                 }
 
-            let toml = TomlConfigParser.serialize(cfg)
+            let toml = TomlConfigParser.save(cfg)
     
             let expected = 
                 """
@@ -60,7 +60,7 @@ let tests =
                     Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
                 }
 
-            let cfg = TomlConfigParser.deserialize(toml)
+            let cfg = TomlConfigParser.read(toml)
     
             Expect.equal expected cfg ""
         }
@@ -84,7 +84,7 @@ let tests =
                     Config.Readers = None
                 }
 
-            let cfg = TomlConfigParser.deserialize(toml)
+            let cfg = TomlConfigParser.read(toml)
     
             Expect.equal expected cfg ""
         }

@@ -6,37 +6,42 @@ open Tomlyn.Syntax
 open Domain
 
 type TomlTable with
-    member this.TryGetTable(name: string) =
+
+    member this.Get<'T>(name: string) = 
+        this.Item(name) :?> 'T
+
+    member this.TryGet<'T>(name: string) =
         if this.ContainsKey(name)
-        then Some (this.Item(name) :?> TomlTable)
+        then Some (this.Item(name) :?> 'T)
         else None
 
-/// Toml to Config.
-let deserialize(toml: string) =
+/// Reads .toml file and returns a Config.
+let read(toml: string) =
     (*
         NOTE: New configuration keys should be parsed gracefully so as to not break older versions!
     *)
-    let doc = Toml.Parse(toml)
-    let table = doc.ToModel()
-    let general = table.Item("general") :?> TomlTable
-    let readersMaybe = table.TryGetTable("readers")
-
+    let doc = Toml.Parse toml
+    let model = doc.ToModel()
+    let generalTable = model.Get<TomlTable> "general"
+    let filterMaybe = generalTable.TryGet "filter"
+    let readersTable = model.TryGet<TomlTable> "readers"
     {
-        Config.ConnectionString = general.["connection"] :?> string
-        Config.OutputFile = general.["output"] :?> string
-        Config.Namespace = general.["namespace"] :?> string
-        Config.IsCLIMutable = general.["cli_mutable"] :?> bool
+        Config.ConnectionString = generalTable.Get "connection"
+        Config.OutputFile = generalTable.Get "output"
+        Config.Namespace = generalTable.Get "namespace"
+        Config.IsCLIMutable = generalTable.Get "cli_mutable"
+        Config.Filter = filterMaybe
         Config.Readers = 
-            readersMaybe
-            |> Option.map (fun tbl -> 
+            readersTable
+            |> Option.map (fun rdrsTbl -> 
                 {
-                    ReadersConfig.ReaderType = tbl.["reader_type"] :?> string
+                    ReadersConfig.ReaderType = rdrsTbl.Get<string> "reader_type"
                 }
             )
     }
 
-/// Config to toml.
-let serialize(cfg: Config) =
+/// Saves a Config to .toml file.
+let save(cfg: Config) =
     let doc = DocumentSyntax()
     
     let general = TableSyntax("general")        
@@ -44,12 +49,17 @@ let serialize(cfg: Config) =
     general.Items.Add("output", cfg.OutputFile)
     general.Items.Add("namespace", cfg.Namespace)
     general.Items.Add("cli_mutable", cfg.IsCLIMutable)
+    cfg.Filter |> Option.iter (fun filter -> 
+        general.Items.Add("filter", filter)
+    )
+
     doc.Tables.Add(general)
     
-    if cfg.Readers.IsSome then
+    cfg.Readers |> Option.iter (fun readersConfig ->
         let readers = TableSyntax("readers")
-        readers.Items.Add("reader_type", cfg.Readers.Value.ReaderType)
+        readers.Items.Add("reader_type", readersConfig.ReaderType)
         doc.Tables.Add(readers)
+    )
     
     let toml = doc.ToString()
     toml
