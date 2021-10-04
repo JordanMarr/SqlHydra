@@ -4,7 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
         <WarnOn>3390;$(WarnOn)</WarnOn>
-        <Version>0.500.1</Version>
+        <Version>0.510.0</Version>
         <Authors>Jordan Marr</Authors>
         <Description>SqlHydra.Npgsql is a dotnet tool that generates F# records for a PostgreSQL database.</Description>
         <PackageTags>F# fsharp data database orm sql</PackageTags>
@@ -29,6 +29,8 @@
             - Removed "Could not read type '___ option' because no primary key exists." exception.
             v0.500.1
             - Fixed build error that affected only netstandard projects
+            v0.510.0
+            - Adding an optional schema/table [filters] section to .toml config
         </PackageReleaseNotes>
     </PropertyGroup>
 
