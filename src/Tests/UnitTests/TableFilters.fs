@@ -32,7 +32,19 @@ let tests =
     categoryList "Unit Tests" "Table Filters" [
         
         test "Apply No Filters" {
-            Expect.equal 1 2 ""
+            let dboTbl1 = tbl "dbo" "tbl1"
+            let dboTbl2 = tbl "dbo" "tbl2"
+            let prodTbl1 = tbl "prod" "tbl1"
+            let prodTbl2 = tbl "prod" "tbl2"
+            let tables = [ dboTbl1; dboTbl2; prodTbl1; prodTbl2 ]
+
+            let cfg = cfg { 
+                Includes = [ ]
+                Excludes = [ ] 
+            }
+
+            let filteredTables = tables |> applyFilters cfg.Filters
+            Expect.equal filteredTables tables ""
         }
 
         test "Apply Includes" {
@@ -42,20 +54,45 @@ let tests =
             let prodTbl2 = tbl "prod" "tbl2"
             let tables = [ dboTbl1; dboTbl2; prodTbl1; prodTbl2 ]
 
-            let cfg = cfg { Includes = [ "dbo/*" ]; Excludes = [ ] }
+            let cfg = cfg { 
+                Includes = [ "dbo/*" ]
+                Excludes = [ ] 
+            }
 
             let filteredTables = tables |> applyFilters cfg.Filters
-
             Expect.equal filteredTables [ dboTbl1; dboTbl2 ] ""
         }
 
         test "Apply Excludes" {
-            Expect.equal 1 2 ""
+            let dboTbl1 = tbl "dbo" "tbl1"
+            let dboTbl2 = tbl "dbo" "tbl2"
+            let prodTbl1 = tbl "prod" "tbl1"
+            let prodTbl2 = tbl "prod" "tbl2"
+            let tables = [ dboTbl1; dboTbl2; prodTbl1; prodTbl2 ]
+
+            let cfg = cfg { 
+                Includes = [ "*" ]
+                Excludes = [ "dbo/*" ] 
+            }
+
+            let filteredTables = tables |> applyFilters cfg.Filters
+            Expect.equal filteredTables [ prodTbl1; prodTbl2 ] ""
         }
 
         test "Apply Includes and Excludes" {
-            
-            Expect.equal 1 2 ""
+            let dboTbl1 = tbl "dbo" "tbl1"
+            let dboTbl2 = tbl "dbo" "tbl2"
+            let prodTbl1 = tbl "prod" "tbl1"
+            let prodTbl2 = tbl "prod" "tbl2"
+            let tables = [ dboTbl1; dboTbl2; prodTbl1; prodTbl2 ]
+
+            let cfg = cfg { 
+                Includes = [ "dbo/*" ]
+                Excludes = [ "*/*1" ] 
+            }
+
+            let filteredTables = tables |> applyFilters cfg.Filters
+            Expect.equal filteredTables [ dboTbl2 ] ""
         }
     ]
 
