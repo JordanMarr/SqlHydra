@@ -41,7 +41,7 @@ let newConfigWizard(app: AppInfo) =
         Config.OutputFile = outputFile
         Config.Namespace = ns
         Config.IsCLIMutable = isCLIMutable
-        Config.Filter = None // User must manually configure filter in .toml file
+        Config.Filters = Filters.Empty // User must manually configure filter in .toml file
         Config.Readers = 
             if enableReaders 
             then Some { ReadersConfig.ReaderType = readerType }

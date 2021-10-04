@@ -17,22 +17,32 @@ type TomlTable with
 
 /// Reads .toml file and returns a Config.
 let read(toml: string) =
-    (*
-        NOTE: New configuration keys should be parsed gracefully so as to not break older versions!
-    *)
+
+    // NOTE: New configuration keys should be parsed gracefully so as to not break older versions!
     let doc = Toml.Parse toml
     let model = doc.ToModel()
     let generalTable = model.Get<TomlTable> "general"
-    let filterMaybe = generalTable.TryGet "filter"
-    let readersTable = model.TryGet<TomlTable> "readers"
+    let readersTableMaybe = model.TryGet<TomlTable> "readers"
+    let filtersTableMaybe = model.TryGet<TomlTable> "filters"
+
     {
         Config.ConnectionString = generalTable.Get "connection"
         Config.OutputFile = generalTable.Get "output"
         Config.Namespace = generalTable.Get "namespace"
         Config.IsCLIMutable = generalTable.Get "cli_mutable"
-        Config.Filter = filterMaybe
+        Config.Filters = 
+            match filtersTableMaybe with
+            | Some filtersTable -> 
+                {
+                    Filters.Includes = filtersTable.Get "include" |> Seq.cast<string> |> Seq.toList
+                    Filters.Excludes = filtersTable.Get "exclude" |> Seq.cast<string> |> Seq.toList
+                }
+            | None ->
+                Filters.Empty
+
+            
         Config.Readers = 
-            readersTable
+            readersTableMaybe
             |> Option.map (fun rdrsTbl -> 
                 {
                     ReadersConfig.ReaderType = rdrsTbl.Get<string> "reader_type"
@@ -49,10 +59,6 @@ let save(cfg: Config) =
     general.Items.Add("output", cfg.OutputFile)
     general.Items.Add("namespace", cfg.Namespace)
     general.Items.Add("cli_mutable", cfg.IsCLIMutable)
-    cfg.Filter |> Option.iter (fun filter -> 
-        general.Items.Add("filter", filter)
-    )
-
     doc.Tables.Add(general)
     
     cfg.Readers |> Option.iter (fun readersConfig ->
@@ -60,6 +66,12 @@ let save(cfg: Config) =
         readers.Items.Add("reader_type", readersConfig.ReaderType)
         doc.Tables.Add(readers)
     )
+
+    let filters = TableSyntax("filters")
+    filters.Items.Add("include", cfg.Filters.Includes |> List.toArray)
+    filters.Items.Add("exclude", cfg.Filters.Excludes |> List.toArray)
+
+    doc.Tables.Add(filters)
     
     let toml = doc.ToString()
     toml

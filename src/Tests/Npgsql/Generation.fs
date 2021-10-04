@@ -14,6 +14,7 @@ let cfg =
         Namespace = "TestNS"
         IsCLIMutable = true
         Readers = Some { ReadersConfig.ReaderType = Program.app.DefaultReaderType } 
+        Filters = Filters.Empty
     }
 
 [<Tests>]

@@ -28,6 +28,7 @@
     <Compile Include="Npgsql\Generation.fs" />
     <Compile Include="Sqlite\Generation.fs" />
     <Compile Include="UnitTests\TomlConfigParser.fs" />
+    <Compile Include="UnitTests\TableFilters.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

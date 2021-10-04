@@ -13,7 +13,7 @@ let assertEqual (s1: string, s2: string) =
 [<Tests>]
 let tests = 
     categoryList "Unit Tests" "TOML Config Parser" [
-        test "Parse: All" {
+        test "Save: All" {
             let cfg = 
                 {
                     Config.ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
@@ -21,6 +21,7 @@ let tests =
                     Config.Namespace = "SampleApp.AdventureWorks"
                     Config.IsCLIMutable = true
                     Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
+                    Config.Filters = Filters.Empty
                 }
 
             let toml = TomlConfigParser.save(cfg)
@@ -34,12 +35,15 @@ let tests =
                 cli_mutable = true
                 [readers]
                 reader_type = "Microsoft.Data.SqlClient.SqlDataReader"
+                [filters]
+                include = []
+                exclude = []
                 """
 
             assertEqual(expected, toml)
         }
     
-        test "Read: All" {
+        test "Read: with no filters" {
             let toml = 
                 """
                 [general]
@@ -58,11 +62,12 @@ let tests =
                     Config.Namespace = "SampleApp.AdventureWorks"
                     Config.IsCLIMutable = true
                     Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
+                    Config.Filters = Filters.Empty
                 }
 
             let cfg = TomlConfigParser.read(toml)
     
-            Expect.equal expected cfg ""
+            Expect.equal cfg expected ""
         }
 
         test "Read: when no readers section should be None"  {
@@ -82,10 +87,35 @@ let tests =
                     Config.Namespace = "SampleApp.AdventureWorks"
                     Config.IsCLIMutable = true
                     Config.Readers = None
+                    Config.Filters = Filters.Empty
                 }
 
             let cfg = TomlConfigParser.read(toml)
     
-            Expect.equal expected cfg ""
+            Expect.equal cfg expected ""
+        }
+
+        test "Read: should parse filters"  {
+            let toml = 
+                """
+                [general]
+                connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+                output = "AdventureWorks.fs"
+                namespace = "SampleApp.AdventureWorks"
+                cli_mutable = true
+                [filters]
+                include = [ "products/*", "dbo/*" ]
+                exclude = [ "products/system*" ]                
+                """
+
+            let expectedFilters =
+                { 
+                    Includes = [ "products/*"; "dbo/*" ]
+                    Excludes = [ "products/system*" ] 
+                }
+
+            let cfg = TomlConfigParser.read(toml)
+    
+            Expect.equal cfg.Filters expectedFilters ""
         }
     ]
