@@ -40,6 +40,7 @@
 
     <ItemGroup>
         <PackageReference Include="Fantomas" Version="4.4.0" />
+        <PackageReference Include="Glob" Version="1.1.8" />
         <PackageReference Include="Microsoft.Build" Version="16.11.0" />
         <PackageReference Include="Npgsql" Version="5.0.7" />
         <PackageReference Include="Spectre.Console" Version="0.41.0" />

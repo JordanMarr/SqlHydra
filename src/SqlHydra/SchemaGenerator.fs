@@ -574,14 +574,15 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
 
 /// Generates the outer module and table records.
 let generateModule (cfg: Config) (app: AppInfo) (db: Schema) = 
-    let schemas = db.Tables |> List.map (fun t -> t.Schema) |> List.distinct
+    let filteredTables = db.Tables |> applyFilters cfg.Filters
+    let schemas = filteredTables |> List.map (fun t -> t.Schema) |> List.distinct
     
     let nestedSchemaModules = 
         schemas
         |> List.map (fun schema -> 
             let schemaNestedModule = SynComponentInfoRcd.Create [ Ident.Create schema ]
 
-            let tables = db.Tables |> List.filter (fun t -> t.Schema = schema)
+            let tables = filteredTables |> List.filter (fun t -> t.Schema = schema)
 
             let tableRecordDeclarations = 
                 [ 
@@ -601,7 +602,7 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
 
     let readerExtensionsPlaceholder = SynModuleDecl.CreateOpen("Substitute.Extensions")
 
-    let allTables = schemas |> List.collect (fun schema -> db.Tables |> List.filter (fun t -> t.Schema = schema))
+    let allTables = schemas |> List.collect (fun schema -> filteredTables |> List.filter (fun t -> t.Schema = schema))
     // TODO: Handle duplicate table names between schemas
 
     let declarations = 
