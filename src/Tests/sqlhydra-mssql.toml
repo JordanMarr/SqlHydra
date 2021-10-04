@@ -5,3 +5,6 @@ namespace = "SqlServer.AdventureWorks"
 cli_mutable = true
 [readers]
 reader_type = "Microsoft.Data.SqlClient.SqlDataReader"
+[filters]
+include = [ "*" ]
+exclude = [ "*/v*" ]

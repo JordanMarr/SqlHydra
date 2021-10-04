@@ -197,294 +197,6 @@ module HumanResources =
         member __.ReadIfNotNull() =
             if __.ShiftID.IsNull() then None else Some(__.Read())
 
-    [<CLIMutable>]
-    type vEmployee =
-        { BusinessEntityID: int
-          FirstName: string
-          JobTitle: string
-          City: string
-          StateProvinceName: string
-          PostalCode: string
-          CountryRegionName: string
-          LastName: string
-          EmailPromotion: int
-          AddressLine1: string
-          AddressLine2: Option<string>
-          Suffix: Option<string>
-          PhoneNumber: Option<string>
-          PhoneNumberType: Option<string>
-          EmailAddress: Option<string>
-          MiddleName: Option<string>
-          Title: Option<string> }
-
-    type vEmployeeReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-        member __.JobTitle = RequiredColumn(reader, getOrdinal, reader.GetString, "JobTitle")
-        member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
-        member __.StateProvinceName = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceName")
-        member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
-        member __.CountryRegionName = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionName")
-        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
-        member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
-        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
-        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
-        member __.PhoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumber")
-        member __.PhoneNumberType = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumberType")
-        member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
-        member __.Read() =
-            { BusinessEntityID = __.BusinessEntityID.Read()
-              FirstName = __.FirstName.Read()
-              JobTitle = __.JobTitle.Read()
-              City = __.City.Read()
-              StateProvinceName = __.StateProvinceName.Read()
-              PostalCode = __.PostalCode.Read()
-              CountryRegionName = __.CountryRegionName.Read()
-              LastName = __.LastName.Read()
-              EmailPromotion = __.EmailPromotion.Read()
-              AddressLine1 = __.AddressLine1.Read()
-              AddressLine2 = __.AddressLine2.Read()
-              Suffix = __.Suffix.Read()
-              PhoneNumber = __.PhoneNumber.Read()
-              PhoneNumberType = __.PhoneNumberType.Read()
-              EmailAddress = __.EmailAddress.Read()
-              MiddleName = __.MiddleName.Read()
-              Title = __.Title.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vEmployeeDepartment =
-        { BusinessEntityID: int
-          FirstName: string
-          JobTitle: string
-          Department: string
-          GroupName: string
-          StartDate: System.DateTime
-          LastName: string
-          Suffix: Option<string>
-          MiddleName: Option<string>
-          Title: Option<string> }
-
-    type vEmployeeDepartmentReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-        member __.JobTitle = RequiredColumn(reader, getOrdinal, reader.GetString, "JobTitle")
-        member __.Department = RequiredColumn(reader, getOrdinal, reader.GetString, "Department")
-        member __.GroupName = RequiredColumn(reader, getOrdinal, reader.GetString, "GroupName")
-        member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
-        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
-        member __.Read() =
-            { BusinessEntityID = __.BusinessEntityID.Read()
-              FirstName = __.FirstName.Read()
-              JobTitle = __.JobTitle.Read()
-              Department = __.Department.Read()
-              GroupName = __.GroupName.Read()
-              StartDate = __.StartDate.Read()
-              LastName = __.LastName.Read()
-              Suffix = __.Suffix.Read()
-              MiddleName = __.MiddleName.Read()
-              Title = __.Title.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vEmployeeDepartmentHistory =
-        { BusinessEntityID: int
-          FirstName: string
-          LastName: string
-          Shift: string
-          Department: string
-          GroupName: string
-          StartDate: System.DateTime
-          EndDate: Option<System.DateTime>
-          Suffix: Option<string>
-          MiddleName: Option<string>
-          Title: Option<string> }
-
-    type vEmployeeDepartmentHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-        member __.Shift = RequiredColumn(reader, getOrdinal, reader.GetString, "Shift")
-        member __.Department = RequiredColumn(reader, getOrdinal, reader.GetString, "Department")
-        member __.GroupName = RequiredColumn(reader, getOrdinal, reader.GetString, "GroupName")
-        member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
-        member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
-        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
-        member __.Read() =
-            { BusinessEntityID = __.BusinessEntityID.Read()
-              FirstName = __.FirstName.Read()
-              LastName = __.LastName.Read()
-              Shift = __.Shift.Read()
-              Department = __.Department.Read()
-              GroupName = __.GroupName.Read()
-              StartDate = __.StartDate.Read()
-              EndDate = __.EndDate.Read()
-              Suffix = __.Suffix.Read()
-              MiddleName = __.MiddleName.Read()
-              Title = __.Title.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vJobCandidate =
-        { JobCandidateID: int
-          ModifiedDate: System.DateTime
-          BusinessEntityID: Option<int>
-          ``Name.Prefix``: Option<string>
-          ``Name.First``: Option<string>
-          ``Name.Middle``: Option<string>
-          ``Name.Last``: Option<string>
-          ``Name.Suffix``: Option<string>
-          Skills: Option<string>
-          ``Addr.Type``: Option<string>
-          ``Addr.Loc.CountryRegion``: Option<string>
-          ``Addr.Loc.State``: Option<string>
-          ``Addr.Loc.City``: Option<string>
-          ``Addr.PostalCode``: Option<string>
-          EMail: Option<string>
-          WebSite: Option<string> }
-
-    type vJobCandidateReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.JobCandidateID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "JobCandidateID")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.BusinessEntityID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.``Name.Prefix`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Name.Prefix")
-        member __.``Name.First`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Name.First")
-        member __.``Name.Middle`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Name.Middle")
-        member __.``Name.Last`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Name.Last")
-        member __.``Name.Suffix`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Name.Suffix")
-        member __.Skills = OptionalColumn(reader, getOrdinal, reader.GetString, "Skills")
-        member __.``Addr.Type`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Addr.Type")
-        member __.``Addr.Loc.CountryRegion`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Addr.Loc.CountryRegion")
-        member __.``Addr.Loc.State`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Addr.Loc.State")
-        member __.``Addr.Loc.City`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Addr.Loc.City")
-        member __.``Addr.PostalCode`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Addr.PostalCode")
-        member __.EMail = OptionalColumn(reader, getOrdinal, reader.GetString, "EMail")
-        member __.WebSite = OptionalColumn(reader, getOrdinal, reader.GetString, "WebSite")
-        member __.Read() =
-            { JobCandidateID = __.JobCandidateID.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              BusinessEntityID = __.BusinessEntityID.Read()
-              ``Name.Prefix`` = __.``Name.Prefix``.Read()
-              ``Name.First`` = __.``Name.First``.Read()
-              ``Name.Middle`` = __.``Name.Middle``.Read()
-              ``Name.Last`` = __.``Name.Last``.Read()
-              ``Name.Suffix`` = __.``Name.Suffix``.Read()
-              Skills = __.Skills.Read()
-              ``Addr.Type`` = __.``Addr.Type``.Read()
-              ``Addr.Loc.CountryRegion`` = __.``Addr.Loc.CountryRegion``.Read()
-              ``Addr.Loc.State`` = __.``Addr.Loc.State``.Read()
-              ``Addr.Loc.City`` = __.``Addr.Loc.City``.Read()
-              ``Addr.PostalCode`` = __.``Addr.PostalCode``.Read()
-              EMail = __.EMail.Read()
-              WebSite = __.WebSite.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.JobCandidateID.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vJobCandidateEducation =
-        { JobCandidateID: int
-          ``Edu.Level``: Option<string>
-          ``Edu.StartDate``: Option<System.DateTime>
-          ``Edu.EndDate``: Option<System.DateTime>
-          ``Edu.Degree``: Option<string>
-          ``Edu.Major``: Option<string>
-          ``Edu.Minor``: Option<string>
-          ``Edu.GPA``: Option<string>
-          ``Edu.GPAScale``: Option<string>
-          ``Edu.School``: Option<string>
-          ``Edu.Loc.CountryRegion``: Option<string>
-          ``Edu.Loc.State``: Option<string>
-          ``Edu.Loc.City``: Option<string> }
-
-    type vJobCandidateEducationReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.JobCandidateID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "JobCandidateID")
-        member __.``Edu.Level`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Level")
-        member __.``Edu.StartDate`` = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "Edu.StartDate")
-        member __.``Edu.EndDate`` = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "Edu.EndDate")
-        member __.``Edu.Degree`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Degree")
-        member __.``Edu.Major`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Major")
-        member __.``Edu.Minor`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Minor")
-        member __.``Edu.GPA`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.GPA")
-        member __.``Edu.GPAScale`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.GPAScale")
-        member __.``Edu.School`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.School")
-        member __.``Edu.Loc.CountryRegion`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Loc.CountryRegion")
-        member __.``Edu.Loc.State`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Loc.State")
-        member __.``Edu.Loc.City`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Loc.City")
-        member __.Read() =
-            { JobCandidateID = __.JobCandidateID.Read()
-              ``Edu.Level`` = __.``Edu.Level``.Read()
-              ``Edu.StartDate`` = __.``Edu.StartDate``.Read()
-              ``Edu.EndDate`` = __.``Edu.EndDate``.Read()
-              ``Edu.Degree`` = __.``Edu.Degree``.Read()
-              ``Edu.Major`` = __.``Edu.Major``.Read()
-              ``Edu.Minor`` = __.``Edu.Minor``.Read()
-              ``Edu.GPA`` = __.``Edu.GPA``.Read()
-              ``Edu.GPAScale`` = __.``Edu.GPAScale``.Read()
-              ``Edu.School`` = __.``Edu.School``.Read()
-              ``Edu.Loc.CountryRegion`` = __.``Edu.Loc.CountryRegion``.Read()
-              ``Edu.Loc.State`` = __.``Edu.Loc.State``.Read()
-              ``Edu.Loc.City`` = __.``Edu.Loc.City``.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.JobCandidateID.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vJobCandidateEmployment =
-        { JobCandidateID: int
-          ``Emp.StartDate``: Option<System.DateTime>
-          ``Emp.EndDate``: Option<System.DateTime>
-          ``Emp.OrgName``: Option<string>
-          ``Emp.JobTitle``: Option<string>
-          ``Emp.Responsibility``: Option<string>
-          ``Emp.FunctionCategory``: Option<string>
-          ``Emp.IndustryCategory``: Option<string>
-          ``Emp.Loc.CountryRegion``: Option<string>
-          ``Emp.Loc.State``: Option<string>
-          ``Emp.Loc.City``: Option<string> }
-
-    type vJobCandidateEmploymentReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.JobCandidateID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "JobCandidateID")
-        member __.``Emp.StartDate`` = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "Emp.StartDate")
-        member __.``Emp.EndDate`` = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "Emp.EndDate")
-        member __.``Emp.OrgName`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.OrgName")
-        member __.``Emp.JobTitle`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.JobTitle")
-        member __.``Emp.Responsibility`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.Responsibility")
-        member __.``Emp.FunctionCategory`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.FunctionCategory")
-        member __.``Emp.IndustryCategory`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.IndustryCategory")
-        member __.``Emp.Loc.CountryRegion`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.Loc.CountryRegion")
-        member __.``Emp.Loc.State`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.Loc.State")
-        member __.``Emp.Loc.City`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.Loc.City")
-        member __.Read() =
-            { JobCandidateID = __.JobCandidateID.Read()
-              ``Emp.StartDate`` = __.``Emp.StartDate``.Read()
-              ``Emp.EndDate`` = __.``Emp.EndDate``.Read()
-              ``Emp.OrgName`` = __.``Emp.OrgName``.Read()
-              ``Emp.JobTitle`` = __.``Emp.JobTitle``.Read()
-              ``Emp.Responsibility`` = __.``Emp.Responsibility``.Read()
-              ``Emp.FunctionCategory`` = __.``Emp.FunctionCategory``.Read()
-              ``Emp.IndustryCategory`` = __.``Emp.IndustryCategory``.Read()
-              ``Emp.Loc.CountryRegion`` = __.``Emp.Loc.CountryRegion``.Read()
-              ``Emp.Loc.State`` = __.``Emp.Loc.State``.Read()
-              ``Emp.Loc.City`` = __.``Emp.Loc.City``.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.JobCandidateID.IsNull() then None else Some(__.Read())
-
 module Person =
     [<CLIMutable>]
     type Address =
@@ -800,96 +512,6 @@ module Person =
               TerritoryID = __.TerritoryID.Read()
               rowguid = __.rowguid.Read()
               ModifiedDate = __.ModifiedDate.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.StateProvinceID.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vAdditionalContactInfo =
-        { BusinessEntityID: int
-          FirstName: string
-          rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          LastName: string
-          TelephoneNumber: Option<string>
-          TelephoneSpecialInstructions: Option<string>
-          Street: Option<string>
-          City: Option<string>
-          StateProvince: Option<string>
-          PostalCode: Option<string>
-          CountryRegion: Option<string>
-          HomeAddressSpecialInstructions: Option<string>
-          EMailAddress: Option<string>
-          EMailSpecialInstructions: Option<string>
-          EMailTelephoneNumber: Option<string>
-          MiddleName: Option<string> }
-
-    type vAdditionalContactInfoReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-        member __.TelephoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "TelephoneNumber")
-        member __.TelephoneSpecialInstructions = OptionalColumn(reader, getOrdinal, reader.GetString, "TelephoneSpecialInstructions")
-        member __.Street = OptionalColumn(reader, getOrdinal, reader.GetString, "Street")
-        member __.City = OptionalColumn(reader, getOrdinal, reader.GetString, "City")
-        member __.StateProvince = OptionalColumn(reader, getOrdinal, reader.GetString, "StateProvince")
-        member __.PostalCode = OptionalColumn(reader, getOrdinal, reader.GetString, "PostalCode")
-        member __.CountryRegion = OptionalColumn(reader, getOrdinal, reader.GetString, "CountryRegion")
-        member __.HomeAddressSpecialInstructions = OptionalColumn(reader, getOrdinal, reader.GetString, "HomeAddressSpecialInstructions")
-        member __.EMailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EMailAddress")
-        member __.EMailSpecialInstructions = OptionalColumn(reader, getOrdinal, reader.GetString, "EMailSpecialInstructions")
-        member __.EMailTelephoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "EMailTelephoneNumber")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
-        member __.Read() =
-            { BusinessEntityID = __.BusinessEntityID.Read()
-              FirstName = __.FirstName.Read()
-              rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              LastName = __.LastName.Read()
-              TelephoneNumber = __.TelephoneNumber.Read()
-              TelephoneSpecialInstructions = __.TelephoneSpecialInstructions.Read()
-              Street = __.Street.Read()
-              City = __.City.Read()
-              StateProvince = __.StateProvince.Read()
-              PostalCode = __.PostalCode.Read()
-              CountryRegion = __.CountryRegion.Read()
-              HomeAddressSpecialInstructions = __.HomeAddressSpecialInstructions.Read()
-              EMailAddress = __.EMailAddress.Read()
-              EMailSpecialInstructions = __.EMailSpecialInstructions.Read()
-              EMailTelephoneNumber = __.EMailTelephoneNumber.Read()
-              MiddleName = __.MiddleName.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vStateProvinceCountryRegion =
-        { StateProvinceID: int
-          StateProvinceCode: string
-          IsOnlyStateProvinceFlag: bool
-          StateProvinceName: string
-          TerritoryID: int
-          CountryRegionCode: string
-          CountryRegionName: string }
-
-    type vStateProvinceCountryRegionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.StateProvinceID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "StateProvinceID")
-        member __.StateProvinceCode = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceCode")
-        member __.IsOnlyStateProvinceFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "IsOnlyStateProvinceFlag")
-        member __.StateProvinceName = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceName")
-        member __.TerritoryID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
-        member __.CountryRegionCode = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionCode")
-        member __.CountryRegionName = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionName")
-        member __.Read() =
-            { StateProvinceID = __.StateProvinceID.Read()
-              StateProvinceCode = __.StateProvinceCode.Read()
-              IsOnlyStateProvinceFlag = __.IsOnlyStateProvinceFlag.Read()
-              StateProvinceName = __.StateProvinceName.Read()
-              TerritoryID = __.TerritoryID.Read()
-              CountryRegionCode = __.CountryRegionCode.Read()
-              CountryRegionName = __.CountryRegionName.Read() }
 
         member __.ReadIfNotNull() =
             if __.StateProvinceID.IsNull() then None else Some(__.Read())
@@ -1612,156 +1234,6 @@ module Production =
         member __.ReadIfNotNull() =
             if __.WorkOrderID.IsNull() then None else Some(__.Read())
 
-    [<CLIMutable>]
-    type vProductAndDescription =
-        { ProductID: int
-          Name: string
-          ProductModel: string
-          CultureID: string
-          Description: string }
-
-    type vProductAndDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
-        member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
-        member __.ProductModel = RequiredColumn(reader, getOrdinal, reader.GetString, "ProductModel")
-        member __.CultureID = RequiredColumn(reader, getOrdinal, reader.GetString, "CultureID")
-        member __.Description = RequiredColumn(reader, getOrdinal, reader.GetString, "Description")
-        member __.Read() =
-            { ProductID = __.ProductID.Read()
-              Name = __.Name.Read()
-              ProductModel = __.ProductModel.Read()
-              CultureID = __.CultureID.Read()
-              Description = __.Description.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.ProductID.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vProductModelCatalogDescription =
-        { ProductModelID: int
-          Name: string
-          rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          Summary: Option<string>
-          Manufacturer: Option<string>
-          Copyright: Option<string>
-          ProductURL: Option<string>
-          WarrantyPeriod: Option<string>
-          WarrantyDescription: Option<string>
-          NoOfYears: Option<string>
-          MaintenanceDescription: Option<string>
-          Wheel: Option<string>
-          Saddle: Option<string>
-          Pedal: Option<string>
-          BikeFrame: Option<string>
-          Crankset: Option<string>
-          PictureAngle: Option<string>
-          PictureSize: Option<string>
-          ProductPhotoID: Option<string>
-          Material: Option<string>
-          Color: Option<string>
-          ProductLine: Option<string>
-          Style: Option<string>
-          RiderExperience: Option<string> }
-
-    type vProductModelCatalogDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
-        member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.Summary = OptionalColumn(reader, getOrdinal, reader.GetString, "Summary")
-        member __.Manufacturer = OptionalColumn(reader, getOrdinal, reader.GetString, "Manufacturer")
-        member __.Copyright = OptionalColumn(reader, getOrdinal, reader.GetString, "Copyright")
-        member __.ProductURL = OptionalColumn(reader, getOrdinal, reader.GetString, "ProductURL")
-        member __.WarrantyPeriod = OptionalColumn(reader, getOrdinal, reader.GetString, "WarrantyPeriod")
-        member __.WarrantyDescription = OptionalColumn(reader, getOrdinal, reader.GetString, "WarrantyDescription")
-        member __.NoOfYears = OptionalColumn(reader, getOrdinal, reader.GetString, "NoOfYears")
-        member __.MaintenanceDescription = OptionalColumn(reader, getOrdinal, reader.GetString, "MaintenanceDescription")
-        member __.Wheel = OptionalColumn(reader, getOrdinal, reader.GetString, "Wheel")
-        member __.Saddle = OptionalColumn(reader, getOrdinal, reader.GetString, "Saddle")
-        member __.Pedal = OptionalColumn(reader, getOrdinal, reader.GetString, "Pedal")
-        member __.BikeFrame = OptionalColumn(reader, getOrdinal, reader.GetString, "BikeFrame")
-        member __.Crankset = OptionalColumn(reader, getOrdinal, reader.GetString, "Crankset")
-        member __.PictureAngle = OptionalColumn(reader, getOrdinal, reader.GetString, "PictureAngle")
-        member __.PictureSize = OptionalColumn(reader, getOrdinal, reader.GetString, "PictureSize")
-        member __.ProductPhotoID = OptionalColumn(reader, getOrdinal, reader.GetString, "ProductPhotoID")
-        member __.Material = OptionalColumn(reader, getOrdinal, reader.GetString, "Material")
-        member __.Color = OptionalColumn(reader, getOrdinal, reader.GetString, "Color")
-        member __.ProductLine = OptionalColumn(reader, getOrdinal, reader.GetString, "ProductLine")
-        member __.Style = OptionalColumn(reader, getOrdinal, reader.GetString, "Style")
-        member __.RiderExperience = OptionalColumn(reader, getOrdinal, reader.GetString, "RiderExperience")
-        member __.Read() =
-            { ProductModelID = __.ProductModelID.Read()
-              Name = __.Name.Read()
-              rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              Summary = __.Summary.Read()
-              Manufacturer = __.Manufacturer.Read()
-              Copyright = __.Copyright.Read()
-              ProductURL = __.ProductURL.Read()
-              WarrantyPeriod = __.WarrantyPeriod.Read()
-              WarrantyDescription = __.WarrantyDescription.Read()
-              NoOfYears = __.NoOfYears.Read()
-              MaintenanceDescription = __.MaintenanceDescription.Read()
-              Wheel = __.Wheel.Read()
-              Saddle = __.Saddle.Read()
-              Pedal = __.Pedal.Read()
-              BikeFrame = __.BikeFrame.Read()
-              Crankset = __.Crankset.Read()
-              PictureAngle = __.PictureAngle.Read()
-              PictureSize = __.PictureSize.Read()
-              ProductPhotoID = __.ProductPhotoID.Read()
-              Material = __.Material.Read()
-              Color = __.Color.Read()
-              ProductLine = __.ProductLine.Read()
-              Style = __.Style.Read()
-              RiderExperience = __.RiderExperience.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.ProductModelID.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vProductModelInstructions =
-        { ProductModelID: int
-          Name: string
-          rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          Instructions: Option<string>
-          LocationID: Option<int>
-          SetupHours: Option<decimal>
-          MachineHours: Option<decimal>
-          LaborHours: Option<decimal>
-          LotSize: Option<int>
-          Step: Option<string> }
-
-    type vProductModelInstructionsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
-        member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.Instructions = OptionalColumn(reader, getOrdinal, reader.GetString, "Instructions")
-        member __.LocationID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "LocationID")
-        member __.SetupHours = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SetupHours")
-        member __.MachineHours = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "MachineHours")
-        member __.LaborHours = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "LaborHours")
-        member __.LotSize = OptionalColumn(reader, getOrdinal, reader.GetInt32, "LotSize")
-        member __.Step = OptionalColumn(reader, getOrdinal, reader.GetString, "Step")
-        member __.Read() =
-            { ProductModelID = __.ProductModelID.Read()
-              Name = __.Name.Read()
-              rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              Instructions = __.Instructions.Read()
-              LocationID = __.LocationID.Read()
-              SetupHours = __.SetupHours.Read()
-              MachineHours = __.MachineHours.Read()
-              LaborHours = __.LaborHours.Read()
-              LotSize = __.LotSize.Read()
-              Step = __.Step.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.ProductModelID.IsNull() then None else Some(__.Read())
-
 module Purchasing =
     [<CLIMutable>]
     type ProductVendor =
@@ -1951,87 +1423,6 @@ module Purchasing =
               ActiveFlag = __.ActiveFlag.Read()
               ModifiedDate = __.ModifiedDate.Read()
               PurchasingWebServiceURL = __.PurchasingWebServiceURL.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vVendorWithAddresses =
-        { City: string
-          StateProvinceName: string
-          PostalCode: string
-          CountryRegionName: string
-          BusinessEntityID: int
-          Name: string
-          AddressType: string
-          AddressLine1: string
-          AddressLine2: Option<string> }
-
-    type vVendorWithAddressesReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
-        member __.StateProvinceName = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceName")
-        member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
-        member __.CountryRegionName = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionName")
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
-        member __.AddressType = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressType")
-        member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
-        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
-        member __.Read() =
-            { City = __.City.Read()
-              StateProvinceName = __.StateProvinceName.Read()
-              PostalCode = __.PostalCode.Read()
-              CountryRegionName = __.CountryRegionName.Read()
-              BusinessEntityID = __.BusinessEntityID.Read()
-              Name = __.Name.Read()
-              AddressType = __.AddressType.Read()
-              AddressLine1 = __.AddressLine1.Read()
-              AddressLine2 = __.AddressLine2.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.City.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vVendorWithContacts =
-        { BusinessEntityID: int
-          Name: string
-          ContactType: string
-          LastName: string
-          FirstName: string
-          EmailPromotion: int
-          MiddleName: Option<string>
-          Suffix: Option<string>
-          PhoneNumber: Option<string>
-          PhoneNumberType: Option<string>
-          EmailAddress: Option<string>
-          Title: Option<string> }
-
-    type vVendorWithContactsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
-        member __.ContactType = RequiredColumn(reader, getOrdinal, reader.GetString, "ContactType")
-        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
-        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
-        member __.PhoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumber")
-        member __.PhoneNumberType = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumberType")
-        member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
-        member __.Read() =
-            { BusinessEntityID = __.BusinessEntityID.Read()
-              Name = __.Name.Read()
-              ContactType = __.ContactType.Read()
-              LastName = __.LastName.Read()
-              FirstName = __.FirstName.Read()
-              EmailPromotion = __.EmailPromotion.Read()
-              MiddleName = __.MiddleName.Read()
-              Suffix = __.Suffix.Read()
-              PhoneNumber = __.PhoneNumber.Read()
-              PhoneNumberType = __.PhoneNumberType.Read()
-              EmailAddress = __.EmailAddress.Read()
-              Title = __.Title.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -2616,345 +2007,6 @@ module Sales =
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-    [<CLIMutable>]
-    type vIndividualCustomer =
-        { FirstName: string
-          City: string
-          StateProvinceName: string
-          PostalCode: string
-          CountryRegionName: string
-          BusinessEntityID: int
-          LastName: string
-          EmailPromotion: int
-          AddressType: string
-          AddressLine1: string
-          AddressLine2: Option<string>
-          Suffix: Option<string>
-          PhoneNumber: Option<string>
-          PhoneNumberType: Option<string>
-          EmailAddress: Option<string>
-          Title: Option<string>
-          MiddleName: Option<string> }
-
-    type vIndividualCustomerReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-        member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
-        member __.StateProvinceName = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceName")
-        member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
-        member __.CountryRegionName = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionName")
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
-        member __.AddressType = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressType")
-        member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
-        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
-        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
-        member __.PhoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumber")
-        member __.PhoneNumberType = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumberType")
-        member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
-        member __.Read() =
-            { FirstName = __.FirstName.Read()
-              City = __.City.Read()
-              StateProvinceName = __.StateProvinceName.Read()
-              PostalCode = __.PostalCode.Read()
-              CountryRegionName = __.CountryRegionName.Read()
-              BusinessEntityID = __.BusinessEntityID.Read()
-              LastName = __.LastName.Read()
-              EmailPromotion = __.EmailPromotion.Read()
-              AddressType = __.AddressType.Read()
-              AddressLine1 = __.AddressLine1.Read()
-              AddressLine2 = __.AddressLine2.Read()
-              Suffix = __.Suffix.Read()
-              PhoneNumber = __.PhoneNumber.Read()
-              PhoneNumberType = __.PhoneNumberType.Read()
-              EmailAddress = __.EmailAddress.Read()
-              Title = __.Title.Read()
-              MiddleName = __.MiddleName.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.FirstName.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vPersonDemographics =
-        { BusinessEntityID: int
-          TotalPurchaseYTD: Option<decimal>
-          DateFirstPurchase: Option<System.DateTime>
-          BirthDate: Option<System.DateTime>
-          MaritalStatus: Option<string>
-          YearlyIncome: Option<string>
-          Gender: Option<string>
-          TotalChildren: Option<int>
-          NumberChildrenAtHome: Option<int>
-          Education: Option<string>
-          Occupation: Option<string>
-          HomeOwnerFlag: Option<bool>
-          NumberCarsOwned: Option<int> }
-
-    type vPersonDemographicsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.TotalPurchaseYTD = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "TotalPurchaseYTD")
-        member __.DateFirstPurchase = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "DateFirstPurchase")
-        member __.BirthDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "BirthDate")
-        member __.MaritalStatus = OptionalColumn(reader, getOrdinal, reader.GetString, "MaritalStatus")
-        member __.YearlyIncome = OptionalColumn(reader, getOrdinal, reader.GetString, "YearlyIncome")
-        member __.Gender = OptionalColumn(reader, getOrdinal, reader.GetString, "Gender")
-        member __.TotalChildren = OptionalColumn(reader, getOrdinal, reader.GetInt32, "TotalChildren")
-        member __.NumberChildrenAtHome = OptionalColumn(reader, getOrdinal, reader.GetInt32, "NumberChildrenAtHome")
-        member __.Education = OptionalColumn(reader, getOrdinal, reader.GetString, "Education")
-        member __.Occupation = OptionalColumn(reader, getOrdinal, reader.GetString, "Occupation")
-        member __.HomeOwnerFlag = OptionalColumn(reader, getOrdinal, reader.GetBoolean, "HomeOwnerFlag")
-        member __.NumberCarsOwned = OptionalColumn(reader, getOrdinal, reader.GetInt32, "NumberCarsOwned")
-        member __.Read() =
-            { BusinessEntityID = __.BusinessEntityID.Read()
-              TotalPurchaseYTD = __.TotalPurchaseYTD.Read()
-              DateFirstPurchase = __.DateFirstPurchase.Read()
-              BirthDate = __.BirthDate.Read()
-              MaritalStatus = __.MaritalStatus.Read()
-              YearlyIncome = __.YearlyIncome.Read()
-              Gender = __.Gender.Read()
-              TotalChildren = __.TotalChildren.Read()
-              NumberChildrenAtHome = __.NumberChildrenAtHome.Read()
-              Education = __.Education.Read()
-              Occupation = __.Occupation.Read()
-              HomeOwnerFlag = __.HomeOwnerFlag.Read()
-              NumberCarsOwned = __.NumberCarsOwned.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vSalesPerson =
-        { EmailPromotion: int
-          AddressLine1: string
-          SalesYTD: decimal
-          SalesLastYear: decimal
-          JobTitle: string
-          City: string
-          StateProvinceName: string
-          PostalCode: string
-          CountryRegionName: string
-          BusinessEntityID: int
-          FirstName: string
-          LastName: string
-          Suffix: Option<string>
-          MiddleName: Option<string>
-          Title: Option<string>
-          TerritoryName: Option<string>
-          TerritoryGroup: Option<string>
-          SalesQuota: Option<decimal>
-          PhoneNumber: Option<string>
-          PhoneNumberType: Option<string>
-          EmailAddress: Option<string>
-          AddressLine2: Option<string> }
-
-    type vSalesPersonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
-        member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
-        member __.SalesYTD = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SalesYTD")
-        member __.SalesLastYear = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SalesLastYear")
-        member __.JobTitle = RequiredColumn(reader, getOrdinal, reader.GetString, "JobTitle")
-        member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
-        member __.StateProvinceName = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceName")
-        member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
-        member __.CountryRegionName = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionName")
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
-        member __.TerritoryName = OptionalColumn(reader, getOrdinal, reader.GetString, "TerritoryName")
-        member __.TerritoryGroup = OptionalColumn(reader, getOrdinal, reader.GetString, "TerritoryGroup")
-        member __.SalesQuota = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SalesQuota")
-        member __.PhoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumber")
-        member __.PhoneNumberType = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumberType")
-        member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
-        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
-        member __.Read() =
-            { EmailPromotion = __.EmailPromotion.Read()
-              AddressLine1 = __.AddressLine1.Read()
-              SalesYTD = __.SalesYTD.Read()
-              SalesLastYear = __.SalesLastYear.Read()
-              JobTitle = __.JobTitle.Read()
-              City = __.City.Read()
-              StateProvinceName = __.StateProvinceName.Read()
-              PostalCode = __.PostalCode.Read()
-              CountryRegionName = __.CountryRegionName.Read()
-              BusinessEntityID = __.BusinessEntityID.Read()
-              FirstName = __.FirstName.Read()
-              LastName = __.LastName.Read()
-              Suffix = __.Suffix.Read()
-              MiddleName = __.MiddleName.Read()
-              Title = __.Title.Read()
-              TerritoryName = __.TerritoryName.Read()
-              TerritoryGroup = __.TerritoryGroup.Read()
-              SalesQuota = __.SalesQuota.Read()
-              PhoneNumber = __.PhoneNumber.Read()
-              PhoneNumberType = __.PhoneNumberType.Read()
-              EmailAddress = __.EmailAddress.Read()
-              AddressLine2 = __.AddressLine2.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.EmailPromotion.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vSalesPersonSalesByFiscalYears =
-        { JobTitle: string
-          SalesTerritory: string
-          ``2002``: Option<decimal>
-          ``2003``: Option<decimal>
-          ``2004``: Option<decimal>
-          SalesPersonID: Option<int>
-          FullName: Option<string> }
-
-    type vSalesPersonSalesByFiscalYearsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.JobTitle = RequiredColumn(reader, getOrdinal, reader.GetString, "JobTitle")
-        member __.SalesTerritory = RequiredColumn(reader, getOrdinal, reader.GetString, "SalesTerritory")
-        member __.``2002`` = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "2002")
-        member __.``2003`` = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "2003")
-        member __.``2004`` = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "2004")
-        member __.SalesPersonID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "SalesPersonID")
-        member __.FullName = OptionalColumn(reader, getOrdinal, reader.GetString, "FullName")
-        member __.Read() =
-            { JobTitle = __.JobTitle.Read()
-              SalesTerritory = __.SalesTerritory.Read()
-              ``2002`` = __.``2002``.Read()
-              ``2003`` = __.``2003``.Read()
-              ``2004`` = __.``2004``.Read()
-              SalesPersonID = __.SalesPersonID.Read()
-              FullName = __.FullName.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.JobTitle.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vStoreWithAddresses =
-        { BusinessEntityID: int
-          Name: string
-          AddressType: string
-          AddressLine1: string
-          City: string
-          StateProvinceName: string
-          PostalCode: string
-          CountryRegionName: string
-          AddressLine2: Option<string> }
-
-    type vStoreWithAddressesReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
-        member __.AddressType = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressType")
-        member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
-        member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
-        member __.StateProvinceName = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceName")
-        member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
-        member __.CountryRegionName = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionName")
-        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
-        member __.Read() =
-            { BusinessEntityID = __.BusinessEntityID.Read()
-              Name = __.Name.Read()
-              AddressType = __.AddressType.Read()
-              AddressLine1 = __.AddressLine1.Read()
-              City = __.City.Read()
-              StateProvinceName = __.StateProvinceName.Read()
-              PostalCode = __.PostalCode.Read()
-              CountryRegionName = __.CountryRegionName.Read()
-              AddressLine2 = __.AddressLine2.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vStoreWithContacts =
-        { EmailPromotion: int
-          FirstName: string
-          BusinessEntityID: int
-          Name: string
-          ContactType: string
-          LastName: string
-          Suffix: Option<string>
-          PhoneNumber: Option<string>
-          PhoneNumberType: Option<string>
-          EmailAddress: Option<string>
-          Title: Option<string>
-          MiddleName: Option<string> }
-
-    type vStoreWithContactsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
-        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
-        member __.ContactType = RequiredColumn(reader, getOrdinal, reader.GetString, "ContactType")
-        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
-        member __.PhoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumber")
-        member __.PhoneNumberType = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumberType")
-        member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
-        member __.Read() =
-            { EmailPromotion = __.EmailPromotion.Read()
-              FirstName = __.FirstName.Read()
-              BusinessEntityID = __.BusinessEntityID.Read()
-              Name = __.Name.Read()
-              ContactType = __.ContactType.Read()
-              LastName = __.LastName.Read()
-              Suffix = __.Suffix.Read()
-              PhoneNumber = __.PhoneNumber.Read()
-              PhoneNumberType = __.PhoneNumberType.Read()
-              EmailAddress = __.EmailAddress.Read()
-              Title = __.Title.Read()
-              MiddleName = __.MiddleName.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.EmailPromotion.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type vStoreWithDemographics =
-        { BusinessEntityID: int
-          Name: string
-          AnnualSales: Option<decimal>
-          AnnualRevenue: Option<decimal>
-          BankName: Option<string>
-          BusinessType: Option<string>
-          YearOpened: Option<int>
-          Specialty: Option<string>
-          SquareFeet: Option<int>
-          Brands: Option<string>
-          Internet: Option<string>
-          NumberEmployees: Option<int> }
-
-    type vStoreWithDemographicsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
-        member __.AnnualSales = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "AnnualSales")
-        member __.AnnualRevenue = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "AnnualRevenue")
-        member __.BankName = OptionalColumn(reader, getOrdinal, reader.GetString, "BankName")
-        member __.BusinessType = OptionalColumn(reader, getOrdinal, reader.GetString, "BusinessType")
-        member __.YearOpened = OptionalColumn(reader, getOrdinal, reader.GetInt32, "YearOpened")
-        member __.Specialty = OptionalColumn(reader, getOrdinal, reader.GetString, "Specialty")
-        member __.SquareFeet = OptionalColumn(reader, getOrdinal, reader.GetInt32, "SquareFeet")
-        member __.Brands = OptionalColumn(reader, getOrdinal, reader.GetString, "Brands")
-        member __.Internet = OptionalColumn(reader, getOrdinal, reader.GetString, "Internet")
-        member __.NumberEmployees = OptionalColumn(reader, getOrdinal, reader.GetInt32, "NumberEmployees")
-        member __.Read() =
-            { BusinessEntityID = __.BusinessEntityID.Read()
-              Name = __.Name.Read()
-              AnnualSales = __.AnnualSales.Read()
-              AnnualRevenue = __.AnnualRevenue.Read()
-              BankName = __.BankName.Read()
-              BusinessType = __.BusinessType.Read()
-              YearOpened = __.YearOpened.Read()
-              Specialty = __.Specialty.Read()
-              SquareFeet = __.SquareFeet.Read()
-              Brands = __.Brands.Read()
-              Internet = __.Internet.Read()
-              NumberEmployees = __.NumberEmployees.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
-
 module dbo =
     [<CLIMutable>]
     type AWBuildVersion =
@@ -3062,12 +2114,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     let lazyHumanResourcesEmployeePayHistory = lazy (HumanResources.EmployeePayHistoryReader(reader, buildGetOrdinal 5))
     let lazyHumanResourcesJobCandidate = lazy (HumanResources.JobCandidateReader(reader, buildGetOrdinal 4))
     let lazyHumanResourcesShift = lazy (HumanResources.ShiftReader(reader, buildGetOrdinal 5))
-    let lazyHumanResourcesvEmployee = lazy (HumanResources.vEmployeeReader (reader, buildGetOrdinal 18))
-    let lazyHumanResourcesvEmployeeDepartment = lazy (HumanResources.vEmployeeDepartmentReader (reader, buildGetOrdinal 10))
-    let lazyHumanResourcesvEmployeeDepartmentHistory = lazy (HumanResources.vEmployeeDepartmentHistoryReader (reader, buildGetOrdinal 11))
-    let lazyHumanResourcesvJobCandidate = lazy (HumanResources.vJobCandidateReader (reader, buildGetOrdinal 16))
-    let lazyHumanResourcesvJobCandidateEducation = lazy (HumanResources.vJobCandidateEducationReader (reader, buildGetOrdinal 13))
-    let lazyHumanResourcesvJobCandidateEmployment = lazy (HumanResources.vJobCandidateEmploymentReader (reader, buildGetOrdinal 11))
     let lazyPersonAddress = lazy (Person.AddressReader(reader, buildGetOrdinal 9))
     let lazyPersonAddressType = lazy (Person.AddressTypeReader(reader, buildGetOrdinal 4))
     let lazyPersonBusinessEntity = lazy (Person.BusinessEntityReader(reader, buildGetOrdinal 3))
@@ -3081,8 +2127,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     let lazyPersonPersonPhone = lazy (Person.PersonPhoneReader(reader, buildGetOrdinal 4))
     let lazyPersonPhoneNumberType = lazy (Person.PhoneNumberTypeReader(reader, buildGetOrdinal 3))
     let lazyPersonStateProvince = lazy (Person.StateProvinceReader(reader, buildGetOrdinal 8))
-    let lazyPersonvAdditionalContactInfo = lazy (Person.vAdditionalContactInfoReader (reader, buildGetOrdinal 17))
-    let lazyPersonvStateProvinceCountryRegion = lazy (Person.vStateProvinceCountryRegionReader (reader, buildGetOrdinal 7))
     let lazyProductionBillOfMaterials = lazy (Production.BillOfMaterialsReader(reader, buildGetOrdinal 9))
     let lazyProductionCulture = lazy (Production.CultureReader(reader, buildGetOrdinal 3))
     let lazyProductionDocument = lazy (Production.DocumentReader(reader, buildGetOrdinal 14))
@@ -3108,16 +2152,11 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     let lazyProductionUnitMeasure = lazy (Production.UnitMeasureReader(reader, buildGetOrdinal 3))
     let lazyProductionWorkOrder = lazy (Production.WorkOrderReader(reader, buildGetOrdinal 10))
     let lazyProductionWorkOrderRouting = lazy (Production.WorkOrderRoutingReader(reader, buildGetOrdinal 12))
-    let lazyProductionvProductAndDescription = lazy (Production.vProductAndDescriptionReader (reader, buildGetOrdinal 5))
-    let lazyProductionvProductModelCatalogDescription = lazy (Production.vProductModelCatalogDescriptionReader (reader, buildGetOrdinal 25))
-    let lazyProductionvProductModelInstructions = lazy (Production.vProductModelInstructionsReader (reader, buildGetOrdinal 11))
     let lazyPurchasingProductVendor = lazy (Purchasing.ProductVendorReader(reader, buildGetOrdinal 11))
     let lazyPurchasingPurchaseOrderDetail = lazy (Purchasing.PurchaseOrderDetailReader(reader, buildGetOrdinal 11))
     let lazyPurchasingPurchaseOrderHeader = lazy (Purchasing.PurchaseOrderHeaderReader(reader, buildGetOrdinal 13))
     let lazyPurchasingShipMethod = lazy (Purchasing.ShipMethodReader(reader, buildGetOrdinal 6))
     let lazyPurchasingVendor = lazy (Purchasing.VendorReader(reader, buildGetOrdinal 8))
-    let lazyPurchasingvVendorWithAddresses = lazy (Purchasing.vVendorWithAddressesReader (reader, buildGetOrdinal 9))
-    let lazyPurchasingvVendorWithContacts = lazy (Purchasing.vVendorWithContactsReader (reader, buildGetOrdinal 12))
     let lazySalesCountryRegionCurrency = lazy (Sales.CountryRegionCurrencyReader(reader, buildGetOrdinal 3))
     let lazySalesCreditCard = lazy (Sales.CreditCardReader(reader, buildGetOrdinal 6))
     let lazySalesCurrency = lazy (Sales.CurrencyReader(reader, buildGetOrdinal 3))
@@ -3137,13 +2176,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     let lazySalesSpecialOffer = lazy (Sales.SpecialOfferReader(reader, buildGetOrdinal 11))
     let lazySalesSpecialOfferProduct = lazy (Sales.SpecialOfferProductReader(reader, buildGetOrdinal 4))
     let lazySalesStore = lazy (Sales.StoreReader(reader, buildGetOrdinal 6))
-    let lazySalesvIndividualCustomer = lazy (Sales.vIndividualCustomerReader (reader, buildGetOrdinal 18))
-    let lazySalesvPersonDemographics = lazy (Sales.vPersonDemographicsReader (reader, buildGetOrdinal 13))
-    let lazySalesvSalesPerson = lazy (Sales.vSalesPersonReader (reader, buildGetOrdinal 22))
-    let lazySalesvSalesPersonSalesByFiscalYears = lazy (Sales.vSalesPersonSalesByFiscalYearsReader (reader, buildGetOrdinal 7))
-    let lazySalesvStoreWithAddresses = lazy (Sales.vStoreWithAddressesReader (reader, buildGetOrdinal 9))
-    let lazySalesvStoreWithContacts = lazy (Sales.vStoreWithContactsReader (reader, buildGetOrdinal 12))
-    let lazySalesvStoreWithDemographics = lazy (Sales.vStoreWithDemographicsReader (reader, buildGetOrdinal 12))
     let lazydboAWBuildVersion = lazy (dbo.AWBuildVersionReader(reader, buildGetOrdinal 4))
     let lazydboDatabaseLog = lazy (dbo.DatabaseLogReader(reader, buildGetOrdinal 8))
     let lazydboErrorLog = lazy (dbo.ErrorLogReader(reader, buildGetOrdinal 9))
@@ -3153,12 +2185,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     member __.``HumanResources.EmployeePayHistory`` = lazyHumanResourcesEmployeePayHistory.Value
     member __.``HumanResources.JobCandidate`` = lazyHumanResourcesJobCandidate.Value
     member __.``HumanResources.Shift`` = lazyHumanResourcesShift.Value
-    member __.``HumanResources.vEmployee`` = lazyHumanResourcesvEmployee.Value
-    member __.``HumanResources.vEmployeeDepartment`` = lazyHumanResourcesvEmployeeDepartment.Value
-    member __.``HumanResources.vEmployeeDepartmentHistory`` = lazyHumanResourcesvEmployeeDepartmentHistory.Value
-    member __.``HumanResources.vJobCandidate`` = lazyHumanResourcesvJobCandidate.Value
-    member __.``HumanResources.vJobCandidateEducation`` = lazyHumanResourcesvJobCandidateEducation.Value
-    member __.``HumanResources.vJobCandidateEmployment`` = lazyHumanResourcesvJobCandidateEmployment.Value
     member __.``Person.Address`` = lazyPersonAddress.Value
     member __.``Person.AddressType`` = lazyPersonAddressType.Value
     member __.``Person.BusinessEntity`` = lazyPersonBusinessEntity.Value
@@ -3172,8 +2198,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     member __.``Person.PersonPhone`` = lazyPersonPersonPhone.Value
     member __.``Person.PhoneNumberType`` = lazyPersonPhoneNumberType.Value
     member __.``Person.StateProvince`` = lazyPersonStateProvince.Value
-    member __.``Person.vAdditionalContactInfo`` = lazyPersonvAdditionalContactInfo.Value
-    member __.``Person.vStateProvinceCountryRegion`` = lazyPersonvStateProvinceCountryRegion.Value
     member __.``Production.BillOfMaterials`` = lazyProductionBillOfMaterials.Value
     member __.``Production.Culture`` = lazyProductionCulture.Value
     member __.``Production.Document`` = lazyProductionDocument.Value
@@ -3199,16 +2223,11 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     member __.``Production.UnitMeasure`` = lazyProductionUnitMeasure.Value
     member __.``Production.WorkOrder`` = lazyProductionWorkOrder.Value
     member __.``Production.WorkOrderRouting`` = lazyProductionWorkOrderRouting.Value
-    member __.``Production.vProductAndDescription`` = lazyProductionvProductAndDescription.Value
-    member __.``Production.vProductModelCatalogDescription`` = lazyProductionvProductModelCatalogDescription.Value
-    member __.``Production.vProductModelInstructions`` = lazyProductionvProductModelInstructions.Value
     member __.``Purchasing.ProductVendor`` = lazyPurchasingProductVendor.Value
     member __.``Purchasing.PurchaseOrderDetail`` = lazyPurchasingPurchaseOrderDetail.Value
     member __.``Purchasing.PurchaseOrderHeader`` = lazyPurchasingPurchaseOrderHeader.Value
     member __.``Purchasing.ShipMethod`` = lazyPurchasingShipMethod.Value
     member __.``Purchasing.Vendor`` = lazyPurchasingVendor.Value
-    member __.``Purchasing.vVendorWithAddresses`` = lazyPurchasingvVendorWithAddresses.Value
-    member __.``Purchasing.vVendorWithContacts`` = lazyPurchasingvVendorWithContacts.Value
     member __.``Sales.CountryRegionCurrency`` = lazySalesCountryRegionCurrency.Value
     member __.``Sales.CreditCard`` = lazySalesCreditCard.Value
     member __.``Sales.Currency`` = lazySalesCurrency.Value
@@ -3228,13 +2247,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     member __.``Sales.SpecialOffer`` = lazySalesSpecialOffer.Value
     member __.``Sales.SpecialOfferProduct`` = lazySalesSpecialOfferProduct.Value
     member __.``Sales.Store`` = lazySalesStore.Value
-    member __.``Sales.vIndividualCustomer`` = lazySalesvIndividualCustomer.Value
-    member __.``Sales.vPersonDemographics`` = lazySalesvPersonDemographics.Value
-    member __.``Sales.vSalesPerson`` = lazySalesvSalesPerson.Value
-    member __.``Sales.vSalesPersonSalesByFiscalYears`` = lazySalesvSalesPersonSalesByFiscalYears.Value
-    member __.``Sales.vStoreWithAddresses`` = lazySalesvStoreWithAddresses.Value
-    member __.``Sales.vStoreWithContacts`` = lazySalesvStoreWithContacts.Value
-    member __.``Sales.vStoreWithDemographics`` = lazySalesvStoreWithDemographics.Value
     member __.``dbo.AWBuildVersion`` = lazydboAWBuildVersion.Value
     member __.``dbo.DatabaseLog`` = lazydboDatabaseLog.Value
     member __.``dbo.ErrorLog`` = lazydboErrorLog.Value
@@ -3253,18 +2265,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "HumanResources.JobCandidate", true -> __.``HumanResources.JobCandidate``.ReadIfNotNull >> box
         | "HumanResources.Shift", false -> __.``HumanResources.Shift``.Read >> box
         | "HumanResources.Shift", true -> __.``HumanResources.Shift``.ReadIfNotNull >> box
-        | "HumanResources.vEmployee", false -> __.``HumanResources.vEmployee``.Read >> box
-        | "HumanResources.vEmployee", true -> __.``HumanResources.vEmployee``.ReadIfNotNull >> box
-        | "HumanResources.vEmployeeDepartment", false -> __.``HumanResources.vEmployeeDepartment``.Read >> box
-        | "HumanResources.vEmployeeDepartment", true -> __.``HumanResources.vEmployeeDepartment``.ReadIfNotNull >> box
-        | "HumanResources.vEmployeeDepartmentHistory", false -> __.``HumanResources.vEmployeeDepartmentHistory``.Read >> box
-        | "HumanResources.vEmployeeDepartmentHistory", true -> __.``HumanResources.vEmployeeDepartmentHistory``.ReadIfNotNull >> box
-        | "HumanResources.vJobCandidate", false -> __.``HumanResources.vJobCandidate``.Read >> box
-        | "HumanResources.vJobCandidate", true -> __.``HumanResources.vJobCandidate``.ReadIfNotNull >> box
-        | "HumanResources.vJobCandidateEducation", false -> __.``HumanResources.vJobCandidateEducation``.Read >> box
-        | "HumanResources.vJobCandidateEducation", true -> __.``HumanResources.vJobCandidateEducation``.ReadIfNotNull >> box
-        | "HumanResources.vJobCandidateEmployment", false -> __.``HumanResources.vJobCandidateEmployment``.Read >> box
-        | "HumanResources.vJobCandidateEmployment", true -> __.``HumanResources.vJobCandidateEmployment``.ReadIfNotNull >> box
         | "Person.Address", false -> __.``Person.Address``.Read >> box
         | "Person.Address", true -> __.``Person.Address``.ReadIfNotNull >> box
         | "Person.AddressType", false -> __.``Person.AddressType``.Read >> box
@@ -3291,10 +2291,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "Person.PhoneNumberType", true -> __.``Person.PhoneNumberType``.ReadIfNotNull >> box
         | "Person.StateProvince", false -> __.``Person.StateProvince``.Read >> box
         | "Person.StateProvince", true -> __.``Person.StateProvince``.ReadIfNotNull >> box
-        | "Person.vAdditionalContactInfo", false -> __.``Person.vAdditionalContactInfo``.Read >> box
-        | "Person.vAdditionalContactInfo", true -> __.``Person.vAdditionalContactInfo``.ReadIfNotNull >> box
-        | "Person.vStateProvinceCountryRegion", false -> __.``Person.vStateProvinceCountryRegion``.Read >> box
-        | "Person.vStateProvinceCountryRegion", true -> __.``Person.vStateProvinceCountryRegion``.ReadIfNotNull >> box
         | "Production.BillOfMaterials", false -> __.``Production.BillOfMaterials``.Read >> box
         | "Production.BillOfMaterials", true -> __.``Production.BillOfMaterials``.ReadIfNotNull >> box
         | "Production.Culture", false -> __.``Production.Culture``.Read >> box
@@ -3345,12 +2341,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "Production.WorkOrder", true -> __.``Production.WorkOrder``.ReadIfNotNull >> box
         | "Production.WorkOrderRouting", false -> __.``Production.WorkOrderRouting``.Read >> box
         | "Production.WorkOrderRouting", true -> __.``Production.WorkOrderRouting``.ReadIfNotNull >> box
-        | "Production.vProductAndDescription", false -> __.``Production.vProductAndDescription``.Read >> box
-        | "Production.vProductAndDescription", true -> __.``Production.vProductAndDescription``.ReadIfNotNull >> box
-        | "Production.vProductModelCatalogDescription", false -> __.``Production.vProductModelCatalogDescription``.Read >> box
-        | "Production.vProductModelCatalogDescription", true -> __.``Production.vProductModelCatalogDescription``.ReadIfNotNull >> box
-        | "Production.vProductModelInstructions", false -> __.``Production.vProductModelInstructions``.Read >> box
-        | "Production.vProductModelInstructions", true -> __.``Production.vProductModelInstructions``.ReadIfNotNull >> box
         | "Purchasing.ProductVendor", false -> __.``Purchasing.ProductVendor``.Read >> box
         | "Purchasing.ProductVendor", true -> __.``Purchasing.ProductVendor``.ReadIfNotNull >> box
         | "Purchasing.PurchaseOrderDetail", false -> __.``Purchasing.PurchaseOrderDetail``.Read >> box
@@ -3361,10 +2351,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "Purchasing.ShipMethod", true -> __.``Purchasing.ShipMethod``.ReadIfNotNull >> box
         | "Purchasing.Vendor", false -> __.``Purchasing.Vendor``.Read >> box
         | "Purchasing.Vendor", true -> __.``Purchasing.Vendor``.ReadIfNotNull >> box
-        | "Purchasing.vVendorWithAddresses", false -> __.``Purchasing.vVendorWithAddresses``.Read >> box
-        | "Purchasing.vVendorWithAddresses", true -> __.``Purchasing.vVendorWithAddresses``.ReadIfNotNull >> box
-        | "Purchasing.vVendorWithContacts", false -> __.``Purchasing.vVendorWithContacts``.Read >> box
-        | "Purchasing.vVendorWithContacts", true -> __.``Purchasing.vVendorWithContacts``.ReadIfNotNull >> box
         | "Sales.CountryRegionCurrency", false -> __.``Sales.CountryRegionCurrency``.Read >> box
         | "Sales.CountryRegionCurrency", true -> __.``Sales.CountryRegionCurrency``.ReadIfNotNull >> box
         | "Sales.CreditCard", false -> __.``Sales.CreditCard``.Read >> box
@@ -3403,20 +2389,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "Sales.SpecialOfferProduct", true -> __.``Sales.SpecialOfferProduct``.ReadIfNotNull >> box
         | "Sales.Store", false -> __.``Sales.Store``.Read >> box
         | "Sales.Store", true -> __.``Sales.Store``.ReadIfNotNull >> box
-        | "Sales.vIndividualCustomer", false -> __.``Sales.vIndividualCustomer``.Read >> box
-        | "Sales.vIndividualCustomer", true -> __.``Sales.vIndividualCustomer``.ReadIfNotNull >> box
-        | "Sales.vPersonDemographics", false -> __.``Sales.vPersonDemographics``.Read >> box
-        | "Sales.vPersonDemographics", true -> __.``Sales.vPersonDemographics``.ReadIfNotNull >> box
-        | "Sales.vSalesPerson", false -> __.``Sales.vSalesPerson``.Read >> box
-        | "Sales.vSalesPerson", true -> __.``Sales.vSalesPerson``.ReadIfNotNull >> box
-        | "Sales.vSalesPersonSalesByFiscalYears", false -> __.``Sales.vSalesPersonSalesByFiscalYears``.Read >> box
-        | "Sales.vSalesPersonSalesByFiscalYears", true -> __.``Sales.vSalesPersonSalesByFiscalYears``.ReadIfNotNull >> box
-        | "Sales.vStoreWithAddresses", false -> __.``Sales.vStoreWithAddresses``.Read >> box
-        | "Sales.vStoreWithAddresses", true -> __.``Sales.vStoreWithAddresses``.ReadIfNotNull >> box
-        | "Sales.vStoreWithContacts", false -> __.``Sales.vStoreWithContacts``.Read >> box
-        | "Sales.vStoreWithContacts", true -> __.``Sales.vStoreWithContacts``.ReadIfNotNull >> box
-        | "Sales.vStoreWithDemographics", false -> __.``Sales.vStoreWithDemographics``.Read >> box
-        | "Sales.vStoreWithDemographics", true -> __.``Sales.vStoreWithDemographics``.ReadIfNotNull >> box
         | "dbo.AWBuildVersion", false -> __.``dbo.AWBuildVersion``.Read >> box
         | "dbo.AWBuildVersion", true -> __.``dbo.AWBuildVersion``.ReadIfNotNull >> box
         | "dbo.DatabaseLog", false -> __.``dbo.DatabaseLog``.Read >> box

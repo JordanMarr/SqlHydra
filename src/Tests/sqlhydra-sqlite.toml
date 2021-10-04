@@ -5,6 +5,3 @@ namespace = "Sqlite.AdventureWorks"
 cli_mutable = true
 [readers]
 reader_type = "System.Data.IDataReader"
-[filters]
-include = [ "*" ]
-exclude = [ "*/Build*" ]

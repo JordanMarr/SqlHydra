@@ -66,6 +66,27 @@ module main =
             if __.AddressID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
+    type BuildVersion =
+        { SystemInformationID: int64
+          ``Database Version``: string
+          VersionDate: System.DateTime
+          ModifiedDate: System.DateTime }
+
+    type BuildVersionReader(reader: System.Data.IDataReader, getOrdinal) =
+        member __.SystemInformationID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "SystemInformationID")
+        member __.``Database Version`` = RequiredColumn(reader, getOrdinal, reader.GetString, "Database Version")
+        member __.VersionDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "VersionDate")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
+        member __.Read() =
+            { SystemInformationID = __.SystemInformationID.Read()
+              ``Database Version`` = __.``Database Version``.Read()
+              VersionDate = __.VersionDate.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.SystemInformationID.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
     type Customer =
         { CustomerID: int64
           NameStyle: int64
@@ -457,6 +478,7 @@ type HydraReader(reader: System.Data.IDataReader) =
         fun col -> dictionary.Item col
         
     let lazymainAddress = lazy (main.AddressReader(reader, buildGetOrdinal 9))
+    let lazymainBuildVersion = lazy (main.BuildVersionReader(reader, buildGetOrdinal 4))
     let lazymainCustomer = lazy (main.CustomerReader(reader, buildGetOrdinal 15))
     let lazymainCustomerAddress = lazy (main.CustomerAddressReader(reader, buildGetOrdinal 5))
     let lazymainErrorLog = lazy (main.ErrorLogReader(reader, buildGetOrdinal 9))
@@ -468,6 +490,7 @@ type HydraReader(reader: System.Data.IDataReader) =
     let lazymainSalesOrderDetail = lazy (main.SalesOrderDetailReader(reader, buildGetOrdinal 9))
     let lazymainSalesOrderHeader = lazy (main.SalesOrderHeaderReader(reader, buildGetOrdinal 22))
     member __.``main.Address`` = lazymainAddress.Value
+    member __.``main.BuildVersion`` = lazymainBuildVersion.Value
     member __.``main.Customer`` = lazymainCustomer.Value
     member __.``main.CustomerAddress`` = lazymainCustomerAddress.Value
     member __.``main.ErrorLog`` = lazymainErrorLog.Value
@@ -483,6 +506,8 @@ type HydraReader(reader: System.Data.IDataReader) =
         match entity, isOption with
         | "main.Address", false -> __.``main.Address``.Read >> box
         | "main.Address", true -> __.``main.Address``.ReadIfNotNull >> box
+        | "main.BuildVersion", false -> __.``main.BuildVersion``.Read >> box
+        | "main.BuildVersion", true -> __.``main.BuildVersion``.ReadIfNotNull >> box
         | "main.Customer", false -> __.``main.Customer``.Read >> box
         | "main.Customer", true -> __.``main.Customer``.ReadIfNotNull >> box
         | "main.CustomerAddress", false -> __.``main.CustomerAddress``.Read >> box
