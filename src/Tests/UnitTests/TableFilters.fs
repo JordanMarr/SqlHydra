@@ -94,5 +94,21 @@ let tests =
             let filteredTables = tables |> applyFilters cfg.Filters
             Expect.equal filteredTables [ dboTbl2 ] ""
         }
+
+        test "Apply Multiple Includes" {
+            let dboTbl1 = tbl "dbo" "tbl1"
+            let dboTbl2 = tbl "dbo" "tbl2"
+            let prodTbl1 = tbl "prod" "tbl1"
+            let prodTbl2 = tbl "prod" "tbl2"
+            let tables = [ dboTbl1; dboTbl2; prodTbl1; prodTbl2 ]
+
+            let cfg = cfg { 
+                Includes = [ "dbo/tbl1"; "prod/tbl2" ]
+                Excludes = [ ] 
+            }
+
+            let filteredTables = tables |> applyFilters cfg.Filters
+            Expect.equal filteredTables [ dboTbl1; prodTbl2 ] ""
+        }
     ]
 
