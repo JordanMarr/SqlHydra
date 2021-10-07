@@ -1,7 +1,6 @@
 ﻿namespace SqlHydra.Query
 
 open System.Data.Common
-open FSharp.Control.Tasks.V2
 open SqlKata
 
 /// Contains methods that compile and read a query.
@@ -58,11 +57,12 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         cmd.ExecuteReader() :?> 'Reader
 
     member this.GetReaderAsync<'T, 'Reader when 'Reader :> DbDataReader> (query: SelectQuery<'T>) = 
-        task {
+        async {
             let cmd = this.BuildCommand(query.ToKataQuery()) // do not dispose cmd
-            let! reader = cmd.ExecuteReaderAsync()
+            let! reader = cmd.ExecuteReaderAsync() |> Async.AwaitTask
             return reader :?> 'Reader
         }
+        |> Async.StartAsTask
 
     member this.Read<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
         use cmd = this.BuildCommand(query.ToKataQuery())
@@ -77,9 +77,9 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         this.Read getReaders query |> Seq.tryHead
 
     member this.ReadAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) = 
-        task {
+        async {
             use cmd = this.BuildCommand(query.ToKataQuery())
-            use! reader = cmd.ExecuteReaderAsync()
+            use! reader = cmd.ExecuteReaderAsync() |> Async.AwaitTask
             let read = getReaders (reader :?> 'Reader)
             return
                 seq [| 
@@ -87,12 +87,14 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                         read() 
                 |]
         }
+        |> Async.StartAsTask
 
     member this.ReadOneAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) = 
-        task {
-            let! entities = this.ReadAsync getReaders query
+        async {
+            let! entities = this.ReadAsync getReaders query |> Async.AwaitTask
             return entities |> Seq.tryHead
         }
+        |> Async.StartAsTask
 
     member this.Insert<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
@@ -112,24 +114,26 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
             System.Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
 
-    member this.InsertAsync<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>) = task {
-        use cmd = this.BuildCommand(query.ToKataQuery())
-        // Did the user select an identity field?
-        match query.Spec.IdentityField with
-        | Some identityField -> 
-            if compiler :? SqlKata.Compilers.PostgresCompiler then 
-                // Replace PostgreSQL identity query
-                cmd.CommandText <- cmd.CommandText.Replace(";SELECT lastval() AS id", $" RETURNING {identityField};")
+    member this.InsertAsync<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>) = 
+        async {
+            use cmd = this.BuildCommand(query.ToKataQuery())
+            // Did the user select an identity field?
+            match query.Spec.IdentityField with
+            | Some identityField -> 
+                if compiler :? SqlKata.Compilers.PostgresCompiler then 
+                    // Replace PostgreSQL identity query
+                    cmd.CommandText <- cmd.CommandText.Replace(";SELECT lastval() AS id", $" RETURNING {identityField};")
 
-            let! identity = cmd.ExecuteScalarAsync()
-            // 'InsertReturn type set via `getId` in the builder
-            return System.Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
+                let! identity = cmd.ExecuteScalarAsync() |> Async.AwaitTask
+                // 'InsertReturn type set via `getId` in the builder
+                return System.Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
-        | None ->
-            let! results = cmd.ExecuteNonQueryAsync()
-            // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
-            return System.Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
-    }
+            | None ->
+                let! results = cmd.ExecuteNonQueryAsync() |> Async.AwaitTask
+                // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
+                return System.Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
+        }
+        |> Async.StartAsTask
     
     member this.Update (query: UpdateQuery<'T>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
@@ -152,8 +156,10 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         let count = cmd.ExecuteScalar()
         count :?> int
 
-    member this.CountAsync (query: SelectQuery<int>) = task {
-        use cmd = this.BuildCommand(query.ToKataQuery())
-        let! count = cmd.ExecuteScalarAsync()
-        return count :?> int
-    }
+    member this.CountAsync (query: SelectQuery<int>) = 
+        async {
+            use cmd = this.BuildCommand(query.ToKataQuery())
+            let! count = cmd.ExecuteScalarAsync() |> Async.AwaitTask
+            return count :?> int
+        }
+        |> Async.StartAsTask

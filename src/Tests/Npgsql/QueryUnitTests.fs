@@ -4,7 +4,6 @@ open Expecto
 open SqlHydra.Query
 open DB
 open Npgsql.AdventureWorks
-open FSharp.Control.Tasks.V2
 
 // Tables
 let personTable =           table<person.person>                    |> inSchema (nameof person)
