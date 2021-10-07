@@ -4,29 +4,13 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <WarnOn>3390;$(WarnOn)</WarnOn>
-        <Version>0.510.0</Version>
+        <Version>0.510.1</Version>
         <Description>SqlHydra.Query is an F# query builder powered by SqlKata.Query that supports Sql Server, MySql, PostgreSql, Oracle and Firebird.</Description>
         <Authors>Jordan Marr</Authors>
         <PackageTags>F# fsharp data database orm sql</PackageTags>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReleaseNotes>
-            SqlHydra.Query:
-            v0.400.0
-            - Breaking change: Removed `InsertGetId` and `InsertGetIdAsync` methods on QueryContext.
-            - Added `getId` operation to `insert` builder
-            v0.500.0
-            - Added support for multi-column joins
-            v0.500.1
-            - Fixed regression bug when joining on an optional prop.Value
-
-            SqlHydra.*:
-            v0.400.0
-            - PostgreSQL is now supported!
-            v0.500.0
-            - Breaking change (only if using HydraReader manually): Generated HydraReader properties are now fully qualified as ``{Schema}.{Table}``
-            - Removed "Could not read type '___ option' because no primary key exists." exception.
-            v0.510.0
-            - Adding an optional schema/table [filters] section to .toml config
+            Removed dependency on TaskBuilder package.
         </PackageReleaseNotes>
     </PropertyGroup>
 
