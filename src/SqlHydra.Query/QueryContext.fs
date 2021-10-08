@@ -154,12 +154,17 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
     member this.Count (query: SelectQuery<int>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
         let count = cmd.ExecuteScalar()
-        count :?> int
+        match count with
+        | :? int64 as value -> System.Convert.ToInt32 value
+        | _ -> count :?> int
 
     member this.CountAsync (query: SelectQuery<int>) = 
         async {
             use cmd = this.BuildCommand(query.ToKataQuery())
             let! count = cmd.ExecuteScalarAsync() |> Async.AwaitTask
-            return count :?> int
+            return 
+                match count with
+                | :? int64 as value -> System.Convert.ToInt32 value
+                | _ -> count :?> int
         }
         |> Async.StartAsTask
