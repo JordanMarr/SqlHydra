@@ -16,6 +16,7 @@
     <Compile Include="Sqlite\AdventureWorks.fs" />
     <Compile Include="Sqlite\DB.fs" />
     <Compile Include="Sqlite\QueryUnitTests.fs" />
+    <Compile Include="Sqlite\QueryIntegrationTests.fs" />
     <Compile Include="SqlServer\AdventureWorks.fs" />
     <Compile Include="SqlServer\DB.fs" />
     <Compile Include="SqlServer\QueryUnitTests.fs" />
@@ -33,6 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Expecto" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.10" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
     <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.12.8" />
   </ItemGroup>
