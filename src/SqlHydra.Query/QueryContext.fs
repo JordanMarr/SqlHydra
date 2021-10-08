@@ -62,7 +62,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             let! reader = cmd.ExecuteReaderAsync() |> Async.AwaitTask
             return reader :?> 'Reader
         }
-        |> Async.StartAsTask
+        |> Async.StartImmediateAsTask
 
     member this.Read<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
         use cmd = this.BuildCommand(query.ToKataQuery())
@@ -87,14 +87,14 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                         read() 
                 |]
         }
-        |> Async.StartAsTask
+        |> Async.StartImmediateAsTask
 
     member this.ReadOneAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) = 
         async {
             let! entities = this.ReadAsync getReaders query |> Async.AwaitTask
             return entities |> Seq.tryHead
         }
-        |> Async.StartAsTask
+        |> Async.StartImmediateAsTask
 
     member this.Insert<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
@@ -133,7 +133,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
                 return System.Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
         }
-        |> Async.StartAsTask
+        |> Async.StartImmediateAsTask
     
     member this.Update (query: UpdateQuery<'T>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
@@ -166,4 +166,4 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 | :? int64 as value -> System.Convert.ToInt32 value
                 | _ -> count :?> int
         }
-        |> Async.StartAsTask
+        |> Async.StartImmediateAsTask
