@@ -17,18 +17,23 @@ let query = path [ slnRoot; "SqlHydra.Query" ]
 let mssql = path [ slnRoot; "SqlHydra.SqlServer" ]
 let npgsql = path [ slnRoot; "SqlHydra.Npgsql" ]
 let sqlite = path [ slnRoot; "SqlHydra.Sqlite" ]
+let tests = path [ slnRoot; "Tests" ]
 
 let packages = [ query; mssql; npgsql; sqlite ]
 
 Target.create "Restore" <| fun _ ->
-    packages
+    packages @ [ tests ]
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "restore", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not restore '{pkg}' package.")
 
 Target.create "Build" <| fun _ ->
-    packages
+    packages @ [ tests ]
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
+
+Target.create "Tests" <| fun _ ->
+    let exitCode = Shell.Exec(Tools.dotnet, "run --configuration Release", tests)
+    if exitCode <> 0 then failwith "Failed while running server tests"
 
 Target.create "Pack" <| fun _ ->
     packages
@@ -47,8 +52,8 @@ Target.create "Publish" <| fun _ ->
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not publish '{pkg}' package.'")
 
 let dependencies = [
-    "Restore" ==> "Build" ==> "Pack"
-    "Restore" ==> "Build" ==> "Pack" ==> "Publish"
+    "Restore" ==> "Build" ==> "Tests" ==> "Pack"
+    "Restore" ==> "Build" ==> "Tests" ==> "Pack" ==> "Publish"
 ]
 
 Target.runOrDefaultWithArguments "Pack"

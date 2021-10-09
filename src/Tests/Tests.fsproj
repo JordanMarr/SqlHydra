@@ -11,6 +11,9 @@
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE;LOCALHOST</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="Util.fs" />
     <Compile Include="Sqlite\AdventureWorks.fs" />
