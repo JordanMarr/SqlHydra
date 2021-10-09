@@ -40,6 +40,8 @@ Target.create "Pack" <| fun _ ->
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "pack --configuration Release -o nupkg/Release", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}' package.'")
 
+let version = "*.0.520.0.nupkg"
+
 Target.create "Publish" <| fun _ ->
     let nugetKey =
         match Environment.environVarOrNone "SQLHYDRA_NUGET_KEY" with
@@ -47,7 +49,7 @@ Target.create "Publish" <| fun _ ->
         | None -> failwith "The Nuget API key must be set in a SQLHYDRA_NUGET_KEY environmental variable"
     
     packages
-    |> List.map (fun pkg -> pkg </> "nupkg")
+    |> List.map (fun pkg -> pkg </> "nupkg" </> "Release" </> version)
     |> List.map (fun nupkg -> Shell.Exec(Tools.dotnet, $"nuget push {nupkg} -s nuget.org -k {nugetKey}"), nupkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not publish '{pkg}' package.'")
 
@@ -56,4 +58,4 @@ let dependencies = [
     "Restore" ==> "Build" ==> "Tests" ==> "Pack" ==> "Publish"
 ]
 
-Target.runOrDefaultWithArguments "Pack"
+Target.runOrDefaultWithArguments "Publish"
