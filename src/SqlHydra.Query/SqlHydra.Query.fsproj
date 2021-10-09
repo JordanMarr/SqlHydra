@@ -4,14 +4,18 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <WarnOn>3390;$(WarnOn)</WarnOn>
-        <Version>0.510.2</Version>
+        <Version>0.520.0</Version>
         <Description>SqlHydra.Query is an F# query builder powered by SqlKata.Query that supports Sql Server, MySql, PostgreSql, Oracle and Firebird.</Description>
         <Authors>Jordan Marr</Authors>
         <PackageTags>F# fsharp data database orm sql</PackageTags>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReleaseNotes>
+            SqlHydra.Query:
             Count now returns int instead of int64 in Sqlite.
             Small bugfix for async methods (now use StartImmediateAsTask instead of StartAsTask).
+
+            SqlHydra.*:
+            Fixed edge case for tables that do not have any required columns.
         </PackageReleaseNotes>
     </PropertyGroup>
 

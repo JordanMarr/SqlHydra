@@ -42,9 +42,9 @@ Target.create "Pack" <| fun _ ->
 
 Target.create "Publish" <| fun _ ->
     let nugetKey =
-        match Environment.environVarOrNone "NUGET_KEY" with
+        match Environment.environVarOrNone "SQLHYDRA_NUGET_KEY" with
         | Some nugetKey -> nugetKey
-        | None -> failwith "The Nuget API key must be set in a NUGET_KEY environmental variable"
+        | None -> failwith "The Nuget API key must be set in a SQLHYDRA_NUGET_KEY environmental variable"
     
     packages
     |> List.map (fun pkg -> pkg </> "nupkg")

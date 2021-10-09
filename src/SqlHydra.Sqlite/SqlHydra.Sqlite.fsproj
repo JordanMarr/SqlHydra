@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
-        <Version>0.510.1</Version>
+        <Version>0.520.0</Version>
         <Authors>Jordan Marr</Authors>
         <Description>SqlHydra.Sqlite is a dotnet tool that generates F# records for a SQLite database.</Description>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -12,6 +12,11 @@
         <PackageOutputPath>./nupkg</PackageOutputPath>
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
         <PackageReleaseNotes>
+            SqlHydra.Query:
+            Count now returns int instead of int64 in Sqlite.
+            Small bugfix for async methods (now use StartImmediateAsTask instead of StartAsTask).
+
+            SqlHydra.*:
             Fixed edge case for tables that do not have any required columns.
         </PackageReleaseNotes>
     </PropertyGroup>
