@@ -28,15 +28,27 @@ Target.create "Restore" <| fun _ ->
 Target.create "Build" <| fun _ ->
     packages
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release", pkg), pkg)
-    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg} package.'")
+    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
 Target.create "Pack" <| fun _ ->
     packages
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "pack --configuration Release -o nupkg/Release", pkg), pkg)
-    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg} package.'")
+    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}' package.'")
+
+Target.create "Publish" <| fun _ ->
+    let nugetKey =
+        match Environment.environVarOrNone "NUGET_KEY" with
+        | Some nugetKey -> nugetKey
+        | None -> failwith "The Nuget API key must be set in a NUGET_KEY environmental variable"
+    
+    packages
+    |> List.map (fun pkg -> pkg </> "nupkg")
+    |> List.map (fun nupkg -> Shell.Exec(Tools.dotnet, $"nuget push {nupkg} -s nuget.org -k {nugetKey}"), nupkg)
+    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not publish '{pkg}' package.'")
 
 let dependencies = [
     "Restore" ==> "Build" ==> "Pack"
+    "Restore" ==> "Build" ==> "Pack" ==> "Publish"
 ]
 
 Target.runOrDefaultWithArguments "Pack"
