@@ -122,17 +122,16 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
     /// Initializes an optional table record (based on the existence of a PK or user supplied column).
     let readIfNotNullMethod = 
 
-        let firstRequiredField =
-            tbl.Columns
-            |> Seq.tryFind (fun c -> c.IsNullable = false)
-            |> Option.map (fun c -> c.Name)
+        let firstRequiredField = tbl.Columns |> Seq.tryFind (fun c -> c.IsNullable = false)
+        let firstOptionalField = tbl.Columns |> Seq.tryFind (fun c -> c.IsNullable = true)
 
-        // Try to get the first PK, or else the first required field...
+        // Try to get the first PK, or else the first required field, or else the first optional field (as a last resort)
         let firstPkOrFirstRequiredField = 
             tbl.Columns 
             |> List.tryFind (fun c -> c.IsPK)
-            |> Option.map (fun c -> c.Name)
             |> Option.orElse firstRequiredField
+            |> Option.orElse firstOptionalField
+            |> Option.map (fun c -> c.Name)
 
         SynMemberDefn.CreateMember(            
             { SynBindingRcd.Let with 
