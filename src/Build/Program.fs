@@ -51,11 +51,11 @@ Target.create "Publish" <| fun _ ->
     packages
     |> List.map (fun pkg -> pkg </> "nupkg" </> "Release" </> version)
     |> List.map (fun nupkg -> Shell.Exec(Tools.dotnet, $"nuget push {nupkg} -s nuget.org -k {nugetKey}"), nupkg)
-    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not publish '{pkg}' package.'")
+    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not publish '{pkg}' package. Error: {code}")
 
 let dependencies = [
     "Restore" ==> "Build" ==> "Tests" ==> "Pack"
-    "Restore" ==> "Build" ==> "Tests" ==> "Pack" ==> "Publish"
+    "Publish"
 ]
 
 Target.runOrDefaultWithArguments "Publish"
