@@ -55,7 +55,7 @@ Target.create "Publish" <| fun _ ->
 
 let dependencies = [
     "Restore" ==> "Build" ==> "Tests" ==> "Pack"
-    "Publish"
+    "Restore" ==> "Build" ==> "Tests" ==> "Pack" ==> "Publish"
 ]
 
 Target.runOrDefaultWithArguments "Publish"
