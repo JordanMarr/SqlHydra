@@ -384,7 +384,7 @@ let tests =
     
             let! rowsInserted = 
                 insert {
-                    for e in currencyTable do
+                    into currencyTable
                     entities currencies
                 }
                 |> ctx.InsertAsync
