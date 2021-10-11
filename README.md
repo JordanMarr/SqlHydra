@@ -426,7 +426,9 @@ printfn "Result: %i" result
 ```
 
 If you have an Identity column or if you want to specify columns to include/exclude, use the `for _ in _ do` syntax.
-Use `getId` to select and return the identity field.
+By default, all record fields will be included as insert values, so when using an identity column, you must handle it in one of two ways:
+1) Mark it with `getId`. This will prevent it from being added as an insert value, and it will also select and return the identity field.
+2) Mark it with `excludeColumn` to prevent it from being added as an insert value.
 
 ```F#
 
@@ -435,7 +437,7 @@ let errorID =
         for e in errorLogTable do
         entity 
             {
-                dbo.ErrorLog.ErrorLogID = 0 // Identity column
+                dbo.ErrorLog.ErrorLogID = 0 // Adding `getId` below will ignore this value.
                 dbo.ErrorLog.ErrorTime = System.DateTime.Now
                 dbo.ErrorLog.ErrorLine = None
                 dbo.ErrorLog.ErrorMessage = "TEST"
