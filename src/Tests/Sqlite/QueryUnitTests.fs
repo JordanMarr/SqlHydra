@@ -378,4 +378,19 @@ let tests =
                 "INSERT INTO \"BuildVersion\" (\"Database Version\", \"VersionDate\", \"ModifiedDate\") VALUES (@p0, @p1, @p2);select last_insert_rowid() as id" 
                 ""
         }
+        
+        test "Inline Aggregates" {
+            let query =
+                select {
+                    for o in orderHeaderTable do
+                    select (countBy o.SalesOrderID)
+                }
+        
+            let sql = query.ToKataQuery() |> toSql
+            printfn "%s" sql
+            Expect.equal
+                sql
+                "SELECT COUNT(\"SalesOrderHeader\".\"SalesOrderID\") FROM \"SalesOrderHeader\""
+                ""
+        }
     ]

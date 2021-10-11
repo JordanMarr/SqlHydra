@@ -353,5 +353,20 @@ let tests =
                 "INSERT INTO \"sales\".\"customer\" (\"modifieddate\", \"territoryid\", \"storeid\", \"personid\", \"rowguid\", \"customerid\") VALUES (@p0, @p1, @p2, @p3, @p4, @p5)" 
                 ""
         }
+        
+        test "Inline Aggregates" {
+            let query =
+                select {
+                    for o in orderHeaderTable do
+                    select (countBy o.salesorderid)
+                }
+        
+            let sql = query.ToKataQuery() |> toSql
+            printfn "%s" sql
+            Expect.equal 
+                sql 
+                "SELECT COUNT(\"sales\".\"salesorderheader\".\"salesorderid\") FROM \"sales\".\"salesorderheader\""
+                ""
+        }
     ]
 

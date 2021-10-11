@@ -390,4 +390,19 @@ let tests =
                 "INSERT INTO [Sales].[Customer] ([AccountNumber], [rowguid], [ModifiedDate], [PersonID], [StoreID], [TerritoryID]) VALUES (@p0, @p1, @p2, @p3, @p4, @p5);SELECT scope_identity() as Id" 
                 ""
         }
+
+        test "Inline Aggregates" {
+            let query =
+                select {
+                    for o in orderHeaderTable do
+                    select (countBy o.SalesOrderID)
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            printfn "%s" sql
+            Expect.equal
+                sql
+                "SELECT COUNT([Sales].[SalesOrderHeader].[SalesOrderID]) FROM [Sales].[SalesOrderHeader]"
+                ""
+        }
     ]
