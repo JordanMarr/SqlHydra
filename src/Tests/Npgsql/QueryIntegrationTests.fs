@@ -366,4 +366,90 @@ let tests =
 
             ctx.CommitTransaction()
         }
+
+        testTask "Multiple Inserts" {
+            use ctx = openContext()
+
+            ctx.BeginTransaction()
+
+            let currencies = 
+                [ 0 .. 2 ] 
+                |> List.map (fun i -> 
+                    {
+                        sales.currency.currencycode = $"BC{i}"
+                        sales.currency.name = "BitCoin"
+                        sales.currency.modifieddate = System.DateTime.Now
+                    }
+                )
+    
+            let! rowsInserted = 
+                insert {
+                    for e in currencyTable do
+                    entities currencies
+                }
+                |> ctx.InsertAsync
+
+            Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+
+            let! results =
+                select {
+                    for c in currencyTable do
+                    where (c.currencycode =% "BC%")
+                    select c.currencycode
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            let codes = results |> Seq.toList
+    
+            Expect.equal codes [ "BC0"; "BC1"; "BC2" ] ""
+
+            ctx.RollbackTransaction()
+        }
+
+        testTask "Distinct Test" {
+            use ctx = openContext()
+
+            ctx.BeginTransaction()
+
+            let currencies = 
+                [ 0 .. 2 ] 
+                |> List.map (fun i -> 
+                    {
+                        sales.currency.currencycode = $"BC{i}"
+                        sales.currency.name = "BitCoin"
+                        sales.currency.modifieddate = System.DateTime.Now
+                    }
+                )
+    
+            let! rowsInserted = 
+                insert {
+                    for e in currencyTable do
+                    entities currencies
+                }
+                |> ctx.InsertAsync
+
+            Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+
+            let! results =
+                select {
+                    for c in currencyTable do
+                    where (c.currencycode =% "BC%")
+                    select c.name
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            let! distinctResults =
+                select {
+                    for c in currencyTable do
+                    where (c.currencycode =% "BC%")
+                    select c.name
+                    distinct
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            Expect.equal (results |> Seq.length) 3 ""
+            Expect.equal (distinctResults |> Seq.length) 1 ""
+
+            ctx.RollbackTransaction()
+        }
     ]

@@ -285,12 +285,20 @@ type InsertExpressionBuilder<'T, 'InsertReturn when 'InsertReturn : struct>() =
     member this.Yield _ =
         QuerySource<'T>(Map.empty)
 
-    /// Sets the single value for INSERT
+    /// Sets a single value for INSERT
     [<CustomOperation("entity", MaintainsVariableSpace = true)>]
     member this.Entity (state:QuerySource<'T>, value: 'T) = 
         let query = state |> getQueryOrDefault
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
-            { query with Entity = value |> Some}
+            { query with Entities = [ value ] }
+            , state.TableMappings)
+
+    /// Sets multiple values for INSERT
+    [<CustomOperation("entities", MaintainsVariableSpace = true)>]
+    member this.Entities (state:QuerySource<'T>, values: 'T seq) = 
+        let query = state |> getQueryOrDefault
+        QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
+            { query with Entities = values |> Seq.toList }
             , state.TableMappings)
 
     /// Includes a column in the insert query.
@@ -323,7 +331,7 @@ type InsertExpressionBuilder<'T, 'InsertReturn when 'InsertReturn : struct>() =
         // Set the identity property and the 'InsertReturn type
         let spec = state.Query
         let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'InsertReturn> propertySelector :?> Reflection.PropertyInfo
-        let identitySpec = { Table = spec.Table; Entity = spec.Entity; Fields = spec.Fields; IdentityField = Some prop.Name }
+        let identitySpec = { Table = spec.Table; Entities = spec.Entities; Fields = spec.Fields; IdentityField = Some prop.Name }
         
         // Sets both the identity field name (prop.Name) and its type ('InsertReturn)
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(identitySpec, state.TableMappings)

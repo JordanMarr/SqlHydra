@@ -25,15 +25,15 @@ module FQ =
         | Some schema -> $"{schema}.{tbl.Name}"
         | None -> tbl.Name
 
-type InsertQuerySpec<'T, 'Identity> = 
+type InsertQuerySpec<'T, 'Identity> =
     {
         Table: string
-        Entity: 'T option
+        Entities: 'T list
         Fields: string list
         IdentityField: string option
     }
     static member Default : InsertQuerySpec<'T, 'Identity> = 
-        { Table = ""; Entity = Option<'T>.None; Fields = []; IdentityField = None }
+        { Table = ""; Entities = []; Fields = []; IdentityField = None }
 
 type UpdateQuerySpec<'T> = 
     {
@@ -67,7 +67,8 @@ type QuerySource<'T, 'Query>(query, tableMappings) =
 
 module private KataUtils = 
 
-    let boxValue (value: obj) = 
+    /// Boxes values (and option values)
+    let boxValueOrOption (value: obj) = 
         if isNull value then 
             box System.DBNull.Value
         else
@@ -98,10 +99,9 @@ module private KataUtils =
             | None, [] -> failwith "Either an `entity` or `set` operations must be present in an `update` expression."
             | None, setValues -> setValues |> List.toArray
                     
-        // Handle option values
         let preparedKvps = 
             kvps 
-            |> Seq.map (fun (key,value) -> key, boxValue value)
+            |> Seq.map (fun (key,value) -> key, boxValueOrOption value)
             |> dict
             |> Seq.map id
 
@@ -112,31 +112,39 @@ module private KataUtils =
         | Some where -> q.Where(fun w -> where)
         | None -> q
 
-    let fromInsert (spec: InsertQuerySpec<'T, 'InsertReturn>) =
-        let kvps = 
-            match spec.Entity with
-            | Some entity -> 
-                match spec.Fields with 
-                | [] -> 
-                    FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
-                    |> Array.map (fun p -> p.Name, p.GetValue(entity))
-                        
-                | fields -> 
-                    let included = fields |> Set.ofList
-                    FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
-                    |> Array.filter (fun p -> included.Contains(p.Name)) 
-                    |> Array.map (fun p -> p.Name, p.GetValue(entity))
-            | None -> 
-                failwith "Value not set"
+    let fromInsert (spec: InsertQuerySpec<'T, 'Identity>) =
+        let includedProperties = 
+            match spec.Fields with
+            | [] -> 
+                FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
+            | fields ->
+                let included = fields |> Set.ofList
+                FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
+                |> Array.filter (fun p -> included.Contains(p.Name)) 
+    
+        match spec.Entities with
+        | [] -> 
+            failwith "At least one `entity` or `entities` must be set in the `insert` builder."
 
-        // Handle option values
-        let preparedKvps = 
-            kvps 
-            |> Seq.map (fun (key,value) -> key, boxValue value)
-            |> dict
-            |> Seq.map id
+        | [ entity ] -> 
+            let keyValuePairs =
+                includedProperties
+                |> Array.map (fun p -> KeyValuePair(p.Name, p.GetValue(entity) |> boxValueOrOption))
+                |> Array.toList
+            Query(spec.Table).AsInsert(keyValuePairs, returnId = spec.IdentityField.IsSome)
 
-        Query(spec.Table).AsInsert(preparedKvps, returnId = spec.IdentityField.IsSome)
+        | entities -> 
+            if spec.IdentityField.IsSome 
+            then failwith "`getId` is not currently supported for multiple inserts via the `entities` operation."
+            let columns = includedProperties |> Array.map (fun p -> p.Name)
+            let rowsValues =
+                entities
+                |> List.map (fun entity ->
+                    includedProperties
+                    |> Array.map (fun p -> p.GetValue(entity) |> boxValueOrOption)
+                    |> Array.toSeq
+                )
+            Query(spec.Table).AsInsert(columns, rowsValues)
 
 
 [<AbstractClass>]

@@ -385,44 +385,91 @@ let tests =
                 main.ErrorLog.UserName = "jmarr"
             }
 
+        testTask "Multiple Inserts" {
+            use ctx = openContext()
+
+            ctx.BeginTransaction()
+
+            let! _ = 
+                delete {
+                    for e in errorLogTable do
+                    deleteAll
+                }
+                |> ctx.DeleteAsync
+
+            let errorLogs = 
+                [ 0L .. 2L ] 
+                |> List.map (fun i -> 
+                    { stubbedErrorLog with ErrorNumber = stubbedErrorLog.ErrorNumber + i }
+                )
+            
+            let! rowsInserted = 
+                insert {
+                    for e in errorLogTable do
+                    entities errorLogs
+                    excludeColumn e.ErrorLogID
+                }
+                |> ctx.InsertAsync
+
+            Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+
+            let! results =
+                select {
+                    for e in errorLogTable do
+                    select e.ErrorNumber
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            let errorNumbers = results |> Seq.toList
+            
+            Expect.equal errorNumbers [ 400L; 401L; 402L ] ""
+
+            ctx.RollbackTransaction()
+        }
+
         testTask "Distinct Test" {
             use ctx = openContext()
 
             ctx.BeginTransaction()
 
-            for i in [0..2] do
-                let! result = 
-                    insert {
-                        for e in errorLogTable do
-                        entity stubbedErrorLog
-                        getId e.ErrorLogID
-                    }
-                    |> ctx.InsertAsync
+            let! _ = 
+                delete {
+                    for e in errorLogTable do
+                    deleteAll
+                }
+                |> ctx.DeleteAsync
 
-                printfn "Identity: %i" result
+            let errorLogs = 
+                [ 0L .. 2L ] 
+                |> List.map (fun _ -> stubbedErrorLog)
+            
+            let! rowsInserted = 
+                insert {
+                    for e in errorLogTable do
+                    entities errorLogs
+                    excludeColumn e.ErrorLogID
+                }
+                |> ctx.InsertAsync
+
+            Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
 
             let! results =
                 select {
                     for e in errorLogTable do
-                    select (e.ErrorNumber)
+                    select e.ErrorNumber
                 }
-                |> ctx.ReadAsync (fun reader () ->
-                    reader.[0] :?> int64
-                )
+                |> ctx.ReadAsync HydraReader.Read
 
             let! distinctResults =
                 select {
                     for e in errorLogTable do
-                    select (e.ErrorNumber)
+                    select e.ErrorNumber
                     distinct
                 }
-                |> ctx.ReadAsync (fun reader () ->
-                    reader.[0] :?> int64
-                )
+                |> ctx.ReadAsync HydraReader.Read
 
-            printfn $"results: {results}; distinctResults: {distinctResults}"
-
-            Expect.isGreaterThan (results |> Seq.length) (distinctResults |> Seq.length) ""
+            Expect.equal (results |> Seq.length) 3 ""
+            Expect.equal (distinctResults |> Seq.length) 1 ""
 
             ctx.RollbackTransaction()
         }
