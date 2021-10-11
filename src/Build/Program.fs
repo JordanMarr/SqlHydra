@@ -31,7 +31,7 @@ Target.create "Build" <| fun _ ->
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
-Target.create "Tests" <| fun _ ->
+Target.create "Test" <| fun _ ->
     let exitCode = Shell.Exec(Tools.dotnet, "run --configuration Release", tests)
     if exitCode <> 0 then failwith "Failed while running server tests"
 
@@ -40,7 +40,7 @@ Target.create "Pack" <| fun _ ->
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "pack --configuration Release -o nupkg/Release", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}' package.'")
 
-let version = "*.0.520.1.nupkg"
+let version = "*.0.530.0.nupkg"
 
 Target.create "Publish" <| fun _ ->
     let nugetKey =
@@ -54,8 +54,8 @@ Target.create "Publish" <| fun _ ->
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not publish '{pkg}' package. Error: {code}")
 
 let dependencies = [
-    "Restore" ==> "Build" ==> "Tests" ==> "Pack"
-    "Restore" ==> "Build" ==> "Tests" ==> "Pack" ==> "Publish"
+    "Restore" ==> "Build" ==> "Test" ==> "Pack"
+    "Restore" ==> "Build" ==> "Test" ==> "Pack" ==> "Publish"
 ]
 
 Target.runOrDefaultWithArguments "Publish"

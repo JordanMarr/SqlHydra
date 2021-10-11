@@ -4,7 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
         <WarnOn>3390;$(WarnOn)</WarnOn>
-        <Version>0.520.0</Version>
+        <Version>0.530.0</Version>
         <Authors>Jordan Marr</Authors>
         <Description>SqlHydra.Npgsql is a dotnet tool that generates F# records for a PostgreSQL database.</Description>
         <PackageTags>F# fsharp data database orm sql</PackageTags>
@@ -15,11 +15,7 @@
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReleaseNotes>
             SqlHydra.Query:
-            Count now returns int instead of int64 in Sqlite.
-            Small bugfix for async methods (now use StartImmediateAsTask instead of StartAsTask).
-
-            SqlHydra.*:
-            Fixed edge case for tables that do not have any required columns.
+            Added support for multiple inserts via the `entities` operation.
         </PackageReleaseNotes>
     </PropertyGroup>
 
