@@ -57,7 +57,7 @@ type SelectExpressionBuilder<'Output>() =
                     // Currently in v2.3.7, SqlKata doesn't support multiple inline aggregate functions.
                     // Use SelectRaw as a workaround until SqlKata supports multiple aggregates.
                     // https://github.com/sqlkata/querybuilder/pull/504
-                    let fqCol = $"{FQ.fullyQualifyColumn state.TableMappings col}"
+                    let fqCol = FQ.fullyQualifyColumn state.TableMappings col
 
                     // SqlKata will translate curly braces to dialect-specific characters (ex: [] for mssql, "" for postgres)
                     let fqColWithCurlyBraces = 
