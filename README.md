@@ -481,7 +481,9 @@ let! rowsInserted =
 
 ### Update Builder
 
-Update individual fields:
+#### Update Individual Fields
+To update individual columns, use the `set` operation.
+
 ```F#
 let rowsUpdated = 
     update {
@@ -495,7 +497,12 @@ let rowsUpdated =
     |> ctx.Update
 ```
 
-Update an entity with fields excluded/included:
+#### Update an Entire Record
+To update an entire record, use the `entity` operation.
+You may optionally use `includeColumn` to specify an allow list of one or more columns on the record to include in the update.
+You may optionally use `excludeColum` to specify a deny list of one or more columns on the record to exclude from the update.
+NOTE: You may use `includeColumn` or `excludeColumn` multiple times - once for each column to include/exclude.
+
 ```F#
 let rowsUpdated = 
     update {
