@@ -507,8 +507,19 @@ NOTE: You may use `includeColumn` or `excludeColumn` multiple times - once for e
 let rowsUpdated = 
     update {
         for e in errorLogTable do
-        entity errorLog
-        excludeColumn e.ErrorLogID
+        entity 
+            {
+                dbo.ErrorLog.ErrorLogID = 0 // Add `excludeColumn` below to ignore an identity column
+                dbo.ErrorLog.ErrorTime = System.DateTime.Now
+                dbo.ErrorLog.ErrorLine = None
+                dbo.ErrorLog.ErrorMessage = "TEST"
+                dbo.ErrorLog.ErrorNumber = 400
+                dbo.ErrorLog.ErrorProcedure = (Some "Procedure 400")
+                dbo.ErrorLog.ErrorSeverity = None
+                dbo.ErrorLog.ErrorState = None
+                dbo.ErrorLog.UserName = "jmarr"
+            }
+        excludeColumn e.ErrorLogID // Exclude the identity column
         where (e.ErrorLogID = errorLog.ErrorLogID)
     }
     |> ctx.Update
