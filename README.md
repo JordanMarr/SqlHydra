@@ -406,6 +406,7 @@ let cities =
 
 ### Insert Builder
 
+#### Simple Inserts
 For simple inserts with no identity column and no included/excluded columns, use the `into _` syntax:
 
 ```F#
@@ -425,6 +426,7 @@ let result =
 printfn "Result: %i" result
 ```
 
+#### Insert with an Identity Field
 If you have an Identity column or if you want to specify columns to include/exclude, use the `for _ in _ do` syntax.
 By default, all record fields will be included as insert values, so when using an identity column, you must handle it in one of two ways:
 1) Mark it with `getId`. This will prevent it from being added as an insert value, and it will also select and return the identity field.
@@ -452,6 +454,29 @@ let errorID =
     |> ctx.Insert
 
 printfn "ErrorID Identity: %i" errorID
+```
+
+#### Multiple Inserts
+To insert multiple entities in one query, use the `entities` operation.
+NOTE: `getId` is not supported for multiple inserts with `entities`! So if you are inserting multiple entities that have an identity field, you must use `excludeColumn` on the identity column.
+
+```F#
+let currencies = 
+    [ 0..2 ] 
+    |> List.map (fun i -> 
+        {
+            Sales.Currency.CurrencyCode = $"BC{i}"
+            Sales.Currency.Name = "BitCoin"
+            Sales.Currency.ModifiedDate = System.DateTime.Now
+        }
+    )
+
+let! rowsInserted = 
+    insert {
+        into currencyTable
+        entities currencies
+    }
+    |> ctx.InsertAsync
 ```
 
 ### Update Builder
