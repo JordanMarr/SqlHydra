@@ -497,7 +497,7 @@ let rowsUpdated =
     |> ctx.Update
 ```
 
-#### Update an Entire Record
+#### Update Entire Record
 To update an entire record, use the `entity` operation.
 You may optionally use `includeColumn` to specify an allow list of one or more columns on the record to include in the update.
 You may optionally use `excludeColum` to specify a deny list of one or more columns on the record to exclude from the update.
