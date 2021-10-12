@@ -410,7 +410,7 @@ let cities =
 For simple inserts with no identity column and no included/excluded columns, use the `into _` syntax:
 
 ```F#
-let result = 
+let rowsInserted = 
     insert {
         into personTable
         entity 
@@ -423,7 +423,7 @@ let result =
     }
     |> ctx.Insert
 
-printfn "Result: %i" result
+printfn "Rows inserted: %i" rowsInserted
 ```
 
 #### Insert with an Identity Field
@@ -483,7 +483,7 @@ let! rowsInserted =
 
 Update individual fields:
 ```F#
-let result = 
+let rowsUpdated = 
     update {
         for e in errorLogTable do
         set e.ErrorNumber 123
@@ -519,14 +519,14 @@ update {
 ### Delete Builder
 
 ```F#
-let result = 
+let rowsDeleted = 
     delete {
         for e in errorLogTable do
         where (e.ErrorLogID = 5)
     }
     |> ctx.Delete
 
-printfn "result: %i" result
+printfn "Rows deleted: %i" rowsDeleted
 ```
 
 If you want to delete all records in a table, you must use the `deleteAll` keyword in lieu of a `where` statement or else it will not compile:
