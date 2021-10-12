@@ -497,7 +497,7 @@ let rowsUpdated =
 
 Update an entity with fields excluded/included:
 ```F#
-let result = 
+let rowsUpdated = 
     update {
         for e in errorLogTable do
         entity errorLog
