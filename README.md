@@ -434,7 +434,7 @@ By default, all record fields will be included as insert values, so when using a
 
 ```F#
 
-let errorID =
+let errorLogID =
     insert {
         for e in errorLogTable do
         entity 
@@ -453,7 +453,7 @@ let errorID =
     }
     |> ctx.Insert
 
-printfn "ErrorID Identity: %i" errorID
+printfn "ErrorLogID Identity: %i" errorLogID
 ```
 
 #### Multiple Inserts
