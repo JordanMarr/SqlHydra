@@ -34,7 +34,7 @@ Run the tool from the command line (or add to a .bat|.cmd|.sh file):
 dotnet sqlhydra-mssql
 ```
 
-* The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
+* The configuration wizard will ask you some questions, create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and then run your new config.
 * If a .toml configuration file already exists, it will run.
 * The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
 
@@ -65,7 +65,7 @@ Run the tool from the command line (or add to a .bat|.cmd|.sh file):
 dotnet sqlhydra-npgsql
 ```
 
-* The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
+* The configuration wizard will ask you some questions, create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and then run your new config.
 * If a .toml configuration file already exists, it will run.
 * The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
 
@@ -94,7 +94,7 @@ Run the tool from the command line (or add to a .bat|.cmd|.sh file):
 dotnet sqlhydra-sqlite
 ```
 
-* The configuration wizard will ask you some questions, create a new .toml configuration file for you, and then run your new config.
+* The configuration wizard will ask you some questions, create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and then run your new config.
 * If a .toml configuration file already exists, it will run.
 * The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
 
