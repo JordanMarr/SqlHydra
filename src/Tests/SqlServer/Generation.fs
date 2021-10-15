@@ -19,7 +19,7 @@ let cfg =
 let tests = 
     categoryList "SqlServer" "Generation Integration Tests" [
 
-        test "Print Schema" {
+        ptest "Print Schema" {
             let schema = SqlServerSchemaProvider.getSchema cfg
             printfn "Schema: %A" schema
         }
@@ -39,7 +39,7 @@ let tests =
             let code = getCode cfg
             Expect.isFalse (code.Contains str) ""
 
-        test "Print Code"  {
+        ptest "Print Code"  {
             getCode cfg |> printfn "%s"
         }
     

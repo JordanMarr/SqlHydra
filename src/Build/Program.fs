@@ -6,6 +6,7 @@ open Fake.Core
 open Fake.DotNet
 open Fake.IO.FileSystemOperators
 open Fake.Core.TargetOperators
+open Fake.IO.Globbing.Operators
 
 // Initialize FAKE context
 Setup.context()
@@ -40,7 +41,7 @@ Target.create "Pack" <| fun _ ->
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "pack --configuration Release -o nupkg/Release", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}' package.'")
 
-let version = "*.0.530.0.nupkg"
+let version = "0.540.0-beta1"
 
 Target.create "Publish" <| fun _ ->
     let nugetKey =
@@ -48,13 +49,16 @@ Target.create "Publish" <| fun _ ->
         | Some nugetKey -> nugetKey
         | None -> failwith "The Nuget API key must be set in a SQLHYDRA_NUGET_KEY environmental variable"
     
-    packages
-    |> List.map (fun pkg -> pkg </> "nupkg" </> "Release" </> version)
-    |> List.map (fun nupkg -> Shell.Exec(Tools.dotnet, $"nuget push {nupkg} -s nuget.org -k {nugetKey}"), nupkg)
-    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not publish '{pkg}' package. Error: {code}")
+    let existingPackages = !! (slnRoot </> "**" </> "nupkg" </> "Release" </> $"*.{version}.nupkg")
+
+    if existingPackages |> Seq.length = 0
+    then printfn $"No packages were found for version '{version}'."
+
+    existingPackages
+    |> Seq.map (fun nupkg -> Shell.Exec(Tools.dotnet, $"nuget push {nupkg} -s nuget.org -k {nugetKey}"), nupkg)
+    |> Seq.iter (fun (code, pkg) -> if code = 0 then printfn $"Published '{pkg}'." else failwith $"Could not publish '{pkg}' package. Error: {code}")
 
 let dependencies = [
-    "Restore" ==> "Build" ==> "Test" ==> "Pack"
     "Restore" ==> "Build" ==> "Test" ==> "Pack" ==> "Publish"
 ]
 
