@@ -83,12 +83,16 @@ let getSchema (cfg: Config) : Schema =
                 )
                 |> Seq.toList
 
+            let filteredColumns = 
+                supportedColumns
+                |> filterColumns cfg.Filters tableSchema tableName
+
             { 
                 Table.Catalog = tableCatalog
                 Table.Schema = tableSchema
                 Table.Name =  tableName
                 Table.Type = if tableType = "BASE TABLE" then TableType.Table else TableType.View
-                Table.Columns = supportedColumns
+                Table.Columns = filteredColumns
                 Table.TotalColumns = tableColumns |> Seq.length
             }
         )

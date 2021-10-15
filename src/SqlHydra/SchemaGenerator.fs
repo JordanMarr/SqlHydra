@@ -575,7 +575,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
 let generateModule (cfg: Config) (app: AppInfo) (db: Schema) = 
     let filteredTables = 
         db.Tables 
-        |> applyFilters cfg.Filters
+        |> filterTables cfg.Filters
         |> List.sortBy (fun tbl -> tbl.Schema, tbl.Name)
 
     let schemas = filteredTables |> List.map (fun t -> t.Schema) |> List.distinct
