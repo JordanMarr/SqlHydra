@@ -79,30 +79,25 @@ open GlobExpressions
 
 let filterTables (filters: Filters) (tables: Table list) = 
     let isTableFilter (filter: string) = not (filter.Contains ".")
-    let includes = filters.Includes |> List.filter isTableFilter
-    let excludes = filters.Excludes |> List.filter isTableFilter
+    let includeFilters = filters.Includes |> List.filter isTableFilter
+    let excludeFilters = filters.Excludes |> List.filter isTableFilter
 
-    match includes, excludes with
+    match includeFilters, excludeFilters with
     | [], [] -> 
         tables
     | _ -> 
         let getPath tbl = $"{tbl.Schema}/{tbl.Name}"
         let tablesByPath = tables |> List.map (fun t -> getPath t, t) |> Map.ofList
-        let paths = tablesByPath |> Map.toList |> List.map fst
+        let tablePaths = tablesByPath |> Map.toList |> List.map fst
 
-        let includedPaths = 
-            includes
-            |> List.map Glob
-            |> List.collect (fun pattern -> paths |> List.filter pattern.IsMatch)
-            |> List.distinct
-            |> Set.ofList
+        let getMatchingTablePaths = 
+            List.map Glob
+            >> List.collect (fun pattern -> tablePaths |> List.filter pattern.IsMatch)
+            >> List.distinct
+            >> Set.ofList
 
-        let excludedPaths = 
-            excludes
-            |> List.map Glob
-            |> List.collect (fun pattern -> paths |> List.filter pattern.IsMatch)
-            |> List.distinct
-            |> Set.ofList
+        let includedPaths = includeFilters |> getMatchingTablePaths
+        let excludedPaths = excludeFilters |> getMatchingTablePaths
         
         let filteredPaths = includedPaths - excludedPaths
         let filteredTables = filteredPaths |> Seq.map (fun path -> tablesByPath.[path]) |> Seq.toList
@@ -110,30 +105,25 @@ let filterTables (filters: Filters) (tables: Table list) =
 
 let filterColumns (filters: Filters) (schema: string) (table: string) (columns: Column list) = 
     let isColumnFilter (filter: string) = filter.Contains "."
-    let includes = filters.Includes |> List.filter isColumnFilter
-    let excludes = filters.Excludes |> List.filter isColumnFilter
+    let includeFilters = filters.Includes |> List.filter isColumnFilter
+    let excludeFilters = filters.Excludes |> List.filter isColumnFilter
 
-    match includes, excludes with
+    match includeFilters, excludeFilters with
     | [], [] -> 
         columns
     | _ -> 
         let getPath (col: Column) = $"{schema}/{table}.{col.Name}"
         let columnsByPath = columns |> List.map (fun c -> getPath c, c) |> Map.ofList
-        let paths = columnsByPath |> Map.toList |> List.map fst
+        let columnPaths = columnsByPath |> Map.toList |> List.map fst
         
-        let includedPaths = 
-            includes
-            |> List.map Glob
-            |> List.collect (fun pattern -> paths |> List.filter pattern.IsMatch)
-            |> List.distinct
-            |> Set.ofList
+        let getMatchingColumnPaths = 
+            List.map Glob
+            >> List.collect (fun pattern -> columnPaths |> List.filter pattern.IsMatch)
+            >> List.distinct
+            >> Set.ofList
 
-        let excludedPaths = 
-            excludes
-            |> List.map Glob
-            |> List.collect (fun pattern -> paths |> List.filter pattern.IsMatch)
-            |> List.distinct
-            |> Set.ofList
+        let includedPaths = includeFilters |> getMatchingColumnPaths
+        let excludedPaths = excludeFilters |> getMatchingColumnPaths
         
         let filteredPaths = includedPaths - excludedPaths
         let filteredColumns = filteredPaths |> Seq.map (fun path -> columnsByPath.[path]) |> Seq.toList
