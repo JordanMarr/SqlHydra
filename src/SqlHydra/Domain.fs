@@ -77,22 +77,12 @@ type Config =
 
 open GlobExpressions
 
-let (|TableFilter|_|) (filter: string) =
-    match filter.Contains "/", filter.Contains "." with
-    | false, false -> Some (TableFilter (Glob filter))
-    | true, false -> Some (TableFilter (Glob filter))
-    | _, true -> None
-
-let (|ColumnFilter|_|) (filter: string) =
-    if filter.Contains "."
-    then Some (ColumnFilter (Glob filter))
-    else None
-
 let filterTables (filters: Filters) (tables: Table list) = 
-    let includePatterns = filters.Includes |> List.choose (function | TableFilter tf -> Some tf | _ -> None)
-    let excludePatterns = filters.Excludes |> List.choose (function | TableFilter tf -> Some tf | _ -> None)
+    let isTableFilter (filter: string) = not (filter.Contains ".")
+    let includes = filters.Includes |> List.filter isTableFilter
+    let excludes = filters.Excludes |> List.filter isTableFilter
 
-    match includePatterns, excludePatterns with
+    match includes, excludes with
     | [], [] -> 
         tables
     | _ -> 
@@ -101,13 +91,15 @@ let filterTables (filters: Filters) (tables: Table list) =
         let paths = tablesByPath |> Map.toList |> List.map fst
 
         let includedPaths = 
-            includePatterns
+            includes
+            |> List.map Glob
             |> List.collect (fun pattern -> paths |> List.filter pattern.IsMatch)
             |> List.distinct
             |> Set.ofList
 
         let excludedPaths = 
-            excludePatterns
+            excludes
+            |> List.map Glob
             |> List.collect (fun pattern -> paths |> List.filter pattern.IsMatch)
             |> List.distinct
             |> Set.ofList
@@ -117,10 +109,11 @@ let filterTables (filters: Filters) (tables: Table list) =
         filteredTables
 
 let filterColumns (filters: Filters) (schema: string) (table: string) (columns: Column list) = 
-    let includePatterns = filters.Includes |> List.choose (function | ColumnFilter cf -> Some cf | _ -> None)
-    let excludePatterns = filters.Excludes |> List.choose (function | ColumnFilter cf -> Some cf | _ -> None)
+    let isColumnFilter (filter: string) = filter.Contains "."
+    let includes = filters.Includes |> List.filter isColumnFilter
+    let excludes = filters.Excludes |> List.filter isColumnFilter
 
-    match includePatterns, excludePatterns with
+    match includes, excludes with
     | [], [] -> 
         columns
     | _ -> 
@@ -129,13 +122,15 @@ let filterColumns (filters: Filters) (schema: string) (table: string) (columns: 
         let paths = columnsByPath |> Map.toList |> List.map fst
         
         let includedPaths = 
-            includePatterns
+            includes
+            |> List.map Glob
             |> List.collect (fun pattern -> paths |> List.filter pattern.IsMatch)
             |> List.distinct
             |> Set.ofList
 
         let excludedPaths = 
-            excludePatterns
+            excludes
+            |> List.map Glob
             |> List.collect (fun pattern -> paths |> List.filter pattern.IsMatch)
             |> List.distinct
             |> Set.ofList
@@ -143,4 +138,3 @@ let filterColumns (filters: Filters) (schema: string) (table: string) (columns: 
         let filteredPaths = includedPaths - excludedPaths
         let filteredColumns = filteredPaths |> Seq.map (fun path -> columnsByPath.[path]) |> Seq.toList
         filteredColumns
-
