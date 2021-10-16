@@ -7,8 +7,9 @@ SqlHydra is a suite of NuGet packages for working with databases in F#.
 - [SqlHydra.Sqlite](#sqlhydrasqlite-) is a dotnet tool that generates F# records for a SQLite database.
 
 ### Query Library
-- [SqlHydra.Query](#sqlhydraquery-) is an F# query generator computation expression powered by [SqlKata](https://sqlkata.com/) that supports the following databases:
-    - SQL Server, SQLite, PostgreSql, MySql, Oracle, Firebird
+- [SqlHydra.Query](#sqlhydraquery-) is an F# query generator computation expression powered by [SqlKata](https://sqlkata.com/).
+    - SqlHydra.Query is specifically designed to work with SqlHydra generated types. (If you don't want to use generated types, then I would recommend you use [Dapper.FSharp](https://github.com/Dzoukr/Dapper.FSharp) instead.)
+    - SqlKata officially supports SQL Server, SQLite, PostgreSql, MySql, Oracle and Firebird; however, SqlHydra.Query does not yet have generators for MySql, Oracle and Firebird. Please submit an issue if you are interested in contributing a generator for one of these!
 
 #### Notes
 - The generation libraries can be useful with _any_ query library for creating strongly typed table records and data readers.
