@@ -17,9 +17,16 @@ type TypeMapping =
         ReaderMethod: string
     }
 
+type CommandParameterType =
+    {
+        TypeName: string
+        TypeValue: string
+    }
+
 type Column = 
     {
         Name: string
+        CommandParameterType: CommandParameterType option
         TypeMapping: TypeMapping
         IsNullable: bool
         IsPK: bool

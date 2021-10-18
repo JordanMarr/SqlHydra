@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Compile Include="Domain.fs" />
+    <Compile Include="DbColumnTypeAttribute.fs" />
     <Compile Include="SchemaGenerator.fs" />
     <Compile Include="TomlConfigParser.fs" />
     <Compile Include="Fsproj.fs" />
