@@ -6,6 +6,7 @@ open FsAst
 open Fantomas
 open Domain
 open System.Data
+open SqlHydra.DbColumnTypeAttribute
 
 let range0 = Range.range.Zero
 
@@ -28,9 +29,9 @@ let createDbColumnTypeAttributes (column: Column) =
     column.CommandParameterType
     |> Option.map (fun type' ->
     let attr =
-        { TypeName = LongIdentWithDots.CreateString
-                         $"{nameof DbColumnTypeAttribute}(\"{type'.TypeName}\", \"{type'.TypeValue}\")"
-        ; ArgExpr = SynExpr.CreateUnit
+        { TypeName = LongIdentWithDots.CreateString (nameof DbColumnTypeAttribute)
+        ; ArgExpr = SynExpr.CreateParenedTuple [ SynExpr.CreateConst (SynConst.String(type'.TypeName, range0))
+                                                 SynExpr.CreateConst (SynConst.String(type'.TypeValue, range0)) ]
         ; Target = None
         ; AppliesToGetterAndSetter = false
         ; Range = range0 } : SynAttribute

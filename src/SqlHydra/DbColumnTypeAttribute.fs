@@ -1,4 +1,4 @@
-module SqlHydra
+module SqlHydra.DbColumnTypeAttribute
 
 open System
 open SqlHydra.Domain
