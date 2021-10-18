@@ -8,6 +8,6 @@ open SqlHydra.Domain
 type DbColumnTypeAttribute(columnTypeName: string, columnTypeValue: string) =
     inherit Attribute()
 
-    member this.CommandParameterType: CommandParameterType =
+    member this.CommandParameterType: DbColumnType =
         { TypeName = columnTypeName
           TypeValue = columnTypeValue }

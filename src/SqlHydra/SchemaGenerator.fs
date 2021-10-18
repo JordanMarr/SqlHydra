@@ -26,7 +26,7 @@ let cliMutableAttribute =
     SynModuleDecl.CreateAttributes(atts)
     
 let createDbColumnTypeAttributes (column: Column) =
-    column.CommandParameterType
+    column.DbColumnType
     |> Option.map (fun type' ->
     let attr =
         { TypeName = LongIdentWithDots.CreateString (nameof DbColumnTypeAttribute)

@@ -17,7 +17,7 @@ type TypeMapping =
         ReaderMethod: string
     }
 
-type CommandParameterType =
+type DbColumnType =
     {
         TypeName: string
         TypeValue: string
@@ -26,7 +26,7 @@ type CommandParameterType =
 type Column = 
     {
         Name: string
-        CommandParameterType: CommandParameterType option
+        DbColumnType: DbColumnType option
         TypeMapping: TypeMapping
         IsNullable: bool
         IsPK: bool
