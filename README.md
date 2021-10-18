@@ -1,5 +1,5 @@
 # SqlHydra
-SqlHydra is a suite of NuGet packages for working with databases in F#.
+SqlHydra is a suite of NuGet packages for working with databases in F# with an emphasis on type safety and convenience.
 
 ### Generation Tools
 - [SqlHydra.SqlServer](#sqlhydrasqlserver-) is a dotnet tool that generates F# records for a SQL Server database.
@@ -7,13 +7,12 @@ SqlHydra is a suite of NuGet packages for working with databases in F#.
 - [SqlHydra.Sqlite](#sqlhydrasqlite-) is a dotnet tool that generates F# records for a SQLite database.
 
 ### Query Library
-- [SqlHydra.Query](#sqlhydraquery-) is an F# query generator computation expression powered by [SqlKata](https://sqlkata.com/).
-    - SqlHydra.Query is specifically designed to take advantage of SqlHydra generated types. (If you don't want to use generated types, then I would recommend checking out [Dapper.FSharp](https://github.com/Dzoukr/Dapper.FSharp) instead.)
-    - SqlKata officially supports SQL Server, SQLite, PostgreSql, MySql, Oracle and Firebird; however, SqlHydra.Query does not yet have generators for MySql, Oracle and Firebird. Please submit an issue if you are interested in contributing a generator for one of these!
-
+- [SqlHydra.Query](#sqlhydraquery-) provides strongly typed Linq queries against generated types. 
+        
 #### Notes
-- The generation libraries can be useful with _any_ query library for creating strongly typed table records and data readers.
-- The SqlHydra.Query library is designed to work in conjunction with one of the generation libraries.
+- The generation tools can be useful with any query library for creating strongly typed table records and data readers.
+- SqlHydra.Query is specifically designed to take advantage of SqlHydra generated types. (If you don't want to use generated types, then I would recommend checking out [Dapper.FSharp](https://github.com/Dzoukr/Dapper.FSharp) instead.)
+- SqlHydra.Query uses [SqlKata](https://sqlkata.com/) to generate provider-specific SQL queries. SqlKata officially supports SQL Server, SQLite, PostgreSql, MySql, Oracle and Firebird; however, SqlHydra.Query does not yet have generators for MySql, Oracle and Firebird. Please submit an issue if you are interested in contributing a generator for one of these!
 - _All SqlHydra NuGet packages will be released with matching major and minor version numbers._
 
 ## Contributing
