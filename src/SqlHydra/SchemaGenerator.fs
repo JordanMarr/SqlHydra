@@ -660,7 +660,10 @@ let substitutions =
     [
         /// Reader classes at top of namespace
         "open Substitute.Extensions",
-        """type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
+        """
+open SqlHydra.DbColumnTypeAttribute
+        
+type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
         member __.Name = column
         member __.IsNull() = getOrdinal column |> reader.IsDBNull
         override __.ToString() = __.Name
