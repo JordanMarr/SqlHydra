@@ -5,7 +5,16 @@ open SqlKata
 
 /// Contains methods that compile and read a query.
 type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
-
+    let setParameterDbType (param: DbParameter) (qp: QueryParameter) =
+        match qp.Type, compiler with
+        | Some type', :? SqlKata.Compilers.PostgresCompiler when type'.TypeName = "NpgsqlDbType" ->
+            let property = param.GetType().GetProperty("NpgsqlDbType")
+            let dbTypeSetter = property.GetSetMethod()
+            
+            let value = System.Enum.Parse(property.PropertyType, type'.TypeValue)
+            dbTypeSetter.Invoke(param, [|value|]) |> ignore
+        | _ -> ()    
+        
     interface System.IDisposable with
         member this.Dispose() = 
             conn.Dispose()
@@ -44,7 +53,13 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         for kvp in compiledQuery.NamedBindings do
             let p = cmd.CreateParameter()
             p.ParameterName <- kvp.Key
-            p.Value <- kvp.Value
+
+            match kvp.Value with
+            | :? QueryParameter as qp ->
+                do setParameterDbType p qp
+                p.Value <- qp.Value
+            | _ ->
+                p.Value <- kvp.Value
             cmd.Parameters.Add(p) |> ignore
         cmd
 
