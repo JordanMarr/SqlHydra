@@ -58,12 +58,6 @@ let getSchema (cfg: Config) : Schema =
                     | _ -> false
             |}
         )
-
-    let getDbColumnType =
-        function
-            | "json" -> { TypeName = nameof NpgsqlDbType; TypeValue = nameof NpgsqlDbType.Json } |> Some
-            | "jsonb" -> { TypeName = nameof NpgsqlDbType; TypeValue = nameof NpgsqlDbType.Jsonb } |> Some
-            | _ -> None
     
     let tables = 
         sTables.Rows
@@ -93,7 +87,6 @@ let getSchema (cfg: Config) : Schema =
                     |> Option.map (fun typeMapping ->
                         { 
                             Column.Name = col.ColumnName
-                            Column.DbColumnType = getDbColumnType col.ProviderTypeName
                             Column.IsNullable = col.IsNullable
                             Column.TypeMapping = typeMapping
                             Column.IsPK = pks.Contains(col.TableSchema, col.TableName, col.ColumnName)

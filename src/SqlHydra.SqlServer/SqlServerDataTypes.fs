@@ -54,6 +54,7 @@ let typeMappingsByName =
             TypeMapping.ClrType = clrType
             TypeMapping.DbType = dbType
             TypeMapping.ReaderMethod = readerMethod
+            TypeMapping.ProviderDbType = None
         }
     )
     |> Map.ofList

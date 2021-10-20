@@ -1,10 +1,8 @@
 ﻿module UnitTests.TableFilters
 
 open Expecto
-open System
-open SqlHydra
+open SqlHydra.Filter
 open SqlHydra.Domain
-open System.Globalization
 
 [<Tests>]
 let tests = 

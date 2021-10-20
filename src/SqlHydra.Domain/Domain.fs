@@ -13,20 +13,14 @@ type TypeMapping =
     {
         ClrType: string
         DbType: DbType
+        ProviderDbType: string option
         ColumnTypeAlias: string
         ReaderMethod: string
-    }
-
-type DbColumnType =
-    {
-        TypeName: string
-        TypeValue: string
     }
 
 type Column = 
     {
         Name: string
-        DbColumnType: DbColumnType option
         TypeMapping: TypeMapping
         IsNullable: bool
         IsPK: bool
@@ -81,33 +75,3 @@ type Config =
         Filters: Filters
         Readers: ReadersConfig option
     }
-
-open GlobExpressions
-
-let applyFilters (filters: Filters) (tables: Table list) = 
-    match filters with
-    | { Includes = []; Excludes = [] } -> 
-        tables
-    | _ -> 
-        let getPath tbl = $"{tbl.Schema}/{tbl.Name}"
-        let tablesByPath = tables |> List.map (fun t -> getPath t, t) |> Map.ofList
-        let paths = tablesByPath |> Map.toList |> List.map fst
-
-        let includePatterns = filters.Includes |> List.map Glob
-        let excludePatterns = filters.Excludes |> List.map Glob
-        
-        let includedPaths = 
-            includePatterns
-            |> List.collect (fun pattern -> paths |> List.filter pattern.IsMatch)
-            |> List.distinct
-            |> Set.ofList
-
-        let excludedPaths = 
-            excludePatterns
-            |> List.collect (fun pattern -> paths |> List.filter pattern.IsMatch)
-            |> List.distinct
-            |> Set.ofList
-        
-        let filteredPaths = includedPaths - excludedPaths
-        let filteredTables = filteredPaths |> Seq.map (fun path -> tablesByPath.[path]) |> Seq.toList
-        filteredTables

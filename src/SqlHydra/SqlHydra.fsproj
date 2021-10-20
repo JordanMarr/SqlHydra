@@ -9,8 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Domain.fs" />
-    <Compile Include="DbColumnTypeAttribute.fs" />
+    <Compile Include="Filter.fs" />
     <Compile Include="SchemaGenerator.fs" />
     <Compile Include="TomlConfigParser.fs" />
     <Compile Include="Fsproj.fs" />
@@ -28,6 +27,10 @@
     
     <ItemGroup>
       <PackageReference Update="FSharp.Core" Version="5.0.0" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\SqlHydra.Domain\SqlHydra.Domain.fsproj" />
     </ItemGroup>
 
 </Project>

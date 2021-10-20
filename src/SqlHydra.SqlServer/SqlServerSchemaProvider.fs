@@ -75,7 +75,6 @@ let getSchema (cfg: Config) : Schema =
                     |> Option.map (fun typeMapping -> 
                         {
                             Column.Name = col.ColumnName
-                            Column.DbColumnType = None
                             Column.IsNullable = col.IsNullable
                             Column.TypeMapping = typeMapping
                             Column.IsPK = pks.Contains(col.TableSchema, col.TableName, col.ColumnName)
