@@ -1,7 +1,7 @@
 ﻿namespace SqlHydra.Query
 
 open System.Reflection
-open SqlHydra.DbColumnTypeAttribute
+open SqlHydra.ProviderDbTypeAttribute
 open SqlHydra.Domain
 open SqlKata
 open System.Collections.Generic
@@ -31,7 +31,7 @@ module FQ =
 type QueryParameter = 
     {
         Value: obj
-        Type: DbColumnType option
+        ProviderDbType: string option
     }
 
 type InsertQuerySpec<'T, 'Identity> =
@@ -89,10 +89,10 @@ module private KataUtils =
                 | null -> box System.DBNull.Value 
                 | o -> o
 
-    let getDbColumnType (p: PropertyInfo) =
+    let getProviderDbTypeName (p: PropertyInfo) =
         let attrs = p.GetCustomAttributes(true)
         (attrs
-        |> Seq.choose (function | :? DbColumnTypeAttribute as attr -> Some attr.ColumnType | _ -> None))
+        |> Seq.choose (function | :? ProviderDbTypeAttribute as attr -> Some attr.ProviderDbTypeName | _ -> None))
         |> Seq.tryHead
     
     let fromUpdate (spec: UpdateQuerySpec<'T>) = 
@@ -102,13 +102,13 @@ module private KataUtils =
                 match spec.Fields with 
                 | [] -> 
                     FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
-                    |> Array.map (fun p -> p.Name, { Value = p.GetValue(entity) |> boxValueOrOption; Type = getDbColumnType p } :> obj)
+                    |> Array.map (fun p -> p.Name, { Value = p.GetValue(entity) |> boxValueOrOption; ProviderDbType = getProviderDbTypeName p } :> obj)
                         
                 | fields -> 
                     let included = fields |> Set.ofList
                     FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
                     |> Array.filter (fun p -> included.Contains(p.Name)) 
-                    |> Array.map (fun p -> p.Name, { Value = p.GetValue(entity) |> boxValueOrOption; Type = getDbColumnType p } :> obj)
+                    |> Array.map (fun p -> p.Name, { Value = p.GetValue(entity) |> boxValueOrOption; ProviderDbType = getProviderDbTypeName p } :> obj)
 
             | Some _, _ -> failwith "Cannot have both `entity` and `set` operations in an `update` expression."
             | None, [] -> failwith "Either an `entity` or `set` operations must be present in an `update` expression."
@@ -144,7 +144,7 @@ module private KataUtils =
         | [ entity ] -> 
             let keyValuePairs =
                 includedProperties
-                |> Array.map (fun p -> KeyValuePair(p.Name, { Value = p.GetValue(entity) |> boxValueOrOption; Type = getDbColumnType p } :> obj))
+                |> Array.map (fun p -> KeyValuePair(p.Name, { Value = p.GetValue(entity) |> boxValueOrOption; ProviderDbType = getProviderDbTypeName p } :> obj))
                 |> Array.toList
             Query(spec.Table).AsInsert(keyValuePairs, returnId = spec.IdentityField.IsSome)
 
@@ -156,7 +156,7 @@ module private KataUtils =
                 entities
                 |> List.map (fun entity ->
                     includedProperties
-                    |> Array.map (fun p -> { Value = p.GetValue(entity) |> boxValueOrOption; Type = getDbColumnType p } :> obj)
+                    |> Array.map (fun p -> { Value = p.GetValue(entity) |> boxValueOrOption; ProviderDbType = getProviderDbTypeName p } :> obj)
                     |> Array.toSeq
                 )
             Query(spec.Table).AsInsert(columns, rowsValues)

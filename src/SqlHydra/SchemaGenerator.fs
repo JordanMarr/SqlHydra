@@ -6,7 +6,8 @@ open FsAst
 open Fantomas
 open Domain
 open System.Data
-open SqlHydra.DbColumnTypeAttribute
+open SqlHydra.ProviderDbTypeAttribute
+open SqlHydra.Filter
 
 let range0 = Range.range.Zero
 
@@ -25,13 +26,12 @@ let cliMutableAttribute =
     let atts = [ SynAttributeList.Create(attr) ]
     SynModuleDecl.CreateAttributes(atts)
     
-let createDbColumnTypeAttributes (column: Column) =
-    column.DbColumnType
+let createProviderDbTypeAttribute (mapping: TypeMapping) =
+    mapping.ProviderDbType
     |> Option.map (fun type' ->
     let attr =
-        { TypeName = LongIdentWithDots.CreateString (nameof DbColumnTypeAttribute)
-        ; ArgExpr = SynExpr.CreateParenedTuple [ SynExpr.CreateConst (SynConst.String(type'.TypeName, range0))
-                                                 SynExpr.CreateConst (SynConst.String(type'.TypeValue, range0)) ]
+        { TypeName = LongIdentWithDots.CreateString (nameof ProviderDbTypeAttribute)
+        ; ArgExpr = SynExpr.CreateParenedTuple [ SynExpr.CreateConst (SynConst.String(type', range0)) ]
         ; Target = None
         ; AppliesToGetterAndSetter = false
         ; Range = range0 } : SynAttribute
@@ -54,7 +54,7 @@ let createTableRecord (tbl: Table) =
                 else
                     SynType.Create(col.TypeMapping.ClrType)
 
-            let attributes = createDbColumnTypeAttributes col
+            let attributes = createProviderDbTypeAttribute col.TypeMapping
           
             let type' =
                 if col.IsNullable then
@@ -660,8 +660,8 @@ let substitutions =
     [
         /// Reader classes at top of namespace
         "open Substitute.Extensions",
-        """
-open SqlHydra.DbColumnTypeAttribute
+        $"""
+open {nameof SqlHydra}.{nameof ProviderDbTypeAttribute}
         
 type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
         member __.Name = column

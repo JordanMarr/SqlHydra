@@ -5,14 +5,19 @@ open SqlKata
 
 /// Contains methods that compile and read a query.
 type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
+    let setProviderDbType (param: DbParameter) (propertyName: string) (providerDbType: string) =
+        let property = param.GetType().GetProperty(propertyName)
+        let dbTypeSetter = property.GetSetMethod()
+        
+        let value = System.Enum.Parse(property.PropertyType, providerDbType)
+        dbTypeSetter.Invoke(param, [|value|]) |> ignore
+        
     let setParameterDbType (param: DbParameter) (qp: QueryParameter) =
-        match qp.Type, compiler with
-        | Some type', :? SqlKata.Compilers.PostgresCompiler when type'.TypeName = "NpgsqlDbType" ->
-            let property = param.GetType().GetProperty("NpgsqlDbType")
-            let dbTypeSetter = property.GetSetMethod()
-            
-            let value = System.Enum.Parse(property.PropertyType, type'.TypeValue)
-            dbTypeSetter.Invoke(param, [|value|]) |> ignore
+        match qp.ProviderDbType, compiler with
+        | Some type', :? SqlKata.Compilers.PostgresCompiler ->
+            setProviderDbType param "NpgsqlDbType" type'
+        | Some type', :? SqlKata.Compilers.SqlServerCompiler ->
+            setProviderDbType param "SqlDbType" type'
         | _ -> ()    
         
     interface System.IDisposable with
