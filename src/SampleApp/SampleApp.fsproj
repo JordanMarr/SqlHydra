@@ -21,6 +21,6 @@
     <PackageReference Include="TaskBuilder.fs" Version="2.1.0" />
   </ItemGroup>
   <Target Name="SqlHydra" BeforeTargets="Clean">
-<!--    <Exec Command="sqlhydra-mssql.bat" />-->
+    <Exec Command="sqlhydra-mssql.bat" />
   </Target>
 </Project>

@@ -58,7 +58,7 @@ let getSchema (cfg: Config) : Schema =
                     | _ -> false
             |}
         )
-    
+
     let tables = 
         sTables.Rows
         |> Seq.cast<DataRow>

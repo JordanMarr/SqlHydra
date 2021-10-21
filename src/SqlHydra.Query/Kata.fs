@@ -2,7 +2,6 @@
 
 open System.Reflection
 open SqlHydra.ProviderDbTypeAttribute
-open SqlHydra.Domain
 open SqlKata
 open System.Collections.Generic
 open System
