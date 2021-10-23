@@ -467,9 +467,12 @@ let tests =
             ctx.RollbackTransaction()
         }
         
-        testTask "Insert, Update and Read npgsql provider specific db fields" {
+        ftestTask "Insert, Update and Read npgsql provider specific db fields" {
             do generateProviderDbTestTable ()
             use ctx = openContext ()
+            
+            let expectJsonEqual (dbValue: string) = Expect.equal (dbValue.Replace(" ", ""))
+                
             let getRowById id =
                 select {
                     for e in providerDbTestTable do
@@ -497,8 +500,8 @@ let tests =
 
             Expect.wantSome (selectedRows |> Seq.tryHead) "Select returned empty set"
             |> fun (row: provider_test.test) ->
-                 Expect.equal row.json_field jsonValue "Json field doesn't match"
-                 Expect.equal row.jsonb_field jsonValue "Jsonb field doesn't match"
+                 expectJsonEqual row.json_field jsonValue "Json field doesn't match"
+                 expectJsonEqual row.jsonb_field jsonValue "Jsonb field doesn't match"
      
             let updatedJsonValue = """{"name":"test_2"}"""
             
@@ -513,12 +516,12 @@ let tests =
         
             Expect.equal updatedRows 1 "Provider specific db update failed"
             
-            let! selectedRows = getRowById insertedRowId
+            let! selectedRowsAfterUpdate = getRowById insertedRowId
 
-            Expect.wantSome (selectedRows |> Seq.tryHead) "Select returned empty set"
+            Expect.wantSome (selectedRowsAfterUpdate |> Seq.tryHead) "Select returned empty set"
             |> fun (row: provider_test.test) ->
-                 Expect.equal row.json_field updatedJsonValue "Json field doesn't match"
-                 Expect.equal row.jsonb_field updatedJsonValue "Jsonb field doesn't match"
+                 expectJsonEqual row.json_field  updatedJsonValue "Json field doesn't match"
+                 expectJsonEqual row.jsonb_field updatedJsonValue "Jsonb field doesn't match"
                    
             let! insertedNumberOfRows = 
                 insert {
