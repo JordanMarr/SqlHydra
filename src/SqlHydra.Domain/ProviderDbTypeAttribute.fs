@@ -1,4 +1,4 @@
-module SqlHydra.ProviderDbTypeAttribute
+namespace SqlHydra
 
 open System
 

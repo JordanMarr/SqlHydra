@@ -1,7 +1,6 @@
 ﻿namespace SqlHydra.Query
 
 open System.Reflection
-open SqlHydra.ProviderDbTypeAttribute
 open SqlKata
 open System.Collections.Generic
 open System
@@ -91,7 +90,9 @@ module private KataUtils =
     let getProviderDbTypeName (p: PropertyInfo) =
         let attrs = p.GetCustomAttributes(true)
         (attrs
-        |> Seq.choose (function | :? ProviderDbTypeAttribute as attr -> Some attr.ProviderDbTypeName | _ -> None))
+        |> Seq.choose (function
+            | :? SqlHydra.ProviderDbTypeAttribute as attr -> Some attr.ProviderDbTypeName
+            | _ -> None))
         |> Seq.tryHead
     
     let fromUpdate (spec: UpdateQuerySpec<'T>) = 

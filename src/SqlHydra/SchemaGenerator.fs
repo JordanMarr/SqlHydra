@@ -6,7 +6,6 @@ open FsAst
 open Fantomas
 open Domain
 open System.Data
-open SqlHydra.ProviderDbTypeAttribute
 open SqlHydra.Filter
 
 let range0 = Range.range.Zero
@@ -29,8 +28,10 @@ let cliMutableAttribute =
 let createProviderDbTypeAttribute (mapping: TypeMapping) =
     mapping.ProviderDbType
     |> Option.map (fun type' ->
-    let attr =
-        { TypeName = LongIdentWithDots.CreateString (nameof ProviderDbTypeAttribute)
+    let attributeFullName = typeof<ProviderDbTypeAttribute>.FullName
+
+    let attr = 
+        { TypeName = LongIdentWithDots.Create (attributeFullName.Split(".") |> List.ofArray) 
         ; ArgExpr = SynExpr.CreateParenedTuple [ SynExpr.CreateConst (SynConst.String(type', range0)) ]
         ; Target = None
         ; AppliesToGetterAndSetter = false
@@ -660,10 +661,7 @@ let substitutions =
     [
         /// Reader classes at top of namespace
         "open Substitute.Extensions",
-        $"""
-open {nameof SqlHydra}.{nameof ProviderDbTypeAttribute}
-        
-type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
+        """type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
         member __.Name = column
         member __.IsNull() = getOrdinal column |> reader.IsDBNull
         override __.ToString() = __.Name
