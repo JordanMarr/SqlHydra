@@ -1,6 +1,7 @@
 ﻿module Npgsql.QueryIntegrationTests
 
 open Expecto
+open Npgsql.AdventureWorks.person
 open SqlHydra.Query
 open DB
 open Npgsql.AdventureWorks
@@ -22,6 +23,19 @@ let subCategoryTable =      table<production.productsubcategory>    |> inSchema 
 let categoryTable =         table<production.productcategory>       |> inSchema (nameof production)
 let currencyTable =         table<sales.currency>                   |> inSchema (nameof sales)
 let productReviewTable =    table<production.productreview>         |> inSchema (nameof production)
+let providerDbTestTable = table<provider_test.test> |> inSchema (nameof provider_test)
+
+let generateProviderDbTestTable () =
+   use ctx = openContext()
+   let dropProvideDbTestTableCmd = ctx.Connection.CreateCommand ()
+   dropProvideDbTestTableCmd.CommandText <-
+       "drop table if exists provider_test.test; drop schema if exists provider_test"
+   dropProvideDbTestTableCmd.ExecuteNonQuery () |> ignore
+   
+   let createProviderDbTestTableCmd = ctx.Connection.CreateCommand ()
+   createProviderDbTestTableCmd.CommandText <-
+       "create schema provider_test; create table provider_test.test(id serial, json_field json not null, jsonb_field jsonb not null);"
+   createProviderDbTestTableCmd.ExecuteNonQuery () |> ignore
 
 [<Tests>]
 let tests = 
@@ -451,5 +465,68 @@ let tests =
             Expect.equal (distinctResults |> Seq.length) 1 ""
 
             ctx.RollbackTransaction()
+        }
+        
+        testTask "Insert, Update and Read npgsql provider specific db fields" {
+            do generateProviderDbTestTable ()
+            use ctx = openContext ()
+            let getRowById id =
+                select {
+                    for e in providerDbTestTable do
+                        select e
+                        where (e.id = id)
+                } |> ctx.ReadAsync HydraReader.Read
+                
+            let jsonValue = """{"name":"test"}"""
+            let entity': provider_test.test =
+                {
+                    id = 0
+                    json_field = jsonValue
+                    jsonb_field = jsonValue
+                }
+                
+            let! insertedRowId = 
+                insert {
+                    for e in providerDbTestTable do
+                    entity entity'
+                    getId e.id
+                }
+                |> ctx.InsertAsync
+                  
+            let! selectedRows = getRowById insertedRowId
+
+            Expect.wantSome (selectedRows |> Seq.tryHead) "Select returned empty set"
+            |> fun (row: provider_test.test) ->
+                 Expect.equal row.json_field jsonValue "Json field doesn't match"
+                 Expect.equal row.jsonb_field jsonValue "Jsonb field doesn't match"
+     
+            let updatedJsonValue = """{"name":"test_2"}"""
+            
+            let! updatedRows =
+                update {
+                        for e in providerDbTestTable do
+                        set e.json_field updatedJsonValue
+                        set e.jsonb_field updatedJsonValue
+                        where (e.id = insertedRowId)
+                    }
+                    |> ctx.UpdateAsync
+        
+            Expect.equal updatedRows 1 "Provider specific db update failed"
+            
+            let! selectedRows = getRowById insertedRowId
+
+            Expect.wantSome (selectedRows |> Seq.tryHead) "Select returned empty set"
+            |> fun (row: provider_test.test) ->
+                 Expect.equal row.json_field updatedJsonValue "Json field doesn't match"
+                 Expect.equal row.jsonb_field updatedJsonValue "Jsonb field doesn't match"
+                   
+            let! insertedNumberOfRows = 
+                insert {
+                    for e in providerDbTestTable do
+                    entities [entity'; entity']
+                }
+                |> ctx.InsertAsync
+            
+            Expect.equal insertedNumberOfRows 2 "Failed insert entities"
         }
     ]
