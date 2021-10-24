@@ -31,171 +31,171 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
 module humanresources =
     [<CLIMutable>]
     type department =
-        { name: string
+        { departmentid: int
+          name: string
           groupname: string
-          modifieddate: System.DateTime
-          departmentid: int }
+          modifieddate: System.DateTime }
 
     type departmentReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.departmentid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "departmentid")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.groupname = RequiredColumn(reader, getOrdinal, reader.GetString, "groupname")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.departmentid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "departmentid")
         member __.Read() =
-            { name = __.name.Read()
+            { departmentid = __.departmentid.Read()
+              name = __.name.Read()
               groupname = __.groupname.Read()
-              modifieddate = __.modifieddate.Read()
-              departmentid = __.departmentid.Read() }
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.departmentid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type employee =
-        { nationalidnumber: string
+        { businessentityid: int
+          nationalidnumber: string
+          loginid: string
+          jobtitle: string
+          birthdate: System.DateTime
+          maritalstatus: string
+          gender: string
+          hiredate: System.DateTime
+          salariedflag: bool
+          vacationhours: int16
           sickleavehours: int16
           currentflag: bool
-          loginid: string
-          modifieddate: System.DateTime
-          hiredate: System.DateTime
-          maritalstatus: string
-          birthdate: System.DateTime
-          vacationhours: int16
-          salariedflag: bool
-          gender: string
-          businessentityid: int
-          organizationnode: Option<string>
           rowguid: System.Guid
-          jobtitle: string }
+          modifieddate: System.DateTime
+          organizationnode: Option<string> }
 
     type employeeReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
         member __.nationalidnumber = RequiredColumn(reader, getOrdinal, reader.GetString, "nationalidnumber")
+        member __.loginid = RequiredColumn(reader, getOrdinal, reader.GetString, "loginid")
+        member __.jobtitle = RequiredColumn(reader, getOrdinal, reader.GetString, "jobtitle")
+        member __.birthdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "birthdate")
+        member __.maritalstatus = RequiredColumn(reader, getOrdinal, reader.GetString, "maritalstatus")
+        member __.gender = RequiredColumn(reader, getOrdinal, reader.GetString, "gender")
+        member __.hiredate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "hiredate")
+        member __.salariedflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "salariedflag")
+        member __.vacationhours = RequiredColumn(reader, getOrdinal, reader.GetInt16, "vacationhours")
         member __.sickleavehours = RequiredColumn(reader, getOrdinal, reader.GetInt16, "sickleavehours")
         member __.currentflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "currentflag")
-        member __.loginid = RequiredColumn(reader, getOrdinal, reader.GetString, "loginid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.hiredate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "hiredate")
-        member __.maritalstatus = RequiredColumn(reader, getOrdinal, reader.GetString, "maritalstatus")
-        member __.birthdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "birthdate")
-        member __.vacationhours = RequiredColumn(reader, getOrdinal, reader.GetInt16, "vacationhours")
-        member __.salariedflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "salariedflag")
-        member __.gender = RequiredColumn(reader, getOrdinal, reader.GetString, "gender")
-        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
-        member __.organizationnode = OptionalColumn(reader, getOrdinal, reader.GetString, "organizationnode")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.jobtitle = RequiredColumn(reader, getOrdinal, reader.GetString, "jobtitle")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.organizationnode = OptionalColumn(reader, getOrdinal, reader.GetString, "organizationnode")
         member __.Read() =
-            { nationalidnumber = __.nationalidnumber.Read()
+            { businessentityid = __.businessentityid.Read()
+              nationalidnumber = __.nationalidnumber.Read()
+              loginid = __.loginid.Read()
+              jobtitle = __.jobtitle.Read()
+              birthdate = __.birthdate.Read()
+              maritalstatus = __.maritalstatus.Read()
+              gender = __.gender.Read()
+              hiredate = __.hiredate.Read()
+              salariedflag = __.salariedflag.Read()
+              vacationhours = __.vacationhours.Read()
               sickleavehours = __.sickleavehours.Read()
               currentflag = __.currentflag.Read()
-              loginid = __.loginid.Read()
-              modifieddate = __.modifieddate.Read()
-              hiredate = __.hiredate.Read()
-              maritalstatus = __.maritalstatus.Read()
-              birthdate = __.birthdate.Read()
-              vacationhours = __.vacationhours.Read()
-              salariedflag = __.salariedflag.Read()
-              gender = __.gender.Read()
-              businessentityid = __.businessentityid.Read()
-              organizationnode = __.organizationnode.Read()
               rowguid = __.rowguid.Read()
-              jobtitle = __.jobtitle.Read() }
+              modifieddate = __.modifieddate.Read()
+              organizationnode = __.organizationnode.Read() }
 
         member __.ReadIfNotNull() =
             if __.businessentityid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type employeedepartmenthistory =
-        { startdate: System.DateTime
-          shiftid: int16
+        { businessentityid: int
           departmentid: int16
-          businessentityid: int
+          shiftid: int16
+          startdate: System.DateTime
           enddate: Option<System.DateTime>
           modifieddate: System.DateTime }
 
     type employeedepartmenthistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
-        member __.shiftid = RequiredColumn(reader, getOrdinal, reader.GetInt16, "shiftid")
-        member __.departmentid = RequiredColumn(reader, getOrdinal, reader.GetInt16, "departmentid")
         member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.departmentid = RequiredColumn(reader, getOrdinal, reader.GetInt16, "departmentid")
+        member __.shiftid = RequiredColumn(reader, getOrdinal, reader.GetInt16, "shiftid")
+        member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
         member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { startdate = __.startdate.Read()
-              shiftid = __.shiftid.Read()
+            { businessentityid = __.businessentityid.Read()
               departmentid = __.departmentid.Read()
-              businessentityid = __.businessentityid.Read()
+              shiftid = __.shiftid.Read()
+              startdate = __.startdate.Read()
               enddate = __.enddate.Read()
               modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
-            if __.startdate.IsNull() then None else Some(__.Read())
+            if __.businessentityid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type employeepayhistory =
-        { rate: decimal
-          payfrequency: int16
+        { businessentityid: int
           ratechangedate: System.DateTime
-          businessentityid: int
+          rate: decimal
+          payfrequency: int16
           modifieddate: System.DateTime }
 
     type employeepayhistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.ratechangedate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ratechangedate")
         member __.rate = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "rate")
         member __.payfrequency = RequiredColumn(reader, getOrdinal, reader.GetInt16, "payfrequency")
-        member __.ratechangedate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ratechangedate")
-        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { rate = __.rate.Read()
-              payfrequency = __.payfrequency.Read()
+            { businessentityid = __.businessentityid.Read()
               ratechangedate = __.ratechangedate.Read()
-              businessentityid = __.businessentityid.Read()
+              rate = __.rate.Read()
+              payfrequency = __.payfrequency.Read()
               modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
-            if __.ratechangedate.IsNull() then None else Some(__.Read())
+            if __.businessentityid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type jobcandidate =
         { jobcandidateid: int
           businessentityid: Option<int>
-          modifieddate: System.DateTime
-          resume: Option<string> }
+          resume: Option<string>
+          modifieddate: System.DateTime }
 
     type jobcandidateReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.jobcandidateid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "jobcandidateid")
         member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.resume = OptionalColumn(reader, getOrdinal, reader.GetString, "resume")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
             { jobcandidateid = __.jobcandidateid.Read()
               businessentityid = __.businessentityid.Read()
-              modifieddate = __.modifieddate.Read()
-              resume = __.resume.Read() }
+              resume = __.resume.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.jobcandidateid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type shift =
-        { modifieddate: System.DateTime
-          shiftid: int
+        { shiftid: int
           name: string
           starttime: System.TimeSpan
-          endtime: System.TimeSpan }
+          endtime: System.TimeSpan
+          modifieddate: System.DateTime }
 
     type shiftReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.shiftid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "shiftid")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.starttime = RequiredColumn(reader, getOrdinal, reader.GetTimeSpan, "starttime")
         member __.endtime = RequiredColumn(reader, getOrdinal, reader.GetTimeSpan, "endtime")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { modifieddate = __.modifieddate.Read()
-              shiftid = __.shiftid.Read()
+            { shiftid = __.shiftid.Read()
               name = __.name.Read()
               starttime = __.starttime.Read()
-              endtime = __.endtime.Read() }
+              endtime = __.endtime.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.shiftid.IsNull() then None else Some(__.Read())
@@ -203,123 +203,123 @@ module humanresources =
 module person =
     [<CLIMutable>]
     type address =
-        { addressline1: string
-          city: string
+        { addressid: int
+          addressline1: string
           addressline2: Option<string>
-          rowguid: System.Guid
-          spatiallocation: Option<string>
+          city: string
           stateprovinceid: int
-          addressid: int
-          modifieddate: System.DateTime
-          postalcode: string }
+          postalcode: string
+          spatiallocation: Option<string>
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type addressReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.addressline1 = RequiredColumn(reader, getOrdinal, reader.GetString, "addressline1")
-        member __.city = RequiredColumn(reader, getOrdinal, reader.GetString, "city")
-        member __.addressline2 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline2")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.spatiallocation = OptionalColumn(reader, getOrdinal, reader.GetString, "spatiallocation")
-        member __.stateprovinceid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "stateprovinceid")
         member __.addressid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "addressid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.addressline1 = RequiredColumn(reader, getOrdinal, reader.GetString, "addressline1")
+        member __.addressline2 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline2")
+        member __.city = RequiredColumn(reader, getOrdinal, reader.GetString, "city")
+        member __.stateprovinceid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "stateprovinceid")
         member __.postalcode = RequiredColumn(reader, getOrdinal, reader.GetString, "postalcode")
+        member __.spatiallocation = OptionalColumn(reader, getOrdinal, reader.GetString, "spatiallocation")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { addressline1 = __.addressline1.Read()
-              city = __.city.Read()
+            { addressid = __.addressid.Read()
+              addressline1 = __.addressline1.Read()
               addressline2 = __.addressline2.Read()
-              rowguid = __.rowguid.Read()
-              spatiallocation = __.spatiallocation.Read()
+              city = __.city.Read()
               stateprovinceid = __.stateprovinceid.Read()
-              addressid = __.addressid.Read()
-              modifieddate = __.modifieddate.Read()
-              postalcode = __.postalcode.Read() }
+              postalcode = __.postalcode.Read()
+              spatiallocation = __.spatiallocation.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.addressid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type addresstype =
-        { rowguid: System.Guid
-          modifieddate: System.DateTime
-          name: string
-          addresstypeid: int }
-
-    type addresstypeReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
-        member __.addresstypeid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "addresstypeid")
-        member __.Read() =
-            { rowguid = __.rowguid.Read()
-              modifieddate = __.modifieddate.Read()
-              name = __.name.Read()
-              addresstypeid = __.addresstypeid.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.addresstypeid.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type businessentity =
-        { rowguid: System.Guid
-          modifieddate: System.DateTime
-          businessentityid: int }
-
-    type businessentityReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
-        member __.Read() =
-            { rowguid = __.rowguid.Read()
-              modifieddate = __.modifieddate.Read()
-              businessentityid = __.businessentityid.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.businessentityid.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type businessentityaddress =
         { addresstypeid: int
+          name: string
           rowguid: System.Guid
-          addressid: int
-          businessentityid: int
           modifieddate: System.DateTime }
 
-    type businessentityaddressReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+    type addresstypeReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.addresstypeid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "addresstypeid")
+        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.addressid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "addressid")
-        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
             { addresstypeid = __.addresstypeid.Read()
+              name = __.name.Read()
               rowguid = __.rowguid.Read()
-              addressid = __.addressid.Read()
-              businessentityid = __.businessentityid.Read()
               modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.addresstypeid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
+    type businessentity =
+        { businessentityid: int
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
+
+    type businessentityReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type businessentityaddress =
+        { businessentityid: int
+          addressid: int
+          addresstypeid: int
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
+
+    type businessentityaddressReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.addressid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "addressid")
+        member __.addresstypeid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "addresstypeid")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              addressid = __.addressid.Read()
+              addresstypeid = __.addresstypeid.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
     type businessentitycontact =
         { businessentityid: int
-          modifieddate: System.DateTime
+          personid: int
           contacttypeid: int
           rowguid: System.Guid
-          personid: int }
+          modifieddate: System.DateTime }
 
     type businessentitycontactReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.personid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "personid")
         member __.contacttypeid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "contacttypeid")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.personid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "personid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
             { businessentityid = __.businessentityid.Read()
-              modifieddate = __.modifieddate.Read()
+              personid = __.personid.Read()
               contacttypeid = __.contacttypeid.Read()
               rowguid = __.rowguid.Read()
-              personid = __.personid.Read() }
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.businessentityid.IsNull() then None else Some(__.Read())
@@ -344,114 +344,114 @@ module person =
 
     [<CLIMutable>]
     type countryregion =
-        { name: string
-          modifieddate: System.DateTime
-          countryregioncode: string }
+        { countryregioncode: string
+          name: string
+          modifieddate: System.DateTime }
 
     type countryregionReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.countryregioncode = RequiredColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.countryregioncode = RequiredColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
         member __.Read() =
-            { name = __.name.Read()
-              modifieddate = __.modifieddate.Read()
-              countryregioncode = __.countryregioncode.Read() }
+            { countryregioncode = __.countryregioncode.Read()
+              name = __.name.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.countryregioncode.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type emailaddress =
-        { modifieddate: System.DateTime
-          businessentityid: int
+        { businessentityid: int
           emailaddressid: int
+          emailaddress: Option<string>
           rowguid: System.Guid
-          emailaddress: Option<string> }
+          modifieddate: System.DateTime }
 
     type emailaddressReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
         member __.emailaddressid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "emailaddressid")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.emailaddress = OptionalColumn(reader, getOrdinal, reader.GetString, "emailaddress")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { modifieddate = __.modifieddate.Read()
-              businessentityid = __.businessentityid.Read()
+            { businessentityid = __.businessentityid.Read()
               emailaddressid = __.emailaddressid.Read()
+              emailaddress = __.emailaddress.Read()
               rowguid = __.rowguid.Read()
-              emailaddress = __.emailaddress.Read() }
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.businessentityid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type password =
-        { passwordhash: string
-          rowguid: System.Guid
+        { businessentityid: int
+          passwordhash: string
           passwordsalt: string
-          modifieddate: System.DateTime
-          businessentityid: int }
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type passwordReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.passwordhash = RequiredColumn(reader, getOrdinal, reader.GetString, "passwordhash")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.passwordsalt = RequiredColumn(reader, getOrdinal, reader.GetString, "passwordsalt")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.passwordhash = RequiredColumn(reader, getOrdinal, reader.GetString, "passwordhash")
+        member __.passwordsalt = RequiredColumn(reader, getOrdinal, reader.GetString, "passwordsalt")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { passwordhash = __.passwordhash.Read()
-              rowguid = __.rowguid.Read()
+            { businessentityid = __.businessentityid.Read()
+              passwordhash = __.passwordhash.Read()
               passwordsalt = __.passwordsalt.Read()
-              modifieddate = __.modifieddate.Read()
-              businessentityid = __.businessentityid.Read() }
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.businessentityid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type person =
-        { persontype: string
-          modifieddate: System.DateTime
+        { businessentityid: int
+          persontype: string
           namestyle: bool
           title: Option<string>
-          additionalcontactinfo: Option<string>
-          suffix: Option<string>
+          firstname: string
+          middlename: Option<string>
           lastname: string
+          suffix: Option<string>
+          emailpromotion: int
+          additionalcontactinfo: Option<string>
           demographics: Option<string>
           rowguid: System.Guid
-          firstname: string
-          emailpromotion: int
-          businessentityid: int
-          middlename: Option<string> }
+          modifieddate: System.DateTime }
 
     type personReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
         member __.persontype = RequiredColumn(reader, getOrdinal, reader.GetString, "persontype")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.namestyle = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "namestyle")
         member __.title = OptionalColumn(reader, getOrdinal, reader.GetString, "title")
-        member __.additionalcontactinfo = OptionalColumn(reader, getOrdinal, reader.GetString, "additionalcontactinfo")
-        member __.suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "suffix")
+        member __.firstname = RequiredColumn(reader, getOrdinal, reader.GetString, "firstname")
+        member __.middlename = OptionalColumn(reader, getOrdinal, reader.GetString, "middlename")
         member __.lastname = RequiredColumn(reader, getOrdinal, reader.GetString, "lastname")
+        member __.suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "suffix")
+        member __.emailpromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "emailpromotion")
+        member __.additionalcontactinfo = OptionalColumn(reader, getOrdinal, reader.GetString, "additionalcontactinfo")
         member __.demographics = OptionalColumn(reader, getOrdinal, reader.GetString, "demographics")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.firstname = RequiredColumn(reader, getOrdinal, reader.GetString, "firstname")
-        member __.emailpromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "emailpromotion")
-        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
-        member __.middlename = OptionalColumn(reader, getOrdinal, reader.GetString, "middlename")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { persontype = __.persontype.Read()
-              modifieddate = __.modifieddate.Read()
+            { businessentityid = __.businessentityid.Read()
+              persontype = __.persontype.Read()
               namestyle = __.namestyle.Read()
               title = __.title.Read()
-              additionalcontactinfo = __.additionalcontactinfo.Read()
-              suffix = __.suffix.Read()
+              firstname = __.firstname.Read()
+              middlename = __.middlename.Read()
               lastname = __.lastname.Read()
+              suffix = __.suffix.Read()
+              emailpromotion = __.emailpromotion.Read()
+              additionalcontactinfo = __.additionalcontactinfo.Read()
               demographics = __.demographics.Read()
               rowguid = __.rowguid.Read()
-              firstname = __.firstname.Read()
-              emailpromotion = __.emailpromotion.Read()
-              businessentityid = __.businessentityid.Read()
-              middlename = __.middlename.Read() }
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.businessentityid.IsNull() then None else Some(__.Read())
@@ -480,50 +480,50 @@ module person =
     [<CLIMutable>]
     type phonenumbertype =
         { phonenumbertypeid: int
-          modifieddate: System.DateTime
-          name: string }
+          name: string
+          modifieddate: System.DateTime }
 
     type phonenumbertypeReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.phonenumbertypeid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "phonenumbertypeid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
             { phonenumbertypeid = __.phonenumbertypeid.Read()
-              modifieddate = __.modifieddate.Read()
-              name = __.name.Read() }
+              name = __.name.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.phonenumbertypeid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type stateprovince =
-        { isonlystateprovinceflag: bool
-          countryregioncode: string
+        { stateprovinceid: int
           stateprovincecode: string
-          rowguid: System.Guid
-          modifieddate: System.DateTime
-          stateprovinceid: int
+          countryregioncode: string
+          isonlystateprovinceflag: bool
           name: string
-          territoryid: int }
+          territoryid: int
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type stateprovinceReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.isonlystateprovinceflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "isonlystateprovinceflag")
-        member __.countryregioncode = RequiredColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
-        member __.stateprovincecode = RequiredColumn(reader, getOrdinal, reader.GetString, "stateprovincecode")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.stateprovinceid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "stateprovinceid")
+        member __.stateprovincecode = RequiredColumn(reader, getOrdinal, reader.GetString, "stateprovincecode")
+        member __.countryregioncode = RequiredColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
+        member __.isonlystateprovinceflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "isonlystateprovinceflag")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.territoryid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { isonlystateprovinceflag = __.isonlystateprovinceflag.Read()
-              countryregioncode = __.countryregioncode.Read()
+            { stateprovinceid = __.stateprovinceid.Read()
               stateprovincecode = __.stateprovincecode.Read()
-              rowguid = __.rowguid.Read()
-              modifieddate = __.modifieddate.Read()
-              stateprovinceid = __.stateprovinceid.Read()
+              countryregioncode = __.countryregioncode.Read()
+              isonlystateprovinceflag = __.isonlystateprovinceflag.Read()
               name = __.name.Read()
-              territoryid = __.territoryid.Read() }
+              territoryid = __.territoryid.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.stateprovinceid.IsNull() then None else Some(__.Read())
@@ -531,120 +531,120 @@ module person =
 module production =
     [<CLIMutable>]
     type billofmaterials =
-        { unitmeasurecode: string
-          modifieddate: System.DateTime
-          billofmaterialsid: int
-          enddate: Option<System.DateTime>
-          bomlevel: int16
-          perassemblyqty: decimal
+        { billofmaterialsid: int
+          productassemblyid: Option<int>
           componentid: int
           startdate: System.DateTime
-          productassemblyid: Option<int> }
+          enddate: Option<System.DateTime>
+          unitmeasurecode: string
+          bomlevel: int16
+          perassemblyqty: decimal
+          modifieddate: System.DateTime }
 
     type billofmaterialsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.unitmeasurecode = RequiredColumn(reader, getOrdinal, reader.GetString, "unitmeasurecode")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.billofmaterialsid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "billofmaterialsid")
-        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
-        member __.bomlevel = RequiredColumn(reader, getOrdinal, reader.GetInt16, "bomlevel")
-        member __.perassemblyqty = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "perassemblyqty")
+        member __.productassemblyid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productassemblyid")
         member __.componentid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "componentid")
         member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
-        member __.productassemblyid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productassemblyid")
+        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
+        member __.unitmeasurecode = RequiredColumn(reader, getOrdinal, reader.GetString, "unitmeasurecode")
+        member __.bomlevel = RequiredColumn(reader, getOrdinal, reader.GetInt16, "bomlevel")
+        member __.perassemblyqty = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "perassemblyqty")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { unitmeasurecode = __.unitmeasurecode.Read()
-              modifieddate = __.modifieddate.Read()
-              billofmaterialsid = __.billofmaterialsid.Read()
-              enddate = __.enddate.Read()
-              bomlevel = __.bomlevel.Read()
-              perassemblyqty = __.perassemblyqty.Read()
+            { billofmaterialsid = __.billofmaterialsid.Read()
+              productassemblyid = __.productassemblyid.Read()
               componentid = __.componentid.Read()
               startdate = __.startdate.Read()
-              productassemblyid = __.productassemblyid.Read() }
+              enddate = __.enddate.Read()
+              unitmeasurecode = __.unitmeasurecode.Read()
+              bomlevel = __.bomlevel.Read()
+              perassemblyqty = __.perassemblyqty.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.billofmaterialsid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type culture =
-        { name: string
-          modifieddate: System.DateTime
-          cultureid: string }
+        { cultureid: string
+          name: string
+          modifieddate: System.DateTime }
 
     type cultureReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.cultureid = RequiredColumn(reader, getOrdinal, reader.GetString, "cultureid")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.cultureid = RequiredColumn(reader, getOrdinal, reader.GetString, "cultureid")
         member __.Read() =
-            { name = __.name.Read()
-              modifieddate = __.modifieddate.Read()
-              cultureid = __.cultureid.Read() }
+            { cultureid = __.cultureid.Read()
+              name = __.name.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.cultureid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type document =
-        { rowguid: System.Guid
-          modifieddate: System.DateTime
-          title: string
+        { title: string
           owner: int
-          status: int16
-          revision: string
+          folderflag: bool
+          filename: string
           fileextension: Option<string>
+          revision: string
+          changenumber: int
+          status: int16
           documentsummary: Option<string>
           document: Option<byte []>
-          folderflag: bool
-          changenumber: int
-          documentnode: string
-          filename: string }
+          rowguid: System.Guid
+          modifieddate: System.DateTime
+          documentnode: string }
 
     type documentReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.title = RequiredColumn(reader, getOrdinal, reader.GetString, "title")
         member __.owner = RequiredColumn(reader, getOrdinal, reader.GetInt32, "owner")
-        member __.status = RequiredColumn(reader, getOrdinal, reader.GetInt16, "status")
-        member __.revision = RequiredColumn(reader, getOrdinal, reader.GetString, "revision")
+        member __.folderflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "folderflag")
+        member __.filename = RequiredColumn(reader, getOrdinal, reader.GetString, "filename")
         member __.fileextension = OptionalColumn(reader, getOrdinal, reader.GetString, "fileextension")
+        member __.revision = RequiredColumn(reader, getOrdinal, reader.GetString, "revision")
+        member __.changenumber = RequiredColumn(reader, getOrdinal, reader.GetInt32, "changenumber")
+        member __.status = RequiredColumn(reader, getOrdinal, reader.GetInt16, "status")
         member __.documentsummary = OptionalColumn(reader, getOrdinal, reader.GetString, "documentsummary")
         member __.document = OptionalBinaryColumn(reader, getOrdinal, reader.GetValue, "document")
-        member __.folderflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "folderflag")
-        member __.changenumber = RequiredColumn(reader, getOrdinal, reader.GetInt32, "changenumber")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.documentnode = RequiredColumn(reader, getOrdinal, reader.GetString, "documentnode")
-        member __.filename = RequiredColumn(reader, getOrdinal, reader.GetString, "filename")
         member __.Read() =
-            { rowguid = __.rowguid.Read()
-              modifieddate = __.modifieddate.Read()
-              title = __.title.Read()
+            { title = __.title.Read()
               owner = __.owner.Read()
-              status = __.status.Read()
-              revision = __.revision.Read()
+              folderflag = __.folderflag.Read()
+              filename = __.filename.Read()
               fileextension = __.fileextension.Read()
+              revision = __.revision.Read()
+              changenumber = __.changenumber.Read()
+              status = __.status.Read()
               documentsummary = __.documentsummary.Read()
               document = __.document.Read()
-              folderflag = __.folderflag.Read()
-              changenumber = __.changenumber.Read()
-              documentnode = __.documentnode.Read()
-              filename = __.filename.Read() }
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read()
+              documentnode = __.documentnode.Read() }
 
         member __.ReadIfNotNull() =
             if __.documentnode.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type illustration =
-        { diagram: Option<string>
-          modifieddate: System.DateTime
-          illustrationid: int }
+        { illustrationid: int
+          diagram: Option<string>
+          modifieddate: System.DateTime }
 
     type illustrationReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.illustrationid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "illustrationid")
         member __.diagram = OptionalColumn(reader, getOrdinal, reader.GetString, "diagram")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.illustrationid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "illustrationid")
         member __.Read() =
-            { diagram = __.diagram.Read()
-              modifieddate = __.modifieddate.Read()
-              illustrationid = __.illustrationid.Read() }
+            { illustrationid = __.illustrationid.Read()
+              diagram = __.diagram.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.illustrationid.IsNull() then None else Some(__.Read())
@@ -652,152 +652,152 @@ module production =
     [<CLIMutable>]
     type location =
         { locationid: int
-          modifieddate: System.DateTime
-          availability: decimal
+          name: string
           costrate: decimal
-          name: string }
+          availability: decimal
+          modifieddate: System.DateTime }
 
     type locationReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.locationid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "locationid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.availability = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "availability")
-        member __.costrate = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "costrate")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.costrate = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "costrate")
+        member __.availability = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "availability")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
             { locationid = __.locationid.Read()
-              modifieddate = __.modifieddate.Read()
-              availability = __.availability.Read()
+              name = __.name.Read()
               costrate = __.costrate.Read()
-              name = __.name.Read() }
+              availability = __.availability.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.locationid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type product =
-        { reorderpoint: int16
-          safetystocklevel: int16
-          discontinueddate: Option<System.DateTime>
-          listprice: decimal
-          rowguid: System.Guid
-          weight: Option<decimal>
+        { productid: int
+          name: string
           productnumber: string
           makeflag: bool
+          finishedgoodsflag: bool
+          color: Option<string>
+          safetystocklevel: int16
+          reorderpoint: int16
+          standardcost: decimal
+          listprice: decimal
+          size: Option<string>
+          sizeunitmeasurecode: Option<string>
+          weightunitmeasurecode: Option<string>
+          weight: Option<decimal>
+          daystomanufacture: int
           productline: Option<string>
-          name: string
+          ``class``: Option<string>
           style: Option<string>
           productsubcategoryid: Option<int>
-          weightunitmeasurecode: Option<string>
-          color: Option<string>
-          ``class``: Option<string>
-          modifieddate: System.DateTime
-          sellstartdate: System.DateTime
-          daystomanufacture: int
-          standardcost: decimal
-          productid: int
-          sellenddate: Option<System.DateTime>
-          sizeunitmeasurecode: Option<string>
-          size: Option<string>
           productmodelid: Option<int>
-          finishedgoodsflag: bool }
+          sellstartdate: System.DateTime
+          sellenddate: Option<System.DateTime>
+          discontinueddate: Option<System.DateTime>
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type productReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.reorderpoint = RequiredColumn(reader, getOrdinal, reader.GetInt16, "reorderpoint")
-        member __.safetystocklevel = RequiredColumn(reader, getOrdinal, reader.GetInt16, "safetystocklevel")
-        member __.discontinueddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "discontinueddate")
-        member __.listprice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "listprice")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.weight = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "weight")
+        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.productnumber = RequiredColumn(reader, getOrdinal, reader.GetString, "productnumber")
         member __.makeflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "makeflag")
+        member __.finishedgoodsflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "finishedgoodsflag")
+        member __.color = OptionalColumn(reader, getOrdinal, reader.GetString, "color")
+        member __.safetystocklevel = RequiredColumn(reader, getOrdinal, reader.GetInt16, "safetystocklevel")
+        member __.reorderpoint = RequiredColumn(reader, getOrdinal, reader.GetInt16, "reorderpoint")
+        member __.standardcost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "standardcost")
+        member __.listprice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "listprice")
+        member __.size = OptionalColumn(reader, getOrdinal, reader.GetString, "size")
+        member __.sizeunitmeasurecode = OptionalColumn(reader, getOrdinal, reader.GetString, "sizeunitmeasurecode")
+        member __.weightunitmeasurecode = OptionalColumn(reader, getOrdinal, reader.GetString, "weightunitmeasurecode")
+        member __.weight = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "weight")
+        member __.daystomanufacture = RequiredColumn(reader, getOrdinal, reader.GetInt32, "daystomanufacture")
         member __.productline = OptionalColumn(reader, getOrdinal, reader.GetString, "productline")
-        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.``class`` = OptionalColumn(reader, getOrdinal, reader.GetString, "class")
         member __.style = OptionalColumn(reader, getOrdinal, reader.GetString, "style")
         member __.productsubcategoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productsubcategoryid")
-        member __.weightunitmeasurecode = OptionalColumn(reader, getOrdinal, reader.GetString, "weightunitmeasurecode")
-        member __.color = OptionalColumn(reader, getOrdinal, reader.GetString, "color")
-        member __.``class`` = OptionalColumn(reader, getOrdinal, reader.GetString, "class")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.sellstartdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "sellstartdate")
-        member __.daystomanufacture = RequiredColumn(reader, getOrdinal, reader.GetInt32, "daystomanufacture")
-        member __.standardcost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "standardcost")
-        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
-        member __.sellenddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "sellenddate")
-        member __.sizeunitmeasurecode = OptionalColumn(reader, getOrdinal, reader.GetString, "sizeunitmeasurecode")
-        member __.size = OptionalColumn(reader, getOrdinal, reader.GetString, "size")
         member __.productmodelid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
-        member __.finishedgoodsflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "finishedgoodsflag")
+        member __.sellstartdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "sellstartdate")
+        member __.sellenddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "sellenddate")
+        member __.discontinueddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "discontinueddate")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { reorderpoint = __.reorderpoint.Read()
-              safetystocklevel = __.safetystocklevel.Read()
-              discontinueddate = __.discontinueddate.Read()
-              listprice = __.listprice.Read()
-              rowguid = __.rowguid.Read()
-              weight = __.weight.Read()
+            { productid = __.productid.Read()
+              name = __.name.Read()
               productnumber = __.productnumber.Read()
               makeflag = __.makeflag.Read()
+              finishedgoodsflag = __.finishedgoodsflag.Read()
+              color = __.color.Read()
+              safetystocklevel = __.safetystocklevel.Read()
+              reorderpoint = __.reorderpoint.Read()
+              standardcost = __.standardcost.Read()
+              listprice = __.listprice.Read()
+              size = __.size.Read()
+              sizeunitmeasurecode = __.sizeunitmeasurecode.Read()
+              weightunitmeasurecode = __.weightunitmeasurecode.Read()
+              weight = __.weight.Read()
+              daystomanufacture = __.daystomanufacture.Read()
               productline = __.productline.Read()
-              name = __.name.Read()
+              ``class`` = __.``class``.Read()
               style = __.style.Read()
               productsubcategoryid = __.productsubcategoryid.Read()
-              weightunitmeasurecode = __.weightunitmeasurecode.Read()
-              color = __.color.Read()
-              ``class`` = __.``class``.Read()
-              modifieddate = __.modifieddate.Read()
-              sellstartdate = __.sellstartdate.Read()
-              daystomanufacture = __.daystomanufacture.Read()
-              standardcost = __.standardcost.Read()
-              productid = __.productid.Read()
-              sellenddate = __.sellenddate.Read()
-              sizeunitmeasurecode = __.sizeunitmeasurecode.Read()
-              size = __.size.Read()
               productmodelid = __.productmodelid.Read()
-              finishedgoodsflag = __.finishedgoodsflag.Read() }
+              sellstartdate = __.sellstartdate.Read()
+              sellenddate = __.sellenddate.Read()
+              discontinueddate = __.discontinueddate.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.productid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type productcategory =
-        { modifieddate: System.DateTime
-          rowguid: System.Guid
+        { productcategoryid: int
           name: string
-          productcategoryid: int }
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type productcategoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.productcategoryid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productcategoryid")
+        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { modifieddate = __.modifieddate.Read()
-              rowguid = __.rowguid.Read()
+            { productcategoryid = __.productcategoryid.Read()
               name = __.name.Read()
-              productcategoryid = __.productcategoryid.Read() }
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.productcategoryid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type productcosthistory =
-        { modifieddate: System.DateTime
-          productid: int
+        { productid: int
           startdate: System.DateTime
           enddate: Option<System.DateTime>
-          standardcost: decimal }
+          standardcost: decimal
+          modifieddate: System.DateTime }
 
     type productcosthistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
         member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
         member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
         member __.standardcost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "standardcost")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { modifieddate = __.modifieddate.Read()
-              productid = __.productid.Read()
+            { productid = __.productid.Read()
               startdate = __.startdate.Read()
               enddate = __.enddate.Read()
-              standardcost = __.standardcost.Read() }
+              standardcost = __.standardcost.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.productid.IsNull() then None else Some(__.Read())
@@ -805,119 +805,119 @@ module production =
     [<CLIMutable>]
     type productdescription =
         { productdescriptionid: int
-          modifieddate: System.DateTime
+          description: string
           rowguid: System.Guid
-          description: string }
+          modifieddate: System.DateTime }
 
     type productdescriptionReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.productdescriptionid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productdescriptionid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.description = RequiredColumn(reader, getOrdinal, reader.GetString, "description")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
             { productdescriptionid = __.productdescriptionid.Read()
-              modifieddate = __.modifieddate.Read()
+              description = __.description.Read()
               rowguid = __.rowguid.Read()
-              description = __.description.Read() }
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.productdescriptionid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type productdocument =
-        { modifieddate: System.DateTime
-          documentnode: string
-          productid: int }
+        { productid: int
+          modifieddate: System.DateTime
+          documentnode: string }
 
     type productdocumentReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.documentnode = RequiredColumn(reader, getOrdinal, reader.GetString, "documentnode")
-        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
         member __.Read() =
-            { modifieddate = __.modifieddate.Read()
-              documentnode = __.documentnode.Read()
-              productid = __.productid.Read() }
+            { productid = __.productid.Read()
+              modifieddate = __.modifieddate.Read()
+              documentnode = __.documentnode.Read() }
 
         member __.ReadIfNotNull() =
-            if __.documentnode.IsNull() then None else Some(__.Read())
+            if __.productid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type productinventory =
-        { locationid: int16
+        { productid: int
+          locationid: int16
           shelf: string
           bin: int16
-          modifieddate: System.DateTime
           quantity: int16
-          productid: int
-          rowguid: System.Guid }
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type productinventoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
         member __.locationid = RequiredColumn(reader, getOrdinal, reader.GetInt16, "locationid")
         member __.shelf = RequiredColumn(reader, getOrdinal, reader.GetString, "shelf")
         member __.bin = RequiredColumn(reader, getOrdinal, reader.GetInt16, "bin")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.quantity = RequiredColumn(reader, getOrdinal, reader.GetInt16, "quantity")
-        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { locationid = __.locationid.Read()
+            { productid = __.productid.Read()
+              locationid = __.locationid.Read()
               shelf = __.shelf.Read()
               bin = __.bin.Read()
-              modifieddate = __.modifieddate.Read()
               quantity = __.quantity.Read()
-              productid = __.productid.Read()
-              rowguid = __.rowguid.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.locationid.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type productlistpricehistory =
-        { enddate: Option<System.DateTime>
-          listprice: decimal
-          startdate: System.DateTime
-          productid: int
-          modifieddate: System.DateTime }
-
-    type productlistpricehistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
-        member __.listprice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "listprice")
-        member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
-        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.Read() =
-            { enddate = __.enddate.Read()
-              listprice = __.listprice.Read()
-              startdate = __.startdate.Read()
-              productid = __.productid.Read()
+              rowguid = __.rowguid.Read()
               modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
-            if __.startdate.IsNull() then None else Some(__.Read())
+            if __.productid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type productlistpricehistory =
+        { productid: int
+          startdate: System.DateTime
+          enddate: Option<System.DateTime>
+          listprice: decimal
+          modifieddate: System.DateTime }
+
+    type productlistpricehistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
+        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
+        member __.listprice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "listprice")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { productid = __.productid.Read()
+              startdate = __.startdate.Read()
+              enddate = __.enddate.Read()
+              listprice = __.listprice.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.productid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type productmodel =
         { productmodelid: int
-          rowguid: System.Guid
-          modifieddate: System.DateTime
+          name: string
           catalogdescription: Option<string>
           instructions: Option<string>
-          name: string }
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type productmodelReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.productmodelid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.catalogdescription = OptionalColumn(reader, getOrdinal, reader.GetString, "catalogdescription")
         member __.instructions = OptionalColumn(reader, getOrdinal, reader.GetString, "instructions")
-        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
             { productmodelid = __.productmodelid.Read()
-              rowguid = __.rowguid.Read()
-              modifieddate = __.modifieddate.Read()
+              name = __.name.Read()
               catalogdescription = __.catalogdescription.Read()
               instructions = __.instructions.Read()
-              name = __.name.Read() }
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.productmodelid.IsNull() then None else Some(__.Read())
@@ -925,17 +925,17 @@ module production =
     [<CLIMutable>]
     type productmodelillustration =
         { productmodelid: int
-          modifieddate: System.DateTime
-          illustrationid: int }
+          illustrationid: int
+          modifieddate: System.DateTime }
 
     type productmodelillustrationReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.productmodelid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.illustrationid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "illustrationid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
             { productmodelid = __.productmodelid.Read()
-              modifieddate = __.modifieddate.Read()
-              illustrationid = __.illustrationid.Read() }
+              illustrationid = __.illustrationid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.productmodelid.IsNull() then None else Some(__.Read())
@@ -943,125 +943,125 @@ module production =
     [<CLIMutable>]
     type productmodelproductdescriptionculture =
         { productmodelid: int
+          productdescriptionid: int
           cultureid: string
-          modifieddate: System.DateTime
-          productdescriptionid: int }
+          modifieddate: System.DateTime }
 
     type productmodelproductdescriptioncultureReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.productmodelid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
+        member __.productdescriptionid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productdescriptionid")
         member __.cultureid = RequiredColumn(reader, getOrdinal, reader.GetString, "cultureid")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.productdescriptionid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productdescriptionid")
         member __.Read() =
             { productmodelid = __.productmodelid.Read()
+              productdescriptionid = __.productdescriptionid.Read()
               cultureid = __.cultureid.Read()
-              modifieddate = __.modifieddate.Read()
-              productdescriptionid = __.productdescriptionid.Read() }
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.productmodelid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type productphoto =
-        { modifieddate: System.DateTime
-          productphotoid: int
-          largephotofilename: Option<string>
+        { productphotoid: int
+          thumbnailphoto: Option<byte []>
           thumbnailphotofilename: Option<string>
           largephoto: Option<byte []>
-          thumbnailphoto: Option<byte []> }
+          largephotofilename: Option<string>
+          modifieddate: System.DateTime }
 
     type productphotoReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.productphotoid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productphotoid")
-        member __.largephotofilename = OptionalColumn(reader, getOrdinal, reader.GetString, "largephotofilename")
+        member __.thumbnailphoto = OptionalBinaryColumn(reader, getOrdinal, reader.GetValue, "thumbnailphoto")
         member __.thumbnailphotofilename = OptionalColumn(reader, getOrdinal, reader.GetString, "thumbnailphotofilename")
         member __.largephoto = OptionalBinaryColumn(reader, getOrdinal, reader.GetValue, "largephoto")
-        member __.thumbnailphoto = OptionalBinaryColumn(reader, getOrdinal, reader.GetValue, "thumbnailphoto")
+        member __.largephotofilename = OptionalColumn(reader, getOrdinal, reader.GetString, "largephotofilename")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { modifieddate = __.modifieddate.Read()
-              productphotoid = __.productphotoid.Read()
-              largephotofilename = __.largephotofilename.Read()
+            { productphotoid = __.productphotoid.Read()
+              thumbnailphoto = __.thumbnailphoto.Read()
               thumbnailphotofilename = __.thumbnailphotofilename.Read()
               largephoto = __.largephoto.Read()
-              thumbnailphoto = __.thumbnailphoto.Read() }
+              largephotofilename = __.largephotofilename.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.productphotoid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type productproductphoto =
-        { primary: bool
-          modifieddate: System.DateTime
+        { productid: int
           productphotoid: int
-          productid: int }
+          primary: bool
+          modifieddate: System.DateTime }
 
     type productproductphotoReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.productphotoid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productphotoid")
         member __.primary = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "primary")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.productphotoid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productphotoid")
-        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
         member __.Read() =
-            { primary = __.primary.Read()
-              modifieddate = __.modifieddate.Read()
+            { productid = __.productid.Read()
               productphotoid = __.productphotoid.Read()
-              productid = __.productid.Read() }
+              primary = __.primary.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
-            if __.productphotoid.IsNull() then None else Some(__.Read())
+            if __.productid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type productreview =
-        { modifieddate: System.DateTime
-          comments: Option<string>
+        { productreviewid: int
+          productid: int
           reviewername: string
           reviewdate: System.DateTime
-          productid: int
+          emailaddress: string
           rating: int
-          productreviewid: int
-          emailaddress: string }
+          comments: Option<string>
+          modifieddate: System.DateTime }
 
     type productreviewReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.comments = OptionalColumn(reader, getOrdinal, reader.GetString, "comments")
+        member __.productreviewid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productreviewid")
+        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
         member __.reviewername = RequiredColumn(reader, getOrdinal, reader.GetString, "reviewername")
         member __.reviewdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "reviewdate")
-        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
-        member __.rating = RequiredColumn(reader, getOrdinal, reader.GetInt32, "rating")
-        member __.productreviewid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productreviewid")
         member __.emailaddress = RequiredColumn(reader, getOrdinal, reader.GetString, "emailaddress")
+        member __.rating = RequiredColumn(reader, getOrdinal, reader.GetInt32, "rating")
+        member __.comments = OptionalColumn(reader, getOrdinal, reader.GetString, "comments")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { modifieddate = __.modifieddate.Read()
-              comments = __.comments.Read()
+            { productreviewid = __.productreviewid.Read()
+              productid = __.productid.Read()
               reviewername = __.reviewername.Read()
               reviewdate = __.reviewdate.Read()
-              productid = __.productid.Read()
+              emailaddress = __.emailaddress.Read()
               rating = __.rating.Read()
-              productreviewid = __.productreviewid.Read()
-              emailaddress = __.emailaddress.Read() }
+              comments = __.comments.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.productreviewid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type productsubcategory =
-        { productcategoryid: int
+        { productsubcategoryid: int
+          productcategoryid: int
           name: string
           rowguid: System.Guid
-          modifieddate: System.DateTime
-          productsubcategoryid: int }
+          modifieddate: System.DateTime }
 
     type productsubcategoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.productsubcategoryid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productsubcategoryid")
         member __.productcategoryid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productcategoryid")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.productsubcategoryid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productsubcategoryid")
         member __.Read() =
-            { productcategoryid = __.productcategoryid.Read()
+            { productsubcategoryid = __.productsubcategoryid.Read()
+              productcategoryid = __.productcategoryid.Read()
               name = __.name.Read()
               rowguid = __.rowguid.Read()
-              modifieddate = __.modifieddate.Read()
-              productsubcategoryid = __.productsubcategoryid.Read() }
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.productsubcategoryid.IsNull() then None else Some(__.Read())
@@ -1069,89 +1069,89 @@ module production =
     [<CLIMutable>]
     type scrapreason =
         { scrapreasonid: int
-          modifieddate: System.DateTime
-          name: string }
+          name: string
+          modifieddate: System.DateTime }
 
     type scrapreasonReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.scrapreasonid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "scrapreasonid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
             { scrapreasonid = __.scrapreasonid.Read()
-              modifieddate = __.modifieddate.Read()
-              name = __.name.Read() }
+              name = __.name.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.scrapreasonid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type transactionhistory =
-        { transactiondate: System.DateTime
-          modifieddate: System.DateTime
-          transactionid: int
-          transactiontype: string
+        { transactionid: int
           productid: int
           referenceorderid: int
           referenceorderlineid: int
+          transactiondate: System.DateTime
+          transactiontype: string
           quantity: int
-          actualcost: decimal }
+          actualcost: decimal
+          modifieddate: System.DateTime }
 
     type transactionhistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.transactiondate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "transactiondate")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.transactionid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "transactionid")
-        member __.transactiontype = RequiredColumn(reader, getOrdinal, reader.GetString, "transactiontype")
         member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
         member __.referenceorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "referenceorderid")
         member __.referenceorderlineid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "referenceorderlineid")
+        member __.transactiondate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "transactiondate")
+        member __.transactiontype = RequiredColumn(reader, getOrdinal, reader.GetString, "transactiontype")
         member __.quantity = RequiredColumn(reader, getOrdinal, reader.GetInt32, "quantity")
         member __.actualcost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "actualcost")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { transactiondate = __.transactiondate.Read()
-              modifieddate = __.modifieddate.Read()
-              transactionid = __.transactionid.Read()
-              transactiontype = __.transactiontype.Read()
+            { transactionid = __.transactionid.Read()
               productid = __.productid.Read()
               referenceorderid = __.referenceorderid.Read()
               referenceorderlineid = __.referenceorderlineid.Read()
+              transactiondate = __.transactiondate.Read()
+              transactiontype = __.transactiontype.Read()
               quantity = __.quantity.Read()
-              actualcost = __.actualcost.Read() }
+              actualcost = __.actualcost.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.transactionid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type transactionhistoryarchive =
-        { transactiondate: System.DateTime
-          modifieddate: System.DateTime
-          transactionid: int
-          transactiontype: string
+        { transactionid: int
           productid: int
           referenceorderid: int
           referenceorderlineid: int
+          transactiondate: System.DateTime
+          transactiontype: string
+          quantity: int
           actualcost: decimal
-          quantity: int }
+          modifieddate: System.DateTime }
 
     type transactionhistoryarchiveReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.transactiondate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "transactiondate")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.transactionid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "transactionid")
-        member __.transactiontype = RequiredColumn(reader, getOrdinal, reader.GetString, "transactiontype")
         member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
         member __.referenceorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "referenceorderid")
         member __.referenceorderlineid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "referenceorderlineid")
-        member __.actualcost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "actualcost")
+        member __.transactiondate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "transactiondate")
+        member __.transactiontype = RequiredColumn(reader, getOrdinal, reader.GetString, "transactiontype")
         member __.quantity = RequiredColumn(reader, getOrdinal, reader.GetInt32, "quantity")
+        member __.actualcost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "actualcost")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { transactiondate = __.transactiondate.Read()
-              modifieddate = __.modifieddate.Read()
-              transactionid = __.transactionid.Read()
-              transactiontype = __.transactiontype.Read()
+            { transactionid = __.transactionid.Read()
               productid = __.productid.Read()
               referenceorderid = __.referenceorderid.Read()
               referenceorderlineid = __.referenceorderlineid.Read()
+              transactiondate = __.transactiondate.Read()
+              transactiontype = __.transactiontype.Read()
+              quantity = __.quantity.Read()
               actualcost = __.actualcost.Read()
-              quantity = __.quantity.Read() }
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.transactionid.IsNull() then None else Some(__.Read())
@@ -1159,98 +1159,98 @@ module production =
     [<CLIMutable>]
     type unitmeasure =
         { unitmeasurecode: string
-          modifieddate: System.DateTime
-          name: string }
+          name: string
+          modifieddate: System.DateTime }
 
     type unitmeasureReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.unitmeasurecode = RequiredColumn(reader, getOrdinal, reader.GetString, "unitmeasurecode")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
             { unitmeasurecode = __.unitmeasurecode.Read()
-              modifieddate = __.modifieddate.Read()
-              name = __.name.Read() }
+              name = __.name.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.unitmeasurecode.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type workorder =
-        { modifieddate: System.DateTime
-          enddate: Option<System.DateTime>
-          duedate: System.DateTime
+        { workorderid: int
           productid: int
           orderqty: int
-          startdate: System.DateTime
           scrappedqty: int16
-          workorderid: int
-          scrapreasonid: Option<int16> }
+          startdate: System.DateTime
+          enddate: Option<System.DateTime>
+          duedate: System.DateTime
+          scrapreasonid: Option<int16>
+          modifieddate: System.DateTime }
 
     type workorderReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
-        member __.duedate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "duedate")
+        member __.workorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "workorderid")
         member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
         member __.orderqty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "orderqty")
-        member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
         member __.scrappedqty = RequiredColumn(reader, getOrdinal, reader.GetInt16, "scrappedqty")
-        member __.workorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "workorderid")
+        member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
+        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
+        member __.duedate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "duedate")
         member __.scrapreasonid = OptionalColumn(reader, getOrdinal, reader.GetInt16, "scrapreasonid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { modifieddate = __.modifieddate.Read()
-              enddate = __.enddate.Read()
-              duedate = __.duedate.Read()
+            { workorderid = __.workorderid.Read()
               productid = __.productid.Read()
               orderqty = __.orderqty.Read()
-              startdate = __.startdate.Read()
               scrappedqty = __.scrappedqty.Read()
-              workorderid = __.workorderid.Read()
-              scrapreasonid = __.scrapreasonid.Read() }
+              startdate = __.startdate.Read()
+              enddate = __.enddate.Read()
+              duedate = __.duedate.Read()
+              scrapreasonid = __.scrapreasonid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.workorderid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type workorderrouting =
-        { actualresourcehrs: Option<decimal>
-          workorderid: int
-          actualcost: Option<decimal>
-          modifieddate: System.DateTime
-          scheduledstartdate: System.DateTime
-          scheduledenddate: System.DateTime
+        { workorderid: int
+          productid: int
           operationsequence: int16
           locationid: int16
-          productid: int
-          actualenddate: Option<System.DateTime>
+          scheduledstartdate: System.DateTime
+          scheduledenddate: System.DateTime
           actualstartdate: Option<System.DateTime>
-          plannedcost: decimal }
+          actualenddate: Option<System.DateTime>
+          actualresourcehrs: Option<decimal>
+          plannedcost: decimal
+          actualcost: Option<decimal>
+          modifieddate: System.DateTime }
 
     type workorderroutingReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.actualresourcehrs = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "actualresourcehrs")
         member __.workorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "workorderid")
-        member __.actualcost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "actualcost")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.scheduledstartdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "scheduledstartdate")
-        member __.scheduledenddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "scheduledenddate")
+        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
         member __.operationsequence = RequiredColumn(reader, getOrdinal, reader.GetInt16, "operationsequence")
         member __.locationid = RequiredColumn(reader, getOrdinal, reader.GetInt16, "locationid")
-        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
-        member __.actualenddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "actualenddate")
+        member __.scheduledstartdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "scheduledstartdate")
+        member __.scheduledenddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "scheduledenddate")
         member __.actualstartdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "actualstartdate")
+        member __.actualenddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "actualenddate")
+        member __.actualresourcehrs = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "actualresourcehrs")
         member __.plannedcost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "plannedcost")
+        member __.actualcost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "actualcost")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { actualresourcehrs = __.actualresourcehrs.Read()
-              workorderid = __.workorderid.Read()
-              actualcost = __.actualcost.Read()
-              modifieddate = __.modifieddate.Read()
-              scheduledstartdate = __.scheduledstartdate.Read()
-              scheduledenddate = __.scheduledenddate.Read()
+            { workorderid = __.workorderid.Read()
+              productid = __.productid.Read()
               operationsequence = __.operationsequence.Read()
               locationid = __.locationid.Read()
-              productid = __.productid.Read()
-              actualenddate = __.actualenddate.Read()
+              scheduledstartdate = __.scheduledstartdate.Read()
+              scheduledenddate = __.scheduledenddate.Read()
               actualstartdate = __.actualstartdate.Read()
-              plannedcost = __.plannedcost.Read() }
+              actualenddate = __.actualenddate.Read()
+              actualresourcehrs = __.actualresourcehrs.Read()
+              plannedcost = __.plannedcost.Read()
+              actualcost = __.actualcost.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.workorderid.IsNull() then None else Some(__.Read())
@@ -1258,204 +1258,204 @@ module production =
 module provider_test =
     [<CLIMutable>]
     type test =
-        { [<SqlHydra.ProviderDbTypeAttribute("Jsonb")>]
-          jsonb_field: string
+        { id: int
           [<SqlHydra.ProviderDbTypeAttribute("Json")>]
           json_field: string
-          id: int }
+          [<SqlHydra.ProviderDbTypeAttribute("Jsonb")>]
+          jsonb_field: string }
 
     type testReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.jsonb_field = RequiredColumn(reader, getOrdinal, reader.GetString, "jsonb_field")
-        member __.json_field = RequiredColumn(reader, getOrdinal, reader.GetString, "json_field")
         member __.id = RequiredColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.json_field = RequiredColumn(reader, getOrdinal, reader.GetString, "json_field")
+        member __.jsonb_field = RequiredColumn(reader, getOrdinal, reader.GetString, "jsonb_field")
         member __.Read() =
-            { jsonb_field = __.jsonb_field.Read()
+            { id = __.id.Read()
               json_field = __.json_field.Read()
-              id = __.id.Read() }
+              jsonb_field = __.jsonb_field.Read() }
 
         member __.ReadIfNotNull() =
-            if __.jsonb_field.IsNull() then None else Some(__.Read())
+            if __.id.IsNull() then None else Some(__.Read())
 
 module purchasing =
     [<CLIMutable>]
     type productvendor =
-        { lastreceiptdate: Option<System.DateTime>
-          modifieddate: System.DateTime
+        { productid: int
+          businessentityid: int
+          averageleadtime: int
+          standardprice: decimal
           lastreceiptcost: Option<decimal>
-          productid: int
+          lastreceiptdate: Option<System.DateTime>
+          minorderqty: int
+          maxorderqty: int
           onorderqty: Option<int>
           unitmeasurecode: string
-          maxorderqty: int
-          minorderqty: int
-          businessentityid: int
-          standardprice: decimal
-          averageleadtime: int }
+          modifieddate: System.DateTime }
 
     type productvendorReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.lastreceiptdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "lastreceiptdate")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.lastreceiptcost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "lastreceiptcost")
         member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.averageleadtime = RequiredColumn(reader, getOrdinal, reader.GetInt32, "averageleadtime")
+        member __.standardprice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "standardprice")
+        member __.lastreceiptcost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "lastreceiptcost")
+        member __.lastreceiptdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "lastreceiptdate")
+        member __.minorderqty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "minorderqty")
+        member __.maxorderqty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "maxorderqty")
         member __.onorderqty = OptionalColumn(reader, getOrdinal, reader.GetInt32, "onorderqty")
         member __.unitmeasurecode = RequiredColumn(reader, getOrdinal, reader.GetString, "unitmeasurecode")
-        member __.maxorderqty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "maxorderqty")
-        member __.minorderqty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "minorderqty")
-        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
-        member __.standardprice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "standardprice")
-        member __.averageleadtime = RequiredColumn(reader, getOrdinal, reader.GetInt32, "averageleadtime")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { lastreceiptdate = __.lastreceiptdate.Read()
-              modifieddate = __.modifieddate.Read()
+            { productid = __.productid.Read()
+              businessentityid = __.businessentityid.Read()
+              averageleadtime = __.averageleadtime.Read()
+              standardprice = __.standardprice.Read()
               lastreceiptcost = __.lastreceiptcost.Read()
-              productid = __.productid.Read()
+              lastreceiptdate = __.lastreceiptdate.Read()
+              minorderqty = __.minorderqty.Read()
+              maxorderqty = __.maxorderqty.Read()
               onorderqty = __.onorderqty.Read()
               unitmeasurecode = __.unitmeasurecode.Read()
-              maxorderqty = __.maxorderqty.Read()
-              minorderqty = __.minorderqty.Read()
-              businessentityid = __.businessentityid.Read()
-              standardprice = __.standardprice.Read()
-              averageleadtime = __.averageleadtime.Read() }
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.productid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type purchaseorderdetail =
-        { receivedqty: decimal
+        { purchaseorderid: int
           purchaseorderdetailid: int
           duedate: System.DateTime
           orderqty: int16
-          unitprice: decimal
-          modifieddate: System.DateTime
           productid: int
+          unitprice: decimal
+          receivedqty: decimal
           rejectedqty: decimal
-          purchaseorderid: int }
+          modifieddate: System.DateTime }
 
     type purchaseorderdetailReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.receivedqty = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "receivedqty")
+        member __.purchaseorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "purchaseorderid")
         member __.purchaseorderdetailid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "purchaseorderdetailid")
         member __.duedate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "duedate")
         member __.orderqty = RequiredColumn(reader, getOrdinal, reader.GetInt16, "orderqty")
-        member __.unitprice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "unitprice")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.unitprice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "unitprice")
+        member __.receivedqty = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "receivedqty")
         member __.rejectedqty = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "rejectedqty")
-        member __.purchaseorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "purchaseorderid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { receivedqty = __.receivedqty.Read()
+            { purchaseorderid = __.purchaseorderid.Read()
               purchaseorderdetailid = __.purchaseorderdetailid.Read()
               duedate = __.duedate.Read()
               orderqty = __.orderqty.Read()
-              unitprice = __.unitprice.Read()
-              modifieddate = __.modifieddate.Read()
               productid = __.productid.Read()
+              unitprice = __.unitprice.Read()
+              receivedqty = __.receivedqty.Read()
               rejectedqty = __.rejectedqty.Read()
-              purchaseorderid = __.purchaseorderid.Read() }
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
-            if __.purchaseorderdetailid.IsNull() then None else Some(__.Read())
+            if __.purchaseorderid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type purchaseorderheader =
         { purchaseorderid: int
-          subtotal: decimal
-          vendorid: int
-          freight: decimal
-          shipmethodid: int
-          employeeid: int
-          status: int16
-          modifieddate: System.DateTime
           revisionnumber: int16
+          status: int16
+          employeeid: int
+          vendorid: int
+          shipmethodid: int
           orderdate: System.DateTime
           shipdate: Option<System.DateTime>
-          taxamt: decimal }
+          subtotal: decimal
+          taxamt: decimal
+          freight: decimal
+          modifieddate: System.DateTime }
 
     type purchaseorderheaderReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.purchaseorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "purchaseorderid")
-        member __.subtotal = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "subtotal")
-        member __.vendorid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "vendorid")
-        member __.freight = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "freight")
-        member __.shipmethodid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "shipmethodid")
-        member __.employeeid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "employeeid")
-        member __.status = RequiredColumn(reader, getOrdinal, reader.GetInt16, "status")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.revisionnumber = RequiredColumn(reader, getOrdinal, reader.GetInt16, "revisionnumber")
+        member __.status = RequiredColumn(reader, getOrdinal, reader.GetInt16, "status")
+        member __.employeeid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "employeeid")
+        member __.vendorid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "vendorid")
+        member __.shipmethodid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "shipmethodid")
         member __.orderdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "orderdate")
         member __.shipdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "shipdate")
+        member __.subtotal = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "subtotal")
         member __.taxamt = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "taxamt")
+        member __.freight = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "freight")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
             { purchaseorderid = __.purchaseorderid.Read()
-              subtotal = __.subtotal.Read()
-              vendorid = __.vendorid.Read()
-              freight = __.freight.Read()
-              shipmethodid = __.shipmethodid.Read()
-              employeeid = __.employeeid.Read()
-              status = __.status.Read()
-              modifieddate = __.modifieddate.Read()
               revisionnumber = __.revisionnumber.Read()
+              status = __.status.Read()
+              employeeid = __.employeeid.Read()
+              vendorid = __.vendorid.Read()
+              shipmethodid = __.shipmethodid.Read()
               orderdate = __.orderdate.Read()
               shipdate = __.shipdate.Read()
-              taxamt = __.taxamt.Read() }
+              subtotal = __.subtotal.Read()
+              taxamt = __.taxamt.Read()
+              freight = __.freight.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.purchaseorderid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type shipmethod =
-        { rowguid: System.Guid
-          shipmethodid: int
-          modifieddate: System.DateTime
+        { shipmethodid: int
           name: string
+          shipbase: decimal
           shiprate: decimal
-          shipbase: decimal }
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type shipmethodReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.shipmethodid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "shipmethodid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
-        member __.shiprate = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "shiprate")
         member __.shipbase = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "shipbase")
+        member __.shiprate = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "shiprate")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { rowguid = __.rowguid.Read()
-              shipmethodid = __.shipmethodid.Read()
-              modifieddate = __.modifieddate.Read()
+            { shipmethodid = __.shipmethodid.Read()
               name = __.name.Read()
+              shipbase = __.shipbase.Read()
               shiprate = __.shiprate.Read()
-              shipbase = __.shipbase.Read() }
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.shipmethodid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vendor =
-        { purchasingwebserviceurl: Option<string>
-          modifieddate: System.DateTime
+        { businessentityid: int
+          accountnumber: string
           name: string
           creditrating: int16
-          accountnumber: string
+          preferredvendorstatus: bool
           activeflag: bool
-          businessentityid: int
-          preferredvendorstatus: bool }
+          purchasingwebserviceurl: Option<string>
+          modifieddate: System.DateTime }
 
     type vendorReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.purchasingwebserviceurl = OptionalColumn(reader, getOrdinal, reader.GetString, "purchasingwebserviceurl")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.accountnumber = RequiredColumn(reader, getOrdinal, reader.GetString, "accountnumber")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.creditrating = RequiredColumn(reader, getOrdinal, reader.GetInt16, "creditrating")
-        member __.accountnumber = RequiredColumn(reader, getOrdinal, reader.GetString, "accountnumber")
-        member __.activeflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "activeflag")
-        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
         member __.preferredvendorstatus = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "preferredvendorstatus")
+        member __.activeflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "activeflag")
+        member __.purchasingwebserviceurl = OptionalColumn(reader, getOrdinal, reader.GetString, "purchasingwebserviceurl")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { purchasingwebserviceurl = __.purchasingwebserviceurl.Read()
-              modifieddate = __.modifieddate.Read()
+            { businessentityid = __.businessentityid.Read()
+              accountnumber = __.accountnumber.Read()
               name = __.name.Read()
               creditrating = __.creditrating.Read()
-              accountnumber = __.accountnumber.Read()
+              preferredvendorstatus = __.preferredvendorstatus.Read()
               activeflag = __.activeflag.Read()
-              businessentityid = __.businessentityid.Read()
-              preferredvendorstatus = __.preferredvendorstatus.Read() }
+              purchasingwebserviceurl = __.purchasingwebserviceurl.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.businessentityid.IsNull() then None else Some(__.Read())
@@ -1463,45 +1463,45 @@ module purchasing =
 module sales =
     [<CLIMutable>]
     type countryregioncurrency =
-        { currencycode: string
-          modifieddate: System.DateTime
-          countryregioncode: string }
+        { countryregioncode: string
+          currencycode: string
+          modifieddate: System.DateTime }
 
     type countryregioncurrencyReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.countryregioncode = RequiredColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
         member __.currencycode = RequiredColumn(reader, getOrdinal, reader.GetString, "currencycode")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.countryregioncode = RequiredColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
         member __.Read() =
-            { currencycode = __.currencycode.Read()
-              modifieddate = __.modifieddate.Read()
-              countryregioncode = __.countryregioncode.Read() }
+            { countryregioncode = __.countryregioncode.Read()
+              currencycode = __.currencycode.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
-            if __.currencycode.IsNull() then None else Some(__.Read())
+            if __.countryregioncode.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type creditcard =
-        { expyear: int16
-          creditcardid: int
-          modifieddate: System.DateTime
+        { creditcardid: int
           cardtype: string
+          cardnumber: string
           expmonth: int16
-          cardnumber: string }
+          expyear: int16
+          modifieddate: System.DateTime }
 
     type creditcardReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.expyear = RequiredColumn(reader, getOrdinal, reader.GetInt16, "expyear")
         member __.creditcardid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "creditcardid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.cardtype = RequiredColumn(reader, getOrdinal, reader.GetString, "cardtype")
-        member __.expmonth = RequiredColumn(reader, getOrdinal, reader.GetInt16, "expmonth")
         member __.cardnumber = RequiredColumn(reader, getOrdinal, reader.GetString, "cardnumber")
+        member __.expmonth = RequiredColumn(reader, getOrdinal, reader.GetInt16, "expmonth")
+        member __.expyear = RequiredColumn(reader, getOrdinal, reader.GetInt16, "expyear")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { expyear = __.expyear.Read()
-              creditcardid = __.creditcardid.Read()
-              modifieddate = __.modifieddate.Read()
+            { creditcardid = __.creditcardid.Read()
               cardtype = __.cardtype.Read()
+              cardnumber = __.cardnumber.Read()
               expmonth = __.expmonth.Read()
-              cardnumber = __.cardnumber.Read() }
+              expyear = __.expyear.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.creditcardid.IsNull() then None else Some(__.Read())
@@ -1509,74 +1509,74 @@ module sales =
     [<CLIMutable>]
     type currency =
         { currencycode: string
-          modifieddate: System.DateTime
-          name: string }
+          name: string
+          modifieddate: System.DateTime }
 
     type currencyReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.currencycode = RequiredColumn(reader, getOrdinal, reader.GetString, "currencycode")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
             { currencycode = __.currencycode.Read()
-              modifieddate = __.modifieddate.Read()
-              name = __.name.Read() }
+              name = __.name.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.currencycode.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type currencyrate =
-        { currencyratedate: System.DateTime
+        { currencyrateid: int
+          currencyratedate: System.DateTime
           fromcurrencycode: string
           tocurrencycode: string
-          modifieddate: System.DateTime
           averagerate: decimal
-          currencyrateid: int
-          endofdayrate: decimal }
+          endofdayrate: decimal
+          modifieddate: System.DateTime }
 
     type currencyrateReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.currencyrateid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "currencyrateid")
         member __.currencyratedate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "currencyratedate")
         member __.fromcurrencycode = RequiredColumn(reader, getOrdinal, reader.GetString, "fromcurrencycode")
         member __.tocurrencycode = RequiredColumn(reader, getOrdinal, reader.GetString, "tocurrencycode")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.averagerate = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "averagerate")
-        member __.currencyrateid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "currencyrateid")
         member __.endofdayrate = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "endofdayrate")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { currencyratedate = __.currencyratedate.Read()
+            { currencyrateid = __.currencyrateid.Read()
+              currencyratedate = __.currencyratedate.Read()
               fromcurrencycode = __.fromcurrencycode.Read()
               tocurrencycode = __.tocurrencycode.Read()
-              modifieddate = __.modifieddate.Read()
               averagerate = __.averagerate.Read()
-              currencyrateid = __.currencyrateid.Read()
-              endofdayrate = __.endofdayrate.Read() }
+              endofdayrate = __.endofdayrate.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.currencyrateid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type customer =
-        { territoryid: Option<int>
-          storeid: Option<int>
+        { customerid: int
           personid: Option<int>
-          modifieddate: System.DateTime
-          customerid: int
-          rowguid: System.Guid }
+          storeid: Option<int>
+          territoryid: Option<int>
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type customerReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.territoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
-        member __.storeid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "storeid")
-        member __.personid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "personid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.customerid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "customerid")
+        member __.personid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "personid")
+        member __.storeid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "storeid")
+        member __.territoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { territoryid = __.territoryid.Read()
-              storeid = __.storeid.Read()
+            { customerid = __.customerid.Read()
               personid = __.personid.Read()
-              modifieddate = __.modifieddate.Read()
-              customerid = __.customerid.Read()
-              rowguid = __.rowguid.Read() }
+              storeid = __.storeid.Read()
+              territoryid = __.territoryid.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.customerid.IsNull() then None else Some(__.Read())
@@ -1601,123 +1601,123 @@ module sales =
 
     [<CLIMutable>]
     type salesorderdetail =
-        { modifieddate: System.DateTime
-          productid: int
-          salesorderid: int
-          specialofferid: int
+        { salesorderid: int
           salesorderdetailid: int
           carriertrackingnumber: Option<string>
           orderqty: int16
-          rowguid: System.Guid
+          productid: int
+          specialofferid: int
+          unitprice: decimal
           unitpricediscount: decimal
-          unitprice: decimal }
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type salesorderdetailReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
         member __.salesorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salesorderid")
-        member __.specialofferid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "specialofferid")
         member __.salesorderdetailid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salesorderdetailid")
         member __.carriertrackingnumber = OptionalColumn(reader, getOrdinal, reader.GetString, "carriertrackingnumber")
         member __.orderqty = RequiredColumn(reader, getOrdinal, reader.GetInt16, "orderqty")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.unitpricediscount = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "unitpricediscount")
+        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.specialofferid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "specialofferid")
         member __.unitprice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "unitprice")
+        member __.unitpricediscount = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "unitpricediscount")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { modifieddate = __.modifieddate.Read()
-              productid = __.productid.Read()
-              salesorderid = __.salesorderid.Read()
-              specialofferid = __.specialofferid.Read()
+            { salesorderid = __.salesorderid.Read()
               salesorderdetailid = __.salesorderdetailid.Read()
               carriertrackingnumber = __.carriertrackingnumber.Read()
               orderqty = __.orderqty.Read()
-              rowguid = __.rowguid.Read()
+              productid = __.productid.Read()
+              specialofferid = __.specialofferid.Read()
+              unitprice = __.unitprice.Read()
               unitpricediscount = __.unitpricediscount.Read()
-              unitprice = __.unitprice.Read() }
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.salesorderid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type salesorderheader =
-        { comment: Option<string>
-          accountnumber: Option<string>
-          onlineorderflag: bool
-          totaldue: Option<decimal>
-          currencyrateid: Option<int>
-          territoryid: Option<int>
+        { salesorderid: int
           revisionnumber: int16
-          creditcardapprovalcode: Option<string>
-          billtoaddressid: int
           orderdate: System.DateTime
           duedate: System.DateTime
-          shipmethodid: int
-          taxamt: decimal
-          shiptoaddressid: int
-          creditcardid: Option<int>
-          rowguid: System.Guid
-          modifieddate: System.DateTime
-          status: int16
           shipdate: Option<System.DateTime>
-          salespersonid: Option<int>
-          customerid: int
-          subtotal: decimal
+          status: int16
+          onlineorderflag: bool
           purchaseordernumber: Option<string>
-          salesorderid: int
-          freight: decimal }
+          accountnumber: Option<string>
+          customerid: int
+          salespersonid: Option<int>
+          territoryid: Option<int>
+          billtoaddressid: int
+          shiptoaddressid: int
+          shipmethodid: int
+          creditcardid: Option<int>
+          creditcardapprovalcode: Option<string>
+          currencyrateid: Option<int>
+          subtotal: decimal
+          taxamt: decimal
+          freight: decimal
+          totaldue: Option<decimal>
+          comment: Option<string>
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type salesorderheaderReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.comment = OptionalColumn(reader, getOrdinal, reader.GetString, "comment")
-        member __.accountnumber = OptionalColumn(reader, getOrdinal, reader.GetString, "accountnumber")
-        member __.onlineorderflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "onlineorderflag")
-        member __.totaldue = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "totaldue")
-        member __.currencyrateid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "currencyrateid")
-        member __.territoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
+        member __.salesorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salesorderid")
         member __.revisionnumber = RequiredColumn(reader, getOrdinal, reader.GetInt16, "revisionnumber")
-        member __.creditcardapprovalcode = OptionalColumn(reader, getOrdinal, reader.GetString, "creditcardapprovalcode")
-        member __.billtoaddressid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "billtoaddressid")
         member __.orderdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "orderdate")
         member __.duedate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "duedate")
-        member __.shipmethodid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "shipmethodid")
-        member __.taxamt = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "taxamt")
+        member __.shipdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "shipdate")
+        member __.status = RequiredColumn(reader, getOrdinal, reader.GetInt16, "status")
+        member __.onlineorderflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "onlineorderflag")
+        member __.purchaseordernumber = OptionalColumn(reader, getOrdinal, reader.GetString, "purchaseordernumber")
+        member __.accountnumber = OptionalColumn(reader, getOrdinal, reader.GetString, "accountnumber")
+        member __.customerid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "customerid")
+        member __.salespersonid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salespersonid")
+        member __.territoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
+        member __.billtoaddressid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "billtoaddressid")
         member __.shiptoaddressid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "shiptoaddressid")
+        member __.shipmethodid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "shipmethodid")
         member __.creditcardid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "creditcardid")
+        member __.creditcardapprovalcode = OptionalColumn(reader, getOrdinal, reader.GetString, "creditcardapprovalcode")
+        member __.currencyrateid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "currencyrateid")
+        member __.subtotal = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "subtotal")
+        member __.taxamt = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "taxamt")
+        member __.freight = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "freight")
+        member __.totaldue = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "totaldue")
+        member __.comment = OptionalColumn(reader, getOrdinal, reader.GetString, "comment")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.status = RequiredColumn(reader, getOrdinal, reader.GetInt16, "status")
-        member __.shipdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "shipdate")
-        member __.salespersonid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salespersonid")
-        member __.customerid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "customerid")
-        member __.subtotal = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "subtotal")
-        member __.purchaseordernumber = OptionalColumn(reader, getOrdinal, reader.GetString, "purchaseordernumber")
-        member __.salesorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salesorderid")
-        member __.freight = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "freight")
         member __.Read() =
-            { comment = __.comment.Read()
-              accountnumber = __.accountnumber.Read()
-              onlineorderflag = __.onlineorderflag.Read()
-              totaldue = __.totaldue.Read()
-              currencyrateid = __.currencyrateid.Read()
-              territoryid = __.territoryid.Read()
+            { salesorderid = __.salesorderid.Read()
               revisionnumber = __.revisionnumber.Read()
-              creditcardapprovalcode = __.creditcardapprovalcode.Read()
-              billtoaddressid = __.billtoaddressid.Read()
               orderdate = __.orderdate.Read()
               duedate = __.duedate.Read()
-              shipmethodid = __.shipmethodid.Read()
-              taxamt = __.taxamt.Read()
-              shiptoaddressid = __.shiptoaddressid.Read()
-              creditcardid = __.creditcardid.Read()
-              rowguid = __.rowguid.Read()
-              modifieddate = __.modifieddate.Read()
-              status = __.status.Read()
               shipdate = __.shipdate.Read()
-              salespersonid = __.salespersonid.Read()
-              customerid = __.customerid.Read()
-              subtotal = __.subtotal.Read()
+              status = __.status.Read()
+              onlineorderflag = __.onlineorderflag.Read()
               purchaseordernumber = __.purchaseordernumber.Read()
-              salesorderid = __.salesorderid.Read()
-              freight = __.freight.Read() }
+              accountnumber = __.accountnumber.Read()
+              customerid = __.customerid.Read()
+              salespersonid = __.salespersonid.Read()
+              territoryid = __.territoryid.Read()
+              billtoaddressid = __.billtoaddressid.Read()
+              shiptoaddressid = __.shiptoaddressid.Read()
+              shipmethodid = __.shipmethodid.Read()
+              creditcardid = __.creditcardid.Read()
+              creditcardapprovalcode = __.creditcardapprovalcode.Read()
+              currencyrateid = __.currencyrateid.Read()
+              subtotal = __.subtotal.Read()
+              taxamt = __.taxamt.Read()
+              freight = __.freight.Read()
+              totaldue = __.totaldue.Read()
+              comment = __.comment.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.salesorderid.IsNull() then None else Some(__.Read())
@@ -1725,166 +1725,166 @@ module sales =
     [<CLIMutable>]
     type salesorderheadersalesreason =
         { salesorderid: int
-          modifieddate: System.DateTime
-          salesreasonid: int }
+          salesreasonid: int
+          modifieddate: System.DateTime }
 
     type salesorderheadersalesreasonReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.salesorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salesorderid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.salesreasonid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salesreasonid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
             { salesorderid = __.salesorderid.Read()
-              modifieddate = __.modifieddate.Read()
-              salesreasonid = __.salesreasonid.Read() }
+              salesreasonid = __.salesreasonid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.salesorderid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type salesperson =
-        { territoryid: Option<int>
+        { businessentityid: int
+          territoryid: Option<int>
           salesquota: Option<decimal>
           bonus: decimal
+          commissionpct: decimal
+          salesytd: decimal
           saleslastyear: decimal
           rowguid: System.Guid
-          commissionpct: decimal
-          modifieddate: System.DateTime
-          businessentityid: int
-          salesytd: decimal }
+          modifieddate: System.DateTime }
 
     type salespersonReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
         member __.territoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
         member __.salesquota = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "salesquota")
         member __.bonus = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "bonus")
+        member __.commissionpct = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "commissionpct")
+        member __.salesytd = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "salesytd")
         member __.saleslastyear = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "saleslastyear")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.commissionpct = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "commissionpct")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
-        member __.salesytd = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "salesytd")
         member __.Read() =
-            { territoryid = __.territoryid.Read()
+            { businessentityid = __.businessentityid.Read()
+              territoryid = __.territoryid.Read()
               salesquota = __.salesquota.Read()
               bonus = __.bonus.Read()
+              commissionpct = __.commissionpct.Read()
+              salesytd = __.salesytd.Read()
               saleslastyear = __.saleslastyear.Read()
               rowguid = __.rowguid.Read()
-              commissionpct = __.commissionpct.Read()
-              modifieddate = __.modifieddate.Read()
-              businessentityid = __.businessentityid.Read()
-              salesytd = __.salesytd.Read() }
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.businessentityid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type salespersonquotahistory =
-        { rowguid: System.Guid
-          salesquota: decimal
+        { businessentityid: int
           quotadate: System.DateTime
-          businessentityid: int
+          salesquota: decimal
+          rowguid: System.Guid
           modifieddate: System.DateTime }
 
     type salespersonquotahistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.salesquota = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "salesquota")
-        member __.quotadate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "quotadate")
         member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.quotadate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "quotadate")
+        member __.salesquota = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "salesquota")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { rowguid = __.rowguid.Read()
-              salesquota = __.salesquota.Read()
+            { businessentityid = __.businessentityid.Read()
               quotadate = __.quotadate.Read()
-              businessentityid = __.businessentityid.Read()
+              salesquota = __.salesquota.Read()
+              rowguid = __.rowguid.Read()
               modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
-            if __.quotadate.IsNull() then None else Some(__.Read())
+            if __.businessentityid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type salesreason =
-        { name: string
-          modifieddate: System.DateTime
+        { salesreasonid: int
+          name: string
           reasontype: string
-          salesreasonid: int }
+          modifieddate: System.DateTime }
 
     type salesreasonReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.reasontype = RequiredColumn(reader, getOrdinal, reader.GetString, "reasontype")
         member __.salesreasonid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salesreasonid")
+        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.reasontype = RequiredColumn(reader, getOrdinal, reader.GetString, "reasontype")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { name = __.name.Read()
-              modifieddate = __.modifieddate.Read()
+            { salesreasonid = __.salesreasonid.Read()
+              name = __.name.Read()
               reasontype = __.reasontype.Read()
-              salesreasonid = __.salesreasonid.Read() }
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.salesreasonid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type salestaxrate =
-        { stateprovinceid: int
-          taxrate: decimal
+        { salestaxrateid: int
+          stateprovinceid: int
           taxtype: int16
-          modifieddate: System.DateTime
+          taxrate: decimal
           name: string
-          salestaxrateid: int
-          rowguid: System.Guid }
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type salestaxrateReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.stateprovinceid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "stateprovinceid")
-        member __.taxrate = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "taxrate")
-        member __.taxtype = RequiredColumn(reader, getOrdinal, reader.GetInt16, "taxtype")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.salestaxrateid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salestaxrateid")
+        member __.stateprovinceid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "stateprovinceid")
+        member __.taxtype = RequiredColumn(reader, getOrdinal, reader.GetInt16, "taxtype")
+        member __.taxrate = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "taxrate")
+        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { stateprovinceid = __.stateprovinceid.Read()
-              taxrate = __.taxrate.Read()
+            { salestaxrateid = __.salestaxrateid.Read()
+              stateprovinceid = __.stateprovinceid.Read()
               taxtype = __.taxtype.Read()
-              modifieddate = __.modifieddate.Read()
+              taxrate = __.taxrate.Read()
               name = __.name.Read()
-              salestaxrateid = __.salestaxrateid.Read()
-              rowguid = __.rowguid.Read() }
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.salestaxrateid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type salesterritory =
-        { rowguid: System.Guid
-          territoryid: int
-          salesytd: decimal
-          saleslastyear: decimal
+        { territoryid: int
+          name: string
           countryregioncode: string
           group: string
-          name: string
+          salesytd: decimal
+          saleslastyear: decimal
           costytd: decimal
           costlastyear: decimal
+          rowguid: System.Guid
           modifieddate: System.DateTime }
 
     type salesterritoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.territoryid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
-        member __.salesytd = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "salesytd")
-        member __.saleslastyear = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "saleslastyear")
+        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
         member __.countryregioncode = RequiredColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
         member __.group = RequiredColumn(reader, getOrdinal, reader.GetString, "group")
-        member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.salesytd = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "salesytd")
+        member __.saleslastyear = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "saleslastyear")
         member __.costytd = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "costytd")
         member __.costlastyear = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "costlastyear")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { rowguid = __.rowguid.Read()
-              territoryid = __.territoryid.Read()
-              salesytd = __.salesytd.Read()
-              saleslastyear = __.saleslastyear.Read()
+            { territoryid = __.territoryid.Read()
+              name = __.name.Read()
               countryregioncode = __.countryregioncode.Read()
               group = __.group.Read()
-              name = __.name.Read()
+              salesytd = __.salesytd.Read()
+              saleslastyear = __.saleslastyear.Read()
               costytd = __.costytd.Read()
               costlastyear = __.costlastyear.Read()
+              rowguid = __.rowguid.Read()
               modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
@@ -1892,144 +1892,144 @@ module sales =
 
     [<CLIMutable>]
     type salesterritoryhistory =
-        { modifieddate: System.DateTime
-          businessentityid: int
-          rowguid: System.Guid
-          enddate: Option<System.DateTime>
+        { businessentityid: int
+          territoryid: int
           startdate: System.DateTime
-          territoryid: int }
+          enddate: Option<System.DateTime>
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type salesterritoryhistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
-        member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
         member __.territoryid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
+        member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
+        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { modifieddate = __.modifieddate.Read()
-              businessentityid = __.businessentityid.Read()
-              rowguid = __.rowguid.Read()
-              enddate = __.enddate.Read()
+            { businessentityid = __.businessentityid.Read()
+              territoryid = __.territoryid.Read()
               startdate = __.startdate.Read()
-              territoryid = __.territoryid.Read() }
+              enddate = __.enddate.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.businessentityid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type shoppingcartitem =
-        { modifieddate: System.DateTime
-          shoppingcartitemid: int
-          datecreated: System.DateTime
+        { shoppingcartitemid: int
+          shoppingcartid: string
           quantity: int
           productid: int
-          shoppingcartid: string }
+          datecreated: System.DateTime
+          modifieddate: System.DateTime }
 
     type shoppingcartitemReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.shoppingcartitemid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "shoppingcartitemid")
-        member __.datecreated = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "datecreated")
+        member __.shoppingcartid = RequiredColumn(reader, getOrdinal, reader.GetString, "shoppingcartid")
         member __.quantity = RequiredColumn(reader, getOrdinal, reader.GetInt32, "quantity")
         member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
-        member __.shoppingcartid = RequiredColumn(reader, getOrdinal, reader.GetString, "shoppingcartid")
+        member __.datecreated = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "datecreated")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { modifieddate = __.modifieddate.Read()
-              shoppingcartitemid = __.shoppingcartitemid.Read()
-              datecreated = __.datecreated.Read()
+            { shoppingcartitemid = __.shoppingcartitemid.Read()
+              shoppingcartid = __.shoppingcartid.Read()
               quantity = __.quantity.Read()
               productid = __.productid.Read()
-              shoppingcartid = __.shoppingcartid.Read() }
+              datecreated = __.datecreated.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.shoppingcartitemid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type specialoffer =
-        { ``type``: string
-          discountpct: decimal
+        { specialofferid: int
           description: string
-          minqty: int
-          enddate: System.DateTime
-          rowguid: System.Guid
-          specialofferid: int
-          maxqty: Option<int>
-          modifieddate: System.DateTime
+          discountpct: decimal
+          ``type``: string
           category: string
-          startdate: System.DateTime }
+          startdate: System.DateTime
+          enddate: System.DateTime
+          minqty: int
+          maxqty: Option<int>
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type specialofferReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.``type`` = RequiredColumn(reader, getOrdinal, reader.GetString, "type")
-        member __.discountpct = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "discountpct")
-        member __.description = RequiredColumn(reader, getOrdinal, reader.GetString, "description")
-        member __.minqty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "minqty")
-        member __.enddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.specialofferid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "specialofferid")
-        member __.maxqty = OptionalColumn(reader, getOrdinal, reader.GetInt32, "maxqty")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.description = RequiredColumn(reader, getOrdinal, reader.GetString, "description")
+        member __.discountpct = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "discountpct")
+        member __.``type`` = RequiredColumn(reader, getOrdinal, reader.GetString, "type")
         member __.category = RequiredColumn(reader, getOrdinal, reader.GetString, "category")
         member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
+        member __.enddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
+        member __.minqty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "minqty")
+        member __.maxqty = OptionalColumn(reader, getOrdinal, reader.GetInt32, "maxqty")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { ``type`` = __.``type``.Read()
-              discountpct = __.discountpct.Read()
+            { specialofferid = __.specialofferid.Read()
               description = __.description.Read()
-              minqty = __.minqty.Read()
-              enddate = __.enddate.Read()
-              rowguid = __.rowguid.Read()
-              specialofferid = __.specialofferid.Read()
-              maxqty = __.maxqty.Read()
-              modifieddate = __.modifieddate.Read()
+              discountpct = __.discountpct.Read()
+              ``type`` = __.``type``.Read()
               category = __.category.Read()
-              startdate = __.startdate.Read() }
+              startdate = __.startdate.Read()
+              enddate = __.enddate.Read()
+              minqty = __.minqty.Read()
+              maxqty = __.maxqty.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.specialofferid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type specialofferproduct =
-        { modifieddate: System.DateTime
-          rowguid: System.Guid
+        { specialofferid: int
           productid: int
-          specialofferid: int }
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type specialofferproductReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
         member __.specialofferid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "specialofferid")
+        member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { modifieddate = __.modifieddate.Read()
-              rowguid = __.rowguid.Read()
+            { specialofferid = __.specialofferid.Read()
               productid = __.productid.Read()
-              specialofferid = __.specialofferid.Read() }
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
-            if __.productid.IsNull() then None else Some(__.Read())
+            if __.specialofferid.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type store =
-        { rowguid: System.Guid
-          businessentityid: int
-          modifieddate: System.DateTime
+        { businessentityid: int
           name: string
+          salespersonid: Option<int>
           demographics: Option<string>
-          salespersonid: Option<int> }
+          rowguid: System.Guid
+          modifieddate: System.DateTime }
 
     type storeReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
-        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
-        member __.demographics = OptionalColumn(reader, getOrdinal, reader.GetString, "demographics")
         member __.salespersonid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salespersonid")
+        member __.demographics = OptionalColumn(reader, getOrdinal, reader.GetString, "demographics")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
         member __.Read() =
-            { rowguid = __.rowguid.Read()
-              businessentityid = __.businessentityid.Read()
-              modifieddate = __.modifieddate.Read()
+            { businessentityid = __.businessentityid.Read()
               name = __.name.Read()
+              salespersonid = __.salespersonid.Read()
               demographics = __.demographics.Read()
-              salespersonid = __.salespersonid.Read() }
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
 
         member __.ReadIfNotNull() =
             if __.businessentityid.IsNull() then None else Some(__.Read())

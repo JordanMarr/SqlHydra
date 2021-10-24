@@ -25,17 +25,21 @@ let currencyTable =         table<sales.currency>                   |> inSchema 
 let productReviewTable =    table<production.productreview>         |> inSchema (nameof production)
 let providerDbTestTable = table<provider_test.test> |> inSchema (nameof provider_test)
 
-let generateProviderDbTestTable () =
-   use ctx = openContext()
-   let dropProvideDbTestTableCmd = ctx.Connection.CreateCommand ()
-   dropProvideDbTestTableCmd.CommandText <-
+let dropProviderDbTestTable () =
+    use ctx = openContext()
+    let dropProvideDbTestTableCmd = ctx.Connection.CreateCommand ()
+    dropProvideDbTestTableCmd.CommandText <-
        "drop table if exists provider_test.test; drop schema if exists provider_test"
-   dropProvideDbTestTableCmd.ExecuteNonQuery () |> ignore
+    dropProvideDbTestTableCmd.ExecuteNonQuery () |> ignore
+
+let generateProviderDbTestTable () =
+    dropProviderDbTestTable ()
    
-   let createProviderDbTestTableCmd = ctx.Connection.CreateCommand ()
-   createProviderDbTestTableCmd.CommandText <-
+    use ctx = openContext()
+    let createProviderDbTestTableCmd = ctx.Connection.CreateCommand ()
+    createProviderDbTestTableCmd.CommandText <-
        "create schema provider_test; create table provider_test.test(id serial, json_field json not null, jsonb_field jsonb not null);"
-   createProviderDbTestTableCmd.ExecuteNonQuery () |> ignore
+    createProviderDbTestTableCmd.ExecuteNonQuery () |> ignore
 
 [<Tests>]
 let tests = 
@@ -468,6 +472,7 @@ let tests =
         }
         
         testTask "Insert, Update and Read npgsql provider specific db fields" {
+            // Setup
             do generateProviderDbTestTable ()
             use ctx = openContext ()
             
