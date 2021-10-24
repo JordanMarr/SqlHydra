@@ -1255,7 +1255,7 @@ module production =
         member __.ReadIfNotNull() =
             if __.workorderid.IsNull() then None else Some(__.Read())
 
-module provider_test =
+module providerdbtypetest =
     [<CLIMutable>]
     type test =
         { id: int
@@ -2091,7 +2091,7 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     let lazyproductionunitmeasure = lazy (production.unitmeasureReader (reader, buildGetOrdinal 3))
     let lazyproductionworkorder = lazy (production.workorderReader (reader, buildGetOrdinal 9))
     let lazyproductionworkorderrouting = lazy (production.workorderroutingReader (reader, buildGetOrdinal 12))
-    let lazyprovider_testtest = lazy (provider_test.testReader (reader, buildGetOrdinal 3))
+    let lazyproviderdbtypetesttest = lazy (providerdbtypetest.testReader (reader, buildGetOrdinal 3))
     let lazypurchasingproductvendor = lazy (purchasing.productvendorReader (reader, buildGetOrdinal 11))
     let lazypurchasingpurchaseorderdetail = lazy (purchasing.purchaseorderdetailReader (reader, buildGetOrdinal 9))
     let lazypurchasingpurchaseorderheader = lazy (purchasing.purchaseorderheaderReader (reader, buildGetOrdinal 12))
@@ -2160,7 +2160,7 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     member __.``production.unitmeasure`` = lazyproductionunitmeasure.Value
     member __.``production.workorder`` = lazyproductionworkorder.Value
     member __.``production.workorderrouting`` = lazyproductionworkorderrouting.Value
-    member __.``provider_test.test`` = lazyprovider_testtest.Value
+    member __.``providerdbtypetest.test`` = lazyproviderdbtypetesttest.Value
     member __.``purchasing.productvendor`` = lazypurchasingproductvendor.Value
     member __.``purchasing.purchaseorderdetail`` = lazypurchasingpurchaseorderdetail.Value
     member __.``purchasing.purchaseorderheader`` = lazypurchasingpurchaseorderheader.Value
@@ -2276,8 +2276,8 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         | "production.workorder", true -> __.``production.workorder``.ReadIfNotNull >> box
         | "production.workorderrouting", false -> __.``production.workorderrouting``.Read >> box
         | "production.workorderrouting", true -> __.``production.workorderrouting``.ReadIfNotNull >> box
-        | "provider_test.test", false -> __.``provider_test.test``.Read >> box
-        | "provider_test.test", true -> __.``provider_test.test``.ReadIfNotNull >> box
+        | "providerdbtypetest.test", false -> __.``providerdbtypetest.test``.Read >> box
+        | "providerdbtypetest.test", true -> __.``providerdbtypetest.test``.ReadIfNotNull >> box
         | "purchasing.productvendor", false -> __.``purchasing.productvendor``.Read >> box
         | "purchasing.productvendor", true -> __.``purchasing.productvendor``.ReadIfNotNull >> box
         | "purchasing.purchaseorderdetail", false -> __.``purchasing.purchaseorderdetail``.Read >> box

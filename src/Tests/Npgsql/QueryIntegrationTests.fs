@@ -23,23 +23,7 @@ let subCategoryTable =      table<production.productsubcategory>    |> inSchema 
 let categoryTable =         table<production.productcategory>       |> inSchema (nameof production)
 let currencyTable =         table<sales.currency>                   |> inSchema (nameof sales)
 let productReviewTable =    table<production.productreview>         |> inSchema (nameof production)
-let providerDbTestTable = table<provider_test.test> |> inSchema (nameof provider_test)
-
-let dropProviderDbTestTable () =
-    use ctx = openContext()
-    let dropProvideDbTestTableCmd = ctx.Connection.CreateCommand ()
-    dropProvideDbTestTableCmd.CommandText <-
-       "drop table if exists provider_test.test; drop schema if exists provider_test"
-    dropProvideDbTestTableCmd.ExecuteNonQuery () |> ignore
-
-let generateProviderDbTestTable () =
-    dropProviderDbTestTable ()
-   
-    use ctx = openContext()
-    let createProviderDbTestTableCmd = ctx.Connection.CreateCommand ()
-    createProviderDbTestTableCmd.CommandText <-
-       "create schema provider_test; create table provider_test.test(id serial, json_field json not null, jsonb_field jsonb not null);"
-    createProviderDbTestTableCmd.ExecuteNonQuery () |> ignore
+let providerDbTestTable = table<providerdbtypetest.test> |> inSchema (nameof providerdbtypetest)
 
 [<Tests>]
 let tests = 
@@ -472,8 +456,6 @@ let tests =
         }
         
         testTask "Insert, Update and Read npgsql provider specific db fields" {
-            // Setup
-            do generateProviderDbTestTable ()
             use ctx = openContext ()
             
             let expectJsonEqual (dbValue: string) = Expect.equal (dbValue.Replace(" ", ""))
@@ -487,7 +469,7 @@ let tests =
                 
             // Simple insert of one entity
             let jsonValue = """{"name":"test"}"""
-            let entity': provider_test.test =
+            let entity': providerdbtypetest.test =
                 {
                     id = 0
                     json_field = jsonValue
@@ -505,7 +487,7 @@ let tests =
             let! selectedRows = getRowById insertedRowId
 
             Expect.wantSome (selectedRows |> Seq.tryHead) "Select returned empty set"
-            |> fun (row: provider_test.test) ->
+            |> fun (row: providerdbtypetest.test) ->
                  expectJsonEqual row.json_field jsonValue "Json field after insert doesn't match"
                  expectJsonEqual row.jsonb_field jsonValue "Jsonb field after insert doesn't match"
      
@@ -525,7 +507,7 @@ let tests =
             let! selectedRowsAfterUpdate = getRowById insertedRowId
 
             Expect.wantSome (selectedRowsAfterUpdate |> Seq.tryHead) "Select returned empty set"
-            |> fun (row: provider_test.test) ->
+            |> fun (row: providerdbtypetest.test) ->
                  expectJsonEqual row.json_field  updatedJsonValue "Json field after update doesn't match"
                  expectJsonEqual row.jsonb_field updatedJsonValue "Jsonb field after update doesn't match"
                    
