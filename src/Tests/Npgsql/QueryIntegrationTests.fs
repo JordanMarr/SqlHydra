@@ -467,7 +467,7 @@ let tests =
             ctx.RollbackTransaction()
         }
         
-        ftestTask "Insert, Update and Read npgsql provider specific db fields" {
+        testTask "Insert, Update and Read npgsql provider specific db fields" {
             do generateProviderDbTestTable ()
             use ctx = openContext ()
             
@@ -480,6 +480,7 @@ let tests =
                         where (e.id = id)
                 } |> ctx.ReadAsync HydraReader.Read
                 
+            // Simple insert of one entity
             let jsonValue = """{"name":"test"}"""
             let entity': provider_test.test =
                 {
@@ -500,11 +501,11 @@ let tests =
 
             Expect.wantSome (selectedRows |> Seq.tryHead) "Select returned empty set"
             |> fun (row: provider_test.test) ->
-                 expectJsonEqual row.json_field jsonValue "Json field doesn't match"
-                 expectJsonEqual row.jsonb_field jsonValue "Jsonb field doesn't match"
+                 expectJsonEqual row.json_field jsonValue "Json field after insert doesn't match"
+                 expectJsonEqual row.jsonb_field jsonValue "Jsonb field after insert doesn't match"
      
+            // Simple update of one entity
             let updatedJsonValue = """{"name":"test_2"}"""
-            
             let! updatedRows =
                 update {
                         for e in providerDbTestTable do
@@ -514,15 +515,16 @@ let tests =
                     }
                     |> ctx.UpdateAsync
         
-            Expect.equal updatedRows 1 "Provider specific db update failed"
+            Expect.equal updatedRows 1 "Expected 1 row to be updated"
             
             let! selectedRowsAfterUpdate = getRowById insertedRowId
 
             Expect.wantSome (selectedRowsAfterUpdate |> Seq.tryHead) "Select returned empty set"
             |> fun (row: provider_test.test) ->
-                 expectJsonEqual row.json_field  updatedJsonValue "Json field doesn't match"
-                 expectJsonEqual row.jsonb_field updatedJsonValue "Jsonb field doesn't match"
+                 expectJsonEqual row.json_field  updatedJsonValue "Json field after update doesn't match"
+                 expectJsonEqual row.jsonb_field updatedJsonValue "Jsonb field after update doesn't match"
                    
+            // Insert of multiple entities
             let! insertedNumberOfRows = 
                 insert {
                     for e in providerDbTestTable do
@@ -530,6 +532,6 @@ let tests =
                 }
                 |> ctx.InsertAsync
             
-            Expect.equal insertedNumberOfRows 2 "Failed insert entities"
+            Expect.equal insertedNumberOfRows 2 "Failed insert multiple entities"
         }
     ]
