@@ -1,7 +1,6 @@
 ﻿module SqlHydra.Npgsql.NpgsqlSchemaProvider
 
 open System.Data
-open NpgsqlTypes
 open SqlHydra.Domain
 
 let getSchema (cfg: Config) : Schema =
