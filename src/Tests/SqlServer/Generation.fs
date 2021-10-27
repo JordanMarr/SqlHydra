@@ -1,6 +1,8 @@
 ﻿module SqlServer.Generation
 
 open Expecto
+open VerifyTests
+open VerifyExpecto
 open SqlHydra
 open SqlHydra.SqlServer
 open SqlHydra.Domain
@@ -39,8 +41,9 @@ let tests =
             let code = getCode cfg
             Expect.isFalse (code.Contains str) ""
 
-        test "Print Code"  {
-            getCode cfg |> printfn "%s"
+        testTask "Generated Code"  {
+            let code = getCode cfg
+            do! Verifier.Verify("GeneratedCode", code)
         }
     
         test "Code Should Have Reader"  {
