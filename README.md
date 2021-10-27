@@ -479,6 +479,8 @@ let! rowsInserted =
     |> ctx.InsertAsync
 ```
 
+💥 Passing an empty collection to `entities` will fail with the following exception: "At least one `entity` or `entities` must be set in the `insert` builder.", so be sure to validate that your collection is not empty!
+
 ### Update Builder
 
 #### Update Individual Fields
