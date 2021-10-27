@@ -52,7 +52,11 @@ module HumanResources =
 
     [<CLIMutable>]
     type Employee =
-        { JobTitle: string
+        { BusinessEntityID: int
+          NationalIDNumber: string
+          LoginID: string
+          OrganizationLevel: Option<int16>
+          JobTitle: string
           BirthDate: System.DateTime
           MaritalStatus: string
           Gender: string
@@ -62,13 +66,13 @@ module HumanResources =
           SickLeaveHours: int16
           CurrentFlag: bool
           rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          BusinessEntityID: int
-          NationalIDNumber: string
-          LoginID: string
-          OrganizationLevel: Option<int16> }
+          ModifiedDate: System.DateTime }
 
     type EmployeeReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
+        member __.NationalIDNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "NationalIDNumber")
+        member __.LoginID = RequiredColumn(reader, getOrdinal, reader.GetString, "LoginID")
+        member __.OrganizationLevel = OptionalColumn(reader, getOrdinal, reader.GetInt16, "OrganizationLevel")
         member __.JobTitle = RequiredColumn(reader, getOrdinal, reader.GetString, "JobTitle")
         member __.BirthDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "BirthDate")
         member __.MaritalStatus = RequiredColumn(reader, getOrdinal, reader.GetString, "MaritalStatus")
@@ -80,12 +84,12 @@ module HumanResources =
         member __.CurrentFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "CurrentFlag")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.NationalIDNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "NationalIDNumber")
-        member __.LoginID = RequiredColumn(reader, getOrdinal, reader.GetString, "LoginID")
-        member __.OrganizationLevel = OptionalColumn(reader, getOrdinal, reader.GetInt16, "OrganizationLevel")
         member __.Read() =
-            { JobTitle = __.JobTitle.Read()
+            { BusinessEntityID = __.BusinessEntityID.Read()
+              NationalIDNumber = __.NationalIDNumber.Read()
+              LoginID = __.LoginID.Read()
+              OrganizationLevel = __.OrganizationLevel.Read()
+              JobTitle = __.JobTitle.Read()
               BirthDate = __.BirthDate.Read()
               MaritalStatus = __.MaritalStatus.Read()
               Gender = __.Gender.Read()
@@ -95,11 +99,7 @@ module HumanResources =
               SickLeaveHours = __.SickLeaveHours.Read()
               CurrentFlag = __.CurrentFlag.Read()
               rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              BusinessEntityID = __.BusinessEntityID.Read()
-              NationalIDNumber = __.NationalIDNumber.Read()
-              LoginID = __.LoginID.Read()
-              OrganizationLevel = __.OrganizationLevel.Read() }
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -110,23 +110,23 @@ module HumanResources =
           DepartmentID: int16
           ShiftID: byte
           StartDate: System.DateTime
-          ModifiedDate: System.DateTime
-          EndDate: Option<System.DateTime> }
+          EndDate: Option<System.DateTime>
+          ModifiedDate: System.DateTime }
 
     type EmployeeDepartmentHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
         member __.DepartmentID = RequiredColumn(reader, getOrdinal, reader.GetInt16, "DepartmentID")
         member __.ShiftID = RequiredColumn(reader, getOrdinal, reader.GetByte, "ShiftID")
         member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
             { BusinessEntityID = __.BusinessEntityID.Read()
               DepartmentID = __.DepartmentID.Read()
               ShiftID = __.ShiftID.Read()
               StartDate = __.StartDate.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              EndDate = __.EndDate.Read() }
+              EndDate = __.EndDate.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -158,17 +158,17 @@ module HumanResources =
     [<CLIMutable>]
     type JobCandidate =
         { JobCandidateID: int
-          ModifiedDate: System.DateTime
-          BusinessEntityID: Option<int> }
+          BusinessEntityID: Option<int>
+          ModifiedDate: System.DateTime }
 
     type JobCandidateReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.JobCandidateID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "JobCandidateID")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.BusinessEntityID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
             { JobCandidateID = __.JobCandidateID.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              BusinessEntityID = __.BusinessEntityID.Read() }
+              BusinessEntityID = __.BusinessEntityID.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.JobCandidateID.IsNull() then None else Some(__.Read())
@@ -200,59 +200,59 @@ module HumanResources =
     [<CLIMutable>]
     type vEmployee =
         { BusinessEntityID: int
+          Title: Option<string>
           FirstName: string
-          JobTitle: string
-          City: string
-          StateProvinceName: string
-          PostalCode: string
-          CountryRegionName: string
+          MiddleName: Option<string>
           LastName: string
-          EmailPromotion: int
-          AddressLine1: string
-          AddressLine2: Option<string>
           Suffix: Option<string>
+          JobTitle: string
           PhoneNumber: Option<string>
           PhoneNumberType: Option<string>
           EmailAddress: Option<string>
-          MiddleName: Option<string>
-          Title: Option<string> }
+          EmailPromotion: int
+          AddressLine1: string
+          AddressLine2: Option<string>
+          City: string
+          StateProvinceName: string
+          PostalCode: string
+          CountryRegionName: string }
 
     type vEmployeeReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
+        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
         member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
+        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
+        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
+        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
         member __.JobTitle = RequiredColumn(reader, getOrdinal, reader.GetString, "JobTitle")
+        member __.PhoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumber")
+        member __.PhoneNumberType = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumberType")
+        member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
+        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
+        member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
+        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
         member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
         member __.StateProvinceName = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceName")
         member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
         member __.CountryRegionName = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionName")
-        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
-        member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
-        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
-        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
-        member __.PhoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumber")
-        member __.PhoneNumberType = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumberType")
-        member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
         member __.Read() =
             { BusinessEntityID = __.BusinessEntityID.Read()
+              Title = __.Title.Read()
               FirstName = __.FirstName.Read()
-              JobTitle = __.JobTitle.Read()
-              City = __.City.Read()
-              StateProvinceName = __.StateProvinceName.Read()
-              PostalCode = __.PostalCode.Read()
-              CountryRegionName = __.CountryRegionName.Read()
+              MiddleName = __.MiddleName.Read()
               LastName = __.LastName.Read()
-              EmailPromotion = __.EmailPromotion.Read()
-              AddressLine1 = __.AddressLine1.Read()
-              AddressLine2 = __.AddressLine2.Read()
               Suffix = __.Suffix.Read()
+              JobTitle = __.JobTitle.Read()
               PhoneNumber = __.PhoneNumber.Read()
               PhoneNumberType = __.PhoneNumberType.Read()
               EmailAddress = __.EmailAddress.Read()
-              MiddleName = __.MiddleName.Read()
-              Title = __.Title.Read() }
+              EmailPromotion = __.EmailPromotion.Read()
+              AddressLine1 = __.AddressLine1.Read()
+              AddressLine2 = __.AddressLine2.Read()
+              City = __.City.Read()
+              StateProvinceName = __.StateProvinceName.Read()
+              PostalCode = __.PostalCode.Read()
+              CountryRegionName = __.CountryRegionName.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -260,38 +260,38 @@ module HumanResources =
     [<CLIMutable>]
     type vEmployeeDepartment =
         { BusinessEntityID: int
+          Title: Option<string>
           FirstName: string
+          MiddleName: Option<string>
+          LastName: string
+          Suffix: Option<string>
           JobTitle: string
           Department: string
           GroupName: string
-          StartDate: System.DateTime
-          LastName: string
-          Suffix: Option<string>
-          MiddleName: Option<string>
-          Title: Option<string> }
+          StartDate: System.DateTime }
 
     type vEmployeeDepartmentReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
+        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
         member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
+        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
+        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
+        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
         member __.JobTitle = RequiredColumn(reader, getOrdinal, reader.GetString, "JobTitle")
         member __.Department = RequiredColumn(reader, getOrdinal, reader.GetString, "Department")
         member __.GroupName = RequiredColumn(reader, getOrdinal, reader.GetString, "GroupName")
         member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
-        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
         member __.Read() =
             { BusinessEntityID = __.BusinessEntityID.Read()
+              Title = __.Title.Read()
               FirstName = __.FirstName.Read()
+              MiddleName = __.MiddleName.Read()
+              LastName = __.LastName.Read()
+              Suffix = __.Suffix.Read()
               JobTitle = __.JobTitle.Read()
               Department = __.Department.Read()
               GroupName = __.GroupName.Read()
-              StartDate = __.StartDate.Read()
-              LastName = __.LastName.Read()
-              Suffix = __.Suffix.Read()
-              MiddleName = __.MiddleName.Read()
-              Title = __.Title.Read() }
+              StartDate = __.StartDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -299,41 +299,41 @@ module HumanResources =
     [<CLIMutable>]
     type vEmployeeDepartmentHistory =
         { BusinessEntityID: int
+          Title: Option<string>
           FirstName: string
+          MiddleName: Option<string>
           LastName: string
+          Suffix: Option<string>
           Shift: string
           Department: string
           GroupName: string
           StartDate: System.DateTime
-          EndDate: Option<System.DateTime>
-          Suffix: Option<string>
-          MiddleName: Option<string>
-          Title: Option<string> }
+          EndDate: Option<System.DateTime> }
 
     type vEmployeeDepartmentHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
+        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
         member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
+        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
         member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
+        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
         member __.Shift = RequiredColumn(reader, getOrdinal, reader.GetString, "Shift")
         member __.Department = RequiredColumn(reader, getOrdinal, reader.GetString, "Department")
         member __.GroupName = RequiredColumn(reader, getOrdinal, reader.GetString, "GroupName")
         member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
         member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
-        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
         member __.Read() =
             { BusinessEntityID = __.BusinessEntityID.Read()
+              Title = __.Title.Read()
               FirstName = __.FirstName.Read()
+              MiddleName = __.MiddleName.Read()
               LastName = __.LastName.Read()
+              Suffix = __.Suffix.Read()
               Shift = __.Shift.Read()
               Department = __.Department.Read()
               GroupName = __.GroupName.Read()
               StartDate = __.StartDate.Read()
-              EndDate = __.EndDate.Read()
-              Suffix = __.Suffix.Read()
-              MiddleName = __.MiddleName.Read()
-              Title = __.Title.Read() }
+              EndDate = __.EndDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -341,7 +341,6 @@ module HumanResources =
     [<CLIMutable>]
     type vJobCandidate =
         { JobCandidateID: int
-          ModifiedDate: System.DateTime
           BusinessEntityID: Option<int>
           ``Name.Prefix``: Option<string>
           ``Name.First``: Option<string>
@@ -355,11 +354,11 @@ module HumanResources =
           ``Addr.Loc.City``: Option<string>
           ``Addr.PostalCode``: Option<string>
           EMail: Option<string>
-          WebSite: Option<string> }
+          WebSite: Option<string>
+          ModifiedDate: System.DateTime }
 
     type vJobCandidateReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.JobCandidateID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "JobCandidateID")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.BusinessEntityID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
         member __.``Name.Prefix`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Name.Prefix")
         member __.``Name.First`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Name.First")
@@ -374,9 +373,9 @@ module HumanResources =
         member __.``Addr.PostalCode`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Addr.PostalCode")
         member __.EMail = OptionalColumn(reader, getOrdinal, reader.GetString, "EMail")
         member __.WebSite = OptionalColumn(reader, getOrdinal, reader.GetString, "WebSite")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
             { JobCandidateID = __.JobCandidateID.Read()
-              ModifiedDate = __.ModifiedDate.Read()
               BusinessEntityID = __.BusinessEntityID.Read()
               ``Name.Prefix`` = __.``Name.Prefix``.Read()
               ``Name.First`` = __.``Name.First``.Read()
@@ -390,7 +389,8 @@ module HumanResources =
               ``Addr.Loc.City`` = __.``Addr.Loc.City``.Read()
               ``Addr.PostalCode`` = __.``Addr.PostalCode``.Read()
               EMail = __.EMail.Read()
-              WebSite = __.WebSite.Read() }
+              WebSite = __.WebSite.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.JobCandidateID.IsNull() then None else Some(__.Read())
@@ -490,31 +490,31 @@ module Person =
     type Address =
         { AddressID: int
           AddressLine1: string
+          AddressLine2: Option<string>
           City: string
           StateProvinceID: int
           PostalCode: string
           rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          AddressLine2: Option<string> }
+          ModifiedDate: System.DateTime }
 
     type AddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.AddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "AddressID")
         member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
+        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
         member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
         member __.StateProvinceID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "StateProvinceID")
         member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
         member __.Read() =
             { AddressID = __.AddressID.Read()
               AddressLine1 = __.AddressLine1.Read()
+              AddressLine2 = __.AddressLine2.Read()
               City = __.City.Read()
               StateProvinceID = __.StateProvinceID.Read()
               PostalCode = __.PostalCode.Read()
               rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              AddressLine2 = __.AddressLine2.Read() }
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.AddressID.IsNull() then None else Some(__.Read())
@@ -646,22 +646,22 @@ module Person =
     type EmailAddress =
         { BusinessEntityID: int
           EmailAddressID: int
+          EmailAddress: Option<string>
           rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          EmailAddress: Option<string> }
+          ModifiedDate: System.DateTime }
 
     type EmailAddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
         member __.EmailAddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailAddressID")
+        member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
         member __.Read() =
             { BusinessEntityID = __.BusinessEntityID.Read()
               EmailAddressID = __.EmailAddressID.Read()
+              EmailAddress = __.EmailAddress.Read()
               rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              EmailAddress = __.EmailAddress.Read() }
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -695,39 +695,39 @@ module Person =
         { BusinessEntityID: int
           PersonType: string
           NameStyle: bool
-          rowguid: System.Guid
-          ModifiedDate: System.DateTime
+          Title: Option<string>
           FirstName: string
-          LastName: string
-          EmailPromotion: int
-          Suffix: Option<string>
           MiddleName: Option<string>
-          Title: Option<string> }
+          LastName: string
+          Suffix: Option<string>
+          EmailPromotion: int
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
 
     type PersonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
         member __.PersonType = RequiredColumn(reader, getOrdinal, reader.GetString, "PersonType")
         member __.NameStyle = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "NameStyle")
+        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
+        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
+        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
+        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
+        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
+        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
-        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
         member __.Read() =
             { BusinessEntityID = __.BusinessEntityID.Read()
               PersonType = __.PersonType.Read()
               NameStyle = __.NameStyle.Read()
-              rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
+              Title = __.Title.Read()
               FirstName = __.FirstName.Read()
-              LastName = __.LastName.Read()
-              EmailPromotion = __.EmailPromotion.Read()
-              Suffix = __.Suffix.Read()
               MiddleName = __.MiddleName.Read()
-              Title = __.Title.Read() }
+              LastName = __.LastName.Read()
+              Suffix = __.Suffix.Read()
+              EmailPromotion = __.EmailPromotion.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -808,8 +808,7 @@ module Person =
     type vAdditionalContactInfo =
         { BusinessEntityID: int
           FirstName: string
-          rowguid: System.Guid
-          ModifiedDate: System.DateTime
+          MiddleName: Option<string>
           LastName: string
           TelephoneNumber: Option<string>
           TelephoneSpecialInstructions: Option<string>
@@ -822,13 +821,13 @@ module Person =
           EMailAddress: Option<string>
           EMailSpecialInstructions: Option<string>
           EMailTelephoneNumber: Option<string>
-          MiddleName: Option<string> }
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
 
     type vAdditionalContactInfoReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
         member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
+        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
         member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
         member __.TelephoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "TelephoneNumber")
         member __.TelephoneSpecialInstructions = OptionalColumn(reader, getOrdinal, reader.GetString, "TelephoneSpecialInstructions")
@@ -841,12 +840,12 @@ module Person =
         member __.EMailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EMailAddress")
         member __.EMailSpecialInstructions = OptionalColumn(reader, getOrdinal, reader.GetString, "EMailSpecialInstructions")
         member __.EMailTelephoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "EMailTelephoneNumber")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
             { BusinessEntityID = __.BusinessEntityID.Read()
               FirstName = __.FirstName.Read()
-              rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
+              MiddleName = __.MiddleName.Read()
               LastName = __.LastName.Read()
               TelephoneNumber = __.TelephoneNumber.Read()
               TelephoneSpecialInstructions = __.TelephoneSpecialInstructions.Read()
@@ -859,7 +858,8 @@ module Person =
               EMailAddress = __.EMailAddress.Read()
               EMailSpecialInstructions = __.EMailSpecialInstructions.Read()
               EMailTelephoneNumber = __.EMailTelephoneNumber.Read()
-              MiddleName = __.MiddleName.Read() }
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -898,35 +898,35 @@ module Production =
     [<CLIMutable>]
     type BillOfMaterials =
         { BillOfMaterialsID: int
-          UnitMeasureCode: string
-          BOMLevel: int16
-          PerAssemblyQty: decimal
-          ModifiedDate: System.DateTime
+          ProductAssemblyID: Option<int>
           ComponentID: int
           StartDate: System.DateTime
           EndDate: Option<System.DateTime>
-          ProductAssemblyID: Option<int> }
+          UnitMeasureCode: string
+          BOMLevel: int16
+          PerAssemblyQty: decimal
+          ModifiedDate: System.DateTime }
 
     type BillOfMaterialsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.BillOfMaterialsID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BillOfMaterialsID")
+        member __.ProductAssemblyID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "ProductAssemblyID")
+        member __.ComponentID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ComponentID")
+        member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
+        member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
         member __.UnitMeasureCode = RequiredColumn(reader, getOrdinal, reader.GetString, "UnitMeasureCode")
         member __.BOMLevel = RequiredColumn(reader, getOrdinal, reader.GetInt16, "BOMLevel")
         member __.PerAssemblyQty = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PerAssemblyQty")
         member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.ComponentID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ComponentID")
-        member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
-        member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
-        member __.ProductAssemblyID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "ProductAssemblyID")
         member __.Read() =
             { BillOfMaterialsID = __.BillOfMaterialsID.Read()
-              UnitMeasureCode = __.UnitMeasureCode.Read()
-              BOMLevel = __.BOMLevel.Read()
-              PerAssemblyQty = __.PerAssemblyQty.Read()
-              ModifiedDate = __.ModifiedDate.Read()
+              ProductAssemblyID = __.ProductAssemblyID.Read()
               ComponentID = __.ComponentID.Read()
               StartDate = __.StartDate.Read()
               EndDate = __.EndDate.Read()
-              ProductAssemblyID = __.ProductAssemblyID.Read() }
+              UnitMeasureCode = __.UnitMeasureCode.Read()
+              BOMLevel = __.BOMLevel.Read()
+              PerAssemblyQty = __.PerAssemblyQty.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.BillOfMaterialsID.IsNull() then None else Some(__.Read())
@@ -951,8 +951,7 @@ module Production =
 
     [<CLIMutable>]
     type Document =
-        { rowguid: System.Guid
-          ModifiedDate: System.DateTime
+        { DocumentLevel: Option<int16>
           Title: string
           Owner: int
           FolderFlag: bool
@@ -963,11 +962,11 @@ module Production =
           Status: byte
           DocumentSummary: Option<string>
           Document: Option<byte []>
-          DocumentLevel: Option<int16> }
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
 
     type DocumentReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
+        member __.DocumentLevel = OptionalColumn(reader, getOrdinal, reader.GetInt16, "DocumentLevel")
         member __.Title = RequiredColumn(reader, getOrdinal, reader.GetString, "Title")
         member __.Owner = RequiredColumn(reader, getOrdinal, reader.GetInt32, "Owner")
         member __.FolderFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "FolderFlag")
@@ -978,10 +977,10 @@ module Production =
         member __.Status = RequiredColumn(reader, getOrdinal, reader.GetByte, "Status")
         member __.DocumentSummary = OptionalColumn(reader, getOrdinal, reader.GetString, "DocumentSummary")
         member __.Document = OptionalBinaryColumn(reader, getOrdinal, reader.GetValue, "Document")
-        member __.DocumentLevel = OptionalColumn(reader, getOrdinal, reader.GetInt16, "DocumentLevel")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
-            { rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
+            { DocumentLevel = __.DocumentLevel.Read()
               Title = __.Title.Read()
               Owner = __.Owner.Read()
               FolderFlag = __.FolderFlag.Read()
@@ -992,22 +991,23 @@ module Production =
               Status = __.Status.Read()
               DocumentSummary = __.DocumentSummary.Read()
               Document = __.Document.Read()
-              DocumentLevel = __.DocumentLevel.Read() }
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
-            if __.rowguid.IsNull() then None else Some(__.Read())
+            if __.Title.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type Illustration =
-        { ModifiedDate: System.DateTime
-          IllustrationID: int }
+        { IllustrationID: int
+          ModifiedDate: System.DateTime }
 
     type IllustrationReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.IllustrationID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "IllustrationID")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
-            { ModifiedDate = __.ModifiedDate.Read()
-              IllustrationID = __.IllustrationID.Read() }
+            { IllustrationID = __.IllustrationID.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.IllustrationID.IsNull() then None else Some(__.Read())
@@ -1043,26 +1043,26 @@ module Production =
           ProductNumber: string
           MakeFlag: bool
           FinishedGoodsFlag: bool
+          Color: Option<string>
           SafetyStockLevel: int16
           ReorderPoint: int16
           StandardCost: decimal
           ListPrice: decimal
+          Size: Option<string>
+          SizeUnitMeasureCode: Option<string>
+          WeightUnitMeasureCode: Option<string>
+          Weight: Option<decimal>
           DaysToManufacture: int
-          SellStartDate: System.DateTime
-          rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          SellEndDate: Option<System.DateTime>
-          DiscontinuedDate: Option<System.DateTime>
           ProductLine: Option<string>
           Class: Option<string>
           Style: Option<string>
           ProductSubcategoryID: Option<int>
           ProductModelID: Option<int>
-          Size: Option<string>
-          SizeUnitMeasureCode: Option<string>
-          WeightUnitMeasureCode: Option<string>
-          Weight: Option<decimal>
-          Color: Option<string> }
+          SellStartDate: System.DateTime
+          SellEndDate: Option<System.DateTime>
+          DiscontinuedDate: Option<System.DateTime>
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
 
     type ProductReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
@@ -1070,52 +1070,52 @@ module Production =
         member __.ProductNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "ProductNumber")
         member __.MakeFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "MakeFlag")
         member __.FinishedGoodsFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "FinishedGoodsFlag")
+        member __.Color = OptionalColumn(reader, getOrdinal, reader.GetString, "Color")
         member __.SafetyStockLevel = RequiredColumn(reader, getOrdinal, reader.GetInt16, "SafetyStockLevel")
         member __.ReorderPoint = RequiredColumn(reader, getOrdinal, reader.GetInt16, "ReorderPoint")
         member __.StandardCost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "StandardCost")
         member __.ListPrice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "ListPrice")
+        member __.Size = OptionalColumn(reader, getOrdinal, reader.GetString, "Size")
+        member __.SizeUnitMeasureCode = OptionalColumn(reader, getOrdinal, reader.GetString, "SizeUnitMeasureCode")
+        member __.WeightUnitMeasureCode = OptionalColumn(reader, getOrdinal, reader.GetString, "WeightUnitMeasureCode")
+        member __.Weight = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "Weight")
         member __.DaysToManufacture = RequiredColumn(reader, getOrdinal, reader.GetInt32, "DaysToManufacture")
-        member __.SellStartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "SellStartDate")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.SellEndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "SellEndDate")
-        member __.DiscontinuedDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "DiscontinuedDate")
         member __.ProductLine = OptionalColumn(reader, getOrdinal, reader.GetString, "ProductLine")
         member __.Class = OptionalColumn(reader, getOrdinal, reader.GetString, "Class")
         member __.Style = OptionalColumn(reader, getOrdinal, reader.GetString, "Style")
         member __.ProductSubcategoryID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "ProductSubcategoryID")
         member __.ProductModelID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
-        member __.Size = OptionalColumn(reader, getOrdinal, reader.GetString, "Size")
-        member __.SizeUnitMeasureCode = OptionalColumn(reader, getOrdinal, reader.GetString, "SizeUnitMeasureCode")
-        member __.WeightUnitMeasureCode = OptionalColumn(reader, getOrdinal, reader.GetString, "WeightUnitMeasureCode")
-        member __.Weight = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "Weight")
-        member __.Color = OptionalColumn(reader, getOrdinal, reader.GetString, "Color")
+        member __.SellStartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "SellStartDate")
+        member __.SellEndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "SellEndDate")
+        member __.DiscontinuedDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "DiscontinuedDate")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
             { ProductID = __.ProductID.Read()
               Name = __.Name.Read()
               ProductNumber = __.ProductNumber.Read()
               MakeFlag = __.MakeFlag.Read()
               FinishedGoodsFlag = __.FinishedGoodsFlag.Read()
+              Color = __.Color.Read()
               SafetyStockLevel = __.SafetyStockLevel.Read()
               ReorderPoint = __.ReorderPoint.Read()
               StandardCost = __.StandardCost.Read()
               ListPrice = __.ListPrice.Read()
+              Size = __.Size.Read()
+              SizeUnitMeasureCode = __.SizeUnitMeasureCode.Read()
+              WeightUnitMeasureCode = __.WeightUnitMeasureCode.Read()
+              Weight = __.Weight.Read()
               DaysToManufacture = __.DaysToManufacture.Read()
-              SellStartDate = __.SellStartDate.Read()
-              rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              SellEndDate = __.SellEndDate.Read()
-              DiscontinuedDate = __.DiscontinuedDate.Read()
               ProductLine = __.ProductLine.Read()
               Class = __.Class.Read()
               Style = __.Style.Read()
               ProductSubcategoryID = __.ProductSubcategoryID.Read()
               ProductModelID = __.ProductModelID.Read()
-              Size = __.Size.Read()
-              SizeUnitMeasureCode = __.SizeUnitMeasureCode.Read()
-              WeightUnitMeasureCode = __.WeightUnitMeasureCode.Read()
-              Weight = __.Weight.Read()
-              Color = __.Color.Read() }
+              SellStartDate = __.SellStartDate.Read()
+              SellEndDate = __.SellEndDate.Read()
+              DiscontinuedDate = __.DiscontinuedDate.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.ProductID.IsNull() then None else Some(__.Read())
@@ -1145,22 +1145,22 @@ module Production =
     type ProductCostHistory =
         { ProductID: int
           StartDate: System.DateTime
+          EndDate: Option<System.DateTime>
           StandardCost: decimal
-          ModifiedDate: System.DateTime
-          EndDate: Option<System.DateTime> }
+          ModifiedDate: System.DateTime }
 
     type ProductCostHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
         member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
+        member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
         member __.StandardCost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "StandardCost")
         member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
         member __.Read() =
             { ProductID = __.ProductID.Read()
               StartDate = __.StartDate.Read()
+              EndDate = __.EndDate.Read()
               StandardCost = __.StandardCost.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              EndDate = __.EndDate.Read() }
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.ProductID.IsNull() then None else Some(__.Read())
@@ -1233,45 +1233,45 @@ module Production =
 
     [<CLIMutable>]
     type ProductListPriceHistory =
-        { ListPrice: decimal
-          ModifiedDate: System.DateTime
-          ProductID: int
+        { ProductID: int
           StartDate: System.DateTime
-          EndDate: Option<System.DateTime> }
+          EndDate: Option<System.DateTime>
+          ListPrice: decimal
+          ModifiedDate: System.DateTime }
 
     type ProductListPriceHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.ListPrice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "ListPrice")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
         member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
         member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
+        member __.ListPrice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "ListPrice")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
-            { ListPrice = __.ListPrice.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              ProductID = __.ProductID.Read()
+            { ProductID = __.ProductID.Read()
               StartDate = __.StartDate.Read()
-              EndDate = __.EndDate.Read() }
+              EndDate = __.EndDate.Read()
+              ListPrice = __.ListPrice.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.ProductID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type ProductModel =
-        { rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          ProductModelID: int
-          Name: string }
+        { ProductModelID: int
+          Name: string
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
 
     type ProductModelReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
-            { rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              ProductModelID = __.ProductModelID.Read()
-              Name = __.Name.Read() }
+            { ProductModelID = __.ProductModelID.Read()
+              Name = __.Name.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.ProductModelID.IsNull() then None else Some(__.Read())
@@ -1318,26 +1318,26 @@ module Production =
     [<CLIMutable>]
     type ProductPhoto =
         { ProductPhotoID: int
-          ModifiedDate: System.DateTime
           ThumbNailPhoto: Option<byte []>
           ThumbnailPhotoFileName: Option<string>
           LargePhoto: Option<byte []>
-          LargePhotoFileName: Option<string> }
+          LargePhotoFileName: Option<string>
+          ModifiedDate: System.DateTime }
 
     type ProductPhotoReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ProductPhotoID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductPhotoID")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.ThumbNailPhoto = OptionalBinaryColumn(reader, getOrdinal, reader.GetValue, "ThumbNailPhoto")
         member __.ThumbnailPhotoFileName = OptionalColumn(reader, getOrdinal, reader.GetString, "ThumbnailPhotoFileName")
         member __.LargePhoto = OptionalBinaryColumn(reader, getOrdinal, reader.GetValue, "LargePhoto")
         member __.LargePhotoFileName = OptionalColumn(reader, getOrdinal, reader.GetString, "LargePhotoFileName")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
             { ProductPhotoID = __.ProductPhotoID.Read()
-              ModifiedDate = __.ModifiedDate.Read()
               ThumbNailPhoto = __.ThumbNailPhoto.Read()
               ThumbnailPhotoFileName = __.ThumbnailPhotoFileName.Read()
               LargePhoto = __.LargePhoto.Read()
-              LargePhotoFileName = __.LargePhotoFileName.Read() }
+              LargePhotoFileName = __.LargePhotoFileName.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.ProductPhotoID.IsNull() then None else Some(__.Read())
@@ -1365,17 +1365,16 @@ module Production =
 
     [<CLIMutable>]
     type ProductReview =
-        { ModifiedDate: System.DateTime
-          ProductReviewID: int
+        { ProductReviewID: int
           ProductID: int
           ReviewerName: string
           ReviewDate: System.DateTime
           EmailAddress: string
           Rating: int
-          Comments: Option<string> }
+          Comments: Option<string>
+          ModifiedDate: System.DateTime }
 
     type ProductReviewReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.ProductReviewID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductReviewID")
         member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
         member __.ReviewerName = RequiredColumn(reader, getOrdinal, reader.GetString, "ReviewerName")
@@ -1383,15 +1382,16 @@ module Production =
         member __.EmailAddress = RequiredColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
         member __.Rating = RequiredColumn(reader, getOrdinal, reader.GetInt32, "Rating")
         member __.Comments = OptionalColumn(reader, getOrdinal, reader.GetString, "Comments")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
-            { ModifiedDate = __.ModifiedDate.Read()
-              ProductReviewID = __.ProductReviewID.Read()
+            { ProductReviewID = __.ProductReviewID.Read()
               ProductID = __.ProductID.Read()
               ReviewerName = __.ReviewerName.Read()
               ReviewDate = __.ReviewDate.Read()
               EmailAddress = __.EmailAddress.Read()
               Rating = __.Rating.Read()
-              Comments = __.Comments.Read() }
+              Comments = __.Comments.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.ProductReviewID.IsNull() then None else Some(__.Read())
@@ -1536,10 +1536,10 @@ module Production =
           StockedQty: int
           ScrappedQty: int16
           StartDate: System.DateTime
-          ModifiedDate: System.DateTime
+          EndDate: Option<System.DateTime>
           DueDate: System.DateTime
           ScrapReasonID: Option<int16>
-          EndDate: Option<System.DateTime> }
+          ModifiedDate: System.DateTime }
 
     type WorkOrderReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.WorkOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "WorkOrderID")
@@ -1548,10 +1548,10 @@ module Production =
         member __.StockedQty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "StockedQty")
         member __.ScrappedQty = RequiredColumn(reader, getOrdinal, reader.GetInt16, "ScrappedQty")
         member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
+        member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
         member __.DueDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "DueDate")
         member __.ScrapReasonID = OptionalColumn(reader, getOrdinal, reader.GetInt16, "ScrapReasonID")
-        member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
             { WorkOrderID = __.WorkOrderID.Read()
               ProductID = __.ProductID.Read()
@@ -1559,10 +1559,10 @@ module Production =
               StockedQty = __.StockedQty.Read()
               ScrappedQty = __.ScrappedQty.Read()
               StartDate = __.StartDate.Read()
-              ModifiedDate = __.ModifiedDate.Read()
+              EndDate = __.EndDate.Read()
               DueDate = __.DueDate.Read()
               ScrapReasonID = __.ScrapReasonID.Read()
-              EndDate = __.EndDate.Read() }
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.WorkOrderID.IsNull() then None else Some(__.Read())
@@ -1575,12 +1575,12 @@ module Production =
           LocationID: int16
           ScheduledStartDate: System.DateTime
           ScheduledEndDate: System.DateTime
-          ModifiedDate: System.DateTime
-          PlannedCost: decimal
-          ActualCost: Option<decimal>
           ActualStartDate: Option<System.DateTime>
           ActualEndDate: Option<System.DateTime>
-          ActualResourceHrs: Option<decimal> }
+          ActualResourceHrs: Option<decimal>
+          PlannedCost: decimal
+          ActualCost: Option<decimal>
+          ModifiedDate: System.DateTime }
 
     type WorkOrderRoutingReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.WorkOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "WorkOrderID")
@@ -1589,12 +1589,12 @@ module Production =
         member __.LocationID = RequiredColumn(reader, getOrdinal, reader.GetInt16, "LocationID")
         member __.ScheduledStartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ScheduledStartDate")
         member __.ScheduledEndDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ScheduledEndDate")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.PlannedCost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PlannedCost")
-        member __.ActualCost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "ActualCost")
         member __.ActualStartDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "ActualStartDate")
         member __.ActualEndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "ActualEndDate")
         member __.ActualResourceHrs = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "ActualResourceHrs")
+        member __.PlannedCost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PlannedCost")
+        member __.ActualCost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "ActualCost")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
             { WorkOrderID = __.WorkOrderID.Read()
               ProductID = __.ProductID.Read()
@@ -1602,12 +1602,12 @@ module Production =
               LocationID = __.LocationID.Read()
               ScheduledStartDate = __.ScheduledStartDate.Read()
               ScheduledEndDate = __.ScheduledEndDate.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              PlannedCost = __.PlannedCost.Read()
-              ActualCost = __.ActualCost.Read()
               ActualStartDate = __.ActualStartDate.Read()
               ActualEndDate = __.ActualEndDate.Read()
-              ActualResourceHrs = __.ActualResourceHrs.Read() }
+              ActualResourceHrs = __.ActualResourceHrs.Read()
+              PlannedCost = __.PlannedCost.Read()
+              ActualCost = __.ActualCost.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.WorkOrderID.IsNull() then None else Some(__.Read())
@@ -1640,8 +1640,6 @@ module Production =
     type vProductModelCatalogDescription =
         { ProductModelID: int
           Name: string
-          rowguid: System.Guid
-          ModifiedDate: System.DateTime
           Summary: Option<string>
           Manufacturer: Option<string>
           Copyright: Option<string>
@@ -1662,13 +1660,13 @@ module Production =
           Color: Option<string>
           ProductLine: Option<string>
           Style: Option<string>
-          RiderExperience: Option<string> }
+          RiderExperience: Option<string>
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
 
     type vProductModelCatalogDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Summary = OptionalColumn(reader, getOrdinal, reader.GetString, "Summary")
         member __.Manufacturer = OptionalColumn(reader, getOrdinal, reader.GetString, "Manufacturer")
         member __.Copyright = OptionalColumn(reader, getOrdinal, reader.GetString, "Copyright")
@@ -1690,11 +1688,11 @@ module Production =
         member __.ProductLine = OptionalColumn(reader, getOrdinal, reader.GetString, "ProductLine")
         member __.Style = OptionalColumn(reader, getOrdinal, reader.GetString, "Style")
         member __.RiderExperience = OptionalColumn(reader, getOrdinal, reader.GetString, "RiderExperience")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
             { ProductModelID = __.ProductModelID.Read()
               Name = __.Name.Read()
-              rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
               Summary = __.Summary.Read()
               Manufacturer = __.Manufacturer.Read()
               Copyright = __.Copyright.Read()
@@ -1715,7 +1713,9 @@ module Production =
               Color = __.Color.Read()
               ProductLine = __.ProductLine.Read()
               Style = __.Style.Read()
-              RiderExperience = __.RiderExperience.Read() }
+              RiderExperience = __.RiderExperience.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.ProductModelID.IsNull() then None else Some(__.Read())
@@ -1724,21 +1724,19 @@ module Production =
     type vProductModelInstructions =
         { ProductModelID: int
           Name: string
-          rowguid: System.Guid
-          ModifiedDate: System.DateTime
           Instructions: Option<string>
           LocationID: Option<int>
           SetupHours: Option<decimal>
           MachineHours: Option<decimal>
           LaborHours: Option<decimal>
           LotSize: Option<int>
-          Step: Option<string> }
+          Step: Option<string>
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
 
     type vProductModelInstructionsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Instructions = OptionalColumn(reader, getOrdinal, reader.GetString, "Instructions")
         member __.LocationID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "LocationID")
         member __.SetupHours = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SetupHours")
@@ -1746,18 +1744,20 @@ module Production =
         member __.LaborHours = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "LaborHours")
         member __.LotSize = OptionalColumn(reader, getOrdinal, reader.GetInt32, "LotSize")
         member __.Step = OptionalColumn(reader, getOrdinal, reader.GetString, "Step")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
             { ProductModelID = __.ProductModelID.Read()
               Name = __.Name.Read()
-              rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
               Instructions = __.Instructions.Read()
               LocationID = __.LocationID.Read()
               SetupHours = __.SetupHours.Read()
               MachineHours = __.MachineHours.Read()
               LaborHours = __.LaborHours.Read()
               LotSize = __.LotSize.Read()
-              Step = __.Step.Read() }
+              Step = __.Step.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.ProductModelID.IsNull() then None else Some(__.Read())
@@ -1765,42 +1765,42 @@ module Production =
 module Purchasing =
     [<CLIMutable>]
     type ProductVendor =
-        { UnitMeasureCode: string
-          ModifiedDate: System.DateTime
-          MinOrderQty: int
-          MaxOrderQty: int
-          ProductID: int
+        { ProductID: int
           BusinessEntityID: int
           AverageLeadTime: int
           StandardPrice: decimal
           LastReceiptCost: Option<decimal>
           LastReceiptDate: Option<System.DateTime>
-          OnOrderQty: Option<int> }
+          MinOrderQty: int
+          MaxOrderQty: int
+          OnOrderQty: Option<int>
+          UnitMeasureCode: string
+          ModifiedDate: System.DateTime }
 
     type ProductVendorReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.UnitMeasureCode = RequiredColumn(reader, getOrdinal, reader.GetString, "UnitMeasureCode")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.MinOrderQty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "MinOrderQty")
-        member __.MaxOrderQty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "MaxOrderQty")
         member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
         member __.AverageLeadTime = RequiredColumn(reader, getOrdinal, reader.GetInt32, "AverageLeadTime")
         member __.StandardPrice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "StandardPrice")
         member __.LastReceiptCost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "LastReceiptCost")
         member __.LastReceiptDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "LastReceiptDate")
+        member __.MinOrderQty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "MinOrderQty")
+        member __.MaxOrderQty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "MaxOrderQty")
         member __.OnOrderQty = OptionalColumn(reader, getOrdinal, reader.GetInt32, "OnOrderQty")
+        member __.UnitMeasureCode = RequiredColumn(reader, getOrdinal, reader.GetString, "UnitMeasureCode")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
-            { UnitMeasureCode = __.UnitMeasureCode.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              MinOrderQty = __.MinOrderQty.Read()
-              MaxOrderQty = __.MaxOrderQty.Read()
-              ProductID = __.ProductID.Read()
+            { ProductID = __.ProductID.Read()
               BusinessEntityID = __.BusinessEntityID.Read()
               AverageLeadTime = __.AverageLeadTime.Read()
               StandardPrice = __.StandardPrice.Read()
               LastReceiptCost = __.LastReceiptCost.Read()
               LastReceiptDate = __.LastReceiptDate.Read()
-              OnOrderQty = __.OnOrderQty.Read() }
+              MinOrderQty = __.MinOrderQty.Read()
+              MaxOrderQty = __.MaxOrderQty.Read()
+              OnOrderQty = __.OnOrderQty.Read()
+              UnitMeasureCode = __.UnitMeasureCode.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.ProductID.IsNull() then None else Some(__.Read())
@@ -1856,12 +1856,12 @@ module Purchasing =
           VendorID: int
           ShipMethodID: int
           OrderDate: System.DateTime
+          ShipDate: Option<System.DateTime>
           SubTotal: decimal
           TaxAmt: decimal
           Freight: decimal
           TotalDue: decimal
-          ModifiedDate: System.DateTime
-          ShipDate: Option<System.DateTime> }
+          ModifiedDate: System.DateTime }
 
     type PurchaseOrderHeaderReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.PurchaseOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "PurchaseOrderID")
@@ -1871,12 +1871,12 @@ module Purchasing =
         member __.VendorID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "VendorID")
         member __.ShipMethodID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ShipMethodID")
         member __.OrderDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "OrderDate")
+        member __.ShipDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "ShipDate")
         member __.SubTotal = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SubTotal")
         member __.TaxAmt = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TaxAmt")
         member __.Freight = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "Freight")
         member __.TotalDue = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TotalDue")
         member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.ShipDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "ShipDate")
         member __.Read() =
             { PurchaseOrderID = __.PurchaseOrderID.Read()
               RevisionNumber = __.RevisionNumber.Read()
@@ -1885,12 +1885,12 @@ module Purchasing =
               VendorID = __.VendorID.Read()
               ShipMethodID = __.ShipMethodID.Read()
               OrderDate = __.OrderDate.Read()
+              ShipDate = __.ShipDate.Read()
               SubTotal = __.SubTotal.Read()
               TaxAmt = __.TaxAmt.Read()
               Freight = __.Freight.Read()
               TotalDue = __.TotalDue.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              ShipDate = __.ShipDate.Read() }
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.PurchaseOrderID.IsNull() then None else Some(__.Read())
@@ -1930,8 +1930,8 @@ module Purchasing =
           CreditRating: byte
           PreferredVendorStatus: bool
           ActiveFlag: bool
-          ModifiedDate: System.DateTime
-          PurchasingWebServiceURL: Option<string> }
+          PurchasingWebServiceURL: Option<string>
+          ModifiedDate: System.DateTime }
 
     type VendorReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
@@ -1940,8 +1940,8 @@ module Purchasing =
         member __.CreditRating = RequiredColumn(reader, getOrdinal, reader.GetByte, "CreditRating")
         member __.PreferredVendorStatus = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "PreferredVendorStatus")
         member __.ActiveFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "ActiveFlag")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.PurchasingWebServiceURL = OptionalColumn(reader, getOrdinal, reader.GetString, "PurchasingWebServiceURL")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
             { BusinessEntityID = __.BusinessEntityID.Read()
               AccountNumber = __.AccountNumber.Read()
@@ -1949,89 +1949,89 @@ module Purchasing =
               CreditRating = __.CreditRating.Read()
               PreferredVendorStatus = __.PreferredVendorStatus.Read()
               ActiveFlag = __.ActiveFlag.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              PurchasingWebServiceURL = __.PurchasingWebServiceURL.Read() }
+              PurchasingWebServiceURL = __.PurchasingWebServiceURL.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vVendorWithAddresses =
-        { City: string
-          StateProvinceName: string
-          PostalCode: string
-          CountryRegionName: string
-          BusinessEntityID: int
+        { BusinessEntityID: int
           Name: string
           AddressType: string
           AddressLine1: string
-          AddressLine2: Option<string> }
+          AddressLine2: Option<string>
+          City: string
+          StateProvinceName: string
+          PostalCode: string
+          CountryRegionName: string }
 
     type vVendorWithAddressesReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
-        member __.StateProvinceName = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceName")
-        member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
-        member __.CountryRegionName = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionName")
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
         member __.AddressType = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressType")
         member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
         member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
+        member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
+        member __.StateProvinceName = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceName")
+        member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
+        member __.CountryRegionName = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionName")
         member __.Read() =
-            { City = __.City.Read()
-              StateProvinceName = __.StateProvinceName.Read()
-              PostalCode = __.PostalCode.Read()
-              CountryRegionName = __.CountryRegionName.Read()
-              BusinessEntityID = __.BusinessEntityID.Read()
+            { BusinessEntityID = __.BusinessEntityID.Read()
               Name = __.Name.Read()
               AddressType = __.AddressType.Read()
               AddressLine1 = __.AddressLine1.Read()
-              AddressLine2 = __.AddressLine2.Read() }
+              AddressLine2 = __.AddressLine2.Read()
+              City = __.City.Read()
+              StateProvinceName = __.StateProvinceName.Read()
+              PostalCode = __.PostalCode.Read()
+              CountryRegionName = __.CountryRegionName.Read() }
 
         member __.ReadIfNotNull() =
-            if __.City.IsNull() then None else Some(__.Read())
+            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vVendorWithContacts =
         { BusinessEntityID: int
           Name: string
           ContactType: string
-          LastName: string
+          Title: Option<string>
           FirstName: string
-          EmailPromotion: int
           MiddleName: Option<string>
+          LastName: string
           Suffix: Option<string>
           PhoneNumber: Option<string>
           PhoneNumberType: Option<string>
           EmailAddress: Option<string>
-          Title: Option<string> }
+          EmailPromotion: int }
 
     type vVendorWithContactsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
         member __.ContactType = RequiredColumn(reader, getOrdinal, reader.GetString, "ContactType")
-        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
+        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
         member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
         member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
+        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
         member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
         member __.PhoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumber")
         member __.PhoneNumberType = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumberType")
         member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
+        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
         member __.Read() =
             { BusinessEntityID = __.BusinessEntityID.Read()
               Name = __.Name.Read()
               ContactType = __.ContactType.Read()
-              LastName = __.LastName.Read()
+              Title = __.Title.Read()
               FirstName = __.FirstName.Read()
-              EmailPromotion = __.EmailPromotion.Read()
               MiddleName = __.MiddleName.Read()
+              LastName = __.LastName.Read()
               Suffix = __.Suffix.Read()
               PhoneNumber = __.PhoneNumber.Read()
               PhoneNumberType = __.PhoneNumberType.Read()
               EmailAddress = __.EmailAddress.Read()
-              Title = __.Title.Read() }
+              EmailPromotion = __.EmailPromotion.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -2133,29 +2133,29 @@ module Sales =
     [<CLIMutable>]
     type Customer =
         { CustomerID: int
-          AccountNumber: string
-          rowguid: System.Guid
-          ModifiedDate: System.DateTime
           PersonID: Option<int>
           StoreID: Option<int>
-          TerritoryID: Option<int> }
+          TerritoryID: Option<int>
+          AccountNumber: string
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
 
     type CustomerReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.CustomerID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "CustomerID")
-        member __.AccountNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "AccountNumber")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.PersonID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "PersonID")
         member __.StoreID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "StoreID")
         member __.TerritoryID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
+        member __.AccountNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "AccountNumber")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
             { CustomerID = __.CustomerID.Read()
-              AccountNumber = __.AccountNumber.Read()
-              rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
               PersonID = __.PersonID.Read()
               StoreID = __.StoreID.Read()
-              TerritoryID = __.TerritoryID.Read() }
+              TerritoryID = __.TerritoryID.Read()
+              AccountNumber = __.AccountNumber.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.CustomerID.IsNull() then None else Some(__.Read())
@@ -2182,6 +2182,7 @@ module Sales =
     type SalesOrderDetail =
         { SalesOrderID: int
           SalesOrderDetailID: int
+          CarrierTrackingNumber: Option<string>
           OrderQty: int16
           ProductID: int
           SpecialOfferID: int
@@ -2189,12 +2190,12 @@ module Sales =
           UnitPriceDiscount: decimal
           LineTotal: decimal
           rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          CarrierTrackingNumber: Option<string> }
+          ModifiedDate: System.DateTime }
 
     type SalesOrderDetailReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.SalesOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderID")
         member __.SalesOrderDetailID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderDetailID")
+        member __.CarrierTrackingNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "CarrierTrackingNumber")
         member __.OrderQty = RequiredColumn(reader, getOrdinal, reader.GetInt16, "OrderQty")
         member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
         member __.SpecialOfferID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SpecialOfferID")
@@ -2203,10 +2204,10 @@ module Sales =
         member __.LineTotal = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "LineTotal")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.CarrierTrackingNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "CarrierTrackingNumber")
         member __.Read() =
             { SalesOrderID = __.SalesOrderID.Read()
               SalesOrderDetailID = __.SalesOrderDetailID.Read()
+              CarrierTrackingNumber = __.CarrierTrackingNumber.Read()
               OrderQty = __.OrderQty.Read()
               ProductID = __.ProductID.Read()
               SpecialOfferID = __.SpecialOfferID.Read()
@@ -2214,95 +2215,94 @@ module Sales =
               UnitPriceDiscount = __.UnitPriceDiscount.Read()
               LineTotal = __.LineTotal.Read()
               rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              CarrierTrackingNumber = __.CarrierTrackingNumber.Read() }
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.SalesOrderID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type SalesOrderHeader =
-        { Status: byte
+        { SalesOrderID: int
+          RevisionNumber: byte
+          OrderDate: System.DateTime
+          DueDate: System.DateTime
+          ShipDate: Option<System.DateTime>
+          Status: byte
           OnlineOrderFlag: bool
           SalesOrderNumber: string
+          PurchaseOrderNumber: Option<string>
+          AccountNumber: Option<string>
+          CustomerID: int
+          SalesPersonID: Option<int>
+          TerritoryID: Option<int>
           BillToAddressID: int
           ShipToAddressID: int
           ShipMethodID: int
+          CreditCardID: Option<int>
+          CreditCardApprovalCode: Option<string>
+          CurrencyRateID: Option<int>
           SubTotal: decimal
           TaxAmt: decimal
           Freight: decimal
           TotalDue: decimal
-          SalesOrderID: int
-          RevisionNumber: byte
-          OrderDate: System.DateTime
-          DueDate: System.DateTime
-          CustomerID: int
-          rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          SalesPersonID: Option<int>
-          TerritoryID: Option<int>
-          ShipDate: Option<System.DateTime>
           Comment: Option<string>
-          CreditCardID: Option<int>
-          CreditCardApprovalCode: Option<string>
-          CurrencyRateID: Option<int>
-          PurchaseOrderNumber: Option<string>
-          AccountNumber: Option<string> }
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
 
     type SalesOrderHeaderReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.Status = RequiredColumn(reader, getOrdinal, reader.GetByte, "Status")
-        member __.OnlineOrderFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "OnlineOrderFlag")
-        member __.SalesOrderNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "SalesOrderNumber")
-        member __.BillToAddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BillToAddressID")
-        member __.ShipToAddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ShipToAddressID")
-        member __.ShipMethodID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ShipMethodID")
-        member __.SubTotal = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SubTotal")
-        member __.TaxAmt = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TaxAmt")
-        member __.Freight = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "Freight")
-        member __.TotalDue = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TotalDue")
         member __.SalesOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderID")
         member __.RevisionNumber = RequiredColumn(reader, getOrdinal, reader.GetByte, "RevisionNumber")
         member __.OrderDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "OrderDate")
         member __.DueDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "DueDate")
+        member __.ShipDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "ShipDate")
+        member __.Status = RequiredColumn(reader, getOrdinal, reader.GetByte, "Status")
+        member __.OnlineOrderFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "OnlineOrderFlag")
+        member __.SalesOrderNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "SalesOrderNumber")
+        member __.PurchaseOrderNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PurchaseOrderNumber")
+        member __.AccountNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "AccountNumber")
         member __.CustomerID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "CustomerID")
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.SalesPersonID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "SalesPersonID")
         member __.TerritoryID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
-        member __.ShipDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "ShipDate")
-        member __.Comment = OptionalColumn(reader, getOrdinal, reader.GetString, "Comment")
+        member __.BillToAddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BillToAddressID")
+        member __.ShipToAddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ShipToAddressID")
+        member __.ShipMethodID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ShipMethodID")
         member __.CreditCardID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "CreditCardID")
         member __.CreditCardApprovalCode = OptionalColumn(reader, getOrdinal, reader.GetString, "CreditCardApprovalCode")
         member __.CurrencyRateID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "CurrencyRateID")
-        member __.PurchaseOrderNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PurchaseOrderNumber")
-        member __.AccountNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "AccountNumber")
+        member __.SubTotal = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SubTotal")
+        member __.TaxAmt = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TaxAmt")
+        member __.Freight = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "Freight")
+        member __.TotalDue = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TotalDue")
+        member __.Comment = OptionalColumn(reader, getOrdinal, reader.GetString, "Comment")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
-            { Status = __.Status.Read()
+            { SalesOrderID = __.SalesOrderID.Read()
+              RevisionNumber = __.RevisionNumber.Read()
+              OrderDate = __.OrderDate.Read()
+              DueDate = __.DueDate.Read()
+              ShipDate = __.ShipDate.Read()
+              Status = __.Status.Read()
               OnlineOrderFlag = __.OnlineOrderFlag.Read()
               SalesOrderNumber = __.SalesOrderNumber.Read()
+              PurchaseOrderNumber = __.PurchaseOrderNumber.Read()
+              AccountNumber = __.AccountNumber.Read()
+              CustomerID = __.CustomerID.Read()
+              SalesPersonID = __.SalesPersonID.Read()
+              TerritoryID = __.TerritoryID.Read()
               BillToAddressID = __.BillToAddressID.Read()
               ShipToAddressID = __.ShipToAddressID.Read()
               ShipMethodID = __.ShipMethodID.Read()
+              CreditCardID = __.CreditCardID.Read()
+              CreditCardApprovalCode = __.CreditCardApprovalCode.Read()
+              CurrencyRateID = __.CurrencyRateID.Read()
               SubTotal = __.SubTotal.Read()
               TaxAmt = __.TaxAmt.Read()
               Freight = __.Freight.Read()
               TotalDue = __.TotalDue.Read()
-              SalesOrderID = __.SalesOrderID.Read()
-              RevisionNumber = __.RevisionNumber.Read()
-              OrderDate = __.OrderDate.Read()
-              DueDate = __.DueDate.Read()
-              CustomerID = __.CustomerID.Read()
-              rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              SalesPersonID = __.SalesPersonID.Read()
-              TerritoryID = __.TerritoryID.Read()
-              ShipDate = __.ShipDate.Read()
               Comment = __.Comment.Read()
-              CreditCardID = __.CreditCardID.Read()
-              CreditCardApprovalCode = __.CreditCardApprovalCode.Read()
-              CurrencyRateID = __.CurrencyRateID.Read()
-              PurchaseOrderNumber = __.PurchaseOrderNumber.Read()
-              AccountNumber = __.AccountNumber.Read() }
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.SalesOrderID.IsNull() then None else Some(__.Read())
@@ -2328,35 +2328,35 @@ module Sales =
     [<CLIMutable>]
     type SalesPerson =
         { BusinessEntityID: int
+          TerritoryID: Option<int>
+          SalesQuota: Option<decimal>
           Bonus: decimal
           CommissionPct: decimal
           SalesYTD: decimal
           SalesLastYear: decimal
           rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          TerritoryID: Option<int>
-          SalesQuota: Option<decimal> }
+          ModifiedDate: System.DateTime }
 
     type SalesPersonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
+        member __.TerritoryID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
+        member __.SalesQuota = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SalesQuota")
         member __.Bonus = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "Bonus")
         member __.CommissionPct = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "CommissionPct")
         member __.SalesYTD = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SalesYTD")
         member __.SalesLastYear = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SalesLastYear")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.TerritoryID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
-        member __.SalesQuota = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SalesQuota")
         member __.Read() =
             { BusinessEntityID = __.BusinessEntityID.Read()
+              TerritoryID = __.TerritoryID.Read()
+              SalesQuota = __.SalesQuota.Read()
               Bonus = __.Bonus.Read()
               CommissionPct = __.CommissionPct.Read()
               SalesYTD = __.SalesYTD.Read()
               SalesLastYear = __.SalesLastYear.Read()
               rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              TerritoryID = __.TerritoryID.Read()
-              SalesQuota = __.SalesQuota.Read() }
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -2480,24 +2480,24 @@ module Sales =
         { BusinessEntityID: int
           TerritoryID: int
           StartDate: System.DateTime
+          EndDate: Option<System.DateTime>
           rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          EndDate: Option<System.DateTime> }
+          ModifiedDate: System.DateTime }
 
     type SalesTerritoryHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
         member __.TerritoryID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
         member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
+        member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
         member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
-        member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
         member __.Read() =
             { BusinessEntityID = __.BusinessEntityID.Read()
               TerritoryID = __.TerritoryID.Read()
               StartDate = __.StartDate.Read()
+              EndDate = __.EndDate.Read()
               rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              EndDate = __.EndDate.Read() }
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -2531,9 +2531,7 @@ module Sales =
 
     [<CLIMutable>]
     type SpecialOffer =
-        { rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          SpecialOfferID: int
+        { SpecialOfferID: int
           Description: string
           DiscountPct: decimal
           Type: string
@@ -2541,11 +2539,11 @@ module Sales =
           StartDate: System.DateTime
           EndDate: System.DateTime
           MinQty: int
-          MaxQty: Option<int> }
+          MaxQty: Option<int>
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
 
     type SpecialOfferReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.SpecialOfferID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SpecialOfferID")
         member __.Description = RequiredColumn(reader, getOrdinal, reader.GetString, "Description")
         member __.DiscountPct = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "DiscountPct")
@@ -2555,10 +2553,10 @@ module Sales =
         member __.EndDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
         member __.MinQty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "MinQty")
         member __.MaxQty = OptionalColumn(reader, getOrdinal, reader.GetInt32, "MaxQty")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
-            { rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              SpecialOfferID = __.SpecialOfferID.Read()
+            { SpecialOfferID = __.SpecialOfferID.Read()
               Description = __.Description.Read()
               DiscountPct = __.DiscountPct.Read()
               Type = __.Type.Read()
@@ -2566,7 +2564,9 @@ module Sales =
               StartDate = __.StartDate.Read()
               EndDate = __.EndDate.Read()
               MinQty = __.MinQty.Read()
-              MaxQty = __.MaxQty.Read() }
+              MaxQty = __.MaxQty.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.SpecialOfferID.IsNull() then None else Some(__.Read())
@@ -2594,87 +2594,87 @@ module Sales =
 
     [<CLIMutable>]
     type Store =
-        { rowguid: System.Guid
-          ModifiedDate: System.DateTime
-          BusinessEntityID: int
+        { BusinessEntityID: int
           Name: string
-          SalesPersonID: Option<int> }
+          SalesPersonID: Option<int>
+          rowguid: System.Guid
+          ModifiedDate: System.DateTime }
 
     type StoreReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
-        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
         member __.SalesPersonID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "SalesPersonID")
+        member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
         member __.Read() =
-            { rowguid = __.rowguid.Read()
-              ModifiedDate = __.ModifiedDate.Read()
-              BusinessEntityID = __.BusinessEntityID.Read()
+            { BusinessEntityID = __.BusinessEntityID.Read()
               Name = __.Name.Read()
-              SalesPersonID = __.SalesPersonID.Read() }
+              SalesPersonID = __.SalesPersonID.Read()
+              rowguid = __.rowguid.Read()
+              ModifiedDate = __.ModifiedDate.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vIndividualCustomer =
-        { FirstName: string
-          City: string
-          StateProvinceName: string
-          PostalCode: string
-          CountryRegionName: string
-          BusinessEntityID: int
+        { BusinessEntityID: int
+          Title: Option<string>
+          FirstName: string
+          MiddleName: Option<string>
           LastName: string
-          EmailPromotion: int
-          AddressType: string
-          AddressLine1: string
-          AddressLine2: Option<string>
           Suffix: Option<string>
           PhoneNumber: Option<string>
           PhoneNumberType: Option<string>
           EmailAddress: Option<string>
-          Title: Option<string>
-          MiddleName: Option<string> }
+          EmailPromotion: int
+          AddressType: string
+          AddressLine1: string
+          AddressLine2: Option<string>
+          City: string
+          StateProvinceName: string
+          PostalCode: string
+          CountryRegionName: string }
 
     type vIndividualCustomerReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-        member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
-        member __.StateProvinceName = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceName")
-        member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
-        member __.CountryRegionName = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionName")
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
+        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
+        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
+        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
         member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
-        member __.AddressType = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressType")
-        member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
-        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
         member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
         member __.PhoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumber")
         member __.PhoneNumberType = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumberType")
         member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
+        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
+        member __.AddressType = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressType")
+        member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
+        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
+        member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
+        member __.StateProvinceName = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceName")
+        member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
+        member __.CountryRegionName = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionName")
         member __.Read() =
-            { FirstName = __.FirstName.Read()
-              City = __.City.Read()
-              StateProvinceName = __.StateProvinceName.Read()
-              PostalCode = __.PostalCode.Read()
-              CountryRegionName = __.CountryRegionName.Read()
-              BusinessEntityID = __.BusinessEntityID.Read()
+            { BusinessEntityID = __.BusinessEntityID.Read()
+              Title = __.Title.Read()
+              FirstName = __.FirstName.Read()
+              MiddleName = __.MiddleName.Read()
               LastName = __.LastName.Read()
-              EmailPromotion = __.EmailPromotion.Read()
-              AddressType = __.AddressType.Read()
-              AddressLine1 = __.AddressLine1.Read()
-              AddressLine2 = __.AddressLine2.Read()
               Suffix = __.Suffix.Read()
               PhoneNumber = __.PhoneNumber.Read()
               PhoneNumberType = __.PhoneNumberType.Read()
               EmailAddress = __.EmailAddress.Read()
-              Title = __.Title.Read()
-              MiddleName = __.MiddleName.Read() }
+              EmailPromotion = __.EmailPromotion.Read()
+              AddressType = __.AddressType.Read()
+              AddressLine1 = __.AddressLine1.Read()
+              AddressLine2 = __.AddressLine2.Read()
+              City = __.City.Read()
+              StateProvinceName = __.StateProvinceName.Read()
+              PostalCode = __.PostalCode.Read()
+              CountryRegionName = __.CountryRegionName.Read() }
 
         member __.ReadIfNotNull() =
-            if __.FirstName.IsNull() then None else Some(__.Read())
+            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vPersonDemographics =
@@ -2726,105 +2726,105 @@ module Sales =
 
     [<CLIMutable>]
     type vSalesPerson =
-        { EmailPromotion: int
-          AddressLine1: string
-          SalesYTD: decimal
-          SalesLastYear: decimal
+        { BusinessEntityID: int
+          Title: Option<string>
+          FirstName: string
+          MiddleName: Option<string>
+          LastName: string
+          Suffix: Option<string>
           JobTitle: string
+          PhoneNumber: Option<string>
+          PhoneNumberType: Option<string>
+          EmailAddress: Option<string>
+          EmailPromotion: int
+          AddressLine1: string
+          AddressLine2: Option<string>
           City: string
           StateProvinceName: string
           PostalCode: string
           CountryRegionName: string
-          BusinessEntityID: int
-          FirstName: string
-          LastName: string
-          Suffix: Option<string>
-          MiddleName: Option<string>
-          Title: Option<string>
           TerritoryName: Option<string>
           TerritoryGroup: Option<string>
           SalesQuota: Option<decimal>
-          PhoneNumber: Option<string>
-          PhoneNumberType: Option<string>
-          EmailAddress: Option<string>
-          AddressLine2: Option<string> }
+          SalesYTD: decimal
+          SalesLastYear: decimal }
 
     type vSalesPersonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
+        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
+        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
+        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
+        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
+        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
+        member __.JobTitle = RequiredColumn(reader, getOrdinal, reader.GetString, "JobTitle")
+        member __.PhoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumber")
+        member __.PhoneNumberType = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumberType")
+        member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
         member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
         member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
-        member __.SalesYTD = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SalesYTD")
-        member __.SalesLastYear = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SalesLastYear")
-        member __.JobTitle = RequiredColumn(reader, getOrdinal, reader.GetString, "JobTitle")
+        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
         member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
         member __.StateProvinceName = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceName")
         member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
         member __.CountryRegionName = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionName")
-        member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-        member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-        member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
         member __.TerritoryName = OptionalColumn(reader, getOrdinal, reader.GetString, "TerritoryName")
         member __.TerritoryGroup = OptionalColumn(reader, getOrdinal, reader.GetString, "TerritoryGroup")
         member __.SalesQuota = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SalesQuota")
-        member __.PhoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumber")
-        member __.PhoneNumberType = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumberType")
-        member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
-        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
+        member __.SalesYTD = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SalesYTD")
+        member __.SalesLastYear = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SalesLastYear")
         member __.Read() =
-            { EmailPromotion = __.EmailPromotion.Read()
-              AddressLine1 = __.AddressLine1.Read()
-              SalesYTD = __.SalesYTD.Read()
-              SalesLastYear = __.SalesLastYear.Read()
+            { BusinessEntityID = __.BusinessEntityID.Read()
+              Title = __.Title.Read()
+              FirstName = __.FirstName.Read()
+              MiddleName = __.MiddleName.Read()
+              LastName = __.LastName.Read()
+              Suffix = __.Suffix.Read()
               JobTitle = __.JobTitle.Read()
+              PhoneNumber = __.PhoneNumber.Read()
+              PhoneNumberType = __.PhoneNumberType.Read()
+              EmailAddress = __.EmailAddress.Read()
+              EmailPromotion = __.EmailPromotion.Read()
+              AddressLine1 = __.AddressLine1.Read()
+              AddressLine2 = __.AddressLine2.Read()
               City = __.City.Read()
               StateProvinceName = __.StateProvinceName.Read()
               PostalCode = __.PostalCode.Read()
               CountryRegionName = __.CountryRegionName.Read()
-              BusinessEntityID = __.BusinessEntityID.Read()
-              FirstName = __.FirstName.Read()
-              LastName = __.LastName.Read()
-              Suffix = __.Suffix.Read()
-              MiddleName = __.MiddleName.Read()
-              Title = __.Title.Read()
               TerritoryName = __.TerritoryName.Read()
               TerritoryGroup = __.TerritoryGroup.Read()
               SalesQuota = __.SalesQuota.Read()
-              PhoneNumber = __.PhoneNumber.Read()
-              PhoneNumberType = __.PhoneNumberType.Read()
-              EmailAddress = __.EmailAddress.Read()
-              AddressLine2 = __.AddressLine2.Read() }
+              SalesYTD = __.SalesYTD.Read()
+              SalesLastYear = __.SalesLastYear.Read() }
 
         member __.ReadIfNotNull() =
-            if __.EmailPromotion.IsNull() then None else Some(__.Read())
+            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vSalesPersonSalesByFiscalYears =
-        { JobTitle: string
+        { SalesPersonID: Option<int>
+          FullName: Option<string>
+          JobTitle: string
           SalesTerritory: string
           ``2002``: Option<decimal>
           ``2003``: Option<decimal>
-          ``2004``: Option<decimal>
-          SalesPersonID: Option<int>
-          FullName: Option<string> }
+          ``2004``: Option<decimal> }
 
     type vSalesPersonSalesByFiscalYearsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.SalesPersonID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "SalesPersonID")
+        member __.FullName = OptionalColumn(reader, getOrdinal, reader.GetString, "FullName")
         member __.JobTitle = RequiredColumn(reader, getOrdinal, reader.GetString, "JobTitle")
         member __.SalesTerritory = RequiredColumn(reader, getOrdinal, reader.GetString, "SalesTerritory")
         member __.``2002`` = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "2002")
         member __.``2003`` = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "2003")
         member __.``2004`` = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "2004")
-        member __.SalesPersonID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "SalesPersonID")
-        member __.FullName = OptionalColumn(reader, getOrdinal, reader.GetString, "FullName")
         member __.Read() =
-            { JobTitle = __.JobTitle.Read()
+            { SalesPersonID = __.SalesPersonID.Read()
+              FullName = __.FullName.Read()
+              JobTitle = __.JobTitle.Read()
               SalesTerritory = __.SalesTerritory.Read()
               ``2002`` = __.``2002``.Read()
               ``2003`` = __.``2003``.Read()
-              ``2004`` = __.``2004``.Read()
-              SalesPersonID = __.SalesPersonID.Read()
-              FullName = __.FullName.Read() }
+              ``2004`` = __.``2004``.Read() }
 
         member __.ReadIfNotNull() =
             if __.JobTitle.IsNull() then None else Some(__.Read())
@@ -2835,80 +2835,80 @@ module Sales =
           Name: string
           AddressType: string
           AddressLine1: string
+          AddressLine2: Option<string>
           City: string
           StateProvinceName: string
           PostalCode: string
-          CountryRegionName: string
-          AddressLine2: Option<string> }
+          CountryRegionName: string }
 
     type vStoreWithAddressesReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
         member __.AddressType = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressType")
         member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
+        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
         member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
         member __.StateProvinceName = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceName")
         member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
         member __.CountryRegionName = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionName")
-        member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
         member __.Read() =
             { BusinessEntityID = __.BusinessEntityID.Read()
               Name = __.Name.Read()
               AddressType = __.AddressType.Read()
               AddressLine1 = __.AddressLine1.Read()
+              AddressLine2 = __.AddressLine2.Read()
               City = __.City.Read()
               StateProvinceName = __.StateProvinceName.Read()
               PostalCode = __.PostalCode.Read()
-              CountryRegionName = __.CountryRegionName.Read()
-              AddressLine2 = __.AddressLine2.Read() }
+              CountryRegionName = __.CountryRegionName.Read() }
 
         member __.ReadIfNotNull() =
             if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vStoreWithContacts =
-        { EmailPromotion: int
-          FirstName: string
-          BusinessEntityID: int
+        { BusinessEntityID: int
           Name: string
           ContactType: string
+          Title: Option<string>
+          FirstName: string
+          MiddleName: Option<string>
           LastName: string
           Suffix: Option<string>
           PhoneNumber: Option<string>
           PhoneNumberType: Option<string>
           EmailAddress: Option<string>
-          Title: Option<string>
-          MiddleName: Option<string> }
+          EmailPromotion: int }
 
     type vStoreWithContactsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
-        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
         member __.ContactType = RequiredColumn(reader, getOrdinal, reader.GetString, "ContactType")
+        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
+        member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
+        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
         member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
         member __.Suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "Suffix")
         member __.PhoneNumber = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumber")
         member __.PhoneNumberType = OptionalColumn(reader, getOrdinal, reader.GetString, "PhoneNumberType")
         member __.EmailAddress = OptionalColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
-        member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
-        member __.MiddleName = OptionalColumn(reader, getOrdinal, reader.GetString, "MiddleName")
+        member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
         member __.Read() =
-            { EmailPromotion = __.EmailPromotion.Read()
-              FirstName = __.FirstName.Read()
-              BusinessEntityID = __.BusinessEntityID.Read()
+            { BusinessEntityID = __.BusinessEntityID.Read()
               Name = __.Name.Read()
               ContactType = __.ContactType.Read()
+              Title = __.Title.Read()
+              FirstName = __.FirstName.Read()
+              MiddleName = __.MiddleName.Read()
               LastName = __.LastName.Read()
               Suffix = __.Suffix.Read()
               PhoneNumber = __.PhoneNumber.Read()
               PhoneNumberType = __.PhoneNumberType.Read()
               EmailAddress = __.EmailAddress.Read()
-              Title = __.Title.Read()
-              MiddleName = __.MiddleName.Read() }
+              EmailPromotion = __.EmailPromotion.Read() }
 
         member __.ReadIfNotNull() =
-            if __.EmailPromotion.IsNull() then None else Some(__.Read())
+            if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type vStoreWithDemographics =
@@ -2983,26 +2983,26 @@ module dbo =
           PostTime: System.DateTime
           DatabaseUser: string
           Event: string
-          TSQL: string
           Schema: Option<string>
-          Object: Option<string> }
+          Object: Option<string>
+          TSQL: string }
 
     type DatabaseLogReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.DatabaseLogID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "DatabaseLogID")
         member __.PostTime = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "PostTime")
         member __.DatabaseUser = RequiredColumn(reader, getOrdinal, reader.GetString, "DatabaseUser")
         member __.Event = RequiredColumn(reader, getOrdinal, reader.GetString, "Event")
-        member __.TSQL = RequiredColumn(reader, getOrdinal, reader.GetString, "TSQL")
         member __.Schema = OptionalColumn(reader, getOrdinal, reader.GetString, "Schema")
         member __.Object = OptionalColumn(reader, getOrdinal, reader.GetString, "Object")
+        member __.TSQL = RequiredColumn(reader, getOrdinal, reader.GetString, "TSQL")
         member __.Read() =
             { DatabaseLogID = __.DatabaseLogID.Read()
               PostTime = __.PostTime.Read()
               DatabaseUser = __.DatabaseUser.Read()
               Event = __.Event.Read()
-              TSQL = __.TSQL.Read()
               Schema = __.Schema.Read()
-              Object = __.Object.Read() }
+              Object = __.Object.Read()
+              TSQL = __.TSQL.Read() }
 
         member __.ReadIfNotNull() =
             if __.DatabaseLogID.IsNull() then None else Some(__.Read())
@@ -3013,32 +3013,32 @@ module dbo =
           ErrorTime: System.DateTime
           UserName: string
           ErrorNumber: int
-          ErrorMessage: string
           ErrorSeverity: Option<int>
           ErrorState: Option<int>
           ErrorProcedure: Option<string>
-          ErrorLine: Option<int> }
+          ErrorLine: Option<int>
+          ErrorMessage: string }
 
     type ErrorLogReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.ErrorLogID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ErrorLogID")
         member __.ErrorTime = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ErrorTime")
         member __.UserName = RequiredColumn(reader, getOrdinal, reader.GetString, "UserName")
         member __.ErrorNumber = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ErrorNumber")
-        member __.ErrorMessage = RequiredColumn(reader, getOrdinal, reader.GetString, "ErrorMessage")
         member __.ErrorSeverity = OptionalColumn(reader, getOrdinal, reader.GetInt32, "ErrorSeverity")
         member __.ErrorState = OptionalColumn(reader, getOrdinal, reader.GetInt32, "ErrorState")
         member __.ErrorProcedure = OptionalColumn(reader, getOrdinal, reader.GetString, "ErrorProcedure")
         member __.ErrorLine = OptionalColumn(reader, getOrdinal, reader.GetInt32, "ErrorLine")
+        member __.ErrorMessage = RequiredColumn(reader, getOrdinal, reader.GetString, "ErrorMessage")
         member __.Read() =
             { ErrorLogID = __.ErrorLogID.Read()
               ErrorTime = __.ErrorTime.Read()
               UserName = __.UserName.Read()
               ErrorNumber = __.ErrorNumber.Read()
-              ErrorMessage = __.ErrorMessage.Read()
               ErrorSeverity = __.ErrorSeverity.Read()
               ErrorState = __.ErrorState.Read()
               ErrorProcedure = __.ErrorProcedure.Read()
-              ErrorLine = __.ErrorLine.Read() }
+              ErrorLine = __.ErrorLine.Read()
+              ErrorMessage = __.ErrorMessage.Read() }
 
         member __.ReadIfNotNull() =
             if __.ErrorLogID.IsNull() then None else Some(__.Read())
