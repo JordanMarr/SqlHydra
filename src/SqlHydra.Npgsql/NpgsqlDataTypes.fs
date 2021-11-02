@@ -9,36 +9,36 @@ let private r : Npgsql.NpgsqlDataReader = null
 /// A list of supported column type mappings
 let supportedTypeMappings =
     [ 
-        "boolean",                      "bool",                 DbType.Boolean,     None,                  nameof r.GetBoolean
-        "smallint",                     "int16",                DbType.Int16,       None,                  nameof r.GetInt16
-        "integer",                      "int",                  DbType.Int32,       None,                  nameof r.GetInt32
-        "bigint",                       "int64",                DbType.Int64,       None,                  nameof r.GetInt64
-        "real",                         "double",               DbType.Double,      None,                  nameof r.GetDouble
-        "double precision",             "double",               DbType.Double,      None,                  nameof r.GetDouble
-        "numeric",                      "decimal",              DbType.Decimal,     None,                  nameof r.GetDecimal
-        "money",                        "decimal",              DbType.Decimal,     None,                  nameof r.GetDecimal
-        "text",                         "string",               DbType.String,      None,                  nameof r.GetString
-        "character varying",            "string",               DbType.String,      None,                  nameof r.GetString
-        "character",                    "string",               DbType.String,      None,                  nameof r.GetString
-        "citext",                       "string",               DbType.String,      None,                  nameof r.GetString
-        "json",                         "string",               DbType.String,      Some (nameof NpgsqlDbType.Json),           nameof r.GetString
-        "jsonb",                        "string",               DbType.String,      Some (nameof NpgsqlDbType.Jsonb),          nameof r.GetString
-        "xml",                          "string",               DbType.String,      None,                  nameof r.GetString
+        "boolean",                      "bool",                 DbType.Boolean,     None,                               nameof r.GetBoolean
+        "smallint",                     "int16",                DbType.Int16,       None,                               nameof r.GetInt16
+        "integer",                      "int",                  DbType.Int32,       None,                               nameof r.GetInt32
+        "bigint",                       "int64",                DbType.Int64,       None,                               nameof r.GetInt64
+        "real",                         "double",               DbType.Double,      None,                               nameof r.GetDouble
+        "double precision",             "double",               DbType.Double,      None,                               nameof r.GetDouble
+        "numeric",                      "decimal",              DbType.Decimal,     None,                               nameof r.GetDecimal
+        "money",                        "decimal",              DbType.Decimal,     None,                               nameof r.GetDecimal
+        "text",                         "string",               DbType.String,      None,                               nameof r.GetString
+        "character varying",            "string",               DbType.String,      None,                               nameof r.GetString
+        "character",                    "string",               DbType.String,      None,                               nameof r.GetString
+        "citext",                       "string",               DbType.String,      None,                               nameof r.GetString
+        "json",                         "string",               DbType.String,      Some (nameof NpgsqlDbType.Json),    nameof r.GetString
+        "jsonb",                        "string",               DbType.String,      Some (nameof NpgsqlDbType.Jsonb),   nameof r.GetString
+        "xml",                          "string",               DbType.String,      None,                               nameof r.GetString
         // skipped unsupported types
-        "bit(1)",                       "bool",                 DbType.Boolean,     None,                  nameof r.GetBoolean
+        "bit(1)",                       "bool",                 DbType.Boolean,     None,                               nameof r.GetBoolean
         // skipped unsupported types
-        "uuid",                         "System.Guid",          DbType.Guid,        None,                  nameof r.GetGuid
+        "uuid",                         "System.Guid",          DbType.Guid,        None,                               nameof r.GetGuid
         // skipped unsupported types
-        "date",                         "System.DateTime",      DbType.DateTime,    None,                  nameof r.GetDateTime 
-        "interval",                     "System.TimeSpan",      DbType.Time,        None,                  nameof r.GetTimeSpan
-        "timestamp without time zone",  "System.DateTime",      DbType.DateTime,    None,                  nameof r.GetDateTime 
-        "timestamp with time zone",     "System.DateTime",      DbType.DateTime,    None,                  nameof r.GetDateTime 
-        "time without time zone",       "System.TimeSpan",      DbType.Time,        None,                  nameof r.GetTimeSpan 
-        "time with time zone",          "System.DateTime",      DbType.DateTime,    None,                  nameof r.GetDateTime 
-        "bytea",                        "byte[]",               DbType.Binary,      None,                  nameof r.GetValue 
+        "date",                         "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
+        "interval",                     "System.TimeSpan",      DbType.Time,        None,                               nameof r.GetTimeSpan
+        "timestamp without time zone",  "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
+        "timestamp with time zone",     "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
+        "time without time zone",       "System.TimeSpan",      DbType.Time,        None,                               nameof r.GetTimeSpan 
+        "time with time zone",          "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
+        "bytea",                        "byte[]",               DbType.Binary,      None,                               nameof r.GetValue 
         // skipped unsupported types
-        "name",                         "string",               DbType.String,      None,                  nameof r.GetString
-        "(internal) char",              "char",                 DbType.String,      None,                  nameof r.GetChar
+        "name",                         "string",               DbType.String,      None,                               nameof r.GetString
+        "(internal) char",              "char",                 DbType.String,      None,                               nameof r.GetChar
         // skipped unsupported types
     ]
 
