@@ -80,10 +80,10 @@ let tests =
         }
         
         test "Code Should Have ProviderDbTypeAttribute With Json" {
-            cfg |> inCode "[<SqlHydra.ProviderDbTypeAttribute(\"Json\")>]"
+            cfg |> inCode "[<SqlHydra.ProviderDbType(\"Json\")>]"
         }
         
         test "Code Should Have ProviderDbTypeAttribute With Jsonb" {
-            cfg |> inCode "[<SqlHydra.ProviderDbTypeAttribute(\"Jsonb\")>]"
+            cfg |> inCode "[<SqlHydra.ProviderDbType(\"Jsonb\")>]"
         }
     ]
