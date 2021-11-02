@@ -15,6 +15,11 @@
             Added support for multiple inserts via the `entities` operation.
         </PackageReleaseNotes>
     </PropertyGroup>
+    <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+        <ItemGroup>
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')->WithMetadataValue('PrivateAssets', 'all'))" />
+        </ItemGroup>
+    </Target>
 
     <ItemGroup>
         <None Include="..\..\LICENSE">
