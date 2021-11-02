@@ -50,3 +50,4 @@ Desktop.ini
 *.dbmdl
 *.jfm
 /src/Tests/TestData/AdventureWorksLT_Temp.db
+*.received.*
