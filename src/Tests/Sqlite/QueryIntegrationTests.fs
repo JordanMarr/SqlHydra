@@ -402,7 +402,7 @@ let tests =
                 |> List.map (fun i -> 
                     { stubbedErrorLog with ErrorNumber = stubbedErrorLog.ErrorNumber + i }
                 )
-                |> AtLeastOne.tryInit
+                |> AtLeastOne.tryCreate
                 
             match errorLogs with
             | Some errorLogs ->
@@ -447,7 +447,7 @@ let tests =
             let errorLogs = 
                 [ 0L .. 2L ] 
                 |> List.map (fun _ -> stubbedErrorLog)
-                |> AtLeastOne.tryInit
+                |> AtLeastOne.tryCreate
             
             match errorLogs with
             | Some errorLogs -> 

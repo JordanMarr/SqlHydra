@@ -29,7 +29,7 @@ module FQ =
 module AtLeastOne =
     type AtLeastOne<'T> = private { Items : 'T seq }
 
-    let tryInit<'T> (items: 'T seq) = 
+    let tryCreate<'T> (items: 'T seq) = 
         if items |> Seq.length > 0
         then Some { Items = items }
         else None

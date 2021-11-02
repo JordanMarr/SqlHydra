@@ -383,7 +383,7 @@ let tests =
                         sales.currency.modifieddate = System.DateTime.Now
                     }
                 )
-                |> AtLeastOne.tryInit
+                |> AtLeastOne.tryCreate
     
             match currencies with
             | Some currencies ->
@@ -426,7 +426,7 @@ let tests =
                         sales.currency.modifieddate = System.DateTime.Now
                     }
                 )
-                |> AtLeastOne.tryInit
+                |> AtLeastOne.tryCreate
     
             match currencies with
             | Some currencies ->
@@ -519,7 +519,7 @@ let tests =
                  expectJsonEqual row.json_field  updatedJsonValue "Json field after update doesn't match"
                  expectJsonEqual row.jsonb_field updatedJsonValue "Jsonb field after update doesn't match"
                    
-            let entities = [entity'; entity'] |> AtLeastOne.tryInit
+            let entities = [entity'; entity'] |> AtLeastOne.tryCreate
 
             match entities with
             | Some entities' ->
