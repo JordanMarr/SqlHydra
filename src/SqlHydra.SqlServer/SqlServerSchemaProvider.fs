@@ -73,7 +73,7 @@ let getSchema (cfg: Config) : Schema =
                 |> Seq.choose (fun col -> 
                     SqlServerDataTypes.tryFindTypeMapping(col.ProviderTypeName)
                     |> Option.map (fun typeMapping -> 
-                        { 
+                        {
                             Column.Name = col.ColumnName
                             Column.IsNullable = col.IsNullable
                             Column.TypeMapping = typeMapping

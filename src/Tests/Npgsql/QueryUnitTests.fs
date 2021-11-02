@@ -350,7 +350,7 @@ let tests =
             let sql = query.ToKataQuery() |> toSql
             Expect.equal 
                 sql 
-                "INSERT INTO \"sales\".\"customer\" (\"modifieddate\", \"territoryid\", \"storeid\", \"personid\", \"rowguid\", \"customerid\") VALUES (@p0, @p1, @p2, @p3, @p4, @p5)" 
+                "INSERT INTO \"sales\".\"customer\" (\"customerid\", \"personid\", \"storeid\", \"territoryid\", \"rowguid\", \"modifieddate\") VALUES (@p0, @p1, @p2, @p3, @p4, @p5)" 
                 ""
         }
         

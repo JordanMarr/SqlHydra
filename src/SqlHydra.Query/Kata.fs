@@ -1,5 +1,6 @@
 ﻿namespace SqlHydra.Query
 
+open System.Reflection
 open SqlKata
 open System.Collections.Generic
 open System
@@ -24,6 +25,12 @@ module FQ =
         match tbl.Schema with
         | Some schema -> $"{schema}.{tbl.Name}"
         | None -> tbl.Name
+
+type QueryParameter = 
+    {
+        Value: obj
+        ProviderDbType: string option
+    }
 
 type InsertQuerySpec<'T, 'Identity> =
     {
@@ -68,7 +75,7 @@ type QuerySource<'T, 'Query>(query, tableMappings) =
 module private KataUtils = 
 
     /// Boxes values (and option values)
-    let boxValueOrOption (value: obj) = 
+    let private boxValueOrOption (value: obj) = 
         if isNull value then 
             box System.DBNull.Value
         else
@@ -80,6 +87,21 @@ module private KataUtils =
                 | null -> box System.DBNull.Value 
                 | o -> o
 
+    let private getProviderDbTypeName (p: PropertyInfo) =
+        let attrs = p.GetCustomAttributes(true)
+        (attrs
+        |> Seq.choose (function
+            | :? SqlHydra.ProviderDbTypeAttribute as attr -> Some attr.ProviderDbTypeName
+            | _ -> None))
+        |> Seq.tryHead
+        
+    let getQueryParameterForValue (p: PropertyInfo) (value: obj) =
+        { Value = value |> boxValueOrOption; ProviderDbType = getProviderDbTypeName p }
+
+    let getQueryParameterForEntity (entity: 'T) (p: PropertyInfo) =
+        p.GetValue(entity)
+        |> getQueryParameterForValue p
+    
     let fromUpdate (spec: UpdateQuerySpec<'T>) = 
         let kvps = 
             match spec.Entity, spec.SetValues with
@@ -87,13 +109,13 @@ module private KataUtils =
                 match spec.Fields with 
                 | [] -> 
                     FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
-                    |> Array.map (fun p -> p.Name, p.GetValue(entity))
+                    |> Array.map (fun p -> p.Name, getQueryParameterForEntity entity p :> obj)
                         
                 | fields -> 
                     let included = fields |> Set.ofList
                     FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
                     |> Array.filter (fun p -> included.Contains(p.Name)) 
-                    |> Array.map (fun p -> p.Name, p.GetValue(entity))
+                    |> Array.map (fun p -> p.Name, getQueryParameterForEntity entity p :> obj)
 
             | Some _, _ -> failwith "Cannot have both `entity` and `set` operations in an `update` expression."
             | None, [] -> failwith "Either an `entity` or `set` operations must be present in an `update` expression."
@@ -101,7 +123,7 @@ module private KataUtils =
                     
         let preparedKvps = 
             kvps 
-            |> Seq.map (fun (key,value) -> key, boxValueOrOption value)
+            |> Seq.map (fun (key,value) -> key, value)
             |> dict
             |> Seq.map id
 
@@ -129,7 +151,7 @@ module private KataUtils =
         | [ entity ] -> 
             let keyValuePairs =
                 includedProperties
-                |> Array.map (fun p -> KeyValuePair(p.Name, p.GetValue(entity) |> boxValueOrOption))
+                |> Array.map (fun p -> KeyValuePair(p.Name, getQueryParameterForEntity entity p :> obj))
                 |> Array.toList
             Query(spec.Table).AsInsert(keyValuePairs, returnId = spec.IdentityField.IsSome)
 
@@ -141,7 +163,7 @@ module private KataUtils =
                 entities
                 |> List.map (fun entity ->
                     includedProperties
-                    |> Array.map (fun p -> p.GetValue(entity) |> boxValueOrOption)
+                    |> Array.map (fun p -> getQueryParameterForEntity entity p :> obj)
                     |> Array.toSeq
                 )
             Query(spec.Table).AsInsert(columns, rowsValues)

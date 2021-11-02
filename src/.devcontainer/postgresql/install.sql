@@ -3293,6 +3293,13 @@ CREATE SCHEMA sa
   CREATE VIEW s AS SELECT businessentityid AS id, * FROM sales.store
 ;
 
+CREATE SCHEMA ProviderDbTypeTest
+    CREATE TABLE Test (
+        ID SERIAL,
+        JSON_FIELD JSON NOT NULL,
+        JSONB_FIELD JSONB NOT NULL
+    );
+
 \pset tuples_only off
 
 

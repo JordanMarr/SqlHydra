@@ -9,6 +9,7 @@
         <Authors>Jordan Marr</Authors>
         <PackageTags>F# fsharp data database orm sql</PackageTags>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
         <PackageReleaseNotes>
             SqlHydra.Query:
             Added support for multiple inserts via the `entities` operation.
@@ -30,6 +31,10 @@
 
     <ItemGroup>
         <PackageReference Include="SqlKata" Version="2.3.7" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SqlHydra.Domain\SqlHydra.Domain.fsproj" />
     </ItemGroup>
 
 </Project>

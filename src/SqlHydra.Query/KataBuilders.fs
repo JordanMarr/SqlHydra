@@ -370,8 +370,10 @@ type UpdateExpressionBuilder<'T>() =
     member this.Set (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector: Expression<Func<'T, 'Prop>>, value: 'Prop) = 
         let query = state |> getQueryOrDefault
         let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector :?> Reflection.PropertyInfo
+        
+        let value = KataUtils.getQueryParameterForValue prop value :> obj
         QuerySource<'T, UpdateQuerySpec<'T>>(
-            { query with SetValues = query.SetValues @ [ prop.Name, box value ] }
+            { query with SetValues = query.SetValues @ [ prop.Name, value ] }
             , state.TableMappings)
 
     /// Includes a column in the insert query.

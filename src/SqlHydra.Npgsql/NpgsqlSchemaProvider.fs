@@ -1,7 +1,6 @@
 ﻿module SqlHydra.Npgsql.NpgsqlSchemaProvider
 
 open System.Data
-open Npgsql
 open SqlHydra.Domain
 
 let getSchema (cfg: Config) : Schema =
@@ -52,12 +51,14 @@ let getSchema (cfg: Config) : Schema =
                 TableName = col.["TABLE_NAME"] :?> string
                 ColumnName = col.["COLUMN_NAME"] :?> string
                 ProviderTypeName = col.["DATA_TYPE"] :?> string
+                OrdinalPosition = col.["ORDINAL_POSITION"] :?> int
                 IsNullable = 
                     match col.["IS_NULLABLE"] :?> string with 
                     | "YES" -> true
                     | _ -> false
             |}
         )
+        |> Seq.sortBy (fun column -> column.OrdinalPosition)
 
     let tables = 
         sTables.Rows

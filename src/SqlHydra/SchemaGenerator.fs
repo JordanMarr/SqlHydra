@@ -1,10 +1,12 @@
 ﻿module SqlHydra.SchemaGenerator
 open FSharp.Compiler.SyntaxTree
 open FSharp.Compiler
+open FSharp.Compiler.XmlDoc
 open FsAst
 open Fantomas
 open Domain
 open System.Data
+open SqlHydra.Filter
 
 let range0 = Range.range.Zero
 
@@ -23,6 +25,21 @@ let cliMutableAttribute =
     let atts = [ SynAttributeList.Create(attr) ]
     SynModuleDecl.CreateAttributes(atts)
     
+let createProviderDbTypeAttribute (mapping: TypeMapping) =
+    mapping.ProviderDbType
+    |> Option.map (fun type' ->
+    let attributeFullName = typeof<ProviderDbTypeAttribute>.FullName
+
+    let attr = 
+        { TypeName = LongIdentWithDots.Create (attributeFullName.Split(".") |> List.ofArray) 
+        ; ArgExpr = SynExpr.CreateParenedTuple [ SynExpr.CreateConst (SynConst.String(type', range0)) ]
+        ; Target = None
+        ; AppliesToGetterAndSetter = false
+        ; Range = range0 } : SynAttribute
+   
+    SynAttributes.Cons (SynAttributeList.Create attr, SynAttributes.Empty)
+    ) |> Option.defaultValue SynAttributes.Empty
+    
 /// Creates a record definition named after a table.
 let createTableRecord (tbl: Table) = 
     let myRecordId = LongIdentWithDots.CreateString tbl.Name
@@ -30,19 +47,32 @@ let createTableRecord (tbl: Table) =
     
     let recordDef =
         tbl.Columns
-        |> List.map (fun col -> 
+        |> List.map (fun col ->
             let field = 
                 if col.TypeMapping.ClrType = "byte[]" then 
                     let b = SynType.Create("byte")
                     SynType.Array(0, b, range0)
                 else
                     SynType.Create(col.TypeMapping.ClrType)
-                    
-            if col.IsNullable then                         
-                let opt = SynType.Option(field)
-                SynFieldRcd.Create(Ident.Create(col.Name), opt)
-            else 
-                SynFieldRcd.Create(Ident.Create(col.Name), field)
+
+            let attributes = createProviderDbTypeAttribute col.TypeMapping
+          
+            let type' =
+                if col.IsNullable then
+                    SynType.Option(field)
+                else
+                    field
+            
+            {   
+                Attributes = attributes
+                IsStatic = false
+                Id = Some (Ident.Create(col.Name))
+                Type = type'
+                IsMutable = false
+                XmlDoc = PreXmlDoc.Empty
+                Access = None
+                Range = range0
+            }
         )
         |> SynTypeDefnSimpleReprRecordRcd.Create
         |> SynTypeDefnSimpleReprRcd.Record

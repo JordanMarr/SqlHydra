@@ -74,8 +74,16 @@ let tests =
 
             let pks = allColumns |> List.filter (fun c -> c.IsPK)
             
-            Expect.equal schema.Tables.Length 68 ""
+            Expect.equal schema.Tables.Length 69 ""
             Expect.isTrue (pks.Length > schema.Tables.Length) "Expected at least one pk per table"
             Expect.isTrue (pks.Length < allColumns.Length) "Every column should not be a PK"
+        }
+        
+        test "Code Should Have ProviderDbTypeAttribute With Json" {
+            cfg |> inCode "[<SqlHydra.ProviderDbTypeAttribute(\"Json\")>]"
+        }
+        
+        test "Code Should Have ProviderDbTypeAttribute With Jsonb" {
+            cfg |> inCode "[<SqlHydra.ProviderDbTypeAttribute(\"Jsonb\")>]"
         }
     ]
