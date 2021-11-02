@@ -29,10 +29,12 @@ let getSchema (cfg: Config) : Schema =
                 TableName = col.["TABLE_NAME"] :?> string
                 ColumnName = col.["COLUMN_NAME"] :?> string
                 ProviderTypeName = col.["DATA_TYPE"] :?> string
+                OrdinalPosition = col.["ORDINAL_POSITION"] :?> int
                 IsNullable = col.["IS_NULLABLE"] :?> bool
                 IsPK = col.["PRIMARY_KEY"] :?> bool
             |}
         )
+        |> Seq.sortBy (fun column -> column.OrdinalPosition)
 
     let tables = 
         sTables.Rows
