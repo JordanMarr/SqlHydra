@@ -1259,9 +1259,9 @@ module providerdbtypetest =
     [<CLIMutable>]
     type test =
         { id: int
-          [<SqlHydra.ProviderDbTypeAttribute("Json")>]
+          [<SqlHydra.ProviderDbType("Json")>]
           json_field: string
-          [<SqlHydra.ProviderDbTypeAttribute("Jsonb")>]
+          [<SqlHydra.ProviderDbType("Jsonb")>]
           jsonb_field: string }
 
     type testReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
@@ -2330,9 +2330,9 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
 
     static member private GetPrimitiveReader(t: System.Type, reader: Npgsql.NpgsqlDataReader, isOpt: bool) =
         let wrap get (ord: int) = 
-                if isOpt 
-                then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
-                else get ord |> box 
+            if isOpt 
+            then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            else get ord |> box 
         
         if t = typedefof<bool> then Some(wrap reader.GetBoolean)
         else if t = typedefof<int16> then Some(wrap reader.GetInt16)

@@ -28,20 +28,21 @@ let cliMutableAttribute =
 let createProviderDbTypeAttribute (mapping: TypeMapping) =
     mapping.ProviderDbType
     |> Option.map (fun type' ->
-    let attributeFullName = typeof<ProviderDbTypeAttribute>.FullName
+        let attributeFullName = typeof<ProviderDbTypeAttribute>.FullName
 
-    let attr = 
-        { TypeName = LongIdentWithDots.Create (attributeFullName.Split(".") |> List.ofArray) 
-        ; ArgExpr = SynExpr.CreateParenedTuple [ SynExpr.CreateConst (SynConst.String(type', range0)) ]
-        ; Target = None
-        ; AppliesToGetterAndSetter = false
-        ; Range = range0 } : SynAttribute
+        let attr = 
+            { TypeName = LongIdentWithDots.Create (attributeFullName.Replace("Attribute", "").Split(".") |> List.ofArray) 
+            ; ArgExpr = SynExpr.CreateParenedTuple [ SynExpr.CreateConst (SynConst.String(type', range0)) ]
+            ; Target = None
+            ; AppliesToGetterAndSetter = false
+            ; Range = range0 } : SynAttribute
    
-    SynAttributes.Cons (SynAttributeList.Create attr, SynAttributes.Empty)
-    ) |> Option.defaultValue SynAttributes.Empty
+        SynAttributes.Cons (SynAttributeList.Create attr, SynAttributes.Empty)
+    ) 
+    |> Option.defaultValue SynAttributes.Empty
     
 /// Creates a record definition named after a table.
-let createTableRecord (tbl: Table) = 
+let createTableRecord (cfg: Config) (tbl: Table) = 
     let myRecordId = LongIdentWithDots.CreateString tbl.Name
     let recordCmpInfo = SynComponentInfoRcd.Create(myRecordId.Lid)
     
@@ -55,8 +56,12 @@ let createTableRecord (tbl: Table) =
                 else
                     SynType.Create(col.TypeMapping.ClrType)
 
-            let attributes = createProviderDbTypeAttribute col.TypeMapping
-          
+            let attributes = 
+                // Add ProviderDbTypeAttribute only if "Generate HydraReader" is enabled
+                if cfg.Readers.IsSome
+                then createProviderDbTypeAttribute col.TypeMapping
+                else []
+
             let type' =
                 if col.IsNullable then
                     SynType.Option(field)
@@ -624,7 +629,7 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                         if cfg.IsCLIMutable then 
                             cliMutableAttribute
                         
-                        createTableRecord tbl
+                        createTableRecord cfg tbl
                         
                         if cfg.Readers.IsSome then 
                             createTableReaderClass cfg.Readers.Value tbl
@@ -707,9 +712,9 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
         // "wrap" fn in GetPrimitiveReader
         "let wrap = \"wrap-placeholder\"",
         """let wrap get (ord: int) = 
-                if isOpt 
-                then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
-                else get ord |> box 
+            if isOpt 
+            then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            else get ord |> box 
         """
 
         // HydraReader Read Method Body
