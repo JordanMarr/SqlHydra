@@ -531,9 +531,9 @@ type HydraReader(reader: System.Data.IDataReader) =
 
     static member private GetPrimitiveReader(t: System.Type, reader: System.Data.IDataReader, isOpt: bool) =
         let wrap get (ord: int) = 
-                if isOpt 
-                then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
-                else get ord |> box 
+            if isOpt 
+            then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            else get ord |> box 
         
         if t = typedefof<int16> then Some(wrap reader.GetInt16)
         else if t = typedefof<int> then Some(wrap reader.GetInt32)
