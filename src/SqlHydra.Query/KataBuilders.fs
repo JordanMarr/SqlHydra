@@ -295,10 +295,10 @@ type InsertExpressionBuilder<'T, 'InsertReturn when 'InsertReturn : struct>() =
 
     /// Sets multiple values for INSERT
     [<CustomOperation("entities", MaintainsVariableSpace = true)>]
-    member this.Entities (state:QuerySource<'T>, values: 'T seq) = 
+    member this.Entities (state:QuerySource<'T>, entities: AtLeastOne.AtLeastOne<'T>) = 
         let query = state |> getQueryOrDefault
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
-            { query with Entities = values |> Seq.toList }
+            { query with Entities = entities |> AtLeastOne.getSeq |> Seq.toList }
             , state.TableMappings)
 
     /// Includes a column in the insert query.

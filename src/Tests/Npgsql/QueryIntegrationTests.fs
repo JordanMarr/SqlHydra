@@ -383,27 +383,31 @@ let tests =
                         sales.currency.modifieddate = System.DateTime.Now
                     }
                 )
+                |> AtLeastOne.tryInit
     
-            let! rowsInserted = 
-                insert {
-                    into currencyTable
-                    entities currencies
-                }
-                |> ctx.InsertAsync
+            match currencies with
+            | Some currencies ->
+                let! rowsInserted = 
+                    insert {
+                        into currencyTable
+                        entities currencies
+                    }
+                    |> ctx.InsertAsync
 
-            Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+                Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
 
-            let! results =
-                select {
-                    for c in currencyTable do
-                    where (c.currencycode =% "BC%")
-                    select c.currencycode
-                }
-                |> ctx.ReadAsync HydraReader.Read
+                let! results =
+                    select {
+                        for c in currencyTable do
+                        where (c.currencycode =% "BC%")
+                        select c.currencycode
+                    }
+                    |> ctx.ReadAsync HydraReader.Read
 
-            let codes = results |> Seq.toList
+                let codes = results |> Seq.toList
     
-            Expect.equal codes [ "BC0"; "BC1"; "BC2" ] ""
+                Expect.equal codes [ "BC0"; "BC1"; "BC2" ] ""
+            | None -> ()
 
             ctx.RollbackTransaction()
         }
@@ -422,35 +426,39 @@ let tests =
                         sales.currency.modifieddate = System.DateTime.Now
                     }
                 )
+                |> AtLeastOne.tryInit
     
-            let! rowsInserted = 
-                insert {
-                    for e in currencyTable do
-                    entities currencies
-                }
-                |> ctx.InsertAsync
+            match currencies with
+            | Some currencies ->
+                let! rowsInserted = 
+                    insert {
+                        for e in currencyTable do
+                        entities currencies
+                    }
+                    |> ctx.InsertAsync
 
-            Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+                Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
 
-            let! results =
-                select {
-                    for c in currencyTable do
-                    where (c.currencycode =% "BC%")
-                    select c.name
-                }
-                |> ctx.ReadAsync HydraReader.Read
+                let! results =
+                    select {
+                        for c in currencyTable do
+                        where (c.currencycode =% "BC%")
+                        select c.name
+                    }
+                    |> ctx.ReadAsync HydraReader.Read
 
-            let! distinctResults =
-                select {
-                    for c in currencyTable do
-                    where (c.currencycode =% "BC%")
-                    select c.name
-                    distinct
-                }
-                |> ctx.ReadAsync HydraReader.Read
+                let! distinctResults =
+                    select {
+                        for c in currencyTable do
+                        where (c.currencycode =% "BC%")
+                        select c.name
+                        distinct
+                    }
+                    |> ctx.ReadAsync HydraReader.Read
 
-            Expect.equal (results |> Seq.length) 3 ""
-            Expect.equal (distinctResults |> Seq.length) 1 ""
+                Expect.equal (results |> Seq.length) 3 ""
+                Expect.equal (distinctResults |> Seq.length) 1 ""
+            | None -> ()
 
             ctx.RollbackTransaction()
         }
@@ -511,14 +519,19 @@ let tests =
                  expectJsonEqual row.json_field  updatedJsonValue "Json field after update doesn't match"
                  expectJsonEqual row.jsonb_field updatedJsonValue "Jsonb field after update doesn't match"
                    
-            // Insert of multiple entities
-            let! insertedNumberOfRows = 
-                insert {
-                    for e in providerDbTestTable do
-                    entities [entity'; entity']
-                }
-                |> ctx.InsertAsync
+            let entities = [entity'; entity'] |> AtLeastOne.tryInit
+
+            match entities with
+            | Some entities' ->
+                // Insert of multiple entities
+                let! insertedNumberOfRows = 
+                    insert {
+                        for e in providerDbTestTable do
+                        entities entities'
+                    }
+                    |> ctx.InsertAsync
             
-            Expect.equal insertedNumberOfRows 2 "Failed insert multiple entities"
+                Expect.equal insertedNumberOfRows 2 "Failed insert multiple entities"
+            | None -> ()
         }
     ]

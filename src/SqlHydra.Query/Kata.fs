@@ -26,6 +26,17 @@ module FQ =
         | Some schema -> $"{schema}.{tbl.Name}"
         | None -> tbl.Name
 
+module AtLeastOne =
+    type AtLeastOne<'T> = private { Items : 'T seq }
+
+    let tryInit<'T> (items: 'T seq) = 
+        if items |> Seq.length > 0
+        then Some { Items = items }
+        else None
+
+    let getSeq { Items = atLeastOne } = 
+        atLeastOne
+
 type QueryParameter = 
     {
         Value: obj
