@@ -462,7 +462,7 @@ To insert multiple entities in one query, use the `entities` operation in conjun
 NOTE: `getId` is not supported for multiple inserts with `entities`! So if you are inserting multiple entities that have an identity field, you must use `excludeColumn` on the identity column.
 
 ```F#
-let currencies = 
+let currenciesMaybe = 
     [ 0..2 ] 
     |> List.map (fun i -> 
         {
@@ -473,7 +473,7 @@ let currencies =
     )
     |> AtLeastOne.tryCreate
 
-match currencies with
+match currenciesMaybe with
 | Some currencies ->
     let! rowsInserted = 
         insert {
