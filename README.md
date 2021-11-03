@@ -457,7 +457,7 @@ printfn "ErrorLogID Identity: %i" errorLogID
 ```
 
 #### Multiple Inserts
-To insert multiple entities in one query, use the `entities` operation.
+To insert multiple entities in one query, use the `entities` operation in conjunction with the `AtLeastOne` type to ensure that at least one item exists in the collection. (The `AtLeastOne` forces you to handle the case where an empty collection is passed to `entities` which would throw a runtime exception.)
 NOTE: `getId` is not supported for multiple inserts with `entities`! So if you are inserting multiple entities that have an identity field, you must use `excludeColumn` on the identity column.
 
 ```F#
@@ -470,16 +470,19 @@ let currencies =
             Sales.Currency.ModifiedDate = System.DateTime.Now
         }
     )
+    |> AtLeastOne.tryCreate
 
-let! rowsInserted = 
-    insert {
-        into currencyTable
-        entities currencies
-    }
-    |> ctx.InsertAsync
+match currencies with
+| Some currencies ->
+    let! rowsInserted = 
+        insert {
+            into currencyTable
+            entities currencies
+        }
+        |> ctx.InsertAsync
+| None ->
+    printfn "Skipping insert because entities seq was empty."
 ```
-
-💥 Passing an empty collection to `entities` will fail with the following exception: "At least one `entity` or `entities` must be set in the `insert` builder.", so be sure to validate that your collection is not empty!
 
 ### Update Builder
 
