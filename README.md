@@ -458,6 +458,7 @@ printfn "ErrorLogID Identity: %i" errorLogID
 
 #### Multiple Inserts
 To insert multiple entities in one query, use the `entities` operation in conjunction with the `AtLeastOne` type to ensure that at least one item exists in the collection. (The `AtLeastOne` forces you to handle the case where an empty collection is passed to `entities` which would throw a runtime exception.)
+
 NOTE: `getId` is not supported for multiple inserts with `entities`! So if you are inserting multiple entities that have an identity field, you must use `excludeColumn` on the identity column.
 
 ```F#
