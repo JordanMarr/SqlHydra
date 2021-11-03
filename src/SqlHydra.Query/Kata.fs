@@ -26,9 +26,11 @@ module FQ =
         | Some schema -> $"{schema}.{tbl.Name}"
         | None -> tbl.Name
 
+/// Represents a collection that must contain at least on item.
 module AtLeastOne =
     type AtLeastOne<'T> = private { Items : 'T seq }
 
+    /// Returns Some if seq contains at least one item, else returns None.
     let tryCreate<'T> (items: 'T seq) = 
         if items |> Seq.length > 0
         then Some { Items = items }
