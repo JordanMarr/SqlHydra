@@ -69,7 +69,7 @@ let tests =
                     select (o, d)
                 }
 
-            query.ToKataQuery() |> toSql |> printfn "%s"
+            //query.ToKataQuery() |> toSql |> printfn "%s"
 
             let! results = query |> ctx.ReadAsync HydraReader.Read
             gt0 results
@@ -89,7 +89,7 @@ let tests =
 
             let! rows = query |> ctx.ReadAsync HydraReader.Read
             printfn "Results: %A" rows
-            query.ToKataQuery() |> toSql |> printfn "%s"
+            //query.ToKataQuery() |> toSql |> printfn "%s"
             gt0 rows
         }
 
@@ -106,8 +106,8 @@ let tests =
                 }
 
             let! aggregates = query |> ctx.ReadAsync HydraReader.Read
-            let sql = query.ToKataQuery() |> toSql 
-            sql |> printfn "%s"
+            //let sql = query.ToKataQuery() |> toSql 
+            //sql |> printfn "%s"
 
             gt0 aggregates
     
@@ -400,6 +400,7 @@ let tests =
                     select {
                         for c in currencyTable do
                         where (c.currencycode =% "BC%")
+                        orderBy c.currencycode
                         select c.currencycode
                     }
                     |> ctx.ReadAsync HydraReader.Read

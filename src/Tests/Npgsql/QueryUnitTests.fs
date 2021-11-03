@@ -30,7 +30,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("WHERE")) ""
         }
 
@@ -42,7 +42,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("SELECT \"person\".\"address\".\"city\" FROM")) ""
         }
 
@@ -54,7 +54,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("SELECT \"sales\".\"salesorderheader\".\"customerid\", \"sales\".\"salesorderheader\".\"onlineorderflag\" FROM")) ""
         }
 
@@ -68,11 +68,11 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("SELECT \"sales\".\"salesorderheader\".*, \"sales\".\"salesorderdetail\".\"unitprice\" FROM")) ""
         }
 
-        test "Where with Option Type" {
+        ptest "Where with Option Type" {
             let query = 
                 select {
                     for a in addressTable do
@@ -82,7 +82,7 @@ let tests =
             query.ToKataQuery() |> toSql |> printfn "%s"
         }
 
-        test "Where Not Like" {
+        ptest "Where Not Like" {
             let query =
                 select {
                     for a in addressTable do
@@ -204,7 +204,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("INNER JOIN \"sales\".\"salesorderdetail\" ON (\"sales\".\"salesorderheader\".\"salesorderid\" = \"sales\".\"salesorderdetail\".\"salesorderid\")")) ""
         }
 
@@ -217,7 +217,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("LEFT JOIN \"sales\".\"salesorderdetail\" ON (\"sales\".\"salesorderheader\".\"salesorderid\" = \"sales\".\"salesorderdetail\".\"salesorderid\")")) ""
         }
         
@@ -230,7 +230,7 @@ let tests =
                 }
         
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("INNER JOIN \"sales\".\"salesorderdetail\" ON (\"sales\".\"salesorderheader\".\"salesorderid\" = \"sales\".\"salesorderdetail\".\"salesorderid\" AND \"sales\".\"salesorderheader\".\"modifieddate\" = \"sales\".\"salesorderdetail\".\"modifieddate\")")) ""
         }
         
@@ -243,7 +243,7 @@ let tests =
                 }
         
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("LEFT JOIN \"sales\".\"salesorderdetail\" ON (\"sales\".\"salesorderheader\".\"salesorderid\" = \"sales\".\"salesorderdetail\".\"salesorderid\" AND \"sales\".\"salesorderheader\".\"modifieddate\" = \"sales\".\"salesorderdetail\".\"modifieddate\")")) ""
         }
 
@@ -362,7 +362,7 @@ let tests =
                 }
         
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.equal 
                 sql 
                 "SELECT COUNT(\"sales\".\"salesorderheader\".\"salesorderid\") FROM \"sales\".\"salesorderheader\""

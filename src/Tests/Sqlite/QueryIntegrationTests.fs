@@ -63,7 +63,7 @@ let tests =
                     select (o, d)
                 }
 
-            query.ToKataQuery() |> toSql |> printfn "%s"
+            //query.ToKataQuery() |> toSql |> printfn "%s"
 
             let! results = query |> ctx.ReadAsync HydraReader.Read
             gt0 results
@@ -253,7 +253,7 @@ let tests =
                 }
                 |> ctx.Insert
 
-            printfn "Identity: %i" errorLogId
+            //printfn "Identity: %i" errorLogId
             Expect.isTrue (errorLogId > 0L) "Expected returned ID to be > 0"
         }
 

@@ -30,7 +30,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("WHERE")) ""
         }
 
@@ -42,7 +42,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("SELECT [Person].[Address].[City] FROM")) ""
         }
 
@@ -54,7 +54,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("SELECT [Sales].[SalesOrderHeader].[CustomerID], [Sales].[SalesOrderHeader].[OnlineOrderFlag] FROM")) ""
         }
 
@@ -68,11 +68,11 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("SELECT [Sales].[SalesOrderHeader].*, [Sales].[SalesOrderDetail].[LineTotal] FROM")) ""
         }
 
-        test "Where with Option Type" {
+        ptest "Where with Option Type" {
             let query = 
                 select {
                     for a in addressTable do
@@ -82,7 +82,7 @@ let tests =
             query.ToKataQuery() |> toSql |> printfn "%s"
         }
 
-        test "Where Not Like" {
+        ptest "Where Not Like" {
             let query =
                 select {
                     for a in addressTable do
@@ -204,7 +204,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID])")) ""
         }
 
@@ -217,7 +217,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID])")) ""
         }
         
@@ -230,7 +230,7 @@ let tests =
                 }
         
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID] AND [Sales].[SalesOrderHeader].[ModifiedDate] = [Sales].[SalesOrderDetail].[ModifiedDate])")) ""
         }
         
@@ -243,7 +243,7 @@ let tests =
                 }
         
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID] AND [Sales].[SalesOrderHeader].[ModifiedDate] = [Sales].[SalesOrderDetail].[ModifiedDate])")) ""
         }
 
@@ -362,8 +362,8 @@ let tests =
             
             let sql = query.ToKataQuery() |> toSql
             Expect.equal 
-                "INSERT INTO [Sales].[Customer] ([CustomerID], [AccountNumber], [rowguid], [ModifiedDate], [PersonID], [StoreID], [TerritoryID]) VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)" 
                 sql 
+                "INSERT INTO [Sales].[Customer] ([CustomerID], [PersonID], [StoreID], [TerritoryID], [AccountNumber], [rowguid], [ModifiedDate]) VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)" 
                 ""
         }
 
@@ -387,7 +387,7 @@ let tests =
             let sql = query.ToKataQuery() |> toSql
             Expect.equal 
                 sql 
-                "INSERT INTO [Sales].[Customer] ([AccountNumber], [rowguid], [ModifiedDate], [PersonID], [StoreID], [TerritoryID]) VALUES (@p0, @p1, @p2, @p3, @p4, @p5);SELECT scope_identity() as Id" 
+                "INSERT INTO [Sales].[Customer] ([PersonID], [StoreID], [TerritoryID], [AccountNumber], [rowguid], [ModifiedDate]) VALUES (@p0, @p1, @p2, @p3, @p4, @p5);SELECT scope_identity() as Id" 
                 ""
         }
 
@@ -399,7 +399,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            printfn "%s" sql
+            //printfn "%s" sql
             Expect.equal
                 sql
                 "SELECT COUNT([Sales].[SalesOrderHeader].[SalesOrderID]) FROM [Sales].[SalesOrderHeader]"
