@@ -21,7 +21,7 @@ let tests =
                     Config.Namespace = "SampleApp.AdventureWorks"
                     Config.IsCLIMutable = true
                     Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
-                    Config.Filters = Filters.Empty
+                    Config.Filters = FilterPatterns.Empty
                 }
 
             let toml = TomlConfigParser.save(cfg)
@@ -62,7 +62,7 @@ let tests =
                     Config.Namespace = "SampleApp.AdventureWorks"
                     Config.IsCLIMutable = true
                     Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
-                    Config.Filters = Filters.Empty
+                    Config.Filters = FilterPatterns.Empty
                 }
 
             let cfg = TomlConfigParser.read(toml)
@@ -87,7 +87,7 @@ let tests =
                     Config.Namespace = "SampleApp.AdventureWorks"
                     Config.IsCLIMutable = true
                     Config.Readers = None
-                    Config.Filters = Filters.Empty
+                    Config.Filters = FilterPatterns.Empty
                 }
 
             let cfg = TomlConfigParser.read(toml)

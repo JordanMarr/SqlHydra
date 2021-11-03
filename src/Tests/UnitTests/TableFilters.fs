@@ -1,8 +1,8 @@
 ﻿module UnitTests.TableFilters
 
 open Expecto
-open SqlHydra.Filter
 open SqlHydra.Domain
+open SqlHydra.SchemaFilters
 
 [<Tests>]
 let tests = 
@@ -17,16 +17,6 @@ let tests =
             Table.Type = TableType.Table
         }
 
-    let cfg filters = 
-        {
-            Config.ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
-            Config.OutputFile = "AdventureWorks.fs"
-            Config.Namespace = "SampleApp.AdventureWorks"
-            Config.IsCLIMutable = true
-            Config.Readers = None
-            Config.Filters = filters
-        }
-
     categoryList "Unit Tests" "Table Filters" [
         
         test "Apply No Filters" {
@@ -36,12 +26,12 @@ let tests =
             let prodTbl2 = tbl "prod" "tbl2"
             let tables = [ dboTbl1; dboTbl2; prodTbl1; prodTbl2 ]
 
-            let cfg = cfg { 
+            let filters = { 
                 Includes = [ ]
                 Excludes = [ ] 
             }
 
-            let filteredTables = tables |> applyFilters cfg.Filters
+            let filteredTables = tables |> filterTables filters
             Expect.equal filteredTables tables ""
         }
 
@@ -52,12 +42,12 @@ let tests =
             let prodTbl2 = tbl "prod" "tbl2"
             let tables = [ dboTbl1; dboTbl2; prodTbl1; prodTbl2 ]
 
-            let cfg = cfg { 
+            let filters = { 
                 Includes = [ "dbo/*" ]
                 Excludes = [ ] 
             }
 
-            let filteredTables = tables |> applyFilters cfg.Filters
+            let filteredTables = tables |> filterTables filters
             Expect.equal filteredTables [ dboTbl1; dboTbl2 ] ""
         }
 
@@ -68,12 +58,12 @@ let tests =
             let prodTbl2 = tbl "prod" "tbl2"
             let tables = [ dboTbl1; dboTbl2; prodTbl1; prodTbl2 ]
 
-            let cfg = cfg { 
+            let filters = { 
                 Includes = [ "*" ]
                 Excludes = [ "dbo/*" ] 
             }
 
-            let filteredTables = tables |> applyFilters cfg.Filters
+            let filteredTables = tables |> filterTables filters
             Expect.equal filteredTables [ prodTbl1; prodTbl2 ] ""
         }
 
@@ -84,12 +74,12 @@ let tests =
             let prodTbl2 = tbl "prod" "tbl2"
             let tables = [ dboTbl1; dboTbl2; prodTbl1; prodTbl2 ]
 
-            let cfg = cfg { 
+            let filters = { 
                 Includes = [ "dbo/*" ]
                 Excludes = [ "*/*1" ] 
             }
 
-            let filteredTables = tables |> applyFilters cfg.Filters
+            let filteredTables = tables |> filterTables filters
             Expect.equal filteredTables [ dboTbl2 ] ""
         }
 
@@ -100,13 +90,12 @@ let tests =
             let prodTbl2 = tbl "prod" "tbl2"
             let tables = [ dboTbl1; dboTbl2; prodTbl1; prodTbl2 ]
 
-            let cfg = cfg { 
+            let filters = { 
                 Includes = [ "dbo/tbl1"; "prod/tbl2" ]
                 Excludes = [ ] 
             }
 
-            let filteredTables = tables |> applyFilters cfg.Filters
+            let filteredTables = tables |> filterTables filters
             Expect.equal filteredTables [ dboTbl1; prodTbl2 ] ""
         }
     ]
-

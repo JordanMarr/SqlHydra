@@ -21,7 +21,7 @@ let cfg =
         Namespace = "TestNS"
         IsCLIMutable = true
         Readers = Some { ReadersConfig.ReaderType = "System.Data.IDataReader" } 
-        Filters = Filters.Empty
+        Filters = FilterPatterns.Empty
     }
 
 [<Tests>]

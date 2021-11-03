@@ -59,7 +59,7 @@ type ReadersConfig =
         ReaderType: string
     }
 
-type Filters = 
+type FilterPatterns = 
     {
         Includes: string list
         Excludes: string list
@@ -72,6 +72,6 @@ type Config =
         OutputFile: string
         Namespace: string
         IsCLIMutable: bool
-        Filters: Filters
+        Filters: FilterPatterns
         Readers: ReadersConfig option
     }

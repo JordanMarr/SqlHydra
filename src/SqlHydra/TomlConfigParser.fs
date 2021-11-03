@@ -34,11 +34,11 @@ let read(toml: string) =
             match filtersTableMaybe with
             | Some filtersTable -> 
                 {
-                    Filters.Includes = filtersTable.Get "include" |> Seq.cast<string> |> Seq.toList
-                    Filters.Excludes = filtersTable.Get "exclude" |> Seq.cast<string> |> Seq.toList
+                    FilterPatterns.Includes = filtersTable.Get "include" |> Seq.cast<string> |> Seq.toList
+                    FilterPatterns.Excludes = filtersTable.Get "exclude" |> Seq.cast<string> |> Seq.toList
                 }
             | None ->
-                Filters.Empty
+                FilterPatterns.Empty
 
             
         Config.Readers = 
