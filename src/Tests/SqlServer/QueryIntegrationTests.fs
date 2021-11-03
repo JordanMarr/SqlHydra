@@ -404,16 +404,20 @@ let tests =
                 |> List.map (fun i -> 
                     { stubbedErrorLog with ErrorNumber = stubbedErrorLog.ErrorNumber + i }
                 )
+                |> AtLeastOne.tryCreate
     
-            let! rowsInserted = 
-                insert {
-                    for e in errorLogTable do
-                    entities errorLogs
-                    excludeColumn e.ErrorLogID
-                }
-                |> ctx.InsertAsync
+            match errorLogs with
+            | Some errorLogs ->
+                let! rowsInserted = 
+                    insert {
+                        for e in errorLogTable do
+                        entities errorLogs
+                        excludeColumn e.ErrorLogID
+                    }
+                    |> ctx.InsertAsync
 
-            Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+                Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+            | None -> ()
 
             let! results =
                 select {
@@ -444,16 +448,20 @@ let tests =
             let errorLogs = 
                 [ 0L .. 2L ] 
                 |> List.map (fun _ -> stubbedErrorLog)
-            
-            let! rowsInserted = 
-                insert {
-                    for e in errorLogTable do
-                    entities errorLogs
-                    excludeColumn e.ErrorLogID
-                }
-                |> ctx.InsertAsync
+                |> AtLeastOne.tryCreate
+                
+            match errorLogs with
+            | Some errorLogs ->            
+                let! rowsInserted = 
+                    insert {
+                        for e in errorLogTable do
+                        entities errorLogs
+                        excludeColumn e.ErrorLogID
+                    }
+                    |> ctx.InsertAsync
 
-            Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+                Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+            | None -> ()
 
             let! results =
                 select {
