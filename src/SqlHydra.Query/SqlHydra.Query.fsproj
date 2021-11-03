@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <WarnOn>3390;$(WarnOn)</WarnOn>
-        <Version>0.600.1</Version>
+        <Version>0.610.0</Version>
         <Description>SqlHydra.Query is an F# query builder powered by SqlKata.Query that supports Sql Server, MySql, PostgreSql, Oracle and Firebird.</Description>
         <Authors>Jordan Marr</Authors>
         <PackageTags>F# fsharp data database orm sql</PackageTags>
@@ -12,7 +12,11 @@
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
         <PackageReleaseNotes>
             SqlHydra.Query:
-            Added support for multiple inserts via the `entities` operation.
+            - (BREAKING) InsertBuilder `entities` operation now takes new `AtLeastOne` type as input.
+            - Better support for PostgreSQL custom types: "json" and "jsonb"
+            SqlHydra.*:
+            - Both tables and now columns can be filtered in generated types.
+            - Generated columns are now sorted by ordinal.
         </PackageReleaseNotes>
     </PropertyGroup>
     

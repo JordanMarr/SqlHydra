@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
-        <Version>0.600.1</Version>
+        <Version>0.610.0</Version>
         <Authors>Jordan Marr</Authors>
         <Description>SqlHydra.Sqlite is a dotnet tool that generates F# records for a SQLite database.</Description>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -13,7 +13,11 @@
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
         <PackageReleaseNotes>
             SqlHydra.Query:
-            Added support for multiple inserts via the `entities` operation.
+            - (BREAKING) InsertBuilder `entities` operation now takes new `AtLeastOne` type as input.
+            - Better support for PostgreSQL custom types: "json" and "jsonb"
+            SqlHydra.*:
+            - Both tables and now columns can be filtered in generated types.
+            - Generated columns are now sorted by ordinal.
         </PackageReleaseNotes>
     </PropertyGroup>
 
