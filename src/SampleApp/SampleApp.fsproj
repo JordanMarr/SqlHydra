@@ -8,6 +8,7 @@
       <Visible>False</Visible>
     </Compile>
     <Compile Include="DapperFSharpExample.fs" />
+    <Compile Include="DapperExample.fs" />
     <Compile Include="DonaldExample.fs" />
     <Compile Include="ReaderExample.fs" />
   </ItemGroup>
