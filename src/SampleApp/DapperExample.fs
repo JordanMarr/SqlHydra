@@ -21,9 +21,8 @@ let unwrapDbDataReader (dapperReader: Common.DbDataReader) =
     (unbox<IWrappedDataReader> dapperReader).Reader :?> SqlDataReader
 
 let getProductsWithThumbnail(conn: SqlConnection) = task {
-    use wrappedReader = conn.ExecuunwrapReader"SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL")
-    use reader = getReader wrappedReader
-    let hydra = SalesLT.HydraReader(reader)
+    use reader = conn.ExecuteReader("SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL")
+    let hydra = SalesLT.HydraReader(unwrapIDataReader reader)
     return [ 
         while reader.Read() do
             hydra.Product.Read() 
@@ -31,10 +30,10 @@ let getProductsWithThumbnail(conn: SqlConnection) = task {
 }
 
 let getProductsWithThumbnailAsync(conn: SqlConnection) = task {
-    use! wrappedReader = conn.ExecuteReaderAsync("SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL")
-    let hydra = SalesLT.HydraReader(unwrapDbDataReader wrappedReader)
+    use! reader = conn.ExecuteReaderAsync("SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL")
+    let hydra = SalesLT.HydraReader(unwrapDbDataReader reader)
     return [ 
-        while wrappedReader.Read() do
+        while reader.Read() do
             hydra.Product.Read() 
     ]
 }
@@ -47,3 +46,4 @@ let runQueries() = task {
 
     let! products2 = getProductsWithThumbnailAsync conn
     printfn "Products with Thumbnails Count: %i" (products |> Seq.length)
+}
