@@ -7,4 +7,4 @@ cli_mutable = true
 reader_type = "Npgsql.NpgsqlDataReader"
 [filters]
 include = [ "*" ]
-exclude = [ "*/v*", "hr/*" ]
+exclude = [ "hr/*" ]

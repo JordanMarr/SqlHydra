@@ -39,8 +39,8 @@
   <ItemGroup>
     <PackageReference Include="Expecto" Version="9.0.4" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.10" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-    <PackageReference Include="Verify.Expecto" Version="13.3.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+    <PackageReference Include="Verify.Expecto" Version="14.6.0" />
     <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.12.8" />
   </ItemGroup>
   <ItemGroup>
