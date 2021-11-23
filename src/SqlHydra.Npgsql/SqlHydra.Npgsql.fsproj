@@ -4,7 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
         <WarnOn>3390;$(WarnOn)</WarnOn>
-        <Version>0.610.0</Version>
+        <Version>0.610.1</Version>
         <Authors>Jordan Marr</Authors>
         <Description>SqlHydra.Npgsql is a dotnet tool that generates F# records for a PostgreSQL database.</Description>
         <PackageTags>F# fsharp data database orm sql</PackageTags>
@@ -14,13 +14,8 @@
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReleaseNotes>
-            SqlHydra.Query:
-            - (BREAKING) InsertBuilder `entities` operation now takes new `AtLeastOne` type as input.
-            - Better support for PostgreSQL custom types: "json" and "jsonb"
-            SqlHydra.*:
-            - Both tables and now columns can be filtered in generated types.
-            - Generated columns are now sorted by ordinal.
-        </PackageReleaseNotes>
+			SqlHydra.Npgsql: Now generates views (thanks to Margarita Krutikova!)
+		</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
