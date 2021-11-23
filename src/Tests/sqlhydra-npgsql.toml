@@ -5,3 +5,6 @@ namespace = "Npgsql.AdventureWorks"
 cli_mutable = true
 [readers]
 reader_type = "Npgsql.NpgsqlDataReader"
+[filters]
+include = [ "*" ]
+exclude = [ "*/v*", "hr/*" ]
