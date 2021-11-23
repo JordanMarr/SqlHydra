@@ -1,4 +1,4 @@
-﻿module Npgsql.Generation
+module Npgsql.Generation
 
 open Expecto
 open SqlHydra.Npgsql
@@ -85,8 +85,14 @@ let tests =
 
             let pks = allColumns |> List.filter (fun c -> c.IsPK)
             
-            Expect.equal schema.Tables.Length 69 ""
-            Expect.isTrue (pks.Length > schema.Tables.Length) "Expected at least one pk per table"
+            Expect.equal schema.Tables.Length 156 ""
+
+            let numberOfTables =
+                schema.Tables
+                |> Seq.filter (fun t -> t.Type = TableType.Table)
+                |> Seq.length
+
+            Expect.isTrue (pks.Length > numberOfTables) "Expected at least one pk per table"
             Expect.isTrue (pks.Length < allColumns.Length) "Every column should not be a PK"
         }
         

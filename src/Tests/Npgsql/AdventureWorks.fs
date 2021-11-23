@@ -28,6 +28,196 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
             | o when reader.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
         
+module hr =
+    [<CLIMutable>]
+    type d =
+        { id: Option<int>
+          departmentid: Option<int>
+          name: Option<string>
+          groupname: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type dReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.departmentid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "departmentid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.groupname = OptionalColumn(reader, getOrdinal, reader.GetString, "groupname")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              departmentid = __.departmentid.Read()
+              name = __.name.Read()
+              groupname = __.groupname.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type e =
+        { id: Option<int>
+          businessentityid: Option<int>
+          nationalidnumber: Option<string>
+          loginid: Option<string>
+          jobtitle: Option<string>
+          birthdate: Option<System.DateTime>
+          maritalstatus: Option<string>
+          gender: Option<string>
+          hiredate: Option<System.DateTime>
+          salariedflag: bool
+          vacationhours: Option<int16>
+          sickleavehours: Option<int16>
+          currentflag: bool
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime>
+          organizationnode: Option<string> }
+
+    type eReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.nationalidnumber = OptionalColumn(reader, getOrdinal, reader.GetString, "nationalidnumber")
+        member __.loginid = OptionalColumn(reader, getOrdinal, reader.GetString, "loginid")
+        member __.jobtitle = OptionalColumn(reader, getOrdinal, reader.GetString, "jobtitle")
+        member __.birthdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "birthdate")
+        member __.maritalstatus = OptionalColumn(reader, getOrdinal, reader.GetString, "maritalstatus")
+        member __.gender = OptionalColumn(reader, getOrdinal, reader.GetString, "gender")
+        member __.hiredate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "hiredate")
+        member __.salariedflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "salariedflag")
+        member __.vacationhours = OptionalColumn(reader, getOrdinal, reader.GetInt16, "vacationhours")
+        member __.sickleavehours = OptionalColumn(reader, getOrdinal, reader.GetInt16, "sickleavehours")
+        member __.currentflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "currentflag")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.organizationnode = OptionalColumn(reader, getOrdinal, reader.GetString, "organizationnode")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              nationalidnumber = __.nationalidnumber.Read()
+              loginid = __.loginid.Read()
+              jobtitle = __.jobtitle.Read()
+              birthdate = __.birthdate.Read()
+              maritalstatus = __.maritalstatus.Read()
+              gender = __.gender.Read()
+              hiredate = __.hiredate.Read()
+              salariedflag = __.salariedflag.Read()
+              vacationhours = __.vacationhours.Read()
+              sickleavehours = __.sickleavehours.Read()
+              currentflag = __.currentflag.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read()
+              organizationnode = __.organizationnode.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.salariedflag.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type edh =
+        { id: Option<int>
+          businessentityid: Option<int>
+          departmentid: Option<int16>
+          shiftid: Option<int16>
+          startdate: Option<System.DateTime>
+          enddate: Option<System.DateTime>
+          modifieddate: Option<System.DateTime> }
+
+    type edhReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.departmentid = OptionalColumn(reader, getOrdinal, reader.GetInt16, "departmentid")
+        member __.shiftid = OptionalColumn(reader, getOrdinal, reader.GetInt16, "shiftid")
+        member __.startdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
+        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              departmentid = __.departmentid.Read()
+              shiftid = __.shiftid.Read()
+              startdate = __.startdate.Read()
+              enddate = __.enddate.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type eph =
+        { id: Option<int>
+          businessentityid: Option<int>
+          ratechangedate: Option<System.DateTime>
+          rate: Option<decimal>
+          payfrequency: Option<int16>
+          modifieddate: Option<System.DateTime> }
+
+    type ephReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.ratechangedate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "ratechangedate")
+        member __.rate = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "rate")
+        member __.payfrequency = OptionalColumn(reader, getOrdinal, reader.GetInt16, "payfrequency")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              ratechangedate = __.ratechangedate.Read()
+              rate = __.rate.Read()
+              payfrequency = __.payfrequency.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type jc =
+        { id: Option<int>
+          jobcandidateid: Option<int>
+          businessentityid: Option<int>
+          resume: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type jcReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.jobcandidateid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "jobcandidateid")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.resume = OptionalColumn(reader, getOrdinal, reader.GetString, "resume")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              jobcandidateid = __.jobcandidateid.Read()
+              businessentityid = __.businessentityid.Read()
+              resume = __.resume.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type s =
+        { id: Option<int>
+          shiftid: Option<int>
+          name: Option<string>
+          starttime: Option<System.TimeSpan>
+          endtime: Option<System.TimeSpan>
+          modifieddate: Option<System.DateTime> }
+
+    type sReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.shiftid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "shiftid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.starttime = OptionalColumn(reader, getOrdinal, reader.GetTimeSpan, "starttime")
+        member __.endtime = OptionalColumn(reader, getOrdinal, reader.GetTimeSpan, "endtime")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              shiftid = __.shiftid.Read()
+              name = __.name.Read()
+              starttime = __.starttime.Read()
+              endtime = __.endtime.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
 module humanresources =
     [<CLIMutable>]
     type department =
@@ -199,6 +389,661 @@ module humanresources =
 
         member __.ReadIfNotNull() =
             if __.shiftid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vemployee =
+        { businessentityid: Option<int>
+          title: Option<string>
+          firstname: Option<string>
+          middlename: Option<string>
+          lastname: Option<string>
+          suffix: Option<string>
+          jobtitle: Option<string>
+          phonenumber: Option<string>
+          phonenumbertype: Option<string>
+          emailaddress: Option<string>
+          emailpromotion: Option<int>
+          addressline1: Option<string>
+          addressline2: Option<string>
+          city: Option<string>
+          stateprovincename: Option<string>
+          postalcode: Option<string>
+          countryregionname: Option<string>
+          additionalcontactinfo: Option<string> }
+
+    type vemployeeReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.title = OptionalColumn(reader, getOrdinal, reader.GetString, "title")
+        member __.firstname = OptionalColumn(reader, getOrdinal, reader.GetString, "firstname")
+        member __.middlename = OptionalColumn(reader, getOrdinal, reader.GetString, "middlename")
+        member __.lastname = OptionalColumn(reader, getOrdinal, reader.GetString, "lastname")
+        member __.suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "suffix")
+        member __.jobtitle = OptionalColumn(reader, getOrdinal, reader.GetString, "jobtitle")
+        member __.phonenumber = OptionalColumn(reader, getOrdinal, reader.GetString, "phonenumber")
+        member __.phonenumbertype = OptionalColumn(reader, getOrdinal, reader.GetString, "phonenumbertype")
+        member __.emailaddress = OptionalColumn(reader, getOrdinal, reader.GetString, "emailaddress")
+        member __.emailpromotion = OptionalColumn(reader, getOrdinal, reader.GetInt32, "emailpromotion")
+        member __.addressline1 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline1")
+        member __.addressline2 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline2")
+        member __.city = OptionalColumn(reader, getOrdinal, reader.GetString, "city")
+        member __.stateprovincename = OptionalColumn(reader, getOrdinal, reader.GetString, "stateprovincename")
+        member __.postalcode = OptionalColumn(reader, getOrdinal, reader.GetString, "postalcode")
+        member __.countryregionname = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregionname")
+        member __.additionalcontactinfo = OptionalColumn(reader, getOrdinal, reader.GetString, "additionalcontactinfo")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              title = __.title.Read()
+              firstname = __.firstname.Read()
+              middlename = __.middlename.Read()
+              lastname = __.lastname.Read()
+              suffix = __.suffix.Read()
+              jobtitle = __.jobtitle.Read()
+              phonenumber = __.phonenumber.Read()
+              phonenumbertype = __.phonenumbertype.Read()
+              emailaddress = __.emailaddress.Read()
+              emailpromotion = __.emailpromotion.Read()
+              addressline1 = __.addressline1.Read()
+              addressline2 = __.addressline2.Read()
+              city = __.city.Read()
+              stateprovincename = __.stateprovincename.Read()
+              postalcode = __.postalcode.Read()
+              countryregionname = __.countryregionname.Read()
+              additionalcontactinfo = __.additionalcontactinfo.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vemployeedepartment =
+        { businessentityid: Option<int>
+          title: Option<string>
+          firstname: Option<string>
+          middlename: Option<string>
+          lastname: Option<string>
+          suffix: Option<string>
+          jobtitle: Option<string>
+          department: Option<string>
+          groupname: Option<string>
+          startdate: Option<System.DateTime> }
+
+    type vemployeedepartmentReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.title = OptionalColumn(reader, getOrdinal, reader.GetString, "title")
+        member __.firstname = OptionalColumn(reader, getOrdinal, reader.GetString, "firstname")
+        member __.middlename = OptionalColumn(reader, getOrdinal, reader.GetString, "middlename")
+        member __.lastname = OptionalColumn(reader, getOrdinal, reader.GetString, "lastname")
+        member __.suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "suffix")
+        member __.jobtitle = OptionalColumn(reader, getOrdinal, reader.GetString, "jobtitle")
+        member __.department = OptionalColumn(reader, getOrdinal, reader.GetString, "department")
+        member __.groupname = OptionalColumn(reader, getOrdinal, reader.GetString, "groupname")
+        member __.startdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              title = __.title.Read()
+              firstname = __.firstname.Read()
+              middlename = __.middlename.Read()
+              lastname = __.lastname.Read()
+              suffix = __.suffix.Read()
+              jobtitle = __.jobtitle.Read()
+              department = __.department.Read()
+              groupname = __.groupname.Read()
+              startdate = __.startdate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vemployeedepartmenthistory =
+        { businessentityid: Option<int>
+          title: Option<string>
+          firstname: Option<string>
+          middlename: Option<string>
+          lastname: Option<string>
+          suffix: Option<string>
+          shift: Option<string>
+          department: Option<string>
+          groupname: Option<string>
+          startdate: Option<System.DateTime>
+          enddate: Option<System.DateTime> }
+
+    type vemployeedepartmenthistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.title = OptionalColumn(reader, getOrdinal, reader.GetString, "title")
+        member __.firstname = OptionalColumn(reader, getOrdinal, reader.GetString, "firstname")
+        member __.middlename = OptionalColumn(reader, getOrdinal, reader.GetString, "middlename")
+        member __.lastname = OptionalColumn(reader, getOrdinal, reader.GetString, "lastname")
+        member __.suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "suffix")
+        member __.shift = OptionalColumn(reader, getOrdinal, reader.GetString, "shift")
+        member __.department = OptionalColumn(reader, getOrdinal, reader.GetString, "department")
+        member __.groupname = OptionalColumn(reader, getOrdinal, reader.GetString, "groupname")
+        member __.startdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
+        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              title = __.title.Read()
+              firstname = __.firstname.Read()
+              middlename = __.middlename.Read()
+              lastname = __.lastname.Read()
+              suffix = __.suffix.Read()
+              shift = __.shift.Read()
+              department = __.department.Read()
+              groupname = __.groupname.Read()
+              startdate = __.startdate.Read()
+              enddate = __.enddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vjobcandidate =
+        { jobcandidateid: Option<int>
+          businessentityid: Option<int>
+          ``Name.Prefix``: Option<string>
+          ``Name.First``: Option<string>
+          ``Name.Middle``: Option<string>
+          ``Name.Last``: Option<string>
+          ``Name.Suffix``: Option<string>
+          Skills: Option<string>
+          ``Addr.Type``: Option<string>
+          ``Addr.Loc.CountryRegion``: Option<string>
+          ``Addr.Loc.State``: Option<string>
+          ``Addr.Loc.City``: Option<string>
+          ``Addr.PostalCode``: Option<string>
+          EMail: Option<string>
+          WebSite: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type vjobcandidateReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.jobcandidateid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "jobcandidateid")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.``Name.Prefix`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Name.Prefix")
+        member __.``Name.First`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Name.First")
+        member __.``Name.Middle`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Name.Middle")
+        member __.``Name.Last`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Name.Last")
+        member __.``Name.Suffix`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Name.Suffix")
+        member __.Skills = OptionalColumn(reader, getOrdinal, reader.GetString, "Skills")
+        member __.``Addr.Type`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Addr.Type")
+        member __.``Addr.Loc.CountryRegion`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Addr.Loc.CountryRegion")
+        member __.``Addr.Loc.State`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Addr.Loc.State")
+        member __.``Addr.Loc.City`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Addr.Loc.City")
+        member __.``Addr.PostalCode`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Addr.PostalCode")
+        member __.EMail = OptionalColumn(reader, getOrdinal, reader.GetString, "EMail")
+        member __.WebSite = OptionalColumn(reader, getOrdinal, reader.GetString, "WebSite")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { jobcandidateid = __.jobcandidateid.Read()
+              businessentityid = __.businessentityid.Read()
+              ``Name.Prefix`` = __.``Name.Prefix``.Read()
+              ``Name.First`` = __.``Name.First``.Read()
+              ``Name.Middle`` = __.``Name.Middle``.Read()
+              ``Name.Last`` = __.``Name.Last``.Read()
+              ``Name.Suffix`` = __.``Name.Suffix``.Read()
+              Skills = __.Skills.Read()
+              ``Addr.Type`` = __.``Addr.Type``.Read()
+              ``Addr.Loc.CountryRegion`` = __.``Addr.Loc.CountryRegion``.Read()
+              ``Addr.Loc.State`` = __.``Addr.Loc.State``.Read()
+              ``Addr.Loc.City`` = __.``Addr.Loc.City``.Read()
+              ``Addr.PostalCode`` = __.``Addr.PostalCode``.Read()
+              EMail = __.EMail.Read()
+              WebSite = __.WebSite.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.jobcandidateid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vjobcandidateeducation =
+        { jobcandidateid: Option<int>
+          ``Edu.Level``: Option<string>
+          ``Edu.StartDate``: Option<System.DateTime>
+          ``Edu.EndDate``: Option<System.DateTime>
+          ``Edu.Degree``: Option<string>
+          ``Edu.Major``: Option<string>
+          ``Edu.Minor``: Option<string>
+          ``Edu.GPA``: Option<string>
+          ``Edu.GPAScale``: Option<string>
+          ``Edu.School``: Option<string>
+          ``Edu.Loc.CountryRegion``: Option<string>
+          ``Edu.Loc.State``: Option<string>
+          ``Edu.Loc.City``: Option<string> }
+
+    type vjobcandidateeducationReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.jobcandidateid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "jobcandidateid")
+        member __.``Edu.Level`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Level")
+        member __.``Edu.StartDate`` = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "Edu.StartDate")
+        member __.``Edu.EndDate`` = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "Edu.EndDate")
+        member __.``Edu.Degree`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Degree")
+        member __.``Edu.Major`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Major")
+        member __.``Edu.Minor`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Minor")
+        member __.``Edu.GPA`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.GPA")
+        member __.``Edu.GPAScale`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.GPAScale")
+        member __.``Edu.School`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.School")
+        member __.``Edu.Loc.CountryRegion`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Loc.CountryRegion")
+        member __.``Edu.Loc.State`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Loc.State")
+        member __.``Edu.Loc.City`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Loc.City")
+        member __.Read() =
+            { jobcandidateid = __.jobcandidateid.Read()
+              ``Edu.Level`` = __.``Edu.Level``.Read()
+              ``Edu.StartDate`` = __.``Edu.StartDate``.Read()
+              ``Edu.EndDate`` = __.``Edu.EndDate``.Read()
+              ``Edu.Degree`` = __.``Edu.Degree``.Read()
+              ``Edu.Major`` = __.``Edu.Major``.Read()
+              ``Edu.Minor`` = __.``Edu.Minor``.Read()
+              ``Edu.GPA`` = __.``Edu.GPA``.Read()
+              ``Edu.GPAScale`` = __.``Edu.GPAScale``.Read()
+              ``Edu.School`` = __.``Edu.School``.Read()
+              ``Edu.Loc.CountryRegion`` = __.``Edu.Loc.CountryRegion``.Read()
+              ``Edu.Loc.State`` = __.``Edu.Loc.State``.Read()
+              ``Edu.Loc.City`` = __.``Edu.Loc.City``.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.jobcandidateid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vjobcandidateemployment =
+        { jobcandidateid: Option<int>
+          ``Emp.StartDate``: Option<System.DateTime>
+          ``Emp.EndDate``: Option<System.DateTime>
+          ``Emp.OrgName``: Option<string>
+          ``Emp.JobTitle``: Option<string>
+          ``Emp.Responsibility``: Option<string>
+          ``Emp.FunctionCategory``: Option<string>
+          ``Emp.IndustryCategory``: Option<string>
+          ``Emp.Loc.CountryRegion``: Option<string>
+          ``Emp.Loc.State``: Option<string>
+          ``Emp.Loc.City``: Option<string> }
+
+    type vjobcandidateemploymentReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.jobcandidateid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "jobcandidateid")
+        member __.``Emp.StartDate`` = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "Emp.StartDate")
+        member __.``Emp.EndDate`` = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "Emp.EndDate")
+        member __.``Emp.OrgName`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.OrgName")
+        member __.``Emp.JobTitle`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.JobTitle")
+        member __.``Emp.Responsibility`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.Responsibility")
+        member __.``Emp.FunctionCategory`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.FunctionCategory")
+        member __.``Emp.IndustryCategory`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.IndustryCategory")
+        member __.``Emp.Loc.CountryRegion`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.Loc.CountryRegion")
+        member __.``Emp.Loc.State`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.Loc.State")
+        member __.``Emp.Loc.City`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.Loc.City")
+        member __.Read() =
+            { jobcandidateid = __.jobcandidateid.Read()
+              ``Emp.StartDate`` = __.``Emp.StartDate``.Read()
+              ``Emp.EndDate`` = __.``Emp.EndDate``.Read()
+              ``Emp.OrgName`` = __.``Emp.OrgName``.Read()
+              ``Emp.JobTitle`` = __.``Emp.JobTitle``.Read()
+              ``Emp.Responsibility`` = __.``Emp.Responsibility``.Read()
+              ``Emp.FunctionCategory`` = __.``Emp.FunctionCategory``.Read()
+              ``Emp.IndustryCategory`` = __.``Emp.IndustryCategory``.Read()
+              ``Emp.Loc.CountryRegion`` = __.``Emp.Loc.CountryRegion``.Read()
+              ``Emp.Loc.State`` = __.``Emp.Loc.State``.Read()
+              ``Emp.Loc.City`` = __.``Emp.Loc.City``.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.jobcandidateid.IsNull() then None else Some(__.Read())
+
+module pe =
+    [<CLIMutable>]
+    type a =
+        { id: Option<int>
+          addressid: Option<int>
+          addressline1: Option<string>
+          addressline2: Option<string>
+          city: Option<string>
+          stateprovinceid: Option<int>
+          postalcode: Option<string>
+          spatiallocation: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type aReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.addressid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "addressid")
+        member __.addressline1 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline1")
+        member __.addressline2 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline2")
+        member __.city = OptionalColumn(reader, getOrdinal, reader.GetString, "city")
+        member __.stateprovinceid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "stateprovinceid")
+        member __.postalcode = OptionalColumn(reader, getOrdinal, reader.GetString, "postalcode")
+        member __.spatiallocation = OptionalColumn(reader, getOrdinal, reader.GetString, "spatiallocation")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              addressid = __.addressid.Read()
+              addressline1 = __.addressline1.Read()
+              addressline2 = __.addressline2.Read()
+              city = __.city.Read()
+              stateprovinceid = __.stateprovinceid.Read()
+              postalcode = __.postalcode.Read()
+              spatiallocation = __.spatiallocation.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type at =
+        { id: Option<int>
+          addresstypeid: Option<int>
+          name: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type atReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.addresstypeid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "addresstypeid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              addresstypeid = __.addresstypeid.Read()
+              name = __.name.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type be =
+        { id: Option<int>
+          businessentityid: Option<int>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type beReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type bea =
+        { id: Option<int>
+          businessentityid: Option<int>
+          addressid: Option<int>
+          addresstypeid: Option<int>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type beaReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.addressid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "addressid")
+        member __.addresstypeid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "addresstypeid")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              addressid = __.addressid.Read()
+              addresstypeid = __.addresstypeid.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type bec =
+        { id: Option<int>
+          businessentityid: Option<int>
+          personid: Option<int>
+          contacttypeid: Option<int>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type becReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.personid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "personid")
+        member __.contacttypeid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "contacttypeid")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              personid = __.personid.Read()
+              contacttypeid = __.contacttypeid.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type cr =
+        { countryregioncode: Option<string>
+          name: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type crReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.countryregioncode = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { countryregioncode = __.countryregioncode.Read()
+              name = __.name.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.countryregioncode.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type ct =
+        { id: Option<int>
+          contacttypeid: Option<int>
+          name: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type ctReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.contacttypeid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "contacttypeid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              contacttypeid = __.contacttypeid.Read()
+              name = __.name.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type e =
+        { id: Option<int>
+          businessentityid: Option<int>
+          emailaddressid: Option<int>
+          emailaddress: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type eReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.emailaddressid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "emailaddressid")
+        member __.emailaddress = OptionalColumn(reader, getOrdinal, reader.GetString, "emailaddress")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              emailaddressid = __.emailaddressid.Read()
+              emailaddress = __.emailaddress.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type p =
+        { id: Option<int>
+          businessentityid: Option<int>
+          persontype: Option<string>
+          namestyle: bool
+          title: Option<string>
+          firstname: Option<string>
+          middlename: Option<string>
+          lastname: Option<string>
+          suffix: Option<string>
+          emailpromotion: Option<int>
+          additionalcontactinfo: Option<string>
+          demographics: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type pReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.persontype = OptionalColumn(reader, getOrdinal, reader.GetString, "persontype")
+        member __.namestyle = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "namestyle")
+        member __.title = OptionalColumn(reader, getOrdinal, reader.GetString, "title")
+        member __.firstname = OptionalColumn(reader, getOrdinal, reader.GetString, "firstname")
+        member __.middlename = OptionalColumn(reader, getOrdinal, reader.GetString, "middlename")
+        member __.lastname = OptionalColumn(reader, getOrdinal, reader.GetString, "lastname")
+        member __.suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "suffix")
+        member __.emailpromotion = OptionalColumn(reader, getOrdinal, reader.GetInt32, "emailpromotion")
+        member __.additionalcontactinfo = OptionalColumn(reader, getOrdinal, reader.GetString, "additionalcontactinfo")
+        member __.demographics = OptionalColumn(reader, getOrdinal, reader.GetString, "demographics")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              persontype = __.persontype.Read()
+              namestyle = __.namestyle.Read()
+              title = __.title.Read()
+              firstname = __.firstname.Read()
+              middlename = __.middlename.Read()
+              lastname = __.lastname.Read()
+              suffix = __.suffix.Read()
+              emailpromotion = __.emailpromotion.Read()
+              additionalcontactinfo = __.additionalcontactinfo.Read()
+              demographics = __.demographics.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.namestyle.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pa =
+        { id: Option<int>
+          businessentityid: Option<int>
+          passwordhash: Option<string>
+          passwordsalt: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type paReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.passwordhash = OptionalColumn(reader, getOrdinal, reader.GetString, "passwordhash")
+        member __.passwordsalt = OptionalColumn(reader, getOrdinal, reader.GetString, "passwordsalt")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              passwordhash = __.passwordhash.Read()
+              passwordsalt = __.passwordsalt.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pnt =
+        { id: Option<int>
+          phonenumbertypeid: Option<int>
+          name: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type pntReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.phonenumbertypeid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "phonenumbertypeid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              phonenumbertypeid = __.phonenumbertypeid.Read()
+              name = __.name.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pp =
+        { id: Option<int>
+          businessentityid: Option<int>
+          phonenumber: Option<string>
+          phonenumbertypeid: Option<int>
+          modifieddate: Option<System.DateTime> }
+
+    type ppReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.phonenumber = OptionalColumn(reader, getOrdinal, reader.GetString, "phonenumber")
+        member __.phonenumbertypeid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "phonenumbertypeid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              phonenumber = __.phonenumber.Read()
+              phonenumbertypeid = __.phonenumbertypeid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type sp =
+        { id: Option<int>
+          stateprovinceid: Option<int>
+          stateprovincecode: Option<string>
+          countryregioncode: Option<string>
+          isonlystateprovinceflag: bool
+          name: Option<string>
+          territoryid: Option<int>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type spReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.stateprovinceid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "stateprovinceid")
+        member __.stateprovincecode = OptionalColumn(reader, getOrdinal, reader.GetString, "stateprovincecode")
+        member __.countryregioncode = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
+        member __.isonlystateprovinceflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "isonlystateprovinceflag")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.territoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              stateprovinceid = __.stateprovinceid.Read()
+              stateprovincecode = __.stateprovincecode.Read()
+              countryregioncode = __.countryregioncode.Read()
+              isonlystateprovinceflag = __.isonlystateprovinceflag.Read()
+              name = __.name.Read()
+              territoryid = __.territoryid.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.isonlystateprovinceflag.IsNull() then None else Some(__.Read())
 
 module person =
     [<CLIMutable>]
@@ -527,6 +1372,856 @@ module person =
 
         member __.ReadIfNotNull() =
             if __.stateprovinceid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vadditionalcontactinfo =
+        { businessentityid: Option<int>
+          firstname: Option<string>
+          middlename: Option<string>
+          lastname: Option<string>
+          telephonenumber: Option<string>
+          telephonespecialinstructions: Option<string>
+          street: Option<string>
+          city: Option<string>
+          stateprovince: Option<string>
+          postalcode: Option<string>
+          countryregion: Option<string>
+          homeaddressspecialinstructions: Option<string>
+          emailaddress: Option<string>
+          emailspecialinstructions: Option<string>
+          emailtelephonenumber: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type vadditionalcontactinfoReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.firstname = OptionalColumn(reader, getOrdinal, reader.GetString, "firstname")
+        member __.middlename = OptionalColumn(reader, getOrdinal, reader.GetString, "middlename")
+        member __.lastname = OptionalColumn(reader, getOrdinal, reader.GetString, "lastname")
+        member __.telephonenumber = OptionalColumn(reader, getOrdinal, reader.GetString, "telephonenumber")
+        member __.telephonespecialinstructions = OptionalColumn(reader, getOrdinal, reader.GetString, "telephonespecialinstructions")
+        member __.street = OptionalColumn(reader, getOrdinal, reader.GetString, "street")
+        member __.city = OptionalColumn(reader, getOrdinal, reader.GetString, "city")
+        member __.stateprovince = OptionalColumn(reader, getOrdinal, reader.GetString, "stateprovince")
+        member __.postalcode = OptionalColumn(reader, getOrdinal, reader.GetString, "postalcode")
+        member __.countryregion = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregion")
+        member __.homeaddressspecialinstructions = OptionalColumn(reader, getOrdinal, reader.GetString, "homeaddressspecialinstructions")
+        member __.emailaddress = OptionalColumn(reader, getOrdinal, reader.GetString, "emailaddress")
+        member __.emailspecialinstructions = OptionalColumn(reader, getOrdinal, reader.GetString, "emailspecialinstructions")
+        member __.emailtelephonenumber = OptionalColumn(reader, getOrdinal, reader.GetString, "emailtelephonenumber")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              firstname = __.firstname.Read()
+              middlename = __.middlename.Read()
+              lastname = __.lastname.Read()
+              telephonenumber = __.telephonenumber.Read()
+              telephonespecialinstructions = __.telephonespecialinstructions.Read()
+              street = __.street.Read()
+              city = __.city.Read()
+              stateprovince = __.stateprovince.Read()
+              postalcode = __.postalcode.Read()
+              countryregion = __.countryregion.Read()
+              homeaddressspecialinstructions = __.homeaddressspecialinstructions.Read()
+              emailaddress = __.emailaddress.Read()
+              emailspecialinstructions = __.emailspecialinstructions.Read()
+              emailtelephonenumber = __.emailtelephonenumber.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
+module pr =
+    [<CLIMutable>]
+    type bom =
+        { id: Option<int>
+          billofmaterialsid: Option<int>
+          productassemblyid: Option<int>
+          componentid: Option<int>
+          startdate: Option<System.DateTime>
+          enddate: Option<System.DateTime>
+          unitmeasurecode: Option<string>
+          bomlevel: Option<int16>
+          perassemblyqty: Option<decimal>
+          modifieddate: Option<System.DateTime> }
+
+    type bomReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.billofmaterialsid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "billofmaterialsid")
+        member __.productassemblyid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productassemblyid")
+        member __.componentid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "componentid")
+        member __.startdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
+        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
+        member __.unitmeasurecode = OptionalColumn(reader, getOrdinal, reader.GetString, "unitmeasurecode")
+        member __.bomlevel = OptionalColumn(reader, getOrdinal, reader.GetInt16, "bomlevel")
+        member __.perassemblyqty = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "perassemblyqty")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              billofmaterialsid = __.billofmaterialsid.Read()
+              productassemblyid = __.productassemblyid.Read()
+              componentid = __.componentid.Read()
+              startdate = __.startdate.Read()
+              enddate = __.enddate.Read()
+              unitmeasurecode = __.unitmeasurecode.Read()
+              bomlevel = __.bomlevel.Read()
+              perassemblyqty = __.perassemblyqty.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type c =
+        { id: Option<string>
+          cultureid: Option<string>
+          name: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type cReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetString, "id")
+        member __.cultureid = OptionalColumn(reader, getOrdinal, reader.GetString, "cultureid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              cultureid = __.cultureid.Read()
+              name = __.name.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type d =
+        { title: Option<string>
+          owner: Option<int>
+          folderflag: bool
+          filename: Option<string>
+          fileextension: Option<string>
+          revision: Option<string>
+          changenumber: Option<int>
+          status: Option<int16>
+          documentsummary: Option<string>
+          document: Option<byte []>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime>
+          documentnode: Option<string> }
+
+    type dReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.title = OptionalColumn(reader, getOrdinal, reader.GetString, "title")
+        member __.owner = OptionalColumn(reader, getOrdinal, reader.GetInt32, "owner")
+        member __.folderflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "folderflag")
+        member __.filename = OptionalColumn(reader, getOrdinal, reader.GetString, "filename")
+        member __.fileextension = OptionalColumn(reader, getOrdinal, reader.GetString, "fileextension")
+        member __.revision = OptionalColumn(reader, getOrdinal, reader.GetString, "revision")
+        member __.changenumber = OptionalColumn(reader, getOrdinal, reader.GetInt32, "changenumber")
+        member __.status = OptionalColumn(reader, getOrdinal, reader.GetInt16, "status")
+        member __.documentsummary = OptionalColumn(reader, getOrdinal, reader.GetString, "documentsummary")
+        member __.document = OptionalBinaryColumn(reader, getOrdinal, reader.GetValue, "document")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.documentnode = OptionalColumn(reader, getOrdinal, reader.GetString, "documentnode")
+        member __.Read() =
+            { title = __.title.Read()
+              owner = __.owner.Read()
+              folderflag = __.folderflag.Read()
+              filename = __.filename.Read()
+              fileextension = __.fileextension.Read()
+              revision = __.revision.Read()
+              changenumber = __.changenumber.Read()
+              status = __.status.Read()
+              documentsummary = __.documentsummary.Read()
+              document = __.document.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read()
+              documentnode = __.documentnode.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.folderflag.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type i =
+        { id: Option<int>
+          illustrationid: Option<int>
+          diagram: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type iReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.illustrationid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "illustrationid")
+        member __.diagram = OptionalColumn(reader, getOrdinal, reader.GetString, "diagram")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              illustrationid = __.illustrationid.Read()
+              diagram = __.diagram.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type l =
+        { id: Option<int>
+          locationid: Option<int>
+          name: Option<string>
+          costrate: Option<decimal>
+          availability: Option<decimal>
+          modifieddate: Option<System.DateTime> }
+
+    type lReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.locationid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "locationid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.costrate = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "costrate")
+        member __.availability = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "availability")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              locationid = __.locationid.Read()
+              name = __.name.Read()
+              costrate = __.costrate.Read()
+              availability = __.availability.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type p =
+        { id: Option<int>
+          productid: Option<int>
+          name: Option<string>
+          productnumber: Option<string>
+          makeflag: bool
+          finishedgoodsflag: bool
+          color: Option<string>
+          safetystocklevel: Option<int16>
+          reorderpoint: Option<int16>
+          standardcost: Option<decimal>
+          listprice: Option<decimal>
+          size: Option<string>
+          sizeunitmeasurecode: Option<string>
+          weightunitmeasurecode: Option<string>
+          weight: Option<decimal>
+          daystomanufacture: Option<int>
+          productline: Option<string>
+          ``class``: Option<string>
+          style: Option<string>
+          productsubcategoryid: Option<int>
+          productmodelid: Option<int>
+          sellstartdate: Option<System.DateTime>
+          sellenddate: Option<System.DateTime>
+          discontinueddate: Option<System.DateTime>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type pReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.productnumber = OptionalColumn(reader, getOrdinal, reader.GetString, "productnumber")
+        member __.makeflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "makeflag")
+        member __.finishedgoodsflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "finishedgoodsflag")
+        member __.color = OptionalColumn(reader, getOrdinal, reader.GetString, "color")
+        member __.safetystocklevel = OptionalColumn(reader, getOrdinal, reader.GetInt16, "safetystocklevel")
+        member __.reorderpoint = OptionalColumn(reader, getOrdinal, reader.GetInt16, "reorderpoint")
+        member __.standardcost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "standardcost")
+        member __.listprice = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "listprice")
+        member __.size = OptionalColumn(reader, getOrdinal, reader.GetString, "size")
+        member __.sizeunitmeasurecode = OptionalColumn(reader, getOrdinal, reader.GetString, "sizeunitmeasurecode")
+        member __.weightunitmeasurecode = OptionalColumn(reader, getOrdinal, reader.GetString, "weightunitmeasurecode")
+        member __.weight = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "weight")
+        member __.daystomanufacture = OptionalColumn(reader, getOrdinal, reader.GetInt32, "daystomanufacture")
+        member __.productline = OptionalColumn(reader, getOrdinal, reader.GetString, "productline")
+        member __.``class`` = OptionalColumn(reader, getOrdinal, reader.GetString, "class")
+        member __.style = OptionalColumn(reader, getOrdinal, reader.GetString, "style")
+        member __.productsubcategoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productsubcategoryid")
+        member __.productmodelid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
+        member __.sellstartdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "sellstartdate")
+        member __.sellenddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "sellenddate")
+        member __.discontinueddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "discontinueddate")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              productid = __.productid.Read()
+              name = __.name.Read()
+              productnumber = __.productnumber.Read()
+              makeflag = __.makeflag.Read()
+              finishedgoodsflag = __.finishedgoodsflag.Read()
+              color = __.color.Read()
+              safetystocklevel = __.safetystocklevel.Read()
+              reorderpoint = __.reorderpoint.Read()
+              standardcost = __.standardcost.Read()
+              listprice = __.listprice.Read()
+              size = __.size.Read()
+              sizeunitmeasurecode = __.sizeunitmeasurecode.Read()
+              weightunitmeasurecode = __.weightunitmeasurecode.Read()
+              weight = __.weight.Read()
+              daystomanufacture = __.daystomanufacture.Read()
+              productline = __.productline.Read()
+              ``class`` = __.``class``.Read()
+              style = __.style.Read()
+              productsubcategoryid = __.productsubcategoryid.Read()
+              productmodelid = __.productmodelid.Read()
+              sellstartdate = __.sellstartdate.Read()
+              sellenddate = __.sellenddate.Read()
+              discontinueddate = __.discontinueddate.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.makeflag.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pc =
+        { id: Option<int>
+          productcategoryid: Option<int>
+          name: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type pcReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.productcategoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productcategoryid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              productcategoryid = __.productcategoryid.Read()
+              name = __.name.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pch =
+        { id: Option<int>
+          productid: Option<int>
+          startdate: Option<System.DateTime>
+          enddate: Option<System.DateTime>
+          standardcost: Option<decimal>
+          modifieddate: Option<System.DateTime> }
+
+    type pchReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.startdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
+        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
+        member __.standardcost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "standardcost")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              productid = __.productid.Read()
+              startdate = __.startdate.Read()
+              enddate = __.enddate.Read()
+              standardcost = __.standardcost.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pd =
+        { id: Option<int>
+          productdescriptionid: Option<int>
+          description: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type pdReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.productdescriptionid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productdescriptionid")
+        member __.description = OptionalColumn(reader, getOrdinal, reader.GetString, "description")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              productdescriptionid = __.productdescriptionid.Read()
+              description = __.description.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pdoc =
+        { id: Option<int>
+          productid: Option<int>
+          modifieddate: Option<System.DateTime>
+          documentnode: Option<string> }
+
+    type pdocReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.documentnode = OptionalColumn(reader, getOrdinal, reader.GetString, "documentnode")
+        member __.Read() =
+            { id = __.id.Read()
+              productid = __.productid.Read()
+              modifieddate = __.modifieddate.Read()
+              documentnode = __.documentnode.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pi =
+        { id: Option<int>
+          productid: Option<int>
+          locationid: Option<int16>
+          shelf: Option<string>
+          bin: Option<int16>
+          quantity: Option<int16>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type piReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.locationid = OptionalColumn(reader, getOrdinal, reader.GetInt16, "locationid")
+        member __.shelf = OptionalColumn(reader, getOrdinal, reader.GetString, "shelf")
+        member __.bin = OptionalColumn(reader, getOrdinal, reader.GetInt16, "bin")
+        member __.quantity = OptionalColumn(reader, getOrdinal, reader.GetInt16, "quantity")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              productid = __.productid.Read()
+              locationid = __.locationid.Read()
+              shelf = __.shelf.Read()
+              bin = __.bin.Read()
+              quantity = __.quantity.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type plph =
+        { id: Option<int>
+          productid: Option<int>
+          startdate: Option<System.DateTime>
+          enddate: Option<System.DateTime>
+          listprice: Option<decimal>
+          modifieddate: Option<System.DateTime> }
+
+    type plphReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.startdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
+        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
+        member __.listprice = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "listprice")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              productid = __.productid.Read()
+              startdate = __.startdate.Read()
+              enddate = __.enddate.Read()
+              listprice = __.listprice.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pm =
+        { id: Option<int>
+          productmodelid: Option<int>
+          name: Option<string>
+          catalogdescription: Option<string>
+          instructions: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type pmReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.productmodelid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.catalogdescription = OptionalColumn(reader, getOrdinal, reader.GetString, "catalogdescription")
+        member __.instructions = OptionalColumn(reader, getOrdinal, reader.GetString, "instructions")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              productmodelid = __.productmodelid.Read()
+              name = __.name.Read()
+              catalogdescription = __.catalogdescription.Read()
+              instructions = __.instructions.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pmi =
+        { productmodelid: Option<int>
+          illustrationid: Option<int>
+          modifieddate: Option<System.DateTime> }
+
+    type pmiReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.productmodelid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
+        member __.illustrationid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "illustrationid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { productmodelid = __.productmodelid.Read()
+              illustrationid = __.illustrationid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.productmodelid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pmpdc =
+        { productmodelid: Option<int>
+          productdescriptionid: Option<int>
+          cultureid: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type pmpdcReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.productmodelid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
+        member __.productdescriptionid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productdescriptionid")
+        member __.cultureid = OptionalColumn(reader, getOrdinal, reader.GetString, "cultureid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { productmodelid = __.productmodelid.Read()
+              productdescriptionid = __.productdescriptionid.Read()
+              cultureid = __.cultureid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.productmodelid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pp =
+        { id: Option<int>
+          productphotoid: Option<int>
+          thumbnailphoto: Option<byte []>
+          thumbnailphotofilename: Option<string>
+          largephoto: Option<byte []>
+          largephotofilename: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type ppReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.productphotoid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productphotoid")
+        member __.thumbnailphoto = OptionalBinaryColumn(reader, getOrdinal, reader.GetValue, "thumbnailphoto")
+        member __.thumbnailphotofilename = OptionalColumn(reader, getOrdinal, reader.GetString, "thumbnailphotofilename")
+        member __.largephoto = OptionalBinaryColumn(reader, getOrdinal, reader.GetValue, "largephoto")
+        member __.largephotofilename = OptionalColumn(reader, getOrdinal, reader.GetString, "largephotofilename")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              productphotoid = __.productphotoid.Read()
+              thumbnailphoto = __.thumbnailphoto.Read()
+              thumbnailphotofilename = __.thumbnailphotofilename.Read()
+              largephoto = __.largephoto.Read()
+              largephotofilename = __.largephotofilename.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type ppp =
+        { productid: Option<int>
+          productphotoid: Option<int>
+          primary: bool
+          modifieddate: Option<System.DateTime> }
+
+    type pppReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.productphotoid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productphotoid")
+        member __.primary = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "primary")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { productid = __.productid.Read()
+              productphotoid = __.productphotoid.Read()
+              primary = __.primary.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.primary.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pr =
+        { id: Option<int>
+          productreviewid: Option<int>
+          productid: Option<int>
+          reviewername: Option<string>
+          reviewdate: Option<System.DateTime>
+          emailaddress: Option<string>
+          rating: Option<int>
+          comments: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type prReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.productreviewid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productreviewid")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.reviewername = OptionalColumn(reader, getOrdinal, reader.GetString, "reviewername")
+        member __.reviewdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "reviewdate")
+        member __.emailaddress = OptionalColumn(reader, getOrdinal, reader.GetString, "emailaddress")
+        member __.rating = OptionalColumn(reader, getOrdinal, reader.GetInt32, "rating")
+        member __.comments = OptionalColumn(reader, getOrdinal, reader.GetString, "comments")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              productreviewid = __.productreviewid.Read()
+              productid = __.productid.Read()
+              reviewername = __.reviewername.Read()
+              reviewdate = __.reviewdate.Read()
+              emailaddress = __.emailaddress.Read()
+              rating = __.rating.Read()
+              comments = __.comments.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type psc =
+        { id: Option<int>
+          productsubcategoryid: Option<int>
+          productcategoryid: Option<int>
+          name: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type pscReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.productsubcategoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productsubcategoryid")
+        member __.productcategoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productcategoryid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              productsubcategoryid = __.productsubcategoryid.Read()
+              productcategoryid = __.productcategoryid.Read()
+              name = __.name.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type sr =
+        { id: Option<int>
+          scrapreasonid: Option<int>
+          name: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type srReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.scrapreasonid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "scrapreasonid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              scrapreasonid = __.scrapreasonid.Read()
+              name = __.name.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type th =
+        { id: Option<int>
+          transactionid: Option<int>
+          productid: Option<int>
+          referenceorderid: Option<int>
+          referenceorderlineid: Option<int>
+          transactiondate: Option<System.DateTime>
+          transactiontype: Option<string>
+          quantity: Option<int>
+          actualcost: Option<decimal>
+          modifieddate: Option<System.DateTime> }
+
+    type thReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.transactionid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "transactionid")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.referenceorderid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "referenceorderid")
+        member __.referenceorderlineid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "referenceorderlineid")
+        member __.transactiondate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "transactiondate")
+        member __.transactiontype = OptionalColumn(reader, getOrdinal, reader.GetString, "transactiontype")
+        member __.quantity = OptionalColumn(reader, getOrdinal, reader.GetInt32, "quantity")
+        member __.actualcost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "actualcost")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              transactionid = __.transactionid.Read()
+              productid = __.productid.Read()
+              referenceorderid = __.referenceorderid.Read()
+              referenceorderlineid = __.referenceorderlineid.Read()
+              transactiondate = __.transactiondate.Read()
+              transactiontype = __.transactiontype.Read()
+              quantity = __.quantity.Read()
+              actualcost = __.actualcost.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type tha =
+        { id: Option<int>
+          transactionid: Option<int>
+          productid: Option<int>
+          referenceorderid: Option<int>
+          referenceorderlineid: Option<int>
+          transactiondate: Option<System.DateTime>
+          transactiontype: Option<string>
+          quantity: Option<int>
+          actualcost: Option<decimal>
+          modifieddate: Option<System.DateTime> }
+
+    type thaReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.transactionid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "transactionid")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.referenceorderid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "referenceorderid")
+        member __.referenceorderlineid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "referenceorderlineid")
+        member __.transactiondate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "transactiondate")
+        member __.transactiontype = OptionalColumn(reader, getOrdinal, reader.GetString, "transactiontype")
+        member __.quantity = OptionalColumn(reader, getOrdinal, reader.GetInt32, "quantity")
+        member __.actualcost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "actualcost")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              transactionid = __.transactionid.Read()
+              productid = __.productid.Read()
+              referenceorderid = __.referenceorderid.Read()
+              referenceorderlineid = __.referenceorderlineid.Read()
+              transactiondate = __.transactiondate.Read()
+              transactiontype = __.transactiontype.Read()
+              quantity = __.quantity.Read()
+              actualcost = __.actualcost.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type um =
+        { id: Option<string>
+          unitmeasurecode: Option<string>
+          name: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type umReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetString, "id")
+        member __.unitmeasurecode = OptionalColumn(reader, getOrdinal, reader.GetString, "unitmeasurecode")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              unitmeasurecode = __.unitmeasurecode.Read()
+              name = __.name.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type w =
+        { id: Option<int>
+          workorderid: Option<int>
+          productid: Option<int>
+          orderqty: Option<int>
+          scrappedqty: Option<int16>
+          startdate: Option<System.DateTime>
+          enddate: Option<System.DateTime>
+          duedate: Option<System.DateTime>
+          scrapreasonid: Option<int16>
+          modifieddate: Option<System.DateTime> }
+
+    type wReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.workorderid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "workorderid")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.orderqty = OptionalColumn(reader, getOrdinal, reader.GetInt32, "orderqty")
+        member __.scrappedqty = OptionalColumn(reader, getOrdinal, reader.GetInt16, "scrappedqty")
+        member __.startdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
+        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
+        member __.duedate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "duedate")
+        member __.scrapreasonid = OptionalColumn(reader, getOrdinal, reader.GetInt16, "scrapreasonid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              workorderid = __.workorderid.Read()
+              productid = __.productid.Read()
+              orderqty = __.orderqty.Read()
+              scrappedqty = __.scrappedqty.Read()
+              startdate = __.startdate.Read()
+              enddate = __.enddate.Read()
+              duedate = __.duedate.Read()
+              scrapreasonid = __.scrapreasonid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type wr =
+        { id: Option<int>
+          workorderid: Option<int>
+          productid: Option<int>
+          operationsequence: Option<int16>
+          locationid: Option<int16>
+          scheduledstartdate: Option<System.DateTime>
+          scheduledenddate: Option<System.DateTime>
+          actualstartdate: Option<System.DateTime>
+          actualenddate: Option<System.DateTime>
+          actualresourcehrs: Option<decimal>
+          plannedcost: Option<decimal>
+          actualcost: Option<decimal>
+          modifieddate: Option<System.DateTime> }
+
+    type wrReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.workorderid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "workorderid")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.operationsequence = OptionalColumn(reader, getOrdinal, reader.GetInt16, "operationsequence")
+        member __.locationid = OptionalColumn(reader, getOrdinal, reader.GetInt16, "locationid")
+        member __.scheduledstartdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "scheduledstartdate")
+        member __.scheduledenddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "scheduledenddate")
+        member __.actualstartdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "actualstartdate")
+        member __.actualenddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "actualenddate")
+        member __.actualresourcehrs = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "actualresourcehrs")
+        member __.plannedcost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "plannedcost")
+        member __.actualcost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "actualcost")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              workorderid = __.workorderid.Read()
+              productid = __.productid.Read()
+              operationsequence = __.operationsequence.Read()
+              locationid = __.locationid.Read()
+              scheduledstartdate = __.scheduledstartdate.Read()
+              scheduledenddate = __.scheduledenddate.Read()
+              actualstartdate = __.actualstartdate.Read()
+              actualenddate = __.actualenddate.Read()
+              actualresourcehrs = __.actualresourcehrs.Read()
+              plannedcost = __.plannedcost.Read()
+              actualcost = __.actualcost.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
 
 module production =
     [<CLIMutable>]
@@ -1175,6 +2870,132 @@ module production =
             if __.unitmeasurecode.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
+    type vproductmodelcatalogdescription =
+        { productmodelid: Option<int>
+          name: Option<string>
+          Summary: Option<string>
+          manufacturer: Option<string>
+          copyright: Option<string>
+          producturl: Option<string>
+          warrantyperiod: Option<string>
+          warrantydescription: Option<string>
+          noofyears: Option<string>
+          maintenancedescription: Option<string>
+          wheel: Option<string>
+          saddle: Option<string>
+          pedal: Option<string>
+          bikeframe: Option<string>
+          crankset: Option<string>
+          pictureangle: Option<string>
+          picturesize: Option<string>
+          productphotoid: Option<string>
+          material: Option<string>
+          color: Option<string>
+          productline: Option<string>
+          style: Option<string>
+          riderexperience: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type vproductmodelcatalogdescriptionReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.productmodelid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.Summary = OptionalColumn(reader, getOrdinal, reader.GetString, "Summary")
+        member __.manufacturer = OptionalColumn(reader, getOrdinal, reader.GetString, "manufacturer")
+        member __.copyright = OptionalColumn(reader, getOrdinal, reader.GetString, "copyright")
+        member __.producturl = OptionalColumn(reader, getOrdinal, reader.GetString, "producturl")
+        member __.warrantyperiod = OptionalColumn(reader, getOrdinal, reader.GetString, "warrantyperiod")
+        member __.warrantydescription = OptionalColumn(reader, getOrdinal, reader.GetString, "warrantydescription")
+        member __.noofyears = OptionalColumn(reader, getOrdinal, reader.GetString, "noofyears")
+        member __.maintenancedescription = OptionalColumn(reader, getOrdinal, reader.GetString, "maintenancedescription")
+        member __.wheel = OptionalColumn(reader, getOrdinal, reader.GetString, "wheel")
+        member __.saddle = OptionalColumn(reader, getOrdinal, reader.GetString, "saddle")
+        member __.pedal = OptionalColumn(reader, getOrdinal, reader.GetString, "pedal")
+        member __.bikeframe = OptionalColumn(reader, getOrdinal, reader.GetString, "bikeframe")
+        member __.crankset = OptionalColumn(reader, getOrdinal, reader.GetString, "crankset")
+        member __.pictureangle = OptionalColumn(reader, getOrdinal, reader.GetString, "pictureangle")
+        member __.picturesize = OptionalColumn(reader, getOrdinal, reader.GetString, "picturesize")
+        member __.productphotoid = OptionalColumn(reader, getOrdinal, reader.GetString, "productphotoid")
+        member __.material = OptionalColumn(reader, getOrdinal, reader.GetString, "material")
+        member __.color = OptionalColumn(reader, getOrdinal, reader.GetString, "color")
+        member __.productline = OptionalColumn(reader, getOrdinal, reader.GetString, "productline")
+        member __.style = OptionalColumn(reader, getOrdinal, reader.GetString, "style")
+        member __.riderexperience = OptionalColumn(reader, getOrdinal, reader.GetString, "riderexperience")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { productmodelid = __.productmodelid.Read()
+              name = __.name.Read()
+              Summary = __.Summary.Read()
+              manufacturer = __.manufacturer.Read()
+              copyright = __.copyright.Read()
+              producturl = __.producturl.Read()
+              warrantyperiod = __.warrantyperiod.Read()
+              warrantydescription = __.warrantydescription.Read()
+              noofyears = __.noofyears.Read()
+              maintenancedescription = __.maintenancedescription.Read()
+              wheel = __.wheel.Read()
+              saddle = __.saddle.Read()
+              pedal = __.pedal.Read()
+              bikeframe = __.bikeframe.Read()
+              crankset = __.crankset.Read()
+              pictureangle = __.pictureangle.Read()
+              picturesize = __.picturesize.Read()
+              productphotoid = __.productphotoid.Read()
+              material = __.material.Read()
+              color = __.color.Read()
+              productline = __.productline.Read()
+              style = __.style.Read()
+              riderexperience = __.riderexperience.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.productmodelid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vproductmodelinstructions =
+        { productmodelid: Option<int>
+          name: Option<string>
+          instructions: Option<string>
+          LocationID: Option<int>
+          SetupHours: Option<decimal>
+          MachineHours: Option<decimal>
+          LaborHours: Option<decimal>
+          LotSize: Option<int>
+          Step: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type vproductmodelinstructionsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.productmodelid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.instructions = OptionalColumn(reader, getOrdinal, reader.GetString, "instructions")
+        member __.LocationID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "LocationID")
+        member __.SetupHours = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SetupHours")
+        member __.MachineHours = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "MachineHours")
+        member __.LaborHours = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "LaborHours")
+        member __.LotSize = OptionalColumn(reader, getOrdinal, reader.GetInt32, "LotSize")
+        member __.Step = OptionalColumn(reader, getOrdinal, reader.GetString, "Step")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { productmodelid = __.productmodelid.Read()
+              name = __.name.Read()
+              instructions = __.instructions.Read()
+              LocationID = __.LocationID.Read()
+              SetupHours = __.SetupHours.Read()
+              MachineHours = __.MachineHours.Read()
+              LaborHours = __.LaborHours.Read()
+              LotSize = __.LotSize.Read()
+              Step = __.Step.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.productmodelid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
     type workorder =
         { workorderid: int
           productid: int
@@ -1275,6 +3096,205 @@ module providerdbtypetest =
 
         member __.ReadIfNotNull() =
             if __.id.IsNull() then None else Some(__.Read())
+
+module pu =
+    [<CLIMutable>]
+    type pod =
+        { id: Option<int>
+          purchaseorderid: Option<int>
+          purchaseorderdetailid: Option<int>
+          duedate: Option<System.DateTime>
+          orderqty: Option<int16>
+          productid: Option<int>
+          unitprice: Option<decimal>
+          receivedqty: Option<decimal>
+          rejectedqty: Option<decimal>
+          modifieddate: Option<System.DateTime> }
+
+    type podReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.purchaseorderid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "purchaseorderid")
+        member __.purchaseorderdetailid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "purchaseorderdetailid")
+        member __.duedate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "duedate")
+        member __.orderqty = OptionalColumn(reader, getOrdinal, reader.GetInt16, "orderqty")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.unitprice = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "unitprice")
+        member __.receivedqty = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "receivedqty")
+        member __.rejectedqty = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "rejectedqty")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              purchaseorderid = __.purchaseorderid.Read()
+              purchaseorderdetailid = __.purchaseorderdetailid.Read()
+              duedate = __.duedate.Read()
+              orderqty = __.orderqty.Read()
+              productid = __.productid.Read()
+              unitprice = __.unitprice.Read()
+              receivedqty = __.receivedqty.Read()
+              rejectedqty = __.rejectedqty.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type poh =
+        { id: Option<int>
+          purchaseorderid: Option<int>
+          revisionnumber: Option<int16>
+          status: Option<int16>
+          employeeid: Option<int>
+          vendorid: Option<int>
+          shipmethodid: Option<int>
+          orderdate: Option<System.DateTime>
+          shipdate: Option<System.DateTime>
+          subtotal: Option<decimal>
+          taxamt: Option<decimal>
+          freight: Option<decimal>
+          modifieddate: Option<System.DateTime> }
+
+    type pohReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.purchaseorderid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "purchaseorderid")
+        member __.revisionnumber = OptionalColumn(reader, getOrdinal, reader.GetInt16, "revisionnumber")
+        member __.status = OptionalColumn(reader, getOrdinal, reader.GetInt16, "status")
+        member __.employeeid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "employeeid")
+        member __.vendorid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "vendorid")
+        member __.shipmethodid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "shipmethodid")
+        member __.orderdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "orderdate")
+        member __.shipdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "shipdate")
+        member __.subtotal = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "subtotal")
+        member __.taxamt = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "taxamt")
+        member __.freight = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "freight")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              purchaseorderid = __.purchaseorderid.Read()
+              revisionnumber = __.revisionnumber.Read()
+              status = __.status.Read()
+              employeeid = __.employeeid.Read()
+              vendorid = __.vendorid.Read()
+              shipmethodid = __.shipmethodid.Read()
+              orderdate = __.orderdate.Read()
+              shipdate = __.shipdate.Read()
+              subtotal = __.subtotal.Read()
+              taxamt = __.taxamt.Read()
+              freight = __.freight.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pv =
+        { id: Option<int>
+          productid: Option<int>
+          businessentityid: Option<int>
+          averageleadtime: Option<int>
+          standardprice: Option<decimal>
+          lastreceiptcost: Option<decimal>
+          lastreceiptdate: Option<System.DateTime>
+          minorderqty: Option<int>
+          maxorderqty: Option<int>
+          onorderqty: Option<int>
+          unitmeasurecode: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type pvReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.averageleadtime = OptionalColumn(reader, getOrdinal, reader.GetInt32, "averageleadtime")
+        member __.standardprice = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "standardprice")
+        member __.lastreceiptcost = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "lastreceiptcost")
+        member __.lastreceiptdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "lastreceiptdate")
+        member __.minorderqty = OptionalColumn(reader, getOrdinal, reader.GetInt32, "minorderqty")
+        member __.maxorderqty = OptionalColumn(reader, getOrdinal, reader.GetInt32, "maxorderqty")
+        member __.onorderqty = OptionalColumn(reader, getOrdinal, reader.GetInt32, "onorderqty")
+        member __.unitmeasurecode = OptionalColumn(reader, getOrdinal, reader.GetString, "unitmeasurecode")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              productid = __.productid.Read()
+              businessentityid = __.businessentityid.Read()
+              averageleadtime = __.averageleadtime.Read()
+              standardprice = __.standardprice.Read()
+              lastreceiptcost = __.lastreceiptcost.Read()
+              lastreceiptdate = __.lastreceiptdate.Read()
+              minorderqty = __.minorderqty.Read()
+              maxorderqty = __.maxorderqty.Read()
+              onorderqty = __.onorderqty.Read()
+              unitmeasurecode = __.unitmeasurecode.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type sm =
+        { id: Option<int>
+          shipmethodid: Option<int>
+          name: Option<string>
+          shipbase: Option<decimal>
+          shiprate: Option<decimal>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type smReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.shipmethodid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "shipmethodid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.shipbase = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "shipbase")
+        member __.shiprate = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "shiprate")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              shipmethodid = __.shipmethodid.Read()
+              name = __.name.Read()
+              shipbase = __.shipbase.Read()
+              shiprate = __.shiprate.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type v =
+        { id: Option<int>
+          businessentityid: Option<int>
+          accountnumber: Option<string>
+          name: Option<string>
+          creditrating: Option<int16>
+          preferredvendorstatus: bool
+          activeflag: bool
+          purchasingwebserviceurl: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type vReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.accountnumber = OptionalColumn(reader, getOrdinal, reader.GetString, "accountnumber")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.creditrating = OptionalColumn(reader, getOrdinal, reader.GetInt16, "creditrating")
+        member __.preferredvendorstatus = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "preferredvendorstatus")
+        member __.activeflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "activeflag")
+        member __.purchasingwebserviceurl = OptionalColumn(reader, getOrdinal, reader.GetString, "purchasingwebserviceurl")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              accountnumber = __.accountnumber.Read()
+              name = __.name.Read()
+              creditrating = __.creditrating.Read()
+              preferredvendorstatus = __.preferredvendorstatus.Read()
+              activeflag = __.activeflag.Read()
+              purchasingwebserviceurl = __.purchasingwebserviceurl.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.preferredvendorstatus.IsNull() then None else Some(__.Read())
 
 module purchasing =
     [<CLIMutable>]
@@ -1459,6 +3479,709 @@ module purchasing =
 
         member __.ReadIfNotNull() =
             if __.businessentityid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vvendorwithaddresses =
+        { businessentityid: Option<int>
+          name: Option<string>
+          addresstype: Option<string>
+          addressline1: Option<string>
+          addressline2: Option<string>
+          city: Option<string>
+          stateprovincename: Option<string>
+          postalcode: Option<string>
+          countryregionname: Option<string> }
+
+    type vvendorwithaddressesReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.addresstype = OptionalColumn(reader, getOrdinal, reader.GetString, "addresstype")
+        member __.addressline1 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline1")
+        member __.addressline2 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline2")
+        member __.city = OptionalColumn(reader, getOrdinal, reader.GetString, "city")
+        member __.stateprovincename = OptionalColumn(reader, getOrdinal, reader.GetString, "stateprovincename")
+        member __.postalcode = OptionalColumn(reader, getOrdinal, reader.GetString, "postalcode")
+        member __.countryregionname = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregionname")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              name = __.name.Read()
+              addresstype = __.addresstype.Read()
+              addressline1 = __.addressline1.Read()
+              addressline2 = __.addressline2.Read()
+              city = __.city.Read()
+              stateprovincename = __.stateprovincename.Read()
+              postalcode = __.postalcode.Read()
+              countryregionname = __.countryregionname.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vvendorwithcontacts =
+        { businessentityid: Option<int>
+          name: Option<string>
+          contacttype: Option<string>
+          title: Option<string>
+          firstname: Option<string>
+          middlename: Option<string>
+          lastname: Option<string>
+          suffix: Option<string>
+          phonenumber: Option<string>
+          phonenumbertype: Option<string>
+          emailaddress: Option<string>
+          emailpromotion: Option<int> }
+
+    type vvendorwithcontactsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.contacttype = OptionalColumn(reader, getOrdinal, reader.GetString, "contacttype")
+        member __.title = OptionalColumn(reader, getOrdinal, reader.GetString, "title")
+        member __.firstname = OptionalColumn(reader, getOrdinal, reader.GetString, "firstname")
+        member __.middlename = OptionalColumn(reader, getOrdinal, reader.GetString, "middlename")
+        member __.lastname = OptionalColumn(reader, getOrdinal, reader.GetString, "lastname")
+        member __.suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "suffix")
+        member __.phonenumber = OptionalColumn(reader, getOrdinal, reader.GetString, "phonenumber")
+        member __.phonenumbertype = OptionalColumn(reader, getOrdinal, reader.GetString, "phonenumbertype")
+        member __.emailaddress = OptionalColumn(reader, getOrdinal, reader.GetString, "emailaddress")
+        member __.emailpromotion = OptionalColumn(reader, getOrdinal, reader.GetInt32, "emailpromotion")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              name = __.name.Read()
+              contacttype = __.contacttype.Read()
+              title = __.title.Read()
+              firstname = __.firstname.Read()
+              middlename = __.middlename.Read()
+              lastname = __.lastname.Read()
+              suffix = __.suffix.Read()
+              phonenumber = __.phonenumber.Read()
+              phonenumbertype = __.phonenumbertype.Read()
+              emailaddress = __.emailaddress.Read()
+              emailpromotion = __.emailpromotion.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
+module sa =
+    [<CLIMutable>]
+    type c =
+        { id: Option<int>
+          customerid: Option<int>
+          personid: Option<int>
+          storeid: Option<int>
+          territoryid: Option<int>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type cReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.customerid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "customerid")
+        member __.personid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "personid")
+        member __.storeid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "storeid")
+        member __.territoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              customerid = __.customerid.Read()
+              personid = __.personid.Read()
+              storeid = __.storeid.Read()
+              territoryid = __.territoryid.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type cc =
+        { id: Option<int>
+          creditcardid: Option<int>
+          cardtype: Option<string>
+          cardnumber: Option<string>
+          expmonth: Option<int16>
+          expyear: Option<int16>
+          modifieddate: Option<System.DateTime> }
+
+    type ccReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.creditcardid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "creditcardid")
+        member __.cardtype = OptionalColumn(reader, getOrdinal, reader.GetString, "cardtype")
+        member __.cardnumber = OptionalColumn(reader, getOrdinal, reader.GetString, "cardnumber")
+        member __.expmonth = OptionalColumn(reader, getOrdinal, reader.GetInt16, "expmonth")
+        member __.expyear = OptionalColumn(reader, getOrdinal, reader.GetInt16, "expyear")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              creditcardid = __.creditcardid.Read()
+              cardtype = __.cardtype.Read()
+              cardnumber = __.cardnumber.Read()
+              expmonth = __.expmonth.Read()
+              expyear = __.expyear.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type cr =
+        { currencyrateid: Option<int>
+          currencyratedate: Option<System.DateTime>
+          fromcurrencycode: Option<string>
+          tocurrencycode: Option<string>
+          averagerate: Option<decimal>
+          endofdayrate: Option<decimal>
+          modifieddate: Option<System.DateTime> }
+
+    type crReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.currencyrateid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "currencyrateid")
+        member __.currencyratedate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "currencyratedate")
+        member __.fromcurrencycode = OptionalColumn(reader, getOrdinal, reader.GetString, "fromcurrencycode")
+        member __.tocurrencycode = OptionalColumn(reader, getOrdinal, reader.GetString, "tocurrencycode")
+        member __.averagerate = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "averagerate")
+        member __.endofdayrate = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "endofdayrate")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { currencyrateid = __.currencyrateid.Read()
+              currencyratedate = __.currencyratedate.Read()
+              fromcurrencycode = __.fromcurrencycode.Read()
+              tocurrencycode = __.tocurrencycode.Read()
+              averagerate = __.averagerate.Read()
+              endofdayrate = __.endofdayrate.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.currencyrateid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type crc =
+        { countryregioncode: Option<string>
+          currencycode: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type crcReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.countryregioncode = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
+        member __.currencycode = OptionalColumn(reader, getOrdinal, reader.GetString, "currencycode")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { countryregioncode = __.countryregioncode.Read()
+              currencycode = __.currencycode.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.countryregioncode.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type cu =
+        { id: Option<string>
+          currencycode: Option<string>
+          name: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type cuReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetString, "id")
+        member __.currencycode = OptionalColumn(reader, getOrdinal, reader.GetString, "currencycode")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              currencycode = __.currencycode.Read()
+              name = __.name.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type pcc =
+        { id: Option<int>
+          businessentityid: Option<int>
+          creditcardid: Option<int>
+          modifieddate: Option<System.DateTime> }
+
+    type pccReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.creditcardid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "creditcardid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              creditcardid = __.creditcardid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type s =
+        { id: Option<int>
+          businessentityid: Option<int>
+          name: Option<string>
+          salespersonid: Option<int>
+          demographics: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type sReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.salespersonid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salespersonid")
+        member __.demographics = OptionalColumn(reader, getOrdinal, reader.GetString, "demographics")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              name = __.name.Read()
+              salespersonid = __.salespersonid.Read()
+              demographics = __.demographics.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type sci =
+        { id: Option<int>
+          shoppingcartitemid: Option<int>
+          shoppingcartid: Option<string>
+          quantity: Option<int>
+          productid: Option<int>
+          datecreated: Option<System.DateTime>
+          modifieddate: Option<System.DateTime> }
+
+    type sciReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.shoppingcartitemid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "shoppingcartitemid")
+        member __.shoppingcartid = OptionalColumn(reader, getOrdinal, reader.GetString, "shoppingcartid")
+        member __.quantity = OptionalColumn(reader, getOrdinal, reader.GetInt32, "quantity")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.datecreated = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "datecreated")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              shoppingcartitemid = __.shoppingcartitemid.Read()
+              shoppingcartid = __.shoppingcartid.Read()
+              quantity = __.quantity.Read()
+              productid = __.productid.Read()
+              datecreated = __.datecreated.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type so =
+        { id: Option<int>
+          specialofferid: Option<int>
+          description: Option<string>
+          discountpct: Option<decimal>
+          ``type``: Option<string>
+          category: Option<string>
+          startdate: Option<System.DateTime>
+          enddate: Option<System.DateTime>
+          minqty: Option<int>
+          maxqty: Option<int>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type soReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.specialofferid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "specialofferid")
+        member __.description = OptionalColumn(reader, getOrdinal, reader.GetString, "description")
+        member __.discountpct = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "discountpct")
+        member __.``type`` = OptionalColumn(reader, getOrdinal, reader.GetString, "type")
+        member __.category = OptionalColumn(reader, getOrdinal, reader.GetString, "category")
+        member __.startdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
+        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
+        member __.minqty = OptionalColumn(reader, getOrdinal, reader.GetInt32, "minqty")
+        member __.maxqty = OptionalColumn(reader, getOrdinal, reader.GetInt32, "maxqty")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              specialofferid = __.specialofferid.Read()
+              description = __.description.Read()
+              discountpct = __.discountpct.Read()
+              ``type`` = __.``type``.Read()
+              category = __.category.Read()
+              startdate = __.startdate.Read()
+              enddate = __.enddate.Read()
+              minqty = __.minqty.Read()
+              maxqty = __.maxqty.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type sod =
+        { id: Option<int>
+          salesorderid: Option<int>
+          salesorderdetailid: Option<int>
+          carriertrackingnumber: Option<string>
+          orderqty: Option<int16>
+          productid: Option<int>
+          specialofferid: Option<int>
+          unitprice: Option<decimal>
+          unitpricediscount: Option<decimal>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type sodReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.salesorderid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salesorderid")
+        member __.salesorderdetailid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salesorderdetailid")
+        member __.carriertrackingnumber = OptionalColumn(reader, getOrdinal, reader.GetString, "carriertrackingnumber")
+        member __.orderqty = OptionalColumn(reader, getOrdinal, reader.GetInt16, "orderqty")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.specialofferid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "specialofferid")
+        member __.unitprice = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "unitprice")
+        member __.unitpricediscount = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "unitpricediscount")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              salesorderid = __.salesorderid.Read()
+              salesorderdetailid = __.salesorderdetailid.Read()
+              carriertrackingnumber = __.carriertrackingnumber.Read()
+              orderqty = __.orderqty.Read()
+              productid = __.productid.Read()
+              specialofferid = __.specialofferid.Read()
+              unitprice = __.unitprice.Read()
+              unitpricediscount = __.unitpricediscount.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type soh =
+        { id: Option<int>
+          salesorderid: Option<int>
+          revisionnumber: Option<int16>
+          orderdate: Option<System.DateTime>
+          duedate: Option<System.DateTime>
+          shipdate: Option<System.DateTime>
+          status: Option<int16>
+          onlineorderflag: bool
+          purchaseordernumber: Option<string>
+          accountnumber: Option<string>
+          customerid: Option<int>
+          salespersonid: Option<int>
+          territoryid: Option<int>
+          billtoaddressid: Option<int>
+          shiptoaddressid: Option<int>
+          shipmethodid: Option<int>
+          creditcardid: Option<int>
+          creditcardapprovalcode: Option<string>
+          currencyrateid: Option<int>
+          subtotal: Option<decimal>
+          taxamt: Option<decimal>
+          freight: Option<decimal>
+          totaldue: Option<decimal>
+          comment: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type sohReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.salesorderid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salesorderid")
+        member __.revisionnumber = OptionalColumn(reader, getOrdinal, reader.GetInt16, "revisionnumber")
+        member __.orderdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "orderdate")
+        member __.duedate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "duedate")
+        member __.shipdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "shipdate")
+        member __.status = OptionalColumn(reader, getOrdinal, reader.GetInt16, "status")
+        member __.onlineorderflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "onlineorderflag")
+        member __.purchaseordernumber = OptionalColumn(reader, getOrdinal, reader.GetString, "purchaseordernumber")
+        member __.accountnumber = OptionalColumn(reader, getOrdinal, reader.GetString, "accountnumber")
+        member __.customerid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "customerid")
+        member __.salespersonid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salespersonid")
+        member __.territoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
+        member __.billtoaddressid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "billtoaddressid")
+        member __.shiptoaddressid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "shiptoaddressid")
+        member __.shipmethodid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "shipmethodid")
+        member __.creditcardid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "creditcardid")
+        member __.creditcardapprovalcode = OptionalColumn(reader, getOrdinal, reader.GetString, "creditcardapprovalcode")
+        member __.currencyrateid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "currencyrateid")
+        member __.subtotal = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "subtotal")
+        member __.taxamt = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "taxamt")
+        member __.freight = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "freight")
+        member __.totaldue = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "totaldue")
+        member __.comment = OptionalColumn(reader, getOrdinal, reader.GetString, "comment")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              salesorderid = __.salesorderid.Read()
+              revisionnumber = __.revisionnumber.Read()
+              orderdate = __.orderdate.Read()
+              duedate = __.duedate.Read()
+              shipdate = __.shipdate.Read()
+              status = __.status.Read()
+              onlineorderflag = __.onlineorderflag.Read()
+              purchaseordernumber = __.purchaseordernumber.Read()
+              accountnumber = __.accountnumber.Read()
+              customerid = __.customerid.Read()
+              salespersonid = __.salespersonid.Read()
+              territoryid = __.territoryid.Read()
+              billtoaddressid = __.billtoaddressid.Read()
+              shiptoaddressid = __.shiptoaddressid.Read()
+              shipmethodid = __.shipmethodid.Read()
+              creditcardid = __.creditcardid.Read()
+              creditcardapprovalcode = __.creditcardapprovalcode.Read()
+              currencyrateid = __.currencyrateid.Read()
+              subtotal = __.subtotal.Read()
+              taxamt = __.taxamt.Read()
+              freight = __.freight.Read()
+              totaldue = __.totaldue.Read()
+              comment = __.comment.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.onlineorderflag.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type sohsr =
+        { salesorderid: Option<int>
+          salesreasonid: Option<int>
+          modifieddate: Option<System.DateTime> }
+
+    type sohsrReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.salesorderid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salesorderid")
+        member __.salesreasonid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salesreasonid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { salesorderid = __.salesorderid.Read()
+              salesreasonid = __.salesreasonid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.salesorderid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type sop =
+        { id: Option<int>
+          specialofferid: Option<int>
+          productid: Option<int>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type sopReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.specialofferid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "specialofferid")
+        member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              specialofferid = __.specialofferid.Read()
+              productid = __.productid.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type sp =
+        { id: Option<int>
+          businessentityid: Option<int>
+          territoryid: Option<int>
+          salesquota: Option<decimal>
+          bonus: Option<decimal>
+          commissionpct: Option<decimal>
+          salesytd: Option<decimal>
+          saleslastyear: Option<decimal>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type spReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.territoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
+        member __.salesquota = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "salesquota")
+        member __.bonus = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "bonus")
+        member __.commissionpct = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "commissionpct")
+        member __.salesytd = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "salesytd")
+        member __.saleslastyear = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "saleslastyear")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              territoryid = __.territoryid.Read()
+              salesquota = __.salesquota.Read()
+              bonus = __.bonus.Read()
+              commissionpct = __.commissionpct.Read()
+              salesytd = __.salesytd.Read()
+              saleslastyear = __.saleslastyear.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type spqh =
+        { id: Option<int>
+          businessentityid: Option<int>
+          quotadate: Option<System.DateTime>
+          salesquota: Option<decimal>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type spqhReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.quotadate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "quotadate")
+        member __.salesquota = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "salesquota")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              quotadate = __.quotadate.Read()
+              salesquota = __.salesquota.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type sr =
+        { id: Option<int>
+          salesreasonid: Option<int>
+          name: Option<string>
+          reasontype: Option<string>
+          modifieddate: Option<System.DateTime> }
+
+    type srReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.salesreasonid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salesreasonid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.reasontype = OptionalColumn(reader, getOrdinal, reader.GetString, "reasontype")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              salesreasonid = __.salesreasonid.Read()
+              name = __.name.Read()
+              reasontype = __.reasontype.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type st =
+        { id: Option<int>
+          territoryid: Option<int>
+          name: Option<string>
+          countryregioncode: Option<string>
+          group: Option<string>
+          salesytd: Option<decimal>
+          saleslastyear: Option<decimal>
+          costytd: Option<decimal>
+          costlastyear: Option<decimal>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type stReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.territoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.countryregioncode = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
+        member __.group = OptionalColumn(reader, getOrdinal, reader.GetString, "group")
+        member __.salesytd = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "salesytd")
+        member __.saleslastyear = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "saleslastyear")
+        member __.costytd = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "costytd")
+        member __.costlastyear = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "costlastyear")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              territoryid = __.territoryid.Read()
+              name = __.name.Read()
+              countryregioncode = __.countryregioncode.Read()
+              group = __.group.Read()
+              salesytd = __.salesytd.Read()
+              saleslastyear = __.saleslastyear.Read()
+              costytd = __.costytd.Read()
+              costlastyear = __.costlastyear.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type sth =
+        { id: Option<int>
+          businessentityid: Option<int>
+          territoryid: Option<int>
+          startdate: Option<System.DateTime>
+          enddate: Option<System.DateTime>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type sthReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.territoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
+        member __.startdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
+        member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              businessentityid = __.businessentityid.Read()
+              territoryid = __.territoryid.Read()
+              startdate = __.startdate.Read()
+              enddate = __.enddate.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type tr =
+        { id: Option<int>
+          salestaxrateid: Option<int>
+          stateprovinceid: Option<int>
+          taxtype: Option<int16>
+          taxrate: Option<decimal>
+          name: Option<string>
+          rowguid: Option<System.Guid>
+          modifieddate: Option<System.DateTime> }
+
+    type trReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = OptionalColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.salestaxrateid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salestaxrateid")
+        member __.stateprovinceid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "stateprovinceid")
+        member __.taxtype = OptionalColumn(reader, getOrdinal, reader.GetInt16, "taxtype")
+        member __.taxrate = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "taxrate")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.rowguid = OptionalColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
+        member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
+        member __.Read() =
+            { id = __.id.Read()
+              salestaxrateid = __.salestaxrateid.Read()
+              stateprovinceid = __.stateprovinceid.Read()
+              taxtype = __.taxtype.Read()
+              taxrate = __.taxrate.Read()
+              name = __.name.Read()
+              rowguid = __.rowguid.Read()
+              modifieddate = __.modifieddate.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
 
 module sales =
     [<CLIMutable>]
@@ -2034,6 +4757,375 @@ module sales =
         member __.ReadIfNotNull() =
             if __.businessentityid.IsNull() then None else Some(__.Read())
 
+    [<CLIMutable>]
+    type vindividualcustomer =
+        { businessentityid: Option<int>
+          title: Option<string>
+          firstname: Option<string>
+          middlename: Option<string>
+          lastname: Option<string>
+          suffix: Option<string>
+          phonenumber: Option<string>
+          phonenumbertype: Option<string>
+          emailaddress: Option<string>
+          emailpromotion: Option<int>
+          addresstype: Option<string>
+          addressline1: Option<string>
+          addressline2: Option<string>
+          city: Option<string>
+          stateprovincename: Option<string>
+          postalcode: Option<string>
+          countryregionname: Option<string>
+          demographics: Option<string> }
+
+    type vindividualcustomerReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.title = OptionalColumn(reader, getOrdinal, reader.GetString, "title")
+        member __.firstname = OptionalColumn(reader, getOrdinal, reader.GetString, "firstname")
+        member __.middlename = OptionalColumn(reader, getOrdinal, reader.GetString, "middlename")
+        member __.lastname = OptionalColumn(reader, getOrdinal, reader.GetString, "lastname")
+        member __.suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "suffix")
+        member __.phonenumber = OptionalColumn(reader, getOrdinal, reader.GetString, "phonenumber")
+        member __.phonenumbertype = OptionalColumn(reader, getOrdinal, reader.GetString, "phonenumbertype")
+        member __.emailaddress = OptionalColumn(reader, getOrdinal, reader.GetString, "emailaddress")
+        member __.emailpromotion = OptionalColumn(reader, getOrdinal, reader.GetInt32, "emailpromotion")
+        member __.addresstype = OptionalColumn(reader, getOrdinal, reader.GetString, "addresstype")
+        member __.addressline1 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline1")
+        member __.addressline2 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline2")
+        member __.city = OptionalColumn(reader, getOrdinal, reader.GetString, "city")
+        member __.stateprovincename = OptionalColumn(reader, getOrdinal, reader.GetString, "stateprovincename")
+        member __.postalcode = OptionalColumn(reader, getOrdinal, reader.GetString, "postalcode")
+        member __.countryregionname = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregionname")
+        member __.demographics = OptionalColumn(reader, getOrdinal, reader.GetString, "demographics")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              title = __.title.Read()
+              firstname = __.firstname.Read()
+              middlename = __.middlename.Read()
+              lastname = __.lastname.Read()
+              suffix = __.suffix.Read()
+              phonenumber = __.phonenumber.Read()
+              phonenumbertype = __.phonenumbertype.Read()
+              emailaddress = __.emailaddress.Read()
+              emailpromotion = __.emailpromotion.Read()
+              addresstype = __.addresstype.Read()
+              addressline1 = __.addressline1.Read()
+              addressline2 = __.addressline2.Read()
+              city = __.city.Read()
+              stateprovincename = __.stateprovincename.Read()
+              postalcode = __.postalcode.Read()
+              countryregionname = __.countryregionname.Read()
+              demographics = __.demographics.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vpersondemographics =
+        { businessentityid: Option<int>
+          totalpurchaseytd: Option<decimal>
+          datefirstpurchase: Option<System.DateTime>
+          birthdate: Option<System.DateTime>
+          maritalstatus: Option<string>
+          yearlyincome: Option<string>
+          gender: Option<string>
+          totalchildren: Option<int>
+          numberchildrenathome: Option<int>
+          education: Option<string>
+          occupation: Option<string>
+          homeownerflag: Option<bool>
+          numbercarsowned: Option<int> }
+
+    type vpersondemographicsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.totalpurchaseytd = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "totalpurchaseytd")
+        member __.datefirstpurchase = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "datefirstpurchase")
+        member __.birthdate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "birthdate")
+        member __.maritalstatus = OptionalColumn(reader, getOrdinal, reader.GetString, "maritalstatus")
+        member __.yearlyincome = OptionalColumn(reader, getOrdinal, reader.GetString, "yearlyincome")
+        member __.gender = OptionalColumn(reader, getOrdinal, reader.GetString, "gender")
+        member __.totalchildren = OptionalColumn(reader, getOrdinal, reader.GetInt32, "totalchildren")
+        member __.numberchildrenathome = OptionalColumn(reader, getOrdinal, reader.GetInt32, "numberchildrenathome")
+        member __.education = OptionalColumn(reader, getOrdinal, reader.GetString, "education")
+        member __.occupation = OptionalColumn(reader, getOrdinal, reader.GetString, "occupation")
+        member __.homeownerflag = OptionalColumn(reader, getOrdinal, reader.GetBoolean, "homeownerflag")
+        member __.numbercarsowned = OptionalColumn(reader, getOrdinal, reader.GetInt32, "numbercarsowned")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              totalpurchaseytd = __.totalpurchaseytd.Read()
+              datefirstpurchase = __.datefirstpurchase.Read()
+              birthdate = __.birthdate.Read()
+              maritalstatus = __.maritalstatus.Read()
+              yearlyincome = __.yearlyincome.Read()
+              gender = __.gender.Read()
+              totalchildren = __.totalchildren.Read()
+              numberchildrenathome = __.numberchildrenathome.Read()
+              education = __.education.Read()
+              occupation = __.occupation.Read()
+              homeownerflag = __.homeownerflag.Read()
+              numbercarsowned = __.numbercarsowned.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vsalesperson =
+        { businessentityid: Option<int>
+          title: Option<string>
+          firstname: Option<string>
+          middlename: Option<string>
+          lastname: Option<string>
+          suffix: Option<string>
+          jobtitle: Option<string>
+          phonenumber: Option<string>
+          phonenumbertype: Option<string>
+          emailaddress: Option<string>
+          emailpromotion: Option<int>
+          addressline1: Option<string>
+          addressline2: Option<string>
+          city: Option<string>
+          stateprovincename: Option<string>
+          postalcode: Option<string>
+          countryregionname: Option<string>
+          territoryname: Option<string>
+          territorygroup: Option<string>
+          salesquota: Option<decimal>
+          salesytd: Option<decimal>
+          saleslastyear: Option<decimal> }
+
+    type vsalespersonReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.title = OptionalColumn(reader, getOrdinal, reader.GetString, "title")
+        member __.firstname = OptionalColumn(reader, getOrdinal, reader.GetString, "firstname")
+        member __.middlename = OptionalColumn(reader, getOrdinal, reader.GetString, "middlename")
+        member __.lastname = OptionalColumn(reader, getOrdinal, reader.GetString, "lastname")
+        member __.suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "suffix")
+        member __.jobtitle = OptionalColumn(reader, getOrdinal, reader.GetString, "jobtitle")
+        member __.phonenumber = OptionalColumn(reader, getOrdinal, reader.GetString, "phonenumber")
+        member __.phonenumbertype = OptionalColumn(reader, getOrdinal, reader.GetString, "phonenumbertype")
+        member __.emailaddress = OptionalColumn(reader, getOrdinal, reader.GetString, "emailaddress")
+        member __.emailpromotion = OptionalColumn(reader, getOrdinal, reader.GetInt32, "emailpromotion")
+        member __.addressline1 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline1")
+        member __.addressline2 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline2")
+        member __.city = OptionalColumn(reader, getOrdinal, reader.GetString, "city")
+        member __.stateprovincename = OptionalColumn(reader, getOrdinal, reader.GetString, "stateprovincename")
+        member __.postalcode = OptionalColumn(reader, getOrdinal, reader.GetString, "postalcode")
+        member __.countryregionname = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregionname")
+        member __.territoryname = OptionalColumn(reader, getOrdinal, reader.GetString, "territoryname")
+        member __.territorygroup = OptionalColumn(reader, getOrdinal, reader.GetString, "territorygroup")
+        member __.salesquota = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "salesquota")
+        member __.salesytd = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "salesytd")
+        member __.saleslastyear = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "saleslastyear")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              title = __.title.Read()
+              firstname = __.firstname.Read()
+              middlename = __.middlename.Read()
+              lastname = __.lastname.Read()
+              suffix = __.suffix.Read()
+              jobtitle = __.jobtitle.Read()
+              phonenumber = __.phonenumber.Read()
+              phonenumbertype = __.phonenumbertype.Read()
+              emailaddress = __.emailaddress.Read()
+              emailpromotion = __.emailpromotion.Read()
+              addressline1 = __.addressline1.Read()
+              addressline2 = __.addressline2.Read()
+              city = __.city.Read()
+              stateprovincename = __.stateprovincename.Read()
+              postalcode = __.postalcode.Read()
+              countryregionname = __.countryregionname.Read()
+              territoryname = __.territoryname.Read()
+              territorygroup = __.territorygroup.Read()
+              salesquota = __.salesquota.Read()
+              salesytd = __.salesytd.Read()
+              saleslastyear = __.saleslastyear.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vsalespersonsalesbyfiscalyears =
+        { SalesPersonID: Option<int>
+          FullName: Option<string>
+          JobTitle: Option<string>
+          SalesTerritory: Option<string>
+          ``2012``: Option<decimal>
+          ``2013``: Option<decimal>
+          ``2014``: Option<decimal> }
+
+    type vsalespersonsalesbyfiscalyearsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.SalesPersonID = OptionalColumn(reader, getOrdinal, reader.GetInt32, "SalesPersonID")
+        member __.FullName = OptionalColumn(reader, getOrdinal, reader.GetString, "FullName")
+        member __.JobTitle = OptionalColumn(reader, getOrdinal, reader.GetString, "JobTitle")
+        member __.SalesTerritory = OptionalColumn(reader, getOrdinal, reader.GetString, "SalesTerritory")
+        member __.``2012`` = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "2012")
+        member __.``2013`` = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "2013")
+        member __.``2014`` = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "2014")
+        member __.Read() =
+            { SalesPersonID = __.SalesPersonID.Read()
+              FullName = __.FullName.Read()
+              JobTitle = __.JobTitle.Read()
+              SalesTerritory = __.SalesTerritory.Read()
+              ``2012`` = __.``2012``.Read()
+              ``2013`` = __.``2013``.Read()
+              ``2014`` = __.``2014``.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.SalesPersonID.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vsalespersonsalesbyfiscalyearsdata =
+        { salespersonid: Option<int>
+          fullname: Option<string>
+          jobtitle: Option<string>
+          salesterritory: Option<string>
+          salestotal: Option<decimal>
+          fiscalyear: Option<decimal> }
+
+    type vsalespersonsalesbyfiscalyearsdataReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.salespersonid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salespersonid")
+        member __.fullname = OptionalColumn(reader, getOrdinal, reader.GetString, "fullname")
+        member __.jobtitle = OptionalColumn(reader, getOrdinal, reader.GetString, "jobtitle")
+        member __.salesterritory = OptionalColumn(reader, getOrdinal, reader.GetString, "salesterritory")
+        member __.salestotal = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "salestotal")
+        member __.fiscalyear = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "fiscalyear")
+        member __.Read() =
+            { salespersonid = __.salespersonid.Read()
+              fullname = __.fullname.Read()
+              jobtitle = __.jobtitle.Read()
+              salesterritory = __.salesterritory.Read()
+              salestotal = __.salestotal.Read()
+              fiscalyear = __.fiscalyear.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.salespersonid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vstorewithaddresses =
+        { businessentityid: Option<int>
+          name: Option<string>
+          addresstype: Option<string>
+          addressline1: Option<string>
+          addressline2: Option<string>
+          city: Option<string>
+          stateprovincename: Option<string>
+          postalcode: Option<string>
+          countryregionname: Option<string> }
+
+    type vstorewithaddressesReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.addresstype = OptionalColumn(reader, getOrdinal, reader.GetString, "addresstype")
+        member __.addressline1 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline1")
+        member __.addressline2 = OptionalColumn(reader, getOrdinal, reader.GetString, "addressline2")
+        member __.city = OptionalColumn(reader, getOrdinal, reader.GetString, "city")
+        member __.stateprovincename = OptionalColumn(reader, getOrdinal, reader.GetString, "stateprovincename")
+        member __.postalcode = OptionalColumn(reader, getOrdinal, reader.GetString, "postalcode")
+        member __.countryregionname = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregionname")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              name = __.name.Read()
+              addresstype = __.addresstype.Read()
+              addressline1 = __.addressline1.Read()
+              addressline2 = __.addressline2.Read()
+              city = __.city.Read()
+              stateprovincename = __.stateprovincename.Read()
+              postalcode = __.postalcode.Read()
+              countryregionname = __.countryregionname.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vstorewithcontacts =
+        { businessentityid: Option<int>
+          name: Option<string>
+          contacttype: Option<string>
+          title: Option<string>
+          firstname: Option<string>
+          middlename: Option<string>
+          lastname: Option<string>
+          suffix: Option<string>
+          phonenumber: Option<string>
+          phonenumbertype: Option<string>
+          emailaddress: Option<string>
+          emailpromotion: Option<int> }
+
+    type vstorewithcontactsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.contacttype = OptionalColumn(reader, getOrdinal, reader.GetString, "contacttype")
+        member __.title = OptionalColumn(reader, getOrdinal, reader.GetString, "title")
+        member __.firstname = OptionalColumn(reader, getOrdinal, reader.GetString, "firstname")
+        member __.middlename = OptionalColumn(reader, getOrdinal, reader.GetString, "middlename")
+        member __.lastname = OptionalColumn(reader, getOrdinal, reader.GetString, "lastname")
+        member __.suffix = OptionalColumn(reader, getOrdinal, reader.GetString, "suffix")
+        member __.phonenumber = OptionalColumn(reader, getOrdinal, reader.GetString, "phonenumber")
+        member __.phonenumbertype = OptionalColumn(reader, getOrdinal, reader.GetString, "phonenumbertype")
+        member __.emailaddress = OptionalColumn(reader, getOrdinal, reader.GetString, "emailaddress")
+        member __.emailpromotion = OptionalColumn(reader, getOrdinal, reader.GetInt32, "emailpromotion")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              name = __.name.Read()
+              contacttype = __.contacttype.Read()
+              title = __.title.Read()
+              firstname = __.firstname.Read()
+              middlename = __.middlename.Read()
+              lastname = __.lastname.Read()
+              suffix = __.suffix.Read()
+              phonenumber = __.phonenumber.Read()
+              phonenumbertype = __.phonenumbertype.Read()
+              emailaddress = __.emailaddress.Read()
+              emailpromotion = __.emailpromotion.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type vstorewithdemographics =
+        { businessentityid: Option<int>
+          name: Option<string>
+          AnnualSales: Option<decimal>
+          AnnualRevenue: Option<decimal>
+          BankName: Option<string>
+          BusinessType: Option<string>
+          YearOpened: Option<int>
+          Specialty: Option<string>
+          SquareFeet: Option<int>
+          Brands: Option<string>
+          Internet: Option<string>
+          NumberEmployees: Option<int> }
+
+    type vstorewithdemographicsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.businessentityid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
+        member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+        member __.AnnualSales = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "AnnualSales")
+        member __.AnnualRevenue = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "AnnualRevenue")
+        member __.BankName = OptionalColumn(reader, getOrdinal, reader.GetString, "BankName")
+        member __.BusinessType = OptionalColumn(reader, getOrdinal, reader.GetString, "BusinessType")
+        member __.YearOpened = OptionalColumn(reader, getOrdinal, reader.GetInt32, "YearOpened")
+        member __.Specialty = OptionalColumn(reader, getOrdinal, reader.GetString, "Specialty")
+        member __.SquareFeet = OptionalColumn(reader, getOrdinal, reader.GetInt32, "SquareFeet")
+        member __.Brands = OptionalColumn(reader, getOrdinal, reader.GetString, "Brands")
+        member __.Internet = OptionalColumn(reader, getOrdinal, reader.GetString, "Internet")
+        member __.NumberEmployees = OptionalColumn(reader, getOrdinal, reader.GetInt32, "NumberEmployees")
+        member __.Read() =
+            { businessentityid = __.businessentityid.Read()
+              name = __.name.Read()
+              AnnualSales = __.AnnualSales.Read()
+              AnnualRevenue = __.AnnualRevenue.Read()
+              BankName = __.BankName.Read()
+              BusinessType = __.BusinessType.Read()
+              YearOpened = __.YearOpened.Read()
+              Specialty = __.Specialty.Read()
+              SquareFeet = __.SquareFeet.Read()
+              Brands = __.Brands.Read()
+              Internet = __.Internet.Read()
+              NumberEmployees = __.NumberEmployees.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.businessentityid.IsNull() then None else Some(__.Read())
+
 type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     let mutable accFieldCount = 0
     let buildGetOrdinal fieldCount =
@@ -2047,12 +5139,37 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         accFieldCount <- accFieldCount + fieldCount
         fun col -> dictionary.Item col
         
+    let lazyhrd = lazy (hr.dReader (reader, buildGetOrdinal 5))
+    let lazyhre = lazy (hr.eReader (reader, buildGetOrdinal 16))
+    let lazyhredh = lazy (hr.edhReader (reader, buildGetOrdinal 7))
+    let lazyhreph = lazy (hr.ephReader (reader, buildGetOrdinal 6))
+    let lazyhrjc = lazy (hr.jcReader (reader, buildGetOrdinal 5))
+    let lazyhrs = lazy (hr.sReader (reader, buildGetOrdinal 6))
     let lazyhumanresourcesdepartment = lazy (humanresources.departmentReader (reader, buildGetOrdinal 4))
     let lazyhumanresourcesemployee = lazy (humanresources.employeeReader (reader, buildGetOrdinal 15))
     let lazyhumanresourcesemployeedepartmenthistory = lazy (humanresources.employeedepartmenthistoryReader (reader, buildGetOrdinal 6))
     let lazyhumanresourcesemployeepayhistory = lazy (humanresources.employeepayhistoryReader (reader, buildGetOrdinal 5))
     let lazyhumanresourcesjobcandidate = lazy (humanresources.jobcandidateReader (reader, buildGetOrdinal 4))
     let lazyhumanresourcesshift = lazy (humanresources.shiftReader (reader, buildGetOrdinal 5))
+    let lazyhumanresourcesvemployee = lazy (humanresources.vemployeeReader (reader, buildGetOrdinal 18))
+    let lazyhumanresourcesvemployeedepartment = lazy (humanresources.vemployeedepartmentReader (reader, buildGetOrdinal 10))
+    let lazyhumanresourcesvemployeedepartmenthistory = lazy (humanresources.vemployeedepartmenthistoryReader (reader, buildGetOrdinal 11))
+    let lazyhumanresourcesvjobcandidate = lazy (humanresources.vjobcandidateReader (reader, buildGetOrdinal 16))
+    let lazyhumanresourcesvjobcandidateeducation = lazy (humanresources.vjobcandidateeducationReader (reader, buildGetOrdinal 13))
+    let lazyhumanresourcesvjobcandidateemployment = lazy (humanresources.vjobcandidateemploymentReader (reader, buildGetOrdinal 11))
+    let lazypea = lazy (pe.aReader (reader, buildGetOrdinal 10))
+    let lazypeat = lazy (pe.atReader (reader, buildGetOrdinal 5))
+    let lazypebe = lazy (pe.beReader (reader, buildGetOrdinal 4))
+    let lazypebea = lazy (pe.beaReader (reader, buildGetOrdinal 6))
+    let lazypebec = lazy (pe.becReader (reader, buildGetOrdinal 6))
+    let lazypecr = lazy (pe.crReader (reader, buildGetOrdinal 3))
+    let lazypect = lazy (pe.ctReader (reader, buildGetOrdinal 4))
+    let lazypee = lazy (pe.eReader (reader, buildGetOrdinal 6))
+    let lazypep = lazy (pe.pReader (reader, buildGetOrdinal 14))
+    let lazypepa = lazy (pe.paReader (reader, buildGetOrdinal 6))
+    let lazypepnt = lazy (pe.pntReader (reader, buildGetOrdinal 4))
+    let lazypepp = lazy (pe.ppReader (reader, buildGetOrdinal 5))
+    let lazypesp = lazy (pe.spReader (reader, buildGetOrdinal 9))
     let lazypersonaddress = lazy (person.addressReader (reader, buildGetOrdinal 9))
     let lazypersonaddresstype = lazy (person.addresstypeReader (reader, buildGetOrdinal 4))
     let lazypersonbusinessentity = lazy (person.businessentityReader (reader, buildGetOrdinal 3))
@@ -2066,6 +5183,32 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     let lazypersonpersonphone = lazy (person.personphoneReader (reader, buildGetOrdinal 4))
     let lazypersonphonenumbertype = lazy (person.phonenumbertypeReader (reader, buildGetOrdinal 3))
     let lazypersonstateprovince = lazy (person.stateprovinceReader (reader, buildGetOrdinal 8))
+    let lazypersonvadditionalcontactinfo = lazy (person.vadditionalcontactinfoReader (reader, buildGetOrdinal 17))
+    let lazyprbom = lazy (pr.bomReader (reader, buildGetOrdinal 10))
+    let lazyprc = lazy (pr.cReader (reader, buildGetOrdinal 4))
+    let lazyprd = lazy (pr.dReader (reader, buildGetOrdinal 13))
+    let lazypri = lazy (pr.iReader (reader, buildGetOrdinal 4))
+    let lazyprl = lazy (pr.lReader (reader, buildGetOrdinal 6))
+    let lazyprp = lazy (pr.pReader (reader, buildGetOrdinal 26))
+    let lazyprpc = lazy (pr.pcReader (reader, buildGetOrdinal 5))
+    let lazyprpch = lazy (pr.pchReader (reader, buildGetOrdinal 6))
+    let lazyprpd = lazy (pr.pdReader (reader, buildGetOrdinal 5))
+    let lazyprpdoc = lazy (pr.pdocReader (reader, buildGetOrdinal 4))
+    let lazyprpi = lazy (pr.piReader (reader, buildGetOrdinal 8))
+    let lazyprplph = lazy (pr.plphReader (reader, buildGetOrdinal 6))
+    let lazyprpm = lazy (pr.pmReader (reader, buildGetOrdinal 7))
+    let lazyprpmi = lazy (pr.pmiReader (reader, buildGetOrdinal 3))
+    let lazyprpmpdc = lazy (pr.pmpdcReader (reader, buildGetOrdinal 4))
+    let lazyprpp = lazy (pr.ppReader (reader, buildGetOrdinal 7))
+    let lazyprppp = lazy (pr.pppReader (reader, buildGetOrdinal 4))
+    let lazyprpr = lazy (pr.prReader (reader, buildGetOrdinal 9))
+    let lazyprpsc = lazy (pr.pscReader (reader, buildGetOrdinal 6))
+    let lazyprsr = lazy (pr.srReader (reader, buildGetOrdinal 4))
+    let lazyprth = lazy (pr.thReader (reader, buildGetOrdinal 10))
+    let lazyprtha = lazy (pr.thaReader (reader, buildGetOrdinal 10))
+    let lazyprum = lazy (pr.umReader (reader, buildGetOrdinal 4))
+    let lazyprw = lazy (pr.wReader (reader, buildGetOrdinal 10))
+    let lazyprwr = lazy (pr.wrReader (reader, buildGetOrdinal 13))
     let lazyproductionbillofmaterials = lazy (production.billofmaterialsReader (reader, buildGetOrdinal 9))
     let lazyproductionculture = lazy (production.cultureReader (reader, buildGetOrdinal 3))
     let lazyproductiondocument = lazy (production.documentReader (reader, buildGetOrdinal 13))
@@ -2089,14 +5232,42 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     let lazyproductiontransactionhistory = lazy (production.transactionhistoryReader (reader, buildGetOrdinal 9))
     let lazyproductiontransactionhistoryarchive = lazy (production.transactionhistoryarchiveReader (reader, buildGetOrdinal 9))
     let lazyproductionunitmeasure = lazy (production.unitmeasureReader (reader, buildGetOrdinal 3))
+    let lazyproductionvproductmodelcatalogdescription = lazy (production.vproductmodelcatalogdescriptionReader (reader, buildGetOrdinal 25))
+    let lazyproductionvproductmodelinstructions = lazy (production.vproductmodelinstructionsReader (reader, buildGetOrdinal 11))
     let lazyproductionworkorder = lazy (production.workorderReader (reader, buildGetOrdinal 9))
     let lazyproductionworkorderrouting = lazy (production.workorderroutingReader (reader, buildGetOrdinal 12))
     let lazyproviderdbtypetesttest = lazy (providerdbtypetest.testReader (reader, buildGetOrdinal 3))
+    let lazypupod = lazy (pu.podReader (reader, buildGetOrdinal 10))
+    let lazypupoh = lazy (pu.pohReader (reader, buildGetOrdinal 13))
+    let lazypupv = lazy (pu.pvReader (reader, buildGetOrdinal 12))
+    let lazypusm = lazy (pu.smReader (reader, buildGetOrdinal 7))
+    let lazypuv = lazy (pu.vReader (reader, buildGetOrdinal 9))
     let lazypurchasingproductvendor = lazy (purchasing.productvendorReader (reader, buildGetOrdinal 11))
     let lazypurchasingpurchaseorderdetail = lazy (purchasing.purchaseorderdetailReader (reader, buildGetOrdinal 9))
     let lazypurchasingpurchaseorderheader = lazy (purchasing.purchaseorderheaderReader (reader, buildGetOrdinal 12))
     let lazypurchasingshipmethod = lazy (purchasing.shipmethodReader (reader, buildGetOrdinal 6))
     let lazypurchasingvendor = lazy (purchasing.vendorReader (reader, buildGetOrdinal 8))
+    let lazypurchasingvvendorwithaddresses = lazy (purchasing.vvendorwithaddressesReader (reader, buildGetOrdinal 9))
+    let lazypurchasingvvendorwithcontacts = lazy (purchasing.vvendorwithcontactsReader (reader, buildGetOrdinal 12))
+    let lazysac = lazy (sa.cReader (reader, buildGetOrdinal 7))
+    let lazysacc = lazy (sa.ccReader (reader, buildGetOrdinal 7))
+    let lazysacr = lazy (sa.crReader (reader, buildGetOrdinal 7))
+    let lazysacrc = lazy (sa.crcReader (reader, buildGetOrdinal 3))
+    let lazysacu = lazy (sa.cuReader (reader, buildGetOrdinal 4))
+    let lazysapcc = lazy (sa.pccReader (reader, buildGetOrdinal 4))
+    let lazysas = lazy (sa.sReader (reader, buildGetOrdinal 7))
+    let lazysasci = lazy (sa.sciReader (reader, buildGetOrdinal 7))
+    let lazysaso = lazy (sa.soReader (reader, buildGetOrdinal 12))
+    let lazysasod = lazy (sa.sodReader (reader, buildGetOrdinal 11))
+    let lazysasoh = lazy (sa.sohReader (reader, buildGetOrdinal 26))
+    let lazysasohsr = lazy (sa.sohsrReader (reader, buildGetOrdinal 3))
+    let lazysasop = lazy (sa.sopReader (reader, buildGetOrdinal 5))
+    let lazysasp = lazy (sa.spReader (reader, buildGetOrdinal 10))
+    let lazysaspqh = lazy (sa.spqhReader (reader, buildGetOrdinal 6))
+    let lazysasr = lazy (sa.srReader (reader, buildGetOrdinal 5))
+    let lazysast = lazy (sa.stReader (reader, buildGetOrdinal 11))
+    let lazysasth = lazy (sa.sthReader (reader, buildGetOrdinal 7))
+    let lazysatr = lazy (sa.trReader (reader, buildGetOrdinal 8))
     let lazysalescountryregioncurrency = lazy (sales.countryregioncurrencyReader (reader, buildGetOrdinal 3))
     let lazysalescreditcard = lazy (sales.creditcardReader (reader, buildGetOrdinal 6))
     let lazysalescurrency = lazy (sales.currencyReader (reader, buildGetOrdinal 3))
@@ -2116,12 +5287,45 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     let lazysalesspecialoffer = lazy (sales.specialofferReader (reader, buildGetOrdinal 11))
     let lazysalesspecialofferproduct = lazy (sales.specialofferproductReader (reader, buildGetOrdinal 4))
     let lazysalesstore = lazy (sales.storeReader (reader, buildGetOrdinal 6))
+    let lazysalesvindividualcustomer = lazy (sales.vindividualcustomerReader (reader, buildGetOrdinal 18))
+    let lazysalesvpersondemographics = lazy (sales.vpersondemographicsReader (reader, buildGetOrdinal 13))
+    let lazysalesvsalesperson = lazy (sales.vsalespersonReader (reader, buildGetOrdinal 22))
+    let lazysalesvsalespersonsalesbyfiscalyears = lazy (sales.vsalespersonsalesbyfiscalyearsReader (reader, buildGetOrdinal 7))
+    let lazysalesvsalespersonsalesbyfiscalyearsdata = lazy (sales.vsalespersonsalesbyfiscalyearsdataReader (reader, buildGetOrdinal 6))
+    let lazysalesvstorewithaddresses = lazy (sales.vstorewithaddressesReader (reader, buildGetOrdinal 9))
+    let lazysalesvstorewithcontacts = lazy (sales.vstorewithcontactsReader (reader, buildGetOrdinal 12))
+    let lazysalesvstorewithdemographics = lazy (sales.vstorewithdemographicsReader (reader, buildGetOrdinal 12))
+    member __.``hr.d`` = lazyhrd.Value
+    member __.``hr.e`` = lazyhre.Value
+    member __.``hr.edh`` = lazyhredh.Value
+    member __.``hr.eph`` = lazyhreph.Value
+    member __.``hr.jc`` = lazyhrjc.Value
+    member __.``hr.s`` = lazyhrs.Value
     member __.``humanresources.department`` = lazyhumanresourcesdepartment.Value
     member __.``humanresources.employee`` = lazyhumanresourcesemployee.Value
     member __.``humanresources.employeedepartmenthistory`` = lazyhumanresourcesemployeedepartmenthistory.Value
     member __.``humanresources.employeepayhistory`` = lazyhumanresourcesemployeepayhistory.Value
     member __.``humanresources.jobcandidate`` = lazyhumanresourcesjobcandidate.Value
     member __.``humanresources.shift`` = lazyhumanresourcesshift.Value
+    member __.``humanresources.vemployee`` = lazyhumanresourcesvemployee.Value
+    member __.``humanresources.vemployeedepartment`` = lazyhumanresourcesvemployeedepartment.Value
+    member __.``humanresources.vemployeedepartmenthistory`` = lazyhumanresourcesvemployeedepartmenthistory.Value
+    member __.``humanresources.vjobcandidate`` = lazyhumanresourcesvjobcandidate.Value
+    member __.``humanresources.vjobcandidateeducation`` = lazyhumanresourcesvjobcandidateeducation.Value
+    member __.``humanresources.vjobcandidateemployment`` = lazyhumanresourcesvjobcandidateemployment.Value
+    member __.``pe.a`` = lazypea.Value
+    member __.``pe.at`` = lazypeat.Value
+    member __.``pe.be`` = lazypebe.Value
+    member __.``pe.bea`` = lazypebea.Value
+    member __.``pe.bec`` = lazypebec.Value
+    member __.``pe.cr`` = lazypecr.Value
+    member __.``pe.ct`` = lazypect.Value
+    member __.``pe.e`` = lazypee.Value
+    member __.``pe.p`` = lazypep.Value
+    member __.``pe.pa`` = lazypepa.Value
+    member __.``pe.pnt`` = lazypepnt.Value
+    member __.``pe.pp`` = lazypepp.Value
+    member __.``pe.sp`` = lazypesp.Value
     member __.``person.address`` = lazypersonaddress.Value
     member __.``person.addresstype`` = lazypersonaddresstype.Value
     member __.``person.businessentity`` = lazypersonbusinessentity.Value
@@ -2135,6 +5339,32 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     member __.``person.personphone`` = lazypersonpersonphone.Value
     member __.``person.phonenumbertype`` = lazypersonphonenumbertype.Value
     member __.``person.stateprovince`` = lazypersonstateprovince.Value
+    member __.``person.vadditionalcontactinfo`` = lazypersonvadditionalcontactinfo.Value
+    member __.``pr.bom`` = lazyprbom.Value
+    member __.``pr.c`` = lazyprc.Value
+    member __.``pr.d`` = lazyprd.Value
+    member __.``pr.i`` = lazypri.Value
+    member __.``pr.l`` = lazyprl.Value
+    member __.``pr.p`` = lazyprp.Value
+    member __.``pr.pc`` = lazyprpc.Value
+    member __.``pr.pch`` = lazyprpch.Value
+    member __.``pr.pd`` = lazyprpd.Value
+    member __.``pr.pdoc`` = lazyprpdoc.Value
+    member __.``pr.pi`` = lazyprpi.Value
+    member __.``pr.plph`` = lazyprplph.Value
+    member __.``pr.pm`` = lazyprpm.Value
+    member __.``pr.pmi`` = lazyprpmi.Value
+    member __.``pr.pmpdc`` = lazyprpmpdc.Value
+    member __.``pr.pp`` = lazyprpp.Value
+    member __.``pr.ppp`` = lazyprppp.Value
+    member __.``pr.pr`` = lazyprpr.Value
+    member __.``pr.psc`` = lazyprpsc.Value
+    member __.``pr.sr`` = lazyprsr.Value
+    member __.``pr.th`` = lazyprth.Value
+    member __.``pr.tha`` = lazyprtha.Value
+    member __.``pr.um`` = lazyprum.Value
+    member __.``pr.w`` = lazyprw.Value
+    member __.``pr.wr`` = lazyprwr.Value
     member __.``production.billofmaterials`` = lazyproductionbillofmaterials.Value
     member __.``production.culture`` = lazyproductionculture.Value
     member __.``production.document`` = lazyproductiondocument.Value
@@ -2158,14 +5388,42 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     member __.``production.transactionhistory`` = lazyproductiontransactionhistory.Value
     member __.``production.transactionhistoryarchive`` = lazyproductiontransactionhistoryarchive.Value
     member __.``production.unitmeasure`` = lazyproductionunitmeasure.Value
+    member __.``production.vproductmodelcatalogdescription`` = lazyproductionvproductmodelcatalogdescription.Value
+    member __.``production.vproductmodelinstructions`` = lazyproductionvproductmodelinstructions.Value
     member __.``production.workorder`` = lazyproductionworkorder.Value
     member __.``production.workorderrouting`` = lazyproductionworkorderrouting.Value
     member __.``providerdbtypetest.test`` = lazyproviderdbtypetesttest.Value
+    member __.``pu.pod`` = lazypupod.Value
+    member __.``pu.poh`` = lazypupoh.Value
+    member __.``pu.pv`` = lazypupv.Value
+    member __.``pu.sm`` = lazypusm.Value
+    member __.``pu.v`` = lazypuv.Value
     member __.``purchasing.productvendor`` = lazypurchasingproductvendor.Value
     member __.``purchasing.purchaseorderdetail`` = lazypurchasingpurchaseorderdetail.Value
     member __.``purchasing.purchaseorderheader`` = lazypurchasingpurchaseorderheader.Value
     member __.``purchasing.shipmethod`` = lazypurchasingshipmethod.Value
     member __.``purchasing.vendor`` = lazypurchasingvendor.Value
+    member __.``purchasing.vvendorwithaddresses`` = lazypurchasingvvendorwithaddresses.Value
+    member __.``purchasing.vvendorwithcontacts`` = lazypurchasingvvendorwithcontacts.Value
+    member __.``sa.c`` = lazysac.Value
+    member __.``sa.cc`` = lazysacc.Value
+    member __.``sa.cr`` = lazysacr.Value
+    member __.``sa.crc`` = lazysacrc.Value
+    member __.``sa.cu`` = lazysacu.Value
+    member __.``sa.pcc`` = lazysapcc.Value
+    member __.``sa.s`` = lazysas.Value
+    member __.``sa.sci`` = lazysasci.Value
+    member __.``sa.so`` = lazysaso.Value
+    member __.``sa.sod`` = lazysasod.Value
+    member __.``sa.soh`` = lazysasoh.Value
+    member __.``sa.sohsr`` = lazysasohsr.Value
+    member __.``sa.sop`` = lazysasop.Value
+    member __.``sa.sp`` = lazysasp.Value
+    member __.``sa.spqh`` = lazysaspqh.Value
+    member __.``sa.sr`` = lazysasr.Value
+    member __.``sa.st`` = lazysast.Value
+    member __.``sa.sth`` = lazysasth.Value
+    member __.``sa.tr`` = lazysatr.Value
     member __.``sales.countryregioncurrency`` = lazysalescountryregioncurrency.Value
     member __.``sales.creditcard`` = lazysalescreditcard.Value
     member __.``sales.currency`` = lazysalescurrency.Value
@@ -2185,9 +5443,29 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     member __.``sales.specialoffer`` = lazysalesspecialoffer.Value
     member __.``sales.specialofferproduct`` = lazysalesspecialofferproduct.Value
     member __.``sales.store`` = lazysalesstore.Value
+    member __.``sales.vindividualcustomer`` = lazysalesvindividualcustomer.Value
+    member __.``sales.vpersondemographics`` = lazysalesvpersondemographics.Value
+    member __.``sales.vsalesperson`` = lazysalesvsalesperson.Value
+    member __.``sales.vsalespersonsalesbyfiscalyears`` = lazysalesvsalespersonsalesbyfiscalyears.Value
+    member __.``sales.vsalespersonsalesbyfiscalyearsdata`` = lazysalesvsalespersonsalesbyfiscalyearsdata.Value
+    member __.``sales.vstorewithaddresses`` = lazysalesvstorewithaddresses.Value
+    member __.``sales.vstorewithcontacts`` = lazysalesvstorewithcontacts.Value
+    member __.``sales.vstorewithdemographics`` = lazysalesvstorewithdemographics.Value
     member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value
     member private __.GetReaderByName(entity: string, isOption: bool) =
         match entity, isOption with
+        | "hr.d", false -> __.``hr.d``.Read >> box
+        | "hr.d", true -> __.``hr.d``.ReadIfNotNull >> box
+        | "hr.e", false -> __.``hr.e``.Read >> box
+        | "hr.e", true -> __.``hr.e``.ReadIfNotNull >> box
+        | "hr.edh", false -> __.``hr.edh``.Read >> box
+        | "hr.edh", true -> __.``hr.edh``.ReadIfNotNull >> box
+        | "hr.eph", false -> __.``hr.eph``.Read >> box
+        | "hr.eph", true -> __.``hr.eph``.ReadIfNotNull >> box
+        | "hr.jc", false -> __.``hr.jc``.Read >> box
+        | "hr.jc", true -> __.``hr.jc``.ReadIfNotNull >> box
+        | "hr.s", false -> __.``hr.s``.Read >> box
+        | "hr.s", true -> __.``hr.s``.ReadIfNotNull >> box
         | "humanresources.department", false -> __.``humanresources.department``.Read >> box
         | "humanresources.department", true -> __.``humanresources.department``.ReadIfNotNull >> box
         | "humanresources.employee", false -> __.``humanresources.employee``.Read >> box
@@ -2200,6 +5478,44 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         | "humanresources.jobcandidate", true -> __.``humanresources.jobcandidate``.ReadIfNotNull >> box
         | "humanresources.shift", false -> __.``humanresources.shift``.Read >> box
         | "humanresources.shift", true -> __.``humanresources.shift``.ReadIfNotNull >> box
+        | "humanresources.vemployee", false -> __.``humanresources.vemployee``.Read >> box
+        | "humanresources.vemployee", true -> __.``humanresources.vemployee``.ReadIfNotNull >> box
+        | "humanresources.vemployeedepartment", false -> __.``humanresources.vemployeedepartment``.Read >> box
+        | "humanresources.vemployeedepartment", true -> __.``humanresources.vemployeedepartment``.ReadIfNotNull >> box
+        | "humanresources.vemployeedepartmenthistory", false -> __.``humanresources.vemployeedepartmenthistory``.Read >> box
+        | "humanresources.vemployeedepartmenthistory", true -> __.``humanresources.vemployeedepartmenthistory``.ReadIfNotNull >> box
+        | "humanresources.vjobcandidate", false -> __.``humanresources.vjobcandidate``.Read >> box
+        | "humanresources.vjobcandidate", true -> __.``humanresources.vjobcandidate``.ReadIfNotNull >> box
+        | "humanresources.vjobcandidateeducation", false -> __.``humanresources.vjobcandidateeducation``.Read >> box
+        | "humanresources.vjobcandidateeducation", true -> __.``humanresources.vjobcandidateeducation``.ReadIfNotNull >> box
+        | "humanresources.vjobcandidateemployment", false -> __.``humanresources.vjobcandidateemployment``.Read >> box
+        | "humanresources.vjobcandidateemployment", true -> __.``humanresources.vjobcandidateemployment``.ReadIfNotNull >> box
+        | "pe.a", false -> __.``pe.a``.Read >> box
+        | "pe.a", true -> __.``pe.a``.ReadIfNotNull >> box
+        | "pe.at", false -> __.``pe.at``.Read >> box
+        | "pe.at", true -> __.``pe.at``.ReadIfNotNull >> box
+        | "pe.be", false -> __.``pe.be``.Read >> box
+        | "pe.be", true -> __.``pe.be``.ReadIfNotNull >> box
+        | "pe.bea", false -> __.``pe.bea``.Read >> box
+        | "pe.bea", true -> __.``pe.bea``.ReadIfNotNull >> box
+        | "pe.bec", false -> __.``pe.bec``.Read >> box
+        | "pe.bec", true -> __.``pe.bec``.ReadIfNotNull >> box
+        | "pe.cr", false -> __.``pe.cr``.Read >> box
+        | "pe.cr", true -> __.``pe.cr``.ReadIfNotNull >> box
+        | "pe.ct", false -> __.``pe.ct``.Read >> box
+        | "pe.ct", true -> __.``pe.ct``.ReadIfNotNull >> box
+        | "pe.e", false -> __.``pe.e``.Read >> box
+        | "pe.e", true -> __.``pe.e``.ReadIfNotNull >> box
+        | "pe.p", false -> __.``pe.p``.Read >> box
+        | "pe.p", true -> __.``pe.p``.ReadIfNotNull >> box
+        | "pe.pa", false -> __.``pe.pa``.Read >> box
+        | "pe.pa", true -> __.``pe.pa``.ReadIfNotNull >> box
+        | "pe.pnt", false -> __.``pe.pnt``.Read >> box
+        | "pe.pnt", true -> __.``pe.pnt``.ReadIfNotNull >> box
+        | "pe.pp", false -> __.``pe.pp``.Read >> box
+        | "pe.pp", true -> __.``pe.pp``.ReadIfNotNull >> box
+        | "pe.sp", false -> __.``pe.sp``.Read >> box
+        | "pe.sp", true -> __.``pe.sp``.ReadIfNotNull >> box
         | "person.address", false -> __.``person.address``.Read >> box
         | "person.address", true -> __.``person.address``.ReadIfNotNull >> box
         | "person.addresstype", false -> __.``person.addresstype``.Read >> box
@@ -2226,6 +5542,58 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         | "person.phonenumbertype", true -> __.``person.phonenumbertype``.ReadIfNotNull >> box
         | "person.stateprovince", false -> __.``person.stateprovince``.Read >> box
         | "person.stateprovince", true -> __.``person.stateprovince``.ReadIfNotNull >> box
+        | "person.vadditionalcontactinfo", false -> __.``person.vadditionalcontactinfo``.Read >> box
+        | "person.vadditionalcontactinfo", true -> __.``person.vadditionalcontactinfo``.ReadIfNotNull >> box
+        | "pr.bom", false -> __.``pr.bom``.Read >> box
+        | "pr.bom", true -> __.``pr.bom``.ReadIfNotNull >> box
+        | "pr.c", false -> __.``pr.c``.Read >> box
+        | "pr.c", true -> __.``pr.c``.ReadIfNotNull >> box
+        | "pr.d", false -> __.``pr.d``.Read >> box
+        | "pr.d", true -> __.``pr.d``.ReadIfNotNull >> box
+        | "pr.i", false -> __.``pr.i``.Read >> box
+        | "pr.i", true -> __.``pr.i``.ReadIfNotNull >> box
+        | "pr.l", false -> __.``pr.l``.Read >> box
+        | "pr.l", true -> __.``pr.l``.ReadIfNotNull >> box
+        | "pr.p", false -> __.``pr.p``.Read >> box
+        | "pr.p", true -> __.``pr.p``.ReadIfNotNull >> box
+        | "pr.pc", false -> __.``pr.pc``.Read >> box
+        | "pr.pc", true -> __.``pr.pc``.ReadIfNotNull >> box
+        | "pr.pch", false -> __.``pr.pch``.Read >> box
+        | "pr.pch", true -> __.``pr.pch``.ReadIfNotNull >> box
+        | "pr.pd", false -> __.``pr.pd``.Read >> box
+        | "pr.pd", true -> __.``pr.pd``.ReadIfNotNull >> box
+        | "pr.pdoc", false -> __.``pr.pdoc``.Read >> box
+        | "pr.pdoc", true -> __.``pr.pdoc``.ReadIfNotNull >> box
+        | "pr.pi", false -> __.``pr.pi``.Read >> box
+        | "pr.pi", true -> __.``pr.pi``.ReadIfNotNull >> box
+        | "pr.plph", false -> __.``pr.plph``.Read >> box
+        | "pr.plph", true -> __.``pr.plph``.ReadIfNotNull >> box
+        | "pr.pm", false -> __.``pr.pm``.Read >> box
+        | "pr.pm", true -> __.``pr.pm``.ReadIfNotNull >> box
+        | "pr.pmi", false -> __.``pr.pmi``.Read >> box
+        | "pr.pmi", true -> __.``pr.pmi``.ReadIfNotNull >> box
+        | "pr.pmpdc", false -> __.``pr.pmpdc``.Read >> box
+        | "pr.pmpdc", true -> __.``pr.pmpdc``.ReadIfNotNull >> box
+        | "pr.pp", false -> __.``pr.pp``.Read >> box
+        | "pr.pp", true -> __.``pr.pp``.ReadIfNotNull >> box
+        | "pr.ppp", false -> __.``pr.ppp``.Read >> box
+        | "pr.ppp", true -> __.``pr.ppp``.ReadIfNotNull >> box
+        | "pr.pr", false -> __.``pr.pr``.Read >> box
+        | "pr.pr", true -> __.``pr.pr``.ReadIfNotNull >> box
+        | "pr.psc", false -> __.``pr.psc``.Read >> box
+        | "pr.psc", true -> __.``pr.psc``.ReadIfNotNull >> box
+        | "pr.sr", false -> __.``pr.sr``.Read >> box
+        | "pr.sr", true -> __.``pr.sr``.ReadIfNotNull >> box
+        | "pr.th", false -> __.``pr.th``.Read >> box
+        | "pr.th", true -> __.``pr.th``.ReadIfNotNull >> box
+        | "pr.tha", false -> __.``pr.tha``.Read >> box
+        | "pr.tha", true -> __.``pr.tha``.ReadIfNotNull >> box
+        | "pr.um", false -> __.``pr.um``.Read >> box
+        | "pr.um", true -> __.``pr.um``.ReadIfNotNull >> box
+        | "pr.w", false -> __.``pr.w``.Read >> box
+        | "pr.w", true -> __.``pr.w``.ReadIfNotNull >> box
+        | "pr.wr", false -> __.``pr.wr``.Read >> box
+        | "pr.wr", true -> __.``pr.wr``.ReadIfNotNull >> box
         | "production.billofmaterials", false -> __.``production.billofmaterials``.Read >> box
         | "production.billofmaterials", true -> __.``production.billofmaterials``.ReadIfNotNull >> box
         | "production.culture", false -> __.``production.culture``.Read >> box
@@ -2272,12 +5640,26 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         | "production.transactionhistoryarchive", true -> __.``production.transactionhistoryarchive``.ReadIfNotNull >> box
         | "production.unitmeasure", false -> __.``production.unitmeasure``.Read >> box
         | "production.unitmeasure", true -> __.``production.unitmeasure``.ReadIfNotNull >> box
+        | "production.vproductmodelcatalogdescription", false -> __.``production.vproductmodelcatalogdescription``.Read >> box
+        | "production.vproductmodelcatalogdescription", true -> __.``production.vproductmodelcatalogdescription``.ReadIfNotNull >> box
+        | "production.vproductmodelinstructions", false -> __.``production.vproductmodelinstructions``.Read >> box
+        | "production.vproductmodelinstructions", true -> __.``production.vproductmodelinstructions``.ReadIfNotNull >> box
         | "production.workorder", false -> __.``production.workorder``.Read >> box
         | "production.workorder", true -> __.``production.workorder``.ReadIfNotNull >> box
         | "production.workorderrouting", false -> __.``production.workorderrouting``.Read >> box
         | "production.workorderrouting", true -> __.``production.workorderrouting``.ReadIfNotNull >> box
         | "providerdbtypetest.test", false -> __.``providerdbtypetest.test``.Read >> box
         | "providerdbtypetest.test", true -> __.``providerdbtypetest.test``.ReadIfNotNull >> box
+        | "pu.pod", false -> __.``pu.pod``.Read >> box
+        | "pu.pod", true -> __.``pu.pod``.ReadIfNotNull >> box
+        | "pu.poh", false -> __.``pu.poh``.Read >> box
+        | "pu.poh", true -> __.``pu.poh``.ReadIfNotNull >> box
+        | "pu.pv", false -> __.``pu.pv``.Read >> box
+        | "pu.pv", true -> __.``pu.pv``.ReadIfNotNull >> box
+        | "pu.sm", false -> __.``pu.sm``.Read >> box
+        | "pu.sm", true -> __.``pu.sm``.ReadIfNotNull >> box
+        | "pu.v", false -> __.``pu.v``.Read >> box
+        | "pu.v", true -> __.``pu.v``.ReadIfNotNull >> box
         | "purchasing.productvendor", false -> __.``purchasing.productvendor``.Read >> box
         | "purchasing.productvendor", true -> __.``purchasing.productvendor``.ReadIfNotNull >> box
         | "purchasing.purchaseorderdetail", false -> __.``purchasing.purchaseorderdetail``.Read >> box
@@ -2288,6 +5670,48 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         | "purchasing.shipmethod", true -> __.``purchasing.shipmethod``.ReadIfNotNull >> box
         | "purchasing.vendor", false -> __.``purchasing.vendor``.Read >> box
         | "purchasing.vendor", true -> __.``purchasing.vendor``.ReadIfNotNull >> box
+        | "purchasing.vvendorwithaddresses", false -> __.``purchasing.vvendorwithaddresses``.Read >> box
+        | "purchasing.vvendorwithaddresses", true -> __.``purchasing.vvendorwithaddresses``.ReadIfNotNull >> box
+        | "purchasing.vvendorwithcontacts", false -> __.``purchasing.vvendorwithcontacts``.Read >> box
+        | "purchasing.vvendorwithcontacts", true -> __.``purchasing.vvendorwithcontacts``.ReadIfNotNull >> box
+        | "sa.c", false -> __.``sa.c``.Read >> box
+        | "sa.c", true -> __.``sa.c``.ReadIfNotNull >> box
+        | "sa.cc", false -> __.``sa.cc``.Read >> box
+        | "sa.cc", true -> __.``sa.cc``.ReadIfNotNull >> box
+        | "sa.cr", false -> __.``sa.cr``.Read >> box
+        | "sa.cr", true -> __.``sa.cr``.ReadIfNotNull >> box
+        | "sa.crc", false -> __.``sa.crc``.Read >> box
+        | "sa.crc", true -> __.``sa.crc``.ReadIfNotNull >> box
+        | "sa.cu", false -> __.``sa.cu``.Read >> box
+        | "sa.cu", true -> __.``sa.cu``.ReadIfNotNull >> box
+        | "sa.pcc", false -> __.``sa.pcc``.Read >> box
+        | "sa.pcc", true -> __.``sa.pcc``.ReadIfNotNull >> box
+        | "sa.s", false -> __.``sa.s``.Read >> box
+        | "sa.s", true -> __.``sa.s``.ReadIfNotNull >> box
+        | "sa.sci", false -> __.``sa.sci``.Read >> box
+        | "sa.sci", true -> __.``sa.sci``.ReadIfNotNull >> box
+        | "sa.so", false -> __.``sa.so``.Read >> box
+        | "sa.so", true -> __.``sa.so``.ReadIfNotNull >> box
+        | "sa.sod", false -> __.``sa.sod``.Read >> box
+        | "sa.sod", true -> __.``sa.sod``.ReadIfNotNull >> box
+        | "sa.soh", false -> __.``sa.soh``.Read >> box
+        | "sa.soh", true -> __.``sa.soh``.ReadIfNotNull >> box
+        | "sa.sohsr", false -> __.``sa.sohsr``.Read >> box
+        | "sa.sohsr", true -> __.``sa.sohsr``.ReadIfNotNull >> box
+        | "sa.sop", false -> __.``sa.sop``.Read >> box
+        | "sa.sop", true -> __.``sa.sop``.ReadIfNotNull >> box
+        | "sa.sp", false -> __.``sa.sp``.Read >> box
+        | "sa.sp", true -> __.``sa.sp``.ReadIfNotNull >> box
+        | "sa.spqh", false -> __.``sa.spqh``.Read >> box
+        | "sa.spqh", true -> __.``sa.spqh``.ReadIfNotNull >> box
+        | "sa.sr", false -> __.``sa.sr``.Read >> box
+        | "sa.sr", true -> __.``sa.sr``.ReadIfNotNull >> box
+        | "sa.st", false -> __.``sa.st``.Read >> box
+        | "sa.st", true -> __.``sa.st``.ReadIfNotNull >> box
+        | "sa.sth", false -> __.``sa.sth``.Read >> box
+        | "sa.sth", true -> __.``sa.sth``.ReadIfNotNull >> box
+        | "sa.tr", false -> __.``sa.tr``.Read >> box
+        | "sa.tr", true -> __.``sa.tr``.ReadIfNotNull >> box
         | "sales.countryregioncurrency", false -> __.``sales.countryregioncurrency``.Read >> box
         | "sales.countryregioncurrency", true -> __.``sales.countryregioncurrency``.ReadIfNotNull >> box
         | "sales.creditcard", false -> __.``sales.creditcard``.Read >> box
@@ -2326,6 +5750,22 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         | "sales.specialofferproduct", true -> __.``sales.specialofferproduct``.ReadIfNotNull >> box
         | "sales.store", false -> __.``sales.store``.Read >> box
         | "sales.store", true -> __.``sales.store``.ReadIfNotNull >> box
+        | "sales.vindividualcustomer", false -> __.``sales.vindividualcustomer``.Read >> box
+        | "sales.vindividualcustomer", true -> __.``sales.vindividualcustomer``.ReadIfNotNull >> box
+        | "sales.vpersondemographics", false -> __.``sales.vpersondemographics``.Read >> box
+        | "sales.vpersondemographics", true -> __.``sales.vpersondemographics``.ReadIfNotNull >> box
+        | "sales.vsalesperson", false -> __.``sales.vsalesperson``.Read >> box
+        | "sales.vsalesperson", true -> __.``sales.vsalesperson``.ReadIfNotNull >> box
+        | "sales.vsalespersonsalesbyfiscalyears", false -> __.``sales.vsalespersonsalesbyfiscalyears``.Read >> box
+        | "sales.vsalespersonsalesbyfiscalyears", true -> __.``sales.vsalespersonsalesbyfiscalyears``.ReadIfNotNull >> box
+        | "sales.vsalespersonsalesbyfiscalyearsdata", false -> __.``sales.vsalespersonsalesbyfiscalyearsdata``.Read >> box
+        | "sales.vsalespersonsalesbyfiscalyearsdata", true -> __.``sales.vsalespersonsalesbyfiscalyearsdata``.ReadIfNotNull >> box
+        | "sales.vstorewithaddresses", false -> __.``sales.vstorewithaddresses``.Read >> box
+        | "sales.vstorewithaddresses", true -> __.``sales.vstorewithaddresses``.ReadIfNotNull >> box
+        | "sales.vstorewithcontacts", false -> __.``sales.vstorewithcontacts``.Read >> box
+        | "sales.vstorewithcontacts", true -> __.``sales.vstorewithcontacts``.ReadIfNotNull >> box
+        | "sales.vstorewithdemographics", false -> __.``sales.vstorewithdemographics``.Read >> box
+        | "sales.vstorewithdemographics", true -> __.``sales.vstorewithdemographics``.ReadIfNotNull >> box
         | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
     static member private GetPrimitiveReader(t: System.Type, reader: Npgsql.NpgsqlDataReader, isOpt: bool) =

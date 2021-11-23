@@ -9,6 +9,7 @@ let getSchema (cfg: Config) : Schema =
     conn.Open()
     let sTables = conn.GetSchema("Tables")
     let sColumns = conn.GetSchema("Columns")
+    let sViews = conn.GetSchema("Views")
 
     let pks = 
         let sql =
@@ -61,6 +62,18 @@ let getSchema (cfg: Config) : Schema =
         )
         |> Seq.sortBy (fun column -> column.OrdinalPosition)
 
+    let views = 
+        sViews.Rows
+        |> Seq.cast<DataRow>
+        |> Seq.map (fun tbl -> 
+            {| 
+                TableCatalog = tbl.["TABLE_CATALOG"] :?> string
+                TableSchema = tbl.["TABLE_SCHEMA"] :?> string
+                TableName  = tbl.["TABLE_NAME"] :?> string
+                TableType = "view"
+            |}
+        )
+        
     let tables = 
         sTables.Rows
         |> Seq.cast<DataRow>
@@ -73,6 +86,7 @@ let getSchema (cfg: Config) : Schema =
             |}
         )
         |> Seq.filter (fun tbl -> tbl.TableType <> "SYSTEM_TABLE")
+        |> Seq.append views
         |> Seq.map (fun tbl -> 
             let tableColumns = 
                 allColumns
