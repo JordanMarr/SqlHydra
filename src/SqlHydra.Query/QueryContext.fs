@@ -147,9 +147,9 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             System.Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
 
     member this.InsertAsync<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>) = 
-        this.InsertAsync(CancellationToken.None, query)
+        this.InsertAsync(query, CancellationToken.None)
     
-    member this.InsertAsync<'T, 'InsertReturn when 'InsertReturn : struct> (cancellationToken: CancellationToken, query: InsertQuery<'T, 'InsertReturn>) = 
+    member this.InsertAsync<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>, cancellationToken: CancellationToken) = 
         async {
             use cmd = this.BuildCommand(query.ToKataQuery())
             // Did the user select an identity field?
@@ -175,9 +175,9 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         cmd.ExecuteNonQuery()
 
     member this.UpdateAsync (query: UpdateQuery<'T>) = 
-        this.UpdateAsync(CancellationToken.None, query)
+        this.UpdateAsync(query, CancellationToken.None)
     
-    member this.UpdateAsync (cancellationToken: CancellationToken, query: UpdateQuery<'T>) = 
+    member this.UpdateAsync (query: UpdateQuery<'T>, cancellationToken: CancellationToken) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
         cmd.ExecuteNonQueryAsync(cancellationToken)
 
@@ -186,9 +186,9 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         cmd.ExecuteNonQuery()
 
     member this.DeleteAsync (query: DeleteQuery<'T>) = 
-        this.DeleteAsync(CancellationToken.None, query)
+        this.DeleteAsync(query, CancellationToken.None)
 
-    member this.DeleteAsync (cancellationToken: CancellationToken, query: DeleteQuery<'T>) = 
+    member this.DeleteAsync (query: DeleteQuery<'T>, cancellationToken: CancellationToken) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
         cmd.ExecuteNonQueryAsync(cancellationToken)
 
@@ -199,9 +199,9 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         | _  as count -> count :?> int
 
     member this.CountAsync (query: SelectQuery<int>) = 
-        this.CountAsync(CancellationToken.None, query)
+        this.CountAsync(query, CancellationToken.None)
 
-    member this.CountAsync (cancellationToken: CancellationToken, query: SelectQuery<int>) = 
+    member this.CountAsync (query: SelectQuery<int>, cancellationToken: CancellationToken) = 
         async {
             use cmd = this.BuildCommand(query.ToKataQuery())
             let! count = cmd.ExecuteScalarAsync(cancellationToken) |> Async.AwaitTask
