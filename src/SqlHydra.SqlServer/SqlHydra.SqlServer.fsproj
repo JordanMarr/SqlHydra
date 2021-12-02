@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
-        <Version>0.610.0</Version>
+        <Version>0.620.0</Version>
         <Authors>Jordan Marr</Authors>
         <Description>SqlHydra.SqlServer is a dotnet tool that generates F# records for a SQL Server database.</Description>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -11,14 +11,7 @@
         <ToolCommandName>sqlhydra-mssql</ToolCommandName>
         <PackageOutputPath>./nupkg</PackageOutputPath>
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-        <PackageReleaseNotes>
-            SqlHydra.Query:
-            - (BREAKING) InsertBuilder `entities` operation now takes new `AtLeastOne` type as input.
-            - Better support for PostgreSQL custom types: "json" and "jsonb"
-            SqlHydra.*:
-            - Both tables and now columns can be filtered in generated types.
-            - Generated columns are now sorted by ordinal.
-        </PackageReleaseNotes>
+        <PackageReleaseNotes></PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
