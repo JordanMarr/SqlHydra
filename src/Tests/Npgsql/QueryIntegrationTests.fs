@@ -317,6 +317,13 @@ let tests =
             use ctx = openContext()
             ctx.BeginTransaction()
 
+            let! deleted =
+                delete {
+                    for r in productReviewTable do
+                    where (r.emailaddress = "gfisher@askjeeves.com")
+                }
+                |> ctx.DeleteAsync
+
             let! prodReviewId = 
                 insert {
                     for r in productReviewTable do

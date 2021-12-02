@@ -69,61 +69,71 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             cmd.Parameters.Add(p) |> ignore
         cmd
 
+    /// Builds an ADO.NET DbCommand from a SqlKata query.
     member this.BuildCommand(query: Query) =
         let compiledQuery = query |> compiler.Compile
         this.BuildCommand(compiledQuery)
 
+    /// Returns an ADO.NET data reader for a given query.
     member this.GetReader<'T, 'Reader when 'Reader :> DbDataReader> (query: SelectQuery<'T>) = 
         let cmd = this.BuildCommand(query.ToKataQuery()) // do not dispose cmd
         cmd.ExecuteReader() :?> 'Reader
 
+    /// Returns an ADO.NET data reader for a given query.
     member this.GetReaderAsync<'T, 'Reader when 'Reader :> DbDataReader> (query: SelectQuery<'T>) = 
-        this.GetReaderAsync<'T, 'Reader>(query, CancellationToken.None)
+        this.GetReaderAsyncWithOptions<'T, 'Reader>(query)
 
-    member this.GetReaderAsync<'T, 'Reader when 'Reader :> DbDataReader> (query: SelectQuery<'T>, cancellationToken: CancellationToken) = 
+    /// Returns an ADO.NET data reader for a given query.
+    member this.GetReaderAsyncWithOptions<'T, 'Reader when 'Reader :> DbDataReader> (query: SelectQuery<'T>, ?cancel: CancellationToken) = 
         async {
             let cmd = this.BuildCommand(query.ToKataQuery()) // do not dispose cmd
-            let! reader = cmd.ExecuteReaderAsync(cancellationToken) |> Async.AwaitTask
+            let! reader = cmd.ExecuteReaderAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
             return reader :?> 'Reader
         }
         |> Async.StartImmediateAsTask
 
-    member this.Read<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
+    /// Executes a select query with a given readEntity builder function.
+    member this.Read<'Entity, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
         use cmd = this.BuildCommand(query.ToKataQuery())
         use reader = cmd.ExecuteReader() :?> 'Reader
-        let read = getReaders reader
+        let readEntity = readEntityBuilder reader
         seq [| 
             while reader.Read() do
-                read() 
+                readEntity() 
         |] 
 
-    member this.ReadOne<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
-        this.Read getReaders query |> Seq.tryHead
+    /// Executes a select query with a given readEntity builder function.
+    member this.ReadAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) = 
+        this.ReadAsyncWithOptions (query, readEntityBuilder)
 
-    member this.ReadAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) = 
-        this.ReadAsyncWithCancellation getReaders CancellationToken.None query
-    
-    member this.ReadAsyncWithCancellation<'Entity, 'Reader when 'Reader :> DbDataReader>
-        (getReaders: 'Reader -> (unit -> 'Entity)) (cancellationToken: CancellationToken) (query: SelectQuery<'Entity>) = 
+    /// Executes a select query with a given readEntity builder function and optional args.
+    member this.ReadAsyncWithOptions<'Entity, 'Reader when 'Reader :> DbDataReader> 
+        (query: SelectQuery<'Entity>, readEntityBuilder: 'Reader -> (unit -> 'Entity), ?cancel: CancellationToken) = 
         async {
-            use cmd = this.BuildCommand(query.ToKataQuery())
-            use! reader = cmd.ExecuteReaderAsync(cancellationToken) |> Async.AwaitTask
-            let read = getReaders (reader :?> 'Reader)
+            use cmd = this.BuildCommand (query.ToKataQuery())
+            use! reader = cmd.ExecuteReaderAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
+            let readEntity = readEntityBuilder (reader :?> 'Reader)
             return
                 seq [| 
                     while reader.Read() do
-                        read() 
+                        readEntity () 
                 |]
         }
         |> Async.StartImmediateAsTask
 
-    member this.ReadOneAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (getReaders: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) = 
-        this.ReadOneAsyncWithCancellation getReaders CancellationToken.None query
+    /// Executes a select query with a given readEntity builder function for a single (option) result.
+    member this.ReadOne<'Entity, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
+        this.Read readEntityBuilder query |> Seq.tryHead
 
-    member this.ReadOneAsyncWithCancellation<'Entity, 'Reader when 'Reader :> DbDataReader>
-        (getReaders: 'Reader -> (unit -> 'Entity)) (cancellationToken: CancellationToken) (query: SelectQuery<'Entity>) = 
+    /// Executes a select query with a given readEntity builder function for a single (option) result.
+    member this.ReadOneAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) = 
+        this.ReadOneAsyncWithOptions(query, readEntityBuilder)
+
+    /// Executes a select query with a given readEntity builder function for a single (option) result with optional args.
+    member this.ReadOneAsyncWithOptions<'Entity, 'Reader when 'Reader :> DbDataReader>
+        (query: SelectQuery<'Entity>, readEntityBuilder: 'Reader -> (unit -> 'Entity), ?cancel: CancellationToken) = 
         async {
-            let! entities = this.ReadAsyncWithCancellation getReaders cancellationToken query |> Async.AwaitTask
+            let! entities = this.ReadAsyncWithOptions (query, readEntityBuilder, cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
             return entities |> Seq.tryHead
         }
         |> Async.StartImmediateAsTask
@@ -147,9 +157,9 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             System.Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
 
     member this.InsertAsync<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>) = 
-        this.InsertAsync(query, CancellationToken.None)
+        this.InsertAsyncWithOptions(query)
     
-    member this.InsertAsync<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>, cancellationToken: CancellationToken) = 
+    member this.InsertAsyncWithOptions<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>, ?cancel: CancellationToken) = 
         async {
             use cmd = this.BuildCommand(query.ToKataQuery())
             // Did the user select an identity field?
@@ -159,12 +169,12 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                     // Replace PostgreSQL identity query
                     cmd.CommandText <- cmd.CommandText.Replace(";SELECT lastval() AS id", $" RETURNING {identityField};")
 
-                let! identity = cmd.ExecuteScalarAsync(cancellationToken) |> Async.AwaitTask
+                let! identity = cmd.ExecuteScalarAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
                 // 'InsertReturn type set via `getId` in the builder
                 return System.Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
             | None ->
-                let! results = cmd.ExecuteNonQueryAsync(cancellationToken) |> Async.AwaitTask
+                let! results = cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
                 // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
                 return System.Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
         }
@@ -175,22 +185,22 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         cmd.ExecuteNonQuery()
 
     member this.UpdateAsync (query: UpdateQuery<'T>) = 
-        this.UpdateAsync(query, CancellationToken.None)
+        this.UpdateAsyncWithOptions(query)
     
-    member this.UpdateAsync (query: UpdateQuery<'T>, cancellationToken: CancellationToken) = 
+    member this.UpdateAsyncWithOptions (query: UpdateQuery<'T>, ?cancel: CancellationToken) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
-        cmd.ExecuteNonQueryAsync(cancellationToken)
+        cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None)
 
     member this.Delete (query: DeleteQuery<'T>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
         cmd.ExecuteNonQuery()
 
     member this.DeleteAsync (query: DeleteQuery<'T>) = 
-        this.DeleteAsync(query, CancellationToken.None)
+        this.DeleteAsyncWithOptions(query)
 
-    member this.DeleteAsync (query: DeleteQuery<'T>, cancellationToken: CancellationToken) = 
+    member this.DeleteAsyncWithOptions (query: DeleteQuery<'T>, ?cancel: CancellationToken) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
-        cmd.ExecuteNonQueryAsync(cancellationToken)
+        cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None)
 
     member this.Count (query: SelectQuery<int>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
@@ -199,12 +209,12 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         | _  as count -> count :?> int
 
     member this.CountAsync (query: SelectQuery<int>) = 
-        this.CountAsync(query, CancellationToken.None)
+        this.CountAsyncWithOptions(query)
 
-    member this.CountAsync (query: SelectQuery<int>, cancellationToken: CancellationToken) = 
+    member this.CountAsyncWithOptions (query: SelectQuery<int>, ?cancel: CancellationToken) = 
         async {
             use cmd = this.BuildCommand(query.ToKataQuery())
-            let! count = cmd.ExecuteScalarAsync(cancellationToken) |> Async.AwaitTask
+            let! count = cmd.ExecuteScalarAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
             return 
                 match count with
                 | :? int64 as value -> System.Convert.ToInt32 value
