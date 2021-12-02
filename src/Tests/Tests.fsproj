@@ -53,6 +53,9 @@
   <ItemGroup>
     <Folder Include="TestData\" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="5.0.2" />
+  </ItemGroup>
   <!--<Target Name="SqlHydra" BeforeTargets="Clean">
     <Exec Command="sqlhydra-mssql.bat" />
   </Target>-->

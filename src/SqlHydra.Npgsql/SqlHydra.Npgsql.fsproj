@@ -4,7 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
         <WarnOn>3390;$(WarnOn)</WarnOn>
-        <Version>0.620.0</Version>
+        <Version>0.620.1</Version>
         <Authors>Jordan Marr</Authors>
         <Description>SqlHydra.Npgsql is a dotnet tool that generates F# records for a PostgreSQL database.</Description>
         <PackageTags>F# fsharp data database orm sql</PackageTags>
@@ -40,6 +40,10 @@
             <Pack>True</Pack>
             <PackagePath></PackagePath>
         </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Update="FSharp.Core" Version="5.0.2" />
     </ItemGroup>
 
 </Project>

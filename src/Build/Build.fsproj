@@ -20,4 +20,8 @@
     <PackageReference Include="Nuke.Common" Version="5.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="5.0.2" />
+  </ItemGroup>
+
 </Project>

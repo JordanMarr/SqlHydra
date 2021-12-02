@@ -4,8 +4,8 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <WarnOn>3390;$(WarnOn)</WarnOn>
-        <Version>0.620.0</Version>
-        <Description>SqlHydra.Query is an F# query builder powered by SqlKata.Query that supports Sql Server, MySql, PostgreSql, Oracle and Firebird.</Description>
+        <Version>0.620.1</Version>
+        <Description>SqlHydra.Query is an F# query builder powered by SqlKata.Query that supports SQL Server, PostgreSQL and Sqlite.</Description>
         <Authors>Jordan Marr</Authors>
         <PackageTags>F# fsharp data database orm sql</PackageTags>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -34,11 +34,15 @@
       <!-- Marked with PrivateAssets="All" to include project reference in NuGet package -->
       <ProjectReference Include="..\SqlHydra.Domain\SqlHydra.Domain.fsproj" PrivateAssets="All" />
     </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Update="FSharp.Core" Version="5.0.2" />
+    </ItemGroup>
     
     <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
         <ItemGroup>
           <!-- Filter out unnecessary files -->
-          <_ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')->WithMetadataValue('PrivateAssets', 'All'))"/>
+          <_ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')-&gt;WithMetadataValue('PrivateAssets', 'All'))" />
         </ItemGroup>
 
         <!-- Print batches for debug purposes -->
@@ -46,7 +50,7 @@
 
         <ItemGroup>
           <!-- Add file to package with consideration of sub folder. If empty, the root folder is chosen. -->
-          <BuildOutputInPackage Include="@(_ReferenceCopyLocalPaths)" TargetPath="%(_ReferenceCopyLocalPaths.DestinationSubDirectory)"/>
+          <BuildOutputInPackage Include="@(_ReferenceCopyLocalPaths)" TargetPath="%(_ReferenceCopyLocalPaths.DestinationSubDirectory)" />
         </ItemGroup>
       </Target>
 
