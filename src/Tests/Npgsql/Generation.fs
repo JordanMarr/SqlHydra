@@ -9,7 +9,6 @@ open VerifyExpecto
 
 let cfg = 
     {
-        // Docker "mssql":
         ConnectionString = DB.connectionString
         OutputFile = ""
         Namespace = "TestNS"
@@ -31,8 +30,8 @@ let tests =
 
         let getCode cfg =
             lazySchema.Value
-            |> SchemaGenerator.generateModule cfg SqlHydra.SqlServer.Program.app
-            |> SchemaGenerator.toFormattedCode cfg SqlHydra.SqlServer.Program.app
+            |> SchemaGenerator.generateModule cfg SqlHydra.Npgsql.Program.app
+            |> SchemaGenerator.toFormattedCode cfg SqlHydra.Npgsql.Program.app
 
         let inCode (str: string) cfg = 
             let code = getCode cfg
