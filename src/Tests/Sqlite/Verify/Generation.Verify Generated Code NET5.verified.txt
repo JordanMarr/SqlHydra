@@ -40,7 +40,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
-    type AddressReader(reader: System.Data.IDataReader, getOrdinal) =
+    type AddressReader(reader: System.Data.Common.DbDataReader, getOrdinal) =
         member __.AddressID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "AddressID")
         member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
         member __.AddressLine2 = OptionalColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
@@ -71,7 +71,7 @@ module main =
           VersionDate: System.DateTime
           ModifiedDate: System.DateTime }
 
-    type BuildVersionReader(reader: System.Data.IDataReader, getOrdinal) =
+    type BuildVersionReader(reader: System.Data.Common.DbDataReader, getOrdinal) =
         member __.SystemInformationID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "SystemInformationID")
         member __.``Database Version`` = RequiredColumn(reader, getOrdinal, reader.GetString, "Database Version")
         member __.VersionDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "VersionDate")
@@ -103,7 +103,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
-    type CustomerReader(reader: System.Data.IDataReader, getOrdinal) =
+    type CustomerReader(reader: System.Data.Common.DbDataReader, getOrdinal) =
         member __.CustomerID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "CustomerID")
         member __.NameStyle = RequiredColumn(reader, getOrdinal, reader.GetInt64, "NameStyle")
         member __.Title = OptionalColumn(reader, getOrdinal, reader.GetString, "Title")
@@ -147,7 +147,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
-    type CustomerAddressReader(reader: System.Data.IDataReader, getOrdinal) =
+    type CustomerAddressReader(reader: System.Data.Common.DbDataReader, getOrdinal) =
         member __.CustomerID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "CustomerID")
         member __.AddressID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "AddressID")
         member __.AddressType = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressType")
@@ -175,7 +175,7 @@ module main =
           ErrorLine: Option<int64>
           ErrorMessage: string }
 
-    type ErrorLogReader(reader: System.Data.IDataReader, getOrdinal) =
+    type ErrorLogReader(reader: System.Data.Common.DbDataReader, getOrdinal) =
         member __.ErrorLogID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "ErrorLogID")
         member __.ErrorTime = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ErrorTime")
         member __.UserName = RequiredColumn(reader, getOrdinal, reader.GetString, "UserName")
@@ -219,7 +219,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
-    type ProductReader(reader: System.Data.IDataReader, getOrdinal) =
+    type ProductReader(reader: System.Data.Common.DbDataReader, getOrdinal) =
         member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "ProductID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
         member __.ProductNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "ProductNumber")
@@ -267,7 +267,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
-    type ProductCategoryReader(reader: System.Data.IDataReader, getOrdinal) =
+    type ProductCategoryReader(reader: System.Data.Common.DbDataReader, getOrdinal) =
         member __.ProductCategoryID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "ProductCategoryID")
         member __.ParentProductCategoryID = OptionalColumn(reader, getOrdinal, reader.GetInt64, "ParentProductCategoryID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
@@ -290,7 +290,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
-    type ProductDescriptionReader(reader: System.Data.IDataReader, getOrdinal) =
+    type ProductDescriptionReader(reader: System.Data.Common.DbDataReader, getOrdinal) =
         member __.ProductDescriptionID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "ProductDescriptionID")
         member __.Description = RequiredColumn(reader, getOrdinal, reader.GetString, "Description")
         member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetString, "rowguid")
@@ -312,7 +312,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
-    type ProductModelReader(reader: System.Data.IDataReader, getOrdinal) =
+    type ProductModelReader(reader: System.Data.Common.DbDataReader, getOrdinal) =
         member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "ProductModelID")
         member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
         member __.CatalogDescription = OptionalColumn(reader, getOrdinal, reader.GetString, "CatalogDescription")
@@ -336,7 +336,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
-    type ProductModelProductDescriptionReader(reader: System.Data.IDataReader, getOrdinal) =
+    type ProductModelProductDescriptionReader(reader: System.Data.Common.DbDataReader, getOrdinal) =
         member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "ProductModelID")
         member __.ProductDescriptionID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "ProductDescriptionID")
         member __.Culture = RequiredColumn(reader, getOrdinal, reader.GetString, "Culture")
@@ -364,7 +364,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
-    type SalesOrderDetailReader(reader: System.Data.IDataReader, getOrdinal) =
+    type SalesOrderDetailReader(reader: System.Data.Common.DbDataReader, getOrdinal) =
         member __.SalesOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "SalesOrderID")
         member __.SalesOrderDetailID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "SalesOrderDetailID")
         member __.OrderQty = RequiredColumn(reader, getOrdinal, reader.GetInt64, "OrderQty")
@@ -413,7 +413,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
-    type SalesOrderHeaderReader(reader: System.Data.IDataReader, getOrdinal) =
+    type SalesOrderHeaderReader(reader: System.Data.Common.DbDataReader, getOrdinal) =
         member __.SalesOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "SalesOrderID")
         member __.RevisionNumber = RequiredColumn(reader, getOrdinal, reader.GetInt64, "RevisionNumber")
         member __.OrderDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "OrderDate")
@@ -463,7 +463,7 @@ module main =
         member __.ReadIfNotNull() =
             if __.SalesOrderID.IsNull() then None else Some(__.Read())
 
-type HydraReader(reader: System.Data.IDataReader) =
+type HydraReader(reader: System.Data.Common.DbDataReader) =
     let mutable accFieldCount = 0
     let buildGetOrdinal fieldCount =
         let dictionary = 
@@ -529,7 +529,7 @@ type HydraReader(reader: System.Data.IDataReader) =
         | "main.SalesOrderHeader", true -> __.``main.SalesOrderHeader``.ReadIfNotNull >> box
         | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
-    static member private GetPrimitiveReader(t: System.Type, reader: System.Data.IDataReader, isOpt: bool) =
+    static member private GetPrimitiveReader(t: System.Type, reader: System.Data.Common.DbDataReader, isOpt: bool) =
         let wrap get (ord: int) = 
             if isOpt 
             then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
@@ -549,7 +549,7 @@ type HydraReader(reader: System.Data.IDataReader) =
         else if t = typedefof<System.Guid> then Some(wrap reader.GetGuid)
         else None
 
-    static member Read(reader: System.Data.IDataReader) = 
+    static member Read(reader: System.Data.Common.DbDataReader) = 
             let hydra = HydraReader(reader)
             
             let getOrdinalAndIncrement() = 

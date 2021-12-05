@@ -2,8 +2,13 @@
 
 open Expecto
 open SqlHydra.Query
-open Sqlite.AdventureWorks
 open DB
+#if NET5_0
+open Sqlite.AdventureWorksNet5
+#endif
+#if NET6_0
+open Sqlite.AdventureWorksNet6
+#endif
 
 // Tables
 let addressTable =          table<main.Address>

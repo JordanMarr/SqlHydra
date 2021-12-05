@@ -16,7 +16,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Util.fs" />
-    <Compile Include="Sqlite\AdventureWorks.fs" />
+	<Compile Include="Sqlite\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
+	<Compile Include="Sqlite\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
     <Compile Include="Sqlite\DB.fs" />
     <Compile Include="Sqlite\QueryUnitTests.fs" />
     <Compile Include="Sqlite\QueryIntegrationTests.fs" />

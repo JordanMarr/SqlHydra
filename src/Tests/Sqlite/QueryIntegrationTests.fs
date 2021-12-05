@@ -1,9 +1,14 @@
 ﻿module Sqlite.QueryIntegrationTests
 
-open Sqlite.AdventureWorks
 open SqlHydra.Query
 open Expecto
 open DB
+#if NET5_0
+open Sqlite.AdventureWorksNet5
+#endif
+#if NET6_0
+open Sqlite.AdventureWorksNet6
+#endif
 
 let openContext() = 
     let compiler = SqlKata.Compilers.SqliteCompiler()
