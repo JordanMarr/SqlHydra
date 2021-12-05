@@ -28,6 +28,7 @@
 
     <ItemGroup>
         <PackageReference Include="SqlKata" Version="2.3.7" />
+        <PackageReference Include="TaskBuilder.fs" Version="2.1.0" Condition="'$(TargetFramework)' == 'net5.0'" />
     </ItemGroup>
 
     <ItemGroup>
