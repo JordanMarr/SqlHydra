@@ -1,10 +1,14 @@
 ﻿module Npgsql.QueryIntegrationTests
 
 open Expecto
-open Npgsql.AdventureWorks.person
 open SqlHydra.Query
 open DB
-open Npgsql.AdventureWorks
+#if NET5_0
+open Npgsql.AdventureWorksNet5
+#endif
+#if NET6_0
+open Npgsql.AdventureWorksNet6
+#endif
 
 let openContext() = 
     let compiler = SqlKata.Compilers.PostgresCompiler()
@@ -253,7 +257,7 @@ let tests =
                         {
                             sales.currency.currencycode = "BTC"
                             sales.currency.name = "BitCoin"
-                            sales.currency.modifieddate = System.DateTime.Now
+                            sales.currency.modifieddate = System.DateTime.Today
                         }
                 }
                 |> ctx.InsertAsync
@@ -431,7 +435,7 @@ let tests =
                     {
                         sales.currency.currencycode = $"BC{i}"
                         sales.currency.name = "BitCoin"
-                        sales.currency.modifieddate = System.DateTime.Now
+                        sales.currency.modifieddate = System.DateTime.Today
                     }
                 )
                 |> AtLeastOne.tryCreate

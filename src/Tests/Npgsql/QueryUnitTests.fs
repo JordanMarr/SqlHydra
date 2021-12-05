@@ -3,7 +3,12 @@
 open Expecto
 open SqlHydra.Query
 open DB
-open Npgsql.AdventureWorks
+#if NET5_0
+open Npgsql.AdventureWorksNet5
+#endif
+#if NET6_0
+open Npgsql.AdventureWorksNet6
+#endif
 
 // Tables
 let personTable =           table<person.person>                    |> inSchema (nameof person)
@@ -338,7 +343,7 @@ let tests =
                     into customerTable
                     entity 
                         { 
-                            sales.customer.modifieddate = System.DateTime.Now
+                            sales.customer.modifieddate = System.DateTime.Today
                             sales.customer.territoryid = None
                             sales.customer.storeid = None
                             sales.customer.personid = Some 1

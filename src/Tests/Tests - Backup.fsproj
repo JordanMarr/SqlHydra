@@ -15,19 +15,24 @@
     <DefineConstants>TRACE;LOCALHOST</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Npgsql/AdventureWorksNet5.fs">
+      <Visible>False</Visible>
+    </Compile>
+    <Compile Include="Npgsql/AdventureWorksNet6.fs">
+      <Visible>False</Visible>
+    </Compile>
     <Compile Include="Util.fs" />
     <Compile Include="Sqlite\AdventureWorks.fs" />
     <Compile Include="Sqlite\DB.fs" />
     <Compile Include="Sqlite\QueryUnitTests.fs" />
     <Compile Include="Sqlite\QueryIntegrationTests.fs" />
-	<Compile Include="SqlServer\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
-	<Compile Include="SqlServer\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
+    <Compile Include="SqlServer\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
+    <Compile Include="SqlServer\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
     <Compile Include="SqlServer\DB.fs" />
     <Compile Include="SqlServer\QueryUnitTests.fs" />
     <Compile Include="SqlServer\QueryIntegrationTests.fs" />
     <Compile Include="SqlServer\Generation.fs" />
-	<Compile Include="Npgsql\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
-	<Compile Include="Npgsql\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
+    <Compile Include="Npgsql\AdventureWorks.fs" />
     <Compile Include="Npgsql\DB.fs" />
     <Compile Include="Npgsql\QueryUnitTests.fs" />
     <Compile Include="Npgsql\QueryIntegrationTests.fs" />

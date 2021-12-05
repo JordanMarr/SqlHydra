@@ -29,11 +29,17 @@ let supportedTypeMappings =
         // skipped unsupported types
         "uuid",                         "System.Guid",          DbType.Guid,        None,                               nameof r.GetGuid
         // skipped unsupported types
-        "date",                         "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
         "interval",                     "System.TimeSpan",      DbType.Time,        None,                               nameof r.GetTimeSpan
-        "timestamp without time zone",  "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
-        "timestamp with time zone",     "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
+#if NET5_0
+        "date",                         "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
         "time without time zone",       "System.TimeSpan",      DbType.Time,        None,                               nameof r.GetTimeSpan 
+#endif
+#if NET6_0
+        "date",                         "System.DateOnly",      DbType.DateTime,    None,                               nameof r.GetFieldValue 
+        "time without time zone",       "System.TimeSpan",      DbType.Time,        None,                               nameof r.GetFieldValue
+#endif
+        "timestamp with time zone",     "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
+        "timestamp without time zone",  "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
         "time with time zone",          "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
         "bytea",                        "byte[]",               DbType.Binary,      None,                               nameof r.GetValue 
         // skipped unsupported types

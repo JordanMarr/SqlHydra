@@ -1,0 +1,10 @@
+[general]
+connection = "Server=localhost;Port=54320;Database=Adventureworks;User Id=postgres;Password=postgres;"
+output = "Npgsql/AdventureWorksNet5.fs"
+namespace = "Npgsql.AdventureWorksNet5"
+cli_mutable = true
+[readers]
+reader_type = "Npgsql.NpgsqlDataReader"
+[filters]
+include = [ "*" ]
+exclude = [ "hr/*" ]
