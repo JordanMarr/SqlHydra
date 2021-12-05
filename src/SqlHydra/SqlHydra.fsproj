@@ -5,7 +5,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Version>1.0.0</Version>
     <Authors>Jordan Marr</Authors>
-    <Description>SqlHydra is a set of Myriad plugins that generate F# records for a range of databases.</Description>
+    <Description></Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,20 +17,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fantomas" Version="4.4.0" />
-    <PackageReference Include="FsAst" Version="0.9.0" />
+    <PackageReference Include="Fantomas" Version="4.4.0" Condition="'$(TargetFramework)' == 'net5.0'" />
+	<PackageReference Include="Fantomas" Version="4.5.10" Condition="'$(TargetFramework)' == 'net6.0'" />
+    <PackageReference Include="FsAst" Version="0.9.0" Condition="'$(TargetFramework)' == 'net5.0'" />
+	<PackageReference Include="FsAst" Version="0.10.0" Condition="'$(TargetFramework)' == 'net6.0'" />
+	<PackageReference Include="FSharp.Core" Version="5.0.0" Condition="'$(TargetFramework)' == 'net5.0'" />
+	<PackageReference Include="FSharp.Core" Version="6.0.1" Condition="'$(TargetFramework)' == 'net6.0'" />
     <PackageReference Include="Glob" Version="1.1.8" />
     <PackageReference Include="Microsoft.Build" Version="16.11.0" />
     <PackageReference Include="Spectre.Console" Version="0.41.0" />
     <PackageReference Include="Tomlyn" Version="0.1.2" />
   </ItemGroup>
     
-    <ItemGroup>
-      <PackageReference Update="FSharp.Core" Version="5.0.2" />
-    </ItemGroup>
-    
-    <ItemGroup>
-      <ProjectReference Include="..\SqlHydra.Domain\SqlHydra.Domain.fsproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SqlHydra.Domain\SqlHydra.Domain.fsproj" />
+  </ItemGroup>
 
 </Project>

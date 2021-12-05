@@ -3,7 +3,13 @@
 open Expecto
 open SqlHydra.Query
 open DB
-open SqlServer.AdventureWorks
+
+#if NET5_0
+open SqlServer.AdventureWorksNet5
+#endif
+#if NET6_0
+open SqlServer.AdventureWorksNet6
+#endif
 
 // Tables
 let personTable =           table<Person.Person>                    |> inSchema (nameof Person)

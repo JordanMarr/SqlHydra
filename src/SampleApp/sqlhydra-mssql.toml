@@ -1,5 +1,8 @@
 [general]
-connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+# Personal Local SQL Server (TODO: Update SampleApp to use Docker DB below which has a different schema):
+connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;TrustServerCertificate=True"
+# Docker SQL Server:
+# connection = "Server=localhost,12019;Database=AdventureWorks;User=sa;Password=Password#123;TrustServerCertificate=True"
 output = "AdventureWorks.fs"
 namespace = "SampleApp.AdventureWorks"
 cli_mutable = true

@@ -27,11 +27,17 @@ let supportedTypeMappings =
         "TEXT",                 "string",                                   DbType.String,              nameof r.GetString
         "NTEXT",                "string",                                   DbType.String,              nameof r.GetString
         "DATETIMEOFFSET",       "System.DateTimeOffset",                    DbType.DateTimeOffset,      nameof r.GetDateTimeOffset
+#if NET5_0
         "DATE",                 "System.DateTime",                          DbType.Date,                nameof r.GetDateTime
+        "TIME",                 "System.TimeSpan",                          DbType.Time,                nameof r.GetTimeSpan
+#endif
+#if NET6_0
+        "DATE",                 "System.DateOnly",                          DbType.Date,                nameof r.GetFieldValue
+        "TIME",                 "System.TimeOnly",                          DbType.Time,                nameof r.GetFieldValue
+#endif
         "DATETIME",             "System.DateTime",                          DbType.DateTime,            nameof r.GetDateTime
         "DATETIME2",            "System.DateTime",                          DbType.DateTime2,           nameof r.GetDateTime
-        "SMALLDATETIME",        "System.DateTime",                          DbType.DateTime,            nameof r.GetDateTime
-        "TIME",                 "System.TimeSpan",                          DbType.Time,                nameof r.GetTimeSpan
+        "SMALLDATETIME",        "System.DateTime",                          DbType.DateTime,            nameof r.GetDateTime        
         "VARBINARY",            "byte[]",                                   DbType.Binary,              nameof r.GetValue
         "BINARY",               "byte[]",                                   DbType.Binary,              nameof r.GetValue
         "IMAGE",                "byte[]",                                   DbType.Binary,              nameof r.GetValue

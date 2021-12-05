@@ -18,10 +18,10 @@ let getProductsWithThumbnail(conn: SqlConnection) = task {
         |> Db.newCommand "SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
         |> Db.Async.read
 
-    let hydra = SalesLT.HydraReader(reader :?> SqlDataReader)
+    let hydra = HydraReader(reader :?> SqlDataReader)
     return [ 
         while reader.Read() do
-            hydra.Product.Read() 
+            hydra.``SalesLT.Product``.Read() 
     ]
 }
 
@@ -40,16 +40,16 @@ let loadCustomProductDomainEntity(conn: SqlConnection) = task {
         |> Db.newCommand "SELECT TOP 4 * FROM SalesLT.Product p JOIN SalesLT.ProductCategory c ON p.ProductCategoryID = c.ProductCategoryID WHERE ThumbNailPhoto IS NOT NULL"
         |> Db.Async.read  
 
-    let hydra = SalesLT.HydraReader(reader :?> SqlDataReader)
+    let hydra = HydraReader(reader :?> SqlDataReader)
 
     return [ 
         while reader.Read() do
             { 
-                ProductInfo.Product = hydra.Product.Name.Read()
-                ProductInfo.Category = hydra.ProductCategory.Name.Read()
-                ProductInfo.ProductNumber = hydra.Product.ProductNumber.Read()
-                ProductInfo.ThumbnailFileName = hydra.Product.ThumbnailPhotoFileName.Read()
-                ProductInfo.Thumbnail = hydra.Product.ThumbNailPhoto.Read()
+                ProductInfo.Product = hydra.``SalesLT.Product``.Name.Read()
+                ProductInfo.Category = hydra.``SalesLT.ProductCategory``.Name.Read()
+                ProductInfo.ProductNumber = hydra.``SalesLT.Product``.ProductNumber.Read()
+                ProductInfo.ThumbnailFileName = hydra.``SalesLT.Product``.ThumbnailPhotoFileName.Read()
+                ProductInfo.Thumbnail = hydra.``SalesLT.Product``.ThumbNailPhoto.Read()
             }
     ]
 }
@@ -68,11 +68,11 @@ let getCustomersJoinAddresses(conn: SqlConnection) = task {
         |> Db.newCommand sql
         |> Db.Async.read
     
-    let hydra = SalesLT.HydraReader(reader :?> SqlDataReader)
+    let hydra = HydraReader(reader :?> SqlDataReader)
 
     return [
         while reader.Read() do
-            hydra.Customer.Read(), hydra.Address.Read()
+            hydra.``SalesLT.Customer``.Read(), hydra.``SalesLT.Address``.Read()
     ]
 }
 
@@ -92,12 +92,12 @@ let getCustomersLeftJoinAddresses(conn: SqlConnection) = task {
         |> Db.newCommand sql
         |> Db.Async.read
 
-    let hydra = SalesLT.HydraReader(reader :?> SqlDataReader)
+    let hydra = HydraReader(reader :?> SqlDataReader)
 
     return [
         while reader.Read() do
-            hydra.Customer.Read(),
-            hydra.Address.ReadIfNotNull()
+            hydra.``SalesLT.Customer``.Read(),
+            hydra.``SalesLT.Address``.ReadIfNotNull()
     ]
 }
 
@@ -114,12 +114,12 @@ let getProductsAndCategories(conn: SqlConnection) = task {
         |> Db.newCommand sql
         |> Db.Async.read
     
-    let hydra = SalesLT.HydraReader(reader :?> SqlDataReader)
+    let hydra = HydraReader(reader :?> SqlDataReader)
 
     return [
         while reader.Read() do
-            hydra.Product.Read(),
-            hydra.ProductCategory.ReadIfNotNull()
+            hydra.``SalesLT.Product``.Read(),
+            hydra.``SalesLT.ProductCategory``.ReadIfNotNull()
     ]
 }
 

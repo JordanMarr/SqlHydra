@@ -1,9 +1,15 @@
 ﻿module SqlServer.QueryIntegrationTests
 
-open SqlServer.AdventureWorks
 open SqlHydra.Query
 open Expecto
 open DB
+
+#if NET5_0
+open SqlServer.AdventureWorksNet5
+#endif
+#if NET6_0
+open SqlServer.AdventureWorksNet6
+#endif
 
 let openContext() = 
     let compiler = SqlKata.Compilers.SqlServerCompiler()

@@ -1,6 +1,6 @@
 ﻿module SqlHydra.SchemaGenerator
+
 open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler
 open FSharp.Compiler.XmlDoc
 open FsAst
 open Fantomas
@@ -8,7 +8,12 @@ open Domain
 open System.Data
 open SqlHydra.SchemaFilters
 
-let range0 = Range.range.Zero
+#if NET5_0
+let range0 = FSharp.Compiler.Range.range.Zero
+#endif
+#if NET6_0
+let range0 = FSharp.Compiler.Text.range.Zero
+#endif
 
 type SynExpr with
     static member FailWith msg = SynExpr.CreateApp(SynExpr.Ident(Ident.Create("failwith")), SynExpr.CreateConstString(msg))
@@ -87,7 +92,7 @@ let createTableRecord (cfg: Config) (tbl: Table) =
 /// Creates a "{tbl.Name}Reader" class that reads columns for a given table/record.
 let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) = 
     let classId = Ident.CreateLong(tbl.Name + "Reader")
-    let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, range0)
+    let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, PreXmlDoc.Empty, false, None, range0)
 
     let ctor = SynMemberDefn.CreateImplicitCtor([ 
         // Ex: (reader: Microsoft.Data.SqlClient.SqlDataReader)
@@ -254,7 +259,7 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
 /// Creates a "HydraReader" class with properties for each table in a given schema.
 let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (tbls: Table seq) = 
     let classId = Ident.CreateLong("HydraReader")
-    let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, XmlDoc.PreXmlDocEmpty, false, None, range0)
+    let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, PreXmlDoc.Empty, false, None, range0)
 
     let ctor = SynMemberDefn.CreateImplicitCtor([ 
         // Ex: (reader: Microsoft.Data.SqlClient.SqlDataReader)
@@ -280,7 +285,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                         , false
                         , false
                         , []
-                        , XmlDoc.PreXmlDocEmpty
+                        , PreXmlDoc.Empty
                         , SynValData.SynValData(None, SynValInfo.Empty, None)
                         , SynPat.LongIdent(LongIdentWithDots.CreateString($"lazy{tbl.Schema}{tbl.Name}"), None, None, SynArgPats.Empty, None, range0)
                         , None
@@ -561,7 +566,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                             , false
                             , false
                             , []
-                            , XmlDoc.PreXmlDocEmpty
+                            , PreXmlDoc.Empty
                             , SynValData.SynValData(None, SynValInfo.Empty, None)
                             , SynPat.LongIdent(LongIdentWithDots.CreateString("wrap"), None, None, SynArgPats.Empty, None, range0)
                             , None

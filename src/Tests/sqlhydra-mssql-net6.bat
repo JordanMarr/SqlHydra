@@ -1,0 +1,1 @@
+dotnet run --project ..\SqlHydra.SqlServer --framework net6.0 -- sqlhydra-mssql-net6.toml

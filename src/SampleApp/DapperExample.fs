@@ -22,19 +22,19 @@ let unwrapDbDataReader (dapperReader: Common.DbDataReader) =
 
 let getProductsWithThumbnail(conn: SqlConnection) = task {
     use reader = conn.ExecuteReader("SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL")
-    let hydra = SalesLT.HydraReader(unwrapIDataReader reader)
+    let hydra = HydraReader(unwrapIDataReader reader)
     return [ 
         while reader.Read() do
-            hydra.Product.Read() 
+            hydra.``SalesLT.Product``.Read() 
     ]
 }
 
 let getProductsWithThumbnailAsync(conn: SqlConnection) = task {
     use! reader = conn.ExecuteReaderAsync("SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL")
-    let hydra = SalesLT.HydraReader(unwrapDbDataReader reader)
+    let hydra = HydraReader(unwrapDbDataReader reader)
     return [ 
         while reader.Read() do
-            hydra.Product.Read() 
+            hydra.``SalesLT.Product``.Read() 
     ]
 }
 

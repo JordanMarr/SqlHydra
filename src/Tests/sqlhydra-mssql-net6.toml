@@ -1,0 +1,10 @@
+[general]
+connection = "Server=localhost,12019;Database=AdventureWorks;User=sa;Password=Password#123;TrustServerCertificate=True"
+output = "SqlServer/AdventureWorksNet6.fs"
+namespace = "SqlServer.AdventureWorksNet6"
+cli_mutable = true
+[readers]
+reader_type = "Microsoft.Data.SqlClient.SqlDataReader"
+[filters]
+include = [ "*" ]
+exclude = [ "*/v*" ]

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AdventureWorks.fs">
@@ -18,11 +18,11 @@
   <ItemGroup>
     <PackageReference Include="Dapper.FSharp" Version="2.2.0" />
     <PackageReference Include="Donald" Version="6.2.2" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.3" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" />
     <PackageReference Include="TaskBuilder.fs" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="5.0.2" />
+    <PackageReference Update="FSharp.Core" Version="6.0.1" />
   </ItemGroup>
   <Target Name="SqlHydra" BeforeTargets="Clean">
     <Exec Command="sqlhydra-mssql.bat" />

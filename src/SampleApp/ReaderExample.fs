@@ -14,11 +14,11 @@ let getProductsWithThumbnail(conn: SqlConnection) = task {
     let sql = "SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
-    let hydra = SalesLT.HydraReader(reader)
+    let hydra = HydraReader(reader)
 
     return [
         while reader.Read() do
-            hydra.Product.Read()
+            hydra.``SalesLT.Product``.Read()
     ]
 }
 
@@ -26,11 +26,11 @@ let getProductNamesNumbers(conn: SqlConnection) = task {
     let sql = "SELECT TOP 10 [Name], [ProductNumber] AS ProductNo FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL"
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
-    let hydra = SalesLT.HydraReader(reader)
+    let hydra = HydraReader(reader)
 
     return [
         while reader.Read() do
-            hydra.Product.Name.Read(), hydra.Product.ProductNumber.Read("ProductNo")
+            hydra.``SalesLT.Product``.Name.Read(), hydra.``SalesLT.Product``.ProductNumber.Read("ProductNo")
     ]
 }
 
@@ -45,11 +45,11 @@ let getCustomersJoinAddresses(conn: SqlConnection) = task {
         """
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
-    let hydra = SalesLT.HydraReader(reader)
+    let hydra = HydraReader(reader)
 
     return [
         while reader.Read() do
-            hydra.Customer.Read(), hydra.Address.Read()
+            hydra.``SalesLT.Customer``.Read(), hydra.``SalesLT.Address``.Read()
     ]
 }
 
@@ -66,11 +66,11 @@ let getCustomersLeftJoinAddresses(conn: SqlConnection) = task {
         """
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
-    let hydra = SalesLT.HydraReader(reader)
+    let hydra = HydraReader(reader)
 
     return [
         while reader.Read() do
-            hydra.Customer.Read(), hydra.Address.ReadIfNotNull()
+            hydra.``SalesLT.Customer``.Read(), hydra.``SalesLT.Address``.ReadIfNotNull()
     ]
 }
 
@@ -83,12 +83,12 @@ let getProductsAndCategories(conn: SqlConnection) = task {
         """
     use cmd = new SqlCommand(sql, conn)
     use! reader = cmd.ExecuteReaderAsync()
-    let hydra = SalesLT.HydraReader(reader)
+    let hydra = HydraReader(reader)
 
     return [
         while reader.Read() do
-            hydra.Product.Read(), 
-            hydra.ProductCategory.ReadIfNotNull()
+            hydra.``SalesLT.Product``.Read(), 
+            hydra.``SalesLT.ProductCategory``.ReadIfNotNull()
     ]
 }
 

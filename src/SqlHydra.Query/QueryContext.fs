@@ -188,8 +188,11 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         this.UpdateAsyncWithOptions(query)
     
     member this.UpdateAsyncWithOptions (query: UpdateQuery<'T>, ?cancel: CancellationToken) = 
-        use cmd = this.BuildCommand(query.ToKataQuery())
-        cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None)
+        async {
+            use cmd = this.BuildCommand(query.ToKataQuery())
+            return! cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
+        }
+        |> Async.StartImmediateAsTask
 
     member this.Delete (query: DeleteQuery<'T>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
@@ -199,8 +202,11 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         this.DeleteAsyncWithOptions(query)
 
     member this.DeleteAsyncWithOptions (query: DeleteQuery<'T>, ?cancel: CancellationToken) = 
-        use cmd = this.BuildCommand(query.ToKataQuery())
-        cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None)
+        async {
+            use cmd = this.BuildCommand(query.ToKataQuery())
+            return! cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
+        }
+        |> Async.StartImmediateAsTask
 
     member this.Count (query: SelectQuery<int>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
