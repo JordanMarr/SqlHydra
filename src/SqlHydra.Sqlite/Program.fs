@@ -5,6 +5,9 @@ open SqlHydra
 open System.IO
 open Domain
 
+type private SelfRef = class end
+let version = System.Reflection.Assembly.GetAssembly(typeof<SelfRef>).GetName().Version |> string
+
 let app = 
     {
         AppInfo.Name = "SqlHydra.Sqlite"
@@ -12,7 +15,7 @@ let app =
         // BREAKING: .NET 6 requires `DbDataReader` for access to `GetFieldValue` for `DateOnly`/`TimeOnly`.
         // Users upgrading existing to .NET 6 will need to update the `reader_type` in the `sqlhydra-sqlite.toml`.
         AppInfo.DefaultReaderType = "System.Data.Common.DbDataReader" // "System.Data.IDataReader" 
-        AppInfo.Version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
+        AppInfo.Version = version
     }
 
 [<EntryPoint>]

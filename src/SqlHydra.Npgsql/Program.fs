@@ -5,12 +5,15 @@ open SqlHydra
 open System.IO
 open Domain
 
+type private SelfRef = class end
+let version = System.Reflection.Assembly.GetAssembly(typeof<SelfRef>).GetName().Version |> string
+
 let app = 
     {
         AppInfo.Name = "SqlHydra.Npgsql"
         AppInfo.Command = "sqlhydra-npgsql"
         AppInfo.DefaultReaderType = "Npgsql.NpgsqlDataReader"
-        AppInfo.Version = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString()
+        AppInfo.Version = version
     }
 
 [<EntryPoint>]
