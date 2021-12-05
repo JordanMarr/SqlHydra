@@ -53,15 +53,15 @@ let buildTomlFilename(app: AppInfo) =
     $"{app.Command}.toml"
 
 /// Saves a config as toml.
-let saveConfig (tomlFilename: string, cfg: Config) = 
+let saveConfig (tomlFile: IO.FileInfo, cfg: Config) = 
     let toml = TomlConfigParser.save(cfg)
-    IO.File.WriteAllText(tomlFilename, toml)
+    IO.File.WriteAllText(tomlFile.FullName, toml)
 
 /// Reads a config from toml.
-let tryLoadConfig(tomlFileName: string) = 
-    if IO.File.Exists(tomlFileName) then
+let tryLoadConfig(tomlFile: IO.FileInfo) = 
+    if tomlFile.Exists then
         try            
-            let toml = IO.File.ReadAllText(tomlFileName)
+            let toml = IO.File.ReadAllText(tomlFile.FullName)
             let config = TomlConfigParser.read(toml)
             Valid config
         with ex -> 
@@ -71,27 +71,25 @@ let tryLoadConfig(tomlFileName: string) =
 
 /// Creates a sqlhydra-*.toml file if necessary and then runs.
 let getConfig(app: AppInfo, argv: string array) = 
-
     AnsiConsole.MarkupLine($"{app.Name}")
     AnsiConsole.MarkupLine($"v[yellow]{app.Version}[/]")
 
-    let tomlFilename = buildTomlFilename(app)
+    let tomlFile = 
+        match argv with 
+        | [| |] -> IO.FileInfo(buildTomlFilename(app))
+        | [| tomlFilePath |] -> IO.FileInfo(tomlFilePath)
+        | _ ->
+            AnsiConsole.MarkupLine($"Invalid args: '{argv}'. Expected no args, or a .toml configuration file path.")
+            failwith "Invalid args."
 
-    match argv with 
-    | [| |] ->
-        match tryLoadConfig(tomlFilename) with
-        | Valid cfg -> 
-            cfg
-        | Invalid exMsg -> 
-            Console.WriteLine($"Unable to deserialize '{tomlFilename}'. \n{exMsg}")
-            failwith "Invalid toml config."
-        | NotFound ->
-            Console.WriteLine($"'{tomlFilename}' not detected. Starting configuration wizard...")
-            let cfg = newConfigWizard(app)
-            saveConfig(tomlFilename, cfg)
-            cfg
-
-    | _ ->
-        AnsiConsole.MarkupLine($"Invalid args: '{argv}'. Expected no args, or \"--new\".")
-        failwith "Invalid args."
-
+    match tryLoadConfig(tomlFile) with
+    | Valid cfg -> 
+        cfg
+    | Invalid exMsg -> 
+        Console.WriteLine($"Unable to deserialize '{tomlFile.FullName}'. \n{exMsg}")
+        failwith "Invalid toml config."
+    | NotFound ->
+        Console.WriteLine($"'{tomlFile.FullName}' does not exist. Starting configuration wizard...")
+        let cfg = newConfigWizard(app)
+        saveConfig(tomlFile, cfg)
+        cfg
