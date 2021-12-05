@@ -55,7 +55,7 @@ Target.create "Pack" <| fun _ ->
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "pack --configuration Release -o nupkg/Release", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}' package.'")
 
-let version = "*.0.620.1.nupkg"
+let version = "*.0.630.0-beta.1.nupkg"
 
 Target.create "Publish" <| fun _ ->
     let nugetKey =
@@ -70,8 +70,17 @@ Target.create "Publish" <| fun _ ->
 
 let dependencies = [
     "Restore" ==> "BuildNet5" ==> "BuildNet6" ==> "Build"
-    "Build" ==> "TestNet5" ==> "TestNet6" ==> "Test"
-    "Test" ==> "Pack" ==> "Publish"
+    "Restore" ==> "BuildNet5" ==> "BuildNet6" ==> "Build" ==> "TestNet5" ==> "TestNet6" ==> "Test"
+    "Restore" ==> "BuildNet5" ==> "BuildNet6" ==> "Build" ==> "TestNet5" ==> "TestNet6" ==> "Test" ==> "Pack" ==> "Publish"
 ]
 
-Target.runOrDefaultWithArguments "Publish"
+[<EntryPoint>]
+let main (args: string[]) =
+    try
+        match args with
+        | [| singleArg |] -> Target.runOrDefault singleArg
+        | _ -> Target.runOrDefault "Publish"
+        0
+    with ex ->
+        printfn "%A" ex
+        1
