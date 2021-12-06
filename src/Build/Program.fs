@@ -19,20 +19,27 @@ let npgsql = path [ slnRoot; "SqlHydra.Npgsql" ]
 let sqlite = path [ slnRoot; "SqlHydra.Sqlite" ]
 let tests = path [ slnRoot; "Tests" ]
 
-let packages = [ query; mssql; npgsql; sqlite ]
+let generators = [ mssql; npgsql; sqlite ]
+let allPackages = [ query ] @ generators
 
 Target.create "Restore" <| fun _ ->
-    packages @ [ tests ]
+    allPackages @ [ tests ]
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "restore", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not restore '{pkg}' package.")
 
+Target.create "BuildQuery" <| fun _ ->
+    // SqlHydra.Query has to built separately since it is netstandard2.0
+    query
+    |> (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release", pkg), pkg)
+    |> (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
+
 Target.create "BuildNet5" <| fun _ ->
-    packages @ [ tests ]
+    generators @ [ tests ]
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net5.0", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
 Target.create "BuildNet6" <| fun _ ->
-    packages @ [ tests ]
+    generators @ [ tests ]
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net6.0", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
@@ -51,7 +58,7 @@ Target.create "Test" <| fun _ ->
     printfn "Testing on all supported frameworks."
 
 Target.create "Pack" <| fun _ ->
-    packages
+    allPackages
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "pack --configuration Release -o nupkg/Release", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}' package.'")
 
@@ -63,15 +70,15 @@ Target.create "Publish" <| fun _ ->
         | Some nugetKey -> nugetKey
         | None -> failwith "The Nuget API key must be set in a SQLHYDRA_NUGET_KEY environmental variable"
     
-    packages
+    allPackages
     |> List.map (fun pkg -> pkg </> "nupkg" </> "Release" </> version)
     |> List.map (fun nupkg -> Shell.Exec(Tools.dotnet, $"nuget push {nupkg} -s nuget.org -k {nugetKey}"), nupkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not publish '{pkg}' package. Error: {code}")
 
 let dependencies = [
-    "Restore" ==> "BuildNet5" ==> "BuildNet6" ==> "Build"
-    "Restore" ==> "BuildNet5" ==> "BuildNet6" ==> "Build" ==> "TestNet5" ==> "TestNet6" ==> "Test"
-    "Restore" ==> "BuildNet5" ==> "BuildNet6" ==> "Build" ==> "TestNet5" ==> "TestNet6" ==> "Test" ==> "Pack" ==> "Publish"
+    "Restore" ==> "BuildQuery" ==> "BuildNet5" ==> "BuildNet6" ==> "Build"
+    "Build" ==> "TestNet5" ==> "TestNet6" ==> "Test"
+    "Test" ==> "Pack" ==> "Publish"
 ]
 
 [<EntryPoint>]
