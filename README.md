@@ -191,11 +191,11 @@ Both .NET 5 and .NET 6 are now supported.
 (.NET 5 will be supported until Microsoft ends official support.)
 
 ### .NET 6
-All generators now support the new .NET 6 `System.DateOnly` and `System.TimeOnly` fields.
+The new .NET 6 `System.DateOnly` and `System.TimeOnly` types are now supported by all generators.
 (Note that if you are upgrading SqlHydra.Sqlite from .NET 5 to .NET 6, please refer to the [SqlHydra.Sqlite](#sqlhydrasqlite-) section for special instructions.)
 
 ### .NET 5
-If you have .NET 5 and .NET 6 installed side-by-side but you want to continue generating using .NET 5 (meaning you do not want your generated code to utilize the new `System.DateOnly` and `System.TimeOnly` types), you can add a `global.json` file to your project folder with the following:
+If you have .NET 5 and .NET 6 installed side-by-side but you want to continue generating types using .NET 5 (meaning you do not want your generated types to utilize the new `System.DateOnly` and `System.TimeOnly` types), you can add a `global.json` file to your project folder with the following:
 
 ```json
 {
