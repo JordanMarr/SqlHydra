@@ -79,7 +79,7 @@ let getConfig(app: AppInfo, argv: string array) =
         | [| |] -> IO.FileInfo(buildTomlFilename(app))
         | [| tomlFilePath |] -> IO.FileInfo(tomlFilePath)
         | _ ->
-            AnsiConsole.MarkupLine($"Invalid args: '{argv}'. Expected no args, or a .toml configuration file path.")
+            Console.WriteLine($"Invalid args: '{argv}'. Expected no args, or a .toml configuration file path.")
             failwith "Invalid args."
 
     match tryLoadConfig(tomlFile) with
