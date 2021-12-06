@@ -107,9 +107,9 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
 ```
 
 ### Upgrading to .NET 6
-If you are upgrading a previous version to a version that supports .NET 6 (SqlHydra.Sqlite v0.630.0 or above), you will need to manually update your `sqlhydra-sqlite.toml` configuration file. 
+If you are upgrading SqlHydra.Sqlite to a version that supports .NET 6 (SqlHydra.Sqlite v0.630.0 or above), you will need to manually update your `sqlhydra-sqlite.toml` configuration file. 
 
-Change your `reader_type` from:
+Change `reader_type` from:
 ```
 reader_type = "System.Data.IDataReader"
 ```
