@@ -78,7 +78,6 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
   </Target>
 ```
 
-
 ## SqlHydra.Sqlite [![NuGet version (SqlHydra.Sqlite)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Sqlite/)
 
 ### Local Install (recommended)
@@ -107,6 +106,20 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
   </Target>
 ```
 
+### Upgrading to .NET 6
+If you are upgrading a previous version to a version that supports .NET 6 (SqlHydra.Sqlite v0.630.0 or above), you will need to manually update your `sqlhydra-sqlite.toml` configuration file. 
+
+Change your `reader_type` from:
+```
+reader_type = "System.Data.IDataReader"
+```
+to:
+```
+reader_type = "System.Data.Common.DbDataReader"
+```
+
+This change is necessary to support the new .NET 6 `System.DateOnly` and `System.TimeOnly` types.
+(Note that v0.630.0 and above will now use `System.Data.Common.DbDataReader` by default when generating a new .toml configuration file.)
 
 ## Example Output for AdventureWorks
 ```F#
@@ -560,3 +573,25 @@ delete {
     deleteAll
 }
 ```
+
+## .NET 5 and .NET 6
+Both .NET 5 and .NET 6 are now supported!
+
+### .NET 6
+All generators now support the new .NET 6 `System.DateOnly` and `System.TimeOnly` fields.
+(Note that if you are upgrading SqlHydra.Sqlite from .NET 5 to .NET 6, please refer to the [SqlHydra.Sqlite](#sqlhydrasqlite-) section for special instructions.)
+
+### .NET 5
+If you have .NET 5 and .NET 6 installed side-by-side but you want to continue generating using .NET 5 (meaning you don't want your generated code to utilize the new `System.DateOnly` and `System.TimeOnly` types, you can add a `global.json` file to your project folder with the following:
+
+```json
+{
+  "sdk": {
+    "version": "5.0.0",
+    "rollForward": "latestFeature"
+  }
+}
+```
+
+
+
