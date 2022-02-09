@@ -54,3 +54,17 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "54320:5432"
+
+  oracle:
+    build: 
+      context: ./oracle
+      dockerfile: Dockerfile.xe
+    hostname: oracle
+    container_name: oracle
+    environment:
+      - ORACLE_PWD=oracle
+      - ORACLE_ALLOW_REMOTE=true
+    ports:
+      - 1521:1521
+    
+    
