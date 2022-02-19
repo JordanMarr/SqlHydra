@@ -18,7 +18,7 @@
 #
 # Pull base image
 # ---------------
-FROM oraclelinux:7-slim
+FROM oraclelinux:7-slim AS base
 
 # Labels
 # ------
@@ -44,15 +44,16 @@ ENV ORACLE_BASE=/opt/oracle \
     CONF_FILE="oracle-xe-18c.conf" \
     CHECK_SPACE_FILE="checkSpace.sh" \
     CHECK_DB_FILE="checkDBStatus.sh" \
-    INSTALL_DIR="$HOME/install" \
-    ORACLE_DOCKER_INSTALL="true"
+    INSTALL_DIR="$HOME/install" \	
+    ORACLE_DOCKER_INSTALL="true" \
+	ORACLE_PWD="oracle"
 
 # Use second ENV so that variable get substituted
 ENV PATH=$ORACLE_HOME/bin:$PATH
 
 # Copy binaries
 # -------------
-COPY $CHECK_SPACE_FILE $RUN_FILE $PWD_FILE $CHECK_DB_FILE $CONF_FILE $INSTALL_DIR/
+COPY $CHECK_SPACE_FILE $RUN_FILE $PWD_FILE  $CHECK_DB_FILE $CONF_FILE $INSTALL_DIR/
 
 RUN chmod ug+x $INSTALL_DIR/*.sh && \
     sync && \
@@ -81,4 +82,12 @@ RUN chmod ug+x $INSTALL_DIR/*.sh && \
 HEALTHCHECK --interval=1m --start-period=5m \
    CMD "$ORACLE_BASE/$CHECK_DB_FILE" >/dev/null || exit 1
 
+## Start oracle
 CMD exec $ORACLE_BASE/$RUN_FILE
+
+## Install AdventureWorks
+FROM base AS adventurework
+COPY ./Oracle-AdventureWorks/AdvWorks_Create_User_Script.sql /opt/oracle/scripts/setup/01_AdvWorks_Create_User_Script.sql
+COPY ./Oracle-AdventureWorks/AdvWorks_Build_Data.sql /opt/oracle/scripts/setup/02_AdvWorks_Build_Data.sql
+COPY ./Oracle-AdventureWorks/DataInserts/ /opt/oracle/scripts/setup/DataInserts/
+COPY ./Oracle-AdventureWorks/DLLConstructs/ /opt/oracle/scripts/setup/DLLConstructs/
