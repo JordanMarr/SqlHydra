@@ -12,8 +12,9 @@ let supportedTypeMappings =
         "LONG",                             "int64",                        DbType.Int64,               nameof r.GetInt64
         "NUMBER",                           "decimal",                      DbType.Decimal,             nameof r.GetDecimal
         "FLOAT",                            "double",                       DbType.Double,              nameof r.GetDouble
-        "BINARY_FLOAT",                     "double",                       DbType.Double,              nameof r.GetDouble
-        "REAL",                             "double",                       DbType.Single,              nameof r.GetDouble
+        "BINARY_DOUBLE",                    "double",                       DbType.Double,              nameof r.GetDouble
+        "BINARY_FLOAT",                     "System.Single",                DbType.Single,              nameof r.GetFieldValue
+        "REAL",                             "System.Single",                DbType.Single,              nameof r.GetFieldValue
         "ROWID",                            "string",                       DbType.String,              nameof r.GetString
         "UROWID",                           "string",                       DbType.String,              nameof r.GetString
         "VARCHAR",                          "string",                       DbType.String,              nameof r.GetString
