@@ -11,79 +11,61 @@ let getSchema (cfg: Config) : Schema =
     let sTables = conn.GetSchema("Tables")
     let sColumns = conn.GetSchema("Columns")
     let sViews = conn.GetSchema("Views")
+    let sPrimaryKeys = conn.GetSchema("PrimaryKeys")
 
     let pks = 
-        let sql =
-            """
-            SELECT
-                tc.table_schema, 
-                tc.constraint_name, 
-                tc.table_name, 
-                kcu.column_name, 
-                ccu.table_schema AS foreign_table_schema,
-                ccu.table_name AS foreign_table_name,
-                ccu.column_name AS foreign_column_name 
-            FROM 
-                information_schema.table_constraints AS tc 
-            JOIN information_schema.key_column_usage AS kcu
-                ON tc.constraint_name = kcu.constraint_name
-                AND tc.table_schema = kcu.table_schema
-            JOIN information_schema.constraint_column_usage AS ccu
-                ON ccu.constraint_name = tc.constraint_name
-                AND ccu.table_schema = tc.table_schema
-            WHERE tc.constraint_type = 'PRIMARY KEY';
-            """
-
-        use cmd = new OracleCommand(sql, conn)
-        use rdr = cmd.ExecuteReader()
-        [
-            while rdr.Read() do
-                rdr.["TABLE_SCHEMA"] :?> string,
-                rdr.["TABLE_NAME"] :?> string,
-                rdr.["COLUMN_NAME"] :?> string
-        ]
-        |> Set.ofList
+        sPrimaryKeys.Rows
+        |> Seq.cast<DataRow>
+        |> Seq.map (fun pk -> 
+            pk.["OWNER"] :?> string,
+            pk.["TABLE_NAME"] :?> string,
+            pk.["GENERATED"] :?> string
+        )
+        |> Set.ofSeq
 
     let allColumns = 
         sColumns.Rows
         |> Seq.cast<DataRow>
         |> Seq.map (fun col -> 
             {| 
-                TableCatalog = col.["TABLE_CATALOG"] :?> string
-                TableSchema = col.["TABLE_SCHEMA"] :?> string
+                TableCatalog = col.["OWNER"] :?> string
+                TableSchema = col.["OWNER"] :?> string
                 TableName = col.["TABLE_NAME"] :?> string
                 ColumnName = col.["COLUMN_NAME"] :?> string
-                ProviderTypeName = col.["DATA_TYPE"] :?> string
-                OrdinalPosition = col.["ORDINAL_POSITION"] :?> int
+                ProviderTypeName = col.["DATATYPE"] :?> string
+                //OrdinalPosition = col.["ORDINAL_POSITION"] :?> int
                 IsNullable = 
-                    match col.["IS_NULLABLE"] :?> string with 
+                    match col.["NULLABLE"] :?> string with 
                     | "YES" -> true
                     | _ -> false
             |}
         )
-        |> Seq.sortBy (fun column -> column.OrdinalPosition)
+        //|> Seq.sortBy (fun column -> column.OrdinalPosition)
+        |> Seq.sortBy (fun column -> column.ColumnName)
+        |> Seq.toList
 
     let views = 
         sViews.Rows
         |> Seq.cast<DataRow>
-        |> Seq.map (fun tbl -> 
+        |> Seq.map (fun view -> 
             {| 
-                TableCatalog = tbl.["TABLE_CATALOG"] :?> string
-                TableSchema = tbl.["TABLE_SCHEMA"] :?> string
-                TableName  = tbl.["TABLE_NAME"] :?> string
+                TableCatalog = view.["OWNER"] :?> string
+                TableSchema = view.["OWNER"] :?> string
+                TableName  = view.["VIEW_NAME"] :?> string
                 TableType = "view"
             |}
         )
+        |> Seq.toList
         
     let tables = 
         sTables.Rows
         |> Seq.cast<DataRow>
         |> Seq.map (fun tbl -> 
             {| 
-                TableCatalog = tbl.["TABLE_CATALOG"] :?> string
-                TableSchema = tbl.["TABLE_SCHEMA"] :?> string
+                TableCatalog = tbl.["OWNER"] :?> string
+                TableSchema = tbl.["OWNER"] :?> string
                 TableName  = tbl.["TABLE_NAME"] :?> string
-                TableType = tbl.["TABLE_TYPE"] :?> string 
+                TableType = tbl.["TYPE"] :?> string 
             |}
         )
         |> Seq.filter (fun tbl -> tbl.TableType <> "SYSTEM_TABLE")
@@ -124,6 +106,12 @@ let getSchema (cfg: Config) : Schema =
                 Table.Columns = filteredColumns
                 Table.TotalColumns = tableColumns |> Seq.length
             }
+        )
+        |> Seq.filter (fun t -> 
+            // Exclude Oracle system tables
+            ["SYS"; "MDSYS"; "OLAPSYS"; "WMSYS"; "CTXSYS"; "XDB"; "GSMADMIN_INTERNAL"; "ORDSYS"; "ORDDATA"; "LBACSYS"; "SYSTEM"] 
+            |> List.contains t.Schema
+            |> not
         )
         |> Seq.toList
 
