@@ -12,16 +12,31 @@ let getSchema (cfg: Config) : Schema =
     let sColumns = conn.GetSchema("Columns")
     let sViews = conn.GetSchema("Views")
     let sPrimaryKeys = conn.GetSchema("PrimaryKeys")
+    let sRestrictions = conn.GetSchema("Restrictions")
+
+    let systemOwners = 
+        ["SYS"; "MDSYS"; "OLAPSYS"; "WMSYS"; "CTXSYS"; "XDB"; "GSMADMIN_INTERNAL"; "ORDSYS"; "ORDDATA"; "LBACSYS"; "SYSTEM"] 
+        |> Set.ofList
+
+    let restrictions = 
+        sRestrictions.Rows
+        |> Seq.cast<DataRow>
+        |> Seq.toList
 
     let pks = 
-        sPrimaryKeys.Rows
-        |> Seq.cast<DataRow>
-        |> Seq.map (fun pk -> 
+        let nonSystemRows = 
+            sPrimaryKeys.Rows
+            |> Seq.cast<DataRow>
+            |> Seq.filter (fun pk -> pk.["OWNER"] :?> string |> systemOwners.Contains |> not) // Exclude system
+            |> Seq.toList 
+
+        nonSystemRows
+        |> List.map (fun pk -> 
             pk.["OWNER"] :?> string,
             pk.["TABLE_NAME"] :?> string,
-            pk.["GENERATED"] :?> string
+            pk.["CONSTRAINT_NAME"] :?> string
         )
-        |> Set.ofSeq
+        |> Set.ofList
 
     let allColumns = 
         sColumns.Rows
@@ -36,7 +51,7 @@ let getSchema (cfg: Config) : Schema =
                 //OrdinalPosition = col.["ORDINAL_POSITION"] :?> int
                 IsNullable = 
                     match col.["NULLABLE"] :?> string with 
-                    | "YES" -> true
+                    | "Y" -> true
                     | _ -> false
             |}
         )
@@ -65,10 +80,10 @@ let getSchema (cfg: Config) : Schema =
                 TableCatalog = tbl.["OWNER"] :?> string
                 TableSchema = tbl.["OWNER"] :?> string
                 TableName  = tbl.["TABLE_NAME"] :?> string
-                TableType = tbl.["TYPE"] :?> string 
+                TableType = tbl.["TYPE"] :?> string // [ "view"; "User"; "System" ]
             |}
         )
-        |> Seq.filter (fun tbl -> tbl.TableType <> "SYSTEM_TABLE")
+        |> Seq.filter (fun tbl -> System.String.Compare(tbl.TableType, "System", true) <> 0) // Exclude system
         |> Seq.append views
         |> Seq.map (fun tbl -> 
             let tableColumns = 
@@ -102,17 +117,12 @@ let getSchema (cfg: Config) : Schema =
                 Table.Catalog = tbl.TableCatalog
                 Table.Schema = tbl.TableSchema
                 Table.Name =  tbl.TableName
-                Table.Type = if tbl.TableType = "table" then TableType.Table else TableType.View
+                Table.Type = if System.String.Compare(tbl.TableType, "view", true) = 0 then TableType.View else TableType.Table
                 Table.Columns = filteredColumns
                 Table.TotalColumns = tableColumns |> Seq.length
             }
         )
-        |> Seq.filter (fun t -> 
-            // Exclude Oracle system tables
-            ["SYS"; "MDSYS"; "OLAPSYS"; "WMSYS"; "CTXSYS"; "XDB"; "GSMADMIN_INTERNAL"; "ORDSYS"; "ORDDATA"; "LBACSYS"; "SYSTEM"] 
-            |> List.contains t.Schema
-            |> not
-        )
+        |> Seq.filter (fun t -> not (systemOwners.Contains t.Schema)) // Exclude Oracle system tables
         |> Seq.toList
 
     { 
