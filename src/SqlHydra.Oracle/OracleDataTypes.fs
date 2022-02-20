@@ -7,42 +7,33 @@ let private r : Oracle.ManagedDataAccess.Client.OracleDataReader = null
 
 /// A list of supported column type mappings
 let supportedTypeMappings =
-    [   // https://docs.oracle.com/database/121/ODPNT/entityDataTypeMapping.htm#ODPNT8300
-        "UNIQUEIDENTIFIER",     "System.Guid",                              DbType.Guid,                nameof r.GetGuid
-        "BIT",                  "bool",                                     DbType.Boolean,             nameof r.GetBoolean
-        "INT",                  "int",                                      DbType.Int32,               nameof r.GetInt32
-        "BIGINT",               "int64",                                    DbType.Int64,               nameof r.GetInt64
-        "SMALLINT",             "int16",                                    DbType.Int16,               nameof r.GetInt16
-        "TINYINT",              "byte",                                     DbType.Byte,                nameof r.GetByte
-        "FLOAT",                "double",                                   DbType.Double,              nameof r.GetDouble
-        "REAL",                 "System.Single",                            DbType.Single,              nameof r.GetFloat
-        "DECIMAL",              "decimal",                                  DbType.Decimal,             nameof r.GetDecimal
-        "NUMERIC",              "decimal",                                  DbType.Decimal,             nameof r.GetDecimal
-        "MONEY",                "decimal",                                  DbType.Decimal,             nameof r.GetDecimal
-        "SMALLMONEY",           "decimal",                                  DbType.Decimal,             nameof r.GetDecimal
-        "VARCHAR",              "string",                                   DbType.String,              nameof r.GetString
-        "NVARCHAR",             "string",                                   DbType.String,              nameof r.GetString
-        "CHAR",                 "string",                                   DbType.String,              nameof r.GetString
-        "NCHAR",                "string",                                   DbType.StringFixedLength,   nameof r.GetString
-        "TEXT",                 "string",                                   DbType.String,              nameof r.GetString
-        "NTEXT",                "string",                                   DbType.String,              nameof r.GetString
-        "DATETIMEOFFSET",       "System.DateTimeOffset",                    DbType.DateTimeOffset,      nameof r.GetDateTimeOffset
-#if NET5_0
-        "DATE",                 "System.DateTime",                          DbType.Date,                nameof r.GetDateTime
-        "TIME",                 "System.TimeSpan",                          DbType.Time,                nameof r.GetTimeSpan
-#endif
-#if NET6_0
-        "DATE",                 "System.DateOnly",                          DbType.Date,                nameof r.GetFieldValue
-        "TIME",                 "System.TimeOnly",                          DbType.Time,                nameof r.GetFieldValue
-#endif
-        "DATETIME",             "System.DateTime",                          DbType.DateTime,            nameof r.GetDateTime
-        "DATETIME2",            "System.DateTime",                          DbType.DateTime2,           nameof r.GetDateTime
-        "SMALLDATETIME",        "System.DateTime",                          DbType.DateTime,            nameof r.GetDateTime        
-        "VARBINARY",            "byte[]",                                   DbType.Binary,              nameof r.GetValue
-        "BINARY",               "byte[]",                                   DbType.Binary,              nameof r.GetValue
-        "IMAGE",                "byte[]",                                   DbType.Binary,              nameof r.GetValue
-        "ROWVERSION",           "byte[]",                                   DbType.Binary,              nameof r.GetValue
-        "SQL_VARIANT",          "obj",                                      DbType.Object,              nameof r.GetValue
+    [   // https://docs.oracle.com/cd/B19306_01/win.102/b14306/appendixa.htm
+        "PLS_INTEGER",                      "int",                          DbType.Int32,               nameof r.GetInt32
+        "LONG",                             "int64",                        DbType.Int64,               nameof r.GetInt64
+        "NUMBER",                           "decimal",                      DbType.Decimal,             nameof r.GetDecimal
+        "FLOAT",                            "double",                       DbType.Double,              nameof r.GetDouble
+        "BINARY_FLOAT",                     "double",                       DbType.Double,              nameof r.GetDouble
+        "REAL",                             "double",                       DbType.Single,              nameof r.GetDouble
+        "ROWID",                            "string",                       DbType.String,              nameof r.GetString
+        "UROWID",                           "string",                       DbType.String,              nameof r.GetString
+        "VARCHAR",                          "string",                       DbType.String,              nameof r.GetString
+        "VARCHAR2",                         "string",                       DbType.String,              nameof r.GetString
+        "NVARCHAR",                         "string",                       DbType.String,              nameof r.GetString
+        "NVARCHAR2",                        "string",                       DbType.String,              nameof r.GetString
+        "CHAR",                             "string",                       DbType.String,              nameof r.GetString
+        "XMLType",                          "string",                       DbType.String,              nameof r.GetString
+        "NCHAR",                            "string",                       DbType.StringFixedLength,   nameof r.GetString
+        "TEXT",                             "string",                       DbType.String,              nameof r.GetString
+        "NTEXT",                            "string",                       DbType.String,              nameof r.GetString
+        "DATE",                             "System.DateTime",              DbType.Date,                nameof r.GetDateTime
+        "TIMESTAMP",                        "System.DateTime",              DbType.Date,                nameof r.GetDateTime
+        "TIMESTAMP WITH LOCAL TIME ZONE",   "System.DateTime",              DbType.Date,                nameof r.GetDateTime
+        "TIMESTAMP WITH TIME ZONE",         "System.DateTime",              DbType.Date,                nameof r.GetDateTime
+        "INTERVAL DAY TO SECOND",           "System.TimeSpan",              DbType.Time,                nameof r.GetTimeSpan
+        "BFILE",                            "byte[]",                       DbType.Binary,              nameof r.GetValue
+        "BLOB",                             "byte[]",                       DbType.Binary,              nameof r.GetValue
+        "LONG RAW",                         "byte[]",                       DbType.Binary,              nameof r.GetValue
+        "RAW",                              "byte[]",                       DbType.Binary,              nameof r.GetValue
     ]
 
 let typeMappingsByName =
