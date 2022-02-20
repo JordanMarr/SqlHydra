@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31129.286
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SampleApp", "SampleApp\SampleApp.fsproj", "{DD3CC6D7-3450-4AD9-A859-8421F3559E73}"
 EndProject
@@ -21,9 +21,11 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Tests", "Tests\Tests.fsproj
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SqlHydra.Npgsql", "SqlHydra.Npgsql\SqlHydra.Npgsql.fsproj", "{D176A6A0-C848-4661-9CAF-BF784B0AC264}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Build", "Build\Build.fsproj", "{1D3ACD32-25B4-40BA-BFE8-6292F3F1A6B4}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Build", "Build\Build.fsproj", "{1D3ACD32-25B4-40BA-BFE8-6292F3F1A6B4}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SqlHydra.Domain", "SqlHydra.Domain\SqlHydra.Domain.fsproj", "{958CEE47-CC2A-4CA2-BFE3-53653CB39604}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "SqlHydra.Domain", "SqlHydra.Domain\SqlHydra.Domain.fsproj", "{958CEE47-CC2A-4CA2-BFE3-53653CB39604}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SqlHydra.Oracle", "SqlHydra.Oracle\SqlHydra.Oracle.fsproj", "{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -200,6 +202,24 @@ Global
 		{958CEE47-CC2A-4CA2-BFE3-53653CB39604}.Release|x64.Build.0 = Release|Any CPU
 		{958CEE47-CC2A-4CA2-BFE3-53653CB39604}.Release|x86.ActiveCfg = Release|Any CPU
 		{958CEE47-CC2A-4CA2-BFE3-53653CB39604}.Release|x86.Build.0 = Release|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.Debug|x64.Build.0 = Debug|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.Debug|x86.Build.0 = Debug|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.DebugLocal|x64.ActiveCfg = Debug|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.DebugLocal|x64.Build.0 = Debug|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.DebugLocal|x86.ActiveCfg = Debug|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.DebugLocal|x86.Build.0 = Debug|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.Release|x64.ActiveCfg = Release|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.Release|x64.Build.0 = Release|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.Release|x86.ActiveCfg = Release|Any CPU
+		{D58C21D3-6F1B-433F-AC9A-5C56505BEA02}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

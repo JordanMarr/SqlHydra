@@ -34,6 +34,8 @@
     <Compile Include="Npgsql\QueryIntegrationTests.fs" />
     <Compile Include="Npgsql\Generation.fs" />
     <Compile Include="Sqlite\Generation.fs" />
+    <Compile Include="Oracle\DB.fs" />
+    <Compile Include="Oracle\Generation.fs" />
     <Compile Include="UnitTests\TomlConfigParser.fs" />
     <Compile Include="UnitTests\ColumnFilters.fs" />
     <Compile Include="UnitTests\TableFilters.fs" />
@@ -47,6 +49,7 @@
     <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.12.13" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SqlHydra.Oracle\SqlHydra.Oracle.fsproj" />
     <ProjectReference Include="..\SqlHydra.Query\SqlHydra.Query.fsproj" />
     <ProjectReference Include="..\SqlHydra.Npgsql\SqlHydra.Npgsql.fsproj" />
     <ProjectReference Include="..\SqlHydra.Sqlite\SqlHydra.Sqlite.fsproj" />
