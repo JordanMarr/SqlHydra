@@ -1,0 +1,1 @@
+dotnet run --project ..\SqlHydra.Oracle --framework net6.0 -- sqlhydra-oracle-net6.toml

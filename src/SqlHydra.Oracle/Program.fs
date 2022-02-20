@@ -12,7 +12,7 @@ let app =
     {
         AppInfo.Name = "SqlHydra.Oracle"
         AppInfo.Command = "sqlhydra-oracle"
-        AppInfo.DefaultReaderType = "Oracle.OracleDataReader"
+        AppInfo.DefaultReaderType = "Oracle.ManagedDataAccess.Client.OracleDataReader"
         AppInfo.Version = version
     }
 
