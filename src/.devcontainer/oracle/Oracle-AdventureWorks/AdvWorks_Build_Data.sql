@@ -22,7 +22,7 @@ Rem      cscreen   12/15/2009 - Finalized
 
 set termout on;
 
-alter session set current_schema = AdvWorks;
+alter session set current_schema = c##AdvWorks;
 
 
 
