@@ -104,7 +104,7 @@ let tests =
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = @p0) OR (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = @p1))")) ""
+            Expect.isTrue (sql.Contains("WHERE ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p0) OR (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p1))")) ""
         }
 
         test "And Where" {
@@ -115,7 +115,7 @@ let tests =
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = @p0) AND (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = @p1))")) ""
+            Expect.isTrue (sql.Contains("WHERE ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p0) AND (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p1))")) ""
         }
 
         test "Where with AND and OR in Parenthesis" {
@@ -127,7 +127,7 @@ let tests =
     
             let sql = query.ToKataQuery() |> toSql
             Expect.isTrue 
-                (sql.Contains("WHERE ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"FIRSTNAME\" = @p0) AND ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = @p1) OR (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" IS NULL)))")) 
+                (sql.Contains("WHERE ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"FIRSTNAME\" = :p0) AND ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p1) OR (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" IS NULL)))")) 
                 "Should wrap OR clause in parenthesis and each individual where clause in parenthesis."
         }
 
@@ -139,7 +139,7 @@ let tests =
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (NOT ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = @p0) AND (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = @p1)))")) ""
+            Expect.isTrue (sql.Contains("WHERE (NOT ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p0) AND (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p1)))")) ""
         }
 
         test "Where Customer isIn List" {
@@ -150,7 +150,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" IN (:p0, :p1, :p2))")) ""
         }
 
         test "Where Customer |=| List" {
@@ -161,7 +161,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" IN (:p0, :p1, :p2))")) ""
         }
 
         test "Where Customer |=| Array" {
@@ -172,7 +172,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" IN (:p0, :p1, :p2))")) ""
         }
         
         test "Where Customer |=| Seq" {            
@@ -185,7 +185,7 @@ let tests =
             let query = buildQuery([ 30018M;29545M;29954M ])
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" IN (:p0, :p1, :p2))")) ""
         }
 
         test "Where Customer |<>| List" {
@@ -196,7 +196,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" NOT IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" NOT IN (:p0, :p1, :p2))")) ""
         }
 
         //test "Inner Join" {
@@ -272,7 +272,7 @@ let tests =
 
             let sql = query.ToKataQuery() |> toSql
             Expect.isTrue (sql.Contains("DELETE FROM \"C##ADVWORKS\".\"DIMCUSTOMER\"")) ""
-            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" NOT IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" NOT IN (:p0, :p1, :p2))")) ""
         }
 
         test "Delete All" {
@@ -295,7 +295,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.equal "UPDATE \"C##ADVWORKS\".\"DIMCUSTOMER\" SET \"LASTNAME\" = @p0 WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = @p1)" sql ""
+            Expect.equal "UPDATE \"C##ADVWORKS\".\"DIMCUSTOMER\" SET \"LASTNAME\" = :p0 WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p1)" sql ""
         }
 
         test "Update Query with No Where" {
@@ -307,7 +307,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.equal "UPDATE \"C##ADVWORKS\".\"DIMCUSTOMER\" SET \"LASTNAME\" = @p0" sql ""
+            Expect.equal "UPDATE \"C##ADVWORKS\".\"DIMCUSTOMER\" SET \"LASTNAME\" = :p0" sql ""
         }
 
         test "Update should fail without where or updateAll" {
@@ -363,7 +363,7 @@ let tests =
             let sql = query.ToKataQuery() |> toSql
             Expect.equal 
                 sql 
-                "INSERT INTO \"C##ADVWORKS\".\"DIMCURRENCY\" (\"CURRENCYKEY\", \"CURRENCYALTERNATEKEY\", \"CURRENCYNAME\") VALUES (@p0, @p1, @p2)" 
+                "INSERT INTO \"C##ADVWORKS\".\"DIMCURRENCY\" (\"CURRENCYALTERNATEKEY\", \"CURRENCYKEY\", \"CURRENCYNAME\") VALUES (:p0, :p1, :p2)" 
                 ""
         }
 
@@ -383,7 +383,7 @@ let tests =
             let sql = query.ToKataQuery() |> toSql
             Expect.equal 
                 sql 
-                "\"C##ADVWORKS\".\"DIMCURRENCY\" (\"CURRENCYKEY\", \"CURRENCYALTERNATEKEY\", \"CURRENCYNAME\") VALUES (@p0, @p1, @p2);SELECT scope_identity() as Id" 
+                "INSERT INTO \"C##ADVWORKS\".\"DIMCURRENCY\" (\"CURRENCYALTERNATEKEY\", \"CURRENCYNAME\") VALUES (:p0, :p1)" 
                 ""
         }
 
