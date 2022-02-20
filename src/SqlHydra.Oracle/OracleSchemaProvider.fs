@@ -11,36 +11,37 @@ let getSchema (cfg: Config) : Schema =
     let sTables = conn.GetSchema("Tables")
     let sColumns = conn.GetSchema("Columns")
     let sViews = conn.GetSchema("Views")
-    let sPrimaryKeys = conn.GetSchema("PrimaryKeys")
-    let sRestrictions = conn.GetSchema("Restrictions")
 
     let systemOwners = 
         ["SYS"; "MDSYS"; "OLAPSYS"; "WMSYS"; "CTXSYS"; "XDB"; "GSMADMIN_INTERNAL"; "ORDSYS"; "ORDDATA"; "LBACSYS"; "SYSTEM"] 
         |> Set.ofList
 
-    let restrictions = 
-        sRestrictions.Rows
-        |> Seq.cast<DataRow>
-        |> Seq.toList
-
     let pks = 
-        let nonSystemRows = 
-            sPrimaryKeys.Rows
-            |> Seq.cast<DataRow>
-            |> Seq.filter (fun pk -> pk.["OWNER"] :?> string |> systemOwners.Contains |> not) // Exclude system
-            |> Seq.toList 
+        let sql =
+            """
+            SELECT cols.table_name, cols.column_name, cols.position, cons.status, cons.owner
+            FROM all_constraints cons, all_cons_columns cols
+            WHERE cons.constraint_type = 'P'
+            AND cons.constraint_name = cols.constraint_name
+            AND cons.owner = cols.owner
+            AND cons.owner NOT IN ('SYS','SYSTEM','DBSNMP','CTXSYS','OJVMSYS','DVSYS','GSMADMIN_INTERNAL','ORDDATA','MDSYS','OLAPSYS','LBACSYS','XDB','WMSYS','ORDSYS')
+            ORDER BY cols.table_name, cols.position
+            """
 
-        nonSystemRows
-        |> List.map (fun pk -> 
-            pk.["OWNER"] :?> string,
-            pk.["TABLE_NAME"] :?> string,
-            pk.["CONSTRAINT_NAME"] :?> string
-        )
+        use cmd = new OracleCommand(sql, conn)
+        use rdr = cmd.ExecuteReader()
+        [
+            while rdr.Read() do
+                rdr.["OWNER"] :?> string,
+                rdr.["TABLE_NAME"] :?> string,
+                rdr.["COLUMN_NAME"] :?> string
+        ]
         |> Set.ofList
 
-    let allColumns = 
+    let columns = 
         sColumns.Rows
         |> Seq.cast<DataRow>
+        |> Seq.filter (fun col -> not (systemOwners.Contains(col.["OWNER"] :?> string)))
         |> Seq.map (fun col -> 
             {| 
                 TableCatalog = col.["OWNER"] :?> string
@@ -49,10 +50,7 @@ let getSchema (cfg: Config) : Schema =
                 ColumnName = col.["COLUMN_NAME"] :?> string
                 ProviderTypeName = col.["DATATYPE"] :?> string
                 //OrdinalPosition = col.["ORDINAL_POSITION"] :?> int
-                IsNullable = 
-                    match col.["NULLABLE"] :?> string with 
-                    | "Y" -> true
-                    | _ -> false
+                IsNullable = col.["NULLABLE"] :?> string = "Y"
             |}
         )
         //|> Seq.sortBy (fun column -> column.OrdinalPosition)
@@ -62,6 +60,7 @@ let getSchema (cfg: Config) : Schema =
     let views = 
         sViews.Rows
         |> Seq.cast<DataRow>
+        |> Seq.filter (fun view -> not (systemOwners.Contains(view.["OWNER"] :?> string)))
         |> Seq.map (fun view -> 
             {| 
                 TableCatalog = view.["OWNER"] :?> string
@@ -87,7 +86,7 @@ let getSchema (cfg: Config) : Schema =
         |> Seq.append views
         |> Seq.map (fun tbl -> 
             let tableColumns = 
-                allColumns
+                columns
                 |> Seq.filter (fun col -> 
                     col.TableCatalog = tbl.TableCatalog && 
                     col.TableSchema = tbl.TableSchema &&
