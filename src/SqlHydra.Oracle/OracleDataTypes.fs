@@ -60,24 +60,27 @@ let tryFindTypeMapping (providerTypeName: string, precisionMaybe: int option, sc
         let scale = scaleMaybe |> Option.defaultValue 0
 
         // NUMBER -> CLR mappings:
-        // https://www.llblgen.com/Documentation/5.5/Designer/Databases/oracleodpnet.htm
+        // https://docs.oracle.com/cd/B19306_01/gateways.102/b14270/apa.htm
         match mapping.ColumnTypeAlias, precision, scale with
-        | "NUMBER", precision, 0 when 0 <= precision && precision < 5 -> 
+        | "NUMBER", precision, 0 when 0 <= precision && precision < 4 -> 
             { mapping with ClrType = "int16"; DbType = DbType.Int16; ReaderMethod = nameof r.GetInt16 }
 
-        | "NUMBER", precision, 0 when 5 <= precision && precision < 10 ->
+        | "NUMBER", precision, 0 when precision < 11 ->
             { mapping with ClrType = "int"; DbType = DbType.Int32; ReaderMethod = nameof r.GetInt32 }
 
-        | "NUMBER", precision, 0 when 10 <= precision && precision < 19 ->
+        | "NUMBER", precision, 0 when precision < 20 ->
             { mapping with ClrType = "int64"; DbType = DbType.Int64; ReaderMethod = nameof r.GetInt64 }
 
-        | "NUMBER", precision, 0 when precision >= 19 ->
+        | "NUMBER", precision, 0 when precision >= 20 ->
+            { mapping with ClrType = "decimal"; DbType = DbType.Decimal; ReaderMethod = nameof r.GetDecimal }
+
+        | "NUMBER", precision, scale when scale >= 4 ->
             { mapping with ClrType = "decimal"; DbType = DbType.Decimal; ReaderMethod = nameof r.GetDecimal }
 
         | "NUMBER", precision, scale when 0 <= precision && precision < 8 && scale > 0 ->
             { mapping with ClrType = "System.Single"; DbType = DbType.Single; ReaderMethod = nameof r.GetFieldValue }
 
-        | "NUMBER", precision, scale when 8 <= precision && precision < 16 && scale > 0 ->
+        | "NUMBER", precision, scale when precision < 16 && scale > 0 ->
             { mapping with ClrType = "double"; DbType = DbType.Double; ReaderMethod = nameof r.GetDouble }
 
         | "NUMBER", precision, scale when precision >= 16 && scale > 0 ->
