@@ -38,6 +38,7 @@
 	<Compile Include="Oracle\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
     <Compile Include="Oracle\DB.fs" />
     <Compile Include="Oracle\QueryUnitTests.fs" />
+    <Compile Include="Oracle\QueryIntegrationTests.fs" />
     <Compile Include="Oracle\Generation.fs" />
     <Compile Include="UnitTests\TomlConfigParser.fs" />
     <Compile Include="UnitTests\ColumnFilters.fs" />
