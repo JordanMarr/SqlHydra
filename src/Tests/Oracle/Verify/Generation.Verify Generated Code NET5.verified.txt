@@ -27,7 +27,6 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
             | o when reader.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
         
-
 module ``C##ADVWORKS`` =
     [<CLIMutable>]
     type DIMACCOUNT =
@@ -53,7 +52,6 @@ module ``C##ADVWORKS`` =
         member __.PARENTACCOUNTCODEALTERNATEKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PARENTACCOUNTCODEALTERNATEKEY")
         member __.PARENTACCOUNTKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PARENTACCOUNTKEY")
         member __.VALUETYPE = OptionalColumn(reader, getOrdinal, reader.GetString, "VALUETYPE")
-
         member __.Read() =
             { ACCOUNTCODEALTERNATEKEY = __.ACCOUNTCODEALTERNATEKEY.Read()
               ACCOUNTDESCRIPTION = __.ACCOUNTDESCRIPTION.Read()
@@ -79,7 +77,6 @@ module ``C##ADVWORKS`` =
         member __.CURRENCYALTERNATEKEY = RequiredColumn(reader, getOrdinal, reader.GetString, "CURRENCYALTERNATEKEY")
         member __.CURRENCYKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "CURRENCYKEY")
         member __.CURRENCYNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "CURRENCYNAME")
-
         member __.Read() =
             { CURRENCYALTERNATEKEY = __.CURRENCYALTERNATEKEY.Read()
               CURRENCYKEY = __.CURRENCYKEY.Read()
@@ -138,7 +135,6 @@ module ``C##ADVWORKS`` =
         member __.TITLE = OptionalColumn(reader, getOrdinal, reader.GetString, "TITLE")
         member __.TOTALCHILDREN = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "TOTALCHILDREN")
         member __.YEARLYINCOME = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "YEARLYINCOME")
-
         member __.Read() =
             { ADDRESSLINE1 = __.ADDRESSLINE1.Read()
               ADDRESSLINE2 = __.ADDRESSLINE2.Read()
@@ -177,7 +173,6 @@ module ``C##ADVWORKS`` =
         member __.DEPARTMENTGROUPKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "DEPARTMENTGROUPKEY")
         member __.DEPARTMENTGROUPNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "DEPARTMENTGROUPNAME")
         member __.PARENTDEPARTMENTGROUPKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PARENTDEPARTMENTGROUPKEY")
-
         member __.Read() =
             { DEPARTMENTGROUPKEY = __.DEPARTMENTGROUPKEY.Read()
               DEPARTMENTGROUPNAME = __.DEPARTMENTGROUPNAME.Read()
@@ -250,7 +245,6 @@ module ``C##ADVWORKS`` =
         member __.STATUS = OptionalColumn(reader, getOrdinal, reader.GetString, "STATUS")
         member __.TITLE = OptionalColumn(reader, getOrdinal, reader.GetString, "TITLE")
         member __.VACATIONHOURS = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "VACATIONHOURS")
-
         member __.Read() =
             { BASERATE = __.BASERATE.Read()
               BIRTHDATE = __.BIRTHDATE.Read()
@@ -310,7 +304,6 @@ module ``C##ADVWORKS`` =
         member __.SPANISHCOUNTRYREGIONNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "SPANISHCOUNTRYREGIONNAME")
         member __.STATEPROVINCECODE = OptionalColumn(reader, getOrdinal, reader.GetString, "STATEPROVINCECODE")
         member __.STATEPROVINCENAME = OptionalColumn(reader, getOrdinal, reader.GetString, "STATEPROVINCENAME")
-
         member __.Read() =
             { CITY = __.CITY.Read()
               COUNTRYREGIONCODE = __.COUNTRYREGIONCODE.Read()
@@ -340,7 +333,6 @@ module ``C##ADVWORKS`` =
         member __.ORGANIZATIONNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "ORGANIZATIONNAME")
         member __.PARENTORGANIZATIONKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PARENTORGANIZATIONKEY")
         member __.PERCENTAGEOFOWNERSHIP = OptionalColumn(reader, getOrdinal, reader.GetString, "PERCENTAGEOFOWNERSHIP")
-
         member __.Read() =
             { CURRENCYKEY = __.CURRENCYKEY.Read()
               ORGANIZATIONKEY = __.ORGANIZATIONKEY.Read()
@@ -401,7 +393,6 @@ module ``C##ADVWORKS`` =
         member __.STYLE = OptionalColumn(reader, getOrdinal, reader.GetString, "STYLE")
         member __.WEIGHT = OptionalColumn(reader, getOrdinal, reader.GetDouble, "WEIGHT")
         member __.WEIGHTUNITMEASURECODE = OptionalColumn(reader, getOrdinal, reader.GetString, "WEIGHTUNITMEASURECODE")
-
         member __.Read() =
             { CLASS = __.CLASS.Read()
               COLOR = __.COLOR.Read()
@@ -444,7 +435,6 @@ module ``C##ADVWORKS`` =
         member __.PRODUCTCATEGORYALTERNATEKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTCATEGORYALTERNATEKEY")
         member __.PRODUCTCATEGORYKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTCATEGORYKEY")
         member __.SPANISHPRODUCTCATEGORYNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "SPANISHPRODUCTCATEGORYNAME")
-
         member __.Read() =
             { ENGLISHPRODUCTCATEGORYNAME = __.ENGLISHPRODUCTCATEGORYNAME.Read()
               FRENCHPRODUCTCATEGORYNAME = __.FRENCHPRODUCTCATEGORYNAME.Read()
@@ -471,7 +461,6 @@ module ``C##ADVWORKS`` =
         member __.PRODUCTSUBCATEGORYALTERNATEKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTSUBCATEGORYALTERNATEKEY")
         member __.PRODUCTSUBCATEGORYKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTSUBCATEGORYKEY")
         member __.SPANISHPRODUCTSUBCATEGORYNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "SPANISHPRODUCTSUBCATEGORYNAME")
-
         member __.Read() =
             { ENGLISHPRODUCTSUBCATEGORYNAME = __.ENGLISHPRODUCTSUBCATEGORYNAME.Read()
               FRENCHPRODUCTSUBCATEGORYNAME = __.FRENCHPRODUCTSUBCATEGORYNAME.Read()
@@ -519,7 +508,6 @@ module ``C##ADVWORKS`` =
         member __.SPANISHPROMOTIONNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "SPANISHPROMOTIONNAME")
         member __.SPANISHPROMOTIONTYPE = OptionalColumn(reader, getOrdinal, reader.GetString, "SPANISHPROMOTIONTYPE")
         member __.STARTDATE = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "STARTDATE")
-
         member __.Read() =
             { DISCOUNTPCT = __.DISCOUNTPCT.Read()
               ENDDATE = __.ENDDATE.Read()
@@ -585,7 +573,6 @@ module ``C##ADVWORKS`` =
         member __.RESELLERKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "RESELLERKEY")
         member __.RESELLERNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "RESELLERNAME")
         member __.YEAROPENED = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "YEAROPENED")
-
         member __.Read() =
             { ADDRESSLINE1 = __.ADDRESSLINE1.Read()
               ADDRESSLINE2 = __.ADDRESSLINE2.Read()
@@ -623,7 +610,6 @@ module ``C##ADVWORKS`` =
         member __.SALESREASONKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SALESREASONKEY")
         member __.SALESREASONNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "SALESREASONNAME")
         member __.SALESREASONREASONTYPE = RequiredColumn(reader, getOrdinal, reader.GetString, "SALESREASONREASONTYPE")
-
         member __.Read() =
             { SALESREASONALTERNATEKEY = __.SALESREASONALTERNATEKEY.Read()
               SALESREASONKEY = __.SALESREASONKEY.Read()
@@ -647,7 +633,6 @@ module ``C##ADVWORKS`` =
         member __.SALESTERRITORYGROUP = OptionalColumn(reader, getOrdinal, reader.GetString, "SALESTERRITORYGROUP")
         member __.SALESTERRITORYKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SALESTERRITORYKEY")
         member __.SALESTERRITORYREGION = RequiredColumn(reader, getOrdinal, reader.GetString, "SALESTERRITORYREGION")
-
         member __.Read() =
             { SALESTERRITORYALTERNATEKEY = __.SALESTERRITORYALTERNATEKEY.Read()
               SALESTERRITORYCOUNTRY = __.SALESTERRITORYCOUNTRY.Read()
@@ -666,7 +651,6 @@ module ``C##ADVWORKS`` =
     type DIMSCENARIOReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
         member __.SCENARIOKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SCENARIOKEY")
         member __.SCENARIONAME = OptionalColumn(reader, getOrdinal, reader.GetString, "SCENARIONAME")
-
         member __.Read() =
             { SCENARIOKEY = __.SCENARIOKEY.Read()
               SCENARIONAME = __.SCENARIONAME.Read() }
@@ -714,7 +698,6 @@ module ``C##ADVWORKS`` =
         member __.SPANISHMONTHNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "SPANISHMONTHNAME")
         member __.TIMEKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TIMEKEY")
         member __.WEEKNUMBEROFYEAR = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "WEEKNUMBEROFYEAR")
-
         member __.Read() =
             { CALENDARQUARTER = __.CALENDARQUARTER.Read()
               CALENDARSEMESTER = __.CALENDARSEMESTER.Read()
@@ -750,7 +733,6 @@ module ``C##ADVWORKS`` =
         member __.CURRENCYKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "CURRENCYKEY")
         member __.ENDOFDAYRATE = RequiredColumn(reader, getOrdinal, reader.GetDouble, "ENDOFDAYRATE")
         member __.TIMEKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TIMEKEY")
-
         member __.Read() =
             { AVERAGERATE = __.AVERAGERATE.Read()
               CURRENCYKEY = __.CURRENCYKEY.Read()
@@ -776,7 +758,6 @@ module ``C##ADVWORKS`` =
         member __.ORGANIZATIONKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "ORGANIZATIONKEY")
         member __.SCENARIOKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SCENARIOKEY")
         member __.TIMEKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "TIMEKEY")
-
         member __.Read() =
             { ACCOUNTKEY = __.ACCOUNTKEY.Read()
               AMOUNT = __.AMOUNT.Read()
@@ -838,7 +819,6 @@ module ``C##ADVWORKS`` =
         member __.TOTALPRODUCTCOST = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "TOTALPRODUCTCOST")
         member __.UNITPRICE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "UNITPRICE")
         member __.UNITPRICEDISCOUNTPCT = OptionalColumn(reader, getOrdinal, reader.GetDouble, "UNITPRICEDISCOUNTPCT")
-
         member __.Read() =
             { CARRIERTRACKINGNUMBER = __.CARRIERTRACKINGNUMBER.Read()
               CURRENCYKEY = __.CURRENCYKEY.Read()
@@ -919,7 +899,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     member __.``C##ADVWORKS.FACTFINANCE`` = ``lazyC##ADVWORKSFACTFINANCE``.Value
     member __.``C##ADVWORKS.FACTINTERNETSALES`` = ``lazyC##ADVWORKSFACTINTERNETSALES``.Value
     member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value
-
     member private __.GetReaderByName(entity: string, isOption: bool) =
         match entity, isOption with
         | "C##ADVWORKS.DIMACCOUNT", false -> __.``C##ADVWORKS.DIMACCOUNT``.Read >> box
@@ -968,7 +947,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
             then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
             else get ord |> box 
         
-
         if t = typedefof<int> then Some(wrap reader.GetInt32)
         else if t = typedefof<int64> then Some(wrap reader.GetInt64)
         else if t = typedefof<decimal> then Some(wrap reader.GetDecimal)

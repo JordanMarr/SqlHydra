@@ -361,7 +361,7 @@ module ``C##ADVWORKS`` =
           ENGLISHDESCRIPTION: Option<string>
           ENGLISHPRODUCTNAME: string
           FINISHEDGOODSFLAG: decimal
-          LISTPRICE: Option<decimal>
+          LISTPRICE: Option<double>
           MODELNAME: Option<string>
           PRODUCTALTERNATEKEY: Option<string>
           PRODUCTKEY: decimal
@@ -386,7 +386,7 @@ module ``C##ADVWORKS`` =
         member __.ENGLISHDESCRIPTION = OptionalColumn(reader, getOrdinal, reader.GetString, "ENGLISHDESCRIPTION")
         member __.ENGLISHPRODUCTNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "ENGLISHPRODUCTNAME")
         member __.FINISHEDGOODSFLAG = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "FINISHEDGOODSFLAG")
-        member __.LISTPRICE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "LISTPRICE")
+        member __.LISTPRICE = OptionalColumn(reader, getOrdinal, reader.GetDouble, "LISTPRICE")
         member __.MODELNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "MODELNAME")
         member __.PRODUCTALTERNATEKEY = OptionalColumn(reader, getOrdinal, reader.GetString, "PRODUCTALTERNATEKEY")
         member __.PRODUCTKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTKEY")

@@ -51,8 +51,41 @@ let typeMappingsByName =
     )
     |> Map.ofList
         
-let tryFindTypeMapping (providerTypeName: string) =
+let tryFindTypeMapping (providerTypeName: string, precisionMaybe: int option, scaleMaybe: int option) =
     typeMappingsByName.TryFind (providerTypeName.ToUpper())
+    |> Option.map (fun mapping -> 
+        // Precision and scale defaults:
+        // https://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#CNCPT313
+        let precision = precisionMaybe |> Option.defaultValue 38
+        let scale = scaleMaybe |> Option.defaultValue 0
+
+        // NUMBER -> CLR mappings:
+        // https://www.llblgen.com/Documentation/5.5/Designer/Databases/oracleodpnet.htm
+        match mapping.ColumnTypeAlias, precision, scale with
+        | "NUMBER", precision, 0 when 0 <= precision && precision < 5 -> 
+            { mapping with ClrType = "int16"; DbType = DbType.Int16; ReaderMethod = nameof r.GetInt16 }
+
+        | "NUMBER", precision, 0 when 5 <= precision && precision < 10 ->
+            { mapping with ClrType = "int"; DbType = DbType.Int32; ReaderMethod = nameof r.GetInt32 }
+
+        | "NUMBER", precision, 0 when 10 <= precision && precision < 19 ->
+            { mapping with ClrType = "int64"; DbType = DbType.Int64; ReaderMethod = nameof r.GetInt64 }
+
+        | "NUMBER", precision, 0 when precision >= 19 ->
+            { mapping with ClrType = "decimal"; DbType = DbType.Decimal; ReaderMethod = nameof r.GetDecimal }
+
+        | "NUMBER", precision, scale when 0 <= precision && precision < 8 && scale > 0 ->
+            { mapping with ClrType = "System.Single"; DbType = DbType.Single; ReaderMethod = nameof r.GetFieldValue }
+
+        | "NUMBER", precision, scale when 8 <= precision && precision < 16 && scale > 0 ->
+            { mapping with ClrType = "double"; DbType = DbType.Double; ReaderMethod = nameof r.GetDouble }
+
+        | "NUMBER", precision, scale when precision >= 16 && scale > 0 ->
+            { mapping with ClrType = "decimal"; DbType = DbType.Decimal; ReaderMethod = nameof r.GetDecimal }
+
+        | _ ->
+            mapping
+    )
         
 let primitiveTypeReaders = 
     supportedTypeMappings

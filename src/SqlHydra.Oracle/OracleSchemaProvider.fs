@@ -1,9 +1,9 @@
 ﻿module SqlHydra.Oracle.OracleSchemaProvider
 
 open System.Data
+open Oracle.ManagedDataAccess.Client
 open SqlHydra.Domain
 open SqlHydra
-open Oracle.ManagedDataAccess.Client
 
 let getSchema (cfg: Config) : Schema =
     use conn = new OracleConnection(cfg.ConnectionString)
@@ -50,6 +50,14 @@ let getSchema (cfg: Config) : Schema =
                 ColumnName = col.["COLUMN_NAME"] :?> string
                 ProviderTypeName = col.["DATATYPE"] :?> string
                 //OrdinalPosition = col.["ORDINAL_POSITION"] :?> int
+                Precision = 
+                    match col.["PRECISION"] with
+                    | :? decimal as precision -> Some (int precision)
+                    | _ -> None
+                Scale = 
+                    match col.["SCALE"] with
+                    | :? decimal as scale -> Some (int scale)
+                    | _ -> None
                 IsNullable = col.["NULLABLE"] :?> string = "Y"
             |}
         )
@@ -96,7 +104,7 @@ let getSchema (cfg: Config) : Schema =
             let supportedColumns = 
                 tableColumns
                 |> Seq.choose (fun col -> 
-                    OracleDataTypes.tryFindTypeMapping(col.ProviderTypeName)
+                    OracleDataTypes.tryFindTypeMapping (col.ProviderTypeName, col.Precision, col.Scale)
                     |> Option.map (fun typeMapping ->
                         { 
                             Column.Name = col.ColumnName
