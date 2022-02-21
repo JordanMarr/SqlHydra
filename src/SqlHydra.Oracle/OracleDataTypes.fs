@@ -62,7 +62,7 @@ let tryFindTypeMapping (providerTypeName: string, precisionMaybe: int option, sc
         // NUMBER -> CLR mappings:
         // https://docs.oracle.com/cd/B19306_01/gateways.102/b14270/apa.htm
         match mapping.ColumnTypeAlias, precision, scale with
-        | "NUMBER", precision, 0 when 0 <= precision && precision < 4 -> 
+        | "NUMBER", precision, 0 when 0 <= precision && precision < 6 -> 
             { mapping with ClrType = "int16"; DbType = DbType.Int16; ReaderMethod = nameof r.GetInt16 }
 
         | "NUMBER", precision, 0 when precision < 11 ->
