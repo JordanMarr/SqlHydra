@@ -12,13 +12,14 @@ open Oracle.AdventureWorksNet6
 #endif
 
 // Tables
-let currencyTable =         table<``C##ADVWORKS``.DIMCURRENCY>              |> inSchema (nameof ``C##ADVWORKS``)
-let customerTable =         table<``C##ADVWORKS``.DIMCUSTOMER>              |> inSchema (nameof ``C##ADVWORKS``)
-//let orderHeaderTable =      table<Sales.SalesOrderHeader>                   |> inSchema (nameof ``C##ADVWORKS``)
-//let orderDetailTable =      table<Sales.SalesOrderDetail>                   |> inSchema (nameof ``C##ADVWORKS``)
-let productTable =          table<``C##ADVWORKS``.DIMPRODUCT>               |> inSchema (nameof ``C##ADVWORKS``)
-let categoryTable =         table<``C##ADVWORKS``.DIMPRODUCTCATEGORY>       |> inSchema (nameof ``C##ADVWORKS``)
-let subCategoryTable =      table<``C##ADVWORKS``.DIMPRODUCTSUBCATEGORY>    |> inSchema (nameof ``C##ADVWORKS``)
+let contactsTable =         table<OT.CONTACTS>              |> inSchema (nameof OT)
+let customerTable =         table<OT.CUSTOMERS>             |> inSchema (nameof OT)
+let orderHeaderTable =      table<OT.ORDERS>                |> inSchema (nameof OT)
+let orderDetailTable =      table<OT.ORDER_ITEMS>           |> inSchema (nameof OT)
+let productTable =          table<OT.PRODUCTS>              |> inSchema (nameof OT)
+let categoryTable =         table<OT.PRODUCT_CATEGORIES>    |> inSchema (nameof OT)
+let regionsTable =          table<OT.REGIONS>               |> inSchema (nameof OT)
+let countriesTable =        table<OT.COUNTRIES>             |> inSchema (nameof OT)
 
 [<Tests>]
 let tests = 
@@ -29,8 +30,7 @@ let tests =
             let query = 
                 select {
                     for c in customerTable do
-                    where (c.LASTNAME = Some "Smith")
-                    orderBy c.FIRSTNAME
+                    where (c.NAME = "John Doe")
                 }
 
             let sql = query.ToKataQuery() |> toSql
@@ -42,45 +42,45 @@ let tests =
             let query =
                 select {
                     for c in customerTable do
-                    select c.FIRSTNAME
+                    select c.NAME
                 }
 
             let sql = query.ToKataQuery() |> toSql
             //printfn "%s" sql
-            Expect.isTrue (sql.Contains("SELECT \"C##ADVWORKS\".\"DIMCUSTOMER\".\"FIRSTNAME\" FROM")) ""
+            Expect.isTrue (sql.Contains("SELECT \"OT\".\"CUSTOMERS\".\"NAME\" FROM")) ""
         }
 
-        //test "Select 2 Columns" {
-        //    let query =
-        //        select {
-        //            for h in orderHeaderTable do
-        //            select (h.CustomerID, h.OnlineOrderFlag)
-        //        }
+        test "Select 2 Columns" {
+            let query =
+                select {
+                    for h in orderHeaderTable do
+                    select (h.CUSTOMER_ID, h.STATUS)
+                }
 
-        //    let sql = query.ToKataQuery() |> toSql
-        //    //printfn "%s" sql
-        //    Expect.isTrue (sql.Contains("SELECT [Sales].[SalesOrderHeader].[CustomerID], [Sales].[SalesOrderHeader].[OnlineOrderFlag] FROM")) ""
-        //}
+            let sql = query.ToKataQuery() |> toSql
+            //printfn "%s" sql
+            Expect.isTrue (sql.Contains("SELECT \"OT\".\"ORDERS\".\"CUSTOMER_ID\", \"OT\".\"ORDERS\".\"STATUS\" FROM")) ""
+        }
 
-        //test "Select 1 Table and 1 Column" {
-        //    let query =
-        //        select {
-        //            for o in orderHeaderTable do
-        //            join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
-        //            where (o.OnlineOrderFlag = true)
-        //            select (o, d.LineTotal)
-        //        }
+        test "Select 1 Table and 1 Column" {
+            let query =
+                select {
+                    for o in orderHeaderTable do
+                    join d in orderDetailTable on (o.ORDER_ID = d.ORDER_ID)
+                    where (o.STATUS = "Pending")
+                    select (o, d.UNIT_PRICE)
+                }
 
-        //    let sql = query.ToKataQuery() |> toSql
-        //    //printfn "%s" sql
-        //    Expect.isTrue (sql.Contains("SELECT [Sales].[SalesOrderHeader].*, [Sales].[SalesOrderDetail].[LineTotal] FROM")) ""
-        //}
+            let sql = query.ToKataQuery() |> toSql
+            //printfn "%s" sql
+            Expect.isTrue (sql.Contains("SELECT \"OT\".\"ORDERS\".*, \"OT\".\"ORDER_ITEMS\".\"UNIT_PRICE\" FROM")) ""
+        }
 
         ptest "Where with Option Type" {
             let query = 
                 select {
-                    for c in customerTable do
-                    where (c.FIRSTNAME <> None)
+                    for c in contactsTable do
+                    where (c.PHONE <> None)
                 }
 
             query.ToKataQuery() |> toSql |> printfn "%s"
@@ -90,7 +90,7 @@ let tests =
             let query =
                 select {
                     for c in customerTable do
-                    where (c.ADDRESSLINE1 <>% "S%")
+                    where (c.ADDRESS <>% "S%")
                 }
 
             query.ToKataQuery() |> toSql |> printfn "%s"
@@ -100,34 +100,34 @@ let tests =
             let query = 
                 select {
                     for c in customerTable do
-                    where (c.LASTNAME = Some "Smith" || c.LASTNAME = Some "Doe")
+                    where (c.NAME = "Smith" || c.NAME = "Doe")
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p0) OR (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p1))")) ""
+            Expect.isTrue (sql.Contains("WHERE ((\"OT\".\"CUSTOMERS\".\"NAME\" = :p0) OR (\"OT\".\"CUSTOMERS\".\"NAME\" = :p1))")) ""
         }
 
         test "And Where" {
             let query = 
                 select {
                     for c in customerTable do
-                    where (c.LASTNAME = Some "Smith" && c.LASTNAME = Some "Doe")
+                    where (c.NAME = "Smith" && c.NAME = "Doe")
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p0) AND (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p1))")) ""
+            Expect.isTrue (sql.Contains("WHERE ((\"OT\".\"CUSTOMERS\".\"NAME\" = :p0) AND (\"OT\".\"CUSTOMERS\".\"NAME\" = :p1))")) ""
         }
 
         test "Where with AND and OR in Parenthesis" {
             let query = 
                 select {
                     for c in customerTable do
-                    where (c.FIRSTNAME = Some "John" && (c.LASTNAME = Some "Smith" || isNullValue c.LASTNAME))
+                    where (c.NAME = "John" && (c.NAME = "Smith" || isNullValue c.ADDRESS))
                 }
     
             let sql = query.ToKataQuery() |> toSql
             Expect.isTrue 
-                (sql.Contains("WHERE ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"FIRSTNAME\" = :p0) AND ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p1) OR (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" IS NULL)))")) 
+                (sql.Contains("WHERE ((\"OT\".\"CUSTOMERS\".\"NAME\" = :p0) AND ((\"OT\".\"CUSTOMERS\".\"NAME\" = :p1) OR (\"OT\".\"CUSTOMERS\".\"ADDRESS\" IS NULL)))")) 
                 "Should wrap OR clause in parenthesis and each individual where clause in parenthesis."
         }
 
@@ -135,82 +135,82 @@ let tests =
             let query = 
                 select {
                     for c in customerTable do
-                    where (not (c.LASTNAME = Some "Smith" && c.LASTNAME = Some "Doe"))
+                    where (not (c.NAME = "Smith" && c.NAME = "Doe"))
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (NOT ((\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p0) AND (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p1)))")) ""
+            Expect.isTrue (sql.Contains("WHERE (NOT ((\"OT\".\"CUSTOMERS\".\"NAME\" = :p0) AND (\"OT\".\"CUSTOMERS\".\"NAME\" = :p1)))")) ""
         }
 
         test "Where Customer isIn List" {
             let query = 
                 select {
                     for c in customerTable do
-                    where (isIn c.CUSTOMERKEY [30018M;29545M;29954M])
+                    where (isIn c.CUSTOMER_ID [1L;2L;3L])
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" IN (:p0, :p1, :p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"OT\".\"CUSTOMERS\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))")) ""
         }
 
         test "Where Customer |=| List" {
             let query = 
                 select {
                     for c in customerTable do
-                    where (c.CUSTOMERKEY |=| [30018M;29545M;29954M])
+                    where (c.CUSTOMER_ID |=| [1L;2L;3L])
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" IN (:p0, :p1, :p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"OT\".\"CUSTOMERS\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))")) ""
         }
 
         test "Where Customer |=| Array" {
             let query = 
                 select {
                     for c in customerTable do
-                    where (c.CUSTOMERKEY |=| [| 30018M;29545M;29954M |])
+                    where (c.CUSTOMER_ID |=| [| 1L;2L;3L |])
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" IN (:p0, :p1, :p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"OT\".\"CUSTOMERS\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))")) ""
         }
         
         test "Where Customer |=| Seq" {            
-            let buildQuery (values: decimal seq) =                
+            let buildQuery (values: int64 seq) =                
                 select {
                     for c in customerTable do
-                    where (c.CUSTOMERKEY |=| values)
+                    where (c.CUSTOMER_ID |=| values)
                 }
 
-            let query = buildQuery([ 30018M;29545M;29954M ])
+            let query = buildQuery([ 1L;2L;3L ])
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" IN (:p0, :p1, :p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"OT\".\"CUSTOMERS\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))")) ""
         }
 
         test "Where Customer |<>| List" {
             let query = 
                 select {
                     for c in customerTable do
-                    where (c.CUSTOMERKEY |<>| [ 30018M;29545M;29954M ])
+                    where (c.CUSTOMER_ID |<>| [ 1L;2L;3L ])
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" NOT IN (:p0, :p1, :p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"OT\".\"CUSTOMERS\".\"CUSTOMER_ID\" NOT IN (:p0, :p1, :p2))")) ""
         }
 
-        //test "Inner Join" {
-        //    let query =
-        //        select {
-        //            for o in orderHeaderTable do
-        //            join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
-        //            select o
-        //        }
+        test "Inner Join" {
+            let query =
+                select {
+                    for o in orderHeaderTable do
+                    join d in orderDetailTable on (o.ORDER_ID = d.ORDER_ID)
+                    select o
+                }
 
-        //    let sql = query.ToKataQuery() |> toSql
-        //    //printfn "%s" sql
-        //    Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID])")) ""
-        //}
+            let sql = query.ToKataQuery() |> toSql
+            //printfn "%s" sql
+            Expect.isTrue (sql.Contains("INNER JOIN \"OT\".\"ORDER_ITEMS\" ON (\"OT\".\"ORDERS\".\"ORDER_ID\" = \"OT\".\"ORDER_ITEMS\".\"ORDER_ID\")")) ""
+        }
 
         //test "Left Join" {
         //    let query =
@@ -222,7 +222,7 @@ let tests =
 
         //    let sql = query.ToKataQuery() |> toSql
         //    //printfn "%s" sql
-        //    Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID])")) ""
+        //    Expect.isTrue (sql.Contains("LEFT JOIN \"Sales\".\"SalesOrderDetail\" ON (\"Sales\".\"SalesOrderHeader\".\"SalesOrderID\" = \"Sales\".\"SalesOrderDetail\".\"SalesOrderID\")")) ""
         //}
         
         //test "Inner Join - Multi Column" {
@@ -235,7 +235,7 @@ let tests =
         
         //    let sql = query.ToKataQuery() |> toSql
         //    //printfn "%s" sql
-        //    Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID] AND [Sales].[SalesOrderHeader].[ModifiedDate] = [Sales].[SalesOrderDetail].[ModifiedDate])")) ""
+        //    Expect.isTrue (sql.Contains("INNER JOIN \"Sales\".\"SalesOrderDetail\" ON (\"Sales\".\"SalesOrderHeader\".\"SalesOrderID\" = \"Sales\".\"SalesOrderDetail\".\"SalesOrderID\" AND \"Sales\".\"SalesOrderHeader\".\"ModifiedDate\" = \"Sales\".\"SalesOrderDetail\".\"ModifiedDate\")")) ""
         //}
         
         //test "Left Join - Multi Column" {
@@ -248,7 +248,7 @@ let tests =
         
         //    let sql = query.ToKataQuery() |> toSql
         //    //printfn "%s" sql
-        //    Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID] AND [Sales].[SalesOrderHeader].[ModifiedDate] = [Sales].[SalesOrderDetail].[ModifiedDate])")) ""
+        //    Expect.isTrue (sql.Contains("LEFT JOIN \"Sales\".\"SalesOrderDetail\" ON (\"Sales\".\"SalesOrderHeader\".\"SalesOrderID\" = \"Sales\".\"SalesOrderDetail\".\"SalesOrderID\" AND \"Sales\".\"SalesOrderHeader\".\"ModifiedDate\" = \"Sales\".\"SalesOrderDetail\".\"ModifiedDate\")")) ""
         //}
 
         //test "Join On Value Bug Fix Test" {
@@ -267,12 +267,12 @@ let tests =
             let query = 
                 delete {
                     for c in customerTable do
-                    where (c.CUSTOMERKEY |<>| [ 30018M;29545M;29954M ])
+                    where (c.CUSTOMER_ID |<>| [ 1L;2L;3L ])
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("DELETE FROM \"C##ADVWORKS\".\"DIMCUSTOMER\"")) ""
-            Expect.isTrue (sql.Contains("WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"CUSTOMERKEY\" NOT IN (:p0, :p1, :p2))")) ""
+            Expect.isTrue (sql.Contains("DELETE FROM \"OT\".\"CUSTOMERS\"")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"OT\".\"CUSTOMERS\".\"CUSTOMER_ID\" NOT IN (:p0, :p1, :p2))")) ""
         }
 
         test "Delete All" {
@@ -283,31 +283,31 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.equal "DELETE FROM \"C##ADVWORKS\".\"DIMCUSTOMER\"" sql ""
+            Expect.equal "DELETE FROM \"OT\".\"CUSTOMERS\"" sql ""
         }
 
         test "Update Query with Where" {
             let query = 
                 update {
                     for c in customerTable do
-                    set c.LASTNAME (Some "Smith")
-                    where (c.LASTNAME = Some "Doe")
+                    set c.NAME "Smith"
+                    where (c.NAME = "Doe")
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.equal "UPDATE \"C##ADVWORKS\".\"DIMCUSTOMER\" SET \"LASTNAME\" = :p0 WHERE (\"C##ADVWORKS\".\"DIMCUSTOMER\".\"LASTNAME\" = :p1)" sql ""
+            Expect.equal "UPDATE \"OT\".\"CUSTOMERS\" SET \"NAME\" = :p0 WHERE (\"OT\".\"CUSTOMERS\".\"NAME\" = :p1)" sql ""
         }
 
         test "Update Query with No Where" {
             let query = 
                 update {
                     for c in customerTable do
-                    set c.LASTNAME (Some "Smith")
+                    set c.NAME "Smith"
                     updateAll
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.equal "UPDATE \"C##ADVWORKS\".\"DIMCUSTOMER\" SET \"LASTNAME\" = :p0" sql ""
+            Expect.equal "UPDATE \"OT\".\"CUSTOMERS\" SET \"NAME\" = :p0" sql ""
         }
 
         test "Update should fail without where or updateAll" {
@@ -315,7 +315,7 @@ let tests =
                 let query = 
                     update {
                         for c in customerTable do
-                        set c.LASTNAME (Some "Smith")
+                        set c.NAME "Smith"
                     }
                 failwith "Should fail because no `where` or `updateAll` exists."
             with ex ->
@@ -327,8 +327,8 @@ let tests =
                 let query = 
                     update {
                         for c in customerTable do
-                        set c.LASTNAME (Some "Smith")
-                        where (c.CUSTOMERKEY = 1M)
+                        set c.NAME "Smith"
+                        where (c.CUSTOMER_ID = 1)
                     }
                 () //Assert.Pass()
             with ex ->
@@ -340,7 +340,7 @@ let tests =
                 let query = 
                     update {
                         for c in customerTable do
-                        set c.LASTNAME (Some "Smith")
+                        set c.NAME "Smith"
                         updateAll
                     }
                 () //Assert.Pass()
@@ -351,39 +351,38 @@ let tests =
         test "Insert Query without Identity" {
             let query = 
                 insert {
-                    into currencyTable
-                    entity 
+                    into countriesTable
+                    entity
                         { 
-                            ``C##ADVWORKS``.DIMCURRENCY.CURRENCYKEY = 123M
-                            ``C##ADVWORKS``.DIMCURRENCY.CURRENCYALTERNATEKEY = "123"
-                            ``C##ADVWORKS``.DIMCURRENCY.CURRENCYNAME = "Currency123"
+                            OT.COUNTRIES.COUNTRY_ID = "WL"
+                            OT.COUNTRIES.REGION_ID = Some 2
+                            OT.COUNTRIES.COUNTRY_NAME = "Wonderland"
                         }
                 }
             
             let sql = query.ToKataQuery() |> toSql
             Expect.equal 
                 sql 
-                "INSERT INTO \"C##ADVWORKS\".\"DIMCURRENCY\" (\"CURRENCYALTERNATEKEY\", \"CURRENCYKEY\", \"CURRENCYNAME\") VALUES (:p0, :p1, :p2)" 
+                "INSERT INTO \"OT\".\"COUNTRIES\" (\"COUNTRY_ID\", \"COUNTRY_NAME\", \"REGION_ID\") VALUES (:p0, :p1, :p2)" 
                 ""
         }
 
         test "Insert Query with Identity" {
             let query = 
                 insert {
-                    for c in currencyTable do
+                    for r in regionsTable do
                     entity 
                         { 
-                            ``C##ADVWORKS``.DIMCURRENCY.CURRENCYKEY = 0M
-                            ``C##ADVWORKS``.DIMCURRENCY.CURRENCYALTERNATEKEY = "123"
-                            ``C##ADVWORKS``.DIMCURRENCY.CURRENCYNAME = "Currency123"
+                            OT.REGIONS.REGION_ID = 0
+                            OT.REGIONS.REGION_NAME = "Outlands"
                         }
-                    getId c.CURRENCYKEY
+                    getId r.REGION_ID
                 }
 
             let sql = query.ToKataQuery() |> toSql
             Expect.equal 
                 sql 
-                "INSERT INTO \"C##ADVWORKS\".\"DIMCURRENCY\" (\"CURRENCYALTERNATEKEY\", \"CURRENCYNAME\") VALUES (:p0, :p1)" 
+                "INSERT INTO \"OT\".\"REGIONS\" (\"REGION_NAME\") VALUES (:p0)" 
                 ""
         }
 

@@ -28,846 +28,290 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
             | o -> Some (getValue o :?> byte[])
         
 
-module ``C##ADVWORKS`` =
+module OT =
     [<CLIMutable>]
-    type DIMACCOUNT =
-        { ACCOUNTCODEALTERNATEKEY: Option<decimal>
-          ACCOUNTDESCRIPTION: Option<string>
-          ACCOUNTKEY: decimal
-          ACCOUNTTYPE: Option<string>
-          CUSTOMMEMBEROPTIONS: Option<string>
-          CUSTOMMEMBERS: Option<string>
-          OPERATOR: Option<string>
-          PARENTACCOUNTCODEALTERNATEKEY: Option<decimal>
-          PARENTACCOUNTKEY: Option<decimal>
-          VALUETYPE: Option<string> }
+    type CONTACTS =
+        { CONTACT_ID: int64
+          CUSTOMER_ID: Option<int64>
+          EMAIL: string
+          FIRST_NAME: string
+          LAST_NAME: string
+          PHONE: Option<string> }
 
-    type DIMACCOUNTReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.ACCOUNTCODEALTERNATEKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "ACCOUNTCODEALTERNATEKEY")
-        member __.ACCOUNTDESCRIPTION = OptionalColumn(reader, getOrdinal, reader.GetString, "ACCOUNTDESCRIPTION")
-        member __.ACCOUNTKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "ACCOUNTKEY")
-        member __.ACCOUNTTYPE = OptionalColumn(reader, getOrdinal, reader.GetString, "ACCOUNTTYPE")
-        member __.CUSTOMMEMBEROPTIONS = OptionalColumn(reader, getOrdinal, reader.GetString, "CUSTOMMEMBEROPTIONS")
-        member __.CUSTOMMEMBERS = OptionalColumn(reader, getOrdinal, reader.GetString, "CUSTOMMEMBERS")
-        member __.OPERATOR = OptionalColumn(reader, getOrdinal, reader.GetString, "OPERATOR")
-        member __.PARENTACCOUNTCODEALTERNATEKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PARENTACCOUNTCODEALTERNATEKEY")
-        member __.PARENTACCOUNTKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PARENTACCOUNTKEY")
-        member __.VALUETYPE = OptionalColumn(reader, getOrdinal, reader.GetString, "VALUETYPE")
-
-        member __.Read() =
-            { ACCOUNTCODEALTERNATEKEY = __.ACCOUNTCODEALTERNATEKEY.Read()
-              ACCOUNTDESCRIPTION = __.ACCOUNTDESCRIPTION.Read()
-              ACCOUNTKEY = __.ACCOUNTKEY.Read()
-              ACCOUNTTYPE = __.ACCOUNTTYPE.Read()
-              CUSTOMMEMBEROPTIONS = __.CUSTOMMEMBEROPTIONS.Read()
-              CUSTOMMEMBERS = __.CUSTOMMEMBERS.Read()
-              OPERATOR = __.OPERATOR.Read()
-              PARENTACCOUNTCODEALTERNATEKEY = __.PARENTACCOUNTCODEALTERNATEKEY.Read()
-              PARENTACCOUNTKEY = __.PARENTACCOUNTKEY.Read()
-              VALUETYPE = __.VALUETYPE.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.ACCOUNTKEY.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type DIMCURRENCY =
-        { CURRENCYALTERNATEKEY: string
-          CURRENCYKEY: decimal
-          CURRENCYNAME: string }
-
-    type DIMCURRENCYReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.CURRENCYALTERNATEKEY = RequiredColumn(reader, getOrdinal, reader.GetString, "CURRENCYALTERNATEKEY")
-        member __.CURRENCYKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "CURRENCYKEY")
-        member __.CURRENCYNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "CURRENCYNAME")
-
-        member __.Read() =
-            { CURRENCYALTERNATEKEY = __.CURRENCYALTERNATEKEY.Read()
-              CURRENCYKEY = __.CURRENCYKEY.Read()
-              CURRENCYNAME = __.CURRENCYNAME.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.CURRENCYKEY.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type DIMCUSTOMER =
-        { ADDRESSLINE1: Option<string>
-          ADDRESSLINE2: Option<string>
-          COMMUTEDISTANCE: Option<string>
-          CUSTOMERALTERNATEKEY: string
-          CUSTOMERKEY: decimal
-          EMAILADDRESS: Option<string>
-          ENGLISHEDUCATION: Option<string>
-          ENGLISHOCCUPATION: Option<string>
-          FIRSTNAME: Option<string>
-          GENDER: Option<string>
-          GEOGRAPHYKEY: Option<decimal>
-          HOUSEOWNERFLAG: Option<string>
-          LASTNAME: Option<string>
-          MARITALSTATUS: Option<string>
-          MIDDLENAME: Option<string>
-          NAMESTYLE: Option<decimal>
-          NUMBERCARSOWNED: Option<decimal>
-          NUMBERCHILDRENATHOME: Option<decimal>
-          PHONE: Option<string>
-          SUFFIX: Option<string>
-          TITLE: Option<string>
-          TOTALCHILDREN: Option<decimal>
-          YEARLYINCOME: Option<decimal> }
-
-    type DIMCUSTOMERReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.ADDRESSLINE1 = OptionalColumn(reader, getOrdinal, reader.GetString, "ADDRESSLINE1")
-        member __.ADDRESSLINE2 = OptionalColumn(reader, getOrdinal, reader.GetString, "ADDRESSLINE2")
-        member __.COMMUTEDISTANCE = OptionalColumn(reader, getOrdinal, reader.GetString, "COMMUTEDISTANCE")
-        member __.CUSTOMERALTERNATEKEY = RequiredColumn(reader, getOrdinal, reader.GetString, "CUSTOMERALTERNATEKEY")
-        member __.CUSTOMERKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "CUSTOMERKEY")
-        member __.EMAILADDRESS = OptionalColumn(reader, getOrdinal, reader.GetString, "EMAILADDRESS")
-        member __.ENGLISHEDUCATION = OptionalColumn(reader, getOrdinal, reader.GetString, "ENGLISHEDUCATION")
-        member __.ENGLISHOCCUPATION = OptionalColumn(reader, getOrdinal, reader.GetString, "ENGLISHOCCUPATION")
-        member __.FIRSTNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "FIRSTNAME")
-        member __.GENDER = OptionalColumn(reader, getOrdinal, reader.GetString, "GENDER")
-        member __.GEOGRAPHYKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "GEOGRAPHYKEY")
-        member __.HOUSEOWNERFLAG = OptionalColumn(reader, getOrdinal, reader.GetString, "HOUSEOWNERFLAG")
-        member __.LASTNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "LASTNAME")
-        member __.MARITALSTATUS = OptionalColumn(reader, getOrdinal, reader.GetString, "MARITALSTATUS")
-        member __.MIDDLENAME = OptionalColumn(reader, getOrdinal, reader.GetString, "MIDDLENAME")
-        member __.NAMESTYLE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "NAMESTYLE")
-        member __.NUMBERCARSOWNED = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "NUMBERCARSOWNED")
-        member __.NUMBERCHILDRENATHOME = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "NUMBERCHILDRENATHOME")
+    type CONTACTSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        member __.CONTACT_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "CONTACT_ID")
+        member __.CUSTOMER_ID = OptionalColumn(reader, getOrdinal, reader.GetInt64, "CUSTOMER_ID")
+        member __.EMAIL = RequiredColumn(reader, getOrdinal, reader.GetString, "EMAIL")
+        member __.FIRST_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "FIRST_NAME")
+        member __.LAST_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "LAST_NAME")
         member __.PHONE = OptionalColumn(reader, getOrdinal, reader.GetString, "PHONE")
-        member __.SUFFIX = OptionalColumn(reader, getOrdinal, reader.GetString, "SUFFIX")
-        member __.TITLE = OptionalColumn(reader, getOrdinal, reader.GetString, "TITLE")
-        member __.TOTALCHILDREN = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "TOTALCHILDREN")
-        member __.YEARLYINCOME = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "YEARLYINCOME")
 
         member __.Read() =
-            { ADDRESSLINE1 = __.ADDRESSLINE1.Read()
-              ADDRESSLINE2 = __.ADDRESSLINE2.Read()
-              COMMUTEDISTANCE = __.COMMUTEDISTANCE.Read()
-              CUSTOMERALTERNATEKEY = __.CUSTOMERALTERNATEKEY.Read()
-              CUSTOMERKEY = __.CUSTOMERKEY.Read()
-              EMAILADDRESS = __.EMAILADDRESS.Read()
-              ENGLISHEDUCATION = __.ENGLISHEDUCATION.Read()
-              ENGLISHOCCUPATION = __.ENGLISHOCCUPATION.Read()
-              FIRSTNAME = __.FIRSTNAME.Read()
-              GENDER = __.GENDER.Read()
-              GEOGRAPHYKEY = __.GEOGRAPHYKEY.Read()
-              HOUSEOWNERFLAG = __.HOUSEOWNERFLAG.Read()
-              LASTNAME = __.LASTNAME.Read()
-              MARITALSTATUS = __.MARITALSTATUS.Read()
-              MIDDLENAME = __.MIDDLENAME.Read()
-              NAMESTYLE = __.NAMESTYLE.Read()
-              NUMBERCARSOWNED = __.NUMBERCARSOWNED.Read()
-              NUMBERCHILDRENATHOME = __.NUMBERCHILDRENATHOME.Read()
-              PHONE = __.PHONE.Read()
-              SUFFIX = __.SUFFIX.Read()
-              TITLE = __.TITLE.Read()
-              TOTALCHILDREN = __.TOTALCHILDREN.Read()
-              YEARLYINCOME = __.YEARLYINCOME.Read() }
+            { CONTACT_ID = __.CONTACT_ID.Read()
+              CUSTOMER_ID = __.CUSTOMER_ID.Read()
+              EMAIL = __.EMAIL.Read()
+              FIRST_NAME = __.FIRST_NAME.Read()
+              LAST_NAME = __.LAST_NAME.Read()
+              PHONE = __.PHONE.Read() }
 
         member __.ReadIfNotNull() =
-            if __.CUSTOMERKEY.IsNull() then None else Some(__.Read())
+            if __.CONTACT_ID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
-    type DIMDEPARTMENTGROUP =
-        { DEPARTMENTGROUPKEY: decimal
-          DEPARTMENTGROUPNAME: Option<string>
-          PARENTDEPARTMENTGROUPKEY: Option<decimal> }
+    type COUNTRIES =
+        { COUNTRY_ID: string
+          COUNTRY_NAME: string
+          REGION_ID: Option<int64> }
 
-    type DIMDEPARTMENTGROUPReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.DEPARTMENTGROUPKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "DEPARTMENTGROUPKEY")
-        member __.DEPARTMENTGROUPNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "DEPARTMENTGROUPNAME")
-        member __.PARENTDEPARTMENTGROUPKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PARENTDEPARTMENTGROUPKEY")
+    type COUNTRIESReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        member __.COUNTRY_ID = RequiredColumn(reader, getOrdinal, reader.GetString, "COUNTRY_ID")
+        member __.COUNTRY_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "COUNTRY_NAME")
+        member __.REGION_ID = OptionalColumn(reader, getOrdinal, reader.GetInt64, "REGION_ID")
 
         member __.Read() =
-            { DEPARTMENTGROUPKEY = __.DEPARTMENTGROUPKEY.Read()
-              DEPARTMENTGROUPNAME = __.DEPARTMENTGROUPNAME.Read()
-              PARENTDEPARTMENTGROUPKEY = __.PARENTDEPARTMENTGROUPKEY.Read() }
+            { COUNTRY_ID = __.COUNTRY_ID.Read()
+              COUNTRY_NAME = __.COUNTRY_NAME.Read()
+              REGION_ID = __.REGION_ID.Read() }
 
         member __.ReadIfNotNull() =
-            if __.DEPARTMENTGROUPKEY.IsNull() then None else Some(__.Read())
+            if __.COUNTRY_ID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
-    type DIMEMPLOYEE =
-        { BASERATE: Option<decimal>
-          BIRTHDATE: Option<decimal>
-          CURRENTFLAG: decimal
-          DEPARTMENTNAME: Option<string>
-          EMAILADDRESS: Option<string>
-          EMERGENCYCONTACTNAME: Option<string>
-          EMERGENCYCONTACTPHONE: Option<string>
-          EMPLOYEEKEY: decimal
-          EMPLOYEENATIONALIDALTERNATEKEY: Option<string>
-          ENDDATE: Option<decimal>
-          FIRSTNAME: string
-          GENDER: Option<string>
-          HIREDATE: Option<decimal>
-          LASTNAME: string
-          LOGINID: Option<string>
-          MARITALSTATUS: Option<string>
-          MIDDLENAME: Option<string>
-          NAMESTYLE: decimal
-          PARENTEMPLOYEEKEY: Option<decimal>
-          PARENTEMPLOYEENATIONALIDALTKEY: Option<string>
-          PAYFREQUENCY: Option<decimal>
-          PHONE: Option<string>
-          SALARIEDFLAG: Option<decimal>
-          SALESPERSONFLAG: decimal
-          SALESTERRITORYKEY: Option<decimal>
-          SICKLEAVEHOURS: Option<decimal>
-          STARTDATE: Option<decimal>
-          STATUS: Option<string>
-          TITLE: Option<string>
-          VACATIONHOURS: Option<decimal> }
+    type CUSTOMERS =
+        { ADDRESS: Option<string>
+          CREDIT_LIMIT: Option<decimal>
+          CUSTOMER_ID: int64
+          NAME: string
+          WEBSITE: Option<string> }
 
-    type DIMEMPLOYEEReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.BASERATE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "BASERATE")
-        member __.BIRTHDATE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "BIRTHDATE")
-        member __.CURRENTFLAG = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "CURRENTFLAG")
-        member __.DEPARTMENTNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "DEPARTMENTNAME")
-        member __.EMAILADDRESS = OptionalColumn(reader, getOrdinal, reader.GetString, "EMAILADDRESS")
-        member __.EMERGENCYCONTACTNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "EMERGENCYCONTACTNAME")
-        member __.EMERGENCYCONTACTPHONE = OptionalColumn(reader, getOrdinal, reader.GetString, "EMERGENCYCONTACTPHONE")
-        member __.EMPLOYEEKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "EMPLOYEEKEY")
-        member __.EMPLOYEENATIONALIDALTERNATEKEY = OptionalColumn(reader, getOrdinal, reader.GetString, "EMPLOYEENATIONALIDALTERNATEKEY")
-        member __.ENDDATE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "ENDDATE")
-        member __.FIRSTNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "FIRSTNAME")
-        member __.GENDER = OptionalColumn(reader, getOrdinal, reader.GetString, "GENDER")
-        member __.HIREDATE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "HIREDATE")
-        member __.LASTNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "LASTNAME")
-        member __.LOGINID = OptionalColumn(reader, getOrdinal, reader.GetString, "LOGINID")
-        member __.MARITALSTATUS = OptionalColumn(reader, getOrdinal, reader.GetString, "MARITALSTATUS")
-        member __.MIDDLENAME = OptionalColumn(reader, getOrdinal, reader.GetString, "MIDDLENAME")
-        member __.NAMESTYLE = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "NAMESTYLE")
-        member __.PARENTEMPLOYEEKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PARENTEMPLOYEEKEY")
-        member __.PARENTEMPLOYEENATIONALIDALTKEY = OptionalColumn(reader, getOrdinal, reader.GetString, "PARENTEMPLOYEENATIONALIDALTKEY")
-        member __.PAYFREQUENCY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PAYFREQUENCY")
-        member __.PHONE = OptionalColumn(reader, getOrdinal, reader.GetString, "PHONE")
-        member __.SALARIEDFLAG = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SALARIEDFLAG")
-        member __.SALESPERSONFLAG = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SALESPERSONFLAG")
-        member __.SALESTERRITORYKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SALESTERRITORYKEY")
-        member __.SICKLEAVEHOURS = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SICKLEAVEHOURS")
-        member __.STARTDATE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "STARTDATE")
-        member __.STATUS = OptionalColumn(reader, getOrdinal, reader.GetString, "STATUS")
-        member __.TITLE = OptionalColumn(reader, getOrdinal, reader.GetString, "TITLE")
-        member __.VACATIONHOURS = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "VACATIONHOURS")
+    type CUSTOMERSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        member __.ADDRESS = OptionalColumn(reader, getOrdinal, reader.GetString, "ADDRESS")
+        member __.CREDIT_LIMIT = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "CREDIT_LIMIT")
+        member __.CUSTOMER_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "CUSTOMER_ID")
+        member __.NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "NAME")
+        member __.WEBSITE = OptionalColumn(reader, getOrdinal, reader.GetString, "WEBSITE")
 
         member __.Read() =
-            { BASERATE = __.BASERATE.Read()
-              BIRTHDATE = __.BIRTHDATE.Read()
-              CURRENTFLAG = __.CURRENTFLAG.Read()
-              DEPARTMENTNAME = __.DEPARTMENTNAME.Read()
-              EMAILADDRESS = __.EMAILADDRESS.Read()
-              EMERGENCYCONTACTNAME = __.EMERGENCYCONTACTNAME.Read()
-              EMERGENCYCONTACTPHONE = __.EMERGENCYCONTACTPHONE.Read()
-              EMPLOYEEKEY = __.EMPLOYEEKEY.Read()
-              EMPLOYEENATIONALIDALTERNATEKEY = __.EMPLOYEENATIONALIDALTERNATEKEY.Read()
-              ENDDATE = __.ENDDATE.Read()
-              FIRSTNAME = __.FIRSTNAME.Read()
-              GENDER = __.GENDER.Read()
-              HIREDATE = __.HIREDATE.Read()
-              LASTNAME = __.LASTNAME.Read()
-              LOGINID = __.LOGINID.Read()
-              MARITALSTATUS = __.MARITALSTATUS.Read()
-              MIDDLENAME = __.MIDDLENAME.Read()
-              NAMESTYLE = __.NAMESTYLE.Read()
-              PARENTEMPLOYEEKEY = __.PARENTEMPLOYEEKEY.Read()
-              PARENTEMPLOYEENATIONALIDALTKEY = __.PARENTEMPLOYEENATIONALIDALTKEY.Read()
-              PAYFREQUENCY = __.PAYFREQUENCY.Read()
-              PHONE = __.PHONE.Read()
-              SALARIEDFLAG = __.SALARIEDFLAG.Read()
-              SALESPERSONFLAG = __.SALESPERSONFLAG.Read()
-              SALESTERRITORYKEY = __.SALESTERRITORYKEY.Read()
-              SICKLEAVEHOURS = __.SICKLEAVEHOURS.Read()
-              STARTDATE = __.STARTDATE.Read()
-              STATUS = __.STATUS.Read()
-              TITLE = __.TITLE.Read()
-              VACATIONHOURS = __.VACATIONHOURS.Read() }
+            { ADDRESS = __.ADDRESS.Read()
+              CREDIT_LIMIT = __.CREDIT_LIMIT.Read()
+              CUSTOMER_ID = __.CUSTOMER_ID.Read()
+              NAME = __.NAME.Read()
+              WEBSITE = __.WEBSITE.Read() }
 
         member __.ReadIfNotNull() =
-            if __.EMPLOYEEKEY.IsNull() then None else Some(__.Read())
+            if __.CUSTOMER_ID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
-    type DIMGEOGRAPHY =
-        { CITY: Option<string>
-          COUNTRYREGIONCODE: Option<string>
-          ENGLISHCOUNTRYREGIONNAME: Option<string>
-          FRENCHCOUNTRYREGIONNAME: Option<string>
-          GEOGRAPHYKEY: decimal
-          POSTALCODE: Option<string>
-          SALESTERRITORYKEY: Option<decimal>
-          SPANISHCOUNTRYREGIONNAME: Option<string>
-          STATEPROVINCECODE: Option<string>
-          STATEPROVINCENAME: Option<string> }
+    type EMPLOYEES =
+        { EMAIL: string
+          EMPLOYEE_ID: int64
+          FIRST_NAME: string
+          HIRE_DATE: System.DateTime
+          JOB_TITLE: string
+          LAST_NAME: string
+          MANAGER_ID: Option<int64>
+          PHONE: string }
 
-    type DIMGEOGRAPHYReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+    type EMPLOYEESReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        member __.EMAIL = RequiredColumn(reader, getOrdinal, reader.GetString, "EMAIL")
+        member __.EMPLOYEE_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "EMPLOYEE_ID")
+        member __.FIRST_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "FIRST_NAME")
+        member __.HIRE_DATE = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "HIRE_DATE")
+        member __.JOB_TITLE = RequiredColumn(reader, getOrdinal, reader.GetString, "JOB_TITLE")
+        member __.LAST_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "LAST_NAME")
+        member __.MANAGER_ID = OptionalColumn(reader, getOrdinal, reader.GetInt64, "MANAGER_ID")
+        member __.PHONE = RequiredColumn(reader, getOrdinal, reader.GetString, "PHONE")
+
+        member __.Read() =
+            { EMAIL = __.EMAIL.Read()
+              EMPLOYEE_ID = __.EMPLOYEE_ID.Read()
+              FIRST_NAME = __.FIRST_NAME.Read()
+              HIRE_DATE = __.HIRE_DATE.Read()
+              JOB_TITLE = __.JOB_TITLE.Read()
+              LAST_NAME = __.LAST_NAME.Read()
+              MANAGER_ID = __.MANAGER_ID.Read()
+              PHONE = __.PHONE.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.EMPLOYEE_ID.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type INVENTORIES =
+        { PRODUCT_ID: int64
+          QUANTITY: int
+          WAREHOUSE_ID: int64 }
+
+    type INVENTORIESReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        member __.PRODUCT_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "PRODUCT_ID")
+        member __.QUANTITY = RequiredColumn(reader, getOrdinal, reader.GetInt32, "QUANTITY")
+        member __.WAREHOUSE_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "WAREHOUSE_ID")
+
+        member __.Read() =
+            { PRODUCT_ID = __.PRODUCT_ID.Read()
+              QUANTITY = __.QUANTITY.Read()
+              WAREHOUSE_ID = __.WAREHOUSE_ID.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.PRODUCT_ID.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type LOCATIONS =
+        { ADDRESS: string
+          CITY: Option<string>
+          COUNTRY_ID: Option<string>
+          LOCATION_ID: int64
+          POSTAL_CODE: Option<string>
+          STATE: Option<string> }
+
+    type LOCATIONSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        member __.ADDRESS = RequiredColumn(reader, getOrdinal, reader.GetString, "ADDRESS")
         member __.CITY = OptionalColumn(reader, getOrdinal, reader.GetString, "CITY")
-        member __.COUNTRYREGIONCODE = OptionalColumn(reader, getOrdinal, reader.GetString, "COUNTRYREGIONCODE")
-        member __.ENGLISHCOUNTRYREGIONNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "ENGLISHCOUNTRYREGIONNAME")
-        member __.FRENCHCOUNTRYREGIONNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "FRENCHCOUNTRYREGIONNAME")
-        member __.GEOGRAPHYKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "GEOGRAPHYKEY")
-        member __.POSTALCODE = OptionalColumn(reader, getOrdinal, reader.GetString, "POSTALCODE")
-        member __.SALESTERRITORYKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SALESTERRITORYKEY")
-        member __.SPANISHCOUNTRYREGIONNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "SPANISHCOUNTRYREGIONNAME")
-        member __.STATEPROVINCECODE = OptionalColumn(reader, getOrdinal, reader.GetString, "STATEPROVINCECODE")
-        member __.STATEPROVINCENAME = OptionalColumn(reader, getOrdinal, reader.GetString, "STATEPROVINCENAME")
+        member __.COUNTRY_ID = OptionalColumn(reader, getOrdinal, reader.GetString, "COUNTRY_ID")
+        member __.LOCATION_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "LOCATION_ID")
+        member __.POSTAL_CODE = OptionalColumn(reader, getOrdinal, reader.GetString, "POSTAL_CODE")
+        member __.STATE = OptionalColumn(reader, getOrdinal, reader.GetString, "STATE")
 
         member __.Read() =
-            { CITY = __.CITY.Read()
-              COUNTRYREGIONCODE = __.COUNTRYREGIONCODE.Read()
-              ENGLISHCOUNTRYREGIONNAME = __.ENGLISHCOUNTRYREGIONNAME.Read()
-              FRENCHCOUNTRYREGIONNAME = __.FRENCHCOUNTRYREGIONNAME.Read()
-              GEOGRAPHYKEY = __.GEOGRAPHYKEY.Read()
-              POSTALCODE = __.POSTALCODE.Read()
-              SALESTERRITORYKEY = __.SALESTERRITORYKEY.Read()
-              SPANISHCOUNTRYREGIONNAME = __.SPANISHCOUNTRYREGIONNAME.Read()
-              STATEPROVINCECODE = __.STATEPROVINCECODE.Read()
-              STATEPROVINCENAME = __.STATEPROVINCENAME.Read() }
+            { ADDRESS = __.ADDRESS.Read()
+              CITY = __.CITY.Read()
+              COUNTRY_ID = __.COUNTRY_ID.Read()
+              LOCATION_ID = __.LOCATION_ID.Read()
+              POSTAL_CODE = __.POSTAL_CODE.Read()
+              STATE = __.STATE.Read() }
 
         member __.ReadIfNotNull() =
-            if __.GEOGRAPHYKEY.IsNull() then None else Some(__.Read())
+            if __.LOCATION_ID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
-    type DIMORGANIZATION =
-        { CURRENCYKEY: Option<decimal>
-          ORGANIZATIONKEY: decimal
-          ORGANIZATIONNAME: Option<string>
-          PARENTORGANIZATIONKEY: Option<decimal>
-          PERCENTAGEOFOWNERSHIP: Option<string> }
+    type ORDERS =
+        { CUSTOMER_ID: int64
+          ORDER_DATE: System.DateTime
+          ORDER_ID: int64
+          SALESMAN_ID: Option<int64>
+          STATUS: string }
 
-    type DIMORGANIZATIONReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.CURRENCYKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "CURRENCYKEY")
-        member __.ORGANIZATIONKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "ORGANIZATIONKEY")
-        member __.ORGANIZATIONNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "ORGANIZATIONNAME")
-        member __.PARENTORGANIZATIONKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PARENTORGANIZATIONKEY")
-        member __.PERCENTAGEOFOWNERSHIP = OptionalColumn(reader, getOrdinal, reader.GetString, "PERCENTAGEOFOWNERSHIP")
+    type ORDERSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        member __.CUSTOMER_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "CUSTOMER_ID")
+        member __.ORDER_DATE = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ORDER_DATE")
+        member __.ORDER_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "ORDER_ID")
+        member __.SALESMAN_ID = OptionalColumn(reader, getOrdinal, reader.GetInt64, "SALESMAN_ID")
+        member __.STATUS = RequiredColumn(reader, getOrdinal, reader.GetString, "STATUS")
 
         member __.Read() =
-            { CURRENCYKEY = __.CURRENCYKEY.Read()
-              ORGANIZATIONKEY = __.ORGANIZATIONKEY.Read()
-              ORGANIZATIONNAME = __.ORGANIZATIONNAME.Read()
-              PARENTORGANIZATIONKEY = __.PARENTORGANIZATIONKEY.Read()
-              PERCENTAGEOFOWNERSHIP = __.PERCENTAGEOFOWNERSHIP.Read() }
+            { CUSTOMER_ID = __.CUSTOMER_ID.Read()
+              ORDER_DATE = __.ORDER_DATE.Read()
+              ORDER_ID = __.ORDER_ID.Read()
+              SALESMAN_ID = __.SALESMAN_ID.Read()
+              STATUS = __.STATUS.Read() }
 
         member __.ReadIfNotNull() =
-            if __.ORGANIZATIONKEY.IsNull() then None else Some(__.Read())
+            if __.ORDER_ID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
-    type DIMPRODUCT =
-        { CLASS: Option<string>
-          COLOR: string
-          DAYSTOMANUFACTURE: Option<decimal>
-          DEALERPRICE: Option<decimal>
-          ENGLISHDESCRIPTION: Option<string>
-          ENGLISHPRODUCTNAME: string
-          FINISHEDGOODSFLAG: decimal
-          LISTPRICE: Option<double>
-          MODELNAME: Option<string>
-          PRODUCTALTERNATEKEY: Option<string>
-          PRODUCTKEY: decimal
-          PRODUCTLINE: Option<string>
-          PRODUCTSUBCATEGORYKEY: Option<decimal>
-          REORDERPOINT: Option<decimal>
-          SAFETYSTOCKLEVEL: Option<decimal>
-          SIZEACTUAL: Option<string>
-          SIZERANGE: Option<string>
-          SIZEUNITMEASURECODE: Option<string>
-          STANDARDCOST: Option<decimal>
-          STATUS: Option<string>
-          STYLE: Option<string>
-          WEIGHT: Option<double>
-          WEIGHTUNITMEASURECODE: Option<string> }
+    type ORDER_ITEMS =
+        { ITEM_ID: int64
+          ORDER_ID: int64
+          PRODUCT_ID: int64
+          QUANTITY: int
+          UNIT_PRICE: decimal }
 
-    type DIMPRODUCTReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.CLASS = OptionalColumn(reader, getOrdinal, reader.GetString, "CLASS")
-        member __.COLOR = RequiredColumn(reader, getOrdinal, reader.GetString, "COLOR")
-        member __.DAYSTOMANUFACTURE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "DAYSTOMANUFACTURE")
-        member __.DEALERPRICE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "DEALERPRICE")
-        member __.ENGLISHDESCRIPTION = OptionalColumn(reader, getOrdinal, reader.GetString, "ENGLISHDESCRIPTION")
-        member __.ENGLISHPRODUCTNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "ENGLISHPRODUCTNAME")
-        member __.FINISHEDGOODSFLAG = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "FINISHEDGOODSFLAG")
-        member __.LISTPRICE = OptionalColumn(reader, getOrdinal, reader.GetDouble, "LISTPRICE")
-        member __.MODELNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "MODELNAME")
-        member __.PRODUCTALTERNATEKEY = OptionalColumn(reader, getOrdinal, reader.GetString, "PRODUCTALTERNATEKEY")
-        member __.PRODUCTKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTKEY")
-        member __.PRODUCTLINE = OptionalColumn(reader, getOrdinal, reader.GetString, "PRODUCTLINE")
-        member __.PRODUCTSUBCATEGORYKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTSUBCATEGORYKEY")
-        member __.REORDERPOINT = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "REORDERPOINT")
-        member __.SAFETYSTOCKLEVEL = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SAFETYSTOCKLEVEL")
-        member __.SIZEACTUAL = OptionalColumn(reader, getOrdinal, reader.GetString, "SIZEACTUAL")
-        member __.SIZERANGE = OptionalColumn(reader, getOrdinal, reader.GetString, "SIZERANGE")
-        member __.SIZEUNITMEASURECODE = OptionalColumn(reader, getOrdinal, reader.GetString, "SIZEUNITMEASURECODE")
-        member __.STANDARDCOST = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "STANDARDCOST")
-        member __.STATUS = OptionalColumn(reader, getOrdinal, reader.GetString, "STATUS")
-        member __.STYLE = OptionalColumn(reader, getOrdinal, reader.GetString, "STYLE")
-        member __.WEIGHT = OptionalColumn(reader, getOrdinal, reader.GetDouble, "WEIGHT")
-        member __.WEIGHTUNITMEASURECODE = OptionalColumn(reader, getOrdinal, reader.GetString, "WEIGHTUNITMEASURECODE")
+    type ORDER_ITEMSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        member __.ITEM_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "ITEM_ID")
+        member __.ORDER_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "ORDER_ID")
+        member __.PRODUCT_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "PRODUCT_ID")
+        member __.QUANTITY = RequiredColumn(reader, getOrdinal, reader.GetInt32, "QUANTITY")
+        member __.UNIT_PRICE = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "UNIT_PRICE")
 
         member __.Read() =
-            { CLASS = __.CLASS.Read()
-              COLOR = __.COLOR.Read()
-              DAYSTOMANUFACTURE = __.DAYSTOMANUFACTURE.Read()
-              DEALERPRICE = __.DEALERPRICE.Read()
-              ENGLISHDESCRIPTION = __.ENGLISHDESCRIPTION.Read()
-              ENGLISHPRODUCTNAME = __.ENGLISHPRODUCTNAME.Read()
-              FINISHEDGOODSFLAG = __.FINISHEDGOODSFLAG.Read()
-              LISTPRICE = __.LISTPRICE.Read()
-              MODELNAME = __.MODELNAME.Read()
-              PRODUCTALTERNATEKEY = __.PRODUCTALTERNATEKEY.Read()
-              PRODUCTKEY = __.PRODUCTKEY.Read()
-              PRODUCTLINE = __.PRODUCTLINE.Read()
-              PRODUCTSUBCATEGORYKEY = __.PRODUCTSUBCATEGORYKEY.Read()
-              REORDERPOINT = __.REORDERPOINT.Read()
-              SAFETYSTOCKLEVEL = __.SAFETYSTOCKLEVEL.Read()
-              SIZEACTUAL = __.SIZEACTUAL.Read()
-              SIZERANGE = __.SIZERANGE.Read()
-              SIZEUNITMEASURECODE = __.SIZEUNITMEASURECODE.Read()
-              STANDARDCOST = __.STANDARDCOST.Read()
-              STATUS = __.STATUS.Read()
-              STYLE = __.STYLE.Read()
-              WEIGHT = __.WEIGHT.Read()
-              WEIGHTUNITMEASURECODE = __.WEIGHTUNITMEASURECODE.Read() }
+            { ITEM_ID = __.ITEM_ID.Read()
+              ORDER_ID = __.ORDER_ID.Read()
+              PRODUCT_ID = __.PRODUCT_ID.Read()
+              QUANTITY = __.QUANTITY.Read()
+              UNIT_PRICE = __.UNIT_PRICE.Read() }
 
         member __.ReadIfNotNull() =
-            if __.PRODUCTKEY.IsNull() then None else Some(__.Read())
+            if __.ITEM_ID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
-    type DIMPRODUCTCATEGORY =
-        { ENGLISHPRODUCTCATEGORYNAME: string
-          FRENCHPRODUCTCATEGORYNAME: string
-          PRODUCTCATEGORYALTERNATEKEY: Option<decimal>
-          PRODUCTCATEGORYKEY: decimal
-          SPANISHPRODUCTCATEGORYNAME: string }
+    type PRODUCTS =
+        { CATEGORY_ID: int64
+          DESCRIPTION: Option<string>
+          LIST_PRICE: Option<decimal>
+          PRODUCT_ID: int64
+          PRODUCT_NAME: string
+          STANDARD_COST: Option<decimal> }
 
-    type DIMPRODUCTCATEGORYReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.ENGLISHPRODUCTCATEGORYNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "ENGLISHPRODUCTCATEGORYNAME")
-        member __.FRENCHPRODUCTCATEGORYNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "FRENCHPRODUCTCATEGORYNAME")
-        member __.PRODUCTCATEGORYALTERNATEKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTCATEGORYALTERNATEKEY")
-        member __.PRODUCTCATEGORYKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTCATEGORYKEY")
-        member __.SPANISHPRODUCTCATEGORYNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "SPANISHPRODUCTCATEGORYNAME")
+    type PRODUCTSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        member __.CATEGORY_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "CATEGORY_ID")
+        member __.DESCRIPTION = OptionalColumn(reader, getOrdinal, reader.GetString, "DESCRIPTION")
+        member __.LIST_PRICE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "LIST_PRICE")
+        member __.PRODUCT_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "PRODUCT_ID")
+        member __.PRODUCT_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "PRODUCT_NAME")
+        member __.STANDARD_COST = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "STANDARD_COST")
 
         member __.Read() =
-            { ENGLISHPRODUCTCATEGORYNAME = __.ENGLISHPRODUCTCATEGORYNAME.Read()
-              FRENCHPRODUCTCATEGORYNAME = __.FRENCHPRODUCTCATEGORYNAME.Read()
-              PRODUCTCATEGORYALTERNATEKEY = __.PRODUCTCATEGORYALTERNATEKEY.Read()
-              PRODUCTCATEGORYKEY = __.PRODUCTCATEGORYKEY.Read()
-              SPANISHPRODUCTCATEGORYNAME = __.SPANISHPRODUCTCATEGORYNAME.Read() }
+            { CATEGORY_ID = __.CATEGORY_ID.Read()
+              DESCRIPTION = __.DESCRIPTION.Read()
+              LIST_PRICE = __.LIST_PRICE.Read()
+              PRODUCT_ID = __.PRODUCT_ID.Read()
+              PRODUCT_NAME = __.PRODUCT_NAME.Read()
+              STANDARD_COST = __.STANDARD_COST.Read() }
 
         member __.ReadIfNotNull() =
-            if __.PRODUCTCATEGORYKEY.IsNull() then None else Some(__.Read())
+            if __.PRODUCT_ID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
-    type DIMPRODUCTSUBCATEGORY =
-        { ENGLISHPRODUCTSUBCATEGORYNAME: string
-          FRENCHPRODUCTSUBCATEGORYNAME: string
-          PRODUCTCATEGORYKEY: Option<decimal>
-          PRODUCTSUBCATEGORYALTERNATEKEY: Option<decimal>
-          PRODUCTSUBCATEGORYKEY: decimal
-          SPANISHPRODUCTSUBCATEGORYNAME: string }
+    type PRODUCT_CATEGORIES =
+        { CATEGORY_ID: int64
+          CATEGORY_NAME: string }
 
-    type DIMPRODUCTSUBCATEGORYReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.ENGLISHPRODUCTSUBCATEGORYNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "ENGLISHPRODUCTSUBCATEGORYNAME")
-        member __.FRENCHPRODUCTSUBCATEGORYNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "FRENCHPRODUCTSUBCATEGORYNAME")
-        member __.PRODUCTCATEGORYKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTCATEGORYKEY")
-        member __.PRODUCTSUBCATEGORYALTERNATEKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTSUBCATEGORYALTERNATEKEY")
-        member __.PRODUCTSUBCATEGORYKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTSUBCATEGORYKEY")
-        member __.SPANISHPRODUCTSUBCATEGORYNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "SPANISHPRODUCTSUBCATEGORYNAME")
+    type PRODUCT_CATEGORIESReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        member __.CATEGORY_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "CATEGORY_ID")
+        member __.CATEGORY_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "CATEGORY_NAME")
 
         member __.Read() =
-            { ENGLISHPRODUCTSUBCATEGORYNAME = __.ENGLISHPRODUCTSUBCATEGORYNAME.Read()
-              FRENCHPRODUCTSUBCATEGORYNAME = __.FRENCHPRODUCTSUBCATEGORYNAME.Read()
-              PRODUCTCATEGORYKEY = __.PRODUCTCATEGORYKEY.Read()
-              PRODUCTSUBCATEGORYALTERNATEKEY = __.PRODUCTSUBCATEGORYALTERNATEKEY.Read()
-              PRODUCTSUBCATEGORYKEY = __.PRODUCTSUBCATEGORYKEY.Read()
-              SPANISHPRODUCTSUBCATEGORYNAME = __.SPANISHPRODUCTSUBCATEGORYNAME.Read() }
+            { CATEGORY_ID = __.CATEGORY_ID.Read()
+              CATEGORY_NAME = __.CATEGORY_NAME.Read() }
 
         member __.ReadIfNotNull() =
-            if __.PRODUCTSUBCATEGORYKEY.IsNull() then None else Some(__.Read())
+            if __.CATEGORY_ID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
-    type DIMPROMOTION =
-        { DISCOUNTPCT: Option<double>
-          ENDDATE: Option<decimal>
-          ENGLISHPROMOTIONCATEGORY: Option<string>
-          ENGLISHPROMOTIONNAME: Option<string>
-          ENGLISHPROMOTIONTYPE: Option<string>
-          FRENCHPROMOTIONCATEGORY: Option<string>
-          FRENCHPROMOTIONNAME: Option<string>
-          FRENCHPROMOTIONTYPE: Option<string>
-          MAXQTY: Option<decimal>
-          MINQTY: Option<decimal>
-          PROMOTIONALTERNATEKEY: Option<decimal>
-          PROMOTIONKEY: decimal
-          SPANISHPROMOTIONCATEGORY: Option<string>
-          SPANISHPROMOTIONNAME: Option<string>
-          SPANISHPROMOTIONTYPE: Option<string>
-          STARTDATE: decimal }
+    type REGIONS =
+        { REGION_ID: int64
+          REGION_NAME: string }
 
-    type DIMPROMOTIONReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.DISCOUNTPCT = OptionalColumn(reader, getOrdinal, reader.GetDouble, "DISCOUNTPCT")
-        member __.ENDDATE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "ENDDATE")
-        member __.ENGLISHPROMOTIONCATEGORY = OptionalColumn(reader, getOrdinal, reader.GetString, "ENGLISHPROMOTIONCATEGORY")
-        member __.ENGLISHPROMOTIONNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "ENGLISHPROMOTIONNAME")
-        member __.ENGLISHPROMOTIONTYPE = OptionalColumn(reader, getOrdinal, reader.GetString, "ENGLISHPROMOTIONTYPE")
-        member __.FRENCHPROMOTIONCATEGORY = OptionalColumn(reader, getOrdinal, reader.GetString, "FRENCHPROMOTIONCATEGORY")
-        member __.FRENCHPROMOTIONNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "FRENCHPROMOTIONNAME")
-        member __.FRENCHPROMOTIONTYPE = OptionalColumn(reader, getOrdinal, reader.GetString, "FRENCHPROMOTIONTYPE")
-        member __.MAXQTY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "MAXQTY")
-        member __.MINQTY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "MINQTY")
-        member __.PROMOTIONALTERNATEKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PROMOTIONALTERNATEKEY")
-        member __.PROMOTIONKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PROMOTIONKEY")
-        member __.SPANISHPROMOTIONCATEGORY = OptionalColumn(reader, getOrdinal, reader.GetString, "SPANISHPROMOTIONCATEGORY")
-        member __.SPANISHPROMOTIONNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "SPANISHPROMOTIONNAME")
-        member __.SPANISHPROMOTIONTYPE = OptionalColumn(reader, getOrdinal, reader.GetString, "SPANISHPROMOTIONTYPE")
-        member __.STARTDATE = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "STARTDATE")
+    type REGIONSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        member __.REGION_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "REGION_ID")
+        member __.REGION_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "REGION_NAME")
 
         member __.Read() =
-            { DISCOUNTPCT = __.DISCOUNTPCT.Read()
-              ENDDATE = __.ENDDATE.Read()
-              ENGLISHPROMOTIONCATEGORY = __.ENGLISHPROMOTIONCATEGORY.Read()
-              ENGLISHPROMOTIONNAME = __.ENGLISHPROMOTIONNAME.Read()
-              ENGLISHPROMOTIONTYPE = __.ENGLISHPROMOTIONTYPE.Read()
-              FRENCHPROMOTIONCATEGORY = __.FRENCHPROMOTIONCATEGORY.Read()
-              FRENCHPROMOTIONNAME = __.FRENCHPROMOTIONNAME.Read()
-              FRENCHPROMOTIONTYPE = __.FRENCHPROMOTIONTYPE.Read()
-              MAXQTY = __.MAXQTY.Read()
-              MINQTY = __.MINQTY.Read()
-              PROMOTIONALTERNATEKEY = __.PROMOTIONALTERNATEKEY.Read()
-              PROMOTIONKEY = __.PROMOTIONKEY.Read()
-              SPANISHPROMOTIONCATEGORY = __.SPANISHPROMOTIONCATEGORY.Read()
-              SPANISHPROMOTIONNAME = __.SPANISHPROMOTIONNAME.Read()
-              SPANISHPROMOTIONTYPE = __.SPANISHPROMOTIONTYPE.Read()
-              STARTDATE = __.STARTDATE.Read() }
+            { REGION_ID = __.REGION_ID.Read()
+              REGION_NAME = __.REGION_NAME.Read() }
 
         member __.ReadIfNotNull() =
-            if __.PROMOTIONKEY.IsNull() then None else Some(__.Read())
+            if __.REGION_ID.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
-    type DIMRESELLER =
-        { ADDRESSLINE1: Option<string>
-          ADDRESSLINE2: Option<string>
-          ANNUALREVENUE: Option<decimal>
-          ANNUALSALES: Option<decimal>
-          BANKNAME: Option<string>
-          BUSINESSTYPE: string
-          FIRSTORDERYEAR: Option<decimal>
-          GEOGRAPHYKEY: Option<decimal>
-          LASTORDERYEAR: Option<decimal>
-          MINPAYMENTAMOUNT: Option<decimal>
-          MINPAYMENTTYPE: Option<decimal>
-          NUMBEREMPLOYEES: Option<decimal>
-          ORDERFREQUENCY: Option<string>
-          ORDERMONTH: Option<decimal>
-          PHONE: Option<string>
-          PRODUCTLINE: Option<string>
-          RESELLERALTERNATEKEY: Option<string>
-          RESELLERKEY: decimal
-          RESELLERNAME: string
-          YEAROPENED: Option<decimal> }
+    type WAREHOUSES =
+        { LOCATION_ID: Option<int64>
+          WAREHOUSE_ID: int64
+          WAREHOUSE_NAME: Option<string> }
 
-    type DIMRESELLERReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.ADDRESSLINE1 = OptionalColumn(reader, getOrdinal, reader.GetString, "ADDRESSLINE1")
-        member __.ADDRESSLINE2 = OptionalColumn(reader, getOrdinal, reader.GetString, "ADDRESSLINE2")
-        member __.ANNUALREVENUE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "ANNUALREVENUE")
-        member __.ANNUALSALES = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "ANNUALSALES")
-        member __.BANKNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "BANKNAME")
-        member __.BUSINESSTYPE = RequiredColumn(reader, getOrdinal, reader.GetString, "BUSINESSTYPE")
-        member __.FIRSTORDERYEAR = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "FIRSTORDERYEAR")
-        member __.GEOGRAPHYKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "GEOGRAPHYKEY")
-        member __.LASTORDERYEAR = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "LASTORDERYEAR")
-        member __.MINPAYMENTAMOUNT = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "MINPAYMENTAMOUNT")
-        member __.MINPAYMENTTYPE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "MINPAYMENTTYPE")
-        member __.NUMBEREMPLOYEES = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "NUMBEREMPLOYEES")
-        member __.ORDERFREQUENCY = OptionalColumn(reader, getOrdinal, reader.GetString, "ORDERFREQUENCY")
-        member __.ORDERMONTH = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "ORDERMONTH")
-        member __.PHONE = OptionalColumn(reader, getOrdinal, reader.GetString, "PHONE")
-        member __.PRODUCTLINE = OptionalColumn(reader, getOrdinal, reader.GetString, "PRODUCTLINE")
-        member __.RESELLERALTERNATEKEY = OptionalColumn(reader, getOrdinal, reader.GetString, "RESELLERALTERNATEKEY")
-        member __.RESELLERKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "RESELLERKEY")
-        member __.RESELLERNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "RESELLERNAME")
-        member __.YEAROPENED = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "YEAROPENED")
+    type WAREHOUSESReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        member __.LOCATION_ID = OptionalColumn(reader, getOrdinal, reader.GetInt64, "LOCATION_ID")
+        member __.WAREHOUSE_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "WAREHOUSE_ID")
+        member __.WAREHOUSE_NAME = OptionalColumn(reader, getOrdinal, reader.GetString, "WAREHOUSE_NAME")
 
         member __.Read() =
-            { ADDRESSLINE1 = __.ADDRESSLINE1.Read()
-              ADDRESSLINE2 = __.ADDRESSLINE2.Read()
-              ANNUALREVENUE = __.ANNUALREVENUE.Read()
-              ANNUALSALES = __.ANNUALSALES.Read()
-              BANKNAME = __.BANKNAME.Read()
-              BUSINESSTYPE = __.BUSINESSTYPE.Read()
-              FIRSTORDERYEAR = __.FIRSTORDERYEAR.Read()
-              GEOGRAPHYKEY = __.GEOGRAPHYKEY.Read()
-              LASTORDERYEAR = __.LASTORDERYEAR.Read()
-              MINPAYMENTAMOUNT = __.MINPAYMENTAMOUNT.Read()
-              MINPAYMENTTYPE = __.MINPAYMENTTYPE.Read()
-              NUMBEREMPLOYEES = __.NUMBEREMPLOYEES.Read()
-              ORDERFREQUENCY = __.ORDERFREQUENCY.Read()
-              ORDERMONTH = __.ORDERMONTH.Read()
-              PHONE = __.PHONE.Read()
-              PRODUCTLINE = __.PRODUCTLINE.Read()
-              RESELLERALTERNATEKEY = __.RESELLERALTERNATEKEY.Read()
-              RESELLERKEY = __.RESELLERKEY.Read()
-              RESELLERNAME = __.RESELLERNAME.Read()
-              YEAROPENED = __.YEAROPENED.Read() }
+            { LOCATION_ID = __.LOCATION_ID.Read()
+              WAREHOUSE_ID = __.WAREHOUSE_ID.Read()
+              WAREHOUSE_NAME = __.WAREHOUSE_NAME.Read() }
 
         member __.ReadIfNotNull() =
-            if __.RESELLERKEY.IsNull() then None else Some(__.Read())
+            if __.WAREHOUSE_ID.IsNull() then None else Some(__.Read())
 
-    [<CLIMutable>]
-    type DIMSALESREASON =
-        { SALESREASONALTERNATEKEY: decimal
-          SALESREASONKEY: decimal
-          SALESREASONNAME: string
-          SALESREASONREASONTYPE: string }
-
-    type DIMSALESREASONReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.SALESREASONALTERNATEKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SALESREASONALTERNATEKEY")
-        member __.SALESREASONKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SALESREASONKEY")
-        member __.SALESREASONNAME = RequiredColumn(reader, getOrdinal, reader.GetString, "SALESREASONNAME")
-        member __.SALESREASONREASONTYPE = RequiredColumn(reader, getOrdinal, reader.GetString, "SALESREASONREASONTYPE")
-
-        member __.Read() =
-            { SALESREASONALTERNATEKEY = __.SALESREASONALTERNATEKEY.Read()
-              SALESREASONKEY = __.SALESREASONKEY.Read()
-              SALESREASONNAME = __.SALESREASONNAME.Read()
-              SALESREASONREASONTYPE = __.SALESREASONREASONTYPE.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.SALESREASONKEY.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type DIMSALESTERRITORY =
-        { SALESTERRITORYALTERNATEKEY: Option<decimal>
-          SALESTERRITORYCOUNTRY: string
-          SALESTERRITORYGROUP: Option<string>
-          SALESTERRITORYKEY: decimal
-          SALESTERRITORYREGION: string }
-
-    type DIMSALESTERRITORYReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.SALESTERRITORYALTERNATEKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SALESTERRITORYALTERNATEKEY")
-        member __.SALESTERRITORYCOUNTRY = RequiredColumn(reader, getOrdinal, reader.GetString, "SALESTERRITORYCOUNTRY")
-        member __.SALESTERRITORYGROUP = OptionalColumn(reader, getOrdinal, reader.GetString, "SALESTERRITORYGROUP")
-        member __.SALESTERRITORYKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SALESTERRITORYKEY")
-        member __.SALESTERRITORYREGION = RequiredColumn(reader, getOrdinal, reader.GetString, "SALESTERRITORYREGION")
-
-        member __.Read() =
-            { SALESTERRITORYALTERNATEKEY = __.SALESTERRITORYALTERNATEKEY.Read()
-              SALESTERRITORYCOUNTRY = __.SALESTERRITORYCOUNTRY.Read()
-              SALESTERRITORYGROUP = __.SALESTERRITORYGROUP.Read()
-              SALESTERRITORYKEY = __.SALESTERRITORYKEY.Read()
-              SALESTERRITORYREGION = __.SALESTERRITORYREGION.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.SALESTERRITORYKEY.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type DIMSCENARIO =
-        { SCENARIOKEY: decimal
-          SCENARIONAME: Option<string> }
-
-    type DIMSCENARIOReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.SCENARIOKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SCENARIOKEY")
-        member __.SCENARIONAME = OptionalColumn(reader, getOrdinal, reader.GetString, "SCENARIONAME")
-
-        member __.Read() =
-            { SCENARIOKEY = __.SCENARIOKEY.Read()
-              SCENARIONAME = __.SCENARIONAME.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.SCENARIOKEY.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type DIMTIME =
-        { CALENDARQUARTER: Option<decimal>
-          CALENDARSEMESTER: Option<decimal>
-          CALENDARYEAR: Option<string>
-          DAYNUMBEROFMONTH: Option<decimal>
-          DAYNUMBEROFWEEK: Option<decimal>
-          DAYNUMBEROFYEAR: Option<decimal>
-          ENGLISHDAYNAMEOFWEEK: Option<string>
-          ENGLISHMONTHNAME: Option<string>
-          FISCALQUARTER: Option<decimal>
-          FISCALSEMESTER: Option<decimal>
-          FISCALYEAR: Option<string>
-          FRENCHDAYNAMEOFWEEK: Option<string>
-          FRENCHMONTHNAME: Option<string>
-          MONTHNUMBEROFYEAR: Option<decimal>
-          SPANISHDAYNAMEOFWEEK: Option<string>
-          SPANISHMONTHNAME: Option<string>
-          TIMEKEY: decimal
-          WEEKNUMBEROFYEAR: Option<decimal> }
-
-    type DIMTIMEReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.CALENDARQUARTER = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "CALENDARQUARTER")
-        member __.CALENDARSEMESTER = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "CALENDARSEMESTER")
-        member __.CALENDARYEAR = OptionalColumn(reader, getOrdinal, reader.GetString, "CALENDARYEAR")
-        member __.DAYNUMBEROFMONTH = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "DAYNUMBEROFMONTH")
-        member __.DAYNUMBEROFWEEK = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "DAYNUMBEROFWEEK")
-        member __.DAYNUMBEROFYEAR = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "DAYNUMBEROFYEAR")
-        member __.ENGLISHDAYNAMEOFWEEK = OptionalColumn(reader, getOrdinal, reader.GetString, "ENGLISHDAYNAMEOFWEEK")
-        member __.ENGLISHMONTHNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "ENGLISHMONTHNAME")
-        member __.FISCALQUARTER = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "FISCALQUARTER")
-        member __.FISCALSEMESTER = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "FISCALSEMESTER")
-        member __.FISCALYEAR = OptionalColumn(reader, getOrdinal, reader.GetString, "FISCALYEAR")
-        member __.FRENCHDAYNAMEOFWEEK = OptionalColumn(reader, getOrdinal, reader.GetString, "FRENCHDAYNAMEOFWEEK")
-        member __.FRENCHMONTHNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "FRENCHMONTHNAME")
-        member __.MONTHNUMBEROFYEAR = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "MONTHNUMBEROFYEAR")
-        member __.SPANISHDAYNAMEOFWEEK = OptionalColumn(reader, getOrdinal, reader.GetString, "SPANISHDAYNAMEOFWEEK")
-        member __.SPANISHMONTHNAME = OptionalColumn(reader, getOrdinal, reader.GetString, "SPANISHMONTHNAME")
-        member __.TIMEKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TIMEKEY")
-        member __.WEEKNUMBEROFYEAR = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "WEEKNUMBEROFYEAR")
-
-        member __.Read() =
-            { CALENDARQUARTER = __.CALENDARQUARTER.Read()
-              CALENDARSEMESTER = __.CALENDARSEMESTER.Read()
-              CALENDARYEAR = __.CALENDARYEAR.Read()
-              DAYNUMBEROFMONTH = __.DAYNUMBEROFMONTH.Read()
-              DAYNUMBEROFWEEK = __.DAYNUMBEROFWEEK.Read()
-              DAYNUMBEROFYEAR = __.DAYNUMBEROFYEAR.Read()
-              ENGLISHDAYNAMEOFWEEK = __.ENGLISHDAYNAMEOFWEEK.Read()
-              ENGLISHMONTHNAME = __.ENGLISHMONTHNAME.Read()
-              FISCALQUARTER = __.FISCALQUARTER.Read()
-              FISCALSEMESTER = __.FISCALSEMESTER.Read()
-              FISCALYEAR = __.FISCALYEAR.Read()
-              FRENCHDAYNAMEOFWEEK = __.FRENCHDAYNAMEOFWEEK.Read()
-              FRENCHMONTHNAME = __.FRENCHMONTHNAME.Read()
-              MONTHNUMBEROFYEAR = __.MONTHNUMBEROFYEAR.Read()
-              SPANISHDAYNAMEOFWEEK = __.SPANISHDAYNAMEOFWEEK.Read()
-              SPANISHMONTHNAME = __.SPANISHMONTHNAME.Read()
-              TIMEKEY = __.TIMEKEY.Read()
-              WEEKNUMBEROFYEAR = __.WEEKNUMBEROFYEAR.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.TIMEKEY.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type FACTCURRENCYRATE =
-        { AVERAGERATE: double
-          CURRENCYKEY: decimal
-          ENDOFDAYRATE: double
-          TIMEKEY: decimal }
-
-    type FACTCURRENCYRATEReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.AVERAGERATE = RequiredColumn(reader, getOrdinal, reader.GetDouble, "AVERAGERATE")
-        member __.CURRENCYKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "CURRENCYKEY")
-        member __.ENDOFDAYRATE = RequiredColumn(reader, getOrdinal, reader.GetDouble, "ENDOFDAYRATE")
-        member __.TIMEKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TIMEKEY")
-
-        member __.Read() =
-            { AVERAGERATE = __.AVERAGERATE.Read()
-              CURRENCYKEY = __.CURRENCYKEY.Read()
-              ENDOFDAYRATE = __.ENDOFDAYRATE.Read()
-              TIMEKEY = __.TIMEKEY.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.AVERAGERATE.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type FACTFINANCE =
-        { ACCOUNTKEY: Option<decimal>
-          AMOUNT: Option<double>
-          DEPARTMENTGROUPKEY: Option<decimal>
-          ORGANIZATIONKEY: Option<decimal>
-          SCENARIOKEY: Option<decimal>
-          TIMEKEY: Option<decimal> }
-
-    type FACTFINANCEReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.ACCOUNTKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "ACCOUNTKEY")
-        member __.AMOUNT = OptionalColumn(reader, getOrdinal, reader.GetDouble, "AMOUNT")
-        member __.DEPARTMENTGROUPKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "DEPARTMENTGROUPKEY")
-        member __.ORGANIZATIONKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "ORGANIZATIONKEY")
-        member __.SCENARIOKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SCENARIOKEY")
-        member __.TIMEKEY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "TIMEKEY")
-
-        member __.Read() =
-            { ACCOUNTKEY = __.ACCOUNTKEY.Read()
-              AMOUNT = __.AMOUNT.Read()
-              DEPARTMENTGROUPKEY = __.DEPARTMENTGROUPKEY.Read()
-              ORGANIZATIONKEY = __.ORGANIZATIONKEY.Read()
-              SCENARIOKEY = __.SCENARIOKEY.Read()
-              TIMEKEY = __.TIMEKEY.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.ACCOUNTKEY.IsNull() then None else Some(__.Read())
-
-    [<CLIMutable>]
-    type FACTINTERNETSALES =
-        { CARRIERTRACKINGNUMBER: Option<string>
-          CURRENCYKEY: decimal
-          CUSTOMERKEY: decimal
-          CUSTOMERPONUMBER: Option<string>
-          DISCOUNTAMOUNT: Option<double>
-          DUEDATEKEY: decimal
-          EXTENDEDAMOUNT: Option<decimal>
-          FREIGHT: Option<decimal>
-          ORDERDATEKEY: decimal
-          ORDERQUANTITY: Option<decimal>
-          PRODUCTKEY: decimal
-          PRODUCTSTANDARDCOST: Option<decimal>
-          PROMOTIONKEY: decimal
-          REVISIONNUMBER: Option<decimal>
-          SALESAMOUNT: Option<decimal>
-          SALESORDERLINENUMBER: decimal
-          SALESORDERNUMBER: string
-          SALESTERRITORYKEY: decimal
-          SHIPDATEKEY: decimal
-          TAXAMT: Option<decimal>
-          TOTALPRODUCTCOST: Option<decimal>
-          UNITPRICE: Option<decimal>
-          UNITPRICEDISCOUNTPCT: Option<double> }
-
-    type FACTINTERNETSALESReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.CARRIERTRACKINGNUMBER = OptionalColumn(reader, getOrdinal, reader.GetString, "CARRIERTRACKINGNUMBER")
-        member __.CURRENCYKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "CURRENCYKEY")
-        member __.CUSTOMERKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "CUSTOMERKEY")
-        member __.CUSTOMERPONUMBER = OptionalColumn(reader, getOrdinal, reader.GetString, "CUSTOMERPONUMBER")
-        member __.DISCOUNTAMOUNT = OptionalColumn(reader, getOrdinal, reader.GetDouble, "DISCOUNTAMOUNT")
-        member __.DUEDATEKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "DUEDATEKEY")
-        member __.EXTENDEDAMOUNT = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "EXTENDEDAMOUNT")
-        member __.FREIGHT = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "FREIGHT")
-        member __.ORDERDATEKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "ORDERDATEKEY")
-        member __.ORDERQUANTITY = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "ORDERQUANTITY")
-        member __.PRODUCTKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTKEY")
-        member __.PRODUCTSTANDARDCOST = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "PRODUCTSTANDARDCOST")
-        member __.PROMOTIONKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PROMOTIONKEY")
-        member __.REVISIONNUMBER = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "REVISIONNUMBER")
-        member __.SALESAMOUNT = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "SALESAMOUNT")
-        member __.SALESORDERLINENUMBER = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SALESORDERLINENUMBER")
-        member __.SALESORDERNUMBER = RequiredColumn(reader, getOrdinal, reader.GetString, "SALESORDERNUMBER")
-        member __.SALESTERRITORYKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SALESTERRITORYKEY")
-        member __.SHIPDATEKEY = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SHIPDATEKEY")
-        member __.TAXAMT = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "TAXAMT")
-        member __.TOTALPRODUCTCOST = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "TOTALPRODUCTCOST")
-        member __.UNITPRICE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "UNITPRICE")
-        member __.UNITPRICEDISCOUNTPCT = OptionalColumn(reader, getOrdinal, reader.GetDouble, "UNITPRICEDISCOUNTPCT")
-
-        member __.Read() =
-            { CARRIERTRACKINGNUMBER = __.CARRIERTRACKINGNUMBER.Read()
-              CURRENCYKEY = __.CURRENCYKEY.Read()
-              CUSTOMERKEY = __.CUSTOMERKEY.Read()
-              CUSTOMERPONUMBER = __.CUSTOMERPONUMBER.Read()
-              DISCOUNTAMOUNT = __.DISCOUNTAMOUNT.Read()
-              DUEDATEKEY = __.DUEDATEKEY.Read()
-              EXTENDEDAMOUNT = __.EXTENDEDAMOUNT.Read()
-              FREIGHT = __.FREIGHT.Read()
-              ORDERDATEKEY = __.ORDERDATEKEY.Read()
-              ORDERQUANTITY = __.ORDERQUANTITY.Read()
-              PRODUCTKEY = __.PRODUCTKEY.Read()
-              PRODUCTSTANDARDCOST = __.PRODUCTSTANDARDCOST.Read()
-              PROMOTIONKEY = __.PROMOTIONKEY.Read()
-              REVISIONNUMBER = __.REVISIONNUMBER.Read()
-              SALESAMOUNT = __.SALESAMOUNT.Read()
-              SALESORDERLINENUMBER = __.SALESORDERLINENUMBER.Read()
-              SALESORDERNUMBER = __.SALESORDERNUMBER.Read()
-              SALESTERRITORYKEY = __.SALESTERRITORYKEY.Read()
-              SHIPDATEKEY = __.SHIPDATEKEY.Read()
-              TAXAMT = __.TAXAMT.Read()
-              TOTALPRODUCTCOST = __.TOTALPRODUCTCOST.Read()
-              UNITPRICE = __.UNITPRICE.Read()
-              UNITPRICEDISCOUNTPCT = __.UNITPRICEDISCOUNTPCT.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.CURRENCYKEY.IsNull() then None else Some(__.Read())
-
-type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+type HydraReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader) =
     let mutable accFieldCount = 0
     let buildGetOrdinal fieldCount =
         let dictionary = 
@@ -880,89 +324,61 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         accFieldCount <- accFieldCount + fieldCount
         fun col -> dictionary.Item col
         
-    let ``lazyC##ADVWORKSDIMACCOUNT`` = lazy (``C##ADVWORKS``.DIMACCOUNTReader(reader, buildGetOrdinal 10))
-    let ``lazyC##ADVWORKSDIMCURRENCY`` = lazy (``C##ADVWORKS``.DIMCURRENCYReader(reader, buildGetOrdinal 3))
-    let ``lazyC##ADVWORKSDIMCUSTOMER`` = lazy (``C##ADVWORKS``.DIMCUSTOMERReader(reader, buildGetOrdinal 25))
-    let ``lazyC##ADVWORKSDIMDEPARTMENTGROUP`` = lazy (``C##ADVWORKS``.DIMDEPARTMENTGROUPReader(reader, buildGetOrdinal 3))
-    let ``lazyC##ADVWORKSDIMEMPLOYEE`` = lazy (``C##ADVWORKS``.DIMEMPLOYEEReader(reader, buildGetOrdinal 30))
-    let ``lazyC##ADVWORKSDIMGEOGRAPHY`` = lazy (``C##ADVWORKS``.DIMGEOGRAPHYReader(reader, buildGetOrdinal 10))
-    let ``lazyC##ADVWORKSDIMORGANIZATION`` = lazy (``C##ADVWORKS``.DIMORGANIZATIONReader(reader, buildGetOrdinal 5))
-    let ``lazyC##ADVWORKSDIMPRODUCT`` = lazy (``C##ADVWORKS``.DIMPRODUCTReader(reader, buildGetOrdinal 25))
-    let ``lazyC##ADVWORKSDIMPRODUCTCATEGORY`` = lazy (``C##ADVWORKS``.DIMPRODUCTCATEGORYReader(reader, buildGetOrdinal 5))
-    let ``lazyC##ADVWORKSDIMPRODUCTSUBCATEGORY`` = lazy (``C##ADVWORKS``.DIMPRODUCTSUBCATEGORYReader(reader, buildGetOrdinal 6))
-    let ``lazyC##ADVWORKSDIMPROMOTION`` = lazy (``C##ADVWORKS``.DIMPROMOTIONReader(reader, buildGetOrdinal 16))
-    let ``lazyC##ADVWORKSDIMRESELLER`` = lazy (``C##ADVWORKS``.DIMRESELLERReader(reader, buildGetOrdinal 20))
-    let ``lazyC##ADVWORKSDIMSALESREASON`` = lazy (``C##ADVWORKS``.DIMSALESREASONReader(reader, buildGetOrdinal 4))
-    let ``lazyC##ADVWORKSDIMSALESTERRITORY`` = lazy (``C##ADVWORKS``.DIMSALESTERRITORYReader(reader, buildGetOrdinal 5))
-    let ``lazyC##ADVWORKSDIMSCENARIO`` = lazy (``C##ADVWORKS``.DIMSCENARIOReader(reader, buildGetOrdinal 2))
-    let ``lazyC##ADVWORKSDIMTIME`` = lazy (``C##ADVWORKS``.DIMTIMEReader(reader, buildGetOrdinal 19))
-    let ``lazyC##ADVWORKSFACTCURRENCYRATE`` = lazy (``C##ADVWORKS``.FACTCURRENCYRATEReader(reader, buildGetOrdinal 4))
-    let ``lazyC##ADVWORKSFACTFINANCE`` = lazy (``C##ADVWORKS``.FACTFINANCEReader(reader, buildGetOrdinal 6))
-    let ``lazyC##ADVWORKSFACTINTERNETSALES`` = lazy (``C##ADVWORKS``.FACTINTERNETSALESReader(reader, buildGetOrdinal 23))
-    member __.``C##ADVWORKS.DIMACCOUNT`` = ``lazyC##ADVWORKSDIMACCOUNT``.Value
-    member __.``C##ADVWORKS.DIMCURRENCY`` = ``lazyC##ADVWORKSDIMCURRENCY``.Value
-    member __.``C##ADVWORKS.DIMCUSTOMER`` = ``lazyC##ADVWORKSDIMCUSTOMER``.Value
-    member __.``C##ADVWORKS.DIMDEPARTMENTGROUP`` = ``lazyC##ADVWORKSDIMDEPARTMENTGROUP``.Value
-    member __.``C##ADVWORKS.DIMEMPLOYEE`` = ``lazyC##ADVWORKSDIMEMPLOYEE``.Value
-    member __.``C##ADVWORKS.DIMGEOGRAPHY`` = ``lazyC##ADVWORKSDIMGEOGRAPHY``.Value
-    member __.``C##ADVWORKS.DIMORGANIZATION`` = ``lazyC##ADVWORKSDIMORGANIZATION``.Value
-    member __.``C##ADVWORKS.DIMPRODUCT`` = ``lazyC##ADVWORKSDIMPRODUCT``.Value
-    member __.``C##ADVWORKS.DIMPRODUCTCATEGORY`` = ``lazyC##ADVWORKSDIMPRODUCTCATEGORY``.Value
-    member __.``C##ADVWORKS.DIMPRODUCTSUBCATEGORY`` = ``lazyC##ADVWORKSDIMPRODUCTSUBCATEGORY``.Value
-    member __.``C##ADVWORKS.DIMPROMOTION`` = ``lazyC##ADVWORKSDIMPROMOTION``.Value
-    member __.``C##ADVWORKS.DIMRESELLER`` = ``lazyC##ADVWORKSDIMRESELLER``.Value
-    member __.``C##ADVWORKS.DIMSALESREASON`` = ``lazyC##ADVWORKSDIMSALESREASON``.Value
-    member __.``C##ADVWORKS.DIMSALESTERRITORY`` = ``lazyC##ADVWORKSDIMSALESTERRITORY``.Value
-    member __.``C##ADVWORKS.DIMSCENARIO`` = ``lazyC##ADVWORKSDIMSCENARIO``.Value
-    member __.``C##ADVWORKS.DIMTIME`` = ``lazyC##ADVWORKSDIMTIME``.Value
-    member __.``C##ADVWORKS.FACTCURRENCYRATE`` = ``lazyC##ADVWORKSFACTCURRENCYRATE``.Value
-    member __.``C##ADVWORKS.FACTFINANCE`` = ``lazyC##ADVWORKSFACTFINANCE``.Value
-    member __.``C##ADVWORKS.FACTINTERNETSALES`` = ``lazyC##ADVWORKSFACTINTERNETSALES``.Value
+    let lazyOTCONTACTS = lazy (OT.CONTACTSReader(reader, buildGetOrdinal 6))
+    let lazyOTCOUNTRIES = lazy (OT.COUNTRIESReader(reader, buildGetOrdinal 3))
+    let lazyOTCUSTOMERS = lazy (OT.CUSTOMERSReader(reader, buildGetOrdinal 5))
+    let lazyOTEMPLOYEES = lazy (OT.EMPLOYEESReader(reader, buildGetOrdinal 8))
+    let lazyOTINVENTORIES = lazy (OT.INVENTORIESReader(reader, buildGetOrdinal 3))
+    let lazyOTLOCATIONS = lazy (OT.LOCATIONSReader(reader, buildGetOrdinal 6))
+    let lazyOTORDERS = lazy (OT.ORDERSReader(reader, buildGetOrdinal 5))
+    let lazyOTORDER_ITEMS = lazy (OT.ORDER_ITEMSReader(reader, buildGetOrdinal 5))
+    let lazyOTPRODUCTS = lazy (OT.PRODUCTSReader(reader, buildGetOrdinal 6))
+    let lazyOTPRODUCT_CATEGORIES = lazy (OT.PRODUCT_CATEGORIESReader(reader, buildGetOrdinal 2))
+    let lazyOTREGIONS = lazy (OT.REGIONSReader(reader, buildGetOrdinal 2))
+    let lazyOTWAREHOUSES = lazy (OT.WAREHOUSESReader(reader, buildGetOrdinal 3))
+    member __.``OT.CONTACTS`` = lazyOTCONTACTS.Value
+    member __.``OT.COUNTRIES`` = lazyOTCOUNTRIES.Value
+    member __.``OT.CUSTOMERS`` = lazyOTCUSTOMERS.Value
+    member __.``OT.EMPLOYEES`` = lazyOTEMPLOYEES.Value
+    member __.``OT.INVENTORIES`` = lazyOTINVENTORIES.Value
+    member __.``OT.LOCATIONS`` = lazyOTLOCATIONS.Value
+    member __.``OT.ORDERS`` = lazyOTORDERS.Value
+    member __.``OT.ORDER_ITEMS`` = lazyOTORDER_ITEMS.Value
+    member __.``OT.PRODUCTS`` = lazyOTPRODUCTS.Value
+    member __.``OT.PRODUCT_CATEGORIES`` = lazyOTPRODUCT_CATEGORIES.Value
+    member __.``OT.REGIONS`` = lazyOTREGIONS.Value
+    member __.``OT.WAREHOUSES`` = lazyOTWAREHOUSES.Value
     member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value
 
     member private __.GetReaderByName(entity: string, isOption: bool) =
         match entity, isOption with
-        | "C##ADVWORKS.DIMACCOUNT", false -> __.``C##ADVWORKS.DIMACCOUNT``.Read >> box
-        | "C##ADVWORKS.DIMACCOUNT", true -> __.``C##ADVWORKS.DIMACCOUNT``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMCURRENCY", false -> __.``C##ADVWORKS.DIMCURRENCY``.Read >> box
-        | "C##ADVWORKS.DIMCURRENCY", true -> __.``C##ADVWORKS.DIMCURRENCY``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMCUSTOMER", false -> __.``C##ADVWORKS.DIMCUSTOMER``.Read >> box
-        | "C##ADVWORKS.DIMCUSTOMER", true -> __.``C##ADVWORKS.DIMCUSTOMER``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMDEPARTMENTGROUP", false -> __.``C##ADVWORKS.DIMDEPARTMENTGROUP``.Read >> box
-        | "C##ADVWORKS.DIMDEPARTMENTGROUP", true -> __.``C##ADVWORKS.DIMDEPARTMENTGROUP``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMEMPLOYEE", false -> __.``C##ADVWORKS.DIMEMPLOYEE``.Read >> box
-        | "C##ADVWORKS.DIMEMPLOYEE", true -> __.``C##ADVWORKS.DIMEMPLOYEE``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMGEOGRAPHY", false -> __.``C##ADVWORKS.DIMGEOGRAPHY``.Read >> box
-        | "C##ADVWORKS.DIMGEOGRAPHY", true -> __.``C##ADVWORKS.DIMGEOGRAPHY``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMORGANIZATION", false -> __.``C##ADVWORKS.DIMORGANIZATION``.Read >> box
-        | "C##ADVWORKS.DIMORGANIZATION", true -> __.``C##ADVWORKS.DIMORGANIZATION``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMPRODUCT", false -> __.``C##ADVWORKS.DIMPRODUCT``.Read >> box
-        | "C##ADVWORKS.DIMPRODUCT", true -> __.``C##ADVWORKS.DIMPRODUCT``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMPRODUCTCATEGORY", false -> __.``C##ADVWORKS.DIMPRODUCTCATEGORY``.Read >> box
-        | "C##ADVWORKS.DIMPRODUCTCATEGORY", true -> __.``C##ADVWORKS.DIMPRODUCTCATEGORY``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMPRODUCTSUBCATEGORY", false -> __.``C##ADVWORKS.DIMPRODUCTSUBCATEGORY``.Read >> box
-        | "C##ADVWORKS.DIMPRODUCTSUBCATEGORY", true -> __.``C##ADVWORKS.DIMPRODUCTSUBCATEGORY``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMPROMOTION", false -> __.``C##ADVWORKS.DIMPROMOTION``.Read >> box
-        | "C##ADVWORKS.DIMPROMOTION", true -> __.``C##ADVWORKS.DIMPROMOTION``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMRESELLER", false -> __.``C##ADVWORKS.DIMRESELLER``.Read >> box
-        | "C##ADVWORKS.DIMRESELLER", true -> __.``C##ADVWORKS.DIMRESELLER``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMSALESREASON", false -> __.``C##ADVWORKS.DIMSALESREASON``.Read >> box
-        | "C##ADVWORKS.DIMSALESREASON", true -> __.``C##ADVWORKS.DIMSALESREASON``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMSALESTERRITORY", false -> __.``C##ADVWORKS.DIMSALESTERRITORY``.Read >> box
-        | "C##ADVWORKS.DIMSALESTERRITORY", true -> __.``C##ADVWORKS.DIMSALESTERRITORY``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMSCENARIO", false -> __.``C##ADVWORKS.DIMSCENARIO``.Read >> box
-        | "C##ADVWORKS.DIMSCENARIO", true -> __.``C##ADVWORKS.DIMSCENARIO``.ReadIfNotNull >> box
-        | "C##ADVWORKS.DIMTIME", false -> __.``C##ADVWORKS.DIMTIME``.Read >> box
-        | "C##ADVWORKS.DIMTIME", true -> __.``C##ADVWORKS.DIMTIME``.ReadIfNotNull >> box
-        | "C##ADVWORKS.FACTCURRENCYRATE", false -> __.``C##ADVWORKS.FACTCURRENCYRATE``.Read >> box
-        | "C##ADVWORKS.FACTCURRENCYRATE", true -> __.``C##ADVWORKS.FACTCURRENCYRATE``.ReadIfNotNull >> box
-        | "C##ADVWORKS.FACTFINANCE", false -> __.``C##ADVWORKS.FACTFINANCE``.Read >> box
-        | "C##ADVWORKS.FACTFINANCE", true -> __.``C##ADVWORKS.FACTFINANCE``.ReadIfNotNull >> box
-        | "C##ADVWORKS.FACTINTERNETSALES", false -> __.``C##ADVWORKS.FACTINTERNETSALES``.Read >> box
-        | "C##ADVWORKS.FACTINTERNETSALES", true -> __.``C##ADVWORKS.FACTINTERNETSALES``.ReadIfNotNull >> box
+        | "OT.CONTACTS", false -> __.``OT.CONTACTS``.Read >> box
+        | "OT.CONTACTS", true -> __.``OT.CONTACTS``.ReadIfNotNull >> box
+        | "OT.COUNTRIES", false -> __.``OT.COUNTRIES``.Read >> box
+        | "OT.COUNTRIES", true -> __.``OT.COUNTRIES``.ReadIfNotNull >> box
+        | "OT.CUSTOMERS", false -> __.``OT.CUSTOMERS``.Read >> box
+        | "OT.CUSTOMERS", true -> __.``OT.CUSTOMERS``.ReadIfNotNull >> box
+        | "OT.EMPLOYEES", false -> __.``OT.EMPLOYEES``.Read >> box
+        | "OT.EMPLOYEES", true -> __.``OT.EMPLOYEES``.ReadIfNotNull >> box
+        | "OT.INVENTORIES", false -> __.``OT.INVENTORIES``.Read >> box
+        | "OT.INVENTORIES", true -> __.``OT.INVENTORIES``.ReadIfNotNull >> box
+        | "OT.LOCATIONS", false -> __.``OT.LOCATIONS``.Read >> box
+        | "OT.LOCATIONS", true -> __.``OT.LOCATIONS``.ReadIfNotNull >> box
+        | "OT.ORDERS", false -> __.``OT.ORDERS``.Read >> box
+        | "OT.ORDERS", true -> __.``OT.ORDERS``.ReadIfNotNull >> box
+        | "OT.ORDER_ITEMS", false -> __.``OT.ORDER_ITEMS``.Read >> box
+        | "OT.ORDER_ITEMS", true -> __.``OT.ORDER_ITEMS``.ReadIfNotNull >> box
+        | "OT.PRODUCTS", false -> __.``OT.PRODUCTS``.Read >> box
+        | "OT.PRODUCTS", true -> __.``OT.PRODUCTS``.ReadIfNotNull >> box
+        | "OT.PRODUCT_CATEGORIES", false -> __.``OT.PRODUCT_CATEGORIES``.Read >> box
+        | "OT.PRODUCT_CATEGORIES", true -> __.``OT.PRODUCT_CATEGORIES``.ReadIfNotNull >> box
+        | "OT.REGIONS", false -> __.``OT.REGIONS``.Read >> box
+        | "OT.REGIONS", true -> __.``OT.REGIONS``.ReadIfNotNull >> box
+        | "OT.WAREHOUSES", false -> __.``OT.WAREHOUSES``.Read >> box
+        | "OT.WAREHOUSES", true -> __.``OT.WAREHOUSES``.ReadIfNotNull >> box
         | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
-    static member private GetPrimitiveReader(t: System.Type, reader: Microsoft.Data.SqlClient.SqlDataReader, isOpt: bool) =
+    static member private GetPrimitiveReader(t: System.Type, reader: Oracle.ManagedDataAccess.Client.OracleDataReader, isOpt: bool) =
         let wrap get (ord: int) = 
             if isOpt 
             then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
@@ -980,7 +396,7 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         else if t = typedefof<byte []> then Some(wrap reader.GetValue)
         else None
 
-    static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
+    static member Read(reader: Oracle.ManagedDataAccess.Client.OracleDataReader) = 
             let hydra = HydraReader(reader)
             
             let getOrdinalAndIncrement() = 

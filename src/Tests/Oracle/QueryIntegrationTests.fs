@@ -18,41 +18,41 @@ let openContext() =
     new QueryContext(conn, compiler)
 
 // Tables
-let regionsTable =              table<``C##ADVWORKS``.REGIONS>              |> inSchema (nameof ``C##ADVWORKS``)
+let regionsTable =          table<OT.REGIONS>               |> inSchema (nameof OT)
 
 [<Tests>]
 let tests = 
     categoryList "Oracle" "Query Integration Tests" [
 
         
-        //testTask "Insert and Get Id" {
-        //    use ctx = openContext()
-        //    ctx.BeginTransaction()
+        testTask "Insert and Get Id" {
+            use ctx = openContext()
+            ctx.BeginTransaction()
 
-        //    let! regionId = 
-        //        insert {
-        //            for r in regionsTable do
-        //            entity 
-        //                {
-        //                    ``C##ADVWORKS``.REGIONS.REGION_ID = 0 // PK
-        //                    ``C##ADVWORKS``.REGIONS.REGION_NAME = "Test Region"
-        //                }
-        //            getId r.REGION_ID
-        //        }
-        //        |> ctx.InsertAsync
+            let! regionId = 
+                insert {
+                    for r in regionsTable do
+                    entity 
+                        {
+                            OT.REGIONS.REGION_ID = 0 // PK
+                            OT.REGIONS.REGION_NAME = "Test Region"
+                        }
+                    getId r.REGION_ID
+                }
+                |> ctx.InsertAsync
 
-        //    let! region = 
-        //        select {
-        //            for r in regionsTable do
-        //            where (r.REGION_ID = regionId)
-        //        }
-        //        |> ctx.ReadOneAsync HydraReader.Read
+            let! region = 
+                select {
+                    for r in regionsTable do
+                    where (r.REGION_ID = regionId)
+                }
+                |> ctx.ReadOneAsync HydraReader.Read
             
-        //    match region with
-        //    | Some (r: ``C##ADVWORKS``.REGIONS) -> 
-        //        Expect.isTrue (r.REGION_ID > 0) "Expected REGION_ID to be greater than 0"
-        //    | None -> 
-        //        failwith "Expected to query a region row."
-        //}
+            match region with
+            | Some (r: OT.REGIONS) -> 
+                Expect.isTrue (r.REGION_ID > 0) "Expected REGION_ID to be greater than 0"
+            | None -> 
+                failwith "Expected to query a region row."
+        }
 
     ]
