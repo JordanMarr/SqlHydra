@@ -146,10 +146,24 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             if compiler :? SqlKata.Compilers.PostgresCompiler then 
                 // Replace PostgreSQL identity query
                 cmd.CommandText <- cmd.CommandText.Replace(";SELECT lastval() AS id", $" RETURNING {identityField};")
+            elif compiler  :? SqlKata.Compilers.OracleCompiler then
+                // SqlKata does not currently implement an identity query for Oracle
+                cmd.CommandText <- cmd.CommandText + $" returning \"{identityField}\" into :outputParam"
 
-            let identity = cmd.ExecuteScalar()
-            // 'InsertReturn type set via `getId` in the builder
-            System.Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
+            // Execute insert and return identity
+            if compiler :? SqlKata.Compilers.OracleCompiler then
+                let outputParam = cmd.CreateParameter()
+                outputParam.ParameterName <- "outputParam"
+                outputParam.DbType <- System.Data.DbType.Decimal
+                outputParam.Direction <- System.Data.ParameterDirection.Output
+                cmd.Parameters.Add(outputParam) |> ignore
+                let _ = cmd.ExecuteNonQuery()
+                // 'InsertReturn type set via `getId` in the builder
+                System.Convert.ChangeType(outputParam.Value, typeof<'InsertReturn>) :?> 'InsertReturn
+            else
+                let identity = cmd.ExecuteScalar()
+                // 'InsertReturn type set via `getId` in the builder
+                System.Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
         | None ->
             let results = cmd.ExecuteNonQuery()
@@ -171,7 +185,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                     cmd.CommandText <- cmd.CommandText.Replace(";SELECT lastval() AS id", $" RETURNING {identityField};")
                 elif compiler  :? SqlKata.Compilers.OracleCompiler then
                     // SqlKata does not currently implement an identity query for Oracle
-                    cmd.CommandText <- cmd.CommandText + $" returning \"{identityField}\" into :outputParam"                    
+                    cmd.CommandText <- cmd.CommandText + $" returning \"{identityField}\" into :outputParam"
 
                 // Execute insert and return identity
                 if compiler :? SqlKata.Compilers.OracleCompiler then
