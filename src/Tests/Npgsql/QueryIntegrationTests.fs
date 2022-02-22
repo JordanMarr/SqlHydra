@@ -33,7 +33,7 @@ let providerDbTestTable = table<providerdbtypetest.test> |> inSchema (nameof pro
 let tests = 
     categoryList "Npgsql" "Query Integration Tests" [
 
-        testTask "Where city Starts With S" {
+        testTask "Where City Contains" {
             use ctx = openContext()
             
             let addresses =
