@@ -507,7 +507,9 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
             else
                 [ SelectedTable p.Type ]
         | Member m -> 
-            [ SelectedColumn m.Member ]
+            if m.Member.DeclaringType |> isOptionType 
+            then visit m.Expression
+            else [ SelectedColumn m.Member ]
         | _ -> 
             notImpl()
 
