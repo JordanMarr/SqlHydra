@@ -66,7 +66,7 @@ let tests =
                 select {
                     for o in orderHeaderTable do
                     join d in orderDetailTable on (o.ORDER_ID = d.ORDER_ID)
-                    where (o.STATUS = "PENDING")
+                    where (o.STATUS = "Pending")
                     select (o, d)
                 }
 
@@ -122,9 +122,9 @@ let tests =
                 let aMinPrice, aMaxPrice, aAvgPrice, aPriceCount, aSumPrice = aggByCatID.[catId]
                 dc aMinPrice xMinPrice; dc aMaxPrice xMaxPrice; dc aAvgPrice xAvgPrice; Expect.equal aPriceCount xPriceCount ""; dc aSumPrice xSumPrice
             
-            verifyAggregateValuesFor 1 (539.99M, 3399.99M, 1683.365M, 32, 53867.6800M)
-            verifyAggregateValuesFor 2 (539.99M, 3578.2700M, 1597.4500M, 43, 68690.3500M)
-            verifyAggregateValuesFor 3 (742.3500M, 2384.0700M, 1425.2481M, 22, 31355.4600M)
+            verifyAggregateValuesFor 1 (554.99M, 3410.46M, 1386.966M, 70, 97087.65M)
+            verifyAggregateValuesFor 2 (739.99M, 5499.99M, 1406.098M, 50, 70304.9M)
+            verifyAggregateValuesFor 5 (15.55M, 8867.99M, 635.216M, 108, 68603.38M)
         }
 
         testTask "Aggregate Subquery One" {
