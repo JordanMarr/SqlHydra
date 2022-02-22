@@ -3,6 +3,16 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
 	<TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+	<Version>0.640.0</Version>
+	<Authors>Jordan Marr</Authors>
+	<Description>SqlHydra.Oracle is a dotnet tool that generates F# records for a Oracle database.</Description>
+	<PackageTags>F# fsharp data database orm sql</PackageTags>
+	<PackAsTool>true</PackAsTool>
+	<ToolCommandName>sqlhydra-oracle</ToolCommandName>
+	<PackageOutputPath>./nupkg</PackageOutputPath>
+	<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+	<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	<PackageReleaseNotes></PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,4 +39,11 @@
 	  <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<None Include="..\..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
+	
 </Project>

@@ -667,7 +667,7 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
     parentNamespace
 
 /// A list of static code text substitutions to the generated file.
-let substitutions = 
+let substitutions (app: AppInfo) = 
     [
         /// Reader classes at top of namespace
         "open Substitute.Extensions",
@@ -724,41 +724,41 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
 
         // HydraReader Read Method Body
         "// ReadMethodBodyPlaceholder",
-        """
-            let hydra = HydraReader(reader)
+        $"""
+        let hydra = HydraReader(reader)
+        {if app.Name = "SqlHydra.Oracle" then "reader.SuppressGetDecimalInvalidCastException <- true" else ""}            
+        let getOrdinalAndIncrement() = 
+            let ordinal = hydra.AccFieldCount
+            hydra.AccFieldCount <- hydra.AccFieldCount + 1
+            ordinal
             
-            let getOrdinalAndIncrement() = 
-                let ordinal = hydra.AccFieldCount
-                hydra.AccFieldCount <- hydra.AccFieldCount + 1
-                ordinal
+        let buildEntityReadFn (t: System.Type) = 
+            let t, isOpt = 
+                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> 
+                then t.GenericTypeArguments.[0], true
+                else t, false
             
-            let buildEntityReadFn (t: System.Type) = 
-                let t, isOpt = 
-                    if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> 
-                    then t.GenericTypeArguments.[0], true
-                    else t, false
+            match HydraReader.GetPrimitiveReader(t, reader, isOpt) with
+            | Some primitiveReader -> 
+                let ord = getOrdinalAndIncrement()
+                fun () -> primitiveReader ord
+            | None ->
+                let nameParts = t.FullName.Split([| '.'; '+' |])
+                let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join(".", parts)
+                hydra.GetReaderByName(schemaAndType, isOpt)
             
-                match HydraReader.GetPrimitiveReader(t, reader, isOpt) with
-                | Some primitiveReader -> 
-                    let ord = getOrdinalAndIncrement()
-                    fun () -> primitiveReader ord
-                | None ->
-                    let nameParts = t.FullName.Split([| '.'; '+' |])
-                    let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join(".", parts)
-                    hydra.GetReaderByName(schemaAndType, isOpt)
-            
-            // Return a fn that will hydrate 'T (which may be a tuple)
-            // This fn will be called once per each record returned by the data reader.
-            let t = typeof<'T>
-            if FSharp.Reflection.FSharpType.IsTuple(t) then
-                let readEntityFns = FSharp.Reflection.FSharpType.GetTupleElements(t) |> Array.map buildEntityReadFn
-                fun () ->
-                    let entities = readEntityFns |> Array.map (fun read -> read())
-                    Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(entities, t) :?> 'T
-            else
-                let readEntityFn = t |> buildEntityReadFn
-                fun () -> 
-                    readEntityFn() :?> 'T
+        // Return a fn that will hydrate 'T (which may be a tuple)
+        // This fn will be called once per each record returned by the data reader.
+        let t = typeof<'T>
+        if FSharp.Reflection.FSharpType.IsTuple(t) then
+            let readEntityFns = FSharp.Reflection.FSharpType.GetTupleElements(t) |> Array.map buildEntityReadFn
+            fun () ->
+                let entities = readEntityFns |> Array.map (fun read -> read())
+                Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(entities, t) :?> 'T
+        else
+            let readEntityFn = t |> buildEntityReadFn
+            fun () -> 
+                readEntityFn() :?> 'T
         """
 
         /// AccFieldCount property
@@ -780,8 +780,8 @@ let toFormattedCode (cfg: Config) (app: AppInfo) (generatedModule: SynModuleOrNa
                 MaxValueBindingWidth = 400      // Ensure reader property/column bindings stay on one line
                 MaxLineLength = 400             // Ensure reader property/column bindings stay on one line
         }
-    let formattedCode = CodeFormatter.FormatASTAsync(parsedInput, "output.fs", [], None, cfg) |> Async.RunSynchronously
-    let finalCode = substitutions |> List.fold (fun (code: string) (placeholder, sub) -> code.Replace(placeholder, sub)) formattedCode
+    let formattedCode = CodeFormatter.FormatASTAsync(parsedInput, "output.fs", [], None, cfg) |> Async.RunSynchronously    
+    let finalCode = substitutions app |> List.fold (fun (code: string) (placeholder, sub) -> code.Replace(placeholder, sub)) formattedCode
 
     let formattedCodeWithComment =
         [   

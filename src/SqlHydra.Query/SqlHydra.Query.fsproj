@@ -4,7 +4,7 @@
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<WarnOn>3390;$(WarnOn)</WarnOn>
-		<Version>0.630.0</Version>
+		<Version>0.640.0</Version>
 		<Description>SqlHydra.Query is an F# query builder powered by SqlKata.Query that supports SQL Server, PostgreSQL and Sqlite.</Description>
 		<Authors>Jordan Marr</Authors>
 		<PackageTags>F# fsharp data database orm sql</PackageTags>

@@ -171,8 +171,7 @@ let tests =
         testTask "Sorted Aggregates - Top 5 categories with highest avg price products" {
             use ctx = openContext()
 
-            //let! aggregates = 
-            let reader : OracleDataReader = 
+            let! aggregates = 
                 select {
                     for p in productTable do
                     where (p.LIST_PRICE <> None)
@@ -181,14 +180,7 @@ let tests =
                     select (p.CATEGORY_ID, avgBy p.LIST_PRICE.Value)
                     take 5
                 }
-                |> ctx.GetReader
-                //|> ctx.ReadAsync HydraReader.Read
-
-            let aggregates = 
-                reader.SuppressGetDecimalInvalidCastException <- true
-                [ while reader.Read() do
-                    reader.GetInt64(0), reader.GetDecimal(1)
-                ]
+                |> ctx.ReadAsync HydraReader.Read
 
             gt0 aggregates
         }

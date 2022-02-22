@@ -5132,7 +5132,7 @@ module sales =
           jobtitle: Option<string>
           salesterritory: Option<string>
           salestotal: Option<decimal>
-          fiscalyear: Option<double> }
+          fiscalyear: Option<decimal> }
 
     type vsalespersonsalesbyfiscalyearsdataReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
         member __.salespersonid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "salespersonid")
@@ -5140,7 +5140,7 @@ module sales =
         member __.jobtitle = OptionalColumn(reader, getOrdinal, reader.GetString, "jobtitle")
         member __.salesterritory = OptionalColumn(reader, getOrdinal, reader.GetString, "salesterritory")
         member __.salestotal = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "salestotal")
-        member __.fiscalyear = OptionalColumn(reader, getOrdinal, reader.GetDouble, "fiscalyear")
+        member __.fiscalyear = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "fiscalyear")
 
         member __.Read() =
             { salespersonid = __.salespersonid.Read()
@@ -5948,38 +5948,38 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         else None
 
     static member Read(reader: Npgsql.NpgsqlDataReader) = 
-            let hydra = HydraReader(reader)
+        let hydra = HydraReader(reader)
+                    
+        let getOrdinalAndIncrement() = 
+            let ordinal = hydra.AccFieldCount
+            hydra.AccFieldCount <- hydra.AccFieldCount + 1
+            ordinal
             
-            let getOrdinalAndIncrement() = 
-                let ordinal = hydra.AccFieldCount
-                hydra.AccFieldCount <- hydra.AccFieldCount + 1
-                ordinal
+        let buildEntityReadFn (t: System.Type) = 
+            let t, isOpt = 
+                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> 
+                then t.GenericTypeArguments.[0], true
+                else t, false
             
-            let buildEntityReadFn (t: System.Type) = 
-                let t, isOpt = 
-                    if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> 
-                    then t.GenericTypeArguments.[0], true
-                    else t, false
+            match HydraReader.GetPrimitiveReader(t, reader, isOpt) with
+            | Some primitiveReader -> 
+                let ord = getOrdinalAndIncrement()
+                fun () -> primitiveReader ord
+            | None ->
+                let nameParts = t.FullName.Split([| '.'; '+' |])
+                let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join(".", parts)
+                hydra.GetReaderByName(schemaAndType, isOpt)
             
-                match HydraReader.GetPrimitiveReader(t, reader, isOpt) with
-                | Some primitiveReader -> 
-                    let ord = getOrdinalAndIncrement()
-                    fun () -> primitiveReader ord
-                | None ->
-                    let nameParts = t.FullName.Split([| '.'; '+' |])
-                    let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join(".", parts)
-                    hydra.GetReaderByName(schemaAndType, isOpt)
-            
-            // Return a fn that will hydrate 'T (which may be a tuple)
-            // This fn will be called once per each record returned by the data reader.
-            let t = typeof<'T>
-            if FSharp.Reflection.FSharpType.IsTuple(t) then
-                let readEntityFns = FSharp.Reflection.FSharpType.GetTupleElements(t) |> Array.map buildEntityReadFn
-                fun () ->
-                    let entities = readEntityFns |> Array.map (fun read -> read())
-                    Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(entities, t) :?> 'T
-            else
-                let readEntityFn = t |> buildEntityReadFn
-                fun () -> 
-                    readEntityFn() :?> 'T
+        // Return a fn that will hydrate 'T (which may be a tuple)
+        // This fn will be called once per each record returned by the data reader.
+        let t = typeof<'T>
+        if FSharp.Reflection.FSharpType.IsTuple(t) then
+            let readEntityFns = FSharp.Reflection.FSharpType.GetTupleElements(t) |> Array.map buildEntityReadFn
+            fun () ->
+                let entities = readEntityFns |> Array.map (fun read -> read())
+                Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(entities, t) :?> 'T
+        else
+            let readEntityFn = t |> buildEntityReadFn
+            fun () -> 
+                readEntityFn() :?> 'T
         

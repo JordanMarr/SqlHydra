@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
-        <Version>0.630.0</Version>
+        <Version>0.640.0</Version>
         <Authors>Jordan Marr</Authors>
         <Description>SqlHydra.Sqlite is a dotnet tool that generates F# records for a SQLite database.</Description>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
