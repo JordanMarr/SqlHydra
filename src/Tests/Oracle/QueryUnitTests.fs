@@ -212,24 +212,24 @@ let tests =
             Expect.isTrue (sql.Contains("INNER JOIN \"OT\".\"ORDER_ITEMS\" ON (\"OT\".\"ORDERS\".\"ORDER_ID\" = \"OT\".\"ORDER_ITEMS\".\"ORDER_ID\")")) ""
         }
 
-        //test "Left Join" {
-        //    let query =
-        //        select {
-        //            for o in orderHeaderTable do
-        //            leftJoin d in orderDetailTable on (o.SalesOrderID = d.Value.SalesOrderID)
-        //            select o
-        //        }
+        test "Left Join" {
+            let query =
+                select {
+                    for o in orderHeaderTable do
+                    leftJoin d in orderDetailTable on (o.ORDER_ID = d.Value.ORDER_ID)
+                    select o
+                }
 
-        //    let sql = query.ToKataQuery() |> toSql
-        //    //printfn "%s" sql
-        //    Expect.isTrue (sql.Contains("LEFT JOIN \"Sales\".\"SalesOrderDetail\" ON (\"Sales\".\"SalesOrderHeader\".\"SalesOrderID\" = \"Sales\".\"SalesOrderDetail\".\"SalesOrderID\")")) ""
-        //}
+            let sql = query.ToKataQuery() |> toSql
+            //printfn "%s" sql
+            Expect.isTrue (sql.Contains("LEFT JOIN \"OT\".\"ORDER_ITEMS\" ON (\"OT\".\"ORDERS\".\"ORDER_ID\" = \"OT\".\"ORDER_ITEMS\".\"ORDER_ID\")")) ""
+        }
         
         //test "Inner Join - Multi Column" {
         //    let query =
         //        select {
         //            for o in orderHeaderTable do
-        //            join d in orderDetailTable on ((o.SalesOrderID, o.ModifiedDate) = (d.SalesOrderID, d.ModifiedDate))
+        //            join d in orderDetailTable on ((o.ORDER_ID, o.) = (d.ORDER_ID, d.))
         //            select o
         //        }
         
@@ -251,17 +251,17 @@ let tests =
         //    Expect.isTrue (sql.Contains("LEFT JOIN \"Sales\".\"SalesOrderDetail\" ON (\"Sales\".\"SalesOrderHeader\".\"SalesOrderID\" = \"Sales\".\"SalesOrderDetail\".\"SalesOrderID\" AND \"Sales\".\"SalesOrderHeader\".\"ModifiedDate\" = \"Sales\".\"SalesOrderDetail\".\"ModifiedDate\")")) ""
         //}
 
-        //test "Join On Value Bug Fix Test" {
-        //    let query = 
-        //        select {
-        //            for o in orderHeaderTable do
-        //            leftJoin d in orderHeaderTable on (o.AccountNumber.Value = d.Value.AccountNumber.Value)
-        //            select o
-        //        }
+        test "Join On Value Bug Fix Test" {
+            let query = 
+                select {
+                    for o in orderHeaderTable do
+                    leftJoin d in orderHeaderTable on (o.SALESMAN_ID.Value = d.Value.SALESMAN_ID.Value)
+                    select o
+                }
 
-        //    let sql = query.ToKataQuery() |> toSql
-        //    Expect.isNotNull sql "Shouldn't fail with exception"
-        //}
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isNotNull sql "Shouldn't fail with exception"
+        }
 
         test "Delete Query with Where" {
             let query = 
