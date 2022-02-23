@@ -386,18 +386,55 @@ let tests =
                 ""
         }
 
-        //test "Inline Aggregates" {
-        //    let query =
-        //        select {
-        //            for o in orderHeaderTable do
-        //            select (countBy o.SalesOrderID)
-        //        }
+        test "Multiple Inserts Fix" {
+            let countriesAL1 = 
+                [ 0 .. 2 ] 
+                |> List.map (fun i -> 
+                    {
+                        OT.COUNTRIES.COUNTRY_ID = $"X{i}"
+                        OT.COUNTRIES.COUNTRY_NAME = $"Country-{i}"
+                        OT.COUNTRIES.REGION_ID = Some 2
+                    }
+                )
+                |> AtLeastOne.tryCreate
 
-        //    let sql = query.ToKataQuery() |> toSql
-        //    //printfn "%s" sql
-        //    Expect.equal
-        //        sql
-        //        "SELECT COUNT([Sales].[SalesOrderHeader].[SalesOrderID]) FROM [Sales].[SalesOrderHeader]"
-        //        ""
-        //}
+            match countriesAL1 with
+            | Some countries ->
+                let query = 
+                    insert {
+                        into countriesTable
+                        entities countries
+                    }
+
+                let sql = query.ToKataQuery() |> toSql
+                let expected = 
+                    let sb = new System.Text.StringBuilder()
+                    sb.AppendLine("INSERT ALL") |> ignore
+                    sb.AppendLine("INTO \"OT\".\"COUNTRIES\" (\"COUNTRY_ID\", \"COUNTRY_NAME\", \"REGION_ID\") VALUES (:p0, :p1, :p2)") |> ignore
+                    sb.AppendLine("INTO \"OT\".\"COUNTRIES\" (\"COUNTRY_ID\", \"COUNTRY_NAME\", \"REGION_ID\") VALUES (:p3, :p4, :p5)") |> ignore
+                    sb.AppendLine("INTO \"OT\".\"COUNTRIES\" (\"COUNTRY_ID\", \"COUNTRY_NAME\", \"REGION_ID\") VALUES (:p6, :p7, :p8)") |> ignore
+                    sb.AppendLine("SELECT * FROM DUAL") |> ignore
+                    sb.ToString()
+
+                let fixedQuery = Fixes.Oracle.fixMultiInsertQuery sql
+
+                Expect.equal fixedQuery expected "SqlKata multiple insert query should be overriden to match."
+                
+            | None -> ()
+        }
+
+        test "Inline Aggregates" {
+            let query =
+                select {
+                    for o in orderHeaderTable do
+                    select (countBy o.ORDER_ID)
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            //printfn "%s" sql
+            Expect.equal
+                sql
+                "SELECT COUNT(\"OT\".\"ORDERS\".\"ORDER_ID\") FROM \"OT\".\"ORDERS\""
+                ""
+        }
     ]

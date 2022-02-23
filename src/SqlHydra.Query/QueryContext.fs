@@ -143,12 +143,11 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         // Did the user select an identity field?
         match query.Spec.IdentityField with
         | Some identityField -> 
-            if compiler :? SqlKata.Compilers.PostgresCompiler then 
-                // Replace PostgreSQL identity query
-                cmd.CommandText <- cmd.CommandText.Replace(";SELECT lastval() AS id", $" RETURNING {identityField};")
-            elif compiler  :? SqlKata.Compilers.OracleCompiler then
-                // SqlKata does not currently implement an identity query for Oracle
-                cmd.CommandText <- cmd.CommandText + $" returning \"{identityField}\" into :outputParam"
+            // Fix identity query
+            if compiler :? SqlKata.Compilers.PostgresCompiler 
+            then cmd.CommandText <- Fixes.Postgres.fixIdentityQuery (cmd.CommandText, identityField)
+            elif compiler  :? SqlKata.Compilers.OracleCompiler 
+            then cmd.CommandText <- Fixes.Oracle.fixIdentityQuery (cmd.CommandText, identityField)
 
             // Execute insert and return identity
             if compiler :? SqlKata.Compilers.OracleCompiler then
@@ -166,6 +165,10 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 System.Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
         | None ->
+            // Fix Oracle multi-insert query
+            if compiler :? SqlKata.Compilers.OracleCompiler && query.Spec.Entities.Length > 1
+            then cmd.CommandText <- Fixes.Oracle.fixMultiInsertQuery cmd.CommandText
+
             let results = cmd.ExecuteNonQuery()
             // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
             System.Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
@@ -179,13 +182,11 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             // Did the user select an identity field?
             match query.Spec.IdentityField with
             | Some identityField -> 
-                // Add/fix identity query
-                if compiler :? SqlKata.Compilers.PostgresCompiler then 
-                    // Replace SqlKata generated PostgreSQL identity query
-                    cmd.CommandText <- cmd.CommandText.Replace(";SELECT lastval() AS id", $" RETURNING {identityField};")
-                elif compiler  :? SqlKata.Compilers.OracleCompiler then
-                    // SqlKata does not currently implement an identity query for Oracle
-                    cmd.CommandText <- cmd.CommandText + $" returning \"{identityField}\" into :outputParam"
+                // Fix identity query
+                if compiler :? SqlKata.Compilers.PostgresCompiler 
+                then cmd.CommandText <- Fixes.Postgres.fixIdentityQuery (cmd.CommandText, identityField)
+                elif compiler  :? SqlKata.Compilers.OracleCompiler 
+                then cmd.CommandText <- Fixes.Oracle.fixIdentityQuery (cmd.CommandText, identityField)
 
                 // Execute insert and return identity
                 if compiler :? SqlKata.Compilers.OracleCompiler then
@@ -203,6 +204,10 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                     return System.Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
             | None ->
+                // Fix Oracle multi-insert query
+                if compiler :? SqlKata.Compilers.OracleCompiler && query.Spec.Entities.Length > 1
+                then cmd.CommandText <- Fixes.Oracle.fixMultiInsertQuery cmd.CommandText
+
                 let! results = cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
                 // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
                 return System.Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
