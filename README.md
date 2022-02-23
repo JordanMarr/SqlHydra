@@ -39,6 +39,7 @@ dotnet sqlhydra-mssql
 * The configuration wizard will ask you some questions, create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and then run your new config.
 * If a .toml configuration file already exists, it will run.
 * The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
+* You can filter the generated schemas by manually editing the generated [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file.
 
 ![hydra-console](https://user-images.githubusercontent.com/1030435/127790303-a69ca6ea-f0a7-4216-aa5d-c292b0dc3229.gif)
 
@@ -70,6 +71,7 @@ dotnet sqlhydra-npgsql
 * The configuration wizard will ask you some questions, create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and then run your new config.
 * If a .toml configuration file already exists, it will run.
 * The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
+* You can filter the generated schemas by manually editing the generated [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file.
 
 ### Build Event (optional)
 To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
@@ -98,6 +100,7 @@ dotnet sqlhydra-oracle
 * The configuration wizard will ask you some questions, create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and then run your new config.
 * If a .toml configuration file already exists, it will run.
 * The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
+* You can filter the generated schemas by manually editing the generated [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file.
 
 ### Build Event (optional)
 To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
@@ -126,6 +129,7 @@ dotnet sqlhydra-sqlite
 * The configuration wizard will ask you some questions, create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and then run your new config.
 * If a .toml configuration file already exists, it will run.
 * The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
+* You can filter the generated schemas by manually editing the generated [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file.
 
 ### Build Event (optional)
 To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
