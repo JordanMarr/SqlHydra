@@ -3,20 +3,22 @@ SqlHydra is a suite of NuGet packages for working with databases in F# with an e
 
 ### Generation Tools
 - [SqlHydra.SqlServer](#sqlhydrasqlserver-) is a dotnet tool that generates F# records for a SQL Server database.
-- [SqlHydra.Npgsql](#sqlhydranpgsql-) is a dotnet tool that generates F# records for a PostgreSQL database
+- [SqlHydra.Npgsql](#sqlhydranpgsql-) is a dotnet tool that generates F# records for a PostgreSQL database.
+- [SqlHydra.Oracle](#sqlhydraoracle-) is a dotnet tool that generates F# records for an Oracle database.
 - [SqlHydra.Sqlite](#sqlhydrasqlite-) is a dotnet tool that generates F# records for a SQLite database.
 
 ### Query Library
 - [SqlHydra.Query](#sqlhydraquery-) provides strongly typed Linq queries against generated types. 
         
 #### Notes
-- The generation tools can be used with any query library for creating strongly typed table records and data readers.
-- SqlHydra.Query is designed to be used with SqlHydra generated types. (If you would prefer to create your own types over using generated types, then I would recommend checking out [Dapper.FSharp](https://github.com/Dzoukr/Dapper.FSharp) instead.)
-- SqlHydra.Query uses [SqlKata](https://sqlkata.com/) to generate provider-specific SQL queries. SqlKata officially supports SQL Server, SQLite, PostgreSql, MySql, Oracle and Firebird; however, SqlHydra.Query does not yet have generators for MySql, Oracle and Firebird. Please submit an issue if you are interested in contributing a generator for one of these!
+- The generation tools can be used alone or with any query library for creating strongly typed table records and data readers.
+- SqlHydra.Query is designed to be used with SqlHydra generated types. (If you would prefer to create your own types over using generated types, then I would recommend checking out [Dapper.FSharp](https://github.com/Dzoukr/Dapper.FSharp).)
+- SqlHydra.Query uses [SqlKata](https://sqlkata.com/) internally to generate provider-specific SQL queries.
 - _All SqlHydra NuGet packages will be released with matching major and minor version numbers._
 
 ## Contributing
 * This project uses the vs-code Remote-Containers extension to spin up a dev environment that includes databases for running the Tests project.
+* Alternatively, you can manually run the docker-compose file to load the development databases along with your IDE of choice.
 * [Contributing Wiki](https://github.com/JordanMarr/SqlHydra/wiki/Contributing)
 
 ## SqlHydra.SqlServer [![NuGet version (SqlHydra.SqlServer)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.SqlServer/)
@@ -63,6 +65,34 @@ Run the tool from the command line (or add to a .bat|.cmd|.sh file):
 
 ```bat
 dotnet sqlhydra-npgsql
+```
+
+* The configuration wizard will ask you some questions, create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and then run your new config.
+* If a .toml configuration file already exists, it will run.
+* The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
+
+### Build Event (optional)
+To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
+
+```bat
+  <Target Name="SqlHydra" BeforeTargets="Clean">
+    <Exec Command="dotnet sqlhydra-npgsql" />
+  </Target>
+```
+
+## SqlHydra.Oracle [![NuGet version (SqlHydra.Oracle)](https://img.shields.io/nuget/v/SqlHydra.Oracle.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Oracle/)
+
+### Local Install (recommended)
+Run the following commands from your project directory:
+1) `dotnet new tool-manifest`
+2) `dotnet tool install SqlHydra.Oracle`
+
+### Configure / Run
+
+Run the tool from the command line (or add to a .bat|.cmd|.sh file):
+
+```bat
+dotnet sqlhydra-oracle
 ```
 
 * The configuration wizard will ask you some questions, create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and then run your new config.
