@@ -53,6 +53,16 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
   </Target>
 ```
 
+### Troubleshooting
+
+The following exception may occur with the latest version of `Microsoft.Data.SqlClient`:
+```
+Microsoft.Data.SqlClient.SqlException (0x80131904): 
+A connection was successfully established with the server, but then an error occurred during the login process. (provider: SSL Provider, error: 0 - The certificate chain was issued by an authority that is not trusted.)
+```
+
+The most simple way to resolve this is to append `;TrustServerCertificate=True` to the connection string in your .toml configuration file.
+
 ## SqlHydra.Npgsql [![NuGet version (SqlHydra.Npgsql)](https://img.shields.io/nuget/v/SqlHydra.Npgsql.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Npgsql/)
 
 ### Local Install (recommended)
