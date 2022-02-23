@@ -107,9 +107,9 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
 ```
 
 ### Upgrading to .NET 6
-If you are upgrading a previous version to a version that supports .NET 6 (SqlHydra.Sqlite v0.630.0 or above), you will need to manually update your `sqlhydra-sqlite.toml` configuration file. 
+If you are upgrading SqlHydra.Sqlite to a version that supports .NET 6 (SqlHydra.Sqlite v0.630.0 or above), you will need to manually update your `sqlhydra-sqlite.toml` configuration file. 
 
-Change your `reader_type` from:
+Change `reader_type` from:
 ```
 reader_type = "System.Data.IDataReader"
 ```
@@ -185,6 +185,26 @@ The generated `HydraReader` class works in tandem with SqlHydra.Query for readin
 
 ## TOML Configuration Reference
 * [View TOML Configuration Reference](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration)
+
+## Supported Frameworks
+Both .NET 5 and .NET 6 are now supported.
+(.NET 5 will be supported until Microsoft ends official support.)
+
+### .NET 6
+The new .NET 6 `System.DateOnly` and `System.TimeOnly` types are now supported by all generators.
+(Note that if you are upgrading SqlHydra.Sqlite from .NET 5 to .NET 6, please refer to the [SqlHydra.Sqlite](#sqlhydrasqlite-) section for special instructions.)
+
+### .NET 5
+If you have .NET 5 and .NET 6 installed side-by-side but you want to continue generating types using .NET 5 (meaning you do not want your generated types to utilize the new `System.DateOnly` and `System.TimeOnly` types), you can add a `global.json` file to your project folder with the following:
+
+```json
+{
+  "sdk": {
+    "version": "5.0.0",
+    "rollForward": "latestFeature"
+  }
+}
+```
 
 ## SqlHydra.Query [![NuGet version (SqlHydra.Query)](https://img.shields.io/nuget/v/SqlHydra.Query.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Query/)
 SqlHydra.Query wraps the powerful [SqlKata](https://sqlkata.com/) query generator with F# computation expression builders for strongly typed query generation.
@@ -573,26 +593,3 @@ delete {
     deleteAll
 }
 ```
-
-## .NET 5 and .NET 6
-Both .NET 5 and .NET 6 are now supported!
-(.NET 5 will be supported until Microsoft ends official support.)
-
-### .NET 6
-All generators now support the new .NET 6 `System.DateOnly` and `System.TimeOnly` fields.
-(Note that if you are upgrading SqlHydra.Sqlite from .NET 5 to .NET 6, please refer to the [SqlHydra.Sqlite](#sqlhydrasqlite-) section for special instructions.)
-
-### .NET 5
-If you have .NET 5 and .NET 6 installed side-by-side but you want to continue generating using .NET 5 (meaning you do not want your generated code to utilize the new `System.DateOnly` and `System.TimeOnly` types, you can add a `global.json` file to your project folder with the following:
-
-```json
-{
-  "sdk": {
-    "version": "5.0.0",
-    "rollForward": "latestFeature"
-  }
-}
-```
-
-
-
