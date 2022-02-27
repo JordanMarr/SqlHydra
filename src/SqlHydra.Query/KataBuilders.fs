@@ -6,11 +6,11 @@ open System
 open System.Linq.Expressions
 open SqlKata
 
-type SelectExpressionBuilder<'Output>() =
+type SelectExpressionBuilder<'Selected>() =
 
-    let getQueryOrDefault (state: QuerySource<'Result>) = // 'Result allows 'T to vary as the result of joins
+    let getQueryOrDefault (state: QuerySource<'T>) =
         match state with
-        | :? QuerySource<'Result, Query> as qs -> qs.Query
+        | :? QuerySource<'T, Query> as qs -> qs.Query
         | _ -> Query()            
 
     let mergeTableMappings (a: Map<FQ.FQName, TableMapping>, b: Map<FQ.FQName, TableMapping>) =
@@ -39,10 +39,10 @@ type SelectExpressionBuilder<'Output>() =
 
     /// Sets the SELECT statement and filters the query to include only the selected tables
     [<CustomOperation("select", MaintainsVariableSpace = true)>]
-    member this.Select (state: QuerySource<'T>, [<ProjectionParameter>] selectExpression: Expression<Func<'T, 'Transform>>) =
+    member this.Select (state: QuerySource<'T>, [<ProjectionParameter>] selectExpression: Expression<Func<'T, 'Selected>>) =
         let query = state |> getQueryOrDefault
 
-        let selections = LinqExpressionVisitors.visitSelect<'T,'Transform> selectExpression
+        let selections = LinqExpressionVisitors.visitSelect<'T,'Selected> selectExpression
 
         let queryWithSelectedColumns =
             selections
@@ -68,7 +68,7 @@ type SelectExpressionBuilder<'Output>() =
                     q.SelectRaw($"{aggFn}({fqColWithCurlyBraces})")
             ) query
                   
-        QuerySource<'Transform, Query>(queryWithSelectedColumns, state.TableMappings)
+        QuerySource<'Selected, Query>(queryWithSelectedColumns, state.TableMappings)
 
     /// Sets the ORDER BY for single column
     [<CustomOperation("orderBy", MaintainsVariableSpace = true)>]
@@ -136,15 +136,15 @@ type SelectExpressionBuilder<'Output>() =
 
     /// INNER JOIN table on one or more columns
     [<CustomOperation("join", MaintainsVariableSpace = true, IsLikeJoin = true, JoinConditionWord = "on")>]
-    member this.Join (outerSource: QuerySource<'TOuter>, 
-                      innerSource: QuerySource<'TInner>, 
-                      outerKeySelector: Expression<Func<'TOuter,'Key>>, 
-                      innerKeySelector: Expression<Func<'TInner,'Key>>, 
-                      resultSelector: Expression<Func<'TOuter,'TInner,'Result>> ) = 
+    member this.Join (outerSource: QuerySource<'Outer>, 
+                      innerSource: QuerySource<'Inner>, 
+                      outerKeySelector: Expression<Func<'Outer,'Key>>, 
+                      innerKeySelector: Expression<Func<'Inner,'Key>>, 
+                      resultSelector: Expression<Func<'Outer,'Inner,'JoinResult>> ) = 
 
         let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
-        let outerProperties = LinqExpressionVisitors.visitJoin<'TOuter, 'Key> outerKeySelector
-        let innerProperties = LinqExpressionVisitors.visitJoin<'TInner, 'Key> innerKeySelector
+        let outerProperties = LinqExpressionVisitors.visitJoin<'Outer, 'Key> outerKeySelector
+        let innerProperties = LinqExpressionVisitors.visitJoin<'Inner, 'Key> innerKeySelector
 
         let outerQuery = outerSource |> getQueryOrDefault
         let innerTableName = 
@@ -162,19 +162,19 @@ type SelectExpressionBuilder<'Output>() =
             List.zip outerProperties innerProperties
             |> List.fold (fun (j: Join) (outerProp, innerProp) -> j.On(fq outerProp, fq innerProp)) (Join())
             
-        QuerySource<'Result, Query>(outerQuery.Join(innerTableName, fun j -> joinOn), mergedTables)
+        QuerySource<'JoinResult, Query>(outerQuery.Join(innerTableName, fun j -> joinOn), mergedTables)
 
     /// LEFT JOIN table on one or more columns
     [<CustomOperation("leftJoin", MaintainsVariableSpace = true, IsLikeJoin = true, JoinConditionWord = "on")>]
-    member this.LeftJoin (outerSource: QuerySource<'TOuter>, 
-                          innerSource: QuerySource<'TInner>, 
-                          outerKeySelector: Expression<Func<'TOuter,'Key>>, 
-                          innerKeySelector: Expression<Func<'TInner option,'Key>>, 
-                          resultSelector: Expression<Func<'TOuter,'TInner option,'Result>> ) = 
+    member this.LeftJoin (outerSource: QuerySource<'Outer>, 
+                          innerSource: QuerySource<'Inner>, 
+                          outerKeySelector: Expression<Func<'Outer,'Key>>, 
+                          innerKeySelector: Expression<Func<'Inner option,'Key>>, 
+                          resultSelector: Expression<Func<'Outer,'Inner option,'JoinResult>> ) = 
 
         let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
-        let outerProperties = LinqExpressionVisitors.visitJoin<'TOuter, 'Key> outerKeySelector
-        let innerProperties = LinqExpressionVisitors.visitJoin<'TInner option, 'Key> innerKeySelector
+        let outerProperties = LinqExpressionVisitors.visitJoin<'Outer, 'Key> outerKeySelector
+        let innerProperties = LinqExpressionVisitors.visitJoin<'Inner option, 'Key> innerKeySelector
 
         let outerQuery = outerSource |> getQueryOrDefault
         let innerTableName = 
@@ -192,7 +192,7 @@ type SelectExpressionBuilder<'Output>() =
             List.zip outerProperties innerProperties
             |> List.fold (fun (j: Join) (outerProp, innerProp) -> j.On(fq outerProp, fq innerProp)) (Join())
             
-        QuerySource<'Result, Query>(outerQuery.LeftJoin(innerTableName, fun j -> joinOn), mergedTables)
+        QuerySource<'JoinResult, Query>(outerQuery.LeftJoin(innerTableName, fun j -> joinOn), mergedTables)
 
     /// Sets the GROUP BY for one or more columns.
     [<CustomOperation("groupBy", MaintainsVariableSpace = true)>]
@@ -221,11 +221,11 @@ type SelectExpressionBuilder<'Output>() =
         QuerySource<'T, Query>(query.Distinct(), state.TableMappings)
 
     /// Transforms the query
-    member this.Run (state: QuerySource<'T>) =
+    member this.Run (state: QuerySource<'Selected>) =
         let query = getQueryOrDefault state
-        SelectQuery<'T>(query)
+        SelectQuery<'Selected>(query)
         
-type DeleteExpressionBuilder<'T>() =
+type DeleteExpressionBuilder<'Deleted>() =
 
     let getQueryOrDefault (state: QuerySource<'Result>) =
         match state with
@@ -255,11 +255,11 @@ type DeleteExpressionBuilder<'T>() =
         state :?> QuerySource<'T, Query>
 
     /// Unwraps the query
-    member this.Run (state: QuerySource<'T>) =
+    member this.Run (state: QuerySource<'Deleted>) =
         let query = state |> getQueryOrDefault
-        DeleteQuery(query.AsDelete())
+        DeleteQuery<'Deleted>(query.AsDelete())
 
-type InsertExpressionBuilder<'T, 'InsertReturn when 'InsertReturn : struct>() =
+type InsertExpressionBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
 
     let getQueryOrDefault (state: QuerySource<'T>) =
         match state with
@@ -336,15 +336,15 @@ type InsertExpressionBuilder<'T, 'InsertReturn when 'InsertReturn : struct>() =
         // Sets both the identity field name (prop.Name) and its type ('InsertReturn)
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(identitySpec, state.TableMappings)
 
-    member this.Run (state: QuerySource<'T>) =
+    member this.Run (state: QuerySource<'Inserted>) =
         let spec = getQueryOrDefault state
-        InsertQuery<'T, 'InsertReturn>(spec)
+        InsertQuery<'Inserted, 'InsertReturn>(spec)
 
-type UpdateExpressionBuilder<'T>() =
+type UpdateExpressionBuilder<'Updated>() =
     
-    let getQueryOrDefault (state: QuerySource<'Result>) =
+    let getQueryOrDefault (state: QuerySource<'T>) =
         match state with
-        | :? QuerySource<'Result, UpdateQuerySpec<'T>> as qs -> qs.Query
+        | :? QuerySource<'T, UpdateQuerySpec<'T>> as qs -> qs.Query
         | _ -> UpdateQuerySpec.Default
 
     member this.For (state: QuerySource<'T>, f: 'T -> QuerySource<'T>) =
@@ -411,15 +411,15 @@ type UpdateExpressionBuilder<'T>() =
         QuerySource<'T, UpdateQuerySpec<'T>>({ query with UpdateAll = true }, state.TableMappings)
 
     /// Unwraps the query
-    member this.Run (state: QuerySource<'T>) =
+    member this.Run (state: QuerySource<'Updated>) =
         let spec = state |> getQueryOrDefault
         if spec.Where = None && spec.UpdateAll = false
         then failwith "An `update` expression must either contain a `where` clause or `updateAll`."
-        UpdateQuery<'T>(spec)
+        UpdateQuery<'Updated>(spec)
         
 
-let select<'T> = SelectExpressionBuilder<'T>()
-let delete<'T> = DeleteExpressionBuilder<'T>()
-let insert<'T, 'InsertReturn when 'InsertReturn : struct> = InsertExpressionBuilder<'T, 'InsertReturn>()
-let update<'T> = UpdateExpressionBuilder<'T>()
+let select<'Selected> = SelectExpressionBuilder<'Selected>()
+let delete<'Deleted> = DeleteExpressionBuilder<'Deleted>()
+let insert<'Inserted, 'InsertReturn when 'InsertReturn : struct> = InsertExpressionBuilder<'Inserted, 'InsertReturn>()
+let update<'Updated> = UpdateExpressionBuilder<'Updated>()
 
