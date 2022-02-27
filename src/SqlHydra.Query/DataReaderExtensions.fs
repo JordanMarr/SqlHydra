@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module SqlHydra.Query.Extensions
+module SqlHydra.Query.DataReaderExtensions
 
 open System.Data
 
