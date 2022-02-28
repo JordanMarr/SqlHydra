@@ -29,5 +29,5 @@ let awaitIgnore (tsk: Task<'T>) =
 
 /// An alias to `Task.FromResult`.
 let fromResult value = 
-    System.Threading.Tasks.Task.FromResult value
+    Task.FromResult value
     
