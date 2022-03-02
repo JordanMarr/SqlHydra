@@ -25,7 +25,6 @@
 		<Compile Include="Fixes.fs" />
 		<Compile Include="QueryContext.fs" />
 		<Compile Include="DataReaderExtensions.fs" />
-		<Compile Include="TaskResult.fs" />
 	</ItemGroup>
 
 	<ItemGroup>
