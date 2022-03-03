@@ -520,28 +520,29 @@ let tests =
         testTask "Select Task" {
             use conn = openConnection()
 
-            let! orderDates = 
+            let! orderNoLineTotals = 
                 selectTask HydraReader.Read conn {
                     for o in orderHeaderTable do
+                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
                     take 10
-                    select o.OrderDate
-                    map (string o)
+                    map ($"{o.SalesOrderNumber} {d.LineTotal}")
                 }
 
-            printfn $"Results: %A{orderDates}"
+            printfn $"Results: %A{orderNoLineTotals}"
         }
 
         testAsync "Select Async" {
             use conn = openConnection()
         
-            let! orderDates = 
+            let! nameTuples = 
                 selectAsync HydraReader.Read conn {
-                    for o in orderHeaderTable do
+                    for p in personTable do
+                    orderBy p.LastName
+                    thenBy p.FirstName
                     take 10
-                    select o.OrderDate
-                    //map (string o)
+                    select (p.FirstName, p.LastName)
                 }
         
-            printfn $"Results: %A{orderDates}"
+            printfn $"Results: %A{nameTuples}"
         }
     ]
