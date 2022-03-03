@@ -21,9 +21,9 @@
 		<Compile Include="Kata.fs" />
 		<Compile Include="QueryFunctions.fs" />
 		<Compile Include="LinqExpressionVisitors.fs" />
-		<Compile Include="KataBuilders.fs" />
 		<Compile Include="Fixes.fs" />
 		<Compile Include="QueryContext.fs" />
+		<Compile Include="KataBuilders.fs" />
 		<Compile Include="DataReaderExtensions.fs" />
 	</ItemGroup>
 

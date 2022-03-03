@@ -516,4 +516,19 @@ let tests =
 
             ctx.RollbackTransaction()
         }
+
+        testTask "select2" {
+            use conn = openConnection()
+
+            let! orderDates = 
+                select2 HydraReader.Read conn {
+                    for o in orderHeaderTable do
+                    take 10
+                    select o.OrderDate                    
+                    map (string o)
+                    
+                }
+
+            printfn $"Results: %A{orderDates}"
+        }
     ]
