@@ -517,18 +517,31 @@ let tests =
             ctx.RollbackTransaction()
         }
 
-        testTask "select2" {
+        testTask "Select Task" {
             use conn = openConnection()
 
             let! orderDates = 
-                select2 HydraReader.Read conn {
+                selectTask HydraReader.Read conn {
                     for o in orderHeaderTable do
                     take 10
-                    select o.OrderDate                    
-                    map (string o)
-                    
+                    select o.OrderDate
+                    //map (string o)
                 }
 
+            printfn $"Results: %A{orderDates}"
+        }
+
+        testAsync "Select Async" {
+            use conn = openConnection()
+        
+            let! orderDates = 
+                selectAsync HydraReader.Read conn {
+                    for o in orderHeaderTable do
+                    take 10
+                    select o.OrderDate
+                    //map (string o)
+                }
+        
             printfn $"Results: %A{orderDates}"
         }
     ]

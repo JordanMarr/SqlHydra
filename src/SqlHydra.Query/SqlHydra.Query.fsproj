@@ -24,6 +24,7 @@
 		<Compile Include="Fixes.fs" />
 		<Compile Include="QueryContext.fs" />
 		<Compile Include="KataBuilders.fs" />
+		<Compile Include="Builders.fs" />
 		<Compile Include="DataReaderExtensions.fs" />
 	</ItemGroup>
 
