@@ -525,7 +525,7 @@ let tests =
                     for o in orderHeaderTable do
                     take 10
                     select o.OrderDate
-                    //map (string o)
+                    map (string o)
                 }
 
             printfn $"Results: %A{orderDates}"

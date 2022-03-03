@@ -6,18 +6,19 @@ open System
 open System.Linq.Expressions
 open SqlKata
 open System.Data.Common
+open System.Threading.Tasks
 
 let getQueryOrDefault (state: QuerySource<'T>) =
     match state with
     | :? QuerySource<'T, Query> as qs -> qs.Query
     | _ -> Query()            
 
-type SelectBuilder<'Selected> () =
+type SelectBuilder<'Selected, 'Mapped> () =
 
     let mergeTableMappings (a: Map<FQ.FQName, TableMapping>, b: Map<FQ.FQName, TableMapping>) =
         Map (Seq.concat [ (Map.toSeq a); (Map.toSeq b) ])
 
-    //let mutable _mapper = Unchecked.defaultof<'Selected -> 'Transform>
+    member val MapFn = Option<Func<'Selected, 'Mapped>>.None with get, set
 
     member this.For (state: QuerySource<'T>, f: 'T -> QuerySource<'T>) =
         let tbl = state.GetOuterTableMapping()
@@ -42,10 +43,10 @@ type SelectBuilder<'Selected> () =
 
     /// Sets the SELECT statement and filters the query to include only the selected tables
     [<CustomOperation("select", MaintainsVariableSpace = true)>]
-    member this.Select (state: QuerySource<'T>, [<ProjectionParameter>] selectExpression: Expression<Func<'T, 'U>>) =
+    member this.Select (state: QuerySource<'T>, [<ProjectionParameter>] selectExpression: Expression<Func<'T, 'Selected>>) =
         let query = state |> getQueryOrDefault
 
-        let selections = LinqExpressionVisitors.visitSelect<'T,'U> selectExpression
+        let selections = LinqExpressionVisitors.visitSelect<'T,'Selected> selectExpression
 
         let queryWithSelectedColumns =
             selections
@@ -71,7 +72,7 @@ type SelectBuilder<'Selected> () =
                     q.SelectRaw($"{aggFn}({fqColWithCurlyBraces})")
             ) query
                   
-        QuerySource<'U, Query>(queryWithSelectedColumns, state.TableMappings)
+        QuerySource<'Selected, Query>(queryWithSelectedColumns, state.TableMappings)
 
     /// Sets the ORDER BY for single column
     [<CustomOperation("orderBy", MaintainsVariableSpace = true)>]
@@ -224,29 +225,41 @@ type SelectBuilder<'Selected> () =
         QuerySource<'T, Query>(query.Distinct(), state.TableMappings)
 
     [<CustomOperation("map", MaintainsVariableSpace = true)>]
-    member this.Map (state: QuerySource<'T>, [<ProjectionParameter>] selectExpression: Expression<Func<'T, 'U>>) =
+    member this.Map (state: QuerySource<'Selected>, [<ProjectionParameter>] map: Func<'Selected, 'Mapped>) =
         let query = state |> getQueryOrDefault
-        QuerySource<'U, Query>(query, state.TableMappings)
+        this.MapFn <- Some map
+        QuerySource<'Mapped, Query>(query, state.TableMappings)
 
-type SelectTaskBuilder<'Selected, 'Reader when 'Reader :> DbDataReader> (
+type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
     readEntityBuilder: 'Reader -> (unit -> 'Selected), 
     conn: System.Data.Common.DbConnection) =
-    inherit SelectBuilder<'Selected>()
+    inherit SelectBuilder<'Selected, 'Mapped>()
     
-    member this.Run(state: QuerySource<'Selected>) =
+    member this.Run(state: QuerySource<'Mapped>) =
         async {
             let query = state |> getQueryOrDefault
             let selectQuery = SelectQuery<'Selected>(query)
             use ctx = new QueryContext(conn, SqlKata.Compilers.SqlServerCompiler())
-            let! result = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
-            return result
+            let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
+            let mapped = results |> Seq.map this.MapFn.Value.Invoke
+            return mapped
         }
         |> Async.StartImmediateAsTask
 
-type SelectAsyncBuilder<'Selected, 'Reader when 'Reader :> DbDataReader> (
+    member this.Run(state: QuerySource<'Selected>) =
+        async {
+            let query = state |> getQueryOrDefault
+            let selectQuery = SelectQuery<'Selected>(query)
+            use ctx = new QueryContext(conn, SqlKata.Compilers.SqlServerCompiler())
+            let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
+            return results
+        }
+        |> Async.StartImmediateAsTask
+
+type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
     readEntityBuilder: 'Reader -> (unit -> 'Selected), 
     conn: System.Data.Common.DbConnection) =
-    inherit SelectBuilder<'Selected>()
+    inherit SelectBuilder<'Selected, 'Mapped>()
     
     member this.Run(state: QuerySource<'Selected>) =
         async {
@@ -257,8 +270,8 @@ type SelectAsyncBuilder<'Selected, 'Reader when 'Reader :> DbDataReader> (
             return result
         }
 
-let selectTask<'Selected, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) conn = 
-    SelectTaskBuilder(readEntityBuilder, conn)
+let selectTask<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) conn = 
+    SelectTaskBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, conn)
 
-let selectAsync<'Selected, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) conn = 
-    SelectAsyncBuilder(readEntityBuilder, conn)
+let selectAsync<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) conn = 
+    SelectAsyncBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, conn)
