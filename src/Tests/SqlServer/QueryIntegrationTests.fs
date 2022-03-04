@@ -559,6 +559,7 @@ let tests =
                     thenBy p.FirstName
                     take 10
                     select (p.FirstName, p.LastName)
+                    toList
                 }
         
             printfn $"Results: %A{nameTuples}"
@@ -574,6 +575,7 @@ let tests =
                     take 10
                     select (o.SalesOrderNumber, d.LineTotal) into (orderNumber, lineTotal)
                     map ($"{orderNumber} {lineTotal}")
+                    toArray
                 }
 
             printfn $"Results: %A{orderNoLineTotals}"

@@ -284,15 +284,26 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
-    member this.Run(state: QuerySource<'Mapped>) =
+    member this.RunTemplate(query: Query, resultModifier) =
         async {
-            let query = state |> getQueryOrDefault
+            //let query = state |> getQueryOrDefault
             let selectQuery = SelectQuery<'Selected>(query)
             let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
-            match this.MapFn with
-            | Some mapFn -> return results |> Seq.map mapFn.Invoke
-            | None -> return results |> Seq.cast<'Mapped>
+            return 
+                match this.MapFn with
+                | Some mapFn -> results |> Seq.map mapFn.Invoke
+                | None -> results |> Seq.cast<'Mapped>
+                |> resultModifier
         }
+
+    member this.Run(state: QuerySource<'Mapped, Query>) =
+        this.RunTemplate(state.Query, id)
+    
+    member this.Run(state: QuerySource<ResultModifier.List<'Mapped>, Query>) =
+        this.RunTemplate(state.Query, Seq.toList)
+
+    member this.Run(state: QuerySource<ResultModifier.Array<'Mapped>, Query>) =
+        this.RunTemplate(state.Query, Seq.toArray)
 
 let selectTask<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) conn = 
     SelectTaskBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, conn)
