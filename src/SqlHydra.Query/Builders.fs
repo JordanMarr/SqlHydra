@@ -234,40 +234,32 @@ type SelectBuilder<'Selected, 'Mapped> () =
         QuerySource<'Mapped, Query>(query, state.TableMappings)
 
 type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
-    readEntityBuilder: 'Reader -> (unit -> 'Selected), conn: DbConnection) =
+    readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
     member this.Run(state: QuerySource<'Mapped>) =
         async {
             let query = state |> getQueryOrDefault
             let selectQuery = SelectQuery<'Selected>(query)
-            use ctx = new QueryContext(conn, SqlKata.Compilers.SqlServerCompiler())
             let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
             match this.MapFn with
-            | Some mapFn ->
-                let mapped = results |> Seq.map mapFn.Invoke
-                return mapped
-            | None ->
-                return results |> Seq.cast<'Mapped>
+            | Some mapFn -> return results |> Seq.map mapFn.Invoke
+            | None -> return results |> Seq.cast<'Mapped>
         }
         |> Async.StartImmediateAsTask
 
 type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
-    readEntityBuilder: 'Reader -> (unit -> 'Selected), conn: DbConnection) =
+    readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
     member this.Run(state: QuerySource<'Mapped>) =
         async {
             let query = state |> getQueryOrDefault
             let selectQuery = SelectQuery<'Selected>(query)
-            use ctx = new QueryContext(conn, SqlKata.Compilers.SqlServerCompiler())
             let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
             match this.MapFn with
-            | Some mapFn ->
-                let mapped = results |> Seq.map mapFn.Invoke
-                return mapped
-            | None ->
-                return results |> Seq.cast<'Mapped>
+            | Some mapFn -> return results |> Seq.map mapFn.Invoke
+            | None -> return results |> Seq.cast<'Mapped>
         }
 
 let selectTask<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) conn = 

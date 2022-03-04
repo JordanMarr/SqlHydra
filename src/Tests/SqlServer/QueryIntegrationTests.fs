@@ -518,10 +518,10 @@ let tests =
         }
 
         testTask "selectTask select columns" {
-            use conn = openConnection()
+            use ctx = openContext()
         
             let! nameTuples = 
-                selectTask HydraReader.Read conn {
+                selectTask HydraReader.Read ctx {
                     for p in personTable do
                     orderBy p.LastName
                     thenBy p.FirstName
@@ -533,10 +533,12 @@ let tests =
         }
 
         testTask "selectTask select and map columns" {
-            use conn = openConnection()
+            use ctx = openContext()
+
+            ctx.BeginTransaction()
 
             let! orderNoLineTotals = 
-                selectTask HydraReader.Read conn {
+                selectTask HydraReader.Read ctx {
                     for o in orderHeaderTable do
                     join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
                     take 10
@@ -544,14 +546,16 @@ let tests =
                     map ($"{orderNumber} {lineTotal}")
                 }
 
+            ctx.CommitTransaction()
+
             printfn $"Results: %A{orderNoLineTotals}"
         }
         
         testAsync "selectAsync select columns" {
-            use conn = openConnection()
+            use ctx = openContext()
         
             let! nameTuples = 
-                selectAsync HydraReader.Read conn {
+                selectAsync HydraReader.Read ctx {
                     for p in personTable do
                     orderBy p.LastName
                     thenBy p.FirstName
@@ -563,10 +567,10 @@ let tests =
         }
 
         testAsync "selectAsync select and map columns" {
-            use conn = openConnection()
+            use ctx = openContext()
 
             let! orderNoLineTotals = 
-                selectAsync HydraReader.Read conn {
+                selectAsync HydraReader.Read ctx {
                     for o in orderHeaderTable do
                     join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
                     take 10
