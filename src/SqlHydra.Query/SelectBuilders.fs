@@ -8,6 +8,27 @@ open System.Data.Common
 open System.Threading.Tasks
 open SqlKata
 
+type ContextType = 
+    | Create of create: (unit -> QueryContext)
+    | Shared of QueryContext
+
+module ContextUtils = 
+    let tryOpen (ctx: QueryContext) = 
+        if ctx.Connection.State <> Data.ConnectionState.Open 
+        then ctx.Connection.Open()
+        ctx
+
+    let getContext ct =
+        match ct with 
+        | Create create -> create() |> tryOpen
+        | Shared ctx -> ctx
+
+    let disposeIfNotShared ct (ctx: QueryContext) =
+        match ct with
+        | Create _ -> (ctx :> IDisposable).Dispose()
+        | Shared _ -> () // Do not dispose if shared
+
+
 [<RequireQualifiedAccess>]
 module ResultModifier =
     type ModifierBase<'T>(qs: QuerySource<'T, Query>) = 
@@ -278,18 +299,22 @@ type SelectQueryBuilder<'Selected, 'Mapped> () =
 
 /// A select builder that returns a Task result.
 type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
-    readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
+    readEntityBuilder: 'Reader -> (unit -> 'Selected), ct: ContextType) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
     member this.RunTaskQuery(query: Query, resultModifier) =
         async {
-            let selectQuery = SelectQuery<'Selected>(query)
-            let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
-            return 
-                match this.MapFn with
-                | Some mapFn -> results |> Seq.map mapFn.Invoke
-                | None -> results |> Seq.cast<'Mapped>
-                |> resultModifier
+            let ctx = ContextUtils.getContext ct
+            try 
+                let selectQuery = SelectQuery<'Selected>(query)
+                let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
+                return 
+                    match this.MapFn with
+                    | Some mapFn -> results |> Seq.map mapFn.Invoke
+                    | None -> results |> Seq.cast<'Mapped>
+                    |> resultModifier
+            finally
+                ContextUtils.disposeIfNotShared ct ctx
         }
         |> Async.StartImmediateAsTask
 
@@ -306,25 +331,34 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
         this.RunTaskQuery(state.Query, Seq.tryHead)
 
     member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =
-        ctx.CountAsync (SelectQuery<int>(state.Query))
+        async {
+            let ctx = ContextUtils.getContext ct
+            try return! ctx.CountAsync (SelectQuery<int>(state.Query)) |> Async.AwaitTask
+            finally ContextUtils.disposeIfNotShared ct ctx
+        }
+        |> Async.StartImmediateAsTask
 
     member this.Run(state: QuerySource<ResultModifier.ToQuery<'Mapped>, Query>) =
         state.Query
 
 /// A select builder that returns an Async result.
 type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
-    readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
+    readEntityBuilder: 'Reader -> (unit -> 'Selected), ct: ContextType) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
     member this.RunAsyncQuery(query: Query, resultModifier) =
         async {
-            let selectQuery = SelectQuery<'Selected>(query)
-            let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
-            return 
-                match this.MapFn with
-                | Some mapFn -> results |> Seq.map mapFn.Invoke
-                | None -> results |> Seq.cast<'Mapped>
-                |> resultModifier
+            let ctx = ContextUtils.getContext ct
+            try
+                let selectQuery = SelectQuery<'Selected>(query)
+                let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
+                return 
+                    match this.MapFn with
+                    | Some mapFn -> results |> Seq.map mapFn.Invoke
+                    | None -> results |> Seq.cast<'Mapped>
+                    |> resultModifier
+            finally
+                ContextUtils.disposeIfNotShared ct ctx
         }
 
     member this.Run(state: QuerySource<'Mapped, Query>) =
@@ -340,7 +374,11 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
         this.RunAsyncQuery(state.Query, Seq.tryHead)
     
     member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =
-        ctx.CountAsync (SelectQuery<int>(state.Query)) |> Async.AwaitTask
+        async {
+            let ctx = ContextUtils.getContext ct
+            try return! ctx.CountAsync (SelectQuery<int>(state.Query)) |> Async.AwaitTask
+            finally ContextUtils.disposeIfNotShared ct ctx
+        }
 
     member this.Run(state: QuerySource<ResultModifier.ToQuery<'Mapped>, Query>) =
         state.Query

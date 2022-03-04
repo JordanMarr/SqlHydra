@@ -532,7 +532,7 @@ let tests =
                 ()
 
             let! count = 
-                selectTask HydraReader.Read ctx {
+                selectTask HydraReader.Read (Shared ctx) {
                     for e in errorLogTable do
                     count
                 }
@@ -558,7 +558,7 @@ let tests =
                 ()
         
             let! count = 
-                selectAsync HydraReader.Read ctx {
+                selectAsync HydraReader.Read (Shared ctx) {
                     for e in errorLogTable do
                     count
                 }
@@ -571,16 +571,14 @@ let tests =
 
 
 
-        testTask "selectTask select columns" {
-            use ctx = openContext()
-        
+        testTask "selectTask select entity" {
             let! nameTuples = 
-                selectTask HydraReader.Read ctx {
+                selectTask HydraReader.Read (Create openContext) {
                     for p in personTable do
                     orderBy p.LastName
                     thenBy p.FirstName
                     take 10
-                    select (p.FirstName, p.LastName)
+                    //select p
                     toList
                 }
         
@@ -588,10 +586,8 @@ let tests =
         }
 
         testTask "selectTask select and map columns" {
-            use ctx = openContext()
-
             let! orderNoLineTotals = 
-                selectTask HydraReader.Read ctx {
+                selectTask HydraReader.Read (Create openContext) {
                     for o in orderHeaderTable do
                     join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
                     take 10
@@ -603,11 +599,9 @@ let tests =
             printfn $"Results: %A{orderNoLineTotals}"
         }
         
-        testAsync "selectAsync select columns" {
-            use ctx = openContext()
-        
+        testAsync "selectAsync select columns" {        
             let! personMaybe = 
-                selectAsync HydraReader.Read ctx {
+                selectAsync HydraReader.Read (Create openContext) {
                     for p in personTable do
                     orderBy p.LastName
                     thenBy p.FirstName
@@ -620,10 +614,8 @@ let tests =
         }
 
         testAsync "selectAsync select and map columns" {
-            use ctx = openContext()
-
             let! orderNoLineTotals = 
-                selectAsync HydraReader.Read ctx {
+                selectAsync HydraReader.Read (Create openContext) {
                     for o in orderHeaderTable do
                     join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
                     take 10
