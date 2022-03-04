@@ -579,8 +579,8 @@ let tests =
                     thenBy p.FirstName
                     take 10
                     //select p
-                    map (p.BusinessEntityID)
-                    toList
+                    //map (p.BusinessEntityID)
+                    //toList
                 }
         
             printfn $"Results: %A{nameTuples}"

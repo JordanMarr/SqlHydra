@@ -321,18 +321,15 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
         }
         |> Async.StartImmediateAsTask
 
-    member this.Run(state: QuerySource<'T, Query>) =
+    member this.Run(state: QuerySource<_, Query>) =
         this.RunTaskQuery(state.Query, id)
 
-    member this.Run(state: QuerySource<'Mapped, Query>) =
+    member this.Run(state: QuerySource<'Selected, Query>) =
         this.RunTaskQuery(state.Query, id)
-    
-    //member this.Run(state: QuerySource<ResultModifier.ToList<'Mapped>, Query>) =
-    //    this.RunTaskQuery(state.Query, Seq.toList)
-    
-    member this.Run(state: QuerySource<ResultModifier.ToList<'Selected>, Query>) =
+
+    member this.Run(state: QuerySource<ResultModifier.ToList<'Mapped>, Query>) =
         this.RunTaskQuery(state.Query, Seq.toList)
-
+    
     member this.Run(state: QuerySource<ResultModifier.ToArray<'Mapped>, Query>) =
         this.RunTaskQuery(state.Query, Seq.toArray)
         
