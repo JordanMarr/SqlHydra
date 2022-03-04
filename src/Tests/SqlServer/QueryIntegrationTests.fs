@@ -579,6 +579,7 @@ let tests =
                     thenBy p.FirstName
                     take 10
                     //select p
+                    map (p.BusinessEntityID)
                     toList
                 }
         
