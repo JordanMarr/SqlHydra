@@ -517,6 +517,60 @@ let tests =
             ctx.RollbackTransaction()
         }
 
+        testTask "Count Test Task" {
+            use ctx = openContext()
+            ctx.BeginTransaction()
+
+            for i in [0..2] do
+                let! result = 
+                    insert {
+                        for e in errorLogTable do
+                        entity stubbedErrorLog
+                        getId e.ErrorLogID
+                    }
+                    |> ctx.InsertAsync
+                ()
+
+            let! count = 
+                selectTask HydraReader.Read ctx {
+                    for e in errorLogTable do
+                    count
+                }
+
+            printfn "Count: %i" count
+            Expect.isTrue (count > 0) ""
+
+            ctx.RollbackTransaction()
+        }
+        
+        testAsync "Count Test Async" {
+            use ctx = openContext()
+            ctx.BeginTransaction()
+        
+            for i in [0..2] do
+                let! result = 
+                    insert {
+                        for e in errorLogTable do
+                        entity stubbedErrorLog
+                        getId e.ErrorLogID
+                    }
+                    |> ctx.InsertAsync |> Async.AwaitTask
+                ()
+        
+            let! count = 
+                selectAsync HydraReader.Read ctx {
+                    for e in errorLogTable do
+                    count
+                }
+        
+            printfn "Count: %i" count
+            Expect.isTrue (count > 0) ""
+        
+            ctx.RollbackTransaction()
+        }
+
+
+
         testTask "selectTask select columns" {
             use ctx = openContext()
         

@@ -13,6 +13,7 @@ module ResultModifier =
     type ModifierBase<'T>(qs: QuerySource<'T, Query>) = 
         member this.Query = qs.Query
 
+    type Count<'T>(qs) = inherit ModifierBase<'T>(qs)
     type ToList<'T>(qs) = inherit ModifierBase<'T>(qs)
     type ToArray<'T>(qs) = inherit ModifierBase<'T>(qs)
     type TryHead<'T>(qs) = inherit ModifierBase<'T>(qs)
@@ -226,12 +227,6 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let having = LinqExpressionVisitors.visitHaving<'T> havingExpression (FQ.fullyQualifyColumn state.TableMappings)
         QuerySource<'T, Query>(query.Having(fun w -> having), state.TableMappings)
 
-    /// COUNT aggregate function
-    [<CustomOperation("count", MaintainsVariableSpace = true)>]
-    member this.Count (state:QuerySource<'T>) = 
-        let query = state |> getQueryOrDefault
-        QuerySource<int, Query>(query.AsCount(), state.TableMappings)
-
     /// Sets query to return DISTINCT values
     [<CustomOperation("distinct", MaintainsVariableSpace = true)>]
     member this.Distinct (state:QuerySource<'T>) = 
@@ -244,6 +239,12 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let query = state |> getQueryOrDefault
         this.MapFn <- Some map
         QuerySource<'Mapped, Query>(query, state.TableMappings)
+
+    /// COUNT aggregate function
+    [<CustomOperation("count", MaintainsVariableSpace = true)>]
+    member this.Count (state:QuerySource<'T>) = 
+        let query = state |> getQueryOrDefault
+        QuerySource<ResultModifier.Count<int>, Query>(query.AsCount(), state.TableMappings)
 
     /// Applies Seq.toList to the query results.
     [<CustomOperation("toList", MaintainsVariableSpace = true)>]
@@ -269,6 +270,9 @@ type SelectBuilder<'Selected, 'Mapped> () =
 type SelectQueryBuilder<'Selected, 'Mapped> () = 
     inherit SelectBuilder<'Selected, 'Mapped>()
     
+    member this.Run (state: QuerySource<ResultModifier.Count<int>, Query>) = 
+        SelectQuery<int>(state.Query)
+
     member this.Run (state: QuerySource<'Selected, Query>) =
         SelectQuery<'Selected>(state.Query)
 
@@ -277,7 +281,7 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
-    member this.RunTemplate(query: Query, resultModifier) =
+    member this.RunTaskQuery(query: Query, resultModifier) =
         async {
             let selectQuery = SelectQuery<'Selected>(query)
             let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
@@ -290,16 +294,19 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
         |> Async.StartImmediateAsTask
 
     member this.Run(state: QuerySource<'Mapped, Query>) =
-        this.RunTemplate(state.Query, id)
+        this.RunTaskQuery(state.Query, id)
     
     member this.Run(state: QuerySource<ResultModifier.ToList<'Mapped>, Query>) =
-        this.RunTemplate(state.Query, Seq.toList)
+        this.RunTaskQuery(state.Query, Seq.toList)
 
     member this.Run(state: QuerySource<ResultModifier.ToArray<'Mapped>, Query>) =
-        this.RunTemplate(state.Query, Seq.toArray)
+        this.RunTaskQuery(state.Query, Seq.toArray)
         
     member this.Run(state: QuerySource<ResultModifier.TryHead<'Mapped>, Query>) =
-        this.RunTemplate(state.Query, Seq.tryHead)
+        this.RunTaskQuery(state.Query, Seq.tryHead)
+
+    member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =
+        ctx.CountAsync (SelectQuery<int>(state.Query))
 
     member this.Run(state: QuerySource<ResultModifier.ToQuery<'Mapped>, Query>) =
         state.Query
@@ -309,7 +316,7 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
-    member this.RunTemplate(query: Query, resultModifier) =
+    member this.RunAsyncQuery(query: Query, resultModifier) =
         async {
             let selectQuery = SelectQuery<'Selected>(query)
             let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
@@ -321,17 +328,20 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
         }
 
     member this.Run(state: QuerySource<'Mapped, Query>) =
-        this.RunTemplate(state.Query, id)
+        this.RunAsyncQuery(state.Query, id)
     
     member this.Run(state: QuerySource<ResultModifier.ToList<'Mapped>, Query>) =
-        this.RunTemplate(state.Query, Seq.toList)
+        this.RunAsyncQuery(state.Query, Seq.toList)
 
     member this.Run(state: QuerySource<ResultModifier.ToArray<'Mapped>, Query>) =
-        this.RunTemplate(state.Query, Seq.toArray)
+        this.RunAsyncQuery(state.Query, Seq.toArray)
         
     member this.Run(state: QuerySource<ResultModifier.TryHead<'Mapped>, Query>) =
-        this.RunTemplate(state.Query, Seq.tryHead)
+        this.RunAsyncQuery(state.Query, Seq.tryHead)
     
+    member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =
+        ctx.CountAsync (SelectQuery<int>(state.Query)) |> Async.AwaitTask
+
     member this.Run(state: QuerySource<ResultModifier.ToQuery<'Mapped>, Query>) =
         state.Query
 
