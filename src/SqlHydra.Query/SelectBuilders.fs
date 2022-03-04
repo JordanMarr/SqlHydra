@@ -4,14 +4,9 @@ module SqlHydra.Query.Builders
 
 open System
 open System.Linq.Expressions
-open SqlKata
 open System.Data.Common
 open System.Threading.Tasks
-
-let getQueryOrDefault (state: QuerySource<'T>) =
-    match state with
-    | :? QuerySource<'T, Query> as qs -> qs.Query
-    | _ -> Query()            
+open SqlKata
 
 module ResultModifier =
     type ModifierBase<'T>(qs: QuerySource<'T, Query>) = 
@@ -22,6 +17,11 @@ module ResultModifier =
     type TryHead<'T>(qs) = inherit ModifierBase<'T>(qs)
 
 type SelectBuilder<'Selected, 'Mapped> () =
+
+    let getQueryOrDefault (state: QuerySource<'T>) =
+        match state with
+        | :? QuerySource<'T, Query> as qs -> qs.Query
+        | _ -> Query()            
 
     let mergeTableMappings (a: Map<FQ.FQName, TableMapping>, b: Map<FQ.FQName, TableMapping>) =
         Map (Seq.concat [ (Map.toSeq a); (Map.toSeq b) ])
@@ -263,7 +263,6 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
     
     member this.RunTemplate(query: Query, resultModifier) =
         async {
-            //let query = state |> getQueryOrDefault
             let selectQuery = SelectQuery<'Selected>(query)
             let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
             return 
@@ -292,7 +291,6 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
     
     member this.RunTemplate(query: Query, resultModifier) =
         async {
-            //let query = state |> getQueryOrDefault
             let selectQuery = SelectQuery<'Selected>(query)
             let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
             return 
