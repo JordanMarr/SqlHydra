@@ -42,7 +42,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
         QuerySource<'T, Query>(query.Where(fun w -> where), state.TableMappings)
 
     /// Sets the SELECT statement and filters the query to include only the selected tables
-    [<CustomOperation("select", MaintainsVariableSpace = true)>]
+    [<CustomOperation("select", MaintainsVariableSpace = true, AllowIntoPattern = true)>]
     member this.Select (state: QuerySource<'T>, [<ProjectionParameter>] selectExpression: Expression<Func<'T, 'Selected>>) =
         let query = state |> getQueryOrDefault
 
@@ -241,18 +241,12 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
             let selectQuery = SelectQuery<'Selected>(query)
             use ctx = new QueryContext(conn, SqlKata.Compilers.SqlServerCompiler())
             let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
-            let mapped = results |> Seq.map this.MapFn.Value.Invoke
-            return mapped
-        }
-        |> Async.StartImmediateAsTask
-
-    member this.Run(state: QuerySource<'Selected>) =
-        async {
-            let query = state |> getQueryOrDefault
-            let selectQuery = SelectQuery<'Selected>(query)
-            use ctx = new QueryContext(conn, SqlKata.Compilers.SqlServerCompiler())
-            let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
-            return results
+            match this.MapFn with
+            | Some mapFn ->
+                let mapped = results |> Seq.map mapFn.Invoke
+                return mapped
+            | None ->
+                return results |> Seq.cast<'Mapped>
         }
         |> Async.StartImmediateAsTask
 
@@ -261,13 +255,18 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
     conn: System.Data.Common.DbConnection) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
-    member this.Run(state: QuerySource<'Selected>) =
+    member this.Run(state: QuerySource<'Mapped>) =
         async {
             let query = state |> getQueryOrDefault
             let selectQuery = SelectQuery<'Selected>(query)
             use ctx = new QueryContext(conn, SqlKata.Compilers.SqlServerCompiler())
-            let! result = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
-            return result
+            let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
+            match this.MapFn with
+            | Some mapFn ->
+                let mapped = results |> Seq.map mapFn.Invoke
+                return mapped
+            | None ->
+                return results |> Seq.cast<'Mapped>
         }
 
 let selectTask<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) conn = 

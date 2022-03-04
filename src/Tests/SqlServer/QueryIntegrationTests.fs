@@ -525,6 +525,7 @@ let tests =
                     for o in orderHeaderTable do
                     join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
                     take 10
+                    //select o.OrderDate
                     map ($"{o.SalesOrderNumber} {d.LineTotal}")
                 }
 
