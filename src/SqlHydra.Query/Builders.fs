@@ -21,11 +21,14 @@ type SelectBuilder<'Selected, 'Mapped> () =
     member val MapFn = Option<Func<'Selected, 'Mapped>>.None with get, set
 
     member this.For (state: QuerySource<'T>, f: 'T -> QuerySource<'T>) =
-        let tbl = state.GetOuterTableMapping()
-        let query = state |> getQueryOrDefault
-        QuerySource<'T, Query>(
-            query.From(match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name), 
-            state.TableMappings)
+        match state.TryGetOuterTableMapping() with
+        | Some tbl -> 
+            let query = state |> getQueryOrDefault
+            QuerySource<'T, Query>(
+                query.From(match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name), 
+                state.TableMappings)
+        | None -> 
+            state :?> QuerySource<'T, Query>
 
     member this.Yield _ =
         QuerySource<'T>(Map.empty)
@@ -231,8 +234,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
         QuerySource<'Mapped, Query>(query, state.TableMappings)
 
 type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
-    readEntityBuilder: 'Reader -> (unit -> 'Selected), 
-    conn: System.Data.Common.DbConnection) =
+    readEntityBuilder: 'Reader -> (unit -> 'Selected), conn: DbConnection) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
     member this.Run(state: QuerySource<'Mapped>) =
@@ -251,8 +253,7 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
         |> Async.StartImmediateAsTask
 
 type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
-    readEntityBuilder: 'Reader -> (unit -> 'Selected), 
-    conn: System.Data.Common.DbConnection) =
+    readEntityBuilder: 'Reader -> (unit -> 'Selected), conn: DbConnection) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
     member this.Run(state: QuerySource<'Mapped>) =

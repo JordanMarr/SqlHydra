@@ -73,13 +73,17 @@ type QuerySource<'T>(tableMappings) =
         member this.GetEnumerator() = Seq.empty<'T>.GetEnumerator()
     
     member this.TableMappings : Map<FQ.FQName, TableMapping> = tableMappings
-    member this.GetOuterTableMapping() = 
+    
+    member this.TryGetOuterTableMapping() = 
         let outerEntity = typeof<'T>
         let fqn = 
             if outerEntity.Name.StartsWith "Tuple" // True for joined tables
             then outerEntity.GetGenericArguments() |> Array.head |> FQ.fqName
             else outerEntity |> FQ.fqName
-        this.TableMappings.[fqn]
+        this.TableMappings.TryFind(fqn)
+
+    member this.GetOuterTableMapping() = 
+        this.TryGetOuterTableMapping().Value
 
 type QuerySource<'T, 'Query>(query, tableMappings) = 
     inherit QuerySource<'T>(tableMappings)

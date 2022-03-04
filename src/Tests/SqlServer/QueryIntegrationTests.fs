@@ -517,7 +517,22 @@ let tests =
             ctx.RollbackTransaction()
         }
 
-        testTask "Select Task" {
+        testTask "selectTask select columns" {
+            use conn = openConnection()
+        
+            let! nameTuples = 
+                selectTask HydraReader.Read conn {
+                    for p in personTable do
+                    orderBy p.LastName
+                    thenBy p.FirstName
+                    take 10
+                    select (p.FirstName, p.LastName)
+                }
+        
+            printfn $"Results: %A{nameTuples}"
+        }
+
+        testTask "selectTask select and map columns" {
             use conn = openConnection()
 
             let! orderNoLineTotals = 
@@ -525,14 +540,14 @@ let tests =
                     for o in orderHeaderTable do
                     join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
                     take 10
-                    //select o.OrderDate
-                    map ($"{o.SalesOrderNumber} {d.LineTotal}")
+                    select (o.SalesOrderNumber, d.LineTotal) into (orderNumber, lineTotal)
+                    map ($"{orderNumber} {lineTotal}")
                 }
 
             printfn $"Results: %A{orderNoLineTotals}"
         }
-
-        testAsync "Select Async" {
+        
+        testAsync "selectAsync select columns" {
             use conn = openConnection()
         
             let! nameTuples = 
@@ -545,5 +560,20 @@ let tests =
                 }
         
             printfn $"Results: %A{nameTuples}"
+        }
+
+        testAsync "selectAsync select and map columns" {
+            use conn = openConnection()
+
+            let! orderNoLineTotals = 
+                selectAsync HydraReader.Read conn {
+                    for o in orderHeaderTable do
+                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+                    take 10
+                    select (o.SalesOrderNumber, d.LineTotal) into (orderNumber, lineTotal)
+                    map ($"{orderNumber} {lineTotal}")
+                }
+
+            printfn $"Results: %A{orderNoLineTotals}"
         }
     ]
