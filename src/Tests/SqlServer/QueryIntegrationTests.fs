@@ -552,17 +552,17 @@ let tests =
         testAsync "selectAsync select columns" {
             use ctx = openContext()
         
-            let! nameTuples = 
+            let! personMaybe = 
                 selectAsync HydraReader.Read ctx {
                     for p in personTable do
                     orderBy p.LastName
                     thenBy p.FirstName
                     take 10
                     select (p.FirstName, p.LastName)
-                    toList
+                    tryHead
                 }
         
-            printfn $"Results: %A{nameTuples}"
+            printfn $"Results: %A{personMaybe}"
         }
 
         testAsync "selectAsync select and map columns" {

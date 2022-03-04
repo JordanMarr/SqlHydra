@@ -17,10 +17,8 @@ module ResultModifier =
     type ModifierBase<'T>(qs: QuerySource<'T, Query>) = 
         member this.Query = qs.Query
 
-    type Seq<'T>(qs) = inherit ModifierBase<'T>(qs)
     type List<'T>(qs) = inherit ModifierBase<'T>(qs)
     type Array<'T>(qs) = inherit ModifierBase<'T>(qs)
-    type Head<'T>(qs) = inherit ModifierBase<'T>(qs)
     type TryHead<'T>(qs) = inherit ModifierBase<'T>(qs)
 
 type SelectBuilder<'Selected, 'Mapped> () =
@@ -254,6 +252,11 @@ type SelectBuilder<'Selected, 'Mapped> () =
     member this.ToArray (state: QuerySource<'Mapped, Query>) = 
         QuerySource<ResultModifier.Array<'Mapped>, Query>(state.Query, state.TableMappings)
 
+    /// Transforms the query results to call Seq.tryHead.
+    [<CustomOperation("tryHead", MaintainsVariableSpace = true)>]
+    member this.TryHead (state: QuerySource<'Mapped, Query>) = 
+        QuerySource<ResultModifier.TryHead<'Mapped>, Query>(state.Query, state.TableMappings)
+
 type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
     inherit SelectBuilder<'Selected, 'Mapped>()
@@ -279,6 +282,9 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
 
     member this.Run(state: QuerySource<ResultModifier.Array<'Mapped>, Query>) =
         this.RunTemplate(state.Query, Seq.toArray)
+        
+    member this.Run(state: QuerySource<ResultModifier.TryHead<'Mapped>, Query>) =
+        this.RunTemplate(state.Query, Seq.tryHead)
 
 type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
@@ -304,6 +310,9 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
 
     member this.Run(state: QuerySource<ResultModifier.Array<'Mapped>, Query>) =
         this.RunTemplate(state.Query, Seq.toArray)
+        
+    member this.Run(state: QuerySource<ResultModifier.TryHead<'Mapped>, Query>) =
+        this.RunTemplate(state.Query, Seq.tryHead)
 
 let selectTask<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) conn = 
     SelectTaskBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, conn)
