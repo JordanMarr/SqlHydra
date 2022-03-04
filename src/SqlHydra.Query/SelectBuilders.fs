@@ -294,6 +294,9 @@ type SelectQueryBuilder<'Selected, 'Mapped> () =
     member this.Run (state: QuerySource<ResultModifier.Count<int>, Query>) = 
         SelectQuery<int>(state.Query)
 
+    member this.Run(state: QuerySource<ResultModifier.ToQuery<'Mapped>, Query>) =
+        state.Query
+
     member this.Run (state: QuerySource<'Selected, Query>) =
         SelectQuery<'Selected>(state.Query)
 
