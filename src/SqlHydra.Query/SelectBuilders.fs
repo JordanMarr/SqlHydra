@@ -8,14 +8,17 @@ open System.Data.Common
 open System.Threading.Tasks
 open SqlKata
 
+[<RequireQualifiedAccess>]
 module ResultModifier =
     type ModifierBase<'T>(qs: QuerySource<'T, Query>) = 
         member this.Query = qs.Query
 
-    type List<'T>(qs) = inherit ModifierBase<'T>(qs)
-    type Array<'T>(qs) = inherit ModifierBase<'T>(qs)
+    type ToList<'T>(qs) = inherit ModifierBase<'T>(qs)
+    type ToArray<'T>(qs) = inherit ModifierBase<'T>(qs)
     type TryHead<'T>(qs) = inherit ModifierBase<'T>(qs)
+    type ToQuery<'T>(qs) = inherit ModifierBase<'T>(qs)
 
+/// Builds a SqlKata select query
 type SelectBuilder<'Selected, 'Mapped> () =
 
     let getQueryOrDefault (state: QuerySource<'T>) =
@@ -242,21 +245,28 @@ type SelectBuilder<'Selected, 'Mapped> () =
         this.MapFn <- Some map
         QuerySource<'Mapped, Query>(query, state.TableMappings)
 
-    /// Transforms the query results seq to a list.
+    /// Applies Seq.toList to the query results.
     [<CustomOperation("toList", MaintainsVariableSpace = true)>]
     member this.ToList (state: QuerySource<'Mapped, Query>) = 
-        QuerySource<ResultModifier.List<'Mapped>, Query>(state.Query, state.TableMappings)
+        QuerySource<ResultModifier.ToList<'Mapped>, Query>(state.Query, state.TableMappings)
 
-    /// Transforms the query results seq to an array.
+    /// Applies Seq.toArray to the query results.
     [<CustomOperation("toArray", MaintainsVariableSpace = true)>]
     member this.ToArray (state: QuerySource<'Mapped, Query>) = 
-        QuerySource<ResultModifier.Array<'Mapped>, Query>(state.Query, state.TableMappings)
+        QuerySource<ResultModifier.ToArray<'Mapped>, Query>(state.Query, state.TableMappings)
 
-    /// Transforms the query results to call Seq.tryHead.
+    /// Applies Seq.tryHead to the query results.
     [<CustomOperation("tryHead", MaintainsVariableSpace = true)>]
     member this.TryHead (state: QuerySource<'Mapped, Query>) = 
         QuerySource<ResultModifier.TryHead<'Mapped>, Query>(state.Query, state.TableMappings)
 
+    /// Returns the underlying SqlKata query.
+    [<CustomOperation("toQuery", MaintainsVariableSpace = true)>]
+    member this.ToQuery (state: QuerySource<'Mapped, Query>) = 
+        QuerySource<ResultModifier.ToQuery<'Mapped>, Query>(state.Query, state.TableMappings)
+
+
+/// A select builder that runs tasks
 type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
     inherit SelectBuilder<'Selected, 'Mapped>()
@@ -276,15 +286,19 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
     member this.Run(state: QuerySource<'Mapped, Query>) =
         this.RunTemplate(state.Query, id)
     
-    member this.Run(state: QuerySource<ResultModifier.List<'Mapped>, Query>) =
+    member this.Run(state: QuerySource<ResultModifier.ToList<'Mapped>, Query>) =
         this.RunTemplate(state.Query, Seq.toList)
 
-    member this.Run(state: QuerySource<ResultModifier.Array<'Mapped>, Query>) =
+    member this.Run(state: QuerySource<ResultModifier.ToArray<'Mapped>, Query>) =
         this.RunTemplate(state.Query, Seq.toArray)
         
     member this.Run(state: QuerySource<ResultModifier.TryHead<'Mapped>, Query>) =
         this.RunTemplate(state.Query, Seq.tryHead)
 
+    member this.Run(state: QuerySource<ResultModifier.ToQuery<'Mapped>, Query>) =
+        state.Query
+
+/// A select builder that runs async
 type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
     inherit SelectBuilder<'Selected, 'Mapped>()
@@ -303,17 +317,22 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
     member this.Run(state: QuerySource<'Mapped, Query>) =
         this.RunTemplate(state.Query, id)
     
-    member this.Run(state: QuerySource<ResultModifier.List<'Mapped>, Query>) =
+    member this.Run(state: QuerySource<ResultModifier.ToList<'Mapped>, Query>) =
         this.RunTemplate(state.Query, Seq.toList)
 
-    member this.Run(state: QuerySource<ResultModifier.Array<'Mapped>, Query>) =
+    member this.Run(state: QuerySource<ResultModifier.ToArray<'Mapped>, Query>) =
         this.RunTemplate(state.Query, Seq.toArray)
         
     member this.Run(state: QuerySource<ResultModifier.TryHead<'Mapped>, Query>) =
         this.RunTemplate(state.Query, Seq.tryHead)
+    
+    member this.Run(state: QuerySource<ResultModifier.ToQuery<'Mapped>, Query>) =
+        state.Query
 
-let selectTask<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) conn = 
-    SelectTaskBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, conn)
+/// Executes a select query with a HydraReader.Read function and a QueryContext; returns a Task query result.
+let selectTask<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ctx = 
+    SelectTaskBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, ctx)
 
-let selectAsync<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) conn = 
-    SelectAsyncBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, conn)
+/// Executes a select query with a HydraReader.Read function and a QueryContext; returns an Async query result.
+let selectAsync<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ctx = 
+    SelectAsyncBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, ctx)
