@@ -527,6 +527,7 @@ let tests =
                     thenBy p.FirstName
                     take 10
                     select (p.FirstName, p.LastName)
+                    toList
                 }
         
             printfn $"Results: %A{nameTuples}"
@@ -535,8 +536,6 @@ let tests =
         testTask "selectTask select and map columns" {
             use ctx = openContext()
 
-            ctx.BeginTransaction()
-
             let! orderNoLineTotals = 
                 selectTask HydraReader.Read ctx {
                     for o in orderHeaderTable do
@@ -544,9 +543,8 @@ let tests =
                     take 10
                     select (o.SalesOrderNumber, d.LineTotal) into (orderNumber, lineTotal)
                     map ($"{orderNumber} {lineTotal}")
+                    toArray
                 }
-
-            ctx.CommitTransaction()
 
             printfn $"Results: %A{orderNoLineTotals}"
         }

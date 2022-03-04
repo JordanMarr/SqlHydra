@@ -13,6 +13,16 @@ let getQueryOrDefault (state: QuerySource<'T>) =
     | :? QuerySource<'T, Query> as qs -> qs.Query
     | _ -> Query()            
 
+module ResultModifier =
+    type ModifierBase<'T>(qs: QuerySource<'T, Query>) = 
+        member this.Query = qs.Query
+
+    type Seq<'T>(qs) = inherit ModifierBase<'T>(qs)
+    type List<'T>(qs) = inherit ModifierBase<'T>(qs)
+    type Array<'T>(qs) = inherit ModifierBase<'T>(qs)
+    type Head<'T>(qs) = inherit ModifierBase<'T>(qs)
+    type TryHead<'T>(qs) = inherit ModifierBase<'T>(qs)
+
 type SelectBuilder<'Selected, 'Mapped> () =
 
     let mergeTableMappings (a: Map<FQ.FQName, TableMapping>, b: Map<FQ.FQName, TableMapping>) =
@@ -227,26 +237,48 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let query = state |> getQueryOrDefault        
         QuerySource<'T, Query>(query.Distinct(), state.TableMappings)
 
+    /// Transforms the query results.
     [<CustomOperation("map", MaintainsVariableSpace = true)>]
     member this.Map (state: QuerySource<'Selected>, [<ProjectionParameter>] map: Func<'Selected, 'Mapped>) =
         let query = state |> getQueryOrDefault
         this.MapFn <- Some map
         QuerySource<'Mapped, Query>(query, state.TableMappings)
 
+    /// Transforms the query results seq to a list.
+    [<CustomOperation("toList", MaintainsVariableSpace = true)>]
+    member this.ToList (state: QuerySource<'Mapped, Query>) = 
+        QuerySource<ResultModifier.List<'Mapped>, Query>(state.Query, state.TableMappings)
+
+    /// Transforms the query results seq to an array.
+    [<CustomOperation("toArray", MaintainsVariableSpace = true)>]
+    member this.ToArray (state: QuerySource<'Mapped, Query>) = 
+        QuerySource<ResultModifier.Array<'Mapped>, Query>(state.Query, state.TableMappings)
+
 type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
-    member this.Run(state: QuerySource<'Mapped>) =
+    member this.RunTemplate(query: Query, resultModifier) =
         async {
-            let query = state |> getQueryOrDefault
+            //let query = state |> getQueryOrDefault
             let selectQuery = SelectQuery<'Selected>(query)
             let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
-            match this.MapFn with
-            | Some mapFn -> return results |> Seq.map mapFn.Invoke
-            | None -> return results |> Seq.cast<'Mapped>
+            return 
+                match this.MapFn with
+                | Some mapFn -> results |> Seq.map mapFn.Invoke
+                | None -> results |> Seq.cast<'Mapped>
+                |> resultModifier
         }
         |> Async.StartImmediateAsTask
+
+    member this.Run(state: QuerySource<'Mapped, Query>) =
+        this.RunTemplate(state.Query, id)
+    
+    member this.Run(state: QuerySource<ResultModifier.List<'Mapped>, Query>) =
+        this.RunTemplate(state.Query, Seq.toList)
+
+    member this.Run(state: QuerySource<ResultModifier.Array<'Mapped>, Query>) =
+        this.RunTemplate(state.Query, Seq.toArray)
 
 type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
