@@ -1,6 +1,6 @@
-﻿/// LINQ builders for SqlKata.Query
+﻿/// Linq select query builders
 [<AutoOpen>]
-module SqlHydra.Query.Builders
+module SqlHydra.Query.SelectBuilders
 
 open System
 open System.Linq.Expressions
@@ -18,7 +18,7 @@ module ResultModifier =
     type TryHead<'T>(qs) = inherit ModifierBase<'T>(qs)
     type ToQuery<'T>(qs) = inherit ModifierBase<'T>(qs)
 
-/// Builds a SqlKata select query
+/// The base select builder that contains all common operations
 type SelectBuilder<'Selected, 'Mapped> () =
 
     let getQueryOrDefault (state: QuerySource<'T>) =
@@ -265,8 +265,14 @@ type SelectBuilder<'Selected, 'Mapped> () =
     member this.ToQuery (state: QuerySource<'Mapped, Query>) = 
         QuerySource<ResultModifier.ToQuery<'Mapped>, Query>(state.Query, state.TableMappings)
 
+/// A select builder that returns a select query.
+type SelectQueryBuilder<'Selected, 'Mapped> () = 
+    inherit SelectBuilder<'Selected, 'Mapped>()
+    
+    member this.Run (state: QuerySource<'Selected, Query>) =
+        SelectQuery<'Selected>(state.Query)
 
-/// A select builder that runs tasks
+/// A select builder that returns a Task result.
 type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
     inherit SelectBuilder<'Selected, 'Mapped>()
@@ -298,7 +304,7 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
     member this.Run(state: QuerySource<ResultModifier.ToQuery<'Mapped>, Query>) =
         state.Query
 
-/// A select builder that runs async
+/// A select builder that returns an Async result.
 type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ctx: QueryContext) =
     inherit SelectBuilder<'Selected, 'Mapped>()
@@ -329,10 +335,16 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
     member this.Run(state: QuerySource<ResultModifier.ToQuery<'Mapped>, Query>) =
         state.Query
 
-/// Executes a select query with a HydraReader.Read function and a QueryContext; returns a Task query result.
+
+/// Builds and returns a select query.
+let select<'Selected, 'Mapped> = 
+    SelectQueryBuilder<'Selected, 'Mapped>()
+
+/// Builds a select query with a HydraReader.Read function and QueryContext - returns a Task query result
 let selectTask<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ctx = 
     SelectTaskBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, ctx)
 
-/// Executes a select query with a HydraReader.Read function and a QueryContext; returns an Async query result.
+/// Builds a select query with a HydraReader.Read function and QueryContext - returns an Async query result
 let selectAsync<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ctx = 
     SelectAsyncBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, ctx)
+
