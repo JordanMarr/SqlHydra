@@ -295,6 +295,17 @@ type SelectBuilder<'Selected, 'Mapped> () =
         QuerySource<'Mapped option, Query>(state.Query, state.TableMappings)
 
 
+/// A select builder that returns a select query.
+type SelectQueryBuilder<'Selected, 'Mapped> () = 
+    inherit SelectBuilder<'Selected, 'Mapped>()
+    
+    member this.Run (state: QuerySource<ResultModifier.Count<int>, Query>) = 
+        SelectQuery<int>(state.Query)
+
+    member this.Run (state: QuerySource<'Selected, Query>) =
+        SelectQuery<'Selected>(state.Query)
+
+
 /// A select builder that returns a Task result.
 type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ct: ContextType) =
@@ -432,13 +443,13 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
 
 /// Builds and returns a select query.
 let select<'Selected, 'Mapped> = 
-    SelectBuilder<'Selected, 'Mapped>()
-
-/// Builds a select query with a HydraReader.Read function and QueryContext - returns a Task query result
-let selectTask<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ct = 
-    SelectTaskBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, ct)
+    SelectQueryBuilder<'Selected, 'Mapped>()
 
 /// Builds a select query with a HydraReader.Read function and QueryContext - returns an Async query result
 let selectAsync<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ct = 
     SelectAsyncBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, ct)
+
+/// Builds a select query with a HydraReader.Read function and QueryContext - returns a Task query result
+let selectTask<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ct = 
+    SelectTaskBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, ct)
 
