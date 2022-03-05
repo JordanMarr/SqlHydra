@@ -256,6 +256,20 @@ SqlHydra.Query wraps the powerful [SqlKata](https://sqlkata.com/) query generato
 It can create queries for the following databases: SQL Server, SQLite, PostgreSql, MySql, Oracle, Firebird.
 SqlHydra.Query can be used with any library that accepts a data reader; however, is designed pair well with SqlHydra generated records and readers! 
 
+### Query Builders
+* `select` - Builds and returns a select query that can be manually run by piping into `QueryContext` read methods
+* `selectAsync` - Builds a select query with a HydraReader.Read function and `QueryContext` - returns an Async query result
+* `selectTask` - Builds a select query with a HydraReader.Read function and `QueryContext` - returns a Task query result
+* `insert` - Builds an insert query that can be manually run by piping into `QueryContext` insert methods
+* `insertAsync` - Builds an insert query that returns an Async result
+* `insertTask` - Builds an insert query that returns a Task result
+* `update` - Builds and returns an update query that can be manually run by piping into `QueryContext` update methods
+* `updateAsync` - Builds an update query that returns an Async result
+* `updateTask` - Builds an update query that returns a Task result
+* `delete` - Builds and returns a delete query that can be manually run by piping into `QueryContext` delete methods
+* `deleteAsync` - Builds and returns a delete query that returns an Async result
+* `deleteTask` - Builds and returns a delete query that returns a Task result
+
 ### Setup
 
 ```F#
