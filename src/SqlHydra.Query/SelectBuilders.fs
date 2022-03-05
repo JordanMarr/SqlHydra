@@ -35,7 +35,6 @@ module ResultModifier =
         member this.Query = qs.Query
 
     type Count<'T>(qs) = inherit ModifierBase<'T>(qs)
-    type ToQuery<'T>(qs) = inherit ModifierBase<'T>(qs)
 
 /// The base select builder that contains all common operations
 type SelectBuilder<'Selected, 'Mapped> () =
@@ -295,25 +294,6 @@ type SelectBuilder<'Selected, 'Mapped> () =
     member this.TryHead (state: QuerySource<'Selected, Query>) = 
         QuerySource<'Mapped option, Query>(state.Query, state.TableMappings)
 
-    /// Returns the underlying SqlKata query.
-    [<CustomOperation("toQuery", MaintainsVariableSpace = true)>]
-    member this.ToQuery (state: QuerySource<'Mapped, Query>) = 
-        QuerySource<ResultModifier.ToQuery<'Mapped>, Query>(state.Query, state.TableMappings)
-
-
-/// A select builder that returns a select query.
-type SelectQueryBuilder<'Selected, 'Mapped> () = 
-    inherit SelectBuilder<'Selected, 'Mapped>()
-    
-    member this.Run (state: QuerySource<ResultModifier.Count<int>, Query>) = 
-        SelectQuery<int>(state.Query)
-
-    member this.Run(state: QuerySource<ResultModifier.ToQuery<'Mapped>, Query>) =
-        state.Query
-
-    member this.Run (state: QuerySource<'Selected, Query>) =
-        SelectQuery<'Selected>(state.Query)
-
 
 /// A select builder that returns a Task result.
 type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
@@ -383,10 +363,6 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
         }
         |> Async.StartImmediateAsTask
 
-    // Run: toQuery
-    member this.Run(state: QuerySource<ResultModifier.ToQuery<'Mapped>, Query>) =
-        state.Query
-
 
 /// A select builder that returns an Async result.
 type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
@@ -453,14 +429,10 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
             finally ContextUtils.disposeIfNotShared ct ctx
         }
 
-    // Run: toQuery
-    member this.Run(state: QuerySource<ResultModifier.ToQuery<'Mapped>, Query>) =
-        state.Query
-
 
 /// Builds and returns a select query.
 let select<'Selected, 'Mapped> = 
-    SelectQueryBuilder<'Selected, 'Mapped>()
+    SelectBuilder<'Selected, 'Mapped>()
 
 /// Builds a select query with a HydraReader.Read function and QueryContext - returns a Task query result
 let selectTask<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ct = 
