@@ -303,7 +303,7 @@ let tests =
                     where (e.ErrorLogID = 1)
                 }
 
-            printfn "result: %i" result
+            Expect.isTrue (result > 0) ""
         }
 
         testTask "UpdateAsync Set Individual Fields" {
@@ -352,12 +352,11 @@ let tests =
         testTask "Delete Test" {
             use ctx = openContext()
 
-            let result = 
-                delete {
+            let! result = 
+                deleteTask (Shared ctx) {
                     for e in errorLogTable do
                     where (e.ErrorLogID = 5)
                 }
-                |> ctx.Delete
 
             printfn "result: %i" result
         }
@@ -366,11 +365,10 @@ let tests =
             use ctx = openContext()
 
             let! result = 
-                delete {
+                deleteTask (Shared ctx) {
                     for e in errorLogTable do
                     where (e.ErrorLogID = 5)
                 }
-                |> ctx.DeleteAsync
 
             printfn "result: %i" result
         }
@@ -394,11 +392,10 @@ let tests =
             ctx.BeginTransaction()
 
             let! _ = 
-                delete {
+                deleteTask (Shared ctx) {
                     for e in errorLogTable do
                     deleteAll
                 }
-                |> ctx.DeleteAsync
 
             let errorLogs = 
                 [ 0 .. 2 ] 
@@ -433,27 +430,26 @@ let tests =
             ctx.RollbackTransaction()
         }
 
-        testTask "Distinct Test" {
+        testAsync "Distinct Test" {
             use ctx = openContext()
 
             ctx.BeginTransaction()
 
-            let! _ = 
-                delete {
+            let! deletedCount = 
+                deleteAsync (Shared ctx) {
                     for e in errorLogTable do
                     deleteAll
-                }
-                |> ctx.DeleteAsync
-
+                } 
+                                
             let errorLogs = 
-                [ 0L .. 2L ] 
+                [ 0 .. 2 ] 
                 |> List.map (fun _ -> stubbedErrorLog)
                 |> AtLeastOne.tryCreate
                 
             match errorLogs with
             | Some errorLogs ->            
                 let! rowsInserted = 
-                    insertTask (Shared ctx) {
+                    insertAsync (Shared ctx) {
                         for e in errorLogTable do
                         entities errorLogs
                         excludeColumn e.ErrorLogID
@@ -463,19 +459,17 @@ let tests =
             | None -> ()
 
             let! results =
-                select {
+                selectAsync HydraReader.Read (Shared ctx)  {
                     for e in errorLogTable do
                     select e.ErrorNumber
                 }
-                |> ctx.ReadAsync HydraReader.Read
 
             let! distinctResults =
-                select {
+                selectAsync HydraReader.Read (Shared ctx) {
                     for e in errorLogTable do
                     select e.ErrorNumber
                     distinct
                 }
-                |> ctx.ReadAsync HydraReader.Read
 
             Expect.equal (results |> Seq.length) 3 ""
             Expect.equal (distinctResults |> Seq.length) 1 ""

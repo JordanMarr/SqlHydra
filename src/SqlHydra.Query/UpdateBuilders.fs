@@ -8,6 +8,11 @@ open System.Data.Common
 open System.Threading.Tasks
 open SqlKata
 
+let private prepareUpdateQuery<'Updated> spec = 
+    if spec.Where = None && spec.UpdateAll = false
+    then failwith "An `update` expression must either contain a `where` clause or `updateAll`."
+    UpdateQuery<'Updated>(spec)
+
 /// The base update builder that contains all common operations
 type UpdateBuilder<'Updated>() =
     
@@ -45,14 +50,14 @@ type UpdateBuilder<'Updated>() =
             { query with SetValues = query.SetValues @ [ prop.Name, value ] }
             , state.TableMappings)
 
-    /// Includes a column in the insert query.
+    /// Includes a column in the update query.
     [<CustomOperation("includeColumn", MaintainsVariableSpace = true)>]
     member this.IncludeColumn (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
         let prop = (propertySelector |> LinqExpressionVisitors.visitPropertySelector<'T, 'Prop>).Name
         QuerySource<'T, UpdateQuerySpec<'T>>({ query with Fields = query.Fields @ [ prop ] }, state.TableMappings)
 
-    /// Excludes a column from the insert query.
+    /// Excludes a column from the update query.
     [<CustomOperation("excludeColumn", MaintainsVariableSpace = true)>]
     member this.ExcludeColumn (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
@@ -81,10 +86,7 @@ type UpdateBuilder<'Updated>() =
 
     /// Unwraps the query
     member this.Run (state: QuerySource<'Updated>) =
-        let spec = state |> getQueryOrDefault
-        if spec.Where = None && spec.UpdateAll = false
-        then failwith "An `update` expression must either contain a `where` clause or `updateAll`."
-        UpdateQuery<'Updated>(spec)
+        state |> getQueryOrDefault |> prepareUpdateQuery
 
 
 /// An update builder that returns an Async result.
@@ -93,10 +95,10 @@ type UpdateAsyncBuilder<'Updated>(ct: ContextType) =
 
     member this.Run (state: QuerySource<'Updated, UpdateQuerySpec<'Updated>>) = 
         async {
+            let updateQuery = state.Query |> prepareUpdateQuery
             let ctx = ContextUtils.getContext ct
             try 
-                let updatetQuery = UpdateQuery<'Updated>(state.Query)
-                let! result = updatetQuery |> ctx.UpdateAsync |> Async.AwaitTask
+                let! result = updateQuery |> ctx.UpdateAsync |> Async.AwaitTask
                 return result
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
@@ -109,10 +111,10 @@ type UpdateTaskBuilder<'Updated>(ct: ContextType) =
 
     member this.Run (state: QuerySource<'Updated, UpdateQuerySpec<'Updated>>) = 
         async {
+            let updateQuery = state.Query |> prepareUpdateQuery
             let ctx = ContextUtils.getContext ct
             try 
-                let updatetQuery = UpdateQuery<'Updated>(state.Query)
-                let! result = updatetQuery |> ctx.UpdateAsync |> Async.AwaitTask
+                let! result = updateQuery |> ctx.UpdateAsync |> Async.AwaitTask
                 return result
             finally 
                 ContextUtils.disposeIfNotShared ct ctx

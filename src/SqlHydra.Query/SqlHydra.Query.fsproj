@@ -23,10 +23,10 @@
 		<Compile Include="LinqExpressionVisitors.fs" />
 		<Compile Include="Fixes.fs" />
 		<Compile Include="QueryContext.fs" />
-		<Compile Include="KataBuilders.fs" />
 		<Compile Include="SelectBuilders.fs" />
 		<Compile Include="InsertBuilders.fs" />
 		<Compile Include="UpdateBuilders.fs" />
+		<Compile Include="DeleteBuilders.fs" />
 		<Compile Include="DataReaderExtensions.fs" />
 	</ItemGroup>
 
