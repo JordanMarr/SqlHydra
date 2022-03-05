@@ -407,30 +407,27 @@ let tests =
             match countriesAL1 with
             | Some countries ->
                 let! rowsInserted = 
-                    insert {
+                    insertTask (Shared ctx) {
                         for e in countriesTable do
                         entities countries
                     }
-                    |> ctx.InsertAsync
 
                 Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
 
                 let! results =
-                    select {
+                    selectTask HydraReader.Read (Shared ctx) {
                         for c in countriesTable do
                         where (c.COUNTRY_ID =% "X%")
                         select c.COUNTRY_NAME
                     }
-                    |> ctx.ReadAsync HydraReader.Read
 
                 let! distinctResults =
-                    select {
+                    selectTask HydraReader.Read (Shared ctx) {
                         for c in countriesTable do
                         where (c.COUNTRY_ID =% "X%")
                         select c.REGION_ID
                         distinct
                     }
-                    |> ctx.ReadAsync HydraReader.Read
 
                 Expect.equal (results |> Seq.length) 3 ""
                 Expect.equal (distinctResults |> Seq.length) 1 ""

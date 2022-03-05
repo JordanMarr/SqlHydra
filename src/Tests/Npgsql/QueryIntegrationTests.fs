@@ -443,30 +443,27 @@ let tests =
             match currencies with
             | Some currencies ->
                 let! rowsInserted = 
-                    insert {
+                    insertTask (Shared ctx) {
                         for e in currencyTable do
                         entities currencies
                     }
-                    |> ctx.InsertAsync
 
                 Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
 
                 let! results =
-                    select {
+                    selectTask HydraReader.Read (Shared ctx) {
                         for c in currencyTable do
                         where (c.currencycode =% "BC%")
                         select c.name
                     }
-                    |> ctx.ReadAsync HydraReader.Read
 
                 let! distinctResults =
-                    select {
+                    selectTask HydraReader.Read (Shared ctx) {
                         for c in currencyTable do
                         where (c.currencycode =% "BC%")
                         select c.name
                         distinct
                     }
-                    |> ctx.ReadAsync HydraReader.Read
 
                 Expect.equal (results |> Seq.length) 3 ""
                 Expect.equal (distinctResults |> Seq.length) 1 ""

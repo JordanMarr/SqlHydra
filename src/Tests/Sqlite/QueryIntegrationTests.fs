@@ -443,11 +443,10 @@ let tests =
             ctx.BeginTransaction()
 
             let! _ = 
-                delete {
+                deleteTask (Shared ctx) {
                     for e in errorLogTable do
                     deleteAll
                 }
-                |> ctx.DeleteAsync
 
             let errorLogs = 
                 [ 0L .. 2L ] 
@@ -457,30 +456,27 @@ let tests =
             match errorLogs with
             | Some errorLogs -> 
                 let! rowsInserted = 
-                    insert {
+                    insertTask (Shared ctx) {
                         for e in errorLogTable do
                         entities errorLogs
                         excludeColumn e.ErrorLogID
                     }
-                    |> ctx.InsertAsync
 
                 Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
             | None -> ()
 
             let! results =
-                select {
+                selectTask HydraReader.Read (Shared ctx) {
                     for e in errorLogTable do
                     select e.ErrorNumber
                 }
-                |> ctx.ReadAsync HydraReader.Read
 
             let! distinctResults =
-                select {
+                selectTask HydraReader.Read (Shared ctx) {
                     for e in errorLogTable do
                     select e.ErrorNumber
                     distinct
                 }
-                |> ctx.ReadAsync HydraReader.Read
 
             Expect.equal (results |> Seq.length) 3 ""
             Expect.equal (distinctResults |> Seq.length) 1 ""
