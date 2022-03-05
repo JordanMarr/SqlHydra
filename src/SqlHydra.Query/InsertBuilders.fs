@@ -8,6 +8,7 @@ open System.Data.Common
 open System.Threading.Tasks
 open SqlKata
 
+/// The base insert builder that contains all common operations
 type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
 
     let getQueryOrDefault (state: QuerySource<'T>) =

@@ -293,8 +293,8 @@ let tests =
         testTask "Update Set Individual Fields" {
             use ctx = openContext()
 
-            let result = 
-                update {
+            let! result = 
+                updateTask (Shared ctx) {
                     for e in errorLogTable do
                     set e.ErrorNumber 123
                     set e.ErrorMessage "ERROR #123"
@@ -302,7 +302,6 @@ let tests =
                     set e.ErrorProcedure None
                     where (e.ErrorLogID = 1)
                 }
-                |> ctx.Update
 
             printfn "result: %i" result
         }
@@ -311,7 +310,7 @@ let tests =
             use ctx = openContext()
 
             let! result = 
-                update {
+                updateTask (Shared ctx) {
                     for e in errorLogTable do
                     set e.ErrorNumber 123
                     set e.ErrorMessage "ERROR #123"
@@ -319,7 +318,6 @@ let tests =
                     set e.ErrorProcedure None
                     where (e.ErrorLogID = 1)
                 }
-                |> ctx.UpdateAsync
 
             printfn "result: %i" result
         }
@@ -340,14 +338,13 @@ let tests =
                     dbo.ErrorLog.UserName = "jmarr"
                 }
 
-            let result = 
-                update {
+            let! result = 
+                updateTask (Shared ctx) {
                     for e in errorLogTable do
                     entity errorLog
                     excludeColumn e.ErrorLogID
                     where (e.ErrorLogID = errorLog.ErrorLogID)
                 }
-                |> ctx.Update
 
             printfn "result: %i" result
         }
