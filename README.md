@@ -402,7 +402,7 @@ _Aggregate functions (can be used in `select`, `having` and `orderBy` clauses):_
 
 ```F#
 /// Select categories with an avg product price > 500 and < 1000
-let getCategoriesHighAvgPrice () = 
+let getCategoriesWithHighAvgPrice () = 
     selectTask HydraReader.Read (Create openContext) {
         for p in productTable do
         where (p.ProductCategoryID <> None)
