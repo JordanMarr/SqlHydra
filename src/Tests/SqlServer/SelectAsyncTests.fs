@@ -34,8 +34,10 @@ let selectTests =
         testAsync "selectAsync" {
             let! results = 
                 selectAsync HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for o in orderHeaderTable do
+                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
                     take 10
+                    mapArray $"{o.SalesOrderNumber} - {d.LineTotal} - {d.ModifiedDate.ToShortDateString()}"
                 }
         
             gt0 results
