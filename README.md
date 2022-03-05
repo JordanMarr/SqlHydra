@@ -492,31 +492,22 @@ Transformations (i.e. `.ToString()` or calling any functions is _not supported_ 
 ✅ CORRECT:
 ```F#
 let getCities () =
-    task {
-        let city = getCity() // DO prepare where parameters above and then pass into the where clause
-
-        let! cities =
-            selectTask HydraReader.Read (Create openContext) {
-                for a in addressTable do
-                where (a.City = city)
-                select (a.City, a.StateProvince) into (city, state)
-                mapList $"City: %s{city}, State: %s{state}")         // DO transforms using the `mapSeq`, `mapArray` or `mapList` operations
-            }
-        
-        return cities
+    let city = getCity() // DO prepare where parameters above and then pass into the where clause
+    selectTask HydraReader.Read (Create openContext) {
+        for a in addressTable do
+        where (a.City = city)
+        select (a.City, a.StateProvince) into (city, state)
+        mapList $"City: %s{city}, State: %s{state}")         // DO transforms using the `mapSeq`, `mapArray` or `mapList` operations
     }
 ```
 
 ❌ INCORRECT:
 ```F#
 let getCities () =
-    task {
-        let cities =
-            selectTask HydraReader.Read (Create openContext) {
-                for a in addressTable do
-                where (a.City = getCity()) // DO NOT perform calculations or translations within the builder
-                select ("City: " + a.City, "State: " + a.StateProvince) // DO NOT transform results within the builder 
-            }
+    selectTask HydraReader.Read (Create openContext) {
+        for a in addressTable do
+        where (a.City = getCity()) // DO NOT perform calculations or translations within the builder
+        select ("City: " + a.City, "State: " + a.StateProvince) // DO NOT transform results within the builder 
     }
 ```
 
