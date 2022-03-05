@@ -280,7 +280,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
 
     /// Applies Seq.tryHead to the query results.
     [<CustomOperation("tryHead", MaintainsVariableSpace = true)>]
-    member this.TryHead (state: QuerySource<'Mapped, Query>) = 
+    member this.TryHead (state: QuerySource<'Selected, Query>) = 
         QuerySource<'Mapped option, Query>(state.Query, state.TableMappings)
 
     /// Returns the underlying SqlKata query.
@@ -351,8 +351,8 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
         this.RunMapped(state.Query, id)
         
     // Run: tryHead
-    member this.Run(state: QuerySource<'Mapped option, Query>) =
-        this.RunMapped(state.Query, Seq.tryHead)
+    member this.Run(state: QuerySource<'Selected option, Query>) =
+        this.RunSelected(state.Query, Seq.tryHead)
 
     // Run: count
     member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =
@@ -373,33 +373,51 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ct: ContextType) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
-    member this.RunAsyncQuery(query: Query, resultModifier) =
+    member this.RunSelected(query: Query, resultModifier) =
         async {
             let ctx = ContextUtils.getContext ct
-            try
+            try 
                 let selectQuery = SelectQuery<'Selected>(query)
                 let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
-                return 
-                    match this.MapFn with
-                    | Some mapFn -> results |> Seq.map mapFn.Invoke
-                    | None -> results |> Seq.cast<'Mapped>
-                    |> resultModifier
-            finally
+                return results |> resultModifier
+            finally 
                 ContextUtils.disposeIfNotShared ct ctx
         }
 
-    member this.Run(state: QuerySource<'Mapped, Query>) =
-        this.RunAsyncQuery(state.Query, id)
-    
-    member this.Run(state: QuerySource<'Mapped list, Query>) =
-        this.RunAsyncQuery(state.Query, Seq.toList)
+    member this.RunMapped(query: Query, resultModifier) =
+        async {
+            let ctx = ContextUtils.getContext ct
+            try 
+                let selectQuery = SelectQuery<'Selected>(query)
+                let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
+                return results |> Seq.map this.MapFn.Value.Invoke |> resultModifier
+            finally 
+                ContextUtils.disposeIfNotShared ct ctx
+        }
 
+    /// Run: default
+    /// Called when no mapSeq, mapArray or mapList is present; 
+    /// this input will always be 'Selected -- even if select is not present.
+    member this.Run(state: QuerySource<'Selected, Query>) =
+        this.RunSelected(state.Query, id)
+
+    /// Run: mapList
+    member this.Run(state: QuerySource<'Mapped list, Query>) =
+        this.RunMapped(state.Query, Seq.toList)
+                    
+    // Run: mapArray
     member this.Run(state: QuerySource<'Mapped array, Query>) =
-        this.RunAsyncQuery(state.Query, Seq.toArray)
-        
-    member this.Run(state: QuerySource<'Mapped option, Query>) =
-        this.RunAsyncQuery(state.Query, Seq.tryHead)
+        this.RunMapped(state.Query, Seq.toArray)
+
+    // Run: mapSeq
+    member this.Run(state: QuerySource<'Mapped seq, Query>) =
+        this.RunMapped(state.Query, id)
     
+    // Run: tryHead
+    member this.Run(state: QuerySource<'Selected option, Query>) =
+        this.RunSelected(state.Query, Seq.tryHead)
+
+    // Run: count
     member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =
         async {
             let ctx = ContextUtils.getContext ct
@@ -407,6 +425,7 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
             finally ContextUtils.disposeIfNotShared ct ctx
         }
 
+    // Run: toQuery
     member this.Run(state: QuerySource<ResultModifier.ToQuery<'Mapped>, Query>) =
         state.Query
 

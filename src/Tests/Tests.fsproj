@@ -27,6 +27,8 @@
     <Compile Include="SqlServer\DB.fs" />
     <Compile Include="SqlServer\QueryUnitTests.fs" />
     <Compile Include="SqlServer\QueryIntegrationTests.fs" />
+    <Compile Include="SqlServer\SelectTaskTests.fs" />
+    <Compile Include="SqlServer\SelectAsyncTests.fs" />
     <Compile Include="SqlServer\Generation.fs" />
     <Compile Include="Npgsql\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
     <Compile Include="Npgsql\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
