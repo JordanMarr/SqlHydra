@@ -401,15 +401,16 @@ _Aggregate functions (can be used in `select`, `having` and `orderBy` clauses):_
 - `avgBy`
 
 ```F#
-// Select categories with an avg product price > 500 and < 1000
-selectTask HydraReader.Read (Create openContext) {
-    for p in productTable do
-    where (p.ProductCategoryID <> None)
-    groupBy p.ProductCategoryID
-    having (minBy p.ListPrice > 500M && maxBy p.ListPrice < 1000M)
-    select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice) into (catId, minPrice, maxPrice)
-    mapList $"CatID: {catId}, MinPrice: {minPrice}, MaxPrice: {maxPrice}"
-}
+/// Select categories with an avg product price > 500 and < 1000
+let getCategoriesWithHighAvgPrice () = 
+    selectTask HydraReader.Read (Create openContext) {
+        for p in productTable do
+        where (p.ProductCategoryID <> None)
+        groupBy p.ProductCategoryID
+        having (minBy p.ListPrice > 500M && maxBy p.ListPrice < 1000M)
+        select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice) into (catId, minPrice, maxPrice)
+        mapList $"CatID: {catId}, MinPrice: {minPrice}, MaxPrice: {maxPrice}"
+    }
 ```
 
 Alternative Row Count Query:
