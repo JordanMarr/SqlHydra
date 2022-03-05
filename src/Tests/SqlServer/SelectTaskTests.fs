@@ -52,12 +52,12 @@ let selectTests =
             gt0 results
         }
 
-        testTask "selectTask - mapArray entity" {
+        testTask "selectTask - toArray" {
             let! results = 
                 selectTask HydraReader.Read (Create openContext) {
                     for p in personTable do
                     take 10
-                    mapArray p
+                    toArray
                 }
         
             gt0 results

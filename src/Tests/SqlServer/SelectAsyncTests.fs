@@ -52,12 +52,12 @@ let selectTests =
             gt0 results
         }
 
-        testAsync "selectAsync - mapArray entity" {
+        testAsync "selectAsync - toArray" {
             let! results = 
                 selectAsync HydraReader.Read (Create openContext) {
                     for p in personTable do
                     take 10
-                    mapArray p
+                    toArray
                 }
         
             gt0 results

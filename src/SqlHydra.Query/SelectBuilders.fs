@@ -258,14 +258,14 @@ type SelectBuilder<'Selected, 'Mapped> () =
         this.MapFn <- Some map
         QuerySource<'Mapped seq, Query>(query, state.TableMappings)
     
-    /// Maps the query results into a seq.
+    /// Maps the query results into an array.
     [<CustomOperation("mapArray", MaintainsVariableSpace = true)>]
     member this.MapArray (state: QuerySource<'Selected>, [<ProjectionParameter>] map: Func<'Selected, 'Mapped>) =
         let query = state |> getQueryOrDefault
         this.MapFn <- Some map
         QuerySource<'Mapped array, Query>(query, state.TableMappings)
         
-    /// Maps the query results into a seq.
+    /// Maps the query results into a list.
     [<CustomOperation("mapList", MaintainsVariableSpace = true)>]
     member this.MapList (state: QuerySource<'Selected>, [<ProjectionParameter>] map: Func<'Selected, 'Mapped>) =
         let query = state |> getQueryOrDefault
