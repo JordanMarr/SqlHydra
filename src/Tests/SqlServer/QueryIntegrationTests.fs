@@ -253,13 +253,12 @@ let tests =
                     dbo.ErrorLog.UserName = "jmarr"
                 }
 
-            let errorLogId = 
-                insert {
+            let! errorLogId = 
+                insertTask (Shared ctx) {
                     for e in errorLogTable do
                     entity errorLog
                     getId e.ErrorLogID
                 }
-                |> ctx.Insert
 
             printfn "Identity: %i" errorLogId
             Expect.isTrue (errorLogId > 0) "Expected returned ID to be > 0"
@@ -282,12 +281,11 @@ let tests =
                 }
 
             let! result = 
-                insert {
+                insertTask (Shared ctx) {
                     for e in errorLogTable do
                     entity errorLog
                     getId e.ErrorLogID
                 }
-                |> ctx.InsertAsync
 
             printfn "Identity: %i" result
         }
@@ -414,13 +412,12 @@ let tests =
     
             match errorLogs with
             | Some errorLogs ->
-                let! rowsInserted = 
-                    insert {
+                let! rowsInserted =  
+                    insertTask (Shared ctx) {
                         for e in errorLogTable do
                         entities errorLogs
                         excludeColumn e.ErrorLogID
                     }
-                    |> ctx.InsertAsync
 
                 Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
             | None -> ()
@@ -459,12 +456,11 @@ let tests =
             match errorLogs with
             | Some errorLogs ->            
                 let! rowsInserted = 
-                    insert {
+                    insertTask (Shared ctx) {
                         for e in errorLogTable do
                         entities errorLogs
                         excludeColumn e.ErrorLogID
                     }
-                    |> ctx.InsertAsync
 
                 Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
             | None -> ()
@@ -496,12 +492,11 @@ let tests =
 
             for i in [0..2] do
                 let! result = 
-                    insert {
+                    insertTask (Shared ctx) {
                         for e in errorLogTable do
                         entity stubbedErrorLog
                         getId e.ErrorLogID
                     }
-                    |> ctx.InsertAsync
                 ()
 
             let! count = 
@@ -523,12 +518,11 @@ let tests =
 
             for i in [0..2] do
                 let! result = 
-                    insert {
+                    insertTask (Shared ctx) {
                         for e in errorLogTable do
                         entity stubbedErrorLog
                         getId e.ErrorLogID
                     }
-                    |> ctx.InsertAsync
                 ()
 
             let! count = 
@@ -549,12 +543,11 @@ let tests =
         
             for i in [0..2] do
                 let! result = 
-                    insert {
+                    insertAsync (Shared ctx) {
                         for e in errorLogTable do
                         entity stubbedErrorLog
                         getId e.ErrorLogID
                     }
-                    |> ctx.InsertAsync |> Async.AwaitTask
                 ()
         
             let! count = 
