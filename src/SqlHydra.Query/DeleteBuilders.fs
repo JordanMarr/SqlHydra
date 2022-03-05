@@ -80,14 +80,14 @@ type DeleteTaskBuilder<'Deleted>(ct: ContextType) =
         }
         |> Async.StartImmediateAsTask
     
-/// Builds and returns a delete query.
+/// Builds and returns a delete query that can be manually run by piping into QueryContext delete methods
 let delete<'Deleted> = 
     DeleteBuilder<'Deleted>()
 
-/// Builds and returns a delete query that returns an Async result.
+/// Builds and returns a delete query that returns an Async result
 let deleteAsync<'Deleted> ct = 
     DeleteAsyncBuilder<'Deleted>(ct)
 
-/// Builds and returns a delete query that returns a Task result.
+/// Builds and returns a delete query that returns a Task result
 let deleteTask<'Deleted> ct = 
     DeleteTaskBuilder<'Deleted>(ct)

@@ -122,14 +122,14 @@ type UpdateTaskBuilder<'Updated>(ct: ContextType) =
         |> Async.StartImmediateAsTask
 
 
-/// Builds and returns an update query.
+/// Builds and returns an update query that can be manually run by piping into QueryContext update methods
 let update<'Updated> = 
     UpdateBuilder<'Updated>()
 
-/// Builds and returns an update query that returns an Async result.
+/// Builds an update query that returns an Async result
 let updateAsync<'Updated> ct = 
     UpdateAsyncBuilder<'Updated>(ct)
 
-/// Builds and returns an update query that returns a Task result.
+/// Builds an update query that returns a Task result
 let updateTask<'Updated> ct = 
     UpdateTaskBuilder<'Updated>(ct)

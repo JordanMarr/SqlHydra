@@ -124,14 +124,14 @@ type InsertTaskBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct:
         |> Async.StartImmediateAsTask
 
 
-/// Builds and returns an insert query.
+/// Builds an insert query that can be manually run by piping into QueryContext insert methods
 let insert<'Inserted, 'InsertReturn when 'InsertReturn : struct> = 
     InsertBuilder<'Inserted, 'InsertReturn>()
 
-/// Builds and returns an insert query that returns an Async result.
+/// Builds an insert query that returns an Async result
 let insertAsync<'Inserted, 'InsertReturn when 'InsertReturn : struct> ct = 
     InsertAsyncBuilder<'Inserted, 'InsertReturn>(ct)
 
-    /// Builds and returns an insert query that returns a Task result.
+/// Builds an insert query that returns a Task result
 let insertTask<'Inserted, 'InsertReturn when 'InsertReturn : struct> ct = 
     InsertTaskBuilder<'Inserted, 'InsertReturn>(ct)

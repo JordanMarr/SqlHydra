@@ -441,7 +441,7 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
         }
 
 
-/// Builds and returns a select query.
+/// Builds and returns a select query that can be manually run by piping into QueryContext read methods
 let select<'Selected, 'Mapped> = 
     SelectQueryBuilder<'Selected, 'Mapped>()
 
