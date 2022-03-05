@@ -571,60 +571,123 @@ let tests =
 
 
 
-        testTask "selectTask select entity" {
-            let! nameTuples = 
-                selectTask HydraReader.Read (Create openContext) {
-                    for p in personTable do
-                    orderBy p.LastName
-                    thenBy p.FirstName
-                    take 10
-                    //select p
-                    //map (p.BusinessEntityID)
-                    //toList
-                }
-        
-            printfn $"Results: %A{nameTuples}"
-        }
-
-        testTask "selectTask select and map columns" {
-            let! orderNoLineTotals = 
-                selectTask HydraReader.Read (Create openContext) {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
-                    take 10
-                    select (o.SalesOrderNumber, d.LineTotal) into (orderNumber, lineTotal)
-                    map ($"{orderNumber} {lineTotal}")
-                    toArray
-                }
-
-            printfn $"Results: %A{orderNoLineTotals}"
-        }
-        
-        testAsync "selectAsync select columns" {        
-            let! personMaybe = 
-                selectAsync HydraReader.Read (Create openContext) {
-                    for p in personTable do
-                    orderBy p.LastName
-                    thenBy p.FirstName
-                    take 10
-                    select (p.FirstName, p.LastName)
-                    tryHead
-                }
-        
-            printfn $"Results: %A{personMaybe}"
-        }
-
-        testAsync "selectAsync select and map columns" {
-            let! orderNoLineTotals = 
-                selectAsync HydraReader.Read (Create openContext) {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
-                    take 10
-                    select (o.SalesOrderNumber, d.LineTotal) into (orderNumber, lineTotal)
-                    map ($"{orderNumber} {lineTotal}")
-                    toArray
-                }
-
-            printfn $"Results: %A{orderNoLineTotals}"
-        }
     ]
+
+[<Tests>]
+let selectTests = 
+    categoryList "SqlServer" "Select Tests" [
+        
+        testTask "selectTask" {
+            let! results = 
+                selectTask HydraReader.Read (Create openContext) {
+                    for p in personTable do
+                    take 10
+                }
+        
+            printfn $"Results: %A{results}"
+        }
+        
+        testTask "selectTask - select" {
+            let! results = 
+                selectTask HydraReader.Read (Create openContext) {
+                    for p in personTable do
+                    take 10
+                    select p
+                }
+        
+            printfn $"Results: %A{results}"
+        }
+
+        testTask "selectTask - mapList entity" {
+            let! results = 
+                selectTask HydraReader.Read (Create openContext) {
+                    for p in personTable do
+                    take 10
+                    mapList p
+                }
+        
+            printfn $"Results: %A{results}"
+        }
+        
+        testTask "selectTask - mapList column" {
+            let! results = 
+                selectTask HydraReader.Read (Create openContext) {
+                    for p in personTable do
+                    take 10
+                    mapList p.FirstName
+                }
+                
+            printfn $"Results: %A{results}"
+        }
+
+        testTask "selectTask - select entity - mapList column" {
+            let! results = 
+                selectTask HydraReader.Read (Create openContext) {
+                    for p in personTable do
+                    take 10
+                    select p
+                    mapList $"{p.FirstName} {p.LastName}"
+                }
+        
+            printfn $"Results: %A{results}"
+        }
+        
+        testTask "selectTask - select columns into - mapList column" {
+            let! results = 
+                selectTask HydraReader.Read (Create openContext) {
+                    for p in personTable do
+                    take 10
+                    select (p.FirstName, p.LastName) into (fname, lname)
+                    mapList $"{fname} {lname}"
+                }
+                
+            printfn $"Results: %A{results}"
+        }
+        
+        testTask "selectTask - mapList" {
+            let! results = 
+                selectTask HydraReader.Read (Create openContext) {
+                    for p in personTable do
+                    take 10
+                    mapList p.FirstName
+                }
+                
+            printfn $"Results: %A{results}"
+        }
+
+        testTask "selectTask - select only" {
+            let! results = 
+                selectTask HydraReader.Read (Create openContext) {
+                    for p in personTable do
+                    take 10
+                    select p
+                }
+        
+            printfn $"Results: %A{results}"
+        }
+        
+        testTask "selectTask - map only" {
+            let! results = 
+                selectTask HydraReader.Read (Create openContext) {
+                    for p in personTable do
+                    take 10
+                    mapList (p.FirstName)
+                }
+        
+            printfn $"Results: %A{results}"
+        }
+
+        testTask "selectTask - select and map" {
+            let! results = 
+                selectTask HydraReader.Read (Create openContext) {
+                    for p in personTable do
+                    take 10
+                    select p
+                    mapList (p.FirstName)
+                }
+        
+            printfn $"Results: %A{results}"
+        }
+        
+    ]
+    
