@@ -271,6 +271,18 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let query = state |> getQueryOrDefault
         this.MapFn <- Some map
         QuerySource<'Mapped list, Query>(query, state.TableMappings)
+    
+    /// Returns the query results as an array.
+    [<CustomOperation("toArray", MaintainsVariableSpace = true)>]
+    member this.ToArray (state: QuerySource<'Selected>) =
+        let query = state |> getQueryOrDefault
+        QuerySource<'Selected array, Query>(query, state.TableMappings)
+
+    /// Returns the query results as a list.
+    [<CustomOperation("toList", MaintainsVariableSpace = true)>]
+    member this.ToList (state: QuerySource<'Selected>) =
+        let query = state |> getQueryOrDefault
+        QuerySource<'Selected list, Query>(query, state.TableMappings)
 
     /// COUNT aggregate function
     [<CustomOperation("count", MaintainsVariableSpace = true)>]
@@ -337,11 +349,19 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
     /// this input will always be 'Selected -- even if select is not present.
     member this.Run(state: QuerySource<'Selected, Query>) =
         this.RunSelected(state.Query, id)
-
+    
+    /// Run: toList
+    member this.Run(state: QuerySource<'Selected list, Query>) =
+        this.RunSelected(state.Query, Seq.toList)
+    
+    /// Run: toArray
+    member this.Run(state: QuerySource<'Selected array, Query>) =
+        this.RunSelected(state.Query, Seq.toArray)
+    
     /// Run: mapList
     member this.Run(state: QuerySource<'Mapped list, Query>) =
         this.RunMapped(state.Query, Seq.toList)
-                        
+  
     // Run: mapArray
     member this.Run(state: QuerySource<'Mapped array, Query>) =
         this.RunMapped(state.Query, Seq.toArray)
@@ -400,11 +420,19 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
     /// this input will always be 'Selected -- even if select is not present.
     member this.Run(state: QuerySource<'Selected, Query>) =
         this.RunSelected(state.Query, id)
+    
+    /// Run: toList
+    member this.Run(state: QuerySource<'Selected list, Query>) =
+        this.RunSelected(state.Query, Seq.toList)
+    
+    /// Run: toArray
+    member this.Run(state: QuerySource<'Selected array, Query>) =
+        this.RunSelected(state.Query, Seq.toArray)
 
     /// Run: mapList
     member this.Run(state: QuerySource<'Mapped list, Query>) =
         this.RunMapped(state.Query, Seq.toList)
-                    
+    
     // Run: mapArray
     member this.Run(state: QuerySource<'Mapped array, Query>) =
         this.RunMapped(state.Query, Seq.toArray)
