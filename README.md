@@ -272,20 +272,25 @@ SqlHydra.Query can be used with any library that accepts a data reader; however,
 
 ### Using the Async and Task Builders
 The new `selectAsync` and `selectTask` builders should generally be prefered over the older `select` builder because they provide several advantages:
-1) They are self-executing.
+
+#### They are self-executing.
 The new `selectAsync` and `selectTask` builders will execute the query automatically, whereas the old `select` builder creates a query that must be manually passed into a `QueryContext` execution method. 
-2) They offer more explicit control over the `QueryContext` and connection handling.
+
+#### They offer more explicit control over the `QueryContext` and connection handling.
 The new `selectAsync` and `selectTask` builders must be initialized with with a `ContextType` discriminated union value that can either be `Shared` or `Create`.
 Passing in a `Shared` context will run the query with an already existing `QueryContext`, whereas `Create` will create a new context and dispose it automatically after executing the query. 
-3) Makes it possible to create a query function that is not wrapped in an `async` or `task` block.
+
+#### They make it possible to create a query function that is not wrapped in an `async` or `task` block.
 One problem with the `select` builder is that the `QueryContext` generally had to be initialized within the `task` block to ensure that it was not disposed while the task was running asynchronously. Having the ability to initilize  a `selectAsync` or `selectTask` builder with `Create` makes it a completely self-contained query which can exist by itself in a function without being wrapped in a `task` block.
-4) The new `selectAsync` and `selectTask` builders have the following new custom operations that are applied to the queried results:
+**The new `selectAsync` and `selectTask` builders have the following new custom operations that are applied to the queried results:**
+
   * `toArray`
   * `toList`
   * `mapArray`
   * `mapList`
 These new operations are designed to make the new select builders completely self-contained by removing the need to pipe the results.
-5) Cleaner.
+
+#### They are Cleaner
 Removing the need to pipeline the query builder into a `QueryContext` makes the code a bit more tidy.
 
 ### Setup
@@ -487,31 +492,22 @@ Transformations (i.e. `.ToString()` or calling any functions is _not supported_ 
 ✅ CORRECT:
 ```F#
 let getCities () =
-    task {
-        let city = getCity() // DO prepare where parameters above and then pass into the where clause
-
-        let! cities =
-            selectTask HydraReader.Read (Create openContext) {
-                for a in addressTable do
-                where (a.City = city)
-                select (a.City, a.StateProvince) into (city, state)
-                mapList $"City: %s{city}, State: %s{state}")         // DO transforms using the `mapSeq`, `mapArray` or `mapList` operations
-            }
-        
-        return cities
+    let city = getCity() // DO prepare where parameters above and then pass into the where clause
+    selectTask HydraReader.Read (Create openContext) {
+        for a in addressTable do
+        where (a.City = city)
+        select (a.City, a.StateProvince) into (city, state)
+        mapList $"City: %s{city}, State: %s{state}"   // DO transforms using the `mapSeq`, `mapArray` or `mapList` operations
     }
 ```
 
 ❌ INCORRECT:
 ```F#
 let getCities () =
-    task {
-        let cities =
-            selectTask HydraReader.Read (Create openContext) {
-                for a in addressTable do
-                where (a.City = getCity()) // DO NOT perform calculations or translations within the builder
-                select ("City: " + a.City, "State: " + a.StateProvince) // DO NOT transform results within the builder 
-            }
+    selectTask HydraReader.Read (Create openContext) {
+        for a in addressTable do
+        where (a.City = getCity()) // DO NOT perform calculations or translations within the builder
+        select ($"City: %s{city}, State: %s{state}")   // DO NOT transform results within the builder 
     }
 ```
 
