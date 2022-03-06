@@ -118,7 +118,7 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
 
 ```bat
   <Target Name="SqlHydra" BeforeTargets="Clean">
-    <Exec Command="dotnet sqlhydra-npgsql" />
+    <Exec Command="dotnet sqlhydra-oracle" />
   </Target>
 ```
 
