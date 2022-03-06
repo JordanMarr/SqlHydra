@@ -68,16 +68,14 @@ type SelectBuilder<'Selected, 'Mapped> () =
 
     /// Sets the WHERE condition
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
-    member this.Where (state:QuerySource<'T>, [<ProjectionParameter>] whereExpression) = 
-        let query = state |> getQueryOrDefault
+    member this.Where (state: QuerySource<'T, Query>, [<ProjectionParameter>] whereExpression) = 
+        let query = state.Query
         let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
         QuerySource<'T, Query>(query.Where(fun w -> where), state.TableMappings)
 
     /// Sets the SELECT statement and filters the query to include only the selected tables
     [<CustomOperation("select", MaintainsVariableSpace = true, AllowIntoPattern = true)>]
-    member this.Select (state: QuerySource<'T>, [<ProjectionParameter>] selectExpression: Expression<Func<'T, 'Selected>>) =
-        let query = state |> getQueryOrDefault
-
+    member this.Select (state: QuerySource<'T, Query>, [<ProjectionParameter>] selectExpression: Expression<Func<'T, 'Selected>>) =
         let selections = LinqExpressionVisitors.visitSelect<'T,'Selected> selectExpression
 
         let queryWithSelectedColumns =
@@ -102,73 +100,67 @@ type SelectBuilder<'Selected, 'Mapped> () =
                         |> fun parts -> String.Join(".", parts)
 
                     q.SelectRaw($"{aggFn}({fqColWithCurlyBraces})")
-            ) query
+            ) state.Query
                   
         QuerySource<'Selected, Query>(queryWithSelectedColumns, state.TableMappings)
 
     /// Sets the ORDER BY for single column
     [<CustomOperation("orderBy", MaintainsVariableSpace = true)>]
-    member this.OrderBy (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
-        let query = state |> getQueryOrDefault
+    member this.OrderBy (state: QuerySource<'T, Query>, [<ProjectionParameter>] propertySelector) = 
         let orderedQuery = 
             LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
             |> function 
                 | LinqExpressionVisitors.OrderByColumn p -> 
-                    query.OrderBy(FQ.fullyQualifyColumn state.TableMappings p)
+                    state.Query.OrderBy(FQ.fullyQualifyColumn state.TableMappings p)
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
-                    query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p})")        
+                    state.Query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p})")        
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the ORDER BY for single column
     [<CustomOperation("thenBy", MaintainsVariableSpace = true)>]
-    member this.ThenBy (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
-        let query = state |> getQueryOrDefault
+    member this.ThenBy (state: QuerySource<'T, Query>, [<ProjectionParameter>] propertySelector) = 
         let orderedQuery = 
             LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
             |> function 
                 | LinqExpressionVisitors.OrderByColumn p -> 
-                    query.OrderBy(FQ.fullyQualifyColumn state.TableMappings p)
+                    state.Query.OrderBy(FQ.fullyQualifyColumn state.TableMappings p)
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
-                    query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p})")        
+                    state.Query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p})")        
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the ORDER BY DESC for single column
     [<CustomOperation("orderByDescending", MaintainsVariableSpace = true)>]
-    member this.OrderByDescending (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
-        let query = state |> getQueryOrDefault
+    member this.OrderByDescending (state: QuerySource<'T, Query>, [<ProjectionParameter>] propertySelector) = 
         let orderedQuery = 
             LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
             |> function 
                 | LinqExpressionVisitors.OrderByColumn p -> 
-                    query.OrderByDesc(FQ.fullyQualifyColumn state.TableMappings p)
+                    state.Query.OrderByDesc(FQ.fullyQualifyColumn state.TableMappings p)
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
-                    query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p}) DESC")        
+                    state.Query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p}) DESC")        
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the ORDER BY DESC for single column
     [<CustomOperation("thenByDescending", MaintainsVariableSpace = true)>]
-    member this.ThenByDescending (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
-        let query = state |> getQueryOrDefault
+    member this.ThenByDescending (state: QuerySource<'T, Query>, [<ProjectionParameter>] propertySelector) = 
         let orderedQuery = 
             LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
             |> function 
                 | LinqExpressionVisitors.OrderByColumn p -> 
-                    query.OrderByDesc(FQ.fullyQualifyColumn state.TableMappings p)
+                    state.Query.OrderByDesc(FQ.fullyQualifyColumn state.TableMappings p)
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
-                    query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p}) DESC")        
+                    state.Query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p}) DESC")        
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the SKIP value for query
     [<CustomOperation("skip", MaintainsVariableSpace = true)>]
-    member this.Skip (state:QuerySource<'T>, skip) = 
-        let query = state |> getQueryOrDefault
-        QuerySource<'T, Query>(query.Skip(skip), state.TableMappings)
+    member this.Skip (state: QuerySource<'T, Query>, skip) = 
+        QuerySource<'T, Query>(state.Query.Skip(skip), state.TableMappings)
     
     /// Sets the TAKE value for query
     [<CustomOperation("take", MaintainsVariableSpace = true)>]
-    member this.Take (state:QuerySource<'T>, take) = 
-        let query = state |> getQueryOrDefault
-        QuerySource<'T, Query>(query.Take(take), state.TableMappings)
+    member this.Take (state: QuerySource<'T, Query>, take) =
+        QuerySource<'T, Query>(state.Query.Take(take), state.TableMappings)
 
     /// INNER JOIN table on one or more columns
     [<CustomOperation("join", MaintainsVariableSpace = true, IsLikeJoin = true, JoinConditionWord = "on")>]
@@ -232,62 +224,53 @@ type SelectBuilder<'Selected, 'Mapped> () =
 
     /// Sets the GROUP BY for one or more columns.
     [<CustomOperation("groupBy", MaintainsVariableSpace = true)>]
-    member this.GroupBy (state:QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
-        let query = state |> getQueryOrDefault
+    member this.GroupBy (state: QuerySource<'T, Query>, [<ProjectionParameter>] propertySelector) = 
         let properties = LinqExpressionVisitors.visitGroupBy<'T, 'Prop> propertySelector (FQ.fullyQualifyColumn state.TableMappings)
-        QuerySource<'T, Query>(query.GroupBy(properties |> List.toArray), state.TableMappings)
+        QuerySource<'T, Query>(state.Query.GroupBy(properties |> List.toArray), state.TableMappings)
 
     /// Sets the HAVING condition.
     [<CustomOperation("having", MaintainsVariableSpace = true)>]
-    member this.Having (state:QuerySource<'T>, [<ProjectionParameter>] havingExpression) = 
-        let query = state |> getQueryOrDefault
+    member this.Having (state: QuerySource<'T, Query>, [<ProjectionParameter>] havingExpression) = 
         let having = LinqExpressionVisitors.visitHaving<'T> havingExpression (FQ.fullyQualifyColumn state.TableMappings)
-        QuerySource<'T, Query>(query.Having(fun w -> having), state.TableMappings)
+        QuerySource<'T, Query>(state.Query.Having(fun w -> having), state.TableMappings)
 
     /// Sets query to return DISTINCT values
     [<CustomOperation("distinct", MaintainsVariableSpace = true)>]
-    member this.Distinct (state:QuerySource<'T>) = 
-        let query = state |> getQueryOrDefault        
-        QuerySource<'T, Query>(query.Distinct(), state.TableMappings)
+    member this.Distinct (state: QuerySource<'T, Query>) = 
+        QuerySource<'T, Query>(state.Query.Distinct(), state.TableMappings)
 
     /// Maps the query results into a seq.
     [<CustomOperation("mapSeq", MaintainsVariableSpace = true)>]
-    member this.MapSeq (state: QuerySource<'Selected>, [<ProjectionParameter>] map: Func<'Selected, 'Mapped>) =
-        let query = state |> getQueryOrDefault
+    member this.MapSeq (state: QuerySource<'Selected, Query>, [<ProjectionParameter>] map: Func<'Selected, 'Mapped>) =
         this.MapFn <- Some map
-        QuerySource<'Mapped seq, Query>(query, state.TableMappings)
+        QuerySource<'Mapped seq, Query>(state.Query, state.TableMappings)
     
     /// Maps the query results into an array.
     [<CustomOperation("mapArray", MaintainsVariableSpace = true)>]
-    member this.MapArray (state: QuerySource<'Selected>, [<ProjectionParameter>] map: Func<'Selected, 'Mapped>) =
-        let query = state |> getQueryOrDefault
+    member this.MapArray (state: QuerySource<'Selected, Query>, [<ProjectionParameter>] map: Func<'Selected, 'Mapped>) =
         this.MapFn <- Some map
-        QuerySource<'Mapped array, Query>(query, state.TableMappings)
+        QuerySource<'Mapped array, Query>(state.Query, state.TableMappings)
         
     /// Maps the query results into a list.
     [<CustomOperation("mapList", MaintainsVariableSpace = true)>]
-    member this.MapList (state: QuerySource<'Selected>, [<ProjectionParameter>] map: Func<'Selected, 'Mapped>) =
-        let query = state |> getQueryOrDefault
+    member this.MapList (state: QuerySource<'Selected, Query>, [<ProjectionParameter>] map: Func<'Selected, 'Mapped>) =
         this.MapFn <- Some map
-        QuerySource<'Mapped list, Query>(query, state.TableMappings)
+        QuerySource<'Mapped list, Query>(state.Query, state.TableMappings)
     
     /// Returns the query results as an array.
     [<CustomOperation("toArray", MaintainsVariableSpace = true)>]
-    member this.ToArray (state: QuerySource<'Selected>) =
-        let query = state |> getQueryOrDefault
-        QuerySource<'Selected array, Query>(query, state.TableMappings)
+    member this.ToArray (state: QuerySource<'Selected, Query>) =
+        QuerySource<'Selected array, Query>(state.Query, state.TableMappings)
 
     /// Returns the query results as a list.
     [<CustomOperation("toList", MaintainsVariableSpace = true)>]
-    member this.ToList (state: QuerySource<'Selected>) =
-        let query = state |> getQueryOrDefault
-        QuerySource<'Selected list, Query>(query, state.TableMappings)
+    member this.ToList (state: QuerySource<'Selected, Query>) =
+        QuerySource<'Selected list, Query>(state.Query, state.TableMappings)
 
     /// COUNT aggregate function
     [<CustomOperation("count", MaintainsVariableSpace = true)>]
-    member this.Count (state:QuerySource<'T>) = 
-        let query = state |> getQueryOrDefault
-        QuerySource<ResultModifier.Count<int>, Query>(query.AsCount(), state.TableMappings)
+    member this.Count (state: QuerySource<'T, Query>) = 
+        QuerySource<ResultModifier.Count<int>, Query>(state.Query.AsCount(), state.TableMappings)
 
     /// Applies Seq.tryHead to the query results.
     [<CustomOperation("tryHead", MaintainsVariableSpace = true)>]
