@@ -272,11 +272,25 @@ type SelectBuilder<'Selected, 'Mapped> () =
     member this.Count (state: QuerySource<'T, Query>) = 
         QuerySource<ResultModifier.Count<int>, Query>(state.Query.AsCount(), state.TableMappings)
 
-    /// Applies Seq.tryHead to the query results.
+    /// Applies Seq.tryHead to the 'Selected query results.
     [<CustomOperation("tryHead", MaintainsVariableSpace = true)>]
     member this.TryHead (state: QuerySource<'Selected, Query>) = 
-        QuerySource<'Mapped option, Query>(state.Query, state.TableMappings)
+        QuerySource<'Selected option, Query>(state.Query, state.TableMappings)
 
+    /// Applies Seq.tryHead to the 'Mapped query results.
+    [<CustomOperation("tryHead", MaintainsVariableSpace = true)>]
+    member this.TryHead (state: QuerySource<'Mapped seq, Query>) = 
+        QuerySource<'Mapped option, Query>(state.Query, state.TableMappings)
+    
+    /// Applies Seq.tryHead to the 'Mapped query results.
+    [<CustomOperation("tryHead", MaintainsVariableSpace = true)>]
+    member this.TryHead (state: QuerySource<'Mapped array, Query>) = 
+        QuerySource<'Mapped option, Query>(state.Query, state.TableMappings)
+        
+    /// Applies Seq.tryHead to the 'Mapped query results.
+    [<CustomOperation("tryHead", MaintainsVariableSpace = true)>]
+    member this.TryHead (state: QuerySource<'Mapped list, Query>) = 
+        QuerySource<'Mapped option, Query>(state.Query, state.TableMappings)
 
 /// A select builder that returns a select query.
 type SelectQueryBuilder<'Selected, 'Mapped> () = 
@@ -344,9 +358,13 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
     member this.Run(state: QuerySource<'Mapped seq, Query>) =
         this.RunMapped(state.Query, id)
         
-    // Run: tryHead
+    // Run: tryHead - 'Selected
     member this.Run(state: QuerySource<'Selected option, Query>) =
         this.RunSelected(state.Query, Seq.tryHead)
+
+    // Run: tryHead - 'Mapped
+    member this.Run(state: QuerySource<'Mapped option, Query>) =
+        this.RunMapped(state.Query, Seq.tryHead)
 
     // Run: count
     member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =
@@ -411,9 +429,13 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
     member this.Run(state: QuerySource<'Mapped seq, Query>) =
         this.RunMapped(state.Query, id)
     
-    // Run: tryHead
+    // Run: tryHead - 'Selected
     member this.Run(state: QuerySource<'Selected option, Query>) =
         this.RunSelected(state.Query, Seq.tryHead)
+
+    // Run: tryHead - 'Mapped
+    member this.Run(state: QuerySource<'Mapped option, Query>) =
+        this.RunMapped(state.Query, Seq.tryHead)
 
     // Run: count
     member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =

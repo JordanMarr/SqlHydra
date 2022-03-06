@@ -109,15 +109,27 @@ let selectTests =
         
             Expect.isTrue (results > 0) ""
         }
-
-        testAsync "selectAsync - tryHead" {
+        
+        testAsync "selectAsync - tryHead - Selected" {
             let! result = 
                 selectAsync HydraReader.Read (Create openContext) {
                     for p in personTable do
                     take 1
                     tryHead
                 }
+                
+            Expect.isSome result ""
+        }
         
+        testAsync "selectAsync - tryHead - Mapped" {
+            let! result = 
+                selectAsync HydraReader.Read (Create openContext) {
+                    for p in personTable do
+                    take 1
+                    mapSeq $"{p.FirstName} {p.LastName}"
+                    tryHead
+                }
+                
             Expect.isSome result ""
         }
         
