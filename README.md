@@ -497,7 +497,7 @@ let getCities () =
         for a in addressTable do
         where (a.City = city)
         select (a.City, a.StateProvince) into (city, state)
-        mapList $"City: %s{city}, State: %s{state}")         // DO transforms using the `mapSeq`, `mapArray` or `mapList` operations
+        mapList $"City: %s{city}, State: %s{state}"   // DO transforms using the `mapSeq`, `mapArray` or `mapList` operations
     }
 ```
 
@@ -507,7 +507,7 @@ let getCities () =
     selectTask HydraReader.Read (Create openContext) {
         for a in addressTable do
         where (a.City = getCity()) // DO NOT perform calculations or translations within the builder
-        select ("City: " + a.City, "State: " + a.StateProvince) // DO NOT transform results within the builder 
+        select ($"City: %s{city}, State: %s{state}")   // DO NOT transform results within the builder 
     }
 ```
 
