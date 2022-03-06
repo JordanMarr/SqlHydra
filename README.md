@@ -324,10 +324,13 @@ Selecting city and state columns only:
 ```F#
 let getCities (cityFilter: string) = 
     selectTask HydraReader.Read (Create openContext) {
-        for a in addressTable do                                // Adds a query FROM table
-        where (a.City = cityFilter)                             // Adds a query WHERE clause
-        select (a.City, a.StateProvince) into (city, state)     // Adds a query SELECT columns
-        mapList $"City, State: %s{city}, %s{state}"             // Transforms the query results
+        for a in addressTable do                                // Specifies a FROM table in the query
+        where (a.City = cityFilter)                             // Specifies a WHERE clause in the query
+        select (a.City, a.StateProvince) into selected          // Specifies which entities and/or columns to SELECT in the query
+        mapList (                                               // Transforms the query results
+            let city, state = selected
+            $"City, State: %s{city}, %s{state}"
+        )
     }
 ```
 
