@@ -118,7 +118,7 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
 
 ```bat
   <Target Name="SqlHydra" BeforeTargets="Clean">
-    <Exec Command="dotnet sqlhydra-npgsql" />
+    <Exec Command="dotnet sqlhydra-oracle" />
   </Target>
 ```
 
@@ -324,10 +324,13 @@ Selecting city and state columns only:
 ```F#
 let getCities (cityFilter: string) = 
     selectTask HydraReader.Read (Create openContext) {
-        for a in addressTable do                                // Adds a query FROM table
-        where (a.City = cityFilter)                             // Adds a query WHERE clause
-        select (a.City, a.StateProvince) into (city, state)     // Adds a query SELECT columns
-        mapList $"City, State: %s{city}, %s{state}"             // Transforms the query results
+        for a in addressTable do                                // Specifies a FROM table in the query
+        where (a.City = cityFilter)                             // Specifies a WHERE clause in the query
+        select (a.City, a.StateProvince) into selected          // Specifies which entities and/or columns to SELECT in the query
+        mapList (                                               // Transforms the query results
+            let city, state = selected
+            $"City, State: %s{city}, %s{state}"
+        )
     }
 ```
 
@@ -396,6 +399,51 @@ select {
 }
 ```
 
+#### Transforming Query Results
+
+To transform the query results use the `mapSeq`, `mapArray` or `mapList` operations. 
+
+```F#
+    let! lineTotals =
+        selectTask HydraReader.Read (Create openContext) {
+            for o in orderHeaderTable do
+            join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+            where (o.OnlineOrderFlag = true)
+            mapList (
+                {| 
+                    ShipDate = 
+                        match o.ShipDate with
+                        | Some d -> d.ToShortDateString()
+                        | None -> "No Order Number"
+                    LineTotal = (decimal qty) * unitPrice
+                |}
+            )
+        }
+```
+
+If a custom subset of entities and/or columns has been selected in the query, you will need to project them into a new binding using the `into` operation:
+
+```F#
+    let! lineTotals =
+        selectTask HydraReader.Read (Create openContext) {
+            for o in orderHeaderTable do
+            join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+            where (o.OnlineOrderFlag = true)
+            select (o, d.OrderQty, d.UnitPrice) into selected  // project selected values so they can be mapped
+            mapList (
+                let o, qty, unitPrice = selected               // unpack the selected values for use in transform
+                {| 
+                    ShipDate = 
+                        match o.ShipDate with
+                        | Some d -> d.ToShortDateString()
+                        | None -> "No Order Number"
+                    LineTotal = (decimal qty) * unitPrice
+                |}
+            )
+        }
+```
+
+
 #### Aggregates
 
 _Aggregate functions (can be used in `select`, `having` and `orderBy` clauses):_
@@ -413,8 +461,11 @@ let getCategoriesWithHighAvgPrice () =
         where (p.ProductCategoryID <> None)
         groupBy p.ProductCategoryID
         having (minBy p.ListPrice > 500M && maxBy p.ListPrice < 1000M)
-        select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice) into (catId, minPrice, maxPrice)
-        mapList $"CatID: {catId}, MinPrice: {minPrice}, MaxPrice: {maxPrice}"
+        select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice) into selected
+        mapList (
+            let catId, minPrice, maxPrice = selected
+            $"CatID: {catId}, MinPrice: {minPrice}, MaxPrice: {maxPrice}"
+        )
     }
 ```
 
