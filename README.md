@@ -458,8 +458,11 @@ let getCategoriesWithHighAvgPrice () =
         where (p.ProductCategoryID <> None)
         groupBy p.ProductCategoryID
         having (minBy p.ListPrice > 500M && maxBy p.ListPrice < 1000M)
-        select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice) into (catId, minPrice, maxPrice)
-        mapList $"CatID: {catId}, MinPrice: {minPrice}, MaxPrice: {maxPrice}"
+        select (p.ProductCategoryID, minBy p.ListPrice, maxBy p.ListPrice) into selected
+        mapList (
+            let catId, minPrice, maxPrice = selected
+            $"CatID: {catId}, MinPrice: {minPrice}, MaxPrice: {maxPrice}"
+        )
     }
 ```
 
