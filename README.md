@@ -396,6 +396,51 @@ select {
 }
 ```
 
+#### Transforming Query Results
+
+To transform the query results use the `mapSeq`, `mapArray` or `mapList` operations. 
+
+```F#
+    let! lineTotals =
+        selectTask HydraReader.Read (Create openContext) {
+            for o in orderHeaderTable do
+            join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+            where (o.OnlineOrderFlag = true)
+            mapList (
+                {| 
+                    ShipDate = 
+                        match o.ShipDate with
+                        | Some d -> d.ToShortDateString()
+                        | None -> "No Order Number"
+                    LineTotal = (decimal qty) * unitPrice
+                |}
+            )
+        }
+```
+
+If a custom subset of entities and/or columns has been selected in the query, you will need to project them into a new binding using the `into` operation:
+
+```F#
+    let! lineTotals =
+        selectTask HydraReader.Read (Create openContext) {
+            for o in orderHeaderTable do
+            join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+            where (o.OnlineOrderFlag = true)
+            select (o, d.OrderQty, d.UnitPrice) into selected  // project selected values so they can be mapped
+            mapList (
+                let o, qty, unitPrice = selected               // unpack the selected values for use in transform
+                {| 
+                    ShipDate = 
+                        match o.ShipDate with
+                        | Some d -> d.ToShortDateString()
+                        | None -> "No Order Number"
+                    LineTotal = (decimal qty) * unitPrice
+                |}
+            )
+        }
+```
+
+
 #### Aggregates
 
 _Aggregate functions (can be used in `select`, `having` and `orderBy` clauses):_
