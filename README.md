@@ -334,17 +334,10 @@ _Special `where` filter operators:_
 Select `Address` entities where City starts with `S`:
 ```F#
 let getAddressesInCitiesStartingWithS () = 
-    task {
-        use ctx = openContext ()
-        
-        let! addresses =
-            selectAsync HydraReader.Read (Shared ctx) {
-                for a in addressTable do
-                where (a.City =% "S%")
-            }
-            
-        return addresses
-    }
+        selectAsync HydraReader.Read (Create openContext) {
+            for a in addressTable do
+            where (a.City =% "S%")
+        }
 ```
 
 #### Joins
