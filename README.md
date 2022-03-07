@@ -514,7 +514,7 @@ let! distinctCustomerNames =
 
 ### Dos and Don'ts
 
-:boom: The `select` clause currently only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
+:boom: The `select` clause only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
 Transformations (i.e. `.ToString()` or calling any functions is _not supported_ and will throw an exception.
 
 :boom: The `where` clause will automatically parameterize your input values. _However_, similar to the `select` clause, the `where` clause does not support calling an transformations (i.e. `.ToString()`). So you must prepare any parameter transformations before the builder. 
