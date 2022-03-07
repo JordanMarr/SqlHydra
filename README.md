@@ -541,8 +541,8 @@ These new operations are designed to make the new select builders completely sel
 #### They are Cleaner
 Removing the need to pipeline the query builder into a `QueryContext` makes the code a bit more tidy.
 
-### Creating a Custom Select Builder
-If the redundancy of passing the generic `HydraReader.Read` static method into the `selectAsync` and `selectTask` builders bothers you, you can easily create your builders that have this baked-in:
+### Creating a Custom `selectAsync` or `selectTask` Builder
+If the redundancy of passing the generic `HydraReader.Read` static method into the `selectAsync` and `selectTask` builders bothers you, you can easily create your builder that has it baked-in:
 
 ```F#
 let selectTask' ct = selectTask HydraReader.Read ct
