@@ -10,7 +10,7 @@ let getSchema (cfg: Config) : Schema =
     let sTables = conn.GetSchema("Tables")
     let sColumns = conn.GetSchema("Columns")
     let sViews = conn.GetSchema("Views")
-
+    
     let pks = 
         let sql =
             """
@@ -42,6 +42,27 @@ let getSchema (cfg: Config) : Schema =
                 rdr.["COLUMN_NAME"] :?> string
         ]
         |> Set.ofList
+
+    let enums = 
+        let sql = 
+            """
+            SELECT      n.nspname as Schema, t.typname as EnumName
+            FROM        pg_type t 
+            LEFT JOIN   pg_catalog.pg_namespace n ON n.oid = t.typnamespace 
+            WHERE       (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid)) and typtype = 'e'
+            AND     NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid)
+            AND     n.nspname NOT IN ('pg_catalog', 'information_schema');
+            """
+
+        use cmd = new Npgsql.NpgsqlCommand(sql, conn)
+        use rdr = cmd.ExecuteReader()
+        [
+            while rdr.Read() do
+                //rdr.["Schema"] :?> string,
+                rdr.["EnumName"] :?> string
+        ]
+        |> Set.ofList
+
 
     let allColumns = 
         sColumns.Rows
@@ -96,7 +117,7 @@ let getSchema (cfg: Config) : Schema =
                     col.TableName = tbl.TableName
                 )
 
-            let supportedColumns = 
+            let mappedColumns = 
                 tableColumns
                 |> Seq.choose (fun col -> 
                     NpgsqlDataTypes.tryFindTypeMapping(col.ProviderTypeName)
@@ -110,6 +131,30 @@ let getSchema (cfg: Config) : Schema =
                     )
                 )
                 |> Seq.toList
+
+            let enumColumns = 
+                tableColumns
+                |> Seq.choose (fun col ->
+                    if enums.Contains col.ProviderTypeName then 
+                        {
+                            Column.Name = col.ColumnName
+                            Column.IsNullable = col.IsNullable
+                            Column.TypeMapping = 
+                                { 
+                                    TypeMapping.ColumnTypeAlias = col.ProviderTypeName
+                                    TypeMapping.ClrType = "string"
+                                    TypeMapping.DbType = DbType.AnsiString
+                                    TypeMapping.ReaderMethod = "GetFieldValue"
+                                    TypeMapping.ProviderDbType = None
+                                }
+                            Column.IsPK = pks.Contains(col.TableSchema, col.TableName, col.ColumnName)
+                        } |> Some
+                    else 
+                        None
+                )
+                |> Seq.toList
+
+            let supportedColumns = mappedColumns @ enumColumns
 
             let filteredColumns = 
                 supportedColumns
