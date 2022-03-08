@@ -635,11 +635,10 @@ let currenciesMaybe =
 
 match currenciesMaybe with
 | Some currencies ->
-    let! rowsInserted = 
-        insertTask (Create openContext) {
+    do! insertTask (Create openContext) {
             into currencyTable
             entities currencies
-        }
+        } :> Task // upcast to Task if you want to ignore the resulting value
 | None ->
     printfn "Skipping insert because entities seq was empty."
 ```
@@ -650,16 +649,14 @@ match currenciesMaybe with
 To update individual columns, use the `set` operation.
 
 ```F#
-let rowsUpdated = 
-    update {
+do! updateAsync (Create openContext) {
         for e in errorLogTable do
         set e.ErrorNumber 123
         set e.ErrorMessage "ERROR #123"
         set e.ErrorLine (Some 999)
         set e.ErrorProcedure None
         where (e.ErrorLogID = 1)
-    }
-    |> ctx.Update
+    } :> Task // upcast to Task if you want to ignore the resulting value
 ```
 
 #### Update Entire Record
@@ -701,11 +698,10 @@ update {
 ### Delete Builder
 
 ```F#
-let! rowsDeleted = 
-    deleteTask (Create openContext) {
+do! deleteTask (Create openContext) {
         for e in errorLogTable do
         where (e.ErrorLogID = 5)
-    }
+    } :> Task // upcast to Task if you want to ignore the resulting value
 
 printfn "Rows deleted: %i" rowsDeleted
 ```
