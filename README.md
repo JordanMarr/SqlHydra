@@ -359,7 +359,7 @@ To create a join query with multi-columns, use tuples:
 select {
     for o in orderHeaderTable do
     join d in orderDetailTable on ((o.SalesOrderID, o.ModifiedDate) = (d.SalesOrderID, d.ModifiedDate))
-    select o
+    select (o, d)
 }
 ```
 
@@ -550,7 +550,7 @@ These new operations are designed to make the new select builders completely sel
 Removing the need to pipeline the query builder into a `QueryContext` makes the code a bit more tidy.
 
 ### Creating a Custom `selectAsync` or `selectTask` Builder
-If the redundancy of passing the generic `HydraReader.Read` static method into the `selectAsync` and `selectTask` builders bothers you, you can easily create your builder that has it baked-in:
+If the redundancy of passing the generated `HydraReader.Read` static method into the `selectAsync` and `selectTask` builders bothers you, you can easily create your builder that has it baked-in:
 
 ```F#
 let selectTask' ct = selectTask HydraReader.Read ct
