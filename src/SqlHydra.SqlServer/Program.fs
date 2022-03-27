@@ -2,8 +2,9 @@
 
 open SqlHydra.SqlServer
 open SqlHydra
+open SqlHydra.Domain
 open System.IO
-open Domain
+open Spectre.Console
 
 type private SelfRef = class end
 let version = System.Reflection.Assembly.GetAssembly(typeof<SelfRef>).GetName().Version |> string
@@ -13,6 +14,7 @@ let app =
         AppInfo.Name = "SqlHydra.SqlServer"
         AppInfo.Command = "sqlhydra-mssql"
         AppInfo.DefaultReaderType = "Microsoft.Data.SqlClient.SqlDataReader"
+        AppInfo.DefaultProvider = "Microsoft.Data.SqlClient"
         AppInfo.Version = version
     }
 
@@ -28,4 +30,5 @@ let main argv =
 
     File.WriteAllText(cfg.OutputFile, formattedCode)
     Fsproj.addFileToProject(cfg)
+    AnsiConsole.MarkupLine($"`{cfg.OutputFile}` has been generated.")
     0

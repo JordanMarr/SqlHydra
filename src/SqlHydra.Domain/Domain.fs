@@ -6,6 +6,7 @@ type AppInfo = {
     Name: string
     Command: string
     DefaultReaderType: string
+    DefaultProvider: string
     Version: string
 }
 

@@ -26,15 +26,10 @@ let newConfigWizard(app: AppInfo) =
     let outputFile = AnsiConsole.Ask<string>("Enter an [green]Output Filename[/] (Ex: [yellow]AdventureWorks.fs[/]):")
     let ns = AnsiConsole.Ask<string>("Enter a [green]Namespace[/] (Ex: [yellow]MyApp.AdventureWorks[/]):")
     let isCLIMutable = yesNo "Add CLIMutable attribute to generated records?"    
-    let enableReaders = yesNo "Generate HydraReader?"
-    let useDefaultReaderType = 
-        if enableReaders 
-        then yesNo $"Use the default Data Reader Type? (Default = {app.DefaultReaderType}):"
-        else false
-    let readerType = 
-        if enableReaders && not useDefaultReaderType
-        then AnsiConsole.Ask<string>($"Enter a [green]Data Reader Type[/]:")
-        else app.DefaultReaderType
+    let enableReaders = yesNo "Generate HydraReader? (Recommended. This generates strongly typed data readers and is also required when using SqlHydra.Query.)"
+
+    AnsiConsole.MarkupLine($"{app.Command}.toml has been created.")
+    AnsiConsole.MarkupLine($"Please install the `{app.DefaultProvider}` NuGet package in your project.");
 
     { 
         Config.ConnectionString = connection.Replace(@"\\", @"\") // Fix if user copies an escaped backslash from an existing config
@@ -44,7 +39,7 @@ let newConfigWizard(app: AppInfo) =
         Config.Filters = FilterPatterns.Empty // User must manually configure filter in .toml file
         Config.Readers = 
             if enableReaders 
-            then Some { ReadersConfig.ReaderType = readerType }
+            then Some { ReadersConfig.ReaderType = app.DefaultReaderType }
             else None
     }
 
