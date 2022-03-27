@@ -80,17 +80,16 @@ let getSchema (cfg: Config) : Schema =
     let allColumns = 
         sColumns.Rows
         |> Seq.cast<DataRow>
-        |> Seq.filter (fun col -> col.["TABLE_NAME"] :?> string = "person")
         |> Seq.map (fun col -> 
             {| 
-                TableCatalog = col.["TABLE_CATALOG"] :?> string
-                TableSchema = col.["TABLE_SCHEMA"] :?> string
-                TableName = col.["TABLE_NAME"] :?> string
-                ColumnName = col.["COLUMN_NAME"] :?> string
-                ProviderTypeName = col.["DATA_TYPE"] :?> string
-                OrdinalPosition = col.["ORDINAL_POSITION"] :?> int
+                TableCatalog = col["TABLE_CATALOG"] :?> string
+                TableSchema = col["TABLE_SCHEMA"] :?> string
+                TableName = col["TABLE_NAME"] :?> string
+                ColumnName = col["COLUMN_NAME"] :?> string
+                ProviderTypeName = col["DATA_TYPE"] :?> string
+                OrdinalPosition = col["ORDINAL_POSITION"] :?> int
                 IsNullable = 
-                    match col.["IS_NULLABLE"] :?> string with 
+                    match col["IS_NULLABLE"] :?> string with 
                     | "YES" -> true
                     | _ -> false
             |}
@@ -102,9 +101,9 @@ let getSchema (cfg: Config) : Schema =
         |> Seq.cast<DataRow>
         |> Seq.map (fun tbl -> 
             {| 
-                TableCatalog = tbl.["TABLE_CATALOG"] :?> string
-                TableSchema = tbl.["TABLE_SCHEMA"] :?> string
-                TableName  = tbl.["TABLE_NAME"] :?> string
+                TableCatalog = tbl["TABLE_CATALOG"] :?> string
+                TableSchema = tbl["TABLE_SCHEMA"] :?> string
+                TableName  = tbl["TABLE_NAME"] :?> string
                 TableType = "view"
             |}
         )
@@ -114,10 +113,10 @@ let getSchema (cfg: Config) : Schema =
         |> Seq.cast<DataRow>
         |> Seq.map (fun tbl -> 
             {| 
-                TableCatalog = tbl.["TABLE_CATALOG"] :?> string
-                TableSchema = tbl.["TABLE_SCHEMA"] :?> string
-                TableName  = tbl.["TABLE_NAME"] :?> string
-                TableType = tbl.["TABLE_TYPE"] :?> string 
+                TableCatalog = tbl["TABLE_CATALOG"] :?> string
+                TableSchema = tbl["TABLE_SCHEMA"] :?> string
+                TableName  = tbl["TABLE_NAME"] :?> string
+                TableType = tbl["TABLE_TYPE"] :?> string 
             |}
         )
         |> Seq.filter (fun tbl -> tbl.TableType <> "SYSTEM_TABLE")

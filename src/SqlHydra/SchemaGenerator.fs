@@ -99,10 +99,10 @@ let createEnum (enum: Enum) =
     let enumDef = 
         enum.Labels
         |> List.sortBy (fun lbl -> lbl.SortOrder)
-        |> List.mapi (fun idx lbl -> 
+        |> List.map (fun lbl -> 
             {
                 SynEnumCaseRcd.Id = Ident.Create(lbl.Name)
-                SynEnumCaseRcd.Constant = SynConst.Int32(idx)
+                SynEnumCaseRcd.Constant = SynConst.Int32(lbl.SortOrder)
                 SynEnumCaseRcd.Range = range0
                 SynEnumCaseRcd.Attributes = []
                 SynEnumCaseRcd.XmlDoc = PreXmlDoc.Empty
