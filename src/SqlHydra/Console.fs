@@ -22,14 +22,14 @@ let yesNo(title: string) =
 
 /// Presents a series of user prompts to create a new config file.
 let newConfigWizard(app: AppInfo) = 
-    let connection = AnsiConsole.Ask<string>("Enter a database [green]Connection String[/]:")
-    let outputFile = AnsiConsole.Ask<string>("Enter an [green]Output Filename[/] (Ex: [yellow]AdventureWorks.fs[/]):")
-    let ns = AnsiConsole.Ask<string>("Enter a [green]Namespace[/] (Ex: [yellow]MyApp.AdventureWorks[/]):")
-    let isCLIMutable = yesNo "Add CLIMutable attribute to generated records?"    
-    let enableReaders = yesNo "Generate HydraReader? (Recommended. This generates strongly typed data readers and is also required when using SqlHydra.Query.)"
+    let connection = AnsiConsole.Ask<string>("[blue]>[/] Enter a database [green]Connection String[/]:")
+    let outputFile = AnsiConsole.Ask<string>("[blue]>[/] Enter an [green]Output Filename[/] (Ex: [yellow]AdventureWorks.fs[/]):")
+    let ns = AnsiConsole.Ask<string>("[blue]>[/] Enter a [green]Namespace[/] (Ex: [yellow]MyApp.AdventureWorks[/]):")
+    let isCLIMutable = yesNo "[blue]>[/] Add CLIMutable attribute to generated records?"    
+    let enableReaders = yesNo "[blue]>[/] Generate HydraReader? (Recommended. This generates strongly typed data readers and is also required when using SqlHydra.Query.)"
 
-    AnsiConsole.MarkupLine($"{app.Command}.toml has been created.")
-    AnsiConsole.MarkupLine($"Please install the `{app.DefaultProvider}` NuGet package in your project.");
+    AnsiConsole.MarkupLine($"[green]>[/] {app.Command}.toml has been created!")
+    AnsiConsole.MarkupLine($"[green]>[/] Please install the `{app.DefaultProvider}` NuGet package in your project.");
 
     { 
         Config.ConnectionString = connection.Replace(@"\\", @"\") // Fix if user copies an escaped backslash from an existing config
@@ -66,25 +66,25 @@ let tryLoadConfig(tomlFile: IO.FileInfo) =
 
 /// Creates a sqlhydra-*.toml file if necessary and then runs.
 let getConfig(app: AppInfo, argv: string array) = 
-    AnsiConsole.MarkupLine($"{app.Name}")
-    AnsiConsole.MarkupLine($"v[yellow]{app.Version}[/]")
+    AnsiConsole.MarkupLine($"[blue]>[/] {app.Name}")
+    AnsiConsole.MarkupLine($"[blue]>[/] v[yellow]{app.Version}[/]")
 
     let tomlFile = 
         match argv with 
         | [| |] -> IO.FileInfo(buildTomlFilename(app))
         | [| tomlFilePath |] -> IO.FileInfo(tomlFilePath)
         | _ ->
-            Console.WriteLine($"Invalid args: '{argv}'. Expected no args, or a .toml configuration file path.")
+            AnsiConsole.MarkupLine($"[red]>[/] Invalid args: '{argv}'. Expected no args, or a .toml configuration file path.")
             failwith "Invalid args."
 
     match tryLoadConfig(tomlFile) with
     | Valid cfg -> 
         cfg
     | Invalid exMsg -> 
-        Console.WriteLine($"Unable to deserialize '{tomlFile.FullName}'. \n{exMsg}")
+        Console.WriteLine($"> Unable to deserialize '{tomlFile.FullName}'. \n{exMsg}")
         failwith "Invalid toml config."
     | NotFound ->
-        Console.WriteLine($"'{tomlFile.FullName}' does not exist. Starting configuration wizard...")
+        AnsiConsole.MarkupLine($"[blue]>[/] `{tomlFile.Name}` does not exist. Starting configuration wizard...")
         let cfg = newConfigWizard(app)
         saveConfig(tomlFile, cfg)
         cfg
