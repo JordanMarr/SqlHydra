@@ -165,9 +165,12 @@ let getSchema (cfg: Config) : Schema =
                         Column.TypeMapping = 
                             { 
                                 TypeMapping.ColumnTypeAlias = col.ProviderTypeName
-                                TypeMapping.ClrType = $"{enum.Schema}.{enum.Name}" // Enum type (will be generated)
+                                TypeMapping.ClrType =                       // Enum type (will be generated)
+                                    if col.TableSchema <> enum.Schema
+                                    then $"{enum.Schema}.{enum.Name}"       // Enum lives in a different schema/module
+                                    else enum.Name                          // Enum lives in this module
                                 TypeMapping.DbType = DbType.Object
-                                TypeMapping.ReaderMethod = "GetFieldValue" // Requires registration with Npgsql via `MapEnum`
+                                TypeMapping.ReaderMethod = "GetFieldValue"  // Requires registration with Npgsql via `MapEnum`
                                 TypeMapping.ProviderDbType = None
                             }
                         Column.IsPK = pks.Contains(col.TableSchema, col.TableName, col.ColumnName)
