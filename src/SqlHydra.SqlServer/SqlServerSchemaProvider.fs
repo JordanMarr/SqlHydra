@@ -103,5 +103,6 @@ let getSchema (cfg: Config) : Schema =
 
     { 
         Tables = tables 
+        Enums = []
         PrimitiveTypeReaders = SqlServerDataTypes.primitiveTypeReaders
     }

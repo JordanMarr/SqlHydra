@@ -12,7 +12,7 @@ let filterTables (filters: FilterPatterns) (tables: Table list) =
     | [], [] -> 
         tables
     | _ -> 
-        let getPath tbl = $"{tbl.Schema}/{tbl.Name}"
+        let getPath (tbl: Table) = $"{tbl.Schema}/{tbl.Name}"
         let tablesByPath = tables |> List.map (fun t -> getPath t, t) |> Map.ofList
         let tablePaths = tablesByPath |> Map.toList |> List.map fst
 

@@ -46,27 +46,41 @@ let getSchema (cfg: Config) : Schema =
     let enums = 
         let sql = 
             """
-            SELECT      n.nspname as Schema, t.typname as EnumName
-            FROM        pg_type t 
-            LEFT JOIN   pg_catalog.pg_namespace n ON n.oid = t.typnamespace 
-            WHERE       (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid)) and typtype = 'e'
-            AND     NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid)
-            AND     n.nspname NOT IN ('pg_catalog', 'information_schema');
+            SELECT n.nspname as Schema, t.typname as Enum, e.enumlabel as Label, e.enumsortorder as LabelOrder
+            FROM pg_enum e
+            JOIN pg_type t ON e.enumtypid = t.oid
+            LEFT JOIN   pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+            WHERE (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid)) and typtype = 'e'
+                AND NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid)
+                AND n.nspname NOT IN ('pg_catalog', 'information_schema');
             """
 
         use cmd = new Npgsql.NpgsqlCommand(sql, conn)
         use rdr = cmd.ExecuteReader()
+
         [
             while rdr.Read() do
-                //rdr.["Schema"] :?> string,
-                rdr.["EnumName"] :?> string
+                {|
+                    Schema = rdr["Schema"] :?> string
+                    Enum = rdr["Enum"] :?> string
+                    Label = rdr["Label"] :?> string
+                    LabelOrder = rdr["LabelOrder"] :?> single
+                |}
         ]
-        |> Set.ofList
-
-
+        |> List.groupBy (fun r -> r.Schema, r.Enum)
+        |> List.map (fun (_, grp) -> 
+            let h = grp |> List.head
+            { 
+                Schema = h.Schema
+                Name = h.Enum
+                Labels = grp |> List.map (fun r -> { Name = r.Label; SortOrder = System.Convert.ToInt32(r.LabelOrder) })
+            }
+        )
+        
     let allColumns = 
         sColumns.Rows
         |> Seq.cast<DataRow>
+        |> Seq.filter (fun col -> col.["TABLE_NAME"] :?> string = "person")
         |> Seq.map (fun col -> 
             {| 
                 TableCatalog = col.["TABLE_CATALOG"] :?> string
@@ -94,7 +108,7 @@ let getSchema (cfg: Config) : Schema =
                 TableType = "view"
             |}
         )
-        
+
     let tables = 
         sTables.Rows
         |> Seq.cast<DataRow>
@@ -134,23 +148,31 @@ let getSchema (cfg: Config) : Schema =
 
             let enumColumns = 
                 tableColumns
-                |> Seq.choose (fun col ->
-                    if enums.Contains col.ProviderTypeName then 
-                        {
-                            Column.Name = col.ColumnName
-                            Column.IsNullable = col.IsNullable
-                            Column.TypeMapping = 
-                                { 
-                                    TypeMapping.ColumnTypeAlias = col.ProviderTypeName
-                                    TypeMapping.ClrType = "string"
-                                    TypeMapping.DbType = DbType.AnsiString
-                                    TypeMapping.ReaderMethod = "GetFieldValue"
-                                    TypeMapping.ProviderDbType = None
-                                }
-                            Column.IsPK = pks.Contains(col.TableSchema, col.TableName, col.ColumnName)
-                        } |> Some
-                    else 
-                        None
+                |> Seq.choose (fun col -> 
+                    let fullyQualified = enums |> List.tryFind (fun e -> col.ProviderTypeName = $"{e.Schema}.{e.Name}")
+                    let unqualified = enums |> List.tryFind (fun e -> col.ProviderTypeName = e.Name)
+
+                    // The same enum can exist in different schemas.
+                    // So ideally, col.ProviderTypeName has a fully qualified enum type (schema.enumName).
+                    // If no qualified enum is found, then just use the first unqualified enum.
+                    fullyQualified 
+                    |> Option.orElse unqualified
+                    |> Option.map (fun enum -> col, enum)
+                )
+                |> Seq.map (fun (col, enum) ->
+                    {
+                        Column.Name = col.ColumnName
+                        Column.IsNullable = col.IsNullable
+                        Column.TypeMapping = 
+                            { 
+                                TypeMapping.ColumnTypeAlias = col.ProviderTypeName
+                                TypeMapping.ClrType = $"{enum.Schema}.{enum.Name}" // Enum type (will be generated)
+                                TypeMapping.DbType = DbType.Object
+                                TypeMapping.ReaderMethod = "GetFieldValue" // Requires registration with Npgsql via `MapEnum`
+                                TypeMapping.ProviderDbType = None
+                            }
+                        Column.IsPK = pks.Contains(col.TableSchema, col.TableName, col.ColumnName)
+                    }
                 )
                 |> Seq.toList
 
@@ -173,5 +195,6 @@ let getSchema (cfg: Config) : Schema =
 
     { 
         Tables = tables
+        Enums = enums
         PrimitiveTypeReaders = NpgsqlDataTypes.primitiveTypeReaders
     }

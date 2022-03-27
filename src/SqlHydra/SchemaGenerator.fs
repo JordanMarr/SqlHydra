@@ -48,8 +48,9 @@ let createProviderDbTypeAttribute (mapping: TypeMapping) =
     
 /// Creates a record definition named after a table.
 let createTableRecord (cfg: Config) (tbl: Table) = 
-    let myRecordId = LongIdentWithDots.CreateString tbl.Name
-    let recordCmpInfo = SynComponentInfoRcd.Create(myRecordId.Lid)
+    let recordCmpInfo = 
+        let myRecordId = LongIdentWithDots.CreateString tbl.Name
+        SynComponentInfoRcd.Create(myRecordId.Lid)
     
     let recordDef =
         tbl.Columns
@@ -88,6 +89,29 @@ let createTableRecord (cfg: Config) (tbl: Table) =
         |> SynTypeDefnSimpleReprRcd.Record
         
     SynModuleDecl.CreateSimpleType(recordCmpInfo, recordDef)
+
+/// Creates an enum definition.
+let createEnum (enum: Enum) = 
+    let cmpInfo = 
+        let myRecordId = LongIdentWithDots.CreateString enum.Name    
+        SynComponentInfoRcd.Create(myRecordId.Lid)
+    
+    let enumDef = 
+        enum.Labels
+        |> List.sortBy (fun lbl -> lbl.SortOrder)
+        |> List.mapi (fun idx lbl -> 
+            {
+                SynEnumCaseRcd.Id = Ident.Create(lbl.Name)
+                SynEnumCaseRcd.Constant = SynConst.Int32(idx)
+                SynEnumCaseRcd.Range = range0
+                SynEnumCaseRcd.Attributes = []
+                SynEnumCaseRcd.XmlDoc = PreXmlDoc.Empty
+            }
+        )
+        |> SynTypeDefnSimpleReprEnumRcd.Create
+        |> SynTypeDefnSimpleReprRcd.Enum
+    
+    SynModuleDecl.CreateSimpleType(cmpInfo, enumDef)
 
 /// Creates a "{tbl.Name}Reader" class that reads columns for a given table/record.
 let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) = 
@@ -618,14 +642,23 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
         |> filterTables cfg.Filters
         |> List.sortBy (fun tbl -> tbl.Schema, tbl.Name)
 
-    let schemas = filteredTables |> List.map (fun t -> t.Schema) |> List.distinct
+    let schemas = 
+        let enumSchemas = db.Enums |> List.map (fun e -> e.Schema)
+        let tableSchemas = filteredTables |> List.map (fun t -> t.Schema) 
+        enumSchemas @ tableSchemas |> List.distinct
     
-    let nestedSchemaModules = 
+    let nestedSchemaModules_hasEnums = 
         schemas
         |> List.map (fun schema -> 
             let schemaNestedModule = SynComponentInfoRcd.Create [ Ident.Create schema ]
 
             let tables = filteredTables |> List.filter (fun t -> t.Schema = schema)
+
+            // Postgres enums
+            let enumDeclarations = 
+                db.Enums
+                |> List.filter (fun enum -> enum.Schema = schema)
+                |> List.map createEnum
 
             let tableRecordDeclarations = 
                 [ 
@@ -640,8 +673,21 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                             createTableReaderClass cfg.Readers.Value tbl
                 ]
 
-            SynModuleDecl.CreateNestedModule(schemaNestedModule, tableRecordDeclarations)
+            let memberDeclarations = enumDeclarations @ tableRecordDeclarations
+
+            let hasEnumDefinitions = db.Enums.Length > 0
+
+            SynModuleDecl.CreateNestedModule(schemaNestedModule, memberDeclarations), hasEnumDefinitions
         )
+
+    // Sort schemas with enum definitions first.
+    // (Tables with Postgres enum columns may depend on an enum in a different schema.)
+    // NOTE: This is the most basic approach to sorting dependencies and could fail.
+    // A more robust approach would be to recursively sort.
+    let nestedSchemaModules = 
+        nestedSchemaModules_hasEnums
+        |> List.sortBy (fun (schemaModule, hasEnums) -> hasEnums)
+        |> List.map (fun (schemaModule, hasEnums) -> schemaModule)
 
     let readerExtensionsPlaceholder = SynModuleDecl.CreateOpen("Substitute.Extensions")
 

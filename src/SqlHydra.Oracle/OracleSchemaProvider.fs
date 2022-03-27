@@ -134,5 +134,6 @@ let getSchema (cfg: Config) : Schema =
 
     { 
         Tables = tables
+        Enums = []
         PrimitiveTypeReaders = OracleDataTypes.primitiveTypeReaders
     }

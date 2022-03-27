@@ -40,6 +40,19 @@ type Table =
         TotalColumns: int
     }
 
+type EnumLabel = 
+    {
+        Name: string
+        SortOrder: int
+    }
+
+type Enum = 
+    {
+        Name: string
+        Schema: string
+        Labels: EnumLabel list
+    }
+
 type PrimitiveTypeReader =
     {
         ClrType: string
@@ -49,6 +62,10 @@ type PrimitiveTypeReader =
 type Schema = 
     {
         Tables: Table list
+
+        /// Support for Postgres enums
+        Enums: Enum list
+
         /// A distinct list of ClrTypes that have an associated data reader method. Ex: `"int", "GetInt32"`
         PrimitiveTypeReaders: PrimitiveTypeReader seq
     }

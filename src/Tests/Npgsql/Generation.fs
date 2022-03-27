@@ -41,7 +41,7 @@ let tests =
             let code = getCode cfg
             Expect.isFalse (code.Contains str) ""
 
-        ptest "Print Code" {
+        test "Print Code" {
             getCode cfg |> printfn "%s"
         }
 

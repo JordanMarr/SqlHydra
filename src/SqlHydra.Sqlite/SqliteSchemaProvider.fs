@@ -90,5 +90,6 @@ let getSchema (cfg: Config) : Schema =
 
     { 
         Tables = tables
+        Enums = []
         PrimitiveTypeReaders = SqliteDataTypes.primitiveTypeReaders
     }
