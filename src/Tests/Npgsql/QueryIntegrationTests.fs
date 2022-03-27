@@ -543,4 +543,63 @@ let tests =
                 Expect.equal insertedNumberOfRows 2 "Failed insert multiple entities"
             | None -> ()
         }
+
+        testTask "Enum Tests" {
+            let expPerson = table<experiments.person> |> inSchema (nameof experiments)
+
+            //Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>("experiments.mood") |> ignore
+
+            use ctx = openContext ()
+            (ctx.Connection :?> Npgsql.NpgsqlConnection)
+                .TypeMapper.MapEnum<experiments.mood>("experiments.mood") |> ignore
+
+            let! deleteResults =
+                deleteTask (Shared ctx) {
+                    for p in expPerson do
+                    deleteAll
+                }
+
+            let! insertResults = 
+                insertTask (Shared ctx) {
+                    into expPerson
+                    entity (
+                        { 
+                            experiments.person.name = Some "john doe"
+                            experiments.person.current_mood = Some (experiments.mood.ok)
+                        }
+                    )
+                }
+
+            Expect.isTrue (insertResults > 0) "Expected insert results > 0"
+
+            let! query1Results = 
+                selectTask HydraReader.Read (Shared ctx) {
+                    for p in expPerson do
+                    select p
+                    toList
+                } 
+
+            let! updateResults = 
+                updateTask (Shared ctx) {
+                    for p in expPerson do
+                    set p.current_mood (Some experiments.mood.happy)
+                    where (p.current_mood = (Some experiments.mood.ok))
+                }
+
+            Expect.isTrue (updateResults > 0) "Expected update results > 0"
+
+            let! query2Results = 
+                selectTask HydraReader.Read (Shared ctx) {
+                    for p in expPerson do
+                    select p
+                    toList
+                } 
+
+            Expect.isTrue (
+                query2Results 
+                |> List.forall (fun (p: experiments.person) -> 
+                    p.current_mood = Some (experiments.mood.happy)
+                )
+            ) ""
+        }
     ]
