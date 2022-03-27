@@ -63,7 +63,7 @@ Target.create "Pack" <| fun _ ->
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "pack --configuration Release -o nupkg/Release", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}' package.'")
 
-let version = "*.0.800.1.nupkg"
+let version = "*.0.810.0.nupkg"
 
 Target.create "Publish" <| fun _ ->
     let nugetKey =
