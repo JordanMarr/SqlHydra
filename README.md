@@ -93,6 +93,11 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
   </Target>
 ```
 
+### Support for Postgres Enums
+Postgres enum types are generated as CLR enums!
+You will, however, still need to manually "register" your custom enums via `NpgsqlConnection.GlobalTypeMapper.MapEnum` method.
+See Npgsql docs on mapping enums [here](https://www.npgsql.org/doc/types/enums_and_composites.html).
+
 ## SqlHydra.Oracle [![NuGet version (SqlHydra.Oracle)](https://img.shields.io/nuget/v/SqlHydra.Oracle.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Oracle/)
 
 ### Local Install (recommended)
