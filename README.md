@@ -98,6 +98,13 @@ Postgres enum types are generated as CLR enums!
 You will, however, still need to manually "register" your custom enums via `NpgsqlConnection.GlobalTypeMapper.MapEnum` method.
 See Npgsql docs on mapping enums [here](https://www.npgsql.org/doc/types/enums_and_composites.html).
 
+Example:
+```F#
+// Global mapping should occur only once at startup:
+// `experiments.mood` is the generated enum, and "experiments.mood" is the "{schema}.{enum}".
+Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>("experiments.mood") |> ignore
+```
+
 ## SqlHydra.Oracle [![NuGet version (SqlHydra.Oracle)](https://img.shields.io/nuget/v/SqlHydra.Oracle.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Oracle/)
 
 ### Local Install (recommended)
