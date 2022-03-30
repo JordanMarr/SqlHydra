@@ -1,4 +1,7 @@
-﻿module SqlHydra.Query.SqliteExtensions
+﻿[<AutoOpen>]
+module SqlHydra.Query.SqliteExtensions.SqliteBuilderExtensions
+
+open SqlHydra.Query
 
 type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
     
@@ -27,3 +30,4 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
         let spec = state.Query
         let newSpec = { spec with InsertOrReplace = true }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
+
