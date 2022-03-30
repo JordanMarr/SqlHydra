@@ -102,7 +102,7 @@ Npgsql Mapping Example:
 ```F#
 // Global mapping should occur only once at startup:
 // `experiments.mood` is the generated enum, and "experiments.mood" is the "{schema}.{enum}".
-Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>("experiments.mood") |> ignore
+Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>(nameof experiments.mood) |> ignore
 ```
 
 💥 Npgsql v6.0.3 has a bug that throws an exception during SqlHydra.Npgsql code generation if an enum exists an a schema other than `public`.
