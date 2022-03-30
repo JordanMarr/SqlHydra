@@ -97,14 +97,17 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
 Postgres enum types are generated as CLR enums!
 You will, however, still need to manually "register" your custom enums via `NpgsqlConnection.GlobalTypeMapper.MapEnum` method.
 See Npgsql docs on mapping enums [here](https://www.npgsql.org/doc/types/enums_and_composites.html).
-NOTE: You should use `Npgsql` v6.0.3 or greater as there was a bug fix that affected enums.
 
-Example:
+Npgsql Mapping Example:
 ```F#
 // Global mapping should occur only once at startup:
 // `experiments.mood` is the generated enum, and "experiments.mood" is the "{schema}.{enum}".
 Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>("experiments.mood") |> ignore
 ```
+
+💥 Npgsql v6.0.3 has a bug that throws an exception during SqlHydra.Npgsql code generation if an enum exists an a schema other than `public`.
+This bug has been fixed and should be available in the next release of `Npgsql`. 
+Until the new release is available, the workaround is to ensure that enums in non `public` schemas are also added to `public`.
 
 ## SqlHydra.Oracle [![NuGet version (SqlHydra.Oracle)](https://img.shields.io/nuget/v/SqlHydra.Oracle.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Oracle/)
 
