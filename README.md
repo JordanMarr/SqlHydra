@@ -97,6 +97,7 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
 Postgres enum types are generated as CLR enums!
 You will, however, still need to manually "register" your custom enums via `NpgsqlConnection.GlobalTypeMapper.MapEnum` method.
 See Npgsql docs on mapping enums [here](https://www.npgsql.org/doc/types/enums_and_composites.html).
+NOTE: You should use `Npgsql` v6.0.3 or greater as there was a bug fix that affected enums.
 
 Example:
 ```F#
