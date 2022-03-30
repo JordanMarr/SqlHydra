@@ -106,8 +106,7 @@ Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>(nameof experi
 ```
 
 💥 Npgsql v6.0.3 has a bug that throws an exception during SqlHydra.Npgsql code generation if an enum exists an a schema other than `public`.
-This bug has been fixed and is slated for the v6.0.4 release of `Npgsql`. 
-Until the v6.0.4 is available, the workaround is to ensure that enums in non `public` schemas are also added to `public`.
+This bug has been fixed and is slated for v6.0.4. The workaround until then is to ensure that enums in non `public` schemas are also added to `public`.
 
 ## SqlHydra.Oracle [![NuGet version (SqlHydra.Oracle)](https://img.shields.io/nuget/v/SqlHydra.Oracle.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Oracle/)
 
