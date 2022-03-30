@@ -129,8 +129,18 @@ type InsertTaskBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct:
         async {
             let ctx = ContextUtils.getContext ct
             try 
-                let insertQuery = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
-                let! insertReturn = insertQuery |> ctx.InsertAsync |> Async.AwaitTask
+                let iq = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
+                let! insertReturn = 
+                    match ctx.Compiler, iq.Spec with
+                    | :? Compilers.SqliteCompiler, { InsertOrReplace = true } -> 
+                        iq |> ctx.InsertOrReplace |> Async.AwaitTask
+                    | :? Compilers.SqliteCompiler, { OnConflictDoUpdate = Some c } ->
+                        iq |> ctx.OnConflictDoUpdate c.ConflictFields c.UpdateFields |> Async.AwaitTask
+                    | :? Compilers.SqliteCompiler, { OnConflictDoNothing = Some c } ->
+                        iq |> ctx.OnConflictDoNothing c.ConflictFields |> Async.AwaitTask
+                    | _ -> 
+                        iq |> ctx.InsertAsync |> Async.AwaitTask
+
                 return insertReturn
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
