@@ -81,7 +81,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
         let spec = state.Query
         let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'InsertReturn> propertySelector :?> Reflection.PropertyInfo
         let identitySpec = 
-            { Table = spec.Table; Entities = spec.Entities; Fields = spec.Fields; IdentityField = Some prop.Name; InsertType = Insert }
+            { Table = spec.Table; Entities = spec.Entities; Fields = spec.Fields; IdentityField = Some prop.Name; InsertType = spec.InsertType }
         
         // Sets both the identity field name (prop.Name) and its type ('InsertReturn)
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(identitySpec, state.TableMappings)
@@ -101,11 +101,11 @@ type InsertAsyncBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct
             try 
                 let iq = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
                 let insertReturn = 
-                    match ctx.Compiler, iq.Spec.InsertType with
-                    | :? SqliteCompiler, InsertOrReplace -> insertOrReplace ctx iq
-                    | :? SqliteCompiler, OnConflictDoUpdate (conflictFields, updateFields) -> onConflictDoUpdate ctx conflictFields updateFields iq
-                    | :? SqliteCompiler, OnConflictDoNothing conflictFields -> onConflictDoNothing ctx conflictFields iq
-                    | _ -> ctx.InsertAsync iq
+                    match iq.Spec.InsertType with
+                    | InsertOrReplace -> insertOrReplace ctx iq
+                    | OnConflictDoUpdate (conflictFields, updateFields) -> onConflictDoUpdate ctx conflictFields updateFields iq
+                    | OnConflictDoNothing conflictFields -> onConflictDoNothing ctx conflictFields iq
+                    | Insert -> ctx.InsertAsync iq
 
                 return! insertReturn |> Async.AwaitTask
             finally 
@@ -123,11 +123,11 @@ type InsertTaskBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct:
             try 
                 let iq = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
                 let insertReturn = 
-                    match ctx.Compiler, iq.Spec.InsertType with
-                    | :? SqliteCompiler, InsertOrReplace -> insertOrReplace ctx iq
-                    | :? SqliteCompiler, OnConflictDoUpdate (conflictFields, updateFields) -> onConflictDoUpdate ctx conflictFields updateFields iq
-                    | :? SqliteCompiler, OnConflictDoNothing conflictFields -> onConflictDoNothing ctx conflictFields iq
-                    | _ -> ctx.InsertAsync iq
+                    match iq.Spec.InsertType with
+                    | InsertOrReplace -> insertOrReplace ctx iq
+                    | OnConflictDoUpdate (conflictFields, updateFields) -> onConflictDoUpdate ctx conflictFields updateFields iq
+                    | OnConflictDoNothing conflictFields -> onConflictDoNothing ctx conflictFields iq
+                    | Insert -> ctx.InsertAsync iq
 
                 return! insertReturn |> Async.AwaitTask
             finally 

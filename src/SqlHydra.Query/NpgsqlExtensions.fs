@@ -1,4 +1,4 @@
-﻿module SqlHydra.Query.SqliteExtensions
+﻿module SqlHydra.Query.NpgsqlExtensions
 
 type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
 
@@ -22,15 +22,9 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
         let newSpec = { spec with InsertType = OnConflictDoNothing conflictFields }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
 
-    [<CustomOperation("insertOrReplace", MaintainsVariableSpace = true)>]
-    member this.InsertOrReplace(state: QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>) =
-        let spec = state.Query
-        let newSpec = { spec with InsertType = InsertOrReplace }
-        QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
-
 
 type QueryContext with
-
+        
     /// Transforms an INSERT query into an UPSERT by appending "ON CONFLICT DO UPDATE".
     /// NOTE: This can only be called on one record at a time.
     member this.OnConflictDoUpdate (conflictColumns: string list) (columnsToUpdate: string list) (iq: InsertQuery<'T, 'ReturnValue>) =
@@ -40,7 +34,3 @@ type QueryContext with
     /// NOTE: This can only be called on one record at a time.
     member this.OnConflictDoNothing (conflictColumns: string list) (iq: InsertQuery<'T, 'ReturnValue>) =
         OnConflict.onConflictDoNothing this conflictColumns iq
-
-    /// Transforms an INSERT query into an INSERT OR REPLACE.
-    member this.InsertOrReplace (iq: InsertQuery<'T, 'ReturnValue>) = 
-        OnConflict.insertOrReplace this iq

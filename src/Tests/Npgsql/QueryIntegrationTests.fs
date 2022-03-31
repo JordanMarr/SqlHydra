@@ -3,6 +3,8 @@
 open Expecto
 open SqlHydra.Query
 open DB
+open SqlHydra.Query.NpgsqlExtensions
+open Swensen.Unquote
 #if NET5_0
 open Npgsql.AdventureWorksNet5
 #endif
@@ -601,5 +603,75 @@ let tests =
                     p.current_mood = Some (experiments.mood.happy)
                 )
             ) ""
+        }
+        
+        testTask "OnConflictDoUpdate" {
+            use ctx = openContext()
+            ctx.BeginTransaction()
+
+            let address = 
+                 { person.address.addressid = 0
+                 ; person.address.addressline1 = "123 Main St"
+                 ; person.address.addressline2 = None
+                 ; person.address.city = "Portland"
+                 ; person.address.stateprovinceid = 2
+                 ; person.address.postalcode = "97205"
+                 ; person.address.spatiallocation = None
+                 ; person.address.rowguid = System.Guid.NewGuid()
+                 ; person.address.modifieddate = System.DateTime.Now }
+
+            let! addressId = 
+                insertTask (Shared ctx) {
+                    for a in addressTable do
+                    entity address
+                    onConflictDoUpdate a.addressid (
+                        a.addressline1,
+                        a.addressline2,
+                        a.city,
+                        a.stateprovinceid,
+                        a.postalcode,
+                        a.modifieddate
+                    )
+                    getId a.addressid
+                }
+
+            let! result1 = 
+                selectTask HydraReader.Read (Shared ctx) {
+                    for a in addressTable do
+                    where (a.addressid = addressId)
+                    toList
+                }
+
+            (result1 : person.address list).Length =! 1
+            (result1 : person.address list).[0].addressline2 =! None
+
+            let updatedAddress = { address with addressline2 = Some "Apt 1A" }
+
+            let! addressId2 = 
+                insertTask (Shared ctx) {
+                    for a in addressTable do
+                    entity updatedAddress
+                    onConflictDoUpdate a.addressid (
+                        a.addressline1,
+                        a.addressline2,
+                        a.city,
+                        a.stateprovinceid,
+                        a.postalcode,
+                        a.modifieddate
+                    )
+                    getId a.addressid
+                }
+
+            let! result2 = 
+                selectTask HydraReader.Read (Shared ctx) {
+                    for a in addressTable do
+                    where (a.addressid = addressId2)
+                    toList
+                }
+
+            (result2 : person.address list).Length =! 1
+            (result2 : person.address list).[0].addressline2 =! Some "Apt 1A"
+
+            ctx.RollbackTransaction()
         }
     ]
