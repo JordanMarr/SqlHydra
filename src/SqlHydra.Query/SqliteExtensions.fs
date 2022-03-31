@@ -1,7 +1,4 @@
-﻿[<AutoOpen>]
-module SqlHydra.Query.SqliteExtensions.SqliteBuilderExtensions
-
-open SqlHydra.Query
+﻿module SqlHydra.Query.SqliteExtensions
 
 type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
 
@@ -31,3 +28,18 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
         let newSpec = { spec with InsertType = InsertOrReplace }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
 
+
+type QueryContext with
+
+    member this.InsertOrReplace (iq: InsertQuery<'T, 'ReturnValue>) = 
+        OnConflict.insertOrReplace this iq
+        
+    /// Transforms a regular INSERT query into an UPSERT by appending "ON CONFLICT DO UPDATE".
+    /// NOTE: This can only be called on one record at a time.
+    member this.OnConflictDoUpdate (conflictColumns: string list) (columnsToUpdate: string list) (iq: InsertQuery<'T, 'ReturnValue>) =
+        OnConflict.onConflictDoUpdate this conflictColumns columnsToUpdate iq
+
+    /// Transforms a regular INSERT query into an INSERT or IGNORE by appending "ON CONFLICT DO NOTHING".
+    /// NOTE: This can only be called on one record at a time.
+    member this.OnConflictDoNothing (conflictColumns: string list) (iq: InsertQuery<'T, 'ReturnValue>) =
+        OnConflict.onConflictDoNothing this conflictColumns iq
