@@ -9,6 +9,8 @@ open Sqlite.AdventureWorksNet5
 #if NET6_0
 open Sqlite.AdventureWorksNet6
 #endif
+open SqlHydra.Query.SqliteExtensions
+open Swensen.Unquote
 
 let openContext() = 
     let compiler = SqlKata.Compilers.SqliteCompiler()
@@ -510,4 +512,73 @@ let tests =
 
             ctx.RollbackTransaction()
         }
+
+        testTask "OnConflictDoUpdate" {
+            use ctx = openContext()
+            ctx.BeginTransaction()
+
+            let address = 
+                 { main.Address.AddressID = 5000
+                 ; main.Address.AddressLine1 = "123 Main St"
+                 ; main.Address.AddressLine2 = None
+                 ; main.Address.City = "Portland"
+                 ; main.Address.StateProvince = "OR"
+                 ; main.Address.CountryRegion = "United States"
+                 ; main.Address.PostalCode = "97205"
+                 ; main.Address.rowguid = ""
+                 ; main.Address.ModifiedDate = System.DateTime.Now }
+
+            do! insertTask (Shared ctx) {
+                    for a in addressTable do
+                    entity address
+                    onConflictDoUpdate a.AddressID (
+                        a.AddressLine1,
+                        a.AddressLine2,
+                        a.City,
+                        a.StateProvince,
+                        a.CountryRegion,
+                        a.PostalCode,
+                        a.ModifiedDate
+                    )
+                }
+
+            let! result1 = 
+                selectTask HydraReader.Read (Shared ctx) {
+                    for a in addressTable do
+                    where (a.AddressID = 5000L)
+                    toList
+                }
+
+            (result1 : main.Address list).Length =! 1
+            (result1 : main.Address list).[0].AddressLine2 =! None
+
+            let updatedAddress = { address with AddressLine2 = Some "Apt 1A" }
+
+            do! insertTask (Shared ctx) {
+                    for a in addressTable do
+                    entity updatedAddress
+                    onConflictDoUpdate a.AddressID (
+                        a.AddressLine1,
+                        a.AddressLine2,
+                        a.City,
+                        a.StateProvince,
+                        a.CountryRegion,
+                        a.PostalCode,
+                        a.ModifiedDate
+                    )
+                }
+
+            let! result2 = 
+                selectTask HydraReader.Read (Shared ctx) {
+                    for a in addressTable do
+                    where (a.AddressID = 5000L)
+                    toList
+                }
+
+            (result2 : main.Address list).Length =! 1
+            (result2 : main.Address list).[0].AddressLine2 =! Some "Apt 1A"
+
+            ctx.RollbackTransaction()
+        }
+
     ]
