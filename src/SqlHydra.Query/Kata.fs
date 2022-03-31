@@ -45,16 +45,11 @@ type QueryParameter =
         ProviderDbType: string option
     }
 
-type OnConflictDoUpdate = 
-    {
-        ConflictFields: string list
-        UpdateFields: string list
-    }
-
-type OnConflictDoNothing = 
-    {
-        ConflictFields: string list
-    }
+type InsertType = 
+    | Insert
+    | InsertOrReplace
+    | OnConflictDoUpdate of conflictFields: string list * updateFields: string list
+    | OnConflictDoNothing of conflictFields: string list
 
 type InsertQuerySpec<'T, 'Identity> =
     {
@@ -62,15 +57,10 @@ type InsertQuerySpec<'T, 'Identity> =
         Entities: 'T list
         Fields: string list
         IdentityField: string option
-        
-        // The following properties are not used by all providers:
-        InsertOrReplace: bool        
-        OnConflictDoUpdate: OnConflictDoUpdate option
-        OnConflictDoNothing: OnConflictDoNothing option
+        InsertType: InsertType
     }
     static member Default : InsertQuerySpec<'T, 'Identity> = 
-        { Table = ""; Entities = []; Fields = []; IdentityField = None
-        ; InsertOrReplace = false ; OnConflictDoUpdate = None; OnConflictDoNothing = None }
+        { Table = ""; Entities = []; Fields = []; IdentityField = None; InsertType = Insert }
 
 type UpdateQuerySpec<'T> = 
     {

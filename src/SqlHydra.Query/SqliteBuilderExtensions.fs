@@ -13,7 +13,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
         let spec = state.Query
         let conflictFields = LinqExpressionVisitors.visitGroupBy<'T, 'ConflictProperty> conflictFieldsSelector (FQ.fullyQualifyColumn state.TableMappings)
         let updateFields = LinqExpressionVisitors.visitGroupBy<'T, 'UpdateProperties> updateFieldsSelector (FQ.fullyQualifyColumn state.TableMappings)
-        let newSpec = { spec with OnConflictDoUpdate = Some { ConflictFields = conflictFields; UpdateFields = updateFields } }
+        let newSpec = { spec with InsertType = OnConflictDoUpdate (conflictFields, updateFields) }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
 
     [<CustomOperation("onConflictDoNothing", MaintainsVariableSpace = true)>]
@@ -22,12 +22,12 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
         
         let spec = state.Query
         let conflictFields = LinqExpressionVisitors.visitGroupBy<'T, 'ConflictProperty> conflictFieldsSelector (FQ.fullyQualifyColumn state.TableMappings)
-        let newSpec = { spec with OnConflictDoNothing = Some { ConflictFields = conflictFields } }
+        let newSpec = { spec with InsertType = OnConflictDoNothing conflictFields }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
 
     [<CustomOperation("insertOrReplace", MaintainsVariableSpace = true)>]
     member this.InsertOrReplace(state: QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>) =
         let spec = state.Query
-        let newSpec = { spec with InsertOrReplace = true }
+        let newSpec = { spec with InsertType = InsertOrReplace }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
 

@@ -3,10 +3,6 @@
 module SqlHydra.Query.InsertBuilders
 
 open System
-open System.Linq.Expressions
-open System.Data.Common
-open System.Threading.Tasks
-open SqlKata
 
 /// The base insert builder that contains all common operations
 type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
@@ -82,8 +78,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
         let spec = state.Query
         let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'InsertReturn> propertySelector :?> Reflection.PropertyInfo
         let identitySpec = 
-            { Table = spec.Table; Entities = spec.Entities; Fields = spec.Fields; IdentityField = Some prop.Name
-            ; InsertOrReplace = false; OnConflictDoUpdate = None; OnConflictDoNothing = None }
+            { Table = spec.Table; Entities = spec.Entities; Fields = spec.Fields; IdentityField = Some prop.Name; InsertType = Insert }
         
         // Sets both the identity field name (prop.Name) and its type ('InsertReturn)
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(identitySpec, state.TableMappings)
@@ -94,6 +89,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
 
 
 open SqliteExtensions.SqliteQueryContextExtensions
+open SqlKata.Compilers
 
 /// An insert builder that returns a Task result.
 type InsertAsyncBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct: ContextType) =
@@ -104,18 +100,14 @@ type InsertAsyncBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct
             let ctx = ContextUtils.getContext ct            
             try 
                 let iq = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
-                let! insertReturn = 
-                    match ctx.Compiler, iq.Spec with
-                    | :? Compilers.SqliteCompiler, { InsertOrReplace = true } -> 
-                        iq |> ctx.InsertOrReplace |> Async.AwaitTask
-                    | :? Compilers.SqliteCompiler, { OnConflictDoUpdate = Some c } ->
-                        iq |> ctx.OnConflictDoUpdate c.ConflictFields c.UpdateFields |> Async.AwaitTask
-                    | :? Compilers.SqliteCompiler, { OnConflictDoNothing = Some c } ->
-                        iq |> ctx.OnConflictDoNothing c.ConflictFields |> Async.AwaitTask
-                    | _ -> 
-                        iq |> ctx.InsertAsync |> Async.AwaitTask
+                let insertReturn = 
+                    match ctx.Compiler, iq.Spec.InsertType with
+                    | :? SqliteCompiler, InsertOrReplace -> iq |> ctx.InsertOrReplace
+                    | :? SqliteCompiler, OnConflictDoUpdate (conflictFields, updateFields) -> iq |> ctx.OnConflictDoUpdate conflictFields updateFields
+                    | :? SqliteCompiler, OnConflictDoNothing conflictFields -> iq |> ctx.OnConflictDoNothing conflictFields
+                    | _ -> iq |> ctx.InsertAsync 
 
-                return insertReturn
+                return! insertReturn |> Async.AwaitTask
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
         }
@@ -130,18 +122,14 @@ type InsertTaskBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct:
             let ctx = ContextUtils.getContext ct
             try 
                 let iq = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
-                let! insertReturn = 
-                    match ctx.Compiler, iq.Spec with
-                    | :? Compilers.SqliteCompiler, { InsertOrReplace = true } -> 
-                        iq |> ctx.InsertOrReplace |> Async.AwaitTask
-                    | :? Compilers.SqliteCompiler, { OnConflictDoUpdate = Some c } ->
-                        iq |> ctx.OnConflictDoUpdate c.ConflictFields c.UpdateFields |> Async.AwaitTask
-                    | :? Compilers.SqliteCompiler, { OnConflictDoNothing = Some c } ->
-                        iq |> ctx.OnConflictDoNothing c.ConflictFields |> Async.AwaitTask
-                    | _ -> 
-                        iq |> ctx.InsertAsync |> Async.AwaitTask
+                let insertReturn = 
+                    match ctx.Compiler, iq.Spec.InsertType with
+                    | :? SqliteCompiler, InsertOrReplace -> iq |> ctx.InsertOrReplace
+                    | :? SqliteCompiler, OnConflictDoUpdate (conflictFields, updateFields) -> iq |> ctx.OnConflictDoUpdate conflictFields updateFields
+                    | :? SqliteCompiler, OnConflictDoNothing conflictFields -> iq |> ctx.OnConflictDoNothing conflictFields
+                    | _ -> iq |> ctx.InsertAsync 
 
-                return insertReturn
+                return! insertReturn |> Async.AwaitTask
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
         }
