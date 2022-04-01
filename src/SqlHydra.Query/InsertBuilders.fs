@@ -74,13 +74,13 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
 
         let spec = 
             match state.Query.InsertType with
-            | Insert
-            | InsertOrReplace ->
+            | Insert ->
                 // Exclude the identity column
                 this.ExcludeColumn(state, propertySelector).Query
+            | InsertOrReplace
             | OnConflictDoUpdate _
             | OnConflictDoNothing _ ->
-                // Do not exclude identity column (it is needed for on conflict update)
+                // Do not exclude identity column (it is needed for updates)
                 state.Query
         
         let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'InsertReturn> propertySelector :?> Reflection.PropertyInfo
