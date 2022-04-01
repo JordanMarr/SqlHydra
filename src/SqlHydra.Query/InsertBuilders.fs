@@ -3,9 +3,6 @@
 module SqlHydra.Query.InsertBuilders
 
 open System
-open SqlHydra.Query.OnConflict
-open SqlKata.Compilers
-
 
 /// The base insert builder that contains all common operations
 type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
@@ -99,15 +96,9 @@ type InsertAsyncBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct
         async {
             let ctx = ContextUtils.getContext ct            
             try 
-                let iq = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
-                let insertReturn = 
-                    match iq.Spec.InsertType with
-                    | InsertOrReplace -> insertOrReplace ctx iq
-                    | OnConflictDoUpdate (conflictFields, updateFields) -> onConflictDoUpdate ctx conflictFields updateFields iq
-                    | OnConflictDoNothing conflictFields -> onConflictDoNothing ctx conflictFields iq
-                    | Insert -> ctx.InsertAsync iq
-
-                return! insertReturn |> Async.AwaitTask
+                let insertQuery = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
+                let! insertReturn = insertQuery |> ctx.InsertAsync |> Async.AwaitTask
+                return insertReturn
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
         }
@@ -121,15 +112,9 @@ type InsertTaskBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct:
         async {
             let ctx = ContextUtils.getContext ct
             try 
-                let iq = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
-                let insertReturn = 
-                    match iq.Spec.InsertType with
-                    | InsertOrReplace -> insertOrReplace ctx iq
-                    | OnConflictDoUpdate (conflictFields, updateFields) -> onConflictDoUpdate ctx conflictFields updateFields iq
-                    | OnConflictDoNothing conflictFields -> onConflictDoNothing ctx conflictFields iq
-                    | Insert -> ctx.InsertAsync iq
-
-                return! insertReturn |> Async.AwaitTask
+                let insertQuery = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
+                let! insertReturn = insertQuery |> ctx.InsertAsync |> Async.AwaitTask
+                return insertReturn
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
         }

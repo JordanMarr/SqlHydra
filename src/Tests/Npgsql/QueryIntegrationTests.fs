@@ -642,8 +642,9 @@ let tests =
                     toList
                 }
 
-            (result1 : person.address list).Length =! 1
-            (result1 : person.address list).[0].addressline2 =! None
+            let r1 = result1 : person.address list
+            r1.Length =! 1
+            r1.[0] =! address
 
             let updatedAddress = { address with addressline2 = Some "Apt 1A" }
 
@@ -669,8 +670,9 @@ let tests =
                     toList
                 }
 
-            (result2 : person.address list).Length =! 1
-            (result2 : person.address list).[0].addressline2 =! Some "Apt 1A"
+            let r2 = result2 : person.address list
+            r2.Length =! 1
+            r2.[0] =! updatedAddress
 
             ctx.RollbackTransaction()
         }

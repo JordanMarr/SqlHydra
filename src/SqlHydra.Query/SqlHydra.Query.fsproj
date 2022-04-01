@@ -22,8 +22,8 @@
 		<Compile Include="QueryFunctions.fs" />
 		<Compile Include="LinqExpressionVisitors.fs" />
 		<Compile Include="Fixes.fs" />
-		<Compile Include="QueryContext.fs" />
 		<Compile Include="OnConflict.fs" />
+		<Compile Include="QueryContext.fs" />
 		<Compile Include="SelectBuilders.fs" />
 		<Compile Include="InsertBuilders.fs" />
 		<Compile Include="UpdateBuilders.fs" />
