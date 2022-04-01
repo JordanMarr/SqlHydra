@@ -154,6 +154,9 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         // Did the user select an identity field?
         match iq.Spec.IdentityField with
         | Some identityField -> 
+            // Try apply on conflict
+            cmd.CommandText <- cmd.CommandText |> applyOnConflict
+
             // Fix postgres identity
             if compiler :? SqlKata.Compilers.PostgresCompiler 
             then cmd.CommandText <- cmd.CommandText |> Fixes.Postgres.fixIdentityQuery identityField 
@@ -161,9 +164,6 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             // Fix oracle identity
             elif compiler  :? SqlKata.Compilers.OracleCompiler 
             then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixIdentityQuery identityField 
-
-            // Try apply on conflict
-            cmd.CommandText <- cmd.CommandText |> applyOnConflict
 
             // Execute insert and return identity
             if compiler :? SqlKata.Compilers.OracleCompiler then
@@ -181,13 +181,13 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
         | None ->
+            // Try apply on conflict
+            cmd.CommandText <- cmd.CommandText |> applyOnConflict
+
             // Fix Oracle multi-insert query
             if compiler :? SqlKata.Compilers.OracleCompiler && iq.Spec.Entities.Length > 1 
             then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixMultiInsertQuery 
                     
-            // Try apply on conflict
-            cmd.CommandText <- cmd.CommandText |> applyOnConflict
-
             let results = cmd.ExecuteNonQuery()
             // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
             Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
@@ -211,6 +211,9 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             // Did the user select an identity field?
             match iq.Spec.IdentityField with
             | Some identityField -> 
+                // Try apply on conflict
+                cmd.CommandText <- cmd.CommandText |> applyOnConflict
+
                 // Fix postgres identity
                 if compiler :? SqlKata.Compilers.PostgresCompiler 
                 then cmd.CommandText <- cmd.CommandText |> Fixes.Postgres.fixIdentityQuery identityField 
@@ -218,9 +221,6 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 // Fix oracle identity
                 elif compiler :? SqlKata.Compilers.OracleCompiler 
                 then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixIdentityQuery identityField
-
-                // Try apply on conflict
-                cmd.CommandText <- cmd.CommandText |> applyOnConflict
 
                 // Execute insert and return identity
                 if compiler :? SqlKata.Compilers.OracleCompiler then
@@ -238,13 +238,13 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                     return Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
             | None ->
+                // Try apply on conflict
+                cmd.CommandText <- cmd.CommandText |> applyOnConflict
+
                 // Fix Oracle multi-insert query
                 if compiler :? SqlKata.Compilers.OracleCompiler && iq.Spec.Entities.Length > 1 
                 then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixMultiInsertQuery 
                         
-                // Try apply on conflict
-                cmd.CommandText <- cmd.CommandText |> applyOnConflict
-
                 let! results = cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
                 // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
                 return Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn

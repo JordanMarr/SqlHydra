@@ -331,7 +331,7 @@ let tests =
                 |> ctx.DeleteAsync
 
             let! prodReviewId = 
-                insert {
+                insertTask (Shared ctx) {
                     for r in productReviewTable do
                     entity 
                         {
@@ -346,7 +346,6 @@ let tests =
                         }
                     getId r.productreviewid
                 }
-                |> ctx.InsertAsync
 
             let! review = 
                 select {
@@ -605,7 +604,7 @@ let tests =
             ) ""
         }
         
-        testTask "OnConflictDoUpdate" {
+        testAsync "OnConflictDoUpdate" {
             use ctx = openContext()
             ctx.BeginTransaction()
 
@@ -618,40 +617,41 @@ let tests =
                  ; person.address.postalcode = "97205"
                  ; person.address.spatiallocation = None
                  ; person.address.rowguid = System.Guid.NewGuid()
-                 ; person.address.modifieddate = System.DateTime.Now }
+                 ; person.address.modifieddate = System.DateTime.Today }
 
             let! addressId = 
-                insertTask (Shared ctx) {
+                insertAsync (Shared ctx) {
                     for a in addressTable do
                     entity address
-                    onConflictDoUpdate a.addressid (
-                        a.addressline1,
-                        a.addressline2,
-                        a.city,
-                        a.stateprovinceid,
-                        a.postalcode,
-                        a.modifieddate
-                    )
+                    //onConflictDoUpdate a.addressid (
+                    //    a.addressline1,
+                    //    a.addressline2,
+                    //    a.city,
+                    //    a.stateprovinceid,
+                    //    a.postalcode,
+                    //    a.modifieddate
+                    //)
                     getId a.addressid
                 }
 
-            let! result1 = 
-                selectTask HydraReader.Read (Shared ctx) {
+            let! firstInsertedAddressMaybe = 
+                selectAsync HydraReader.Read (Shared ctx) {
                     for a in addressTable do
                     where (a.addressid = addressId)
-                    toList
+                    tryHead
                 }
 
-            let r1 = result1 : person.address list
-            r1.Length =! 1
-            r1.[0] =! address
+            firstInsertedAddressMaybe.IsSome =! true
+            let firstInsertedAddress = firstInsertedAddressMaybe.Value
+            firstInsertedAddress =! { address with addressid = addressId }
 
-            let updatedAddress = { address with addressline2 = Some "Apt 1A" }
+            // Now modify the newly inserted address
+            let updatedFirstAddress = { firstInsertedAddress with addressline2 = Some "Apt 1A" }
 
             let! addressId2 = 
-                insertTask (Shared ctx) {
+                insertAsync (Shared ctx) {
                     for a in addressTable do
-                    entity updatedAddress
+                    entity updatedFirstAddress
                     onConflictDoUpdate a.addressid (
                         a.addressline1,
                         a.addressline2,
@@ -663,16 +663,19 @@ let tests =
                     getId a.addressid
                 }
 
-            let! result2 = 
-                selectTask HydraReader.Read (Shared ctx) {
+            // Upsert should return the same address ID
+            addressId =! addressId2
+
+            let! secondInsertedAddressMaybe = 
+                selectAsync HydraReader.Read (Shared ctx) {
                     for a in addressTable do
                     where (a.addressid = addressId2)
-                    toList
+                    tryHead
                 }
 
-            let r2 = result2 : person.address list
-            r2.Length =! 1
-            r2.[0] =! updatedAddress
+            secondInsertedAddressMaybe.IsSome =! true
+            let secondInsertedAddress = secondInsertedAddressMaybe.Value
+            secondInsertedAddress =! updatedFirstAddress
 
             ctx.RollbackTransaction()
         }
