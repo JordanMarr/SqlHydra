@@ -1,6 +1,8 @@
 ﻿/// Implementations for OnConflictDoUpdate, OnConflictDoNothing and InsertOrReplace.
 module internal SqlHydra.Query.OnConflict
 
+open System
+
 /// Modifies an insert query to "INSERT OR REPLACE"
 let insertOrReplace (cmdText: string) =
     cmdText.Replace("INSERT", "INSERT OR REPLACE")
@@ -9,7 +11,7 @@ let insertOrReplace (cmdText: string) =
 let onConflictDoUpdate (conflictColumns: string list) (updateColumns: string list) (query: SqlKata.Query) (cmdText: string) =
     // Separate insert query from optional identity query
     let insertQuery, identityQuery = 
-        match cmdText.Split([| ");" |], System.StringSplitOptions.None) with
+        match cmdText.Split([| ";" |], StringSplitOptions.RemoveEmptyEntries) with
         | [| insertQuery; identityQuery |] -> insertQuery, identityQuery
         | _ -> cmdText, ""
 
@@ -29,11 +31,11 @@ let onConflictDoUpdate (conflictColumns: string list) (updateColumns: string lis
     let setLinesStatement = 
         updateColumns
         |> List.map (fun colNm -> $"{colNm}=@p%i{getColumnIdxByName.[colNm]}\n")
-        |> (fun lines -> System.String.Join(",", lines))
+        |> (fun lines -> String.Join(",", lines))
             
-    let conflictColumnsCsv = System.String.Join(",", conflictColumns)
+    let conflictColumnsCsv = String.Join(",", conflictColumns)
 
-    System.Text.StringBuilder()
+    Text.StringBuilder()
         .AppendLine(insertQuery)
         .AppendLine($"ON CONFLICT({conflictColumnsCsv}) DO UPDATE SET")
         .AppendLine(setLinesStatement).Append(";")
@@ -44,14 +46,14 @@ let onConflictDoUpdate (conflictColumns: string list) (updateColumns: string lis
 let onConflictDoNothing (conflictColumns: string list) (cmdText: string) =
     // Separate insert query from optional identity query
     let insertQuery, identityQuery = 
-        match cmdText.Split([| ");" |], System.StringSplitOptions.None) with
+        match cmdText.Split([| ";" |], StringSplitOptions.RemoveEmptyEntries) with
         | [| insertQuery; identityQuery |] -> insertQuery, identityQuery
         | _ -> cmdText, ""
 
     // Build upsert clause            
-    let conflictColumnsCsv = System.String.Join(",", conflictColumns)
+    let conflictColumnsCsv = String.Join(",", conflictColumns)
         
-    System.Text.StringBuilder()
+    Text.StringBuilder()
         .AppendLine(insertQuery)
         .AppendLine($"ON CONFLICT({conflictColumnsCsv})")
         .AppendLine("DO NOTHING;")
