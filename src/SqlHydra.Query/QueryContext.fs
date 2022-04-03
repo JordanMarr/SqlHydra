@@ -147,7 +147,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         let applyOnConflict =
             match iq.Spec.InsertType with
             | InsertOrReplace -> OnConflict.insertOrReplace
-            | OnConflictDoUpdate (conflictFields, updateFields) -> OnConflict.onConflictDoUpdate conflictFields updateFields query
+            | OnConflictDoUpdate (conflictFields, updateFields) -> OnConflict.onConflictDoUpdate conflictFields updateFields
             | OnConflictDoNothing conflictFields -> OnConflict.onConflictDoNothing conflictFields
             | Insert -> id
 
@@ -204,7 +204,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             let applyOnConflict =
                 match iq.Spec.InsertType with
                 | InsertOrReplace -> OnConflict.insertOrReplace
-                | OnConflictDoUpdate (conflictFields, updateFields) -> OnConflict.onConflictDoUpdate conflictFields updateFields query
+                | OnConflictDoUpdate (conflictFields, updateFields) -> OnConflict.onConflictDoUpdate conflictFields updateFields
                 | OnConflictDoNothing conflictFields -> OnConflict.onConflictDoNothing conflictFields
                 | Insert -> id
 

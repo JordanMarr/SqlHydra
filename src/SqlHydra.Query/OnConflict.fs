@@ -8,29 +8,17 @@ let insertOrReplace (cmdText: string) =
     cmdText.Replace("INSERT", "INSERT OR REPLACE")
 
 /// Modifies an insert query to "ON CONFLICT TO UPDATE"
-let onConflictDoUpdate (conflictColumns: string list) (updateColumns: string list) (query: SqlKata.Query) (cmdText: string) =
+let onConflictDoUpdate (conflictColumns: string list) (updateColumns: string list) (cmdText: string) =
     // Separate insert query from optional identity query
     let insertQuery, identityQuery = 
         match cmdText.Split([| ";" |], StringSplitOptions.RemoveEmptyEntries) with
         | [| insertQuery; identityQuery |] -> insertQuery, identityQuery
         | _ -> cmdText, ""
 
-    // Get insert clause from the SqlKata query
-    let insertClause = 
-        query.Clauses 
-        |> Seq.choose (function | :? SqlKata.InsertClause as ic -> Some ic | _ -> None)
-        |> Seq.head
-
-    // Create a lookup of SqlKata insert column indexes by column name
-    let getColumnIdxByName = 
-        insertClause.Columns
-        |> Seq.mapi (fun idx colNm -> colNm, idx)
-        |> Map.ofSeq
-
     // Build upsert clause
     let setLinesStatement = 
         updateColumns
-        |> List.map (fun colNm -> $"{colNm}=@p%i{getColumnIdxByName.[colNm]}\n")
+        |> List.map (fun colNm -> $"{colNm}=EXCLUDED.\"{colNm}\"\n")
         |> (fun lines -> String.Join(",", lines))
             
     let conflictColumnsCsv = String.Join(",", conflictColumns)
