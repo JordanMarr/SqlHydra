@@ -70,20 +70,10 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
     
     /// Sets the identity field that should be returned from the insert and excludes it from the insert columns.
     [<CustomOperation("getId", MaintainsVariableSpace = true)>]
-    member this.GetId (state: QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>, [<ProjectionParameter>] propertySelector) = 
-
-        let spec = 
-            match state.Query.InsertType with
-            | Insert ->
-                // Exclude the identity column
-                this.ExcludeColumn(state, propertySelector).Query
-            | InsertOrReplace
-            | OnConflictDoUpdate _
-            | OnConflictDoNothing _ ->
-                // Do not exclude identity column (it is needed for updates)
-                state.Query
-        
-        let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'InsertReturn> propertySelector :?> Reflection.PropertyInfo
+    member this.GetId (state: QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>, [<ProjectionParameter>] idProperty) = 
+        // Exclude the identity column
+        let spec = this.ExcludeColumn(state, idProperty).Query
+        let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'InsertReturn> idProperty :?> Reflection.PropertyInfo
         
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>({ spec with IdentityField = Some prop.Name }, state.TableMappings)
 
