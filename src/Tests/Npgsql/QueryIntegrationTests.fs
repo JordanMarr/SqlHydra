@@ -608,45 +608,34 @@ let tests =
             use ctx = openContext()
             ctx.BeginTransaction()
 
-            let newCurrency = 
-                {
-                    sales.currency.currencycode = "NEW"
-                    sales.currency.name = "New Currency"
-                    sales.currency.modifieddate = System.DateTime.Today
+            let upsertCurrency currency = 
+                insertTask (Shared ctx) {
+                    for c in currencyTable do
+                    entity currency
+                    onConflictDoUpdate c.currencycode (c.name, c.modifieddate)
                 }
 
-            do! insertTask (Shared ctx) {
-                for c in currencyTable do
-                entity newCurrency
-                onConflictDoUpdate c.currencycode (c.name, c.modifieddate)
-            }
-
-            let query1 = 
+            let queryCurrency code = 
                 select {
                     for c in currencyTable do
-                    where (c.currencycode = "NEW")
+                    where (c.currencycode = code)
                 }
                 |> ctx.Read HydraReader.Read
                 |> Seq.head
 
+            let newCurrency = 
+                { sales.currency.currencycode = "NEW"
+                ; sales.currency.name = "New Currency"
+                ; sales.currency.modifieddate = System.DateTime.Today }
+
+            do! upsertCurrency newCurrency
+            let query1 = queryCurrency "NEW"
             query1 =! newCurrency
 
             let editedCurrency = { query1 with name = "Edited Currency" }
             
-            do! insertTask (Shared ctx) {
-                for c in currencyTable do
-                entity editedCurrency
-                onConflictDoUpdate c.currencycode (c.name, c.modifieddate)
-            }
-
-            let query2 = 
-                select {
-                    for c in currencyTable do
-                    where (c.currencycode = "NEW")
-                }
-                |> ctx.Read HydraReader.Read
-                |> Seq.head
-
+            do! upsertCurrency editedCurrency
+            let query2 = queryCurrency "NEW"
             query2 =! editedCurrency
 
             ctx.RollbackTransaction()
@@ -656,45 +645,35 @@ let tests =
             use ctx = openContext()
             ctx.BeginTransaction()
 
-            let newCurrency = 
-                {
-                    sales.currency.currencycode = "NEW"
-                    sales.currency.name = "New Currency"
-                    sales.currency.modifieddate = System.DateTime.Today
-                }
-
-            do! insertTask (Shared ctx) {
-                for c in currencyTable do
-                entity newCurrency
-                onConflictDoNothing c.currencycode
-            }
-
-            let query1 = 
+            let tryInsertCurrency currency = 
+                insert {
+                    for c in currencyTable do
+                    entity currency
+                    onConflictDoNothing c.currencycode
+                }   
+                |> ctx.Insert
+                |> ignore
+            
+            let queryCurrency code = 
                 select {
                     for c in currencyTable do
-                    where (c.currencycode = "NEW")
+                    where (c.currencycode = code)
                 }
                 |> ctx.Read HydraReader.Read
                 |> Seq.head
 
+            let newCurrency = 
+                { sales.currency.currencycode = "NEW"
+                ; sales.currency.name = "New Currency"
+                ; sales.currency.modifieddate = System.DateTime.Today }
+
+            tryInsertCurrency newCurrency
+            let query1 = queryCurrency "NEW"
             query1 =! newCurrency
 
             let editedCurrency = { query1 with name = "Edited Currency" }
-            
-            do! insertTask (Shared ctx) {
-                for c in currencyTable do
-                entity editedCurrency
-                onConflictDoNothing c.currencycode
-            }
-
-            let query2 = 
-                select {
-                    for c in currencyTable do
-                    where (c.currencycode = "NEW")
-                }
-                |> ctx.Read HydraReader.Read
-                |> Seq.head
-
+            tryInsertCurrency editedCurrency
+            let query2 = queryCurrency "NEW"
             query2 =! newCurrency
 
             ctx.RollbackTransaction()

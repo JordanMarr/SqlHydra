@@ -517,18 +517,8 @@ let tests =
             use ctx = openContext()
             ctx.BeginTransaction()
 
-            let address = 
-                 { main.Address.AddressID = 5000
-                 ; main.Address.AddressLine1 = "123 Main St"
-                 ; main.Address.AddressLine2 = None
-                 ; main.Address.City = "Portland"
-                 ; main.Address.StateProvince = "OR"
-                 ; main.Address.CountryRegion = "United States"
-                 ; main.Address.PostalCode = "97205"
-                 ; main.Address.rowguid = ""
-                 ; main.Address.ModifiedDate = System.DateTime.Now }
-
-            do! insertTask (Shared ctx) {
+            let upsertAddress address = 
+                insertTask (Shared ctx) {
                     for a in addressTable do
                     entity address
                     onConflictDoUpdate a.AddressID (
@@ -542,39 +532,35 @@ let tests =
                     )
                 }
 
-            let! result1 = 
+            let queryAddress id = 
                 selectTask HydraReader.Read (Shared ctx) {
                     for a in addressTable do
-                    where (a.AddressID = 5000L)
+                    where (a.AddressID = id)
                     toList
                 }
+
+            let newAddress = 
+                 { main.Address.AddressID = 5000
+                 ; main.Address.AddressLine1 = "123 Main St"
+                 ; main.Address.AddressLine2 = None
+                 ; main.Address.City = "Portland"
+                 ; main.Address.StateProvince = "OR"
+                 ; main.Address.CountryRegion = "United States"
+                 ; main.Address.PostalCode = "97205"
+                 ; main.Address.rowguid = ""
+                 ; main.Address.ModifiedDate = System.DateTime.Now }
+
+            do! upsertAddress newAddress
+            let! result1 = queryAddress 5000L
 
             let r1 = result1 : main.Address list
             r1.Length =! 1
-            r1.[0] =! address
+            r1.[0] =! newAddress
 
-            let updatedAddress = { address with AddressLine2 = Some "Apt 1A" }
+            let updatedAddress = { newAddress with AddressLine2 = Some "Apt 1A" }
 
-            do! insertTask (Shared ctx) {
-                    for a in addressTable do
-                    entity updatedAddress
-                    onConflictDoUpdate a.AddressID (
-                        a.AddressLine1,
-                        a.AddressLine2,
-                        a.City,
-                        a.StateProvince,
-                        a.CountryRegion,
-                        a.PostalCode,
-                        a.ModifiedDate
-                    )
-                }
-
-            let! result2 = 
-                selectTask HydraReader.Read (Shared ctx) {
-                    for a in addressTable do
-                    where (a.AddressID = 5000L)
-                    toList
-                }
+            do! upsertAddress updatedAddress
+            let! result2 = queryAddress 5000L
 
             let r2 = result2 : main.Address list
             r2.Length =! 1
