@@ -1,5 +1,6 @@
 ﻿namespace SqlHydra.Query
 
+open System
 open System.Data.Common
 open System.Threading
 open SqlKata
@@ -10,7 +11,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         let property = param.GetType().GetProperty(propertyName)
         let dbTypeSetter = property.GetSetMethod()
         
-        let value = System.Enum.Parse(property.PropertyType, providerDbType)
+        let value = Enum.Parse(property.PropertyType, providerDbType)
         dbTypeSetter.Invoke(param, [|value|]) |> ignore
         
     let setParameterDbType (param: DbParameter) (qp: QueryParameter) =
@@ -21,7 +22,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             setProviderDbType param "SqlDbType" type'
         | _ -> ()    
         
-    interface System.IDisposable with
+    interface IDisposable with
         member this.Dispose() = 
             conn.Dispose()
             this.Transaction |> Option.iter (fun t -> t.Dispose())
@@ -32,7 +33,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
 
     member val Transaction : DbTransaction option = None with get,set
 
-    member this.BeginTransaction(?isolationLevel: System.Data.IsolationLevel) = 
+    member this.BeginTransaction(?isolationLevel: Data.IsolationLevel) = 
         this.Transaction <- 
             match isolationLevel with
             | Some il -> conn.BeginTransaction(il) |> Some
@@ -138,79 +139,119 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         }
         |> Async.StartImmediateAsTask
 
-    member this.Insert<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>) = 
-        use cmd = this.BuildCommand(query.ToKataQuery())
+    member this.Insert<'T, 'InsertReturn when 'InsertReturn : struct> (iq: InsertQuery<'T, 'InsertReturn>) = 
+        let query = iq.ToKataQuery()
+        use cmd = this.BuildCommand(query)
+
+        // Applies on conflict modifier if in spec
+        let applyOnConflict =
+            match iq.Spec.InsertType with
+            | InsertOrReplace -> OnConflict.insertOrReplace
+            | OnConflictDoUpdate (conflictFields, updateFields) -> OnConflict.onConflictDoUpdate conflictFields updateFields
+            | OnConflictDoNothing conflictFields -> OnConflict.onConflictDoNothing conflictFields
+            | Insert -> id
+
+        KataUtils.failIfIdentityOnConflict iq.Spec
+
         // Did the user select an identity field?
-        match query.Spec.IdentityField with
+        match iq.Spec.IdentityField with
         | Some identityField -> 
-            // Fix identity query
+            // Try apply on conflict
+            cmd.CommandText <- cmd.CommandText |> applyOnConflict
+
+            // Fix postgres identity
             if compiler :? SqlKata.Compilers.PostgresCompiler 
-            then cmd.CommandText <- Fixes.Postgres.fixIdentityQuery (cmd.CommandText, identityField)
+            then cmd.CommandText <- cmd.CommandText |> Fixes.Postgres.fixIdentityQuery identityField 
+
+            // Fix oracle identity
             elif compiler  :? SqlKata.Compilers.OracleCompiler 
-            then cmd.CommandText <- Fixes.Oracle.fixIdentityQuery (cmd.CommandText, identityField)
+            then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixIdentityQuery identityField 
 
             // Execute insert and return identity
             if compiler :? SqlKata.Compilers.OracleCompiler then
                 let outputParam = cmd.CreateParameter()
                 outputParam.ParameterName <- "outputParam"
-                outputParam.DbType <- System.Data.DbType.Decimal
-                outputParam.Direction <- System.Data.ParameterDirection.Output
+                outputParam.DbType <- Data.DbType.Decimal
+                outputParam.Direction <- Data.ParameterDirection.Output
                 cmd.Parameters.Add(outputParam) |> ignore
                 let _ = cmd.ExecuteNonQuery()
                 // 'InsertReturn type set via `getId` in the builder
-                System.Convert.ChangeType(outputParam.Value, typeof<'InsertReturn>) :?> 'InsertReturn
+                Convert.ChangeType(outputParam.Value, typeof<'InsertReturn>) :?> 'InsertReturn
             else
                 let identity = cmd.ExecuteScalar()
                 // 'InsertReturn type set via `getId` in the builder
-                System.Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
+                Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
         | None ->
-            // Fix Oracle multi-insert query
-            if compiler :? SqlKata.Compilers.OracleCompiler && query.Spec.Entities.Length > 1
-            then cmd.CommandText <- Fixes.Oracle.fixMultiInsertQuery cmd.CommandText
+            // Try apply on conflict
+            cmd.CommandText <- cmd.CommandText |> applyOnConflict
 
+            // Fix Oracle multi-insert query
+            if compiler :? SqlKata.Compilers.OracleCompiler && iq.Spec.Entities.Length > 1 
+            then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixMultiInsertQuery 
+                    
             let results = cmd.ExecuteNonQuery()
             // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
-            System.Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
+            Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
 
     member this.InsertAsync<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>) = 
         this.InsertAsyncWithOptions(query)
     
-    member this.InsertAsyncWithOptions<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>, ?cancel: CancellationToken) = 
+    member this.InsertAsyncWithOptions<'T, 'InsertReturn when 'InsertReturn : struct> (iq: InsertQuery<'T, 'InsertReturn>, ?cancel: CancellationToken) = 
         async { // Must wrap in async to prevent `EndExecuteNonQuery` ex in NET6_0
-            use cmd = this.BuildCommand(query.ToKataQuery())
+            let query = iq.ToKataQuery()
+            use cmd = this.BuildCommand(query)
+
+            // Applies on conflict modifier if in spec
+            let applyOnConflict =
+                match iq.Spec.InsertType with
+                | InsertOrReplace -> OnConflict.insertOrReplace
+                | OnConflictDoUpdate (conflictFields, updateFields) -> OnConflict.onConflictDoUpdate conflictFields updateFields
+                | OnConflictDoNothing conflictFields -> OnConflict.onConflictDoNothing conflictFields
+                | Insert -> id
+
+            KataUtils.failIfIdentityOnConflict iq.Spec
+
             // Did the user select an identity field?
-            match query.Spec.IdentityField with
+            match iq.Spec.IdentityField with
             | Some identityField -> 
-                // Fix identity query
+                // Try apply on conflict
+                cmd.CommandText <- cmd.CommandText |> applyOnConflict
+
+                // Fix postgres identity
                 if compiler :? SqlKata.Compilers.PostgresCompiler 
-                then cmd.CommandText <- Fixes.Postgres.fixIdentityQuery (cmd.CommandText, identityField)
-                elif compiler  :? SqlKata.Compilers.OracleCompiler 
-                then cmd.CommandText <- Fixes.Oracle.fixIdentityQuery (cmd.CommandText, identityField)
+                then cmd.CommandText <- cmd.CommandText |> Fixes.Postgres.fixIdentityQuery identityField 
+
+                // Fix oracle identity
+                elif compiler :? SqlKata.Compilers.OracleCompiler 
+                then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixIdentityQuery identityField
 
                 // Execute insert and return identity
                 if compiler :? SqlKata.Compilers.OracleCompiler then
                     let outputParam = cmd.CreateParameter()
                     outputParam.ParameterName <- "outputParam"
-                    outputParam.DbType <- System.Data.DbType.Decimal
-                    outputParam.Direction <- System.Data.ParameterDirection.Output
+                    outputParam.DbType <- Data.DbType.Decimal
+                    outputParam.Direction <- Data.ParameterDirection.Output
                     cmd.Parameters.Add(outputParam) |> ignore
                     let! _ = cmd.ExecuteNonQueryAsync() |> Async.AwaitTask
                     // 'InsertReturn type set via `getId` in the builder
-                    return System.Convert.ChangeType(outputParam.Value, typeof<'InsertReturn>) :?> 'InsertReturn
+                    return Convert.ChangeType(outputParam.Value, typeof<'InsertReturn>) :?> 'InsertReturn
                 else
                     let! identity = cmd.ExecuteScalarAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
                     // 'InsertReturn type set via `getId` in the builder
-                    return System.Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
+                    return Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
             | None ->
-                // Fix Oracle multi-insert query
-                if compiler :? SqlKata.Compilers.OracleCompiler && query.Spec.Entities.Length > 1
-                then cmd.CommandText <- Fixes.Oracle.fixMultiInsertQuery cmd.CommandText
+                // Try apply on conflict
+                cmd.CommandText <- cmd.CommandText |> applyOnConflict
 
+                // Fix Oracle multi-insert query
+                if compiler :? SqlKata.Compilers.OracleCompiler && iq.Spec.Entities.Length > 1 
+                then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixMultiInsertQuery 
+                        
                 let! results = cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
                 // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
-                return System.Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
+                return Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
         }
         |> Async.StartImmediateAsTask
     
@@ -245,7 +286,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
     member this.Count (query: SelectQuery<int>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
         match cmd.ExecuteScalar() with
-        | :? int64 as count -> System.Convert.ToInt32 count
+        | :? int64 as count -> Convert.ToInt32 count
         | _  as count -> count :?> int
 
     member this.CountAsync (query: SelectQuery<int>) = 
@@ -257,7 +298,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             let! count = cmd.ExecuteScalarAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
             return 
                 match count with
-                | :? int64 as value -> System.Convert.ToInt32 value
+                | :? int64 as value -> Convert.ToInt32 value
                 | _ -> count :?> int
         }
         |> Async.StartImmediateAsTask

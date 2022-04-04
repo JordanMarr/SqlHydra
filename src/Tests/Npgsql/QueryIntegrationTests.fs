@@ -3,6 +3,8 @@
 open Expecto
 open SqlHydra.Query
 open DB
+open SqlHydra.Query.NpgsqlExtensions
+open Swensen.Unquote
 #if NET5_0
 open Npgsql.AdventureWorksNet5
 #endif
@@ -329,7 +331,7 @@ let tests =
                 |> ctx.DeleteAsync
 
             let! prodReviewId = 
-                insert {
+                insertTask (Shared ctx) {
                     for r in productReviewTable do
                     entity 
                         {
@@ -344,7 +346,6 @@ let tests =
                         }
                     getId r.productreviewid
                 }
-                |> ctx.InsertAsync
 
             let! review = 
                 select {
@@ -601,5 +602,80 @@ let tests =
                     p.current_mood = Some (experiments.mood.happy)
                 )
             ) ""
+        }
+        
+        testTask "OnConflictDoUpdate" {
+            use ctx = openContext()
+            ctx.BeginTransaction()
+
+            let upsertCurrency currency = 
+                insertTask (Shared ctx) {
+                    for c in currencyTable do
+                    entity currency
+                    onConflictDoUpdate c.currencycode (c.name, c.modifieddate)
+                }
+
+            let queryCurrency code = 
+                select {
+                    for c in currencyTable do
+                    where (c.currencycode = code)
+                }
+                |> ctx.Read HydraReader.Read
+                |> Seq.head
+
+            let newCurrency = 
+                { sales.currency.currencycode = "NEW"
+                ; sales.currency.name = "New Currency"
+                ; sales.currency.modifieddate = System.DateTime.Today }
+
+            do! upsertCurrency newCurrency
+            let query1 = queryCurrency "NEW"
+            query1 =! newCurrency
+
+            let editedCurrency = { query1 with name = "Edited Currency" }
+            
+            do! upsertCurrency editedCurrency
+            let query2 = queryCurrency "NEW"
+            query2 =! editedCurrency
+
+            ctx.RollbackTransaction()
+        }
+
+        testTask "OnConflictDoNothing" {
+            use ctx = openContext()
+            ctx.BeginTransaction()
+
+            let tryInsertCurrency currency = 
+                insert {
+                    for c in currencyTable do
+                    entity currency
+                    onConflictDoNothing c.currencycode
+                }   
+                |> ctx.Insert
+                |> ignore
+            
+            let queryCurrency code = 
+                select {
+                    for c in currencyTable do
+                    where (c.currencycode = code)
+                }
+                |> ctx.Read HydraReader.Read
+                |> Seq.head
+
+            let newCurrency = 
+                { sales.currency.currencycode = "NEW"
+                ; sales.currency.name = "New Currency"
+                ; sales.currency.modifieddate = System.DateTime.Today }
+
+            tryInsertCurrency newCurrency
+            let query1 = queryCurrency "NEW"
+            query1 =! newCurrency
+
+            let editedCurrency = { query1 with name = "Edited Currency" }
+            tryInsertCurrency editedCurrency
+            let query2 = queryCurrency "NEW"
+            query2 =! newCurrency
+
+            ctx.RollbackTransaction()
         }
     ]

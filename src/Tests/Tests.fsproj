@@ -51,8 +51,9 @@
     <PackageReference Include="Expecto" Version="9.0.4" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.10" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
-    <PackageReference Include="Verify.Expecto" Version="16.2.0" />
-    <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.12.13" />
+    <PackageReference Include="Unquote" Version="6.1.0" />
+    <PackageReference Include="Verify.Expecto" Version="16.5.1" />
+    <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.12.20" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SqlHydra.Oracle\SqlHydra.Oracle.fsproj" />

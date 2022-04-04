@@ -22,11 +22,14 @@
 		<Compile Include="QueryFunctions.fs" />
 		<Compile Include="LinqExpressionVisitors.fs" />
 		<Compile Include="Fixes.fs" />
+		<Compile Include="OnConflict.fs" />
 		<Compile Include="QueryContext.fs" />
 		<Compile Include="SelectBuilders.fs" />
 		<Compile Include="InsertBuilders.fs" />
 		<Compile Include="UpdateBuilders.fs" />
 		<Compile Include="DeleteBuilders.fs" />
+		<Compile Include="NpgsqlExtensions.fs" />
+		<Compile Include="SqliteExtensions.fs" />
 		<Compile Include="DataReaderExtensions.fs" />
 	</ItemGroup>
 

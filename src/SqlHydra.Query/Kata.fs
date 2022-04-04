@@ -45,15 +45,22 @@ type QueryParameter =
         ProviderDbType: string option
     }
 
+type InsertType = 
+    | Insert
+    | InsertOrReplace
+    | OnConflictDoUpdate of conflictFields: string list * updateFields: string list
+    | OnConflictDoNothing of conflictFields: string list
+
 type InsertQuerySpec<'T, 'Identity> =
     {
         Table: string
         Entities: 'T list
         Fields: string list
         IdentityField: string option
+        InsertType: InsertType
     }
     static member Default : InsertQuerySpec<'T, 'Identity> = 
-        { Table = ""; Entities = []; Fields = []; IdentityField = None }
+        { Table = ""; Entities = []; Fields = []; IdentityField = None; InsertType = Insert }
 
 type UpdateQuerySpec<'T> = 
     {
@@ -184,6 +191,14 @@ module private KataUtils =
                     |> Array.toSeq
                 )
             Query(spec.Table).AsInsert(columns, rowsValues)
+
+    let failIfIdentityOnConflict spec = 
+        match spec.IdentityField, spec.InsertType with
+        | Some ident, OnConflictDoUpdate (conflictFields, _)
+        | Some ident, OnConflictDoNothing conflictFields ->
+            if conflictFields |> List.contains ident 
+            then failwith $"Using identity column as a conflict target is not supported."
+        | _ -> ()
 
 
 [<AbstractClass>]
