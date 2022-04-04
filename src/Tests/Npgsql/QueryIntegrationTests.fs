@@ -604,78 +604,98 @@ let tests =
             ) ""
         }
         
-        testAsync "OnConflictDoUpdate" {
+        testTask "OnConflictDoUpdate" {
             use ctx = openContext()
             ctx.BeginTransaction()
 
-            let address = 
-                 { person.address.addressid = 0
-                 ; person.address.addressline1 = "123 Main St"
-                 ; person.address.addressline2 = None
-                 ; person.address.city = "Portland"
-                 ; person.address.stateprovinceid = 2
-                 ; person.address.postalcode = "97205"
-                 ; person.address.spatiallocation = None
-                 ; person.address.rowguid = System.Guid.NewGuid()
-                 ; person.address.modifieddate = System.DateTime.Today }
-
-            let! addressId = 
-                insertAsync (Shared ctx) {
-                    for a in addressTable do
-                    entity address
-                    //onConflictDoUpdate a.addressid (
-                    //    a.addressline1,
-                    //    a.addressline2,
-                    //    a.city,
-                    //    a.stateprovinceid,
-                    //    a.postalcode,
-                    //    a.modifieddate
-                    //)
-                    getId a.addressid
+            let newCurrency = 
+                {
+                    sales.currency.currencycode = "NEW"
+                    sales.currency.name = "New Currency"
+                    sales.currency.modifieddate = System.DateTime.Today
                 }
 
-            let! firstInsertedAddressMaybe = 
-                selectAsync HydraReader.Read (Shared ctx) {
-                    for a in addressTable do
-                    where (a.addressid = addressId)
-                    tryHead
+            do! insertTask (Shared ctx) {
+                for c in currencyTable do
+                entity newCurrency
+                onConflictDoUpdate c.currencycode (c.name, c.modifieddate)
+            }
+
+            let query1 = 
+                select {
+                    for c in currencyTable do
+                    where (c.currencycode = "NEW")
+                }
+                |> ctx.Read HydraReader.Read
+                |> Seq.head
+
+            query1 =! newCurrency
+
+            let editedCurrency = { query1 with name = "Edited Currency" }
+            
+            do! insertTask (Shared ctx) {
+                for c in currencyTable do
+                entity editedCurrency
+                onConflictDoUpdate c.currencycode (c.name, c.modifieddate)
+            }
+
+            let query2 = 
+                select {
+                    for c in currencyTable do
+                    where (c.currencycode = "NEW")
+                }
+                |> ctx.Read HydraReader.Read
+                |> Seq.head
+
+            query2 =! editedCurrency
+
+            ctx.RollbackTransaction()
+        }
+
+        testTask "OnConflictDoNothing" {
+            use ctx = openContext()
+            ctx.BeginTransaction()
+
+            let newCurrency = 
+                {
+                    sales.currency.currencycode = "NEW"
+                    sales.currency.name = "New Currency"
+                    sales.currency.modifieddate = System.DateTime.Today
                 }
 
-            firstInsertedAddressMaybe.IsSome =! true
-            let firstInsertedAddress = firstInsertedAddressMaybe.Value
-            firstInsertedAddress =! { address with addressid = addressId }
+            do! insertTask (Shared ctx) {
+                for c in currencyTable do
+                entity newCurrency
+                onConflictDoNothing c.currencycode
+            }
 
-            // Now modify the newly inserted address
-            let updatedFirstAddress = { firstInsertedAddress with addressline2 = Some "Apt 1A" }
-
-            let! addressId2 = 
-                insertAsync (Shared ctx) {
-                    for a in addressTable do
-                    entity updatedFirstAddress
-                    onConflictDoUpdate a.addressid (
-                        a.addressline1,
-                        a.addressline2,
-                        a.city,
-                        a.stateprovinceid,
-                        a.postalcode,
-                        a.modifieddate
-                    )
-                    getId a.addressid
+            let query1 = 
+                select {
+                    for c in currencyTable do
+                    where (c.currencycode = "NEW")
                 }
+                |> ctx.Read HydraReader.Read
+                |> Seq.head
 
-            // Upsert should return the same address ID
-            addressId =! addressId2
+            query1 =! newCurrency
 
-            let! secondInsertedAddressMaybe = 
-                selectAsync HydraReader.Read (Shared ctx) {
-                    for a in addressTable do
-                    where (a.addressid = addressId2)
-                    tryHead
+            let editedCurrency = { query1 with name = "Edited Currency" }
+            
+            do! insertTask (Shared ctx) {
+                for c in currencyTable do
+                entity editedCurrency
+                onConflictDoNothing c.currencycode
+            }
+
+            let query2 = 
+                select {
+                    for c in currencyTable do
+                    where (c.currencycode = "NEW")
                 }
+                |> ctx.Read HydraReader.Read
+                |> Seq.head
 
-            secondInsertedAddressMaybe.IsSome =! true
-            let secondInsertedAddress = secondInsertedAddressMaybe.Value
-            secondInsertedAddress =! updatedFirstAddress
+            query2 =! newCurrency
 
             ctx.RollbackTransaction()
         }
