@@ -657,6 +657,48 @@ match currenciesMaybe with
     printfn "Skipping insert because entities seq was empty."
 ```
 
+#### Upsert
+Upsert support has been added for Postgres and Sqlite only because they support `ON CONFLICT DO ___` which provides atomic upsert capabilities.
+(Unfortunately, SQL Server and Oracle only have MERGE which can suffer from concurrency issues.)
+
+**Postgres:**
+`open SqlHydra.Query.NpgsqlExtensions`
+
+**Sqlite:**
+`open SqlHydra.Query.SqliteExtensions`
+
+**Example Usage:**
+
+```F#
+    /// Inserts an address or updates it if it already exists.
+    let upsertAddress address = 
+        insertTask (Create openContext) {
+            for a in addressTable do
+            entity address
+            onConflictDoUpdate a.AddressID (
+                a.AddressLine1,
+                a.AddressLine2,
+                a.City,
+                a.StateProvince,
+                a.CountryRegion,
+                a.PostalCode,
+                a.ModifiedDate
+            )
+        }
+```
+
+
+```F#
+    /// Tries to insert an address if it doesn't already exist.
+    let tryInsertAddress address = 
+        insertTask (Create openContext) {
+            for a in addressTable do
+            entity address
+            onConflictDoNothing a.AddressID
+        }
+```
+
+
 ### Update Builder
 
 #### Update Individual Fields
