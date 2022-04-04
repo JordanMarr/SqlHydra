@@ -192,6 +192,14 @@ module private KataUtils =
                 )
             Query(spec.Table).AsInsert(columns, rowsValues)
 
+    let failIfIdentityOnConflict spec = 
+        match spec.IdentityField, spec.InsertType with
+        | Some ident, OnConflictDoUpdate (conflictFields, _)
+        | Some ident, OnConflictDoNothing conflictFields ->
+            if conflictFields |> List.contains ident 
+            then failwith $"Using identity column as a conflict target is not supported."
+        | _ -> ()
+
 
 [<AbstractClass>]
 type SelectQuery() = 

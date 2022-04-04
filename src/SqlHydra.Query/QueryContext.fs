@@ -151,6 +151,8 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             | OnConflictDoNothing conflictFields -> OnConflict.onConflictDoNothing conflictFields
             | Insert -> id
 
+        KataUtils.failIfIdentityOnConflict iq.Spec
+
         // Did the user select an identity field?
         match iq.Spec.IdentityField with
         | Some identityField -> 
@@ -207,6 +209,8 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 | OnConflictDoUpdate (conflictFields, updateFields) -> OnConflict.onConflictDoUpdate conflictFields updateFields
                 | OnConflictDoNothing conflictFields -> OnConflict.onConflictDoNothing conflictFields
                 | Insert -> id
+
+            KataUtils.failIfIdentityOnConflict iq.Spec
 
             // Did the user select an identity field?
             match iq.Spec.IdentityField with
