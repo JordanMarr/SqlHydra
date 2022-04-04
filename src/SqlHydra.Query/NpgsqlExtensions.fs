@@ -1,24 +1,26 @@
 ﻿module SqlHydra.Query.NpgsqlExtensions
 
 type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
-
+    
+    /// Performs an update on one or more update fields if a conflict occurs.
     [<CustomOperation("onConflictDoUpdate", MaintainsVariableSpace = true)>]
     member this.OnConflictDoUpdate(state: QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>, 
-        [<ProjectionParameter>] conflictFieldsSelector, 
-        [<ProjectionParameter>] updateFieldsSelector) = 
+        [<ProjectionParameter>] conflictFields, 
+        [<ProjectionParameter>] updateFields) = 
         
         let spec = state.Query
-        let conflictFields = LinqExpressionVisitors.visitGroupBy<'T, 'ConflictProperty> conflictFieldsSelector (fun p -> p.Name)
-        let updateFields = LinqExpressionVisitors.visitGroupBy<'T, 'UpdateProperties> updateFieldsSelector (fun p -> p.Name)
+        let conflictFields = LinqExpressionVisitors.visitGroupBy<'T, 'ConflictProperty> conflictFields (fun p -> p.Name)
+        let updateFields = LinqExpressionVisitors.visitGroupBy<'T, 'UpdateProperties> updateFields (fun p -> p.Name)
         let newSpec = { spec with InsertType = OnConflictDoUpdate (conflictFields, updateFields) }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
 
+    /// Insert is ignored if a conflict occurs.
     [<CustomOperation("onConflictDoNothing", MaintainsVariableSpace = true)>]
     member this.OnConflictDoNothing(state: QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>, 
-        [<ProjectionParameter>] conflictFieldsSelector) = 
+        [<ProjectionParameter>] conflictFields) = 
         
         let spec = state.Query
-        let conflictFields = LinqExpressionVisitors.visitGroupBy<'T, 'ConflictProperty> conflictFieldsSelector (fun p -> p.Name)
+        let conflictFields = LinqExpressionVisitors.visitGroupBy<'T, 'ConflictProperty> conflictFields (fun p -> p.Name)
         let newSpec = { spec with InsertType = OnConflictDoNothing conflictFields }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
 

@@ -192,6 +192,7 @@ module private KataUtils =
                 )
             Query(spec.Table).AsInsert(columns, rowsValues)
 
+    /// Fails if `getId` identity field is used as an `onConflict` target.
     let failIfIdentityOnConflict spec = 
         match spec.IdentityField, spec.InsertType with
         | Some ident, OnConflictDoUpdate (conflictFields, _)

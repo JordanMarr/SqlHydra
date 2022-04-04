@@ -2,6 +2,7 @@
 
 type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
 
+    /// Performs an update on one or more update fields if a conflict occurs.
     [<CustomOperation("onConflictDoUpdate", MaintainsVariableSpace = true)>]
     member this.OnConflictDoUpdate(state: QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>, 
         [<ProjectionParameter>] conflictFieldsSelector, 
@@ -13,6 +14,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
         let newSpec = { spec with InsertType = OnConflictDoUpdate (conflictFields, updateFields) }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
 
+    /// Insert is ignored if a conflict occurs.
     [<CustomOperation("onConflictDoNothing", MaintainsVariableSpace = true)>]
     member this.OnConflictDoNothing(state: QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>, 
         [<ProjectionParameter>] conflictFieldsSelector) = 
@@ -22,6 +24,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
         let newSpec = { spec with InsertType = OnConflictDoNothing conflictFields }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
 
+    /// Deletes and re-inserts a record if a primary key conflict occurs.
     [<CustomOperation("insertOrReplace", MaintainsVariableSpace = true)>]
     member this.InsertOrReplace(state: QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>) =
         let spec = state.Query
