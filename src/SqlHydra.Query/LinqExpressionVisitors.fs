@@ -405,7 +405,7 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberI
     visit (filter :> Expression) (Query())
 
 /// Returns a list of one or more fully qualified column names: ["{schema}.{table}.{column}"]
-let visitGroupBy<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) (qualifyColumn: MemberInfo -> string) =
+let visitPropertiesSelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) (qualifyColumn: MemberInfo -> string) =
     let rec visit (exp: Expression) : string list =
         match exp with
         | Lambda x -> visit x.Body

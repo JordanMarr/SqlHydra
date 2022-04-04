@@ -9,8 +9,8 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
         [<ProjectionParameter>] updateFields) = 
         
         let spec = state.Query
-        let conflictFields = LinqExpressionVisitors.visitGroupBy<'T, 'ConflictProperty> conflictFields (fun p -> p.Name)
-        let updateFields = LinqExpressionVisitors.visitGroupBy<'T, 'UpdateProperties> updateFields (fun p -> p.Name)
+        let conflictFields = LinqExpressionVisitors.visitPropertiesSelector<'T, 'ConflictProperty> conflictFields (fun p -> p.Name)
+        let updateFields = LinqExpressionVisitors.visitPropertiesSelector<'T, 'UpdateProperties> updateFields (fun p -> p.Name)
         let newSpec = { spec with InsertType = OnConflictDoUpdate (conflictFields, updateFields) }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
 
@@ -20,7 +20,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
         [<ProjectionParameter>] conflictFields) = 
         
         let spec = state.Query
-        let conflictFields = LinqExpressionVisitors.visitGroupBy<'T, 'ConflictProperty> conflictFields (fun p -> p.Name)
+        let conflictFields = LinqExpressionVisitors.visitPropertiesSelector<'T, 'ConflictProperty> conflictFields (fun p -> p.Name)
         let newSpec = { spec with InsertType = OnConflictDoNothing conflictFields }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
 

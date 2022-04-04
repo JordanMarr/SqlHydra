@@ -225,7 +225,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
     /// Sets the GROUP BY for one or more columns.
     [<CustomOperation("groupBy", MaintainsVariableSpace = true)>]
     member this.GroupBy (state: QuerySource<'T, Query>, [<ProjectionParameter>] propertySelector) = 
-        let properties = LinqExpressionVisitors.visitGroupBy<'T, 'Prop> propertySelector (FQ.fullyQualifyColumn state.TableMappings)
+        let properties = LinqExpressionVisitors.visitPropertiesSelector<'T, 'Prop> propertySelector (FQ.fullyQualifyColumn state.TableMappings)
         QuerySource<'T, Query>(state.Query.GroupBy(properties |> List.toArray), state.TableMappings)
 
     /// Sets the HAVING condition.
