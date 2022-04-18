@@ -166,7 +166,7 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
   </Target>
 ```
 
-### Sqlite Data Types Aliases
+### Sqlite Data Type Aliases
 Sqlite stores all data as either an `INTEGER`, `REAL`, `TEXT` or `BLOB` type.
 Fortunately, you can also use aliases for data types more commonly used in other databases in your table definitions and Sqlite will translate them to the appropriate type.
 Using these type aliases also allows `SqlHydra.Sqlite` to generate the desired .NET CLR property type.
