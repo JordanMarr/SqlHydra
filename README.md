@@ -105,8 +105,10 @@ Npgsql Mapping Example:
 Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>(nameof experiments.mood) |> ignore
 ```
 
-💥 Npgsql v6.0.3 has a bug that throws an exception during SqlHydra.Npgsql code generation if an enum exists an a schema other than `public`.
+💥 SqlHydra.Npgsql 1.0.0 uses Npgsql v6.0.3 which has a bug that throws an exception during SqlHydra.Npgsql code generation if an enum exists an a schema other than `public`.
 This bug has been fixed and is slated for v6.0.4. The workaround until then is to ensure that enums in non `public` schemas are also added to `public`.
+
+✔️ SqlHydra.Npgsql 1.0.1 uses Npgsql v6.0.4 which fixes the bug that causes generation to fail if an enum exists in a schema other than `public`.
 
 ## SqlHydra.Oracle [![NuGet version (SqlHydra.Oracle)](https://img.shields.io/nuget/v/SqlHydra.Oracle.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Oracle/)
 
@@ -165,6 +167,14 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
     <Exec Command="dotnet sqlhydra-sqlite" />
   </Target>
 ```
+
+### Sqlite Data Type Aliases
+Sqlite stores all data as either an `INTEGER`, `REAL`, `TEXT` or `BLOB` type.
+Fortunately, you can also use aliases for data types more commonly used in other databases in your table definitions and Sqlite will translate them to the appropriate type.
+Using these type aliases also allows `SqlHydra.Sqlite` to generate the desired .NET CLR property type.
+
+Here is a list of valid data type aliases (or "affinity names"):
+https://www.sqlite.org/datatype3.html#affinity_name_examples
 
 ### Upgrading to .NET 6
 If you are upgrading SqlHydra.Sqlite to a version that supports .NET 6 (SqlHydra.Sqlite v0.630.0 or above), you will need to manually update your `sqlhydra-sqlite.toml` configuration file. 
@@ -656,6 +666,48 @@ match currenciesMaybe with
 | None ->
     printfn "Skipping insert because entities seq was empty."
 ```
+
+#### Upsert
+Upsert support has been added for Postgres and Sqlite only because they support `ON CONFLICT DO ___` which provides atomic upsert capabilities.
+(Unfortunately, SQL Server and Oracle only have MERGE which can suffer from concurrency issues.)
+
+**Postgres:**
+`open SqlHydra.Query.NpgsqlExtensions`
+
+**Sqlite:**
+`open SqlHydra.Query.SqliteExtensions`
+
+**Example Usage:**
+
+```F#
+    /// Inserts an address or updates it if it already exists.
+    let upsertAddress address = 
+        insertTask (Create openContext) {
+            for a in addressTable do
+            entity address
+            onConflictDoUpdate a.AddressID (
+                a.AddressLine1,
+                a.AddressLine2,
+                a.City,
+                a.StateProvince,
+                a.CountryRegion,
+                a.PostalCode,
+                a.ModifiedDate
+            )
+        }
+```
+
+
+```F#
+    /// Tries to insert an address if it doesn't already exist.
+    let tryInsertAddress address = 
+        insertTask (Create openContext) {
+            for a in addressTable do
+            entity address
+            onConflictDoNothing a.AddressID
+        }
+```
+
 
 ### Update Builder
 
