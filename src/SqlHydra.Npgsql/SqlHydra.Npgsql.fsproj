@@ -31,7 +31,8 @@
 		<PackageReference Include="FsAst" Version="0.10.0" Condition="'$(TargetFramework)' == 'net6.0'" />
         <PackageReference Include="Glob" Version="1.1.8" />
         <PackageReference Include="Microsoft.Build" Version="16.11.0" />
-        <PackageReference Include="Npgsql" Version="5.0.7" />
+        <PackageReference Include="Npgsql" Version="5.0.7" Condition="'$(TargetFramework)' == 'net5.0'" />
+		<PackageReference Include="Npgsql" Version="6.0.4" Condition="'$(TargetFramework)' == 'net6.0'" />
         <PackageReference Include="Spectre.Console" Version="0.41.0" />
         <PackageReference Include="Tomlyn" Version="0.1.2" />
     </ItemGroup>
