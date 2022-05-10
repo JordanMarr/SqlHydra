@@ -262,7 +262,7 @@ It is also possible to have more than one .toml file. By default, SqlHydra will 
 For example, running `dotnet sqlhydra-sqlite` will generate `sqlhydra-sqlite.toml`. 
 However, you can also specify a name for your .toml file: `dotnet sqlhydra-sqlite "Shared.toml"`
 This can be useful for various use cases, such as:
-* data migrations where you want to generate types for a source and a target databases.
+* data migrations where you want to generate types for a source and a target database.
 * generating a records-only file for a `Shared` Fable project. 
 
 
