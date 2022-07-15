@@ -26,6 +26,7 @@ let productTable =          table<Production.Product>               |> inSchema 
 let subCategoryTable =      table<Production.ProductSubcategory>    |> inSchema (nameof Production)
 let categoryTable =         table<Production.ProductCategory>       |> inSchema (nameof Production)
 let errorLogTable =         table<dbo.ErrorLog>
+let employeeTable =         table<HumanResources.Employee>          |> inSchema (nameof HumanResources)
 
 [<Tests>]
 let tests = 
@@ -553,6 +554,17 @@ let tests =
             ctx.RollbackTransaction()
         }
 
+        testTask "Query Employee with DateOnly" {
+            use ctx = openContext()
+            
+            let employees =
+                select {
+                    for e in employeeTable do
+                    select e
+                }
+                |> ctx.Read HydraReader.Read
 
+            gt0 employees
+        }
 
     ]

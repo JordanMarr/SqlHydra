@@ -27,6 +27,12 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
             match alias |> Option.defaultValue __.Name |> getOrdinal with
             | o when reader.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
+
+[<AutoOpen>]        
+module Utils =
+    type System.Data.IDataReader with
+        member reader.GetDateOnly(ordinal: int) = 
+            reader.GetDateTime(ordinal) |> System.DateOnly.FromDateTime
         
 
 module HumanResources =
@@ -76,10 +82,10 @@ module HumanResources =
         member __.LoginID = RequiredColumn(reader, getOrdinal, reader.GetString, "LoginID")
         member __.OrganizationLevel = OptionalColumn(reader, getOrdinal, reader.GetInt16, "OrganizationLevel")
         member __.JobTitle = RequiredColumn(reader, getOrdinal, reader.GetString, "JobTitle")
-        member __.BirthDate = RequiredColumn(reader, getOrdinal, reader.GetFieldValue, "BirthDate")
+        member __.BirthDate = RequiredColumn(reader, getOrdinal, reader.GetDateOnly, "BirthDate")
         member __.MaritalStatus = RequiredColumn(reader, getOrdinal, reader.GetString, "MaritalStatus")
         member __.Gender = RequiredColumn(reader, getOrdinal, reader.GetString, "Gender")
-        member __.HireDate = RequiredColumn(reader, getOrdinal, reader.GetFieldValue, "HireDate")
+        member __.HireDate = RequiredColumn(reader, getOrdinal, reader.GetDateOnly, "HireDate")
         member __.SalariedFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "SalariedFlag")
         member __.VacationHours = RequiredColumn(reader, getOrdinal, reader.GetInt16, "VacationHours")
         member __.SickLeaveHours = RequiredColumn(reader, getOrdinal, reader.GetInt16, "SickLeaveHours")
@@ -120,8 +126,8 @@ module HumanResources =
         member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
         member __.DepartmentID = RequiredColumn(reader, getOrdinal, reader.GetInt16, "DepartmentID")
         member __.ShiftID = RequiredColumn(reader, getOrdinal, reader.GetByte, "ShiftID")
-        member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetFieldValue, "StartDate")
-        member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetFieldValue, "EndDate")
+        member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateOnly, "StartDate")
+        member __.EndDate = OptionalColumn(reader, getOrdinal, reader.GetDateOnly, "EndDate")
         member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
         member __.Read() =
@@ -2488,7 +2494,7 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         else if t = typedefof<decimal> then Some(wrap reader.GetDecimal)
         else if t = typedefof<string> then Some(wrap reader.GetString)
         else if t = typedefof<System.DateTimeOffset> then Some(wrap reader.GetDateTimeOffset)
-        else if t = typedefof<System.DateOnly> then Some(wrap reader.GetFieldValue)
+        else if t = typedefof<System.DateOnly> then Some(wrap reader.GetDateOnly)
         else if t = typedefof<System.TimeOnly> then Some(wrap reader.GetFieldValue)
         else if t = typedefof<System.DateTime> then Some(wrap reader.GetDateTime)
         else if t = typedefof<byte []> then Some(wrap reader.GetValue)
