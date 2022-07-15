@@ -256,6 +256,17 @@ The generated `HydraReader` class works in tandem with SqlHydra.Query for readin
 ## TOML Configuration Reference
 * [View TOML Configuration Reference](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration)
 
+## Generating Multiple TOML Files
+
+It is also possible to have more than one .toml file in the same project. By default, SqlHydra will create a .toml file named after the version of SqlHydra used.
+For example, running `dotnet sqlhydra-sqlite` will generate `sqlhydra-sqlite.toml`. 
+
+However, you can also specify a name for your .toml file: `dotnet sqlhydra-sqlite "Shared.toml"`
+This can be useful for various use cases, such as:
+* data migrations where you want to generate types for a source and a target database.
+* generating record types with different schema/table filters in separate files.
+
+
 ## Supported Frameworks
 Both .NET 5 and .NET 6 are now supported.
 (.NET 5 will be supported until Microsoft ends official support.)
