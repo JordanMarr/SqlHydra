@@ -594,12 +594,12 @@ let tests =
             gt0 employees
 
             let emp : HumanResources.Employee = employees |> Seq.head
-            let today = System.DateOnly.FromDateTime(System.DateTime.Now)
+            let birthDate = System.DateOnly(1980, 1, 1)
 
             let! result = 
                 updateTask (Shared ctx) {
                     for e in employeeTable do
-                    set e.BirthDate today
+                    set e.BirthDate birthDate
                     where (e.BusinessEntityID = emp.BusinessEntityID)
                 }
 
@@ -616,7 +616,7 @@ let tests =
                 (refreshedEmp : HumanResources.Employee option)
                 |> Option.map (fun e -> e.BirthDate)
             
-            Expect.isTrue (actualBirthDate = Some today) ""
+            Expect.isTrue (actualBirthDate = Some birthDate) ""
             
             ctx.RollbackTransaction()
         }
