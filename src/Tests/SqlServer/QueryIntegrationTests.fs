@@ -554,7 +554,7 @@ let tests =
             ctx.RollbackTransaction()
         }
 
-        testTask "Query Employee with DateOnly" {
+        testTask "Query Employee Record with DateOnly" {
             use ctx = openContext()
             
             let employees =
@@ -566,5 +566,60 @@ let tests =
 
             gt0 employees
         }
+        
+        testTask "Query Employee Column with DateOnly" {
+            use ctx = openContext()
+            
+            let employeeBirthDates =
+                select {
+                    for e in employeeTable do
+                    select e.BirthDate
+                }
+                |> ctx.Read HydraReader.Read
+
+            gt0 employeeBirthDates
+        }
+
+#if NET6_0
+        testTask "Update Employee DateOnly" {
+            use ctx = openContext()
+            ctx.BeginTransaction()
+            
+            let! employees =
+                selectTask HydraReader.Read (Shared ctx) {
+                    for e in employeeTable do
+                    select e
+                }
+
+            gt0 employees
+
+            let emp : HumanResources.Employee = employees |> Seq.head
+            let today = System.DateOnly.FromDateTime(System.DateTime.Now)
+
+            let! result = 
+                updateTask (Shared ctx) {
+                    for e in employeeTable do
+                    set e.BirthDate today
+                    where (e.BusinessEntityID = emp.BusinessEntityID)
+                }
+
+            Expect.isTrue (result = 1) "Should update exactly one record."
+
+            let! refreshedEmp = 
+                selectTask HydraReader.Read (Shared ctx) {
+                    for e in employeeTable do
+                    where (e.BusinessEntityID = emp.BusinessEntityID)                    
+                    tryHead
+                }
+
+            let actualBirthDate = 
+                (refreshedEmp : HumanResources.Employee option)
+                |> Option.map (fun e -> e.BirthDate)
+            
+            Expect.isTrue (actualBirthDate = Some today) ""
+            
+            ctx.RollbackTransaction()
+        }
+#endif
 
     ]
