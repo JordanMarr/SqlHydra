@@ -6,7 +6,7 @@ open DB
 #if NET5_0
 open Npgsql.AdventureWorksNet5
 #endif
-#if NET6_0
+#if NET6_0_OR_GREATER
 open Npgsql.AdventureWorksNet6
 #endif
 

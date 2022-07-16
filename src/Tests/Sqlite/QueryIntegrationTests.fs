@@ -8,7 +8,7 @@ open Swensen.Unquote
 #if NET5_0
 open Sqlite.AdventureWorksNet5
 #endif
-#if NET6_0
+#if NET6_0_OR_GREATER
 open Sqlite.AdventureWorksNet6
 #endif
 

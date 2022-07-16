@@ -11,7 +11,7 @@ open SqlHydra.SchemaFilters
 #if NET5_0
 let range0 = FSharp.Compiler.Range.range.Zero
 #endif
-#if NET6_0
+#if NET6_0_OR_GREATER
 let range0 = FSharp.Compiler.Text.range.Zero
 #endif
 
