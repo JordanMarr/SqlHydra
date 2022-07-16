@@ -21,7 +21,7 @@ let oracle = path [ slnRoot; "SqlHydra.Oracle" ]
 let tests = path [ slnRoot; "Tests" ]
 
 let generators = [ mssql; npgsql; sqlite; oracle ]
-let allPackages = [ query ] @ generators
+let allPackages = query :: generators
 
 Target.create "Restore" <| fun _ ->
     allPackages @ [ tests ]
@@ -63,17 +63,25 @@ Target.create "Pack" <| fun _ ->
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "pack --configuration Release -o nupkg/Release", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}' package.'")
 
-let version = "*.1.0.0.nupkg"
-
 Target.create "Publish" <| fun _ ->
     let nugetKey =
         match Environment.environVarOrNone "SQLHYDRA_NUGET_KEY" with
         | Some nugetKey -> nugetKey
         | None -> failwith "The Nuget API key must be set in a SQLHYDRA_NUGET_KEY environmental variable"
     
+    let getProjectVersion (projDir: string) = 
+        let projName = DirectoryInfo(projDir).Name
+        let dllPath = projDir </> "bin" </> "Release" </> "net6.0" </> $"{projName}.dll"
+        System.Reflection.AssemblyName.GetAssemblyName(dllPath).Version
+
     allPackages
-    |> List.map (fun pkg -> pkg </> "nupkg" </> "Release" </> version)
-    |> List.map (fun nupkg -> Shell.Exec(Tools.dotnet, $"nuget push {nupkg} -s nuget.org -k {nugetKey}"), nupkg)
+    |> List.map (fun projDir ->
+        let version = getProjectVersion projDir
+        let projName = DirectoryInfo(projDir).Name
+        let nupkgFilename = $"{projName}.{version.Major}.{version.Minor}.{version.Build}.nupkg"
+        projDir </> "nupkg" </> "Release" </> nupkgFilename
+    )
+    |> List.map (fun nupkgFilepath -> Shell.Exec(Tools.dotnet, $"nuget push {nupkgFilepath} -s nuget.org -k {nugetKey}"), nupkgFilepath)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not publish '{pkg}' package. Error: {code}")
 
 let dependencies = [
