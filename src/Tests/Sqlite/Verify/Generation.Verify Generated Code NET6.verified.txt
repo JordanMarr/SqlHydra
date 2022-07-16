@@ -27,6 +27,13 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
             | o when reader.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
         
+[<AutoOpen>]        
+module Utils =
+    type System.Data.IDataReader with
+        member reader.GetDateOnly(ordinal: int) = 
+            reader.GetDateTime(ordinal) |> System.DateOnly.FromDateTime
+        
+        
 
 module main =
     [<CLIMutable>]
@@ -561,7 +568,7 @@ type HydraReader(reader: System.Data.Common.DbDataReader) =
         else if t = typedefof<byte []> then Some(wrap reader.GetValue)
         else if t = typedefof<string> then Some(wrap reader.GetString)
         else if t = typedefof<System.DateTime> then Some(wrap reader.GetDateTime)
-        else if t = typedefof<System.DateOnly> then Some(wrap reader.GetFieldValue)
+        else if t = typedefof<System.DateOnly> then Some(wrap reader.GetDateOnly)
         else if t = typedefof<System.TimeOnly> then Some(wrap reader.GetFieldValue)
         else if t = typedefof<System.Guid> then Some(wrap reader.GetGuid)
         else None
