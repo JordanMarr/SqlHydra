@@ -30,6 +30,7 @@ let categoryTable =         table<production.productcategory>       |> inSchema 
 let currencyTable =         table<sales.currency>                   |> inSchema (nameof sales)
 let productReviewTable =    table<production.productreview>         |> inSchema (nameof production)
 let providerDbTestTable = table<providerdbtypetest.test> |> inSchema (nameof providerdbtypetest)
+let employeeTable =         table<humanresources.employee>          |> inSchema (nameof humanresources)
 
 [<Tests>]
 let tests = 
@@ -565,8 +566,8 @@ let tests =
                     into expPerson
                     entity (
                         { 
-                            experiments.person.name = Some "john doe"
-                            experiments.person.current_mood = Some (experiments.mood.ok)
+                            experiments.person.name = "john doe"
+                            experiments.person.currentmood = experiments.mood.ok
                         }
                     )
                 }
@@ -583,8 +584,8 @@ let tests =
             let! updateResults = 
                 updateTask (Shared ctx) {
                     for p in expPerson do
-                    set p.current_mood (Some experiments.mood.happy)
-                    where (p.current_mood = (Some experiments.mood.ok))
+                    set p.currentmood experiments.mood.happy
+                    where (p.currentmood = experiments.mood.ok)
                 }
 
             Expect.isTrue (updateResults > 0) "Expected update results > 0"
@@ -599,7 +600,7 @@ let tests =
             Expect.isTrue (
                 query2Results 
                 |> List.forall (fun (p: experiments.person) -> 
-                    p.current_mood = Some (experiments.mood.happy)
+                    p.currentmood = experiments.mood.happy
                 )
             ) ""
         }
@@ -678,4 +679,72 @@ let tests =
 
             ctx.RollbackTransaction()
         }
+
+
+        testTask "Query Employee Record with DateOnly" {
+            use ctx = openContext()
+            
+            let! employees =
+                selectTask HydraReader.Read (Shared ctx) {
+                    for e in employeeTable do
+                    select e
+                }
+
+            gt0 employees
+        }
+        
+        testTask "Query Employee Column with DateOnly" {
+            use ctx = openContext()
+            
+            let! employeeBirthDates =
+                selectTask HydraReader.Read (Shared ctx) {
+                    for e in employeeTable do
+                    select e.birthdate
+                }
+
+            gt0 employeeBirthDates
+        }
+
+#if NET6_0_OR_GREATER
+        testTask "Update Employee DateOnly" {
+            use ctx = openContext()
+            ctx.BeginTransaction()
+            
+            let! employees =
+                selectTask HydraReader.Read (Shared ctx) {
+                    for e in employeeTable do
+                    select e
+                }
+
+            gt0 employees
+
+            let emp : humanresources.employee = employees |> Seq.head
+            let birthDate = System.DateOnly(1980, 1, 1)
+
+            let! result = 
+                updateTask (Shared ctx) {
+                    for e in employeeTable do
+                    set e.birthdate birthDate
+                    where (e.businessentityid = emp.businessentityid)
+                }
+
+            Expect.isTrue (result = 1) "Should update exactly one record."
+
+            let! refreshedEmp = 
+                selectTask HydraReader.Read (Shared ctx) {
+                    for e in employeeTable do
+                    where (e.businessentityid = emp.businessentityid)                    
+                    tryHead
+                }
+
+            let actualBirthDate = 
+                (refreshedEmp : humanresources.employee option)
+                |> Option.map (fun e -> e.birthdate)
+            
+            Expect.isTrue (actualBirthDate = Some birthDate) ""
+            
+            ctx.RollbackTransaction()
+        }
+#endif
+
     ]

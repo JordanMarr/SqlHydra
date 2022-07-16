@@ -580,7 +580,7 @@ let tests =
             gt0 employeeBirthDates
         }
 
-#if NET6_0
+#if NET6_0_OR_GREATER
         testTask "Update Employee DateOnly" {
             use ctx = openContext()
             ctx.BeginTransaction()
