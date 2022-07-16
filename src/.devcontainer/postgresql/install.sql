@@ -67,7 +67,6 @@ CREATE DOMAIN "NameStyle" boolean NOT NULL;
 CREATE DOMAIN "Name" varchar(50) NULL;
 CREATE DOMAIN "Phone" varchar(25) NULL;
 
-
 -------------------------------------
 -- Five schemas, with tables and data
 -------------------------------------
@@ -3293,12 +3292,27 @@ CREATE SCHEMA sa
   CREATE VIEW s AS SELECT businessentityid AS id, * FROM sales.store
 ;
 
+-- SqlHydra Custom Schema
 CREATE SCHEMA ProviderDbTypeTest
     CREATE TABLE Test (
         ID SERIAL,
         JSON_FIELD JSON NOT NULL,
         JSONB_FIELD JSONB NOT NULL
     );
+
+-- SqlHydra Custom Schema
+CREATE SCHEMA Experiments;
+
+-- NOTE: "CREATE TYPE" cannot be nested in CREATE SCHEMA.
+-- Create an enum in `experiments` schema
+CREATE TYPE Experiments.Mood AS ENUM ('sad', 'ok', 'happy');
+
+-- Create a table in `experiment` schema that references the enum
+CREATE TABLE Experiments.Person (
+    Name text not null,
+    CurrentMood Experiments.Mood not null
+);
+
 
 \pset tuples_only off
 
