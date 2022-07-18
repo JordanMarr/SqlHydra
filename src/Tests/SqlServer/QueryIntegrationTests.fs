@@ -557,9 +557,16 @@ let tests =
         testTask "Query Employee Record with DateOnly" {
             use ctx = openContext()
             
+#if NET6_0_OR_GREATER
+            let maxBirthDate = System.DateOnly(2005, 1, 1)
+#else
+            let maxBirthDate = System.DateTime(2005, 1, 1)
+#endif
+
             let employees =
                 select {
                     for e in employeeTable do
+                    where (e.BirthDate < maxBirthDate)
                     select e
                 }
                 |> ctx.Read HydraReader.Read
@@ -570,9 +577,16 @@ let tests =
         testTask "Query Employee Column with DateOnly" {
             use ctx = openContext()
             
+#if NET6_0_OR_GREATER
+            let maxBirthDate = System.DateOnly(2005, 1, 1)
+#else
+            let maxBirthDate = System.DateTime(2005, 1, 1)
+#endif
+
             let employeeBirthDates =
                 select {
                     for e in employeeTable do
+                    where (e.BirthDate < maxBirthDate)
                     select e.BirthDate
                 }
                 |> ctx.Read HydraReader.Read

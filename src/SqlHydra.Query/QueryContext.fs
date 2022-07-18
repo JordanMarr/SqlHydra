@@ -61,12 +61,17 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             let p = cmd.CreateParameter()
             p.ParameterName <- kvp.Key
 
-            match kvp.Value with
-            | :? QueryParameter as qp ->
-                do setParameterDbType p qp
-                p.Value <- qp.Value
-            | _ ->
-                p.Value <- kvp.Value
+            p.Value <-
+                match kvp.Value with
+                | :? QueryParameter as qp ->
+                    do setParameterDbType p qp
+                    qp.Value
+                | _ ->
+                    kvp.Value
+                
+                // SqlHydra must manually handle DateOnly and TimeOnly conversions of all parameters
+                |> KataUtils.convertIfDateOnlyTimeOnly
+
             cmd.Parameters.Add(p) |> ignore
         cmd
 

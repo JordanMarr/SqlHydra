@@ -98,11 +98,12 @@ type QuerySource<'T, 'Query>(query, tableMappings) =
 
 module private KataUtils = 
 
-    // Manually convert DateOnly back to DateTime until Microsoft.Data.SqlClient handles this
-    let handleIfDateOnly (value: obj) =
+    // Manually convert DateOnly to DateTime and TimeOnly to TimeSpan (until Microsoft.Data.SqlClient handles)
+    let convertIfDateOnlyTimeOnly (value: obj) =
         match value with
 #if NET6_0_OR_GREATER
         | :? DateOnly as dateOnly -> box (dateOnly.ToDateTime(TimeOnly.MinValue))
+        | :? TimeOnly as timeOnly -> box (timeOnly.ToTimeSpan())
 #endif
         | _ -> value
 
@@ -118,7 +119,6 @@ module private KataUtils =
             |> function 
                 | null -> box System.DBNull.Value 
                 | o -> o
-            |> handleIfDateOnly
 
     let private getProviderDbTypeName (p: PropertyInfo) =
         let attrs = p.GetCustomAttributes(true)
