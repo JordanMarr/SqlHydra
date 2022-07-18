@@ -33,7 +33,7 @@ let supportedTypeMappings =
 #endif
 #if NET6_0_OR_GREATER
         "DATE",                 "System.DateOnly",                          DbType.Date,                "GetDateOnly"
-        "TIME",                 "System.TimeOnly",                          DbType.Time,                nameof r.GetFieldValue
+        "TIME",                 "System.TimeOnly",                          DbType.Time,                "GetTimeOnly"
 #endif
         "DATETIME",             "System.DateTime",                          DbType.DateTime,            nameof r.GetDateTime
         "DATETIME2",            "System.DateTime",                          DbType.DateTime2,           nameof r.GetDateTime

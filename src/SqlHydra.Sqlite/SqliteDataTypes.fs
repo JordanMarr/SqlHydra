@@ -57,7 +57,7 @@ let supportedTypeMappings =
 #endif
 #if NET6_0_OR_GREATER
         "date",             "System.DateOnly",  DbType.DateTime,    "GetDateOnly"
-        "time",             "System.TimeOnly",  DbType.DateTime,    nameof r.GetFieldValue 
+        "time",             "System.TimeOnly",  DbType.DateTime,    "GetTimeOnly"
 #endif
         "uniqueidentifier", "System.Guid",      DbType.Guid,        nameof r.GetGuid
         "guid",             "System.Guid",      DbType.Guid,        nameof r.GetGuid 

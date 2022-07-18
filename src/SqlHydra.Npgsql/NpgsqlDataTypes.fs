@@ -36,7 +36,7 @@ let supportedTypeMappings =
 #endif
 #if NET6_0_OR_GREATER
         "date",                         "System.DateOnly",      DbType.DateTime,    None,                               "GetDateOnly"
-        "time without time zone",       "System.TimeSpan",      DbType.Time,        None,                               nameof r.GetFieldValue
+        "time without time zone",       "System.TimeOnly",      DbType.Time,        None,                               "GetTimeOnly"
 #endif
         "timestamp with time zone",     "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
         "timestamp without time zone",  "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 

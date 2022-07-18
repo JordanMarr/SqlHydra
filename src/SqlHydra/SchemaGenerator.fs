@@ -721,6 +721,10 @@ module Utils =
     type System.Data.IDataReader with
         member reader.GetDateOnly(ordinal: int) = 
             reader.GetDateTime(ordinal) |> System.DateOnly.FromDateTime
+    
+    type System.Data.Common.DbDataReader with
+        member reader.GetTimeOnly(ordinal: int) = 
+            reader.GetFieldValue(ordinal) |> System.TimeOnly.FromTimeSpan
         """
 
     [

@@ -27,6 +27,7 @@ let subCategoryTable =      table<Production.ProductSubcategory>    |> inSchema 
 let categoryTable =         table<Production.ProductCategory>       |> inSchema (nameof Production)
 let errorLogTable =         table<dbo.ErrorLog>
 let employeeTable =         table<HumanResources.Employee>          |> inSchema (nameof HumanResources)
+let shiftTable =            table<HumanResources.Shift>             |> inSchema (nameof HumanResources)
 
 [<Tests>]
 let tests = 
@@ -592,6 +593,27 @@ let tests =
                 |> ctx.Read HydraReader.Read
 
             gt0 employeeBirthDates
+        }
+
+        testTask "Query Shift with TimeOnly" {
+            use ctx = openContext()
+            
+#if NET6_0_OR_GREATER
+            let minStartTime = System.TimeOnly(9, 30)
+#else
+            let minStartTime = System.TimeSpan(9, 30, 0)
+#endif
+
+            let shiftsAfter930AM =
+                select {
+                    for s in shiftTable do
+                    where (s.StartTime >= minStartTime)
+                }
+                |> ctx.Read HydraReader.Read
+
+            // There are 3 shifts: day, evening and night. 
+            // Results should contain 2 shifts: evening and night
+            gt0 shiftsAfter930AM
         }
 
 #if NET6_0_OR_GREATER
