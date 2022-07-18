@@ -7,7 +7,7 @@ open DB
 #if NET5_0
 open Oracle.AdventureWorksNet5
 #endif
-#if NET6_0
+#if NET6_0_OR_GREATER
 open Oracle.AdventureWorksNet6
 #endif
 

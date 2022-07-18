@@ -28,6 +28,13 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
             | o when reader.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
         
+[<AutoOpen>]        
+module Utils =
+    type System.Data.IDataReader with
+        member reader.GetDateOnly(ordinal: int) = 
+            reader.GetDateTime(ordinal) |> System.DateOnly.FromDateTime
+        
+        
 
 module OT =
     [<CLIMutable>]

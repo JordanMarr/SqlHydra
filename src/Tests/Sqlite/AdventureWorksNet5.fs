@@ -28,6 +28,7 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
             | o when reader.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
         
+        
 module main =
     [<CLIMutable>]
     type Address =

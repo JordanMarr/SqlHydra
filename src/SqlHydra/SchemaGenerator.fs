@@ -11,7 +11,7 @@ open SqlHydra.SchemaFilters
 #if NET5_0
 let range0 = FSharp.Compiler.Range.range.Zero
 #endif
-#if NET6_0
+#if NET6_0_OR_GREATER
 let range0 = FSharp.Compiler.Text.range.Zero
 #endif
 
@@ -714,10 +714,19 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
 
 /// A list of static code text substitutions to the generated file.
 let substitutions (app: AppInfo) = 
+
+    let utilsGetDateOnly = """
+[<AutoOpen>]        
+module Utils =
+    type System.Data.IDataReader with
+        member reader.GetDateOnly(ordinal: int) = 
+            reader.GetDateTime(ordinal) |> System.DateOnly.FromDateTime
+        """
+
     [
         /// Reader classes at top of namespace
         "open Substitute.Extensions",
-        """type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
+        $"""type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
         member __.Name = column
         member __.IsNull() = getOrdinal column |> reader.IsDBNull
         override __.ToString() = __.Name
@@ -743,13 +752,15 @@ type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(r
             match alias |> Option.defaultValue __.Name |> getOrdinal with
             | o when reader.IsDBNull o -> None
             | o -> Some (getValue o :?> byte[])
-
-[<AutoOpen>]        
-module Utils =
-    type System.Data.IDataReader with
-        member reader.GetDateOnly(ordinal: int) = 
-            reader.GetDateTime(ordinal) |> System.DateOnly.FromDateTime
+        {
+#if NET6_0_OR_GREATER
+            utilsGetDateOnly
+#else
+            ""
+#endif
+        }
         """
+
 
         // HydraReader utility functions
         "member HydraReader = \"placeholder\"",
