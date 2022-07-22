@@ -287,7 +287,7 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
             | Property p, Value value ->
                 // Handle column to value comparisons
                 let comparison = getComparison(exp.NodeType)
-                query.Where(qualifyColumn p, comparison, value)
+                query.Where(qualifyColumn p, comparison, KataUtils.getQueryParameterForValue p value)
             | Value v1, Value v2 ->
                 // Not implemented because I didn't want to embed logic to properly format strings, dates, etc.
                 // This can be easily added later if it is implemented in Dapper.FSharp.

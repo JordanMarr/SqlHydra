@@ -17,17 +17,18 @@ let openContext() =
     new QueryContext(conn, compiler)
 
 // Tables
-let personTable =           table<Person.Person>                    |> inSchema (nameof Person)
-let addressTable =          table<Person.Address>                   |> inSchema (nameof Person)
-let customerTable =         table<Sales.Customer>                   |> inSchema (nameof Sales)
-let orderHeaderTable =      table<Sales.SalesOrderHeader>           |> inSchema (nameof Sales)
-let orderDetailTable =      table<Sales.SalesOrderDetail>           |> inSchema (nameof Sales)
-let productTable =          table<Production.Product>               |> inSchema (nameof Production)
-let subCategoryTable =      table<Production.ProductSubcategory>    |> inSchema (nameof Production)
-let categoryTable =         table<Production.ProductCategory>       |> inSchema (nameof Production)
-let errorLogTable =         table<dbo.ErrorLog>
-let employeeTable =         table<HumanResources.Employee>          |> inSchema (nameof HumanResources)
-let shiftTable =            table<HumanResources.Shift>             |> inSchema (nameof HumanResources)
+let personTable =             table<Person.Person>                    |> inSchema (nameof Person)
+let addressTable =            table<Person.Address>                   |> inSchema (nameof Person)
+let customerTable =           table<Sales.Customer>                   |> inSchema (nameof Sales)
+let orderHeaderTable =        table<Sales.SalesOrderHeader>           |> inSchema (nameof Sales)
+let orderDetailTable =        table<Sales.SalesOrderDetail>           |> inSchema (nameof Sales)
+let productTable =            table<Production.Product>               |> inSchema (nameof Production)
+let subCategoryTable =        table<Production.ProductSubcategory>    |> inSchema (nameof Production)
+let categoryTable =           table<Production.ProductCategory>       |> inSchema (nameof Production)
+let errorLogTable =           table<dbo.ErrorLog>
+let employeeTable =           table<HumanResources.Employee>          |> inSchema (nameof HumanResources)
+let shiftTable =              table<HumanResources.Shift>             |> inSchema (nameof HumanResources)
+let providerDbTypeTestTable = table<ProviderDbTypeTest.Test>          |> inSchema (nameof ProviderDbTypeTest)
 
 [<Tests>]
 let tests = 
@@ -658,4 +659,78 @@ let tests =
         }
 #endif
 
+        testTask "Insert, update, and select with both datetime and datetime2 precision" {
+            use ctx = openContext ()
+            ctx.BeginTransaction()
+            
+            let baseTimestamp = System.DateTime(2022,07,22, 11,50,28)
+            let timestamp = System.DateTime(baseTimestamp.Ticks + 1234567L)
+            // Simple insert of one entity
+            let entity': ProviderDbTypeTest.Test =
+                {
+                    ID = 0
+                    LessPrecision = timestamp
+                    MorePrecision = timestamp
+                }
+
+            let! _ = 
+                insert {
+                    into providerDbTypeTestTable 
+                    entity entity'
+                }
+                |> ctx.InsertAsync
+
+            let! retrievedBack = 
+                selectTask HydraReader.Read (Shared ctx) {
+                    for row in providerDbTypeTestTable do
+                    select row
+                }
+
+            Expect.equal [timestamp] [for (row:ProviderDbTypeTest.Test) in retrievedBack -> row.MorePrecision] "INSERT: Expected DATETIME2 to be stored with full precision"
+            Expect.notEqual [timestamp] [for (row:ProviderDbTypeTest.Test) in retrievedBack -> row.LessPrecision] "INSERT: Expected a loss of precision when storing a DATETIME"
+
+            let! fullPrecisionQuery = 
+                selectTask HydraReader.Read (Shared ctx) { 
+                    for row in providerDbTypeTestTable do
+                    where (row.MorePrecision = timestamp)
+                    count
+                }
+
+            let! lessPrecisionQuery = 
+                selectTask HydraReader.Read (Shared ctx) { 
+                    for row in providerDbTypeTestTable do
+                    where (row.LessPrecision = timestamp)
+                    count
+                }
+
+            Expect.equal fullPrecisionQuery 1 "SELECT: Expected precision of a DATETIME2 query parameter to match the precision in the database"
+            Expect.equal lessPrecisionQuery 1 "SELECT: Expected precision of a DATETIME query parameter to match the precision in the database"
+
+            let newTimestamp = System.DateTime(baseTimestamp.Ticks + 2345678L)
+
+            let! _ = 
+                updateTask (Shared ctx) {
+                    for row in providerDbTypeTestTable do
+                    set row.MorePrecision newTimestamp
+                    where (row.MorePrecision = timestamp)
+                }
+
+            let! _ = 
+                updateTask (Shared ctx) {
+                    for row in providerDbTypeTestTable do
+                    set row.LessPrecision newTimestamp
+                    where (row.LessPrecision = timestamp)
+                }
+
+            let! retrievedBack = 
+                selectTask HydraReader.Read (Shared ctx) {
+                    for row in providerDbTypeTestTable do
+                    select row
+                }
+
+            Expect.equal [newTimestamp] [for (row:ProviderDbTypeTest.Test) in retrievedBack -> row.MorePrecision] "UPDATE: Expected DATETIME2 to be stored with full precision"
+            Expect.notEqual [newTimestamp] [for (row:ProviderDbTypeTest.Test) in retrievedBack -> row.LessPrecision] "UPDATE: Expected a loss of precision when storing a DATETIME"
+            
+            ctx.RollbackTransaction ()
+        }
     ]

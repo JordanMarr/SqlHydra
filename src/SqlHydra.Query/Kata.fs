@@ -120,7 +120,7 @@ module private KataUtils =
                 | null -> box System.DBNull.Value 
                 | o -> o
 
-    let private getProviderDbTypeName (p: PropertyInfo) =
+    let private getProviderDbTypeName (p: MemberInfo) =
         let attrs = p.GetCustomAttributes(true)
         (attrs
         |> Seq.choose (function
@@ -128,7 +128,7 @@ module private KataUtils =
             | _ -> None))
         |> Seq.tryHead
         
-    let getQueryParameterForValue (p: PropertyInfo) (value: obj) =
+    let getQueryParameterForValue (p: MemberInfo) (value: obj) =
         { Value = value |> boxValueOrOption; ProviderDbType = getProviderDbTypeName p }
 
     let getQueryParameterForEntity (entity: 'T) (p: PropertyInfo) =

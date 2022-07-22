@@ -35,6 +35,7 @@ module HumanResources =
         { DepartmentID: int16
           Name: string
           GroupName: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type DepartmentReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -67,6 +68,7 @@ module HumanResources =
           SickLeaveHours: int16
           CurrentFlag: bool
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type EmployeeReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -112,6 +114,7 @@ module HumanResources =
           ShiftID: byte
           StartDate: System.DateTime
           EndDate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type EmployeeDepartmentHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -135,9 +138,11 @@ module HumanResources =
     [<CLIMutable>]
     type EmployeePayHistory =
         { BusinessEntityID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           RateChangeDate: System.DateTime
           Rate: decimal
           PayFrequency: byte
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type EmployeePayHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -160,6 +165,7 @@ module HumanResources =
     type JobCandidate =
         { JobCandidateID: int
           BusinessEntityID: Option<int>
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type JobCandidateReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -180,6 +186,7 @@ module HumanResources =
           Name: string
           StartTime: System.TimeSpan
           EndTime: System.TimeSpan
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ShiftReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -208,6 +215,7 @@ module Person =
           StateProvinceID: int
           PostalCode: string
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type AddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -237,6 +245,7 @@ module Person =
         { AddressTypeID: int
           Name: string
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type AddressTypeReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -257,6 +266,7 @@ module Person =
     type BusinessEntity =
         { BusinessEntityID: int
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type BusinessEntityReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -277,6 +287,7 @@ module Person =
           AddressID: int
           AddressTypeID: int
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type BusinessEntityAddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -301,6 +312,7 @@ module Person =
           PersonID: int
           ContactTypeID: int
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type BusinessEntityContactReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -323,6 +335,7 @@ module Person =
     type ContactType =
         { ContactTypeID: int
           Name: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ContactTypeReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -341,6 +354,7 @@ module Person =
     type CountryRegion =
         { CountryRegionCode: string
           Name: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type CountryRegionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -361,6 +375,7 @@ module Person =
           EmailAddressID: int
           EmailAddress: Option<string>
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type EmailAddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -385,6 +400,7 @@ module Person =
           PasswordHash: string
           PasswordSalt: string
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type PasswordReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -415,6 +431,7 @@ module Person =
           Suffix: Option<string>
           EmailPromotion: int
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type PersonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -450,6 +467,7 @@ module Person =
         { BusinessEntityID: int
           PhoneNumber: string
           PhoneNumberTypeID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type PersonPhoneReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -470,6 +488,7 @@ module Person =
     type PhoneNumberType =
         { PhoneNumberTypeID: int
           Name: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type PhoneNumberTypeReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -493,6 +512,7 @@ module Person =
           Name: string
           TerritoryID: int
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type StateProvinceReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -523,11 +543,14 @@ module Production =
         { BillOfMaterialsID: int
           ProductAssemblyID: Option<int>
           ComponentID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           StartDate: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           EndDate: Option<System.DateTime>
           UnitMeasureCode: string
           BOMLevel: int16
           PerAssemblyQty: decimal
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type BillOfMaterialsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -558,6 +581,7 @@ module Production =
     type Culture =
         { CultureID: string
           Name: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type CultureReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -586,6 +610,7 @@ module Production =
           DocumentSummary: Option<string>
           Document: Option<byte []>
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type DocumentReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -623,6 +648,7 @@ module Production =
     [<CLIMutable>]
     type Illustration =
         { IllustrationID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type IllustrationReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -641,6 +667,7 @@ module Production =
           Name: string
           CostRate: decimal
           Availability: decimal
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type LocationReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -681,10 +708,14 @@ module Production =
           Style: Option<string>
           ProductSubcategoryID: Option<int>
           ProductModelID: Option<int>
+          [<SqlHydra.ProviderDbType("DateTime")>]
           SellStartDate: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           SellEndDate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("DateTime")>]
           DiscontinuedDate: Option<System.DateTime>
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -748,6 +779,7 @@ module Production =
         { ProductCategoryID: int
           Name: string
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductCategoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -767,9 +799,12 @@ module Production =
     [<CLIMutable>]
     type ProductCostHistory =
         { ProductID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           StartDate: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           EndDate: Option<System.DateTime>
           StandardCost: decimal
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductCostHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -793,6 +828,7 @@ module Production =
         { ProductDescriptionID: int
           Description: string
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -812,6 +848,7 @@ module Production =
     [<CLIMutable>]
     type ProductDocument =
         { ProductID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductDocumentReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -832,6 +869,7 @@ module Production =
           Bin: byte
           Quantity: int16
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductInventoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -857,9 +895,12 @@ module Production =
     [<CLIMutable>]
     type ProductListPriceHistory =
         { ProductID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           StartDate: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           EndDate: Option<System.DateTime>
           ListPrice: decimal
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductListPriceHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -883,6 +924,7 @@ module Production =
         { ProductModelID: int
           Name: string
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductModelReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -903,6 +945,7 @@ module Production =
     type ProductModelIllustration =
         { ProductModelID: int
           IllustrationID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductModelIllustrationReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -922,6 +965,7 @@ module Production =
         { ProductModelID: int
           ProductDescriptionID: int
           CultureID: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductModelProductDescriptionCultureReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -945,6 +989,7 @@ module Production =
           ThumbnailPhotoFileName: Option<string>
           LargePhoto: Option<byte []>
           LargePhotoFileName: Option<string>
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductPhotoReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -970,6 +1015,7 @@ module Production =
         { ProductID: int
           ProductPhotoID: int
           Primary: bool
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductProductPhotoReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -991,10 +1037,12 @@ module Production =
         { ProductReviewID: int
           ProductID: int
           ReviewerName: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ReviewDate: System.DateTime
           EmailAddress: string
           Rating: int
           Comments: Option<string>
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductReviewReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1025,6 +1073,7 @@ module Production =
           ProductCategoryID: int
           Name: string
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductSubcategoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1047,6 +1096,7 @@ module Production =
     type ScrapReason =
         { ScrapReasonID: int16
           Name: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ScrapReasonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1067,10 +1117,12 @@ module Production =
           ProductID: int
           ReferenceOrderID: int
           ReferenceOrderLineID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           TransactionDate: System.DateTime
           TransactionType: string
           Quantity: int
           ActualCost: decimal
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type TransactionHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1103,10 +1155,12 @@ module Production =
           ProductID: int
           ReferenceOrderID: int
           ReferenceOrderLineID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           TransactionDate: System.DateTime
           TransactionType: string
           Quantity: int
           ActualCost: decimal
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type TransactionHistoryArchiveReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1137,6 +1191,7 @@ module Production =
     type UnitMeasure =
         { UnitMeasureCode: string
           Name: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type UnitMeasureReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1158,10 +1213,14 @@ module Production =
           OrderQty: int
           StockedQty: int
           ScrappedQty: int16
+          [<SqlHydra.ProviderDbType("DateTime")>]
           StartDate: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           EndDate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("DateTime")>]
           DueDate: System.DateTime
           ScrapReasonID: Option<int16>
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type WorkOrderReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1196,13 +1255,18 @@ module Production =
           ProductID: int
           OperationSequence: int16
           LocationID: int16
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ScheduledStartDate: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ScheduledEndDate: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ActualStartDate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ActualEndDate: Option<System.DateTime>
           ActualResourceHrs: Option<decimal>
           PlannedCost: decimal
           ActualCost: Option<decimal>
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type WorkOrderRoutingReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1235,6 +1299,27 @@ module Production =
         member __.ReadIfNotNull() =
             if __.WorkOrderID.IsNull() then None else Some(__.Read())
 
+module ProviderDbTypeTest =
+    [<CLIMutable>]
+    type Test =
+        { ID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
+          LessPrecision: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime2")>]
+          MorePrecision: System.DateTime }
+
+    type TestReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.ID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ID")
+        member __.LessPrecision = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "LessPrecision")
+        member __.MorePrecision = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "MorePrecision")
+        member __.Read() =
+            { ID = __.ID.Read()
+              LessPrecision = __.LessPrecision.Read()
+              MorePrecision = __.MorePrecision.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.ID.IsNull() then None else Some(__.Read())
+
 module Purchasing =
     [<CLIMutable>]
     type ProductVendor =
@@ -1243,11 +1328,13 @@ module Purchasing =
           AverageLeadTime: int
           StandardPrice: decimal
           LastReceiptCost: Option<decimal>
+          [<SqlHydra.ProviderDbType("DateTime")>]
           LastReceiptDate: Option<System.DateTime>
           MinOrderQty: int
           MaxOrderQty: int
           OnOrderQty: Option<int>
           UnitMeasureCode: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ProductVendorReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1282,6 +1369,7 @@ module Purchasing =
     type PurchaseOrderDetail =
         { PurchaseOrderID: int
           PurchaseOrderDetailID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           DueDate: System.DateTime
           OrderQty: int16
           ProductID: int
@@ -1290,6 +1378,7 @@ module Purchasing =
           ReceivedQty: decimal
           RejectedQty: decimal
           StockedQty: decimal
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type PurchaseOrderDetailReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1328,12 +1417,15 @@ module Purchasing =
           EmployeeID: int
           VendorID: int
           ShipMethodID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           OrderDate: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ShipDate: Option<System.DateTime>
           SubTotal: decimal
           TaxAmt: decimal
           Freight: decimal
           TotalDue: decimal
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type PurchaseOrderHeaderReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1375,6 +1467,7 @@ module Purchasing =
           ShipBase: decimal
           ShipRate: decimal
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ShipMethodReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1404,6 +1497,7 @@ module Purchasing =
           PreferredVendorStatus: bool
           ActiveFlag: bool
           PurchasingWebServiceURL: Option<string>
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type VendorReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1433,6 +1527,7 @@ module Sales =
     type CountryRegionCurrency =
         { CountryRegionCode: string
           CurrencyCode: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type CountryRegionCurrencyReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1454,6 +1549,7 @@ module Sales =
           CardNumber: string
           ExpMonth: byte
           ExpYear: int16
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type CreditCardReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1478,6 +1574,7 @@ module Sales =
     type Currency =
         { CurrencyCode: string
           Name: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type CurrencyReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1495,11 +1592,13 @@ module Sales =
     [<CLIMutable>]
     type CurrencyRate =
         { CurrencyRateID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           CurrencyRateDate: System.DateTime
           FromCurrencyCode: string
           ToCurrencyCode: string
           AverageRate: decimal
           EndOfDayRate: decimal
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type CurrencyRateReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1530,6 +1629,7 @@ module Sales =
           TerritoryID: Option<int>
           AccountNumber: string
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type CustomerReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1556,6 +1656,7 @@ module Sales =
     type PersonCreditCard =
         { BusinessEntityID: int
           CreditCardID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type PersonCreditCardReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1582,6 +1683,7 @@ module Sales =
           UnitPriceDiscount: decimal
           LineTotal: decimal
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type SalesOrderDetailReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1616,8 +1718,11 @@ module Sales =
     type SalesOrderHeader =
         { SalesOrderID: int
           RevisionNumber: byte
+          [<SqlHydra.ProviderDbType("DateTime")>]
           OrderDate: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           DueDate: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ShipDate: Option<System.DateTime>
           Status: byte
           OnlineOrderFlag: bool
@@ -1639,6 +1744,7 @@ module Sales =
           TotalDue: decimal
           Comment: Option<string>
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type SalesOrderHeaderReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1703,6 +1809,7 @@ module Sales =
     type SalesOrderHeaderSalesReason =
         { SalesOrderID: int
           SalesReasonID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type SalesOrderHeaderSalesReasonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1727,6 +1834,7 @@ module Sales =
           SalesYTD: decimal
           SalesLastYear: decimal
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type SalesPersonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1756,9 +1864,11 @@ module Sales =
     [<CLIMutable>]
     type SalesPersonQuotaHistory =
         { BusinessEntityID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           QuotaDate: System.DateTime
           SalesQuota: decimal
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type SalesPersonQuotaHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1782,6 +1892,7 @@ module Sales =
         { SalesReasonID: int
           Name: string
           ReasonType: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type SalesReasonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1806,6 +1917,7 @@ module Sales =
           TaxRate: decimal
           Name: string
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type SalesTaxRateReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1839,6 +1951,7 @@ module Sales =
           CostYTD: decimal
           CostLastYear: decimal
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type SalesTerritoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1871,9 +1984,12 @@ module Sales =
     type SalesTerritoryHistory =
         { BusinessEntityID: int
           TerritoryID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           StartDate: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           EndDate: Option<System.DateTime>
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type SalesTerritoryHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1900,7 +2016,9 @@ module Sales =
           ShoppingCartID: string
           Quantity: int
           ProductID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           DateCreated: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type ShoppingCartItemReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1928,11 +2046,14 @@ module Sales =
           DiscountPct: decimal
           Type: string
           Category: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           StartDate: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           EndDate: System.DateTime
           MinQty: int
           MaxQty: Option<int>
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type SpecialOfferReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1968,6 +2089,7 @@ module Sales =
         { SpecialOfferID: int
           ProductID: int
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type SpecialOfferProductReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -1990,6 +2112,7 @@ module Sales =
           Name: string
           SalesPersonID: Option<int>
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type StoreReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -2013,7 +2136,9 @@ module dbo =
     type AWBuildVersion =
         { SystemInformationID: byte
           ``Database Version``: string
+          [<SqlHydra.ProviderDbType("DateTime")>]
           VersionDate: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     type AWBuildVersionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
@@ -2033,6 +2158,7 @@ module dbo =
     [<CLIMutable>]
     type DatabaseLog =
         { DatabaseLogID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           PostTime: System.DateTime
           DatabaseUser: string
           Event: string
@@ -2063,6 +2189,7 @@ module dbo =
     [<CLIMutable>]
     type ErrorLog =
         { ErrorLogID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
           ErrorTime: System.DateTime
           UserName: string
           ErrorNumber: int
@@ -2153,6 +2280,7 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     let lazyProductionUnitMeasure = lazy (Production.UnitMeasureReader(reader, buildGetOrdinal 3))
     let lazyProductionWorkOrder = lazy (Production.WorkOrderReader(reader, buildGetOrdinal 10))
     let lazyProductionWorkOrderRouting = lazy (Production.WorkOrderRoutingReader(reader, buildGetOrdinal 12))
+    let lazyProviderDbTypeTestTest = lazy (ProviderDbTypeTest.TestReader(reader, buildGetOrdinal 3))
     let lazyPurchasingProductVendor = lazy (Purchasing.ProductVendorReader(reader, buildGetOrdinal 11))
     let lazyPurchasingPurchaseOrderDetail = lazy (Purchasing.PurchaseOrderDetailReader(reader, buildGetOrdinal 11))
     let lazyPurchasingPurchaseOrderHeader = lazy (Purchasing.PurchaseOrderHeaderReader(reader, buildGetOrdinal 13))
@@ -2224,6 +2352,7 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     member __.``Production.UnitMeasure`` = lazyProductionUnitMeasure.Value
     member __.``Production.WorkOrder`` = lazyProductionWorkOrder.Value
     member __.``Production.WorkOrderRouting`` = lazyProductionWorkOrderRouting.Value
+    member __.``ProviderDbTypeTest.Test`` = lazyProviderDbTypeTestTest.Value
     member __.``Purchasing.ProductVendor`` = lazyPurchasingProductVendor.Value
     member __.``Purchasing.PurchaseOrderDetail`` = lazyPurchasingPurchaseOrderDetail.Value
     member __.``Purchasing.PurchaseOrderHeader`` = lazyPurchasingPurchaseOrderHeader.Value
@@ -2342,6 +2471,8 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "Production.WorkOrder", true -> __.``Production.WorkOrder``.ReadIfNotNull >> box
         | "Production.WorkOrderRouting", false -> __.``Production.WorkOrderRouting``.Read >> box
         | "Production.WorkOrderRouting", true -> __.``Production.WorkOrderRouting``.ReadIfNotNull >> box
+        | "ProviderDbTypeTest.Test", false -> __.``ProviderDbTypeTest.Test``.Read >> box
+        | "ProviderDbTypeTest.Test", true -> __.``ProviderDbTypeTest.Test``.ReadIfNotNull >> box
         | "Purchasing.ProductVendor", false -> __.``Purchasing.ProductVendor``.Read >> box
         | "Purchasing.ProductVendor", true -> __.``Purchasing.ProductVendor``.ReadIfNotNull >> box
         | "Purchasing.PurchaseOrderDetail", false -> __.``Purchasing.PurchaseOrderDetail``.Read >> box
