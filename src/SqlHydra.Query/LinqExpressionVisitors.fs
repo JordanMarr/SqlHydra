@@ -445,22 +445,27 @@ let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'
 
     visit (propertySelector :> Expression)
 
-/// Returns one or more column members
+/// Returns the table alias (if any), and one or more column members
 let visitJoin<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
-    let rec visit (exp: Expression) : MemberInfo list =
+    let rec visit (exp: Expression) : (string * MemberInfo) list =
         match exp with
-        | Lambda x -> visit x.Body
+        | Lambda x -> (*Some x.Parameters[0].Name,*) (visit x.Body)
         | MethodCall m when m.Method.Name = "Invoke" ->
             // Handle tuples
             visit m.Object
         | New n -> 
             // Handle groupBy that returns a tuple of multiple columns
-            n.Arguments |> Seq.map visit |> Seq.toList |> List.collect id
-        | Member m -> 
+            (n.Arguments |> Seq.map visit |> Seq.toList |> List.collect id)
+        | Member m ->
+            let mObjName =
+                match m.Expression with
+                | Parameter p -> p.Name
+                | _ -> notImpl()
             if m.Member.DeclaringType |> isOptionType
             then visit m.Expression
-            else [ m.Member ]
-        | Property mi -> [ mi ]
+            else [ mObjName, m.Member ]
+        | Property mi ->
+            [ mi.Name, mi ]
         | _ -> notImpl()
 
     visit (propertySelector :> Expression)
