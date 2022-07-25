@@ -62,7 +62,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
             let tblAlias: string = QuotationVisitor.visitFor f
             let query = state |> getQueryOrDefault
             QuerySource<'T, Query>(
-                query.From(Query(tblName), tblAlias),
+                query.From(sprintf "%s AS %s" tblName tblAlias),
                 state.TableMappings)
         | None -> 
             state :?> QuerySource<'T, Query>
@@ -91,21 +91,17 @@ type SelectBuilder<'Selected, 'Mapped> () =
             |> List.fold (fun (q: Query) -> function
                 | LinqExpressionVisitors.SelectedTable tbl -> 
                     // Select all columns in table
-                    q.Select($"%s{FQ.fullyQualifyTable state.TableMappings tbl}.*")
-                | LinqExpressionVisitors.SelectedColumn col -> 
+                    q.Select($"{tbl}.*")
+                | LinqExpressionVisitors.SelectedColumn (tblAlias, col) -> 
                     // Select a single column
-                    q.Select(FQ.fullyQualifyColumn state.TableMappings col)
-                | LinqExpressionVisitors.SelectedAggregateColumn (aggFn, col) -> 
+                    q.Select($"{tblAlias}.{col}")
+                | LinqExpressionVisitors.SelectedAggregateColumn (aggFn, tblAlias, col) -> 
                     // Currently in v2.3.7, SqlKata doesn't support multiple inline aggregate functions.
                     // Use SelectRaw as a workaround until SqlKata supports multiple aggregates.
                     // https://github.com/sqlkata/querybuilder/pull/504
-                    let fqCol = FQ.fullyQualifyColumn state.TableMappings col
 
                     // SqlKata will translate curly braces to dialect-specific characters (ex: [] for mssql, "" for postgres)
-                    let fqColWithCurlyBraces = 
-                        fqCol.Split([|'.'|], StringSplitOptions.RemoveEmptyEntries)
-                        |> Array.map (sprintf "{%s}")
-                        |> fun parts -> String.Join(".", parts)
+                    let fqColWithCurlyBraces = sprintf "{%s}.{%s}" tblAlias col.Name
 
                     q.SelectRaw($"{aggFn}({fqColWithCurlyBraces})")
             ) state.Query
@@ -202,10 +198,9 @@ type SelectBuilder<'Selected, 'Mapped> () =
                 let i = sprintf "%s.%s" innerTableAlias innerProp.Name
                 j.On(o, i)) (Join())
         
-        let innerTableQuery = Query(innerTableName).As(innerTableAlias)
-        outerQuery
-        
-        QuerySource<'JoinResult, Query>(outerQuery.Join(innerTableQuery, fun j -> joinOn), mergedTables)
+        let innerTable = Query(innerTableName).As(innerTableAlias)
+            
+        QuerySource<'JoinResult, Query>(outerQuery.Join(innerTable, fun j -> joinOn), mergedTables)
 
 //    /// LEFT JOIN table on one or more columns
 //    [<CustomOperation("leftJoin", MaintainsVariableSpace = true, IsLikeJoin = true, JoinConditionWord = "on")>]

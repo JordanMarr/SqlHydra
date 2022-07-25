@@ -16,5 +16,7 @@ let visitFor<'T> (f: Expr<'T -> QuerySource<'T>>) =
         | TupleGet (items, i) -> visit items
         | Application (_, e) -> visit e
         | Call (_, _, args) -> args |> Seq.head |> visit
+        | Var v -> Some v.Name
+        | _ -> failwith "bang"
     visit f |> Option.get
     

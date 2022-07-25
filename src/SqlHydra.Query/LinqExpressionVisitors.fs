@@ -136,17 +136,18 @@ module SqlPatterns =
     let isOptionType (t: Type) = 
         t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>>
 
-    /// A property member, a property wrapped in 'Some', or an option 'Value'.
-    let (|Property|_|) (exp: Expression) =
+    /// A property member, a property wrapped in 'Some', or an option 'Value', along with the object the property is being
+    /// called on
+    let (|PropertyWithThis|_|) (exp: Expression) =
         let tryGetMember(x: Expression) = 
             match x with
             | Member m when m.Expression.NodeType = ExpressionType.Parameter -> 
-                Some m.Member
-            | MethodCall opt when opt.Type |> isOptionType ->        
+                Some (m.Expression, m.Member)
+            | MethodCall opt when opt.Type |> isOptionType ->
                 if opt.Arguments.Count > 0 then
                     // Option.Some
                     match opt.Arguments.[0] with
-                    | Member m -> Some m.Member
+                    | Member m -> Some (m.Expression, m.Member)
                     | _ -> None
                 else None
             | _ -> None
@@ -157,6 +158,9 @@ module SqlPatterns =
             tryGetMember m.Expression
         | _ -> 
             tryGetMember exp
+    
+    /// A property member, a property wrapped in 'Some', or an option 'Value'.
+    let (|Property|_|) (exp: Expression) = (|PropertyWithThis|_|) exp |> Option.map snd
             
 
     /// A constant value or an optional constant value
@@ -188,13 +192,13 @@ module SqlPatterns =
                 // Option.None
                 Some null
         | _ -> None
-
-    let (|AggregateColumn|_|) (exp: Expression) =
+    
+    let (|AggregateColumn|_|) (exp: Expression) : (string * ParameterExpression * MemberInfo) option =
         match exp with
         | MethodCall m when List.contains m.Method.Name [ nameof minBy; nameof maxBy; nameof sumBy; nameof avgBy; nameof countBy; nameof avgByAs ] ->
             let aggType = m.Method.Name.Replace("By", "").Replace("As", "").ToUpper()
             match m.Arguments.[0] with
-            | Property p -> Some (aggType, p)
+            | PropertyWithThis (Parameter pThis, p) -> Some (aggType, pThis, p)
             | _ -> notImplMsg "Invalid argument to aggregate function."
         | _ -> None
 
@@ -372,13 +376,13 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberI
                 let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
                 let selectSubquery = subqueryConst.Value :?> SelectQuery
                 query.Having(qualifyColumn p1, comparison, selectSubquery.ToKataQuery())
-            | AggregateColumn (aggType, p1), Property p2 ->
+            | AggregateColumn (aggType, _, p1), Property p2 ->
                 // Handle aggregate col to col comparisons
                 let lt = qualifyColumn p1
                 let comparison = getComparison exp.NodeType
                 let rt = qualifyColumn p2
                 query.HavingRaw($"{aggType}({lt}) {comparison} {rt}")
-            | AggregateColumn (aggType, p), Value value ->
+            | AggregateColumn (aggType, _, p), Value value ->
                 // Handle aggregate column to value comparisons
                 let lt = qualifyColumn p
                 let comparison = getComparison(exp.NodeType)
@@ -435,7 +439,7 @@ let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'
         | MethodCall m when m.Method.Name = "Invoke" ->
             // Handle tuples
             visit m.Object
-        | AggregateColumn (aggType, p) -> OrderByAggregateColumn (aggType, p)
+        | AggregateColumn (aggType, _, p) -> OrderByAggregateColumn (aggType, p)
         | Member m -> 
             if m.Member.DeclaringType |> isOptionType
             then visit m.Expression
@@ -457,15 +461,16 @@ let visitJoin<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
             // Handle groupBy that returns a tuple of multiple columns
             (n.Arguments |> Seq.map visit |> Seq.toList |> List.collect id)
         | Member m ->
-            let mObjName =
-                match m.Expression with
-                | Parameter p -> p.Name
-                | _ -> notImpl()
-            if m.Member.DeclaringType |> isOptionType
-            then visit m.Expression
-            else [ mObjName, m.Member ]
-        | Property mi ->
-            [ mi.Name, mi ]
+            if m.Member.DeclaringType |> isOptionType then
+                visit m.Expression
+            else
+                let mObjName =
+                    match m.Expression with
+                    | Parameter p -> p.Name
+                    | _ -> notImpl()
+                [ mObjName, m.Member ]
+        | PropertyWithThis (Parameter obj, mi) ->
+            [ obj.Name, mi ]
         | _ -> notImpl()
 
     visit (propertySelector :> Expression)
@@ -488,9 +493,9 @@ let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Pro
     visit (propertySelector :> Expression)
 
 type Selection =
-    | SelectedTable of Type
-    | SelectedColumn of MemberInfo
-    | SelectedAggregateColumn of aggregateType: string * MemberInfo
+    | SelectedTable of string
+    | SelectedColumn of string * string
+    | SelectedAggregateColumn of aggregateType: string * tblAlias: string * col: MemberInfo
 
 /// Returns a list of one or more fully qualified table names: ["{schema}.{table}"]
 let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
@@ -500,21 +505,19 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
         | MethodCall m when m.Method.Name = "Invoke" ->
             // Handle tuples
             visit m.Object
-        | AggregateColumn (aggType, p) -> [ SelectedAggregateColumn (aggType, p) ]            
+        | AggregateColumn (aggType, pThis, p) -> [ SelectedAggregateColumn (aggType, pThis.Name, p) ]            
         | New n -> 
             // Handle a tuple of multiple tables
             n.Arguments 
             |> Seq.map visit |> Seq.toList |> List.concat
-        | Parameter p -> 
-            if p.Type |> isOptionType then
-                let innerType = p.Type.GenericTypeArguments.[0]
-                [ SelectedTable innerType ]
-            else
-                [ SelectedTable p.Type ]
+        | Parameter p -> [ SelectedTable p.Name ]
         | Member m -> 
-            if m.Member.DeclaringType |> isOptionType 
-            then visit m.Expression
-            else [ SelectedColumn m.Member ]
+            if m.Member.DeclaringType |> isOptionType then
+                visit m.Expression
+            else
+                if m.Expression.NodeType = ExpressionType.Parameter then
+                    [ SelectedColumn ((m.Expression :?> ParameterExpression).Name, m.Member.Name) ]
+                else notImpl ()
         | _ -> 
             notImpl()
 
