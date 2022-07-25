@@ -6,6 +6,9 @@ open System
 open System.Linq.Expressions
 open System.Data.Common
 open System.Threading.Tasks
+open Microsoft.FSharp.Quotations
+open Microsoft.FSharp.Quotations.Patterns
+open Microsoft.FSharp.Quotations.DerivedPatterns
 open SqlKata
 
 type ContextType = 
@@ -48,8 +51,8 @@ type SelectBuilder<'Selected, 'Mapped> () =
         Map (Seq.concat [ (Map.toSeq a); (Map.toSeq b) ])
 
     member val MapFn = Option<Func<'Selected, 'Mapped>>.None with get, set
-
-    member this.For (state: QuerySource<'T>, tableSelector: 'T -> QuerySource<'T>) =
+    
+    member this.For (state: QuerySource<'T>, [<ReflectedDefinition>] f: FSharp.Quotations.Expr<'T -> QuerySource<'T>>) =        
         match state.TryGetOuterTableMapping() with
         | Some tbl -> 
             let query = state |> getQueryOrDefault

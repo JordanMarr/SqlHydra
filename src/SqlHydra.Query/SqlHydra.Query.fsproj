@@ -20,6 +20,7 @@
 		</None>
 		<Compile Include="Kata.fs" />
 		<Compile Include="QueryFunctions.fs" />
+		<Compile Include="QuotationVisitor.fs" />
 		<Compile Include="LinqExpressionVisitors.fs" />
 		<Compile Include="Fixes.fs" />
 		<Compile Include="OnConflict.fs" />
