@@ -261,10 +261,22 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
             | _ -> notImpl()
         | MethodCall m when m.Method.Name = nameof isNullValue || m.Method.Name = nameof isNotNullValue ->
             match m.Arguments.[0] with
-            | Property p -> 
+            | Property p ->
+                // FIXME: use table aliases instead of types
                 if m.Method.Name = nameof isNullValue
                 then query.WhereNull(qualifyColumn p)
                 else query.WhereNotNull(qualifyColumn p)
+            | Member mm ->
+                match mm.Expression with
+                | Member mmm ->
+                    if mmm.Member.Name = "Value" && mmm.Member.DeclaringType |> isOptionType then
+                        let table = (mmm.Expression :?> ParameterExpression).Name
+                        let col = mm.Member.Name
+                        let fqCol = table + "." + col
+                        if m.Method.Name = nameof isNullValue
+                        then query.WhereNull(fqCol)
+                        else query.WhereNotNull(fqCol)
+                    else notImpl ()
             | _ -> notImpl()
         | BinaryAnd x ->
             let lt = visit x.Left (Query())
@@ -467,7 +479,8 @@ let visitJoin<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
                 let mObjName =
                     match m.Expression with
                     | Parameter p -> p.Name
-                    | _ -> notImpl()
+                    | Member m -> (m.Expression :?> ParameterExpression).Name
+                    | _ -> notImpl ()
                 [ mObjName, m.Member ]
         | PropertyWithThis (Parameter obj, mi) ->
             [ obj.Name, mi ]
@@ -515,9 +528,9 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
             if m.Member.DeclaringType |> isOptionType then
                 visit m.Expression
             else
-                if m.Expression.NodeType = ExpressionType.Parameter then
-                    [ SelectedColumn ((m.Expression :?> ParameterExpression).Name, m.Member.Name) ]
-                else notImpl ()
+                match m.Expression with
+                | Parameter mp -> [ SelectedColumn (mp.Name, m.Member.Name) ]
+                | _ -> notImpl ()
         | _ -> 
             notImpl()
 
