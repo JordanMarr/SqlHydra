@@ -237,20 +237,23 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
             | Property p, ListInit values ->
                 let queryParameters = 
                     values 
-                    |> Seq.map (fun value -> KataUtils.getQueryParameterForValue p value |> box)
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
                 filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN an array of values
             | Property p, ArrayInit values -> 
                 let queryParameters = 
                     values 
-                    |> Seq.map (fun value -> KataUtils.getQueryParameterForValue p value |> box)
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
                 filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN an IEnumerable of values
             | Property p, Value value -> 
                 let queryParameters = 
                     (value :?> System.Collections.IEnumerable) 
                     |> Seq.cast<obj> 
-                    |> Seq.map (fun value -> KataUtils.getQueryParameterForValue p value |> box)
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
                 filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN a sequence expression of values
             | Property p, MethodCall c when c.Method.Name = "CreateSequence" ->
@@ -296,7 +299,8 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
             | Property p, Value value ->
                 // Handle column to value comparisons
                 let comparison = getComparison(exp.NodeType)
-                query.Where(qualifyColumn p, comparison, KataUtils.getQueryParameterForValue p value)
+                let queryParameter = KataUtils.getQueryParameterForValue p value
+                query.Where(qualifyColumn p, comparison, queryParameter)
             | Value v1, Value v2 ->
                 // Not implemented because I didn't want to embed logic to properly format strings, dates, etc.
                 // This can be easily added later if it is implemented in Dapper.FSharp.
@@ -337,20 +341,23 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberI
             | Property p, ListInit values ->
                 let queryParameters = 
                     values 
-                    |> Seq.map (fun value -> KataUtils.getQueryParameterForValue p value |> box)
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
                 filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN an array of values
             | Property p, ArrayInit values -> 
                 let queryParameters = 
                     values 
-                    |> Seq.map (fun value -> KataUtils.getQueryParameterForValue p value |> box)
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
                 filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN an IEnumerable of values
             | Property p, Value value -> 
                 let queryParameters = 
                     (value :?> System.Collections.IEnumerable) 
                     |> Seq.cast<obj> 
-                    |> Seq.map (fun value -> KataUtils.getQueryParameterForValue p value |> box)
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
                 filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN a sequence expression of values
             | Property p, MethodCall c when c.Method.Name = "CreateSequence" ->
@@ -400,8 +407,7 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberI
                 // Handle aggregate column to value comparisons
                 let lt = qualifyColumn p
                 let comparison = getComparison(exp.NodeType)
-                let queryParameter = KataUtils.getQueryParameterForValue p value
-                query.HavingRaw($"{aggType}({lt}) {comparison} ?", [queryParameter])
+                query.HavingRaw($"{aggType}({lt}) {comparison} ?", [value])
             | Property p1, Property p2 ->
                 // Handle col to col comparisons
                 let lt = qualifyColumn p1
