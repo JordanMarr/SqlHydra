@@ -45,7 +45,7 @@ type UpdateBuilder<'Updated>() =
         let query = state |> getQueryOrDefault
         let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector :?> Reflection.PropertyInfo
         
-        let value = KataUtils.getQueryParameterForValue prop value :> obj
+        let value = KataUtils.getQueryParameterForValue prop value
         QuerySource<'T, UpdateQuerySpec<'T>>(
             { query with SetValues = query.SetValues @ [ prop.Name, value ] }
             , state.TableMappings)
@@ -75,7 +75,7 @@ type UpdateBuilder<'Updated>() =
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
     member this.Where (state: QuerySource<'T>, [<ProjectionParameter>] whereExpression) = 
         let query = state |> getQueryOrDefault
-        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
+        let where, props = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
         QuerySource<'T, UpdateQuerySpec<'T>>({ query with Where = Some where }, state.TableMappings)
 
     /// A safeguard that verifies that all records in the table should be updated.
