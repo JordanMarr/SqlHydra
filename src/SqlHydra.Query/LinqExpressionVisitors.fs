@@ -208,91 +208,80 @@ let getComparison (expType: ExpressionType) =
     | ExpressionType.LessThanOrEqual -> "<="
     | _ -> notImplMsg "Unsupported comparison type"
 
-type WhereClause = Query * MemberInfo list
-
 let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberInfo -> string) =
-    let rec visit (exp: Expression) ((query, props): WhereClause) : WhereClause =
+    let rec visit (exp: Expression) (query: Query) : Query =
         match exp with
-        | Lambda x -> visit x.Body (query, props)
+        | Lambda x -> visit x.Body query
         | Not x -> 
-            let operand, operandProps = visit x.Operand (Query(), [])
-            query.WhereNot(fun q -> operand), props @ operandProps
+            let operand = visit x.Operand (Query())
+            query.WhereNot(fun q -> operand)
         | MethodCall m when m.Method.Name = "Invoke" ->
             // Handle tuples
-            visit m.Object (Query(), [])
+            visit m.Object (Query())
         | MethodCall m when List.contains m.Method.Name [ nameof isIn; nameof isNotIn; nameof op_BarEqualsBar; nameof op_BarLessGreaterBar ] ->
             let filter : (string * seq<obj>) -> Query = 
                 match m.Method.Name with
-                | nameof isIn | nameof op_BarEqualsBar -> 
-                    query.WhereIn
-                | _ -> 
-                    query.WhereNotIn
+                | nameof isIn | nameof op_BarEqualsBar -> query.WhereIn
+                | _ -> query.WhereNotIn
 
             match m.Arguments.[0], m.Arguments.[1] with
-
             // Column is IN / NOT IN a subquery of values
             | Property p, MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryMany ->
                 let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
                 let fqCol = qualifyColumn p
                 let selectSubquery = subqueryConst.Value :?> SelectQuery
                 match m.Method.Name with
-                | nameof isIn | nameof op_BarEqualsBar -> 
-                    query.WhereIn(fqCol, selectSubquery.ToKataQuery()), props
-                | _ -> 
-                    query.WhereNotIn(fqCol, selectSubquery.ToKataQuery()), props
-            
+                | nameof isIn | nameof op_BarEqualsBar -> query.WhereIn(fqCol, selectSubquery.ToKataQuery())
+                | _ -> query.WhereNotIn(fqCol, selectSubquery.ToKataQuery())
             // Column is IN / NOT IN a list of values
             | Property p, ListInit values ->
-                filter(qualifyColumn p, values |> Seq.toArray), props @ [p]
-            
+                let queryParameters = 
+                    values 
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
+                filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN an array of values
             | Property p, ArrayInit values -> 
-                filter(qualifyColumn p, values |> Seq.toArray), props @ [p]
-            
+                let queryParameters = 
+                    values 
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
+                filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN an IEnumerable of values
             | Property p, Value value -> 
-                let arr = 
+                let queryParameters = 
                     (value :?> System.Collections.IEnumerable) 
                     |> Seq.cast<obj> 
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
                     |> Seq.toArray
-                filter(qualifyColumn p, arr), props @ [p]
-            
+                filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN a sequence expression of values
             | Property p, MethodCall c when c.Method.Name = "CreateSequence" ->
                 notImplMsg "Unable to unwrap sequence expression. Please use a list or array instead."
-            | _ -> 
-                notImpl()
-
+            | _ -> notImpl()
         | MethodCall m when List.contains m.Method.Name [ nameof like; nameof notLike; nameof op_EqualsPercent; nameof op_LessGreaterPercent ] ->
             match m.Arguments.[0], m.Arguments.[1] with
             | Property p, Value value -> 
                 let pattern = string value
                 match m.Method.Name with
-                | nameof like | nameof op_EqualsPercent -> 
-                    query.WhereLike(qualifyColumn p, pattern, false), props @ [p]
-                | _ -> 
-                    query.WhereNotLike(qualifyColumn p, pattern, false), props @ [p]
-            | _ -> 
-                notImpl()
-
+                | nameof like | nameof op_EqualsPercent -> query.WhereLike(qualifyColumn p, pattern, false)
+                | _ -> query.WhereNotLike(qualifyColumn p, pattern, false)
+            | _ -> notImpl()
         | MethodCall m when m.Method.Name = nameof isNullValue || m.Method.Name = nameof isNotNullValue ->
             match m.Arguments.[0] with
             | Property p -> 
                 if m.Method.Name = nameof isNullValue
-                then query.WhereNull(qualifyColumn p), props
-                else query.WhereNotNull(qualifyColumn p), props
+                then query.WhereNull(qualifyColumn p)
+                else query.WhereNotNull(qualifyColumn p)
             | _ -> notImpl()
-        
         | BinaryAnd x ->
-            let lt, ltProps = visit x.Left (Query(), [])
-            let rt, rtProps = visit x.Right (Query(), [])
-            query.Where(fun q -> lt).Where(fun q -> rt), props @ ltProps @ rtProps
-        
+            let lt = visit x.Left (Query())
+            let rt = visit x.Right (Query())
+            query.Where(fun q -> lt).Where(fun q -> rt)
         | BinaryOr x -> 
-            let lt, ltProps = visit x.Left (Query(), [])
-            let rt, rtProps = visit x.Right (Query(), [])
-            query.OrWhere(fun q -> lt).OrWhere(fun q -> rt), props @ ltProps @ rtProps
-
+            let lt = visit x.Left (Query())
+            let rt = visit x.Right (Query())
+            query.OrWhere(fun q -> lt).OrWhere(fun q -> rt)
         | BinaryCompare x ->
             match x.Left, x.Right with            
             | Property p1, MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryOne ->
@@ -300,126 +289,112 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
                 let comparison = getComparison exp.NodeType
                 let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
                 let selectSubquery = subqueryConst.Value :?> SelectQuery
-                query.Where(qualifyColumn p1, comparison, selectSubquery.ToKataQuery()), props
-            
+                query.Where(qualifyColumn p1, comparison, selectSubquery.ToKataQuery())
             | Property p1, Property p2 ->
                 // Handle col to col comparisons
                 let lt = qualifyColumn p1
                 let comparison = getComparison exp.NodeType
                 let rt = qualifyColumn p2
-                query.WhereColumns(lt, comparison, rt), props
-            
+                query.WhereColumns(lt, comparison, rt)
             | Property p, Value value ->
                 // Handle column to value comparisons
-                let comparison = getComparison(exp.NodeType)
-                query.Where(qualifyColumn p, comparison, value), props @ [p]
-            
+                match exp.NodeType, value with
+                | ExpressionType.Equal, null -> 
+                    query.WhereNull(qualifyColumn p)
+                | ExpressionType.NotEqual, null -> 
+                    query.WhereNotNull(qualifyColumn p)
+                | _ ->                     
+                    let comparison = getComparison(exp.NodeType)
+                    let queryParameter = KataUtils.getQueryParameterForValue p value
+                    query.Where(qualifyColumn p, comparison, queryParameter)
             | Value v1, Value v2 ->
                 // Not implemented because I didn't want to embed logic to properly format strings, dates, etc.
                 // This can be easily added later if it is implemented in Dapper.FSharp.
                 notImplMsg("Value to value comparisons are not currently supported. Ex: where (1 = 1)")
-            
             | _ ->
                 notImpl()
-
         | _ ->
             notImpl()
 
-    visit (filter :> Expression) (Query(), [])
-
-type HavingClause = Query * MemberInfo list
+    visit (filter :> Expression) (Query())
 
 let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberInfo -> string) =
-    let rec visit (exp: Expression) ((query, props): HavingClause) : HavingClause =
+    let rec visit (exp: Expression) (query: Query) : Query =
         match exp with
-        | Lambda x -> visit x.Body (query, props)
+        | Lambda x -> visit x.Body query
         | Not x -> 
-            let operand, operandProps = visit x.Operand (Query(), [])
-            query.HavingNot(fun q -> operand), props @ operandProps
-
+            let operand = visit x.Operand (Query())
+            query.HavingNot(fun q -> operand)
         | MethodCall m when m.Method.Name = "Invoke" ->
             // Handle tuples
-            visit m.Object (Query(), [])
-
+            visit m.Object (Query())
         | MethodCall m when List.contains m.Method.Name [ nameof isIn; nameof isNotIn; nameof op_BarEqualsBar; nameof op_BarLessGreaterBar ] ->
             let filter : (string * seq<obj>) -> Query = 
                 match m.Method.Name with
-                | nameof isIn | nameof op_BarEqualsBar -> 
-                    query.HavingIn
-                | _ -> 
-                    query.HavingNotIn
+                | nameof isIn | nameof op_BarEqualsBar -> query.HavingIn
+                | _ -> query.HavingNotIn
 
             match m.Arguments.[0], m.Arguments.[1] with
-
             // Column is IN / NOT IN a subquery of values
             | Property p, MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryMany ->
                 let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
                 let fqCol = qualifyColumn p
                 let selectSubquery = subqueryConst.Value :?> SelectQuery
                 match m.Method.Name with
-                | nameof isIn | nameof op_BarEqualsBar -> 
-                    query.HavingIn(fqCol, selectSubquery.ToKataQuery()), props
-                | _ -> 
-                    query.HavingNotIn(fqCol, selectSubquery.ToKataQuery()), props
-
+                | nameof isIn | nameof op_BarEqualsBar -> query.HavingIn(fqCol, selectSubquery.ToKataQuery())
+                | _ -> query.HavingNotIn(fqCol, selectSubquery.ToKataQuery())
             // Column is IN / NOT IN a list of values
             | Property p, ListInit values ->
-                filter(qualifyColumn p, values |> Seq.toArray), props @ [p]
-
+                let queryParameters = 
+                    values 
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
+                filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN an array of values
             | Property p, ArrayInit values -> 
-                filter(qualifyColumn p, values |> Seq.toArray), props @ [p]
-
+                let queryParameters = 
+                    values 
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
+                filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN an IEnumerable of values
             | Property p, Value value -> 
-                let arr = 
+                let queryParameters = 
                     (value :?> System.Collections.IEnumerable) 
                     |> Seq.cast<obj> 
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
                     |> Seq.toArray
-                filter(qualifyColumn p, arr), props @ [p]
-
+                filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN a sequence expression of values
             | Property p, MethodCall c when c.Method.Name = "CreateSequence" ->
                 notImplMsg "Unable to unwrap sequence expression. Please use a list or array instead."
-            | _ -> 
-                notImpl()
-
+            | _ -> notImpl()
         | MethodCall m when List.contains m.Method.Name [ nameof like; nameof notLike; nameof op_EqualsPercent; nameof op_LessGreaterPercent ] ->
             match m.Arguments.[0], m.Arguments.[1] with
             | Property p, Value value -> 
                 let pattern = string value
                 match m.Method.Name with
-                | nameof like | nameof op_EqualsPercent -> 
-                    query.HavingLike(qualifyColumn p, pattern, false), props @ [p]
-                | _ -> 
-                    query.HavingNotLike(qualifyColumn p, pattern, false), props @ [p]
-            | _ -> 
-                notImpl()
-
+                | nameof like | nameof op_EqualsPercent -> query.HavingLike(qualifyColumn p, pattern, false)
+                | _ -> query.HavingNotLike(qualifyColumn p, pattern, false)
+            | _ -> notImpl()
         | MethodCall m when m.Method.Name = nameof isNullValue || m.Method.Name = nameof isNotNullValue ->
             match m.Arguments.[0] with
             | Property p -> 
-                if m.Method.Name = nameof isNullValue then 
-                    query.HavingNull(qualifyColumn p), props @ [p]
-                else 
-                    query.HavingNotNull(qualifyColumn p), props @ [p]
-            | _ -> 
-                notImpl()
-
+                if m.Method.Name = nameof isNullValue
+                then query.HavingNull(qualifyColumn p)
+                else query.HavingNotNull(qualifyColumn p)
+            | _ -> notImpl()
         | MethodCall m when List.contains m.Method.Name [ nameof minBy; nameof maxBy; nameof sumBy; nameof avgBy; nameof countBy; nameof avgByAs ] ->
             // Handle aggregate columns
-            visit m.Arguments.[0] (query, props)
-
+            visit m.Arguments.[0] query
         | BinaryAnd x ->
-            let lt, ltProps = visit x.Left (Query(), [])
-            let rt, rtProps = visit x.Right (Query(), [])
-            query.Having(fun q -> lt).Having(fun q -> rt), props @ ltProps @ rtProps
-
+            let lt = visit x.Left (Query())
+            let rt = visit x.Right (Query())
+            query.Having(fun q -> lt).Having(fun q -> rt)
         | BinaryOr x -> 
-            let lt, ltProps = visit x.Left (Query(), [])
-            let rt, rtProps = visit x.Right (Query(), [])
-            query.OrHaving(fun q -> lt).OrHaving(fun q -> rt), props @ ltProps @ rtProps
-
+            let lt = visit x.Left (Query())
+            let rt = visit x.Right (Query())
+            query.OrHaving(fun q -> lt).OrHaving(fun q -> rt)
         | BinaryCompare x ->
             match x.Left, x.Right with            
             | Property p1, MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryOne ->
@@ -427,45 +402,45 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberI
                 let comparison = getComparison exp.NodeType
                 let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
                 let selectSubquery = subqueryConst.Value :?> SelectQuery
-                query.Having(qualifyColumn p1, comparison, selectSubquery.ToKataQuery()), props
-
+                query.Having(qualifyColumn p1, comparison, selectSubquery.ToKataQuery())
             | AggregateColumn (aggType, p1), Property p2 ->
                 // Handle aggregate col to col comparisons
                 let lt = qualifyColumn p1
                 let comparison = getComparison exp.NodeType
                 let rt = qualifyColumn p2
-                query.HavingRaw($"{aggType}({lt}) {comparison} {rt}"), props
-
+                query.HavingRaw($"{aggType}({lt}) {comparison} {rt}")
             | AggregateColumn (aggType, p), Value value ->
                 // Handle aggregate column to value comparisons
                 let lt = qualifyColumn p
                 let comparison = getComparison(exp.NodeType)
-                query.HavingRaw($"{aggType}({lt}) {comparison} ?", [value]), props @ [p]
-
+                query.HavingRaw($"{aggType}({lt}) {comparison} ?", [value])
             | Property p1, Property p2 ->
                 // Handle col to col comparisons
                 let lt = qualifyColumn p1
                 let comparison = getComparison exp.NodeType
                 let rt = qualifyColumn p2
-                query.HavingColumns(lt, comparison, rt), props
-
+                query.HavingColumns(lt, comparison, rt)
             | Property p, Value value ->
                 // Handle column to value comparisons
-                let comparison = getComparison(exp.NodeType)
-                let queryParameter = KataUtils.getQueryParameterForValue p value
-                query.Having(qualifyColumn p, comparison, queryParameter), props @ [p]
-
+                match exp.NodeType, value with
+                | ExpressionType.Equal, null -> 
+                    query.WhereNull(qualifyColumn p)
+                | ExpressionType.NotEqual, null -> 
+                    query.WhereNotNull(qualifyColumn p)
+                | _ ->                     
+                    let comparison = getComparison(exp.NodeType)
+                    let queryParameter = KataUtils.getQueryParameterForValue p value
+                    query.Where(qualifyColumn p, comparison, queryParameter)
             | Value v1, Value v2 ->
                 // Not implemented because I didn't want to embed logic to properly format strings, dates, etc.
                 // This can be easily added later if it is implemented in Dapper.FSharp.
                 notImplMsg("Value to value comparisons are not currently supported. Ex: having (1 = 1)")
             | _ ->
                 notImpl()
-
         | _ ->
             notImpl()
 
-    visit (filter :> Expression) (Query(), [])
+    visit (filter :> Expression) (Query())
 
 /// Returns a list of one or more fully qualified column names: ["{schema}.{table}.{column}"]
 let visitPropertiesSelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) (qualifyColumn: MemberInfo -> string) =

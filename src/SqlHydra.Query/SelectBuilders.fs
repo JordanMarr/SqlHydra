@@ -70,7 +70,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
     member this.Where (state: QuerySource<'T, Query>, [<ProjectionParameter>] whereExpression) = 
         let query = state.Query
-        let where, props = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
+        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
         QuerySource<'T, Query>(query.Where(fun w -> where), state.TableMappings)
 
     /// Sets the SELECT statement and filters the query to include only the selected tables
@@ -231,7 +231,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
     /// Sets the HAVING condition.
     [<CustomOperation("having", MaintainsVariableSpace = true)>]
     member this.Having (state: QuerySource<'T, Query>, [<ProjectionParameter>] havingExpression) = 
-        let having, props = LinqExpressionVisitors.visitHaving<'T> havingExpression (FQ.fullyQualifyColumn state.TableMappings)
+        let having = LinqExpressionVisitors.visitHaving<'T> havingExpression (FQ.fullyQualifyColumn state.TableMappings)
         QuerySource<'T, Query>(state.Query.Having(fun w -> having), state.TableMappings)
 
     /// Sets query to return DISTINCT values
