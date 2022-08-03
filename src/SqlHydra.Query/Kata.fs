@@ -121,12 +121,9 @@ module private KataUtils =
                 | o -> o
 
     let private getProviderDbTypeName (p: MemberInfo) =
-        let attrs = p.GetCustomAttributes(true)
-        (attrs
-        |> Seq.choose (function
-            | :? SqlHydra.ProviderDbTypeAttribute as attr -> Some attr.ProviderDbTypeName
-            | _ -> None))
-        |> Seq.tryHead
+        match Attribute.GetCustomAttribute(p, typeof<SqlHydra.ProviderDbTypeAttribute>, false) with
+        | :? SqlHydra.ProviderDbTypeAttribute as att -> Some att.ProviderDbTypeName
+        | _ -> None
 
     let getQueryParameterForValue (p: MemberInfo) (value: obj) =
         { Value = value |> boxValueOrOption
