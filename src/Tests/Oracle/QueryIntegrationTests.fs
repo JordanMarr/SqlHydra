@@ -88,7 +88,7 @@ let tests =
                 }
 
             let! rows = query |> ctx.ReadAsync HydraReader.Read
-            printfn "Results: %A" rows
+            //printfn "Results: %A" rows
             //query.ToKataQuery() |> toSql |> printfn "%s"
             gt0 rows
         }
