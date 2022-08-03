@@ -22,6 +22,9 @@
     <PackageReference Include="TaskBuilder.fs" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SqlHydra.Domain\SqlHydra.Domain.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="6.0.1" />
   </ItemGroup>
   <Target Name="SqlHydra" BeforeTargets="Clean">
