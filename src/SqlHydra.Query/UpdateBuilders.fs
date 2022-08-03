@@ -45,7 +45,7 @@ type UpdateBuilder<'Updated>() =
         let query = state |> getQueryOrDefault
         let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector :?> Reflection.PropertyInfo
         
-        let value = KataUtils.getQueryParameterForValue prop value :> obj
+        let value = KataUtils.getQueryParameterForValue prop value
         QuerySource<'T, UpdateQuerySpec<'T>>(
             { query with SetValues = query.SetValues @ [ prop.Name, value ] }
             , state.TableMappings)

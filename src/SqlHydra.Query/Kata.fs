@@ -120,21 +120,22 @@ module private KataUtils =
                 | null -> box System.DBNull.Value 
                 | o -> o
 
-    let private getProviderDbTypeName (p: PropertyInfo) =
+    let private getProviderDbTypeName (p: MemberInfo) =
         let attrs = p.GetCustomAttributes(true)
         (attrs
         |> Seq.choose (function
             | :? SqlHydra.ProviderDbTypeAttribute as attr -> Some attr.ProviderDbTypeName
             | _ -> None))
         |> Seq.tryHead
-        
-    let getQueryParameterForValue (p: PropertyInfo) (value: obj) =
-        { Value = value |> boxValueOrOption; ProviderDbType = getProviderDbTypeName p }
+
+    let getQueryParameterForValue (p: MemberInfo) (value: obj) =
+        { Value = value |> boxValueOrOption
+        ; ProviderDbType = getProviderDbTypeName p } :> obj
 
     let getQueryParameterForEntity (entity: 'T) (p: PropertyInfo) =
         p.GetValue(entity) 
         |> getQueryParameterForValue p
-    
+        
     let fromUpdate (spec: UpdateQuerySpec<'T>) = 
         let kvps = 
             match spec.Entity, spec.SetValues with
@@ -142,13 +143,13 @@ module private KataUtils =
                 match spec.Fields with 
                 | [] -> 
                     FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
-                    |> Array.map (fun p -> p.Name, getQueryParameterForEntity entity p :> obj)
+                    |> Array.map (fun p -> p.Name, getQueryParameterForEntity entity p)
                         
                 | fields -> 
                     let included = fields |> Set.ofList
                     FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) 
                     |> Array.filter (fun p -> included.Contains(p.Name)) 
-                    |> Array.map (fun p -> p.Name, getQueryParameterForEntity entity p :> obj)
+                    |> Array.map (fun p -> p.Name, getQueryParameterForEntity entity p)
 
             | Some _, _ -> failwith "Cannot have both `entity` and `set` operations in an `update` expression."
             | None, [] -> failwith "Either an `entity` or `set` operations must be present in an `update` expression."
@@ -184,7 +185,7 @@ module private KataUtils =
         | [ entity ] -> 
             let keyValuePairs =
                 includedProperties
-                |> Array.map (fun p -> KeyValuePair(p.Name, getQueryParameterForEntity entity p :> obj))
+                |> Array.map (fun p -> KeyValuePair(p.Name, getQueryParameterForEntity entity p))
                 |> Array.toList
             Query(spec.Table).AsInsert(keyValuePairs, returnId = spec.IdentityField.IsSome)
 
@@ -196,7 +197,7 @@ module private KataUtils =
                 entities
                 |> List.map (fun entity ->
                     includedProperties
-                    |> Array.map (fun p -> getQueryParameterForEntity entity p :> obj)
+                    |> Array.map (fun p -> getQueryParameterForEntity entity p)
                     |> Array.toSeq
                 )
             Query(spec.Table).AsInsert(columns, rowsValues)

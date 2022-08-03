@@ -235,14 +235,26 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
                 | _ -> query.WhereNotIn(fqCol, selectSubquery.ToKataQuery())
             // Column is IN / NOT IN a list of values
             | Property p, ListInit values ->
-                filter(qualifyColumn p, values)
+                let queryParameters = 
+                    values 
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
+                filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN an array of values
             | Property p, ArrayInit values -> 
-                filter(qualifyColumn p, values)
+                let queryParameters = 
+                    values 
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
+                filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN an IEnumerable of values
             | Property p, Value value -> 
-                let lstValues = (value :?> System.Collections.IEnumerable) |> Seq.cast<obj> |> Seq.toList
-                filter(qualifyColumn p, lstValues)
+                let queryParameters = 
+                    (value :?> System.Collections.IEnumerable) 
+                    |> Seq.cast<obj> 
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
+                filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN a sequence expression of values
             | Property p, MethodCall c when c.Method.Name = "CreateSequence" ->
                 notImplMsg "Unable to unwrap sequence expression. Please use a list or array instead."
@@ -286,8 +298,15 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
                 query.WhereColumns(lt, comparison, rt)
             | Property p, Value value ->
                 // Handle column to value comparisons
-                let comparison = getComparison(exp.NodeType)
-                query.Where(qualifyColumn p, comparison, value)
+                match exp.NodeType, value with
+                | ExpressionType.Equal, null -> 
+                    query.WhereNull(qualifyColumn p)
+                | ExpressionType.NotEqual, null -> 
+                    query.WhereNotNull(qualifyColumn p)
+                | _ ->                     
+                    let comparison = getComparison(exp.NodeType)
+                    let queryParameter = KataUtils.getQueryParameterForValue p value
+                    query.Where(qualifyColumn p, comparison, queryParameter)
             | Value v1, Value v2 ->
                 // Not implemented because I didn't want to embed logic to properly format strings, dates, etc.
                 // This can be easily added later if it is implemented in Dapper.FSharp.
@@ -326,14 +345,26 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberI
                 | _ -> query.HavingNotIn(fqCol, selectSubquery.ToKataQuery())
             // Column is IN / NOT IN a list of values
             | Property p, ListInit values ->
-                filter(qualifyColumn p, values)
+                let queryParameters = 
+                    values 
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
+                filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN an array of values
             | Property p, ArrayInit values -> 
-                filter(qualifyColumn p, values)
+                let queryParameters = 
+                    values 
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
+                filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN an IEnumerable of values
             | Property p, Value value -> 
-                let lstValues = (value :?> System.Collections.IEnumerable) |> Seq.cast<obj> |> Seq.toList
-                filter(qualifyColumn p, lstValues)
+                let queryParameters = 
+                    (value :?> System.Collections.IEnumerable) 
+                    |> Seq.cast<obj> 
+                    |> Seq.map (KataUtils.getQueryParameterForValue p)
+                    |> Seq.toArray
+                filter(qualifyColumn p, queryParameters)
             // Column is IN / NOT IN a sequence expression of values
             | Property p, MethodCall c when c.Method.Name = "CreateSequence" ->
                 notImplMsg "Unable to unwrap sequence expression. Please use a list or array instead."
@@ -391,8 +422,15 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberI
                 query.HavingColumns(lt, comparison, rt)
             | Property p, Value value ->
                 // Handle column to value comparisons
-                let comparison = getComparison(exp.NodeType)
-                query.Having(qualifyColumn p, comparison, value)
+                match exp.NodeType, value with
+                | ExpressionType.Equal, null -> 
+                    query.WhereNull(qualifyColumn p)
+                | ExpressionType.NotEqual, null -> 
+                    query.WhereNotNull(qualifyColumn p)
+                | _ ->                     
+                    let comparison = getComparison(exp.NodeType)
+                    let queryParameter = KataUtils.getQueryParameterForValue p value
+                    query.Where(qualifyColumn p, comparison, queryParameter)
             | Value v1, Value v2 ->
                 // Not implemented because I didn't want to embed logic to properly format strings, dates, etc.
                 // This can be easily added later if it is implemented in Dapper.FSharp.
