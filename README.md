@@ -16,10 +16,40 @@ SqlHydra is a suite of NuGet packages for working with databases in F# with an e
 - SqlHydra.Query uses [SqlKata](https://sqlkata.com/) internally to generate provider-specific SQL queries.
 - _All SqlHydra NuGet packages will be released with matching major and minor version numbers._
 
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/MargaretKrutikova"><img src="https://avatars.githubusercontent.com/u/5932274?v=4?s=100" width="100px;" alt=""/>
+        <br /><sub><b>MargaretKrutikova</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/pull/10" title="Code">💻</a>
+    </td>
+    <td align="center"><a href="https://github.com/Jmaharman"><img src="https://avatars.githubusercontent.com/u/215359?v=4?s=100" width="100px;" alt=""/>
+        <br /><sub><b>Jmaharman</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=Jmaharman" title="Code">💻</a>
+    </td>
+    <td align="center"><a href="https://github.com/ntwilson"><img src="https://avatars.githubusercontent.com/u/15835006?v=4?s=100" width="100px;" alt=""/>
+        <br /><sub><b>ntwilson</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=ntwilson" title="Code">💻</a>
+    </td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+
 ## Contributing
 * This project uses the vs-code Remote-Containers extension to spin up a dev environment that includes databases for running the Tests project.
 * Alternatively, you can manually run the docker-compose file to load the development databases along with your IDE of choice.
 * [Contributing Wiki](https://github.com/JordanMarr/SqlHydra/wiki/Contributing)
+
 
 ## SqlHydra.SqlServer [![NuGet version (SqlHydra.SqlServer)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.SqlServer/)
 
