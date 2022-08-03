@@ -111,8 +111,8 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let orderedQuery = 
             LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
             |> function 
-                | LinqExpressionVisitors.OrderByColumn p -> 
-                    state.Query.OrderBy(FQ.fullyQualifyColumn state.TableMappings p)
+                | LinqExpressionVisitors.OrderByColumn (tblAlias, p) -> 
+                    state.Query.OrderBy(tblAlias + "." + p.Name)
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
                     state.Query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p})")        
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)
@@ -123,8 +123,8 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let orderedQuery = 
             LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
             |> function 
-                | LinqExpressionVisitors.OrderByColumn p -> 
-                    state.Query.OrderBy(FQ.fullyQualifyColumn state.TableMappings p)
+                | LinqExpressionVisitors.OrderByColumn (tblAlias, p) -> 
+                    state.Query.OrderBy(tblAlias + "." + p.Name)
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
                     state.Query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p})")        
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)
@@ -135,8 +135,8 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let orderedQuery = 
             LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
             |> function 
-                | LinqExpressionVisitors.OrderByColumn p -> 
-                    state.Query.OrderByDesc(FQ.fullyQualifyColumn state.TableMappings p)
+                | LinqExpressionVisitors.OrderByColumn (tblAlias, p) -> 
+                    state.Query.OrderByDesc(tblAlias + "." + p.Name)
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
                     state.Query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p}) DESC")        
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)
@@ -147,8 +147,8 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let orderedQuery = 
             LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
             |> function 
-                | LinqExpressionVisitors.OrderByColumn p -> 
-                    state.Query.OrderByDesc(FQ.fullyQualifyColumn state.TableMappings p)
+                | LinqExpressionVisitors.OrderByColumn (tblAlias, p) -> 
+                    state.Query.OrderByDesc(tblAlias + "." + p.Name)
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
                     state.Query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p}) DESC")        
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)

@@ -43,18 +43,18 @@ type UpdateBuilder<'Updated>() =
     [<CustomOperation("set", MaintainsVariableSpace = true)>]
     member this.Set (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector: Expression<Func<'T, 'Prop>>, value: 'Prop) = 
         let query = state |> getQueryOrDefault
-        let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector :?> Reflection.PropertyInfo
+        let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector
         
-        let value = KataUtils.getQueryParameterForValue prop value :> obj
+        let value = KataUtils.getQueryParameterForValue (prop.col :?> Reflection.PropertyInfo) value :> obj
         QuerySource<'T, UpdateQuerySpec<'T>>(
-            { query with SetValues = query.SetValues @ [ prop.Name, value ] }
+            { query with SetValues = query.SetValues @ [ prop.col.Name, value ] }
             , state.TableMappings)
 
     /// Includes a column in the update query.
     [<CustomOperation("includeColumn", MaintainsVariableSpace = true)>]
     member this.IncludeColumn (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
-        let prop = (propertySelector |> LinqExpressionVisitors.visitPropertySelector<'T, 'Prop>).Name
+        let prop = (propertySelector |> LinqExpressionVisitors.visitPropertySelector<'T, 'Prop>).col.Name
         QuerySource<'T, UpdateQuerySpec<'T>>({ query with Fields = query.Fields @ [ prop ] }, state.TableMappings)
 
     /// Excludes a column from the update query.
@@ -67,7 +67,7 @@ type UpdateBuilder<'Updated>() =
             |> function
                 | [] -> FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) |> Array.map (fun x -> x.Name) |> Array.toList
                 | fields -> fields
-            |> List.filter (fun f -> f <> prop.Name)
+            |> List.filter (fun f -> f <> prop.col.Name)
             |> (fun x -> { query with Fields = x })
         QuerySource<'T, UpdateQuerySpec<'T>>(newQuery, state.TableMappings)
 

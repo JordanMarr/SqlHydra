@@ -440,7 +440,7 @@ let visitPropertiesSelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'P
     visit (propertySelector :> Expression)
 
 type OrderBy =
-    | OrderByColumn of MemberInfo
+    | OrderByColumn of string * MemberInfo
     | OrderByAggregateColumn of aggregateType: string * MemberInfo
 
 /// Returns a column MemberInfo.
@@ -455,8 +455,11 @@ let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'
         | Member m -> 
             if m.Member.DeclaringType |> isOptionType
             then visit m.Expression
-            else OrderByColumn m.Member
-        | Property p -> OrderByColumn p
+            else
+                match m.Expression with
+                | Parameter mp -> OrderByColumn (mp.Name, m.Member)
+                | _ -> notImpl ()
+        | PropertyWithThis (tblExp, p) -> OrderByColumn ((tblExp :?> ParameterExpression).Name, p)
         | _ -> notImpl()
 
     visit (propertySelector :> Expression)
@@ -488,9 +491,9 @@ let visitJoin<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
 
     visit (propertySelector :> Expression)
 
-/// Returns a column MemberInfo.
+/// Returns a table alias and a column name.
 let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
-    let rec visit (exp: Expression) : MemberInfo =
+    let rec visit (exp: Expression) : {| tblAlias: string; col: MemberInfo  |} =
         match exp with
         | Lambda x -> visit x.Body
         | MethodCall m when m.Method.Name = "Invoke" ->
@@ -499,8 +502,12 @@ let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Pro
         | Member m -> 
             if m.Member.DeclaringType |> isOptionType
             then visit m.Expression
-            else m.Member
-        | Property mi -> mi
+            else
+                match m.Expression with
+                | Parameter mp -> {| tblAlias = mp.Name; col = m.Member |}
+                | _ -> notImpl ()
+        | PropertyWithThis (mThis, mi) ->
+            {| tblAlias = (mThis :?> ParameterExpression).Name; col = mi |}
         | _ -> notImpl()
 
     visit (propertySelector :> Expression)

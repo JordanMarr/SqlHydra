@@ -51,7 +51,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
     [<CustomOperation("includeColumn", MaintainsVariableSpace = true)>]
     member this.IncludeColumn (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let spec = state |> getQueryOrDefault
-        let prop = (propertySelector |> LinqExpressionVisitors.visitPropertySelector<'T, 'Prop>).Name
+        let prop = (propertySelector |> LinqExpressionVisitors.visitPropertySelector<'T, 'Prop>).col.Name
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>({ spec with Fields = spec.Fields @ [ prop ] }, state.TableMappings)
 
     /// Excludes a column from the insert query.
@@ -64,7 +64,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
             |> function
                 | [] -> FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) |> Array.map (fun x -> x.Name) |> Array.toList
                 | fields -> fields
-            |> List.filter (fun f -> f <> prop.Name)
+            |> List.filter (fun f -> f <> prop.col.Name)
             |> (fun x -> { spec with Fields = x })
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
     
@@ -73,9 +73,9 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
     member this.GetId (state: QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>, [<ProjectionParameter>] idProperty) = 
         // Exclude the identity column
         let spec = this.ExcludeColumn(state, idProperty).Query
-        let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'InsertReturn> idProperty :?> Reflection.PropertyInfo
+        let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'InsertReturn> idProperty
         
-        QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>({ spec with IdentityField = Some prop.Name }, state.TableMappings)
+        QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>({ spec with IdentityField = Some prop.col.Name }, state.TableMappings)
 
     member this.Run (state: QuerySource<'Inserted>) =
         let spec = getQueryOrDefault state
