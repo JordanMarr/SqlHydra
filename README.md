@@ -339,7 +339,8 @@ let errorLogTable =         table<dbo.ErrorLog>
 /// Opens a connection and creates a QueryContext that will generate SQL Server dialect queries
 let openContext() = 
     let compiler = SqlKata.Compilers.SqlServerCompiler()
-    let conn = openConnection()
+    let conn = new SqlConnection("Replace with your connection string")
+    conn.Open()
     new QueryContext(conn, compiler)
 ```
 
