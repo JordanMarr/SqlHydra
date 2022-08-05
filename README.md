@@ -34,6 +34,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/ntwilson"><img src="https://avatars.githubusercontent.com/u/15835006?v=4?s=100" width="100px;" alt=""/>
         <br /><sub><b>ntwilson</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=ntwilson" title="Code">💻</a>
     </td>
+    <td align="center"><a href="https://github.com/MangelMaxime"><img src="https://avatars.githubusercontent.com/u/4760796?v=4?s=100" width="100px;" alt=""/>
+        <br /><sub><b>MangelMaxime</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=MangelMaxime" title="Doc">📖</a>
+    </td>
   </tr>
 </table>
 
