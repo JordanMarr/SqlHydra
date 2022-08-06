@@ -138,11 +138,6 @@ Npgsql Mapping Example:
 Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>(nameof experiments.mood) |> ignore
 ```
 
-💥 SqlHydra.Npgsql 1.0.0 uses Npgsql v6.0.3 which has a bug that throws an exception during SqlHydra.Npgsql code generation if an enum exists an a schema other than `public`.
-This bug has been fixed and is slated for v6.0.4. The workaround until then is to ensure that enums in non `public` schemas are also added to `public`.
-
-✔️ SqlHydra.Npgsql 1.0.1 uses Npgsql v6.0.4 which fixes the bug that causes generation to fail if an enum exists in a schema other than `public`.
-
 ## SqlHydra.Oracle [![NuGet version (SqlHydra.Oracle)](https://img.shields.io/nuget/v/SqlHydra.Oracle.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Oracle/)
 
 ### Local Install (recommended)
