@@ -75,7 +75,7 @@ type UpdateBuilder<'Updated>() =
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
     member this.Where (state: QuerySource<'T>, [<ProjectionParameter>] whereExpression) = 
         let query = state |> getQueryOrDefault
-        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
+        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (fun table col -> $"{table}.{col.Name}")
         QuerySource<'T, UpdateQuerySpec<'T>>({ query with Where = Some where }, state.TableMappings)
 
     /// A safeguard that verifies that all records in the table should be updated.

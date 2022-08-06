@@ -33,7 +33,7 @@ type DeleteBuilder<'Deleted>() =
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
     member this.Where (state:QuerySource<'T>, [<ProjectionParameter>] whereExpression) = 
         let query = state |> getQueryOrDefault
-        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
+        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (fun tableAlias col -> $"{tableAlias}.{col.Name}")
         QuerySource<'T, Query>(query.Where(fun w -> where), state.TableMappings)
 
     /// Deletes all records in the table (only when there are is no where clause)

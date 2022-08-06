@@ -75,7 +75,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
     member this.Where (state: QuerySource<'T, Query>, [<ProjectionParameter>] whereExpression) = 
         let query = state.Query
-        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
+        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (fun table col -> $"{table}.{col.Name}")
         QuerySource<'T, Query>(query.Where(fun w -> where), state.TableMappings)
 
     /// Sets the SELECT statement and filters the query to include only the selected tables

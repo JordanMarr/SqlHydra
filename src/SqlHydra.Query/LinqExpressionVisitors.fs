@@ -158,13 +158,17 @@ module SqlPatterns =
             tryGetMember m.Expression
         | _ -> 
             tryGetMember exp
+            
+    let (|PropertyWithParamThis|_|) (exp: Expression) =
+        (|PropertyWithThis|_|) exp
+        |> Option.map (fun (this, p) -> (this :?> ParameterExpression), p)
     
     /// A property member, a property wrapped in 'Some', or an option 'Value'.
     let (|Property|_|) (exp: Expression) = (|PropertyWithThis|_|) exp |> Option.map snd
             
 
     /// A constant value or an optional constant value
-    let (|Value|_|) (exp: Expression) =
+    let rec (|Value|_|) (exp: Expression) =
         match exp with
         | New n when n.Type.Name = "Guid" -> 
             let value = (n.Arguments.[0] :?> ConstantExpression).Value :?> string
@@ -191,6 +195,10 @@ module SqlPatterns =
             else
                 // Option.None
                 Some null
+        | MethodCall m when m.Method.Name = "op_Implicit" ->
+            match m.Arguments |> Seq.tryHead with
+            | Some v -> (|Value|_|) v
+            | None -> None
         | _ -> None
     
     let (|AggregateColumn|_|) (exp: Expression) : (string * ParameterExpression * MemberInfo) option =
@@ -212,7 +220,7 @@ let getComparison (expType: ExpressionType) =
     | ExpressionType.LessThanOrEqual -> "<="
     | _ -> notImplMsg "Unsupported comparison type"
 
-let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberInfo -> string) =
+let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -> MemberInfo -> string) =
     let rec visit (exp: Expression) (query: Query) : Query =
         match exp with
         | Lambda x -> visit x.Body query
@@ -232,21 +240,21 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
             // Column is IN / NOT IN a subquery of values
             | Property p, MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryMany ->
                 let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
-                let fqCol = qualifyColumn p
+                let fqCol = qualifyColumn "notImpl" p
                 let selectSubquery = subqueryConst.Value :?> SelectQuery
                 match m.Method.Name with
                 | nameof isIn | nameof op_BarEqualsBar -> query.WhereIn(fqCol, selectSubquery.ToKataQuery())
                 | _ -> query.WhereNotIn(fqCol, selectSubquery.ToKataQuery())
             // Column is IN / NOT IN a list of values
             | Property p, ListInit values ->
-                filter(qualifyColumn p, values)
+                filter(qualifyColumn "notImpl" p, values)
             // Column is IN / NOT IN an array of values
             | Property p, ArrayInit values -> 
-                filter(qualifyColumn p, values)
+                filter(qualifyColumn "notImpl" p, values)
             // Column is IN / NOT IN an IEnumerable of values
             | Property p, Value value -> 
                 let lstValues = (value :?> System.Collections.IEnumerable) |> Seq.cast<obj> |> Seq.toList
-                filter(qualifyColumn p, lstValues)
+                filter(qualifyColumn "notImpl" p, lstValues)
             // Column is IN / NOT IN a sequence expression of values
             | Property p, MethodCall c when c.Method.Name = "CreateSequence" ->
                 notImplMsg "Unable to unwrap sequence expression. Please use a list or array instead."
@@ -256,27 +264,26 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
             | Property p, Value value -> 
                 let pattern = string value
                 match m.Method.Name with
-                | nameof like | nameof op_EqualsPercent -> query.WhereLike(qualifyColumn p, pattern, false)
-                | _ -> query.WhereNotLike(qualifyColumn p, pattern, false)
+                | nameof like | nameof op_EqualsPercent -> query.WhereLike(qualifyColumn "notImpl" p, pattern, false)
+                | _ -> query.WhereNotLike(qualifyColumn "notImpl" p, pattern, false)
             | _ -> notImpl()
         | MethodCall m when m.Method.Name = nameof isNullValue || m.Method.Name = nameof isNotNullValue ->
             match m.Arguments.[0] with
             | Property p ->
-                // FIXME: use table aliases instead of types
                 if m.Method.Name = nameof isNullValue
-                then query.WhereNull(qualifyColumn p)
-                else query.WhereNotNull(qualifyColumn p)
+                then query.WhereNull(qualifyColumn "notImpl" p)
+                else query.WhereNotNull(qualifyColumn "notImpl" p)
             | Member mm ->
                 match mm.Expression with
                 | Member mmm ->
                     if mmm.Member.Name = "Value" && mmm.Member.DeclaringType |> isOptionType then
                         let table = (mmm.Expression :?> ParameterExpression).Name
-                        let col = mm.Member.Name
-                        let fqCol = table + "." + col
+                        let fqCol = qualifyColumn table mm.Member
                         if m.Method.Name = nameof isNullValue
                         then query.WhereNull(fqCol)
                         else query.WhereNotNull(fqCol)
                     else notImpl ()
+                | _ -> notImpl ()
             | _ -> notImpl()
         | BinaryAnd x ->
             let lt = visit x.Left (Query())
@@ -293,17 +300,17 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: MemberIn
                 let comparison = getComparison exp.NodeType
                 let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
                 let selectSubquery = subqueryConst.Value :?> SelectQuery
-                query.Where(qualifyColumn p1, comparison, selectSubquery.ToKataQuery())
+                query.Where(qualifyColumn "notImpl" p1, comparison, selectSubquery.ToKataQuery())
             | Property p1, Property p2 ->
                 // Handle col to col comparisons
-                let lt = qualifyColumn p1
+                let lt = qualifyColumn "notImpl" p1
                 let comparison = getComparison exp.NodeType
-                let rt = qualifyColumn p2
+                let rt = qualifyColumn "notImpl" p2
                 query.WhereColumns(lt, comparison, rt)
-            | Property p, Value value ->
+            | PropertyWithThis (Parameter pThis, p), Value value ->
                 // Handle column to value comparisons
                 let comparison = getComparison(exp.NodeType)
-                query.Where(qualifyColumn p, comparison, value)
+                query.Where(qualifyColumn pThis.Name p, comparison, value)
             | Value v1, Value v2 ->
                 // Not implemented because I didn't want to embed logic to properly format strings, dates, etc.
                 // This can be easily added later if it is implemented in Dapper.FSharp.
