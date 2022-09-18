@@ -743,7 +743,7 @@ let tests =
                     for row in tbl do
                     entity
                         {
-                            ext.GetIdGuidRepro.Id = System.Guid.NewGuid()
+                            ext.GetIdGuidRepro.Id = System.Guid.Empty // ignored
                             ext.GetIdGuidRepro.EmailAddress = "requestValues.EmailAddress"
                         }
 
