@@ -96,7 +96,7 @@ type QuerySource<'T, 'Query>(query, tableMappings) =
     inherit QuerySource<'T>(tableMappings)
     member this.Query : 'Query = query
 
-module private KataUtils = 
+module internal KataUtils = 
 
     // Manually convert DateOnly to DateTime and TimeOnly to TimeSpan (until Microsoft.Data.SqlClient handles)
     let convertIfDateOnlyTimeOnly (value: obj) =

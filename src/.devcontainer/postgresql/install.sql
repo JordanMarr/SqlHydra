@@ -3292,25 +3292,23 @@ CREATE SCHEMA sa
   CREATE VIEW s AS SELECT businessentityid AS id, * FROM sales.store
 ;
 
--- SqlHydra Custom Schema
-CREATE SCHEMA ProviderDbTypeTest
-    CREATE TABLE Test (
-        ID SERIAL,
-        JSON_FIELD JSON NOT NULL,
-        JSONB_FIELD JSONB NOT NULL
-    );
+-- SqlHydra custom "extensions" schema (for bug fix reproductions, new features, etc)
+CREATE SCHEMA ext;
 
--- SqlHydra Custom Schema
-CREATE SCHEMA Experiments;
+CREATE TABLE ext.JsonSupport (
+	ID SERIAL,
+	JSON_FIELD JSON NOT NULL,
+	JSONB_FIELD JSONB NOT NULL
+);
 
 -- NOTE: "CREATE TYPE" cannot be nested in CREATE SCHEMA.
--- Create an enum in `experiments` schema
-CREATE TYPE Experiments.Mood AS ENUM ('sad', 'ok', 'happy');
+-- Create an enum in `ext` schema
+CREATE TYPE ext.Mood AS ENUM ('sad', 'ok', 'happy');
 
--- Create a table in `experiment` schema that references the enum
-CREATE TABLE Experiments.Person (
+-- Create a table in `ext` schema that references the enum
+CREATE TABLE ext.Person (
     Name text not null,
-    CurrentMood Experiments.Mood not null
+    CurrentMood ext.Mood not null
 );
 
 

@@ -8,12 +8,25 @@ GO
 
 USE [AdventureWorks]
 GO
-CREATE SCHEMA [ProviderDbTypeTest]
+
+-- SqlHydra custom "extensions" schema for bug fix reproductions, new features, etc
+CREATE SCHEMA [ext]
 GO
 
-CREATE TABLE [ProviderDbTypeTest].[Test] (
+-- https://github.com/JordanMarr/SqlHydra/issues/30
+-- https://github.com/JordanMarr/SqlHydra/pull/33
+CREATE TABLE [ext].[DateTime2Support] (
   [ID] [INT] PRIMARY KEY,
   [LessPrecision] [DATETIME] NOT NULL,
   [MorePrecision] [DATETIME2](7) NOT NULL
+)
+GO
+
+-- https://github.com/JordanMarr/SqlHydra/issues/38
+CREATE TABLE [ext].[GetIdGuidRepro]
+(
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
+    -- descriptive data
+    [EmailAddress] NCHAR(50) NOT NULL
 )
 GO
