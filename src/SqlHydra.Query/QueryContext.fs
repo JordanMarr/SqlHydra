@@ -171,6 +171,10 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             // Fix oracle identity
             elif compiler  :? SqlKata.Compilers.OracleCompiler 
             then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixIdentityQuery identityField 
+                        
+            // Fix mssql guid identity
+            elif compiler :? SqlKata.Compilers.SqlServerCompiler && typeof<'InsertReturn> = typeof<System.Guid>
+            then cmd.CommandText <- cmd.CommandText |> Fixes.MsSql.fixGuidIdentityQuery identityField
 
             // Execute insert and return identity
             if compiler :? SqlKata.Compilers.OracleCompiler then
@@ -230,6 +234,11 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 // Fix oracle identity
                 elif compiler :? SqlKata.Compilers.OracleCompiler 
                 then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixIdentityQuery identityField
+
+                // Fix mssql guid identity
+                elif compiler :? SqlKata.Compilers.SqlServerCompiler && typeof<'InsertReturn> = typeof<System.Guid>
+                then cmd.CommandText <- cmd.CommandText |> Fixes.MsSql.fixGuidIdentityQuery identityField
+                
 
                 // Execute insert and return identity
                 if compiler :? SqlKata.Compilers.OracleCompiler then
