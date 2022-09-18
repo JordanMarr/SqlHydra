@@ -322,14 +322,17 @@ let tests =
 
         testTask "Insert and Get Id" {
             use ctx = openContext()
+            
             ctx.BeginTransaction()
-
-            let! deleted =
+            let! deletedCount =
                 delete {
                     for r in productReviewTable do
                     where (r.emailaddress = "gfisher@askjeeves.com")
                 }
                 |> ctx.DeleteAsync
+            ctx.CommitTransaction()
+
+            ctx.BeginTransaction()
 
             let! prodReviewId = 
                 insertTask (Shared ctx) {
