@@ -553,7 +553,7 @@ let tests =
 
             use ctx = openContext ()
             (ctx.Connection :?> Npgsql.NpgsqlConnection)
-                .TypeMapper.MapEnum<ext.mood>("experiments.mood") |> ignore
+                .TypeMapper.MapEnum<ext.mood>("ext.mood") |> ignore
 
             let! deleteResults =
                 deleteTask (Shared ctx) {
