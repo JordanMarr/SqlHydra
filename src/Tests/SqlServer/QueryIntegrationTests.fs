@@ -733,4 +733,23 @@ let tests =
             
             ctx.RollbackTransaction ()
         }
+
+        testAsync "Guid getId Bug Repro Issue 38" {
+            use ctx = openContext()
+            let tbl = table<ext.GetIdGuidRepro> |> inSchema (nameof ext)
+
+            let! guid = 
+                insertAsync (Shared ctx) {
+                    for row in tbl do
+                    entity
+                        {
+                            ext.GetIdGuidRepro.Id = System.Guid.NewGuid()
+                            ext.GetIdGuidRepro.EmailAddress = "requestValues.EmailAddress"
+                        }
+
+                    getId row.Id
+                }
+
+            Expect.notEqual guid (System.Guid.Empty) "Guid should not be empty."
+        }
     ]
