@@ -28,7 +28,7 @@ let categoryTable =           table<Production.ProductCategory>       |> inSchem
 let errorLogTable =           table<dbo.ErrorLog>
 let employeeTable =           table<HumanResources.Employee>          |> inSchema (nameof HumanResources)
 let shiftTable =              table<HumanResources.Shift>             |> inSchema (nameof HumanResources)
-let providerDbTypeTestTable = table<ProviderDbTypeTest.Test>          |> inSchema (nameof ProviderDbTypeTest)
+let dateTime2SupportTable =   table<ext.DateTime2Support>             |> inSchema (nameof ext)
 
 [<Tests>]
 let tests = 
@@ -666,7 +666,7 @@ let tests =
             let baseTimestamp = System.DateTime(2022,07,22, 11,50,28)
             let timestamp = System.DateTime(baseTimestamp.Ticks + 1234567L)
             // Simple insert of one entity
-            let entity': ProviderDbTypeTest.Test =
+            let entity': ext.DateTime2Support =
                 {
                     ID = 0
                     LessPrecision = timestamp
@@ -675,30 +675,30 @@ let tests =
 
             let! _ = 
                 insert {
-                    into providerDbTypeTestTable 
+                    into dateTime2SupportTable 
                     entity entity'
                 }
                 |> ctx.InsertAsync
 
             let! retrievedBack = 
                 selectTask HydraReader.Read (Shared ctx) {
-                    for row in providerDbTypeTestTable do
+                    for row in dateTime2SupportTable do
                     select row
                 }
 
-            Expect.equal [timestamp] [for (row:ProviderDbTypeTest.Test) in retrievedBack -> row.MorePrecision] "INSERT: Expected DATETIME2 to be stored with full precision"
-            Expect.notEqual [timestamp] [for (row:ProviderDbTypeTest.Test) in retrievedBack -> row.LessPrecision] "INSERT: Expected a loss of precision when storing a DATETIME"
+            Expect.equal [timestamp] [for (row: ext.DateTime2Support) in retrievedBack -> row.MorePrecision] "INSERT: Expected DATETIME2 to be stored with full precision"
+            Expect.notEqual [timestamp] [for (row: ext.DateTime2Support) in retrievedBack -> row.LessPrecision] "INSERT: Expected a loss of precision when storing a DATETIME"
 
             let! fullPrecisionQuery = 
                 selectTask HydraReader.Read (Shared ctx) { 
-                    for row in providerDbTypeTestTable do
+                    for row in dateTime2SupportTable do
                     where (row.MorePrecision = timestamp)
                     count
                 }
 
             let! lessPrecisionQuery = 
                 selectTask HydraReader.Read (Shared ctx) { 
-                    for row in providerDbTypeTestTable do
+                    for row in dateTime2SupportTable do
                     where (row.LessPrecision = timestamp)
                     count
                 }
@@ -710,27 +710,46 @@ let tests =
 
             let! _ = 
                 updateTask (Shared ctx) {
-                    for row in providerDbTypeTestTable do
+                    for row in dateTime2SupportTable do
                     set row.MorePrecision newTimestamp
                     where (row.MorePrecision = timestamp)
                 }
 
             let! _ = 
                 updateTask (Shared ctx) {
-                    for row in providerDbTypeTestTable do
+                    for row in dateTime2SupportTable do
                     set row.LessPrecision newTimestamp
                     where (row.LessPrecision = timestamp)
                 }
 
             let! retrievedBack = 
                 selectTask HydraReader.Read (Shared ctx) {
-                    for row in providerDbTypeTestTable do
+                    for row in dateTime2SupportTable do
                     select row
                 }
 
-            Expect.equal [newTimestamp] [for (row:ProviderDbTypeTest.Test) in retrievedBack -> row.MorePrecision] "UPDATE: Expected DATETIME2 to be stored with full precision"
-            Expect.notEqual [newTimestamp] [for (row:ProviderDbTypeTest.Test) in retrievedBack -> row.LessPrecision] "UPDATE: Expected a loss of precision when storing a DATETIME"
+            Expect.equal [newTimestamp] [for (row: ext.DateTime2Support) in retrievedBack -> row.MorePrecision] "UPDATE: Expected DATETIME2 to be stored with full precision"
+            Expect.notEqual [newTimestamp] [for (row: ext.DateTime2Support) in retrievedBack -> row.LessPrecision] "UPDATE: Expected a loss of precision when storing a DATETIME"
             
             ctx.RollbackTransaction ()
+        }
+
+        testAsync "Guid getId Bug Repro Issue 38" {
+            use ctx = openContext()
+            let tbl = table<ext.GetIdGuidRepro> |> inSchema (nameof ext)
+
+            let! guid = 
+                insertAsync (Shared ctx) {
+                    for row in tbl do
+                    entity
+                        {
+                            ext.GetIdGuidRepro.Id = System.Guid.NewGuid()
+                            ext.GetIdGuidRepro.EmailAddress = "requestValues.EmailAddress"
+                        }
+
+                    getId row.Id
+                }
+
+            Expect.notEqual guid (System.Guid.Empty) "Guid should not be empty."
         }
     ]

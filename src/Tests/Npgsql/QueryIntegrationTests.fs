@@ -29,7 +29,7 @@ let subCategoryTable =      table<production.productsubcategory>    |> inSchema 
 let categoryTable =         table<production.productcategory>       |> inSchema (nameof production)
 let currencyTable =         table<sales.currency>                   |> inSchema (nameof sales)
 let productReviewTable =    table<production.productreview>         |> inSchema (nameof production)
-let providerDbTestTable = table<providerdbtypetest.test> |> inSchema (nameof providerdbtypetest)
+let jsonSupportTable =      table<ext.jsonsupport>                  |> inSchema (nameof ext)
 let employeeTable =         table<humanresources.employee>          |> inSchema (nameof humanresources)
 
 [<Tests>]
@@ -322,14 +322,17 @@ let tests =
 
         testTask "Insert and Get Id" {
             use ctx = openContext()
+            
             ctx.BeginTransaction()
-
-            let! deleted =
+            let! deletedCount =
                 delete {
                     for r in productReviewTable do
                     where (r.emailaddress = "gfisher@askjeeves.com")
                 }
                 |> ctx.DeleteAsync
+            ctx.CommitTransaction()
+
+            ctx.BeginTransaction()
 
             let! prodReviewId = 
                 insertTask (Shared ctx) {
@@ -481,14 +484,14 @@ let tests =
                 
             let getRowById id =
                 select {
-                    for e in providerDbTestTable do
+                    for e in jsonSupportTable do
                         select e
                         where (e.id = id)
                 } |> ctx.ReadAsync HydraReader.Read
                 
             // Simple insert of one entity
             let jsonValue = """{"name":"test"}"""
-            let entity': providerdbtypetest.test =
+            let entity': ext.jsonsupport =
                 {
                     id = 0
                     json_field = jsonValue
@@ -497,7 +500,7 @@ let tests =
                 
             let! insertedRowId = 
                 insert {
-                    for e in providerDbTestTable do
+                    for e in jsonSupportTable do
                     entity entity'
                     getId e.id
                 }
@@ -506,7 +509,7 @@ let tests =
             let! selectedRows = getRowById insertedRowId
 
             Expect.wantSome (selectedRows |> Seq.tryHead) "Select returned empty set"
-            |> fun (row: providerdbtypetest.test) ->
+            |> fun (row: ext.jsonsupport) ->
                  expectJsonEqual row.json_field jsonValue "Json field after insert doesn't match"
                  expectJsonEqual row.jsonb_field jsonValue "Jsonb field after insert doesn't match"
      
@@ -514,7 +517,7 @@ let tests =
             let updatedJsonValue = """{"name":"test_2"}"""
             let! updatedRows =
                 update {
-                        for e in providerDbTestTable do
+                        for e in jsonSupportTable do
                         set e.json_field updatedJsonValue
                         set e.jsonb_field updatedJsonValue
                         where (e.id = insertedRowId)
@@ -526,7 +529,7 @@ let tests =
             let! selectedRowsAfterUpdate = getRowById insertedRowId
 
             Expect.wantSome (selectedRowsAfterUpdate |> Seq.tryHead) "Select returned empty set"
-            |> fun (row: providerdbtypetest.test) ->
+            |> fun (row: ext.jsonsupport) ->
                  expectJsonEqual row.json_field  updatedJsonValue "Json field after update doesn't match"
                  expectJsonEqual row.jsonb_field updatedJsonValue "Jsonb field after update doesn't match"
                    
@@ -537,7 +540,7 @@ let tests =
                 // Insert of multiple entities
                 let! insertedNumberOfRows = 
                     insert {
-                        for e in providerDbTestTable do
+                        for e in jsonSupportTable do
                         entities entities'
                     }
                     |> ctx.InsertAsync
@@ -547,13 +550,13 @@ let tests =
         }
 
         testTask "Enum Tests" {
-            let expPerson = table<experiments.person> |> inSchema (nameof experiments)
+            let expPerson = table<ext.person> |> inSchema (nameof ext)
 
             //Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>("experiments.mood") |> ignore
 
             use ctx = openContext ()
             (ctx.Connection :?> Npgsql.NpgsqlConnection)
-                .TypeMapper.MapEnum<experiments.mood>("experiments.mood") |> ignore
+                .TypeMapper.MapEnum<ext.mood>("ext.mood") |> ignore
 
             let! deleteResults =
                 deleteTask (Shared ctx) {
@@ -566,8 +569,8 @@ let tests =
                     into expPerson
                     entity (
                         { 
-                            experiments.person.name = "john doe"
-                            experiments.person.currentmood = experiments.mood.ok
+                            ext.person.name = "john doe"
+                            ext.person.currentmood = ext.mood.ok
                         }
                     )
                 }
@@ -584,8 +587,8 @@ let tests =
             let! updateResults = 
                 updateTask (Shared ctx) {
                     for p in expPerson do
-                    set p.currentmood experiments.mood.happy
-                    where (p.currentmood = experiments.mood.ok)
+                    set p.currentmood ext.mood.happy
+                    where (p.currentmood = ext.mood.ok)
                 }
 
             Expect.isTrue (updateResults > 0) "Expected update results > 0"
@@ -599,8 +602,8 @@ let tests =
 
             Expect.isTrue (
                 query2Results 
-                |> List.forall (fun (p: experiments.person) -> 
-                    p.currentmood = experiments.mood.happy
+                |> List.forall (fun (p: ext.person) -> 
+                    p.currentmood = ext.mood.happy
                 )
             ) ""
         }

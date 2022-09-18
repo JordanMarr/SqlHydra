@@ -1900,28 +1900,6 @@ module Production =
         member __.ReadIfNotNull() =
             if __.ProductModelID.IsNull() then None else Some(__.Read())
 
-module ProviderDbTypeTest =
-    [<CLIMutable>]
-    type Test =
-        { ID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
-          LessPrecision: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime2")>]
-          MorePrecision: System.DateTime }
-
-    type TestReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-        member __.ID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ID")
-        member __.LessPrecision = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "LessPrecision")
-        member __.MorePrecision = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "MorePrecision")
-
-        member __.Read() =
-            { ID = __.ID.Read()
-              LessPrecision = __.LessPrecision.Read()
-              MorePrecision = __.MorePrecision.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.ID.IsNull() then None else Some(__.Read())
-
 module Purchasing =
     [<CLIMutable>]
     type ProductVendor =
@@ -3283,6 +3261,44 @@ module dbo =
         member __.ReadIfNotNull() =
             if __.ErrorLogID.IsNull() then None else Some(__.Read())
 
+module ext =
+    [<CLIMutable>]
+    type DateTime2Support =
+        { ID: int
+          [<SqlHydra.ProviderDbType("DateTime")>]
+          LessPrecision: System.DateTime
+          [<SqlHydra.ProviderDbType("DateTime2")>]
+          MorePrecision: System.DateTime }
+
+    type DateTime2SupportReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.ID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ID")
+        member __.LessPrecision = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "LessPrecision")
+        member __.MorePrecision = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "MorePrecision")
+
+        member __.Read() =
+            { ID = __.ID.Read()
+              LessPrecision = __.LessPrecision.Read()
+              MorePrecision = __.MorePrecision.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.ID.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
+    type GetIdGuidRepro =
+        { Id: System.Guid
+          EmailAddress: string }
+
+    type GetIdGuidReproReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        member __.Id = RequiredColumn(reader, getOrdinal, reader.GetGuid, "Id")
+        member __.EmailAddress = RequiredColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
+
+        member __.Read() =
+            { Id = __.Id.Read()
+              EmailAddress = __.EmailAddress.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.Id.IsNull() then None else Some(__.Read())
+
 type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     let mutable accFieldCount = 0
     let buildGetOrdinal fieldCount =
@@ -3351,7 +3367,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     let lazyProductionvProductAndDescription = lazy (Production.vProductAndDescriptionReader (reader, buildGetOrdinal 5))
     let lazyProductionvProductModelCatalogDescription = lazy (Production.vProductModelCatalogDescriptionReader (reader, buildGetOrdinal 25))
     let lazyProductionvProductModelInstructions = lazy (Production.vProductModelInstructionsReader (reader, buildGetOrdinal 11))
-    let lazyProviderDbTypeTestTest = lazy (ProviderDbTypeTest.TestReader(reader, buildGetOrdinal 3))
     let lazyPurchasingProductVendor = lazy (Purchasing.ProductVendorReader(reader, buildGetOrdinal 11))
     let lazyPurchasingPurchaseOrderDetail = lazy (Purchasing.PurchaseOrderDetailReader(reader, buildGetOrdinal 11))
     let lazyPurchasingPurchaseOrderHeader = lazy (Purchasing.PurchaseOrderHeaderReader(reader, buildGetOrdinal 13))
@@ -3388,6 +3403,8 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     let lazydboAWBuildVersion = lazy (dbo.AWBuildVersionReader(reader, buildGetOrdinal 4))
     let lazydboDatabaseLog = lazy (dbo.DatabaseLogReader(reader, buildGetOrdinal 8))
     let lazydboErrorLog = lazy (dbo.ErrorLogReader(reader, buildGetOrdinal 9))
+    let lazyextDateTime2Support = lazy (ext.DateTime2SupportReader(reader, buildGetOrdinal 3))
+    let lazyextGetIdGuidRepro = lazy (ext.GetIdGuidReproReader(reader, buildGetOrdinal 2))
     member __.``HumanResources.Department`` = lazyHumanResourcesDepartment.Value
     member __.``HumanResources.Employee`` = lazyHumanResourcesEmployee.Value
     member __.``HumanResources.EmployeeDepartmentHistory`` = lazyHumanResourcesEmployeeDepartmentHistory.Value
@@ -3443,7 +3460,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     member __.``Production.vProductAndDescription`` = lazyProductionvProductAndDescription.Value
     member __.``Production.vProductModelCatalogDescription`` = lazyProductionvProductModelCatalogDescription.Value
     member __.``Production.vProductModelInstructions`` = lazyProductionvProductModelInstructions.Value
-    member __.``ProviderDbTypeTest.Test`` = lazyProviderDbTypeTestTest.Value
     member __.``Purchasing.ProductVendor`` = lazyPurchasingProductVendor.Value
     member __.``Purchasing.PurchaseOrderDetail`` = lazyPurchasingPurchaseOrderDetail.Value
     member __.``Purchasing.PurchaseOrderHeader`` = lazyPurchasingPurchaseOrderHeader.Value
@@ -3480,6 +3496,8 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
     member __.``dbo.AWBuildVersion`` = lazydboAWBuildVersion.Value
     member __.``dbo.DatabaseLog`` = lazydboDatabaseLog.Value
     member __.``dbo.ErrorLog`` = lazydboErrorLog.Value
+    member __.``ext.DateTime2Support`` = lazyextDateTime2Support.Value
+    member __.``ext.GetIdGuidRepro`` = lazyextGetIdGuidRepro.Value
     member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value
 
     member private __.GetReaderByName(entity: string, isOption: bool) =
@@ -3594,8 +3612,6 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "Production.vProductModelCatalogDescription", true -> __.``Production.vProductModelCatalogDescription``.ReadIfNotNull >> box
         | "Production.vProductModelInstructions", false -> __.``Production.vProductModelInstructions``.Read >> box
         | "Production.vProductModelInstructions", true -> __.``Production.vProductModelInstructions``.ReadIfNotNull >> box
-        | "ProviderDbTypeTest.Test", false -> __.``ProviderDbTypeTest.Test``.Read >> box
-        | "ProviderDbTypeTest.Test", true -> __.``ProviderDbTypeTest.Test``.ReadIfNotNull >> box
         | "Purchasing.ProductVendor", false -> __.``Purchasing.ProductVendor``.Read >> box
         | "Purchasing.ProductVendor", true -> __.``Purchasing.ProductVendor``.ReadIfNotNull >> box
         | "Purchasing.PurchaseOrderDetail", false -> __.``Purchasing.PurchaseOrderDetail``.Read >> box
@@ -3668,6 +3684,10 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "dbo.DatabaseLog", true -> __.``dbo.DatabaseLog``.ReadIfNotNull >> box
         | "dbo.ErrorLog", false -> __.``dbo.ErrorLog``.Read >> box
         | "dbo.ErrorLog", true -> __.``dbo.ErrorLog``.ReadIfNotNull >> box
+        | "ext.DateTime2Support", false -> __.``ext.DateTime2Support``.Read >> box
+        | "ext.DateTime2Support", true -> __.``ext.DateTime2Support``.ReadIfNotNull >> box
+        | "ext.GetIdGuidRepro", false -> __.``ext.GetIdGuidRepro``.Read >> box
+        | "ext.GetIdGuidRepro", true -> __.``ext.GetIdGuidRepro``.ReadIfNotNull >> box
         | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
     static member private GetPrimitiveReader(t: System.Type, reader: Microsoft.Data.SqlClient.SqlDataReader, isOpt: bool) =

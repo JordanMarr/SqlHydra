@@ -40,11 +40,32 @@ module Utils =
         
         
 
-module experiments =
+module ext =
     type mood =
         | sad = 1
         | ok = 2
         | happy = 3
+
+    [<CLIMutable>]
+    type jsonsupport =
+        { id: int
+          [<SqlHydra.ProviderDbType("Json")>]
+          json_field: string
+          [<SqlHydra.ProviderDbType("Jsonb")>]
+          jsonb_field: string }
+
+    type jsonsupportReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = RequiredColumn(reader, getOrdinal, reader.GetInt32, "id")
+        member __.json_field = RequiredColumn(reader, getOrdinal, reader.GetString, "json_field")
+        member __.jsonb_field = RequiredColumn(reader, getOrdinal, reader.GetString, "jsonb_field")
+
+        member __.Read() =
+            { id = __.id.Read()
+              json_field = __.json_field.Read()
+              jsonb_field = __.jsonb_field.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
 
     [<CLIMutable>]
     type person = { name: string; currentmood: mood }
@@ -3009,28 +3030,6 @@ module production =
         member __.ReadIfNotNull() =
             if __.workorderid.IsNull() then None else Some(__.Read())
 
-module providerdbtypetest =
-    [<CLIMutable>]
-    type test =
-        { id: int
-          [<SqlHydra.ProviderDbType("Json")>]
-          json_field: string
-          [<SqlHydra.ProviderDbType("Jsonb")>]
-          jsonb_field: string }
-
-    type testReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-        member __.id = RequiredColumn(reader, getOrdinal, reader.GetInt32, "id")
-        member __.json_field = RequiredColumn(reader, getOrdinal, reader.GetString, "json_field")
-        member __.jsonb_field = RequiredColumn(reader, getOrdinal, reader.GetString, "jsonb_field")
-
-        member __.Read() =
-            { id = __.id.Read()
-              json_field = __.json_field.Read()
-              jsonb_field = __.jsonb_field.Read() }
-
-        member __.ReadIfNotNull() =
-            if __.id.IsNull() then None else Some(__.Read())
-
 module pu =
     [<CLIMutable>]
     type pod =
@@ -5131,7 +5130,8 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         accFieldCount <- accFieldCount + fieldCount
         fun col -> dictionary.Item col
         
-    let lazyexperimentsperson = lazy (experiments.personReader (reader, buildGetOrdinal 2))
+    let lazyextjsonsupport = lazy (ext.jsonsupportReader (reader, buildGetOrdinal 3))
+    let lazyextperson = lazy (ext.personReader (reader, buildGetOrdinal 2))
     let lazyhumanresourcesdepartment = lazy (humanresources.departmentReader (reader, buildGetOrdinal 4))
     let lazyhumanresourcesemployee = lazy (humanresources.employeeReader (reader, buildGetOrdinal 15))
     let lazyhumanresourcesemployeedepartmenthistory = lazy (humanresources.employeedepartmenthistoryReader (reader, buildGetOrdinal 6))
@@ -5223,7 +5223,6 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     let lazyproductionvproductmodelinstructions = lazy (production.vproductmodelinstructionsReader (reader, buildGetOrdinal 11))
     let lazyproductionworkorder = lazy (production.workorderReader (reader, buildGetOrdinal 9))
     let lazyproductionworkorderrouting = lazy (production.workorderroutingReader (reader, buildGetOrdinal 12))
-    let lazyproviderdbtypetesttest = lazy (providerdbtypetest.testReader (reader, buildGetOrdinal 3))
     let lazypupod = lazy (pu.podReader (reader, buildGetOrdinal 10))
     let lazypupoh = lazy (pu.pohReader (reader, buildGetOrdinal 13))
     let lazypupv = lazy (pu.pvReader (reader, buildGetOrdinal 12))
@@ -5282,7 +5281,8 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     let lazysalesvstorewithaddresses = lazy (sales.vstorewithaddressesReader (reader, buildGetOrdinal 9))
     let lazysalesvstorewithcontacts = lazy (sales.vstorewithcontactsReader (reader, buildGetOrdinal 12))
     let lazysalesvstorewithdemographics = lazy (sales.vstorewithdemographicsReader (reader, buildGetOrdinal 12))
-    member __.``experiments.person`` = lazyexperimentsperson.Value
+    member __.``ext.jsonsupport`` = lazyextjsonsupport.Value
+    member __.``ext.person`` = lazyextperson.Value
     member __.``humanresources.department`` = lazyhumanresourcesdepartment.Value
     member __.``humanresources.employee`` = lazyhumanresourcesemployee.Value
     member __.``humanresources.employeedepartmenthistory`` = lazyhumanresourcesemployeedepartmenthistory.Value
@@ -5374,7 +5374,6 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     member __.``production.vproductmodelinstructions`` = lazyproductionvproductmodelinstructions.Value
     member __.``production.workorder`` = lazyproductionworkorder.Value
     member __.``production.workorderrouting`` = lazyproductionworkorderrouting.Value
-    member __.``providerdbtypetest.test`` = lazyproviderdbtypetesttest.Value
     member __.``pu.pod`` = lazypupod.Value
     member __.``pu.poh`` = lazypupoh.Value
     member __.``pu.pv`` = lazypupv.Value
@@ -5437,8 +5436,10 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
 
     member private __.GetReaderByName(entity: string, isOption: bool) =
         match entity, isOption with
-        | "experiments.person", false -> __.``experiments.person``.Read >> box
-        | "experiments.person", true -> __.``experiments.person``.ReadIfNotNull >> box
+        | "ext.jsonsupport", false -> __.``ext.jsonsupport``.Read >> box
+        | "ext.jsonsupport", true -> __.``ext.jsonsupport``.ReadIfNotNull >> box
+        | "ext.person", false -> __.``ext.person``.Read >> box
+        | "ext.person", true -> __.``ext.person``.ReadIfNotNull >> box
         | "humanresources.department", false -> __.``humanresources.department``.Read >> box
         | "humanresources.department", true -> __.``humanresources.department``.ReadIfNotNull >> box
         | "humanresources.employee", false -> __.``humanresources.employee``.Read >> box
@@ -5621,8 +5622,6 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         | "production.workorder", true -> __.``production.workorder``.ReadIfNotNull >> box
         | "production.workorderrouting", false -> __.``production.workorderrouting``.Read >> box
         | "production.workorderrouting", true -> __.``production.workorderrouting``.ReadIfNotNull >> box
-        | "providerdbtypetest.test", false -> __.``providerdbtypetest.test``.Read >> box
-        | "providerdbtypetest.test", true -> __.``providerdbtypetest.test``.ReadIfNotNull >> box
         | "pu.pod", false -> __.``pu.pod``.Read >> box
         | "pu.pod", true -> __.``pu.pod``.ReadIfNotNull >> box
         | "pu.poh", false -> __.``pu.poh``.Read >> box
