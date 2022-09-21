@@ -96,6 +96,7 @@ A connection was successfully established with the server, but then an error occ
 ```
 
 The most simple way to resolve this is to append `;TrustServerCertificate=True` to the connection string in your .toml configuration file.
+UPDATE: This behavior has been fixed in `Microsoft.Data.SqlClient` v4.1.1.
 
 ## SqlHydra.Npgsql [![NuGet version (SqlHydra.Npgsql)](https://img.shields.io/nuget/v/SqlHydra.Npgsql.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Npgsql/)
 
