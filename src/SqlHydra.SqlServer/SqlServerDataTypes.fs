@@ -5,9 +5,10 @@ open SqlHydra.Domain
 
 let private r : Microsoft.Data.SqlClient.SqlDataReader = null
 
+// https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql-server-data-type-mappings
 /// A list of supported column type mappings
 let supportedTypeMappings =
-    [   // https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql-server-data-type-mappings
+    [// ColumnTypeAlias         ClrType                                     DbType                      ProviderDbType                  ReaderMethod
         "UNIQUEIDENTIFIER",     "System.Guid",                              DbType.Guid,                None,                           nameof r.GetGuid
         "BIT",                  "bool",                                     DbType.Boolean,             None,                           nameof r.GetBoolean
         "INT",                  "int",                                      DbType.Int32,               None,                           nameof r.GetInt32
