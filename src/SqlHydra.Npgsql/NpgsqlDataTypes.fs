@@ -49,10 +49,10 @@ let supportedTypeMappings =
 
         // "Text,Array" can be parsed by Enum.Parse.
         let textArray = $"{nameof NpgsqlDbType.Text},{nameof NpgsqlDbType.Array}"
-        "text[]",                       "string[]",             DbType.String,      Some textArray,                     nameof r.GetValue
+        "text[]",                       "string[]",             DbType.String,      Some textArray,                     nameof r.GetFieldValue
         
         let integerArray = $"{nameof NpgsqlDbType.Integer},{nameof NpgsqlDbType.Array}"
-        "integer[]",                    "int[]",                DbType.Int32,       Some integerArray,                  nameof r.GetValue
+        "integer[]",                    "int[]",                DbType.Int32,       Some integerArray,                  nameof r.GetFieldValue
     ]
 
 let typeMappingsByName =

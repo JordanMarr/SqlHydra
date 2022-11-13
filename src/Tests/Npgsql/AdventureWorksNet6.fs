@@ -47,6 +47,27 @@ module ext =
         | happy = 3
 
     [<CLIMutable>]
+    type arrays =
+        { id: string
+          [<SqlHydra.ProviderDbType("Text,Array")>]
+          text_array: string []
+          [<SqlHydra.ProviderDbType("Integer,Array")>]
+          integer_array: int [] }
+
+    type arraysReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        member __.id = RequiredColumn(reader, getOrdinal, reader.GetString, "id")
+        member __.text_array = RequiredColumn(reader, getOrdinal, reader.GetFieldValue, "text_array")
+        member __.integer_array = RequiredColumn(reader, getOrdinal, reader.GetFieldValue, "integer_array")
+
+        member __.Read() =
+            { id = __.id.Read()
+              text_array = __.text_array.Read()
+              integer_array = __.integer_array.Read() }
+
+        member __.ReadIfNotNull() =
+            if __.id.IsNull() then None else Some(__.Read())
+
+    [<CLIMutable>]
     type jsonsupport =
         { id: int
           [<SqlHydra.ProviderDbType("Json")>]
@@ -5130,6 +5151,7 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         accFieldCount <- accFieldCount + fieldCount
         fun col -> dictionary.Item col
         
+    let lazyextarrays = lazy (ext.arraysReader (reader, buildGetOrdinal 3))
     let lazyextjsonsupport = lazy (ext.jsonsupportReader (reader, buildGetOrdinal 3))
     let lazyextperson = lazy (ext.personReader (reader, buildGetOrdinal 2))
     let lazyhumanresourcesdepartment = lazy (humanresources.departmentReader (reader, buildGetOrdinal 4))
@@ -5281,6 +5303,7 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     let lazysalesvstorewithaddresses = lazy (sales.vstorewithaddressesReader (reader, buildGetOrdinal 9))
     let lazysalesvstorewithcontacts = lazy (sales.vstorewithcontactsReader (reader, buildGetOrdinal 12))
     let lazysalesvstorewithdemographics = lazy (sales.vstorewithdemographicsReader (reader, buildGetOrdinal 12))
+    member __.``ext.arrays`` = lazyextarrays.Value
     member __.``ext.jsonsupport`` = lazyextjsonsupport.Value
     member __.``ext.person`` = lazyextperson.Value
     member __.``humanresources.department`` = lazyhumanresourcesdepartment.Value
@@ -5436,6 +5459,8 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
 
     member private __.GetReaderByName(entity: string, isOption: bool) =
         match entity, isOption with
+        | "ext.arrays", false -> __.``ext.arrays``.Read >> box
+        | "ext.arrays", true -> __.``ext.arrays``.ReadIfNotNull >> box
         | "ext.jsonsupport", false -> __.``ext.jsonsupport``.Read >> box
         | "ext.jsonsupport", true -> __.``ext.jsonsupport``.ReadIfNotNull >> box
         | "ext.person", false -> __.``ext.person``.Read >> box
@@ -5761,6 +5786,8 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         else if t = typedefof<System.DateTime> then Some(wrap reader.GetDateTime)
         else if t = typedefof<byte []> then Some(wrap reader.GetValue)
         else if t = typedefof<char> then Some(wrap reader.GetChar)
+        else if t = typedefof<string []> then Some(wrap reader.GetFieldValue)
+        else if t = typedefof<int []> then Some(wrap reader.GetFieldValue)
         else None
 
     static member Read(reader: Npgsql.NpgsqlDataReader) = 
