@@ -31,20 +31,17 @@ let cliMutableAttribute =
     SynModuleDecl.CreateAttributes(atts)
     
 let createProviderDbTypeAttribute (mapping: TypeMapping) =
-    mapping.ProviderDbType
-    |> Option.map (fun type' ->
+    mapping.ProviderDbTypes
+    |> List.map (fun type' ->
         let attributeFullName = typeof<ProviderDbTypeAttribute>.FullName
 
-        let attr = 
-            { TypeName = LongIdentWithDots.Create (attributeFullName.Replace("Attribute", "").Split(".") |> List.ofArray) 
-            ; ArgExpr = SynExpr.CreateParenedTuple [ SynExpr.CreateConst (SynConst.String(type', range0)) ]
-            ; Target = None
-            ; AppliesToGetterAndSetter = false
-            ; Range = range0 } : SynAttribute
-   
-        SynAttributes.Cons (SynAttributeList.Create attr, SynAttributes.Empty)
+        { TypeName = LongIdentWithDots.Create (attributeFullName.Replace("Attribute", "").Split(".") |> List.ofArray) 
+        ; ArgExpr = SynExpr.CreateParenedTuple [ SynExpr.CreateConst (SynConst.String(type', range0)) ]
+        ; Target = None
+        ; AppliesToGetterAndSetter = false
+        ; Range = range0 } : SynAttribute
     ) 
-    |> Option.defaultValue SynAttributes.Empty
+    |> fun attr -> SynAttributes.Cons (SynAttributeList.Create attr, SynAttributes.Empty)
     
 /// Creates a record definition named after a table.
 let createTableRecord (cfg: Config) (tbl: Table) = 

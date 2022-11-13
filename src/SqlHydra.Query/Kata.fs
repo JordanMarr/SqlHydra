@@ -42,7 +42,7 @@ module AtLeastOne =
 type QueryParameter = 
     {
         Value: obj
-        ProviderDbType: string option
+        ProviderDbTypes: string list
     }
 
 type InsertType = 
@@ -120,14 +120,17 @@ module internal KataUtils =
                 | null -> box System.DBNull.Value 
                 | o -> o
 
-    let private getProviderDbTypeName (p: MemberInfo) =
-        match Attribute.GetCustomAttribute(p, typeof<SqlHydra.ProviderDbTypeAttribute>, false) with
-        | :? SqlHydra.ProviderDbTypeAttribute as att -> Some att.ProviderDbTypeName
-        | _ -> None
+    let private getProviderDbTypes (p: MemberInfo) =
+        Attribute.GetCustomAttributes(p, typeof<SqlHydra.ProviderDbTypeAttribute>, false) 
+        |> Array.choose (function
+            | :? SqlHydra.ProviderDbTypeAttribute as att -> Some att.ProviderDbTypeName
+            | _ -> None
+        )
+        |> Array.toList
 
     let getQueryParameterForValue (p: MemberInfo) (value: obj) =
         { Value = value |> boxValueOrOption
-        ; ProviderDbType = getProviderDbTypeName p } :> obj
+        ; ProviderDbTypes = getProviderDbTypes p } :> obj
 
     let getQueryParameterForEntity (entity: 'T) (p: PropertyInfo) =
         p.GetValue(entity) 

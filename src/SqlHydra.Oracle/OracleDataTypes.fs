@@ -7,7 +7,10 @@ let private r : Oracle.ManagedDataAccess.Client.OracleDataReader = null
 
 /// A list of supported column type mappings
 let supportedTypeMappings =
-    [   // https://docs.oracle.com/cd/B19306_01/win.102/b14306/appendixa.htm
+
+    (* https://docs.oracle.com/cd/B19306_01/win.102/b14306/appendixa.htm *)
+
+    [// ColumnTypeAlias                     ClrType                         DbType                      ReaderMethod    
         "PLS_INTEGER",                      "int",                          DbType.Int32,               nameof r.GetInt32
         "LONG",                             "int64",                        DbType.Int64,               nameof r.GetInt64
         "NUMBER",                           "decimal",                      DbType.Decimal,             nameof r.GetDecimal
@@ -46,7 +49,7 @@ let typeMappingsByName =
             TypeMapping.ClrType = clrType
             TypeMapping.DbType = dbType
             TypeMapping.ReaderMethod = readerMethod
-            TypeMapping.ProviderDbType = None
+            TypeMapping.ProviderDbTypes = []
         }
     )
     |> Map.ofList

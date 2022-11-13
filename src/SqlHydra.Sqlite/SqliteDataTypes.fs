@@ -6,8 +6,9 @@ open SqlHydra.Domain
 let private r : System.Data.Common.DbDataReader = null
 
 /// A list of supported column type mappings
-let supportedTypeMappings =
-    [ 
+let supportedTypeMappings =    
+
+    [// ColumnTypeAlias     ClrType             DbType              ReaderMethod
         "smallint",         "int16",            DbType.Int16,       nameof r.GetInt16
         "int",              "int",              DbType.Int32,       nameof r.GetInt32
         "real",             "double",           DbType.Double,      nameof r.GetDouble
@@ -72,7 +73,7 @@ let typeMappingsByName =
             TypeMapping.ClrType = clrType
             TypeMapping.DbType = dbType
             TypeMapping.ReaderMethod = readerMethod
-            TypeMapping.ProviderDbType = None
+            TypeMapping.ProviderDbTypes = []
         }
     )
     |> Map.ofList

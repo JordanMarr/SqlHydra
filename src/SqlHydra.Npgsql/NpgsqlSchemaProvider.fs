@@ -174,7 +174,7 @@ let getSchema (cfg: Config) : Schema =
                                     else enum.Name                          // Enum lives in this module
                                 TypeMapping.DbType = DbType.Object
                                 TypeMapping.ReaderMethod = "GetFieldValue"  // Requires registration with Npgsql via `MapEnum`
-                                TypeMapping.ProviderDbType = None
+                                TypeMapping.ProviderDbTypes = []
                             }
                         Column.IsPK = pks.Contains(col.TableSchema, col.TableName, col.ColumnName)
                     }

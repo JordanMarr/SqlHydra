@@ -7,57 +7,66 @@ open SqlHydra.Domain
 let private r : Npgsql.NpgsqlDataReader = null
 
 /// A list of supported column type mappings
-let supportedTypeMappings =
-    [ 
-        "boolean",                      "bool",                 DbType.Boolean,     None,                               nameof r.GetBoolean
-        "smallint",                     "int16",                DbType.Int16,       None,                               nameof r.GetInt16
-        "integer",                      "int",                  DbType.Int32,       None,                               nameof r.GetInt32
-        "bigint",                       "int64",                DbType.Int64,       None,                               nameof r.GetInt64
-        "real",                         "double",               DbType.Double,      None,                               nameof r.GetDouble
-        "double precision",             "double",               DbType.Double,      None,                               nameof r.GetDouble
-        "numeric",                      "decimal",              DbType.Decimal,     None,                               nameof r.GetDecimal
-        "money",                        "decimal",              DbType.Decimal,     None,                               nameof r.GetDecimal
-        "text",                         "string",               DbType.String,      None,                               nameof r.GetString
-        "character varying",            "string",               DbType.String,      None,                               nameof r.GetString
-        "character",                    "string",               DbType.String,      None,                               nameof r.GetString
-        "citext",                       "string",               DbType.String,      None,                               nameof r.GetString
-        "json",                         "string",               DbType.String,      Some (nameof NpgsqlDbType.Json),    nameof r.GetString
-        "jsonb",                        "string",               DbType.String,      Some (nameof NpgsqlDbType.Jsonb),   nameof r.GetString
-        "xml",                          "string",               DbType.String,      None,                               nameof r.GetString
+let supportedTypeMappings =    
+
+    (* https://www.npgsql.org/doc/types/basic.html
+     * ProviderDbTypes add attributes to the generated record fields that are used by the SqlHydra.Query to specify a parameter's NpgsqlDbType type.
+     *)
+
+    [// ColumnTypeAlias                 ClrType                 DbType              ProviderDbTypes                 ReaderMethod   
+        "boolean",                      "bool",                 DbType.Boolean,     [],                             nameof r.GetBoolean
+        "smallint",                     "int16",                DbType.Int16,       [],                             nameof r.GetInt16
+        "integer",                      "int",                  DbType.Int32,       [],                             nameof r.GetInt32
+        "bigint",                       "int64",                DbType.Int64,       [],                             nameof r.GetInt64
+        "real",                         "double",               DbType.Double,      [],                             nameof r.GetDouble
+        "double precision",             "double",               DbType.Double,      [],                             nameof r.GetDouble
+        "numeric",                      "decimal",              DbType.Decimal,     [],                             nameof r.GetDecimal
+        "money",                        "decimal",              DbType.Decimal,     [],                             nameof r.GetDecimal
+        "text",                         "string",               DbType.String,      [],                             nameof r.GetString
+        "character varying",            "string",               DbType.String,      [],                             nameof r.GetString
+        "character",                    "string",               DbType.String,      [],                             nameof r.GetString
+        "citext",                       "string",               DbType.String,      [],                             nameof r.GetString
+        "json",                         "string",               DbType.String,      [nameof NpgsqlDbType.Json],     nameof r.GetString
+        "jsonb",                        "string",               DbType.String,      [nameof NpgsqlDbType.Jsonb],    nameof r.GetString
+        "xml",                          "string",               DbType.String,      [],                             nameof r.GetString
         // skipped unsupported types
-        "bit(1)",                       "bool",                 DbType.Boolean,     None,                               nameof r.GetBoolean
+        "bit(1)",                       "bool",                 DbType.Boolean,     [],                             nameof r.GetBoolean
         // skipped unsupported types
-        "uuid",                         "System.Guid",          DbType.Guid,        None,                               nameof r.GetGuid
+        "uuid",                         "System.Guid",          DbType.Guid,        [],                             nameof r.GetGuid
         // skipped unsupported types
-        "interval",                     "System.TimeSpan",      DbType.Time,        None,                               nameof r.GetTimeSpan
+        "interval",                     "System.TimeSpan",      DbType.Time,        [],                             nameof r.GetTimeSpan
 #if NET5_0
-        "date",                         "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
-        "time without time zone",       "System.TimeSpan",      DbType.Time,        None,                               nameof r.GetTimeSpan 
+        "date",                         "System.DateTime",      DbType.DateTime,    [],                             nameof r.GetDateTime 
+        "time without time zone",       "System.TimeSpan",      DbType.Time,        [],                             nameof r.GetTimeSpan 
 #endif
 #if NET6_0_OR_GREATER
-        "date",                         "System.DateOnly",      DbType.DateTime,    None,                               "GetDateOnly"
-        "time without time zone",       "System.TimeOnly",      DbType.Time,        None,                               "GetTimeOnly"
+        "date",                         "System.DateOnly",      DbType.DateTime,    [],                             "GetDateOnly"
+        "time without time zone",       "System.TimeOnly",      DbType.Time,        [],                             "GetTimeOnly"
 #endif
-        "timestamp with time zone",     "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
-        "timestamp without time zone",  "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
-        "time with time zone",          "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime 
-        "bytea",                        "byte[]",               DbType.Binary,      None,                               nameof r.GetValue 
+        "timestamp with time zone",     "System.DateTime",      DbType.DateTime,    [],                             nameof r.GetDateTime 
+        "timestamp without time zone",  "System.DateTime",      DbType.DateTime,    [],                             nameof r.GetDateTime 
+        "time with time zone",          "System.DateTime",      DbType.DateTime,    [],                             nameof r.GetDateTime 
+        "bytea",                        "byte[]",               DbType.Binary,      [],                             nameof r.GetValue 
         // skipped unsupported types
-        "name",                         "string",               DbType.String,      None,                               nameof r.GetString
-        "(internal) char",              "char",                 DbType.String,      None,                               nameof r.GetChar
+        "name",                         "string",               DbType.String,      [],                             nameof r.GetString
+        "(internal) char",              "char",                 DbType.String,      [],                             nameof r.GetChar
         // skipped unsupported types
+
+        // SqlHydra.Query will need to set parameter NpgsqlDbType = NpgsqlDbType.Text ||| NpgsqlDbType.Array
+        let textArray = [nameof NpgsqlDbType.Text; nameof NpgsqlDbType.Array]
+        "text[]",                       "string[]",             DbType.Object,      textArray,                      nameof r.GetValue
     ]
 
 let typeMappingsByName =
     supportedTypeMappings
-    |> List.map (fun (columnTypeAlias, clrType, dbType, providerDbType, readerMethod) ->
+    |> List.map (fun (columnTypeAlias, clrType, dbType, providerDbTypes, readerMethod) ->
         columnTypeAlias,
         { 
             TypeMapping.ColumnTypeAlias = columnTypeAlias
             TypeMapping.ClrType = clrType
             TypeMapping.DbType = dbType
+            TypeMapping.ProviderDbTypes = providerDbTypes
             TypeMapping.ReaderMethod = readerMethod
-            TypeMapping.ProviderDbType = providerDbType
         }
     )
     |> Map.ofList

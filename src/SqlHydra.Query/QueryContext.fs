@@ -7,20 +7,37 @@ open SqlKata
 
 /// Contains methods that compile and read a query.
 type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
-    let setProviderDbType (param: DbParameter) (propertyName: string) (providerDbType: string) =
-        let property = param.GetType().GetProperty(propertyName)
-        let dbTypeSetter = property.GetSetMethod()
-        
-        let value = Enum.Parse(property.PropertyType, providerDbType)
+    
+    /// Sets the provider specific db type of a parameter with the provider specific Enum value using reflection.
+    /// Ex: `param.{providerDbTypeProperty} <- SqlDbType.NVarChar`
+    let setProviderDbType (providerDbTypeProperty: string) (enumName: string) (param: DbParameter) =
+        let property = param.GetType().GetProperty(providerDbTypeProperty)
+        let dbTypeSetter = property.GetSetMethod()        
+        let value = Enum.Parse(property.PropertyType, enumName)
         dbTypeSetter.Invoke(param, [|value|]) |> ignore
+
+    /// Sets an npgsql "NpgsqlDbType" property of a parameter with an array type using reflection. 
+    /// Ex: `param.NpgsqlDbType <- NpgsqlDbType.Array ||| NpgsqlDbType.Text`
+    let setNpgsqlArrayType (providerDbTypeProperty: string) (enumNames: string array) (param: DbParameter) =
+        let property = param.GetType().GetProperty(providerDbTypeProperty)
+        let dbTypeSetter = property.GetSetMethod()
+        let values = enumNames |> Array.map (fun enumName -> Enum.Parse(property.PropertyType, enumName))
+        dbTypeSetter.Invoke(param, values) |> ignore
         
+    /// If a generated field has one or more `SqlHydra.ProviderDbTypeAttribute`, we will need to set the provider specific DbType property.
     let setParameterDbType (param: DbParameter) (qp: QueryParameter) =
-        match qp.ProviderDbType, compiler with
-        | Some type', :? SqlKata.Compilers.PostgresCompiler ->
-            setProviderDbType param "NpgsqlDbType" type'
-        | Some type', :? SqlKata.Compilers.SqlServerCompiler ->
-            setProviderDbType param "SqlDbType" type'
-        | _ -> ()    
+        match qp.ProviderDbTypes, compiler with
+        | [pdbType], :? SqlKata.Compilers.PostgresCompiler ->
+            param |> setProviderDbType "NpgsqlDbType" pdbType
+
+        | [type1; type2], :? SqlKata.Compilers.PostgresCompiler ->            
+            param |> setNpgsqlArrayType "NpgsqlDbType" [| type1; type2 |]
+
+        | [pdbType], :? SqlKata.Compilers.SqlServerCompiler ->
+            param |> setProviderDbType "SqlDbType" pdbType
+
+        | _ -> 
+            ()
         
     interface IDisposable with
         member this.Dispose() = 
