@@ -139,6 +139,9 @@ Npgsql Mapping Example:
 Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>(nameof experiments.mood) |> ignore
 ```
 
+### Support for Postgres Arrays
+SqlHydra.Postgres [release v1.0.4](https://github.com/JordanMarr/SqlHydra/releases/tag/npgsql-arrays) adds support for `text[]` and `integer[]` column types.
+
 ## SqlHydra.Oracle [![NuGet version (SqlHydra.Oracle)](https://img.shields.io/nuget/v/SqlHydra.Oracle.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Oracle/)
 
 ### Local Install (recommended)
