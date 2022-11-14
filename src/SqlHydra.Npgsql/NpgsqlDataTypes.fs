@@ -8,7 +8,7 @@ let private r : Npgsql.NpgsqlDataReader = null
 
 /// A list of supported column type mappings
 let supportedTypeMappings =
-    [ 
+    [// ColumnTypeAlias                 ClrType                 DbType              ProviderDbType                      ReaderMethod
         "boolean",                      "bool",                 DbType.Boolean,     None,                               nameof r.GetBoolean
         "smallint",                     "int16",                DbType.Int16,       None,                               nameof r.GetInt16
         "integer",                      "int",                  DbType.Int32,       None,                               nameof r.GetInt32
@@ -46,6 +46,13 @@ let supportedTypeMappings =
         "name",                         "string",               DbType.String,      None,                               nameof r.GetString
         "(internal) char",              "char",                 DbType.String,      None,                               nameof r.GetChar
         // skipped unsupported types
+
+        // "Text,Array" can be parsed by Enum.Parse.
+        let textArray = $"{nameof NpgsqlDbType.Text},{nameof NpgsqlDbType.Array}"
+        "text[]",                       "string[]",             DbType.String,      Some textArray,                     nameof r.GetFieldValue
+        
+        let integerArray = $"{nameof NpgsqlDbType.Integer},{nameof NpgsqlDbType.Array}"
+        "integer[]",                    "int[]",                DbType.Int32,       Some integerArray,                  nameof r.GetFieldValue
     ]
 
 let typeMappingsByName =
@@ -56,8 +63,8 @@ let typeMappingsByName =
             TypeMapping.ColumnTypeAlias = columnTypeAlias
             TypeMapping.ClrType = clrType
             TypeMapping.DbType = dbType
-            TypeMapping.ReaderMethod = readerMethod
             TypeMapping.ProviderDbType = providerDbType
+            TypeMapping.ReaderMethod = readerMethod
         }
     )
     |> Map.ofList

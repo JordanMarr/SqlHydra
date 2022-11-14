@@ -56,9 +56,11 @@ let createTableRecord (cfg: Config) (tbl: Table) =
         tbl.Columns
         |> List.map (fun col ->
             let field = 
-                if col.TypeMapping.ClrType = "byte[]" then 
-                    let b = SynType.Create("byte")
-                    SynType.Array(0, b, range0)
+                // Handles array types: "byte[]", "string[]", "int[]", "int []", "int array"
+                if col.TypeMapping.ClrType.EndsWith "[]" || col.TypeMapping.ClrType.EndsWith "array" then
+                    let baseTypeNm = col.TypeMapping.ClrType.Split([| "[]"; " []"; " array" |], System.StringSplitOptions.RemoveEmptyEntries) |> Array.head
+                    let baseType = SynType.Create(baseTypeNm)
+                    SynType.Array(0, baseType, range0)
                 else
                     SynType.Create(col.TypeMapping.ClrType)
 

@@ -3311,6 +3311,12 @@ CREATE TABLE ext.Person (
     CurrentMood ext.Mood not null
 );
 
+CREATE TABLE ext.Arrays
+(
+    id        			text        not null,    
+    text_array  		text[]      not null,
+	integer_array		integer[]	not null
+);
 
 \pset tuples_only off
 

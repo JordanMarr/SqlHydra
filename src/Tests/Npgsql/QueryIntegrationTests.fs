@@ -29,8 +29,9 @@ let subCategoryTable =      table<production.productsubcategory>    |> inSchema 
 let categoryTable =         table<production.productcategory>       |> inSchema (nameof production)
 let currencyTable =         table<sales.currency>                   |> inSchema (nameof sales)
 let productReviewTable =    table<production.productreview>         |> inSchema (nameof production)
-let jsonSupportTable =      table<ext.jsonsupport>                  |> inSchema (nameof ext)
 let employeeTable =         table<humanresources.employee>          |> inSchema (nameof humanresources)
+let jsonSupportTable =      table<ext.jsonsupport>                  |> inSchema (nameof ext)
+let arraysTable =           table<ext.arrays>                       |> inSchema (nameof ext)
 
 [<Tests>]
 let tests = 
@@ -706,6 +707,47 @@ let tests =
                 }
 
             gt0 employeeBirthDates
+        }
+
+        testTask "Test Array Columns" {
+            use ctx = openContext()
+            ctx.BeginTransaction()
+
+            let row = 
+                { 
+                    ext.arrays.id = "Test Array Columns"
+                    ext.arrays.text_array = [| "one"; "two"; "three" |]
+                    ext.arrays.integer_array = [| 1; 2; 3 |]
+                }
+
+            let! insertResults = 
+                insertTask (Shared ctx) {
+                    into arraysTable
+                    entity row
+                }
+
+            Expect.isTrue (insertResults > 0) "Expected insert results > 0"
+
+            
+            let! query1Result = 
+                selectTask HydraReader.Read (Shared ctx) {
+                    for r in arraysTable do
+                    select r
+                    tryHead
+                } 
+                            
+            Expect.equal query1Result (Some row) "Expected query result to match inserted row."
+
+            let! query2Result = 
+                selectTask HydraReader.Read (Shared ctx) {
+                    for r in arraysTable do
+                    select (r.integer_array, r.text_array)
+                    tryHead
+                } 
+
+            Expect.equal query2Result (Some (row.integer_array, row.text_array)) "Expected to query individually selected array columns."
+
+            ctx.RollbackTransaction()
         }
 
 #if NET6_0_OR_GREATER
