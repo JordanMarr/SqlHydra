@@ -738,6 +738,15 @@ let tests =
                             
             Expect.equal query1Result (Some row) "Expected query result to match inserted row."
 
+            let! query2Result = 
+                selectTask HydraReader.Read (Shared ctx) {
+                    for r in arraysTable do
+                    select (r.integer_array, r.text_array)
+                    tryHead
+                } 
+
+            Expect.equal query2Result (Some (row.integer_array, row.text_array)) "Expected to query individually selected array columns."
+
             ctx.RollbackTransaction()
         }
 
