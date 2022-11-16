@@ -812,8 +812,6 @@ do! deleteTask (Create openContext) {
         for e in errorLogTable do
         where (e.ErrorLogID = 5)
     } :> Task // upcast to Task if you want to ignore the resulting value
-
-printfn "Rows deleted: %i" rowsDeleted
 ```
 
 If you want to delete all records in a table, you must use the `deleteAll` keyword in lieu of a `where` statement or else it will not compile:
@@ -823,4 +821,6 @@ let! rowsDeleted =
         for c in customerTable do
         deleteAll
     }
+    
+printfn "Rows deleted: %i" rowsDeleted
 ```
