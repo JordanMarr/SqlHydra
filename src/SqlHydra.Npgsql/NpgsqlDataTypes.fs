@@ -32,7 +32,7 @@ let supportedTypeMappings =
         "interval",                     "System.TimeSpan",      DbType.Time,        None,                               nameof r.GetTimeSpan,   Some NpgsqlDbType.Interval
 #if NET5_0
         "date",                         "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime,   Some NpgsqlDbType.Date
-        "time without time zone",       "System.TimeSpan",      DbType.Time,        None,                               nameof r.GetTimeSpan,   None        
+        "time without time zone",       "System.TimeSpan",      DbType.Time,        None,                               nameof r.GetTimeSpan,   Some NpgsqlDbType.Time        
 #endif
 #if NET6_0_OR_GREATER
         "date",                         "System.DateOnly",      DbType.DateTime,    None,                               "GetDateOnly",          Some NpgsqlDbType.Date
