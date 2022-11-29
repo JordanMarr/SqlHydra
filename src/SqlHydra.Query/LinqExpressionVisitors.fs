@@ -70,7 +70,14 @@ module VisitorPatterns =
         match exp.NodeType with
         | ExpressionType.Constant -> Some (exp :?> ConstantExpression)
         | _ -> None
-
+    
+    let (|Convert|_|) (exp: Expression) =
+        match exp.NodeType with
+        | ExpressionType.Convert ->
+            let unary = exp :?> UnaryExpression
+            Some (unary.Operand, unary.Type)
+        | _ -> None
+    
     let (|ArrayInit|_|) (exp: Expression) =
         match exp.NodeType with
         | ExpressionType.NewArrayInit -> 
@@ -183,6 +190,10 @@ module SqlPatterns =
                 // Option.Some
                 match opt.Arguments.[0] with
                 | Constant c -> Some c.Value
+                | Convert (arg,typ) ->
+                    match arg with
+                    | Constant c when typ.IsPrimitive -> Some c.Value  
+                    | _ -> None
                 | _ -> None
             else
                 // Option.None
