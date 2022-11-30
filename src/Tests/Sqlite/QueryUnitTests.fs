@@ -398,4 +398,38 @@ let tests =
                 "SELECT COUNT(\"SalesOrderHeader\".\"SalesOrderID\") FROM \"SalesOrderHeader\""
                 ""
         }
+        
+        test "Implicit Casts" {
+            let query =
+                select {
+                    for p in productTable do
+                    where (p.ListPrice > 5)
+                }
+
+            // should not throw exception
+            ()
+        }
+
+        test "Implicit Casts Option aciq's example" {
+
+            let query =
+                select {
+                    for e in errorLogTable do
+                    where (e.ErrorSeverity = Some 1)
+                }
+
+            // should not throw exception
+            ()
+        }
+
+        test "Implicit Casts Option" {
+            let query =
+                select {
+                    for p in productTable do
+                    where (p.Weight = Some 5)
+                }
+
+            // should not throw exception
+            ()
+        }
     ]

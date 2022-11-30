@@ -71,11 +71,21 @@ module VisitorPatterns =
         | ExpressionType.Constant -> Some (exp :?> ConstantExpression)
         | _ -> None
     
-    let (|Convert|_|) (exp: Expression) =
+    let (|ImplConvertConstant|_|) (exp: Expression) =
         match exp.NodeType with
         | ExpressionType.Convert ->
+            // Handles implicit conversion. Ex: upcasting int to an int64
             let unary = exp :?> UnaryExpression
-            Some (unary.Operand, unary.Type)
+            match unary.Operand with
+            | Constant c when unary.Type.IsPrimitive -> Some c
+            | _ -> None
+            //Some (unary.Operand, unary.Type)
+        | ExpressionType.Call -> 
+            // Handles implicit conversion. Ex: casting an int to a decimal
+            let mc = exp :?> MethodCallExpression
+            match mc.Method.Name, mc.Arguments |> Seq.toList with
+            | "op_Implicit", [ Constant c ] -> Some c
+            | _ -> None
         | _ -> None
     
     let (|ArrayInit|_|) (exp: Expression) =
@@ -185,15 +195,13 @@ module SqlPatterns =
             // Extract constant value from nested object/properties
             notImplMsg "Nested property value extraction is not supported in 'where' statements. Try manually unwrapping and passing in the value."
         | Constant c -> Some c.Value
+        | ImplConvertConstant c -> Some c.Value
         | MethodCall opt when opt.Type |> isOptionType ->        
             if opt.Arguments.Count > 0 then
                 // Option.Some
                 match opt.Arguments.[0] with
                 | Constant c -> Some c.Value
-                | Convert (arg,typ) ->
-                    match arg with
-                    | Constant c when typ.IsPrimitive -> Some c.Value  
-                    | _ -> None
+                | ImplConvertConstant c -> Some c.Value
                 | _ -> None
             else
                 // Option.None

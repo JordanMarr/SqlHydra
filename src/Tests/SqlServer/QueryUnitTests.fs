@@ -411,4 +411,26 @@ let tests =
                 "SELECT COUNT([Sales].[SalesOrderHeader].[SalesOrderID]) FROM [Sales].[SalesOrderHeader]"
                 ""
         }
+        
+        test "Implicit Casts" {
+            let query =
+                select {
+                    for p in productTable do
+                    where (p.ListPrice > 5)
+                }
+
+            // should not throw exception
+            ()
+        }
+
+        test "Implicit Casts Option" {
+            let query =
+                select {
+                    for p in productTable do
+                    where (p.Weight = Some 5)
+                }
+
+            // should not throw exception
+            ()
+        }
     ]
