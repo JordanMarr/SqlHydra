@@ -22,6 +22,7 @@ let tests = path [ slnRoot; "Tests" ]
 
 let generators = [ mssql; npgsql; sqlite; oracle ]
 let allPackages = query :: generators
+let toPublish = allPackages
 
 Target.create "Restore" <| fun _ ->
     allPackages @ [ tests ]
@@ -59,7 +60,7 @@ Target.create "Test" <| fun _ ->
     printfn "Testing on all supported frameworks."
 
 Target.create "Pack" <| fun _ ->
-    allPackages
+    toPublish
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "pack --configuration Release -o nupkg/Release", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}' package.'")
 
@@ -74,7 +75,7 @@ Target.create "Publish" <| fun _ ->
         let dllPath = projDir </> "bin" </> "Release" </> "net6.0" </> $"{projName}.dll"
         System.Reflection.AssemblyName.GetAssemblyName(dllPath).Version
 
-    allPackages
+    toPublish
     |> List.map (fun projDir ->
         let version = getProjectVersion projDir
         let projName = DirectoryInfo(projDir).Name
