@@ -5,7 +5,7 @@ open SqlKata
 open System.Collections.Generic
 open System
 
-type TableMapping = { Name: string; Schema: string option }
+type TableMapping = { Name: string; Schema: string option; Alias: string option }
 
 module FQ = 
     /// Fully qualified entity type name
@@ -15,16 +15,18 @@ module FQ =
     /// Fully qualifies a column with: {?schema}.{table}.{column}
     let internal fullyQualifyColumn (tables: Map<FQName, TableMapping>) (property: Reflection.MemberInfo) =
         let tbl = tables.[fqName property.DeclaringType]
-        match tbl.Schema with
-        | Some schema -> $"%s{schema}.%s{tbl.Name}.%s{property.Name}"
-        | None -> $"%s{tbl.Name}.%s{property.Name}"
+        match tbl.Alias, tbl.Schema with
+        | None, Some schema -> $"%s{schema}.%s{tbl.Name}.%s{property.Name}"
+        | None, None -> $"%s{tbl.Name}.%s{property.Name}"
+        | Some alias, _ -> $"%s{alias}.%s{property.Name}"
 
     /// Tries to find a table mapping for a given table record type. 
     let internal fullyQualifyTable (tables: Map<FQName, TableMapping>) (tableRecord: Type) =
         let tbl = tables.[fqName tableRecord]
-        match tbl.Schema with
-        | Some schema -> $"{schema}.{tbl.Name}"
-        | None -> tbl.Name
+        match tbl.Alias, tbl.Schema with
+        | None, Some schema -> $"{schema}.{tbl.Name}"
+        | None, None -> tbl.Name
+        | Some alias, _ -> alias
 
 /// Represents a collection that must contain at least on item.
 module AtLeastOne =

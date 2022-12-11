@@ -49,13 +49,17 @@ type SelectBuilder<'Selected, 'Mapped> () =
 
     member val MapFn = Option<Func<'Selected, 'Mapped>>.None with get, set
 
-    member this.For (state: QuerySource<'T>, f: 'T -> QuerySource<'T>) =
+    member this.For (state: QuerySource<'T>, tableSelector: 'T -> QuerySource<'T>) =
         match state.TryGetOuterTableMapping() with
         | Some tbl -> 
             let query = state |> getQueryOrDefault
             QuerySource<'T, Query>(
-                query.From(match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name), 
-                state.TableMappings)
+                let from = match tbl.Schema with | Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name                
+                match tbl.Alias with
+                | Some alias -> query.From($"{from} as {alias}")
+                | None -> query.From(from)
+                , state.TableMappings
+            )
         | None -> 
             state :?> QuerySource<'T, Query>
 
@@ -170,14 +174,14 @@ type SelectBuilder<'Selected, 'Mapped> () =
                       innerKeySelector: Expression<Func<'Inner,'Key>>, 
                       resultSelector: Expression<Func<'Outer,'Inner,'JoinResult>> ) = 
 
-        let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
         let outerProperties = LinqExpressionVisitors.visitJoin<'Outer, 'Key> outerKeySelector
         let innerProperties = LinqExpressionVisitors.visitJoin<'Inner, 'Key> innerKeySelector
+        let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
 
         let outerQuery = outerSource |> getQueryOrDefault
         let innerTableName = 
             innerProperties 
-            |> Seq.map (fun p -> mergedTables.[FQ.fqName p.DeclaringType])
+            |> Seq.map (fun p -> mergedTables.[FQ.fqName p.Member.DeclaringType])
             |> Seq.map (fun tbl -> 
                 match tbl.Schema with
                 | Some schema -> sprintf "%s.%s" schema tbl.Name
@@ -188,7 +192,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let joinOn = 
             let fq = FQ.fullyQualifyColumn mergedTables
             List.zip outerProperties innerProperties
-            |> List.fold (fun (j: Join) (outerProp, innerProp) -> j.On(fq outerProp, fq innerProp)) (Join())
+            |> List.fold (fun (j: Join) (outerProp, innerProp) -> j.On(fq outerProp.Member, fq innerProp.Member)) (Join())
             
         QuerySource<'JoinResult, Query>(outerQuery.Join(innerTableName, fun j -> joinOn), mergedTables)
 
@@ -200,14 +204,14 @@ type SelectBuilder<'Selected, 'Mapped> () =
                           innerKeySelector: Expression<Func<'Inner option,'Key>>, 
                           resultSelector: Expression<Func<'Outer,'Inner option,'JoinResult>> ) = 
 
-        let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
         let outerProperties = LinqExpressionVisitors.visitJoin<'Outer, 'Key> outerKeySelector
         let innerProperties = LinqExpressionVisitors.visitJoin<'Inner option, 'Key> innerKeySelector
+        let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
 
         let outerQuery = outerSource |> getQueryOrDefault
         let innerTableName = 
             innerProperties 
-            |> Seq.map (fun p -> mergedTables.[FQ.fqName p.DeclaringType])
+            |> Seq.map (fun p -> mergedTables.[FQ.fqName p.Member.DeclaringType])
             |> Seq.map (fun tbl -> 
                 match tbl.Schema with
                 | Some schema -> sprintf "%s.%s" schema tbl.Name
@@ -218,7 +222,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let joinOn = 
             let fq = FQ.fullyQualifyColumn mergedTables
             List.zip outerProperties innerProperties
-            |> List.fold (fun (j: Join) (outerProp, innerProp) -> j.On(fq outerProp, fq innerProp)) (Join())
+            |> List.fold (fun (j: Join) (outerProp, innerProp) -> j.On(fq outerProp.Member, fq innerProp.Member)) (Join())
             
         QuerySource<'JoinResult, Query>(outerQuery.LeftJoin(innerTableName, fun j -> joinOn), mergedTables)
 

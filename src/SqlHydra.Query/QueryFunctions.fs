@@ -6,13 +6,13 @@ module Table =
     /// Maps the entity 'T to a table of the exact same name.
     let table<'T> = 
         let ent = typeof<'T>
-        let tables = Map [FQ.fqName ent, { Name = ent.Name; Schema = None }]
+        let tables = Map [FQ.fqName ent, { Name = ent.Name; Schema = None; Alias = None }]
         QuerySource<'T>(tables)
 
     /// Maps the entity 'T to a table of the given name.
     let table'<'T> (tableName: string) = 
         let ent = typeof<'T>
-        let tables = Map [FQ.fqName ent, { Name = tableName; Schema = None }]
+        let tables = Map [FQ.fqName ent, { Name = tableName; Schema = None; Alias = None }]
         QuerySource<'T>(tables)
 
     /// Maps the entity 'T to a schema of the given name.
