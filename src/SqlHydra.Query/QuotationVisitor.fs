@@ -4,6 +4,8 @@ open FSharp.Quotations
 open FSharp.Quotations.Patterns
 open FSharp.Quotations.DerivedPatterns
 
+let notImpl() = raise (NotImplementedException())
+
 let visitFor<'T> (f: Expr<'T -> QuerySource<'T>>) =
     let rec visit expr =
         match expr with
@@ -17,6 +19,6 @@ let visitFor<'T> (f: Expr<'T -> QuerySource<'T>>) =
         | Application (_, e) -> visit e
         | Call (_, _, args) -> args |> Seq.head |> visit
         | Var v -> Some v.Name
-        | _ -> failwith "bang"
+        | _ -> notImpl()
     visit f |> Option.get
     

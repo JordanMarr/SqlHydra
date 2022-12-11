@@ -223,8 +223,9 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID])")) ""
+            let expected = """SELECT [o].* FROM [Sales].[SalesOrderHeader] AS [o] 
+LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID])"""
+            Expect.equal sql expected ""
         }
         
         test "Inner Join - Multi Column" {

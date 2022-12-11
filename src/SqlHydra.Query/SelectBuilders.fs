@@ -239,16 +239,39 @@ type SelectBuilder<'Selected, 'Mapped> () =
 
         let outerProperties = LinqExpressionVisitors.visitJoin<'Outer, 'Key> outerKeySelector
         let innerProperties = LinqExpressionVisitors.visitJoin<'Inner option, 'Key> innerKeySelector
-        let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
+        
+        let mergedTables = 
+            // Update outer table mappings with join aliases
+            let outerTableMappings = 
+                outerProperties
+                |> List.fold (fun (mappings: Map<FQ.FQName, TableMapping>) joinPI -> 
+                    let key = FQ.fqName joinPI.Member.DeclaringType
+                    let tbl = mappings[key]
+                    mappings.Add(key, { tbl with Alias = Some joinPI.Alias })
+                ) outerSource.TableMappings
+
+            // Update inner table mappings with join aliases
+            let innerTableMappings = 
+                innerProperties
+                |> List.fold (fun (mappings: Map<FQ.FQName, TableMapping>) joinPI -> 
+                    let key = FQ.fqName joinPI.Member.DeclaringType
+                    let tbl = mappings[key]
+                    mappings.Add(key, { tbl with Alias = Some joinPI.Alias })
+                ) innerSource.TableMappings
+        
+            mergeTableMappings (outerTableMappings, innerTableMappings)
 
         let outerQuery = outerSource |> getQueryOrDefault
-        let innerTableName = 
+        let innerTableNameAsAlias = 
             innerProperties 
-            |> Seq.map (fun p -> mergedTables[FQ.fqName p.Member.DeclaringType])
-            |> Seq.map (fun tbl -> 
-                match tbl.Schema with
-                | Some schema -> $"%s{schema}.%s{tbl.Name}"
-                | None -> tbl.Name
+            |> Seq.map (fun p -> p, mergedTables[FQ.fqName p.Member.DeclaringType])
+            |> Seq.map (fun (p, tbl) -> 
+                let tblNm = 
+                    match tbl.Schema with
+                    | Some schema -> $"%s{schema}.%s{tbl.Name}"
+                    | None -> tbl.Name
+
+                $"%s{tblNm} AS %s{p.Alias}"
             )
             |> Seq.head
 
@@ -257,7 +280,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
             List.zip outerProperties innerProperties
             |> List.fold (fun (j: Join) (outerProp, innerProp) -> j.On(fq outerProp.Member, fq innerProp.Member)) (Join())
             
-        QuerySource<'JoinResult, Query>(outerQuery.LeftJoin(innerTableName, fun j -> joinOn), mergedTables)
+        QuerySource<'JoinResult, Query>(outerQuery.LeftJoin(innerTableNameAsAlias, fun j -> joinOn), mergedTables)
 
     /// Sets the GROUP BY for one or more columns.
     [<CustomOperation("groupBy", MaintainsVariableSpace = true)>]

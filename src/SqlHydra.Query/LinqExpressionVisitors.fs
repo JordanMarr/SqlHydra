@@ -520,7 +520,12 @@ let visitJoin<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
             // Handle groupBy that returns a tuple of multiple columns
             n.Arguments |> Seq.map visit |> Seq.toList |> List.collect id
         | Member m -> 
-            let alias = (m.Expression :?> ParameterExpression).Name
+            let alias =
+                match m.Expression with
+                | Parameter p -> p.Name
+                | Member m -> (m.Expression :?> ParameterExpression).Name
+                | _ -> notImpl()
+
             if m.Member.DeclaringType |> isOptionType
             then visit m.Expression
             else [ { Alias = alias; Member = m.Member } ]
