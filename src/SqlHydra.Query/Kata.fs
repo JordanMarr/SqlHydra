@@ -5,28 +5,24 @@ open SqlKata
 open System.Collections.Generic
 open System
 
-type TableMapping = { Name: string; Schema: string option; Alias: string option }
+type TableMapping = { Name: string; Schema: string option }
 
 module FQ = 
     /// Fully qualified entity type name
     type [<Struct>] FQName = private FQName of string
+    
     let fqName (t: Type) = FQName t.FullName
 
-    /// Fully qualifies a column with: {?schema}.{table}.{column}
-    let internal fullyQualifyColumn (tables: Map<FQName, TableMapping>) (property: Reflection.MemberInfo) =
-        let tbl = tables.[fqName property.DeclaringType]
-        match tbl.Alias, tbl.Schema with
-        | None, Some schema -> $"%s{schema}.%s{tbl.Name}.%s{property.Name}"
-        | None, None -> $"%s{tbl.Name}.%s{property.Name}"
-        | Some alias, _ -> $"%s{alias}.%s{property.Name}"
+    type TableMappingKey = 
+        | FQNameKey of FQName
+        | TableAliasKey of string
 
-    /// Tries to find a table mapping for a given table record type. 
-    let internal fullyQualifyTable (tables: Map<FQName, TableMapping>) (tableRecord: Type) =
-        let tbl = tables.[fqName tableRecord]
-        match tbl.Alias, tbl.Schema with
-        | None, Some schema -> $"{schema}.{tbl.Name}"
-        | None, None -> tbl.Name
-        | Some alias, _ -> alias
+    /// Fully qualifies a column with: {?schema}.{table}.{column}
+    let internal fullyQualifyColumn (tables: Map<TableMappingKey, TableMapping>) (tableAlias: string) (column: Reflection.MemberInfo) =
+        let tbl = tables[TableAliasKey tableAlias]
+        match tbl.Schema with
+        | Some schema -> $"%s{schema}.%s{tbl.Name}.%s{column.Name}"
+        | None -> $"%s{tbl.Name}.%s{column.Name}"
 
 /// Represents a collection that must contain at least on item.
 module AtLeastOne =
@@ -81,18 +77,25 @@ type QuerySource<'T>(tableMappings) =
         member this.GetEnumerator() = Seq.empty<'T>.GetEnumerator() :> Collections.IEnumerator
         member this.GetEnumerator() = Seq.empty<'T>.GetEnumerator()
     
-    member this.TableMappings : Map<FQ.FQName, TableMapping> = tableMappings
+    member this.TableMappings : Map<FQ.TableMappingKey, TableMapping> = tableMappings
     
-    member this.TryGetOuterTableMapping() = 
+    static member GetTableByAlias (tableAlias: string, tableMappings: Map<FQ.TableMappingKey, TableMapping>) = 
         let outerEntity = typeof<'T>
         let fqn = 
             if outerEntity.Name.StartsWith "Tuple" // True for joined tables
             then outerEntity.GetGenericArguments() |> Array.head |> FQ.fqName
             else outerEntity |> FQ.fqName
-        this.TableMappings.TryFind(fqn)
 
-    member this.GetOuterTableMapping() = 
-        this.TryGetOuterTableMapping().Value
+        match tableMappings.TryFind(FQ.FQNameKey fqn) with
+        | Some tbl -> 
+            let updatedTableMappings = 
+                tableMappings
+                    .Remove(FQ.FQNameKey (FQ.fqName typeof<'T>))
+                    .Add(FQ.TableAliasKey tableAlias, tbl)
+            tbl, updatedTableMappings
+        | None ->
+            let tbl = tableMappings[FQ.TableAliasKey tableAlias]
+            tbl, tableMappings
 
 type QuerySource<'T, 'Query>(query, tableMappings) = 
     inherit QuerySource<'T>(tableMappings)

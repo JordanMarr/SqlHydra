@@ -21,12 +21,14 @@ type UpdateBuilder<'Updated>() =
         | :? QuerySource<'T, UpdateQuerySpec<'T>> as qs -> qs.Query
         | _ -> UpdateQuerySpec.Default
 
-    member this.For (state: QuerySource<'T>, f: 'T -> QuerySource<'T>) =
-        let tbl = state.GetOuterTableMapping()
+    member this.For (state: QuerySource<'T>, [<ReflectedDefinition>] forExpr: FSharp.Quotations.Expr<'T -> QuerySource<'T>>) =
         let query = state |> getQueryOrDefault
+        let tableAlias = QuotationVisitor.visitFor forExpr
+        let tbl, tableMappings = QuerySource<'T>.GetTableByAlias(tableAlias, state.TableMappings)
+
         QuerySource<'T, UpdateQuerySpec<'T>>(
             { query with Table = match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name }
-            , state.TableMappings)
+            , tableMappings)
 
     member this.Yield _ =
         QuerySource<'T>(Map.empty)
