@@ -508,6 +508,15 @@ type JoinedPropertyInfo =
         Member: MemberInfo
     }
 
+let visitAlias (exp: Expression) = 
+    let rec visit (exp: Expression) = 
+        match exp with 
+        | Member m -> visit m.Expression
+        | Property p -> visit p.Expression
+        | Parameter p -> p.Name
+        | _ -> notImpl()
+    visit exp
+
 /// Returns one or more column members
 let visitJoin<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
     let rec visit (exp: Expression) : JoinedPropertyInfo list =
@@ -520,17 +529,12 @@ let visitJoin<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
             // Handle groupBy that returns a tuple of multiple columns
             n.Arguments |> Seq.map visit |> Seq.toList |> List.collect id
         | Member m -> 
-            let alias =
-                match m.Expression with
-                | Parameter p -> p.Name
-                | Member m -> (m.Expression :?> ParameterExpression).Name
-                | _ -> notImpl()
-
+            let alias = visitAlias m.Expression
             if m.Member.DeclaringType |> isOptionType
             then visit m.Expression
             else [ { Alias = alias; Member = m.Member } ]
         | Property p -> 
-            let alias = (p.Expression :?> ParameterExpression).Name
+            let alias = visitAlias p.Expression
             [ { Alias = alias; Member = p.Member }  ]
         | _ -> notImpl()
 
