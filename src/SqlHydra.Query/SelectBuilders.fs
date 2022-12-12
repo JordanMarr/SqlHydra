@@ -95,7 +95,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
                     // Select a single column
                     q.Select($"%s{tableAlias}.%s{column}")
                 | LinqExpressionVisitors.SelectedAggregateColumn (aggFn, tableAlias, column) -> 
-                    // Currently in v2.3.7, SqlKata doesn't support multiple inline aggregate functions.
+                    // Currently in v2.4.0, SqlKata doesn't support multiple inline aggregate functions.
                     // Use SelectRaw as a workaround until SqlKata supports multiple aggregates.
                     // https://github.com/sqlkata/querybuilder/pull/504
                     let fqCol = $"%s{tableAlias}.%s{column}"
