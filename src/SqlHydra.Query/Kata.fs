@@ -14,7 +14,7 @@ module FQ =
     let fqName (t: Type) = FQName t.FullName
 
     type TableMappingKey = 
-        | FQNameKey of FQName
+        | Root
         | TableAliasKey of string
 
     /// Fully qualifies a column with: {?schema}.{table}.{column}
@@ -72,31 +72,26 @@ type UpdateQuerySpec<'T> =
     static member Default = 
         { Table = ""; Entity = Option<'T>.None; Fields = []; SetValues = []; Where = None; UpdateAll = false }
 
+module TableMappings = 
+
+    let getByRootOrAlias (tableAlias: string) (tableMappings: Map<FQ.TableMappingKey, TableMapping>) =
+        match tableMappings.TryFind(FQ.Root) with
+        | Some tbl -> 
+            let updatedTableMappings = tableMappings.Remove(FQ.Root).Add(FQ.TableAliasKey tableAlias, tbl)  
+            tbl, updatedTableMappings
+        | None -> 
+            let tbl = tableMappings[FQ.TableAliasKey tableAlias]
+            tbl, tableMappings
+
+    let getFirst (tableMappings: Map<FQ.TableMappingKey, TableMapping>) = 
+        tableMappings |> Map.toList |> List.map snd |> List.head
+
 type QuerySource<'T>(tableMappings) =
     interface IEnumerable<'T> with
         member this.GetEnumerator() = Seq.empty<'T>.GetEnumerator() :> Collections.IEnumerator
         member this.GetEnumerator() = Seq.empty<'T>.GetEnumerator()
-    
     member this.TableMappings : Map<FQ.TableMappingKey, TableMapping> = tableMappings
     
-    static member GetTableByAlias (tableAlias: string, tableMappings: Map<FQ.TableMappingKey, TableMapping>) = 
-        let outerEntity = typeof<'T>
-        let fqn = 
-            if outerEntity.Name.StartsWith "Tuple" // True for joined tables
-            then outerEntity.GetGenericArguments() |> Array.head |> FQ.fqName
-            else outerEntity |> FQ.fqName
-
-        match tableMappings.TryFind(FQ.FQNameKey fqn) with
-        | Some tbl -> 
-            let updatedTableMappings = 
-                tableMappings
-                    .Remove(FQ.FQNameKey (FQ.fqName typeof<'T>))
-                    .Add(FQ.TableAliasKey tableAlias, tbl)
-            tbl, updatedTableMappings
-        | None ->
-            let tbl = tableMappings[FQ.TableAliasKey tableAlias]
-            tbl, tableMappings
-
 type QuerySource<'T, 'Query>(query, tableMappings) = 
     inherit QuerySource<'T>(tableMappings)
     member this.Query : 'Query = query

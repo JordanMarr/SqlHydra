@@ -22,7 +22,7 @@ type DeleteBuilder<'Deleted>() =
     member this.For (state: QuerySource<'T>, [<ReflectedDefinition>] forExpr: FSharp.Quotations.Expr<'T -> QuerySource<'T>>) =
         let query = state |> getQueryOrDefault
         let tableAlias = QuotationVisitor.visitFor forExpr
-        let tbl, tableMappings = QuerySource<'T>.GetTableByAlias(tableAlias, state.TableMappings)
+        let tbl, tableMappings = TableMappings.getByRootOrAlias tableAlias state.TableMappings
 
         QuerySource<'T, Query>(
             query.From(match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name), 

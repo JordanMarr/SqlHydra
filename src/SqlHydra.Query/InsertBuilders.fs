@@ -15,7 +15,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
     member this.For (state: QuerySource<'T>, [<ReflectedDefinition>] forExpr: FSharp.Quotations.Expr<'T -> QuerySource<'T>>) =        
         let query = state |> getQueryOrDefault
         let tableAlias = QuotationVisitor.visitFor forExpr
-        let tbl, tableMappings = QuerySource<'T>.GetTableByAlias(tableAlias, state.TableMappings)
+        let tbl, tableMappings = TableMappings.getByRootOrAlias tableAlias state.TableMappings
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
             { query with Table = match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name }
             , tableMappings)
@@ -23,7 +23,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
     /// Sets the TABLE name for query.
     [<CustomOperation("into")>]
     member this.Into (state: QuerySource<'T>, table: QuerySource<'T>) =
-        let tbl = state.TableMappings |> Map.toList |> List.map snd |> List.head
+        let tbl = TableMappings.getFirst table.TableMappings
         let query = state |> getQueryOrDefault
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
             { query with Table = match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name }

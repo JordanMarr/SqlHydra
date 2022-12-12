@@ -6,22 +6,13 @@ module Table =
     /// Maps the entity 'T to a table of the exact same name.
     let table<'T> = 
         let ent = typeof<'T>
-        let tables = Map [FQ.FQNameKey (FQ.fqName ent), { Name = ent.Name; Schema = None }]
-        QuerySource<'T>(tables)
-
-    /// Maps the entity 'T to a table of the given name.
-    let table'<'T> (tableName: string) = 
-        let ent = typeof<'T>
-        let tables = Map [FQ.FQNameKey (FQ.fqName ent), { Name = tableName; Schema = None }]
+        let tables = Map [FQ.Root, { Name = ent.Name; Schema = Some ent.DeclaringType.Name}]
         QuerySource<'T>(tables)
 
     /// Maps the entity 'T to a schema of the given name.
+    [<System.Obsolete("The table schema is now automatically inferred from the declaring type.")>]
     let inSchema<'T> (schemaName: string) (qs: QuerySource<'T>) =
-        let ent = typeof<'T>
-        let fqn = FQ.FQNameKey (FQ.fqName ent)
-        let tbl = qs.TableMappings[fqn]
-        let tables = qs.TableMappings.Add(fqn, { tbl with Schema = Some schemaName })
-        QuerySource<'T>(tables)
+        qs
 
 [<AutoOpen>]
 module Where = 

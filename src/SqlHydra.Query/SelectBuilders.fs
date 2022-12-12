@@ -54,7 +54,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
     member this.For (state: QuerySource<'T>, [<ReflectedDefinition>] forExpr: FSharp.Quotations.Expr<'T -> QuerySource<'T>>) =
         let tableAlias = QuotationVisitor.visitFor forExpr
         let query = state |> getQueryOrDefault
-        let tbl, tableMappings = QuerySource<'T>.GetTableByAlias(tableAlias, state.TableMappings)
+        let tbl, tableMappings = TableMappings.getByRootOrAlias tableAlias state.TableMappings
 
         QuerySource<'T, Query>(
             let from = match tbl.Schema with | Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name
@@ -184,26 +184,20 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let innerProperties = LinqExpressionVisitors.visitJoin<'Inner, 'Key> innerKeySelector // right
 
         let mergedTables = 
-            // Update outer table mappings with join aliases
+            // Update outer table mappings with join aliases (accumulated outer/left mappings)
             let outerTableMappings = 
                 outerProperties
                 |> List.fold (fun (mappings: Map<FQ.TableMappingKey, TableMapping>) joinPI -> 
-                    let key = FQ.FQNameKey(FQ.fqName joinPI.Member.DeclaringType)
-                    let tbl = mappings[key]
-                    mappings
-                        .Remove(key)
-                        .Add(FQ.TableAliasKey joinPI.Alias, tbl)
+                    let _, updatedMappings = TableMappings.getByRootOrAlias joinPI.Alias mappings
+                    updatedMappings
                 ) outerSource.TableMappings
 
-            // Update inner table mappings with join aliases
+            // Update inner table mapping with join aliases (this will always be 1 mapping being joined)
             let innerTableMappings = 
                 innerProperties
                 |> List.fold (fun (mappings: Map<FQ.TableMappingKey, TableMapping>) joinPI -> 
-                    let key = FQ.FQNameKey(FQ.fqName joinPI.Member.DeclaringType)
-                    let tbl = mappings[key]
-                    mappings
-                        .Remove(key)
-                        .Add(FQ.TableAliasKey joinPI.Alias, tbl)
+                    let _, updatedMappings = TableMappings.getByRootOrAlias joinPI.Alias mappings
+                    updatedMappings
                 ) innerSource.TableMappings
         
             mergeTableMappings (outerTableMappings, innerTableMappings)
@@ -246,22 +240,16 @@ type SelectBuilder<'Selected, 'Mapped> () =
             let outerTableMappings = 
                 outerProperties
                 |> List.fold (fun (mappings: Map<FQ.TableMappingKey, TableMapping>) joinPI -> 
-                    let key = FQ.FQNameKey(FQ.fqName joinPI.Member.DeclaringType)
-                    let tbl = mappings[key]
-                    mappings
-                        .Remove(key)
-                        .Add(FQ.TableAliasKey joinPI.Alias, tbl)
+                    let _, updatedMappings = TableMappings.getByRootOrAlias joinPI.Alias mappings
+                    updatedMappings
                 ) outerSource.TableMappings
 
             // Update inner table mappings with join aliases
             let innerTableMappings = 
                 innerProperties
                 |> List.fold (fun (mappings: Map<FQ.TableMappingKey, TableMapping>) joinPI -> 
-                    let key = FQ.FQNameKey(FQ.fqName joinPI.Member.DeclaringType)
-                    let tbl = mappings[key]
-                    mappings
-                        .Remove(key)
-                        .Add(FQ.TableAliasKey joinPI.Alias, tbl)
+                    let _, updatedMappings = TableMappings.getByRootOrAlias joinPI.Alias mappings
+                    updatedMappings
                 ) innerSource.TableMappings
         
             mergeTableMappings (outerTableMappings, innerTableMappings)
