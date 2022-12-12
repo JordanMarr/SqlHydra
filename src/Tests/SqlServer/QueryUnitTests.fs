@@ -432,4 +432,22 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
             // should not throw exception
             ()
         }
+
+        test "Self Join" {
+            // NOTE: I could not find a good self join example in AdventureWorks.
+            let query = 
+                select { 
+                    for p1 in productTable do
+                    join p2 in productTable on (p1.ProductID = p2.ProductID)
+                    where (p2.ListPrice > 10.00M)
+                    select p1
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal
+                sql
+                """SELECT [p1].* FROM [Production].[Product] AS [p1] 
+INNER JOIN [Production].[Product] AS [p2] ON ([p1].[ProductID] = [p2].[ProductID]) WHERE ([p2].[ListPrice] > @p0)"""
+                ""
+        }
     ]
