@@ -46,20 +46,18 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("SELECT \"OT\".\"CUSTOMERS\".\"NAME\" FROM")) ""
+            Expect.isTrue (sql.Contains("SELECT \"c\".\"NAME\" FROM")) ""
         }
 
         test "Select 2 Columns" {
             let query =
                 select {
-                    for h in orderHeaderTable do
-                    select (h.CUSTOMER_ID, h.STATUS)
+                    for o in orderHeaderTable do
+                    select (o.CUSTOMER_ID, o.STATUS)
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("SELECT \"OT\".\"ORDERS\".\"CUSTOMER_ID\", \"OT\".\"ORDERS\".\"STATUS\" FROM")) ""
+            Expect.isTrue (sql.Contains("SELECT \"o\".\"CUSTOMER_ID\", \"o\".\"STATUS\" FROM")) ""
         }
 
         test "Select 1 Table and 1 Column" {
@@ -72,8 +70,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("SELECT \"OT\".\"ORDERS\".*, \"OT\".\"ORDER_ITEMS\".\"UNIT_PRICE\" FROM")) ""
+            Expect.isTrue (sql.Contains("SELECT \"o\".*, \"d\".\"UNIT_PRICE\" FROM")) ""
         }
 
         ptest "Where with Option Type" {
@@ -104,7 +101,7 @@ let tests =
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ((\"OT\".\"CUSTOMERS\".\"NAME\" = :p0) OR (\"OT\".\"CUSTOMERS\".\"NAME\" = :p1))")) ""
+            Expect.isTrue (sql.Contains("WHERE ((\"c\".\"NAME\" = :p0) OR (\"c\".\"NAME\" = :p1))")) ""
         }
 
         test "And Where" {
@@ -115,7 +112,7 @@ let tests =
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ((\"OT\".\"CUSTOMERS\".\"NAME\" = :p0) AND (\"OT\".\"CUSTOMERS\".\"NAME\" = :p1))")) ""
+            Expect.isTrue (sql.Contains("WHERE ((\"c\".\"NAME\" = :p0) AND (\"c\".\"NAME\" = :p1))")) ""
         }
 
         test "Where with AND and OR in Parenthesis" {
@@ -127,7 +124,7 @@ let tests =
     
             let sql = query.ToKataQuery() |> toSql
             Expect.isTrue 
-                (sql.Contains("WHERE ((\"OT\".\"CUSTOMERS\".\"NAME\" = :p0) AND ((\"OT\".\"CUSTOMERS\".\"NAME\" = :p1) OR (\"OT\".\"CUSTOMERS\".\"ADDRESS\" IS NULL)))")) 
+                (sql.Contains("WHERE ((\"c\".\"NAME\" = :p0) AND ((\"c\".\"NAME\" = :p1) OR (\"c\".\"ADDRESS\" IS NULL)))")) 
                 "Should wrap OR clause in parenthesis and each individual where clause in parenthesis."
         }
 
@@ -139,7 +136,7 @@ let tests =
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (NOT ((\"OT\".\"CUSTOMERS\".\"NAME\" = :p0) AND (\"OT\".\"CUSTOMERS\".\"NAME\" = :p1)))")) ""
+            Expect.isTrue (sql.Contains("WHERE (NOT ((\"c\".\"NAME\" = :p0) AND (\"c\".\"NAME\" = :p1)))")) ""
         }
 
         test "Where Customer isIn List" {
@@ -150,7 +147,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"OT\".\"CUSTOMERS\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))")) ""
         }
 
         test "Where Customer |=| List" {
@@ -161,7 +158,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"OT\".\"CUSTOMERS\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))")) ""
         }
 
         test "Where Customer |=| Array" {
@@ -172,7 +169,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"OT\".\"CUSTOMERS\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))")) ""
         }
         
         test "Where Customer |=| Seq" {            
@@ -185,7 +182,7 @@ let tests =
             let query = buildQuery([ 1L;2L;3L ])
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"OT\".\"CUSTOMERS\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))")) ""
         }
 
         test "Where Customer |<>| List" {
@@ -196,7 +193,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"OT\".\"CUSTOMERS\".\"CUSTOMER_ID\" NOT IN (:p0, :p1, :p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" NOT IN (:p0, :p1, :p2))")) ""
         }
 
         test "Inner Join" {
@@ -208,8 +205,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("INNER JOIN \"OT\".\"ORDER_ITEMS\" ON (\"OT\".\"ORDERS\".\"ORDER_ID\" = \"OT\".\"ORDER_ITEMS\".\"ORDER_ID\")")) ""
+            Expect.isTrue (sql.Contains("INNER JOIN \"OT\".\"ORDER_ITEMS\" \"d\" ON (\"o\".\"ORDER_ID\" = \"d\".\"ORDER_ID\")")) ""
         }
 
         test "Left Join" {
@@ -221,8 +217,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("LEFT JOIN \"OT\".\"ORDER_ITEMS\" ON (\"OT\".\"ORDERS\".\"ORDER_ID\" = \"OT\".\"ORDER_ITEMS\".\"ORDER_ID\")")) ""
+            Expect.isTrue (sql.Contains("LEFT JOIN \"OT\".\"ORDER_ITEMS\" \"d\" ON (\"o\".\"ORDER_ID\" = \"d\".\"ORDER_ID\")")) ""
         }
         
         //test "Inner Join - Multi Column" {
@@ -431,10 +426,9 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
             Expect.equal
                 sql
-                "SELECT COUNT(\"OT\".\"ORDERS\".\"ORDER_ID\") FROM \"OT\".\"ORDERS\""
+                "SELECT COUNT(\"o\".\"ORDER_ID\") FROM \"OT\".\"ORDERS\" \"o\""
                 ""
         }
     ]
