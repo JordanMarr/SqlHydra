@@ -113,26 +113,17 @@ type SelectBuilder<'Selected, 'Mapped> () =
             LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
             |> function 
                 | LinqExpressionVisitors.OrderByColumn (tableAlias, p) -> 
-                    let fqCol = $"%s{tableAlias}.%s{p.DeclaringType.Name}"
-                    state.Query.OrderBy($"%s{fqCol}")
+                    let fqCol = $"%s{tableAlias}.%s{p.Name}"
+                    state.Query.OrderBy(fqCol)
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, tableAlias, p) -> 
-                    let fqCol = $"%s{tableAlias}.%s{p.DeclaringType.Name}"
+                    let fqCol = $"%s{tableAlias}.%s{p.Name}"
                     state.Query.OrderByRaw($"%s{aggType}(%s{fqCol})")
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the ORDER BY for single column
     [<CustomOperation("thenBy", MaintainsVariableSpace = true)>]
     member this.ThenBy (state: QuerySource<'T, Query>, [<ProjectionParameter>] propertySelector) = 
-        let orderedQuery = 
-            LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
-            |> function 
-                | LinqExpressionVisitors.OrderByColumn (tableAlias, p) -> 
-                    let fqCol = $"%s{tableAlias}.%s{p.DeclaringType.Name}"
-                    state.Query.OrderBy(fqCol)
-                | LinqExpressionVisitors.OrderByAggregateColumn (aggType, tableAlias, p) -> 
-                    let fqCol = $"%s{tableAlias}.%s{p.DeclaringType.Name}"
-                    state.Query.OrderByRaw($"%s{aggType}(%s{fqCol})")
-        QuerySource<'T, Query>(orderedQuery, state.TableMappings)
+        this.OrderBy(state, propertySelector)
 
     /// Sets the ORDER BY DESC for single column
     [<CustomOperation("orderByDescending", MaintainsVariableSpace = true)>]
@@ -141,26 +132,17 @@ type SelectBuilder<'Selected, 'Mapped> () =
             LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
             |> function 
                 | LinqExpressionVisitors.OrderByColumn (tableAlias, p) -> 
-                    let fqCol = $"%s{tableAlias}.%s{p.DeclaringType.Name}"
+                    let fqCol = $"%s{tableAlias}.%s{p.Name}"
                     state.Query.OrderByDesc(fqCol)
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, tableAlias, p) -> 
-                    let fqCol = $"%s{tableAlias}.%s{p.DeclaringType.Name}"
+                    let fqCol = $"%s{tableAlias}.%s{p.Name}"
                     state.Query.OrderByRaw($"%s{aggType}(%s{fqCol}) DESC")
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the ORDER BY DESC for single column
     [<CustomOperation("thenByDescending", MaintainsVariableSpace = true)>]
     member this.ThenByDescending (state: QuerySource<'T, Query>, [<ProjectionParameter>] propertySelector) = 
-        let orderedQuery = 
-            LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
-            |> function 
-                | LinqExpressionVisitors.OrderByColumn (tableAlias, p) -> 
-                    let fqCol = $"%s{tableAlias}.%s{p.DeclaringType.Name}"
-                    state.Query.OrderByDesc(fqCol)
-                | LinqExpressionVisitors.OrderByAggregateColumn (aggType, tableAlias, p) -> 
-                    let fqCol = $"%s{tableAlias}.%s{p.DeclaringType.Name}"
-                    state.Query.OrderByRaw($"%s{aggType}(%s{fqCol}) DESC")
-        QuerySource<'T, Query>(orderedQuery, state.TableMappings)
+        this.OrderByDescending(state, propertySelector)
 
     /// Sets the SKIP value for query
     [<CustomOperation("skip", MaintainsVariableSpace = true)>]

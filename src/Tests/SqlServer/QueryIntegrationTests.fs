@@ -167,16 +167,19 @@ let tests =
         testTask "Sorted Aggregates - Top 5 categories with highest avg price products" {
             use ctx = openContext()
 
-            let! aggregates = 
+            let query = 
                 select {
-                    for p in productTable do
-                    where (p.ProductSubcategoryID <> None)
-                    groupBy p.ProductSubcategoryID
-                    orderByDescending (avgBy p.ListPrice)
-                    select (p.ProductSubcategoryID, avgBy p.ListPrice)
-                    take 5
+                        for p in productTable do
+                        where (p.ProductSubcategoryID <> None)
+                        groupBy p.ProductSubcategoryID
+                        orderByDescending (avgBy p.ListPrice)
+                        select (p.ProductSubcategoryID, avgBy p.ListPrice)
+                        take 5
                 }
-                |> ctx.ReadAsync HydraReader.Read
+
+            let sql = query.ToKataQuery() |> DB.toSql
+
+            let! aggregates = query |> ctx.ReadAsync HydraReader.Read
 
             gt0 aggregates
         }
