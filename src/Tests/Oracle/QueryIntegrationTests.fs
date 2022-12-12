@@ -18,13 +18,13 @@ let openContext() =
     new QueryContext(conn, compiler)
 
 // Tables
-let regionsTable =          table<OT.REGIONS>               |> inSchema (nameof OT)
-let countriesTable =        table<OT.COUNTRIES>             |> inSchema (nameof OT)
-let customersTable =        table<OT.CUSTOMERS>             |> inSchema (nameof OT)
-let orderHeaderTable =      table<OT.ORDERS>                |> inSchema (nameof OT)
-let orderDetailTable =      table<OT.ORDER_ITEMS>           |> inSchema (nameof OT)
-let productTable =          table<OT.PRODUCTS>              |> inSchema (nameof OT)
-let categoryTable =         table<OT.PRODUCT_CATEGORIES>    |> inSchema (nameof OT)
+let regionsTable =          table<OT.REGIONS>
+let countriesTable =        table<OT.COUNTRIES>
+let customersTable =        table<OT.CUSTOMERS>
+let orderHeaderTable =      table<OT.ORDERS>
+let orderDetailTable =      table<OT.ORDER_ITEMS>
+let productTable =          table<OT.PRODUCTS>
+let categoryTable =         table<OT.PRODUCT_CATEGORIES>
 
 [<Tests>]
 let tests = 

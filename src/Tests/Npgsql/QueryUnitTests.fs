@@ -11,15 +11,15 @@ open Npgsql.AdventureWorksNet6
 #endif
 
 // Tables
-let personTable =           table<person.person>                    |> inSchema (nameof person)
-let addressTable =          table<person.address>                   |> inSchema (nameof person)
-let customerTable =         table<sales.customer>                   |> inSchema (nameof sales)
-let orderHeaderTable =      table<sales.salesorderheader>           |> inSchema (nameof sales)
-let orderDetailTable =      table<sales.salesorderdetail>           |> inSchema (nameof sales)
-let productTable =          table<production.product>               |> inSchema (nameof production)
-let subCategoryTable =      table<production.productsubcategory>    |> inSchema (nameof production)
-let categoryTable =         table<production.productcategory>       |> inSchema (nameof production)
-let productReviewTable =    table<production.productreview>         |> inSchema (nameof production)
+let personTable =           table<person.person>
+let addressTable =          table<person.address>
+let customerTable =         table<sales.customer>
+let orderHeaderTable =      table<sales.salesorderheader>
+let orderDetailTable =      table<sales.salesorderdetail>
+let productTable =          table<production.product>
+let subCategoryTable =      table<production.productsubcategory>
+let categoryTable =         table<production.productcategory>
+let productReviewTable =    table<production.productreview>
 
 [<Tests>]
 let tests = 

@@ -12,14 +12,14 @@ open Oracle.AdventureWorksNet6
 #endif
 
 // Tables
-let contactsTable =         table<OT.CONTACTS>              |> inSchema (nameof OT)
-let customerTable =         table<OT.CUSTOMERS>             |> inSchema (nameof OT)
-let orderHeaderTable =      table<OT.ORDERS>                |> inSchema (nameof OT)
-let orderDetailTable =      table<OT.ORDER_ITEMS>           |> inSchema (nameof OT)
-let productTable =          table<OT.PRODUCTS>              |> inSchema (nameof OT)
-let categoryTable =         table<OT.PRODUCT_CATEGORIES>    |> inSchema (nameof OT)
-let regionsTable =          table<OT.REGIONS>               |> inSchema (nameof OT)
-let countriesTable =        table<OT.COUNTRIES>             |> inSchema (nameof OT)
+let contactsTable =         table<OT.CONTACTS>
+let customerTable =         table<OT.CUSTOMERS>
+let orderHeaderTable =      table<OT.ORDERS>
+let orderDetailTable =      table<OT.ORDER_ITEMS>
+let productTable =          table<OT.PRODUCTS>
+let categoryTable =         table<OT.PRODUCT_CATEGORIES>
+let regionsTable =          table<OT.REGIONS>
+let countriesTable =        table<OT.COUNTRIES>
 
 [<Tests>]
 let tests = 

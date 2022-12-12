@@ -17,18 +17,18 @@ let openContext() =
     new QueryContext(conn, compiler)
 
 // Tables
-let personTable =             table<Person.Person>                    |> inSchema (nameof Person)
-let addressTable =            table<Person.Address>                   |> inSchema (nameof Person)
-let customerTable =           table<Sales.Customer>                   |> inSchema (nameof Sales)
-let orderHeaderTable =        table<Sales.SalesOrderHeader>           |> inSchema (nameof Sales)
-let orderDetailTable =        table<Sales.SalesOrderDetail>           |> inSchema (nameof Sales)
-let productTable =            table<Production.Product>               |> inSchema (nameof Production)
-let subCategoryTable =        table<Production.ProductSubcategory>    |> inSchema (nameof Production)
-let categoryTable =           table<Production.ProductCategory>       |> inSchema (nameof Production)
+let personTable =             table<Person.Person>
+let addressTable =            table<Person.Address>
+let customerTable =           table<Sales.Customer>
+let orderHeaderTable =        table<Sales.SalesOrderHeader>
+let orderDetailTable =        table<Sales.SalesOrderDetail>
+let productTable =            table<Production.Product>
+let subCategoryTable =        table<Production.ProductSubcategory>
+let categoryTable =           table<Production.ProductCategory>
 let errorLogTable =           table<dbo.ErrorLog>
-let employeeTable =           table<HumanResources.Employee>          |> inSchema (nameof HumanResources)
-let shiftTable =              table<HumanResources.Shift>             |> inSchema (nameof HumanResources)
-let dateTime2SupportTable =   table<ext.DateTime2Support>             |> inSchema (nameof ext)
+let employeeTable =           table<HumanResources.Employee>
+let shiftTable =              table<HumanResources.Shift>
+let dateTime2SupportTable =   table<ext.DateTime2Support>
 
 [<Tests>]
 let tests = 
