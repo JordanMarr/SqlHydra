@@ -74,15 +74,19 @@ type UpdateQuerySpec<'T> =
 
 module TableMappings = 
 
-    let getByRootOrAlias (tableAlias: string) (tableMappings: Map<FQ.TableMappingKey, TableMapping>) =
+    /// Tries to get TableMapping by Root, then by Alias.
+    /// If found by Root, replaces with a TableAliasKey.
+    let tryGetByRootOrAlias (tableAlias: string) (tableMappings: Map<FQ.TableMappingKey, TableMapping>) =
         match tableMappings.TryFind(FQ.Root) with
         | Some tbl -> 
             let updatedTableMappings = tableMappings.Remove(FQ.Root).Add(FQ.TableAliasKey tableAlias, tbl)  
-            tbl, updatedTableMappings
+            Some tbl, updatedTableMappings
         | None -> 
-            let tbl = tableMappings[FQ.TableAliasKey tableAlias]
-            tbl, tableMappings
+            match tableMappings.TryFind(FQ.TableAliasKey tableAlias) with
+            | Some tbl -> Some tbl, tableMappings
+            | None -> None, tableMappings
 
+    /// Gets the first TableMapping.
     let getFirst (tableMappings: Map<FQ.TableMappingKey, TableMapping>) = 
         tableMappings |> Map.toList |> List.map snd |> List.head
 

@@ -24,7 +24,8 @@ type UpdateBuilder<'Updated>() =
     member this.For (state: QuerySource<'T>, [<ReflectedDefinition>] forExpr: FSharp.Quotations.Expr<'T -> QuerySource<'T>>) =
         let query = state |> getQueryOrDefault
         let tableAlias = QuotationVisitor.visitFor forExpr
-        let tbl, tableMappings = TableMappings.getByRootOrAlias tableAlias state.TableMappings
+        let tblMaybe, tableMappings = TableMappings.tryGetByRootOrAlias tableAlias state.TableMappings
+        let tbl = tblMaybe |> Option.get
 
         QuerySource<'T, UpdateQuerySpec<'T>>(
             { query with Table = match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name }

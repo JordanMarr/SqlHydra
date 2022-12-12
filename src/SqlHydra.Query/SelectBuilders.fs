@@ -54,12 +54,17 @@ type SelectBuilder<'Selected, 'Mapped> () =
     member this.For (state: QuerySource<'T>, [<ReflectedDefinition>] forExpr: FSharp.Quotations.Expr<'T -> QuerySource<'T>>) =
         let tableAlias = QuotationVisitor.visitFor forExpr
         let query = state |> getQueryOrDefault
-        let tbl, tableMappings = TableMappings.getByRootOrAlias tableAlias state.TableMappings
+        let tblMaybe, tableMappings = TableMappings.tryGetByRootOrAlias tableAlias state.TableMappings
 
-        QuerySource<'T, Query>(
-            let from = match tbl.Schema with | Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name
-            query.From($"{from} as {tableAlias}"), tableMappings
-        )
+        match tblMaybe with
+        | Some tbl -> 
+            QuerySource<'T, Query>(
+                let from = match tbl.Schema with | Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name
+                query.From($"{from} as {tableAlias}"), tableMappings
+            )
+        | None -> 
+            // Handles this scenario: `select (p.FirstName, p.LastName) into (fname, lname)`
+            state :?> QuerySource<'T, Query>
 
     member this.Yield _ =
         QuerySource<'T>(Map.empty)
@@ -170,7 +175,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
             let outerTableMappings = 
                 outerProperties
                 |> List.fold (fun (mappings: Map<FQ.TableMappingKey, TableMapping>) joinPI -> 
-                    let _, updatedMappings = TableMappings.getByRootOrAlias joinPI.Alias mappings
+                    let _, updatedMappings = TableMappings.tryGetByRootOrAlias joinPI.Alias mappings
                     updatedMappings
                 ) outerSource.TableMappings
 
@@ -178,7 +183,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
             let innerTableMappings = 
                 innerProperties
                 |> List.fold (fun (mappings: Map<FQ.TableMappingKey, TableMapping>) joinPI -> 
-                    let _, updatedMappings = TableMappings.getByRootOrAlias joinPI.Alias mappings
+                    let _, updatedMappings = TableMappings.tryGetByRootOrAlias joinPI.Alias mappings
                     updatedMappings
                 ) innerSource.TableMappings
         
@@ -222,7 +227,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
             let outerTableMappings = 
                 outerProperties
                 |> List.fold (fun (mappings: Map<FQ.TableMappingKey, TableMapping>) joinPI -> 
-                    let _, updatedMappings = TableMappings.getByRootOrAlias joinPI.Alias mappings
+                    let _, updatedMappings = TableMappings.tryGetByRootOrAlias joinPI.Alias mappings
                     updatedMappings
                 ) outerSource.TableMappings
 
@@ -230,7 +235,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
             let innerTableMappings = 
                 innerProperties
                 |> List.fold (fun (mappings: Map<FQ.TableMappingKey, TableMapping>) joinPI -> 
-                    let _, updatedMappings = TableMappings.getByRootOrAlias joinPI.Alias mappings
+                    let _, updatedMappings = TableMappings.tryGetByRootOrAlias joinPI.Alias mappings
                     updatedMappings
                 ) innerSource.TableMappings
         
