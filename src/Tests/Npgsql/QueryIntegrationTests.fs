@@ -560,7 +560,10 @@ let tests =
 
             use ctx = openContext ()
 #if NET7_0
-            // "TODO: NpgSql for .NET 7 no longer supports this."
+            // https://www.npgsql.org/doc/release-notes/7.0.html#managing-type-mappings-at-the-connection-level-is-no-longer-supported
+            // https://www.npgsql.org/doc/release-notes/7.0.html#global-type-mappings-must-now-be-done-before-any-usage
+            let dataSourceBuilder = NpgsqlDataSourceBuilder(DB.connectionString)
+            dataSourceBuilder.MapEnum<ext.mood>("ext.mood") |> ignore
 #else
             (ctx.Connection :?> Npgsql.NpgsqlConnection)
                 .TypeMapper.MapEnum<ext.mood>("ext.mood") |> ignore
