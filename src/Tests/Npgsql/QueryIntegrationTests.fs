@@ -556,8 +556,12 @@ let tests =
             //Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>("experiments.mood") |> ignore
 
             use ctx = openContext ()
+#if NET7_0
+            failwith "TODO: NpgSql for .NET 7 no longer supports this."
+#else
             (ctx.Connection :?> Npgsql.NpgsqlConnection)
                 .TypeMapper.MapEnum<ext.mood>("ext.mood") |> ignore
+#endif
 
             let! deleteResults =
                 deleteTask (Shared ctx) {
