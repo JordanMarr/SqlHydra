@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
     <WarnOn>3390;$(WarnOn)</WarnOn>
     <Configurations>Debug;Release;DebugLocal</Configurations>
     <GenerateProgramFile>false</GenerateProgramFile>

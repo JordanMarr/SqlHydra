@@ -1,0 +1,10 @@
+[general]
+connection = "Data Source=TestData/AdventureWorksLT.db"
+output = "Sqlite/AdventureWorksNet7.fs"
+namespace = "Sqlite.AdventureWorksNet7"
+cli_mutable = true
+[readers]
+reader_type = "System.Data.Common.DbDataReader"
+[filters]
+include = [ "*" ]
+exclude = [ "hr/*" ]

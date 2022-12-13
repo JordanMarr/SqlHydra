@@ -1,36 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>1.0.0</Version>
-    <Authors>Jordan Marr</Authors>
-    <Description></Description>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Version>1.0.0</Version>
+		<Authors>Jordan Marr</Authors>
+		<Description></Description>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="SchemaFilters.fs" />
-    <Compile Include="SchemaGenerator.fs" />
-    <Compile Include="TomlConfigParser.fs" />
-    <Compile Include="Fsproj.fs" />
-    <Compile Include="Console.fs" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="SchemaFilters.fs" />
+		<Compile Include="SchemaGenerator.fs" />
+		<Compile Include="TomlConfigParser.fs" />
+		<Compile Include="Fsproj.fs" />
+		<Compile Include="Console.fs" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Fantomas" Version="4.4.0" Condition="'$(TargetFramework)' == 'net5.0'" />
-	<PackageReference Include="Fantomas" Version="4.5.10" Condition="'$(TargetFramework)' == 'net6.0'" />
-    <PackageReference Include="FsAst" Version="0.9.0" Condition="'$(TargetFramework)' == 'net5.0'" />
-	<PackageReference Include="FsAst" Version="0.10.0" Condition="'$(TargetFramework)' == 'net6.0'" />
-	<PackageReference Include="FSharp.Core" Version="5.0.0" Condition="'$(TargetFramework)' == 'net5.0'" />
-	<PackageReference Include="FSharp.Core" Version="6.0.1" Condition="'$(TargetFramework)' == 'net6.0'" />
-    <PackageReference Include="Glob" Version="1.1.8" />
-    <PackageReference Include="Microsoft.Build" Version="16.11.0" />
-    <PackageReference Include="Spectre.Console" Version="0.41.0" />
-    <PackageReference Include="Tomlyn" Version="0.1.2" />
-  </ItemGroup>
-    
-  <ItemGroup>
-    <ProjectReference Include="..\SqlHydra.Domain\SqlHydra.Domain.fsproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Fantomas" Version="4.4.0" Condition="'$(TargetFramework)' == 'net5.0'" />
+		<PackageReference Include="Fantomas" Version="4.5.10" Condition="'$(TargetFramework)' == 'net6.0'" />
+		<PackageReference Include="Fantomas" Version="4.5.10" Condition="'$(TargetFramework)' == 'net7.0'" />
+		<PackageReference Include="FsAst" Version="0.9.0" Condition="'$(TargetFramework)' == 'net5.0'" />
+		<PackageReference Include="FsAst" Version="0.10.0" Condition="'$(TargetFramework)' == 'net6.0'" />
+		<PackageReference Include="FsAst" Version="0.13.0" Condition="'$(TargetFramework)' == 'net7.0'" />
+		<PackageReference Include="FSharp.Core" Version="5.0.0" Condition="'$(TargetFramework)' == 'net5.0'" />
+		<PackageReference Include="FSharp.Core" Version="6.0.1" Condition="'$(TargetFramework)' == 'net6.0'" />
+		<PackageReference Include="FSharp.Core" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
+		<PackageReference Include="Glob" Version="1.1.8" />
+		<PackageReference Include="Microsoft.Build" Version="16.11.0" />
+		<PackageReference Include="Spectre.Console" Version="0.41.0" />
+		<PackageReference Include="Tomlyn" Version="0.1.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SqlHydra.Domain\SqlHydra.Domain.fsproj" />
+	</ItemGroup>
 
 </Project>
