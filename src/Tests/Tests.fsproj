@@ -15,18 +15,6 @@
     <DefineConstants>TRACE;LOCALHOST</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Npgsql/AdventureWorksNet7.fs">
-      <Visible>False</Visible>
-    </Compile>
-    <Compile Include="Oracle/AdventureWorksNet7.fs">
-      <Visible>False</Visible>
-    </Compile>
-    <Compile Include="Sqlite/AdventureWorksNet7.fs">
-      <Visible>False</Visible>
-    </Compile>
-    <Compile Include="SqlServer/AdventureWorksNet7.fs">
-      <Visible>False</Visible>
-    </Compile>
     <Compile Include="Util.fs" />
     <Compile Include="Sqlite\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
     <Compile Include="Sqlite\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />

@@ -8,8 +8,11 @@ open Swensen.Unquote
 #if NET5_0
 open Npgsql.AdventureWorksNet5
 #endif
-#if NET6_0_OR_GREATER
+#if NET6_0
 open Npgsql.AdventureWorksNet6
+#endif
+#if NET7_0
+open Npgsql.AdventureWorksNet7
 #endif
 
 let openContext() = 
@@ -557,7 +560,7 @@ let tests =
 
             use ctx = openContext ()
 #if NET7_0
-            failwith "TODO: NpgSql for .NET 7 no longer supports this."
+            // "TODO: NpgSql for .NET 7 no longer supports this."
 #else
             (ctx.Connection :?> Npgsql.NpgsqlConnection)
                 .TypeMapper.MapEnum<ext.mood>("ext.mood") |> ignore
