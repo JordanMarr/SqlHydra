@@ -8,8 +8,11 @@ open Swensen.Unquote
 #if NET5_0
 open Npgsql.AdventureWorksNet5
 #endif
-#if NET6_0_OR_GREATER
+#if NET6_0
 open Npgsql.AdventureWorksNet6
+#endif
+#if NET7_0
+open Npgsql.AdventureWorksNet7
 #endif
 
 let openContext() = 
@@ -556,8 +559,15 @@ let tests =
             //Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>("experiments.mood") |> ignore
 
             use ctx = openContext ()
+#if NET7_0
+            // https://www.npgsql.org/doc/release-notes/7.0.html#managing-type-mappings-at-the-connection-level-is-no-longer-supported
+            // https://www.npgsql.org/doc/release-notes/7.0.html#global-type-mappings-must-now-be-done-before-any-usage
+            let dataSourceBuilder = NpgsqlDataSourceBuilder(DB.connectionString)
+            dataSourceBuilder.MapEnum<ext.mood>("ext.mood") |> ignore
+#else
             (ctx.Connection :?> Npgsql.NpgsqlConnection)
                 .TypeMapper.MapEnum<ext.mood>("ext.mood") |> ignore
+#endif
 
             let! deleteResults =
                 deleteTask (Shared ctx) {

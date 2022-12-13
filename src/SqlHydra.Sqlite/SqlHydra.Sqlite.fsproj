@@ -2,8 +2,8 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
-		<Version>1.0.2</Version>
+        <TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
+		<Version>1.1.0</Version>
         <Authors>Jordan Marr</Authors>
         <Description>SqlHydra.Sqlite is a dotnet tool that generates F# records for a SQLite database.</Description>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -27,14 +27,17 @@
     <ItemGroup>
 		<PackageReference Include="Fantomas" Version="4.4.0" Condition="'$(TargetFramework)' == 'net5.0'" />
 		<PackageReference Include="Fantomas" Version="4.5.10" Condition="'$(TargetFramework)' == 'net6.0'" />
+		<PackageReference Include="Fantomas" Version="4.5.10" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Include="FSharp.Core" Version="5.0.0" Condition="'$(TargetFramework)' == 'net5.0'" />
 		<PackageReference Include="FSharp.Core" Version="6.0.1" Condition="'$(TargetFramework)' == 'net6.0'" />
+		<PackageReference Include="FSharp.Core" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Include="FsAst" Version="0.9.0" Condition="'$(TargetFramework)' == 'net5.0'" />
 		<PackageReference Include="FsAst" Version="0.10.0" Condition="'$(TargetFramework)' == 'net6.0'" />
+		<PackageReference Include="FsAst" Version="0.10.0" Condition="'$(TargetFramework)' == 'net7.0'" />
         <PackageReference Include="Glob" Version="1.1.8" />
-        <PackageReference Include="Microsoft.Build" Version="16.11.0" />
+		<PackageReference Include="Microsoft.Build" Version="16.11.0" />
         <PackageReference Include="Spectre.Console" Version="0.41.0" />
-        <PackageReference Include="System.Data.SQLite" Version="1.0.113.7" />
+        <PackageReference Include="System.Data.SQLite" Version="1.0.117" />
         <PackageReference Include="Tomlyn" Version="0.1.2" />
     </ItemGroup>
 

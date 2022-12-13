@@ -1,0 +1,1 @@
+dotnet run --project ..\SqlHydra.Npgsql --framework net7.0 -- sqlhydra-npgsql-net7.toml

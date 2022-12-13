@@ -6,8 +6,11 @@ open DB
 #if NET5_0
 open Sqlite.AdventureWorksNet5
 #endif
-#if NET6_0_OR_GREATER
+#if NET6_0
 open Sqlite.AdventureWorksNet6
+#endif
+#if NET7_0
+open Sqlite.AdventureWorksNet7
 #endif
 
 // Tables
