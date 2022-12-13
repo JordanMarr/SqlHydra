@@ -45,8 +45,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.equal sql "SELECT \"Address\".\"City\" FROM \"Address\"" ""
+            Expect.equal sql "SELECT \"a\".\"City\" FROM \"main\".\"Address\" AS \"a\"" ""
         }
 
         test "Select 2 Columns" {
@@ -58,7 +57,7 @@ let tests =
 
             let sql = query.ToKataQuery() |> toSql
             //printfn "%s" sql
-            Expect.isTrue (sql.Contains("SELECT \"SalesOrderHeader\".\"CustomerID\", \"SalesOrderHeader\".\"OnlineOrderFlag\" FROM")) ""
+            Expect.isTrue (sql.Contains("SELECT \"h\".\"CustomerID\", \"h\".\"OnlineOrderFlag\" FROM")) ""
         }
 
         test "Select 1 Table and 1 Column" {
@@ -72,7 +71,7 @@ let tests =
 
             let sql = query.ToKataQuery() |> toSql
             //printfn "%s" sql
-            Expect.isTrue (sql.Contains("SELECT \"SalesOrderHeader\".*, \"SalesOrderDetail\".\"LineTotal\" FROM")) ""
+            Expect.isTrue (sql.Contains("SELECT \"o\".*, \"d\".\"LineTotal\" FROM")) ""
         }
 
         ptest "Where with Option Type" {
@@ -103,7 +102,7 @@ let tests =
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ((\"Address\".\"City\" = @p0) OR (\"Address\".\"City\" = @p1))")) ""
+            Expect.isTrue (sql.Contains("WHERE ((\"a\".\"City\" = @p0) OR (\"a\".\"City\" = @p1))")) ""
         }
 
         test "And Where" {
@@ -114,7 +113,7 @@ let tests =
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ((\"Address\".\"City\" = @p0) AND (\"Address\".\"City\" = @p1))")) ""
+            Expect.isTrue (sql.Contains("WHERE ((\"a\".\"City\" = @p0) AND (\"a\".\"City\" = @p1))")) ""
         }
 
         test "Where with AND and OR in Parenthesis" {
@@ -126,7 +125,7 @@ let tests =
     
             let sql = query.ToKataQuery() |> toSql
             Expect.isTrue 
-                (sql.Contains("WHERE ((\"Address\".\"City\" = @p0) AND ((\"Address\".\"AddressLine2\" = @p1) OR (\"Address\".\"AddressLine2\" IS NULL)))")) 
+                (sql.Contains("WHERE ((\"a\".\"City\" = @p0) AND ((\"a\".\"AddressLine2\" = @p1) OR (\"a\".\"AddressLine2\" IS NULL)))")) 
                 "Should wrap OR clause in parenthesis and each individual where clause in parenthesis."
         }
 
@@ -138,7 +137,7 @@ let tests =
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (NOT ((\"Address\".\"City\" = @p0) AND (\"Address\".\"City\" = @p1)))")) ""
+            Expect.isTrue (sql.Contains("WHERE (NOT ((\"a\".\"City\" = @p0) AND (\"a\".\"City\" = @p1)))")) ""
         }
 
         test "Where Customer isIn List" {
@@ -149,7 +148,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"Customer\".\"CustomerID\" IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"c\".\"CustomerID\" IN (@p0, @p1, @p2))")) ""
         }
 
         test "Where Customer |=| List" {
@@ -160,7 +159,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"Customer\".\"CustomerID\" IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"c\".\"CustomerID\" IN (@p0, @p1, @p2))")) ""
         }
 
         test "Where Customer |=| Array" {
@@ -171,7 +170,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"Customer\".\"CustomerID\" IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"c\".\"CustomerID\" IN (@p0, @p1, @p2))")) ""
         }
         
         test "Where Customer |=| Seq" {            
@@ -184,7 +183,7 @@ let tests =
             let query = buildQuery([ 30018L;29545L;29954L ])
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"Customer\".\"CustomerID\" IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"c\".\"CustomerID\" IN (@p0, @p1, @p2))")) ""
         }
 
         test "Where Customer |<>| List" {
@@ -195,7 +194,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (\"Customer\".\"CustomerID\" NOT IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"c\".\"CustomerID\" NOT IN (@p0, @p1, @p2))")) ""
         }
 
         test "Inner Join" {
@@ -207,8 +206,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("INNER JOIN \"SalesOrderDetail\" ON (\"SalesOrderHeader\".\"SalesOrderID\" = \"SalesOrderDetail\".\"SalesOrderID\")")) ""
+            Expect.isTrue (sql.Contains("INNER JOIN \"main\".\"SalesOrderDetail\" AS \"d\" ON (\"o\".\"SalesOrderID\" = \"d\".\"SalesOrderID\")")) ""
         }
 
         test "Left Join" {
@@ -220,8 +218,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("LEFT JOIN \"SalesOrderDetail\" ON (\"SalesOrderHeader\".\"SalesOrderID\" = \"SalesOrderDetail\".\"SalesOrderID\")")) ""
+            Expect.isTrue (sql.Contains("LEFT JOIN \"main\".\"SalesOrderDetail\" AS \"d\" ON (\"o\".\"SalesOrderID\" = \"d\".\"SalesOrderID\")")) ""
         }
         
         test "Inner Join - Multi Column" {
@@ -233,8 +230,7 @@ let tests =
                 }
         
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("INNER JOIN \"SalesOrderDetail\" ON (\"SalesOrderHeader\".\"SalesOrderID\" = \"SalesOrderDetail\".\"SalesOrderID\" AND \"SalesOrderHeader\".\"ModifiedDate\" = \"SalesOrderDetail\".\"ModifiedDate\")")) ""
+            Expect.isTrue (sql.Contains("INNER JOIN \"main\".\"SalesOrderDetail\" AS \"d\" ON (\"o\".\"SalesOrderID\" = \"d\".\"SalesOrderID\" AND \"o\".\"ModifiedDate\" = \"d\".\"ModifiedDate\")")) ""
         }
         
         test "Left Join - Multi Column" {
@@ -246,8 +242,7 @@ let tests =
                 }
         
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("LEFT JOIN \"SalesOrderDetail\" ON (\"SalesOrderHeader\".\"SalesOrderID\" = \"SalesOrderDetail\".\"SalesOrderID\" AND \"SalesOrderHeader\".\"ModifiedDate\" = \"SalesOrderDetail\".\"ModifiedDate\")")) ""
+            Expect.isTrue (sql.Contains("LEFT JOIN \"main\".\"SalesOrderDetail\" AS \"d\" ON (\"o\".\"SalesOrderID\" = \"d\".\"SalesOrderID\" AND \"o\".\"ModifiedDate\" = \"d\".\"ModifiedDate\")")) ""
         }
 
         test "Delete Query with Where" {
@@ -258,8 +253,8 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("DELETE FROM \"Customer\"")) ""
-            Expect.isTrue (sql.Contains("WHERE (\"Customer\".\"CustomerID\" NOT IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("DELETE FROM \"main\".\"Customer\"")) ""
+            Expect.isTrue (sql.Contains("WHERE (\"main\".\"Customer\".\"CustomerID\" NOT IN (@p0, @p1, @p2))")) ""
         }
 
         test "Delete All" {
@@ -270,7 +265,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.equal "DELETE FROM \"Customer\"" sql ""
+            Expect.equal sql "DELETE FROM \"main\".\"Customer\"" ""
         }
 
         test "Update Query with Where" {
@@ -283,7 +278,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.equal "UPDATE \"Customer\" SET \"FirstName\" = @p0, \"LastName\" = @p1 WHERE (\"Customer\".\"CustomerID\" = @p2)" sql ""
+            Expect.equal sql "UPDATE \"main\".\"Customer\" SET \"FirstName\" = @p0, \"LastName\" = @p1 WHERE (\"main\".\"Customer\".\"CustomerID\" = @p2)" ""
         }
 
         test "Update Query with No Where" {
@@ -296,7 +291,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.equal "UPDATE \"Customer\" SET \"FirstName\" = @p0, \"LastName\" = @p1" sql ""
+            Expect.equal "UPDATE \"main\".\"Customer\" SET \"FirstName\" = @p0, \"LastName\" = @p1" sql ""
         }
 
         test "Update should fail without where or updateAll" {
@@ -380,7 +375,7 @@ let tests =
             let sql = query.ToKataQuery() |> toSql
             Expect.equal 
                 sql 
-                "INSERT INTO \"BuildVersion\" (\"Database Version\", \"VersionDate\", \"ModifiedDate\") VALUES (@p0, @p1, @p2);select last_insert_rowid() as id" 
+                "INSERT INTO \"main\".\"BuildVersion\" (\"Database Version\", \"VersionDate\", \"ModifiedDate\") VALUES (@p0, @p1, @p2);select last_insert_rowid() as id" 
                 ""
         }
         
@@ -395,7 +390,7 @@ let tests =
             //printfn "%s" sql
             Expect.equal
                 sql
-                "SELECT COUNT(\"SalesOrderHeader\".\"SalesOrderID\") FROM \"SalesOrderHeader\""
+                "SELECT COUNT(\"o\".\"SalesOrderID\") FROM \"main\".\"SalesOrderHeader\" AS \"o\""
                 ""
         }
         

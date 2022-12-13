@@ -7,24 +7,36 @@ open System
 
 type TableMapping = { Name: string; Schema: string option }
 
+type TableMappingKey = 
+    | Root
+    | TableAliasKey of string
+        
+module TableMappings = 
+
+    /// Tries to get TableMapping by Root, then by Alias.
+    /// If found by Root, replaces with a TableAliasKey.
+    let tryGetByRootOrAlias (tableAlias: string) (tableMappings: Map<TableMappingKey, TableMapping>) =
+        match tableMappings.TryFind(Root) with
+        | Some tbl -> 
+            let updatedTableMappings = tableMappings.Remove(Root).Add(TableAliasKey tableAlias, tbl)  
+            Some tbl, updatedTableMappings
+        | None -> 
+            match tableMappings.TryFind(TableAliasKey tableAlias) with
+            | Some tbl -> Some tbl, tableMappings
+            | None -> None, tableMappings
+
+    /// Gets the first TableMapping.
+    let getFirst (tableMappings: Map<TableMappingKey, TableMapping>) = 
+        tableMappings |> Map.toList |> List.map snd |> List.head
+
 module FQ = 
-    /// Fully qualified entity type name
-    type [<Struct>] FQName = private FQName of string
-    let fqName (t: Type) = FQName t.FullName
 
     /// Fully qualifies a column with: {?schema}.{table}.{column}
-    let internal fullyQualifyColumn (tables: Map<FQName, TableMapping>) (property: Reflection.MemberInfo) =
-        let tbl = tables.[fqName property.DeclaringType]
+    let internal fullyQualifyColumn (tables: Map<TableMappingKey, TableMapping>) (tableAlias: string) (column: Reflection.MemberInfo) =
+        let tbl = tables[TableAliasKey tableAlias]
         match tbl.Schema with
-        | Some schema -> $"%s{schema}.%s{tbl.Name}.%s{property.Name}"
-        | None -> $"%s{tbl.Name}.%s{property.Name}"
-
-    /// Tries to find a table mapping for a given table record type. 
-    let internal fullyQualifyTable (tables: Map<FQName, TableMapping>) (tableRecord: Type) =
-        let tbl = tables.[fqName tableRecord]
-        match tbl.Schema with
-        | Some schema -> $"{schema}.{tbl.Name}"
-        | None -> tbl.Name
+        | Some schema -> $"%s{schema}.%s{tbl.Name}.%s{column.Name}"
+        | None -> $"%s{tbl.Name}.%s{column.Name}"
 
 /// Represents a collection that must contain at least on item.
 module AtLeastOne =
@@ -78,20 +90,8 @@ type QuerySource<'T>(tableMappings) =
     interface IEnumerable<'T> with
         member this.GetEnumerator() = Seq.empty<'T>.GetEnumerator() :> Collections.IEnumerator
         member this.GetEnumerator() = Seq.empty<'T>.GetEnumerator()
+    member this.TableMappings : Map<TableMappingKey, TableMapping> = tableMappings
     
-    member this.TableMappings : Map<FQ.FQName, TableMapping> = tableMappings
-    
-    member this.TryGetOuterTableMapping() = 
-        let outerEntity = typeof<'T>
-        let fqn = 
-            if outerEntity.Name.StartsWith "Tuple" // True for joined tables
-            then outerEntity.GetGenericArguments() |> Array.head |> FQ.fqName
-            else outerEntity |> FQ.fqName
-        this.TableMappings.TryFind(fqn)
-
-    member this.GetOuterTableMapping() = 
-        this.TryGetOuterTableMapping().Value
-
 type QuerySource<'T, 'Query>(query, tableMappings) = 
     inherit QuerySource<'T>(tableMappings)
     member this.Query : 'Query = query

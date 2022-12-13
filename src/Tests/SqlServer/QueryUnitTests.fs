@@ -12,14 +12,14 @@ open SqlServer.AdventureWorksNet6
 #endif
 
 // Tables
-let personTable =           table<Person.Person>                    |> inSchema (nameof Person)
-let addressTable =          table<Person.Address>                   |> inSchema (nameof Person)
-let customerTable =         table<Sales.Customer>                   |> inSchema (nameof Sales)
-let orderHeaderTable =      table<Sales.SalesOrderHeader>           |> inSchema (nameof Sales)
-let orderDetailTable =      table<Sales.SalesOrderDetail>           |> inSchema (nameof Sales)
-let productTable =          table<Production.Product>               |> inSchema (nameof Production)
-let subCategoryTable =      table<Production.ProductSubcategory>    |> inSchema (nameof Production)
-let categoryTable =         table<Production.ProductCategory>       |> inSchema (nameof Production)
+let personTable =           table<Person.Person>
+let addressTable =          table<Person.Address>
+let customerTable =         table<Sales.Customer>
+let orderHeaderTable =      table<Sales.SalesOrderHeader>
+let orderDetailTable =      table<Sales.SalesOrderDetail>
+let productTable =          table<Production.Product>
+let subCategoryTable =      table<Production.ProductSubcategory>
+let categoryTable =         table<Production.ProductCategory>
 let errorLogTable =         table<dbo.ErrorLog>
 
 [<Tests>]
@@ -36,7 +36,6 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
             Expect.isTrue (sql.Contains("WHERE")) ""
         }
 
@@ -48,8 +47,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("SELECT [Person].[Address].[City] FROM")) ""
+            Expect.isTrue (sql.Contains("SELECT [a].[City] FROM")) ""
         }
 
         test "Select 2 Columns" {
@@ -60,8 +58,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("SELECT [Sales].[SalesOrderHeader].[CustomerID], [Sales].[SalesOrderHeader].[OnlineOrderFlag] FROM")) ""
+            Expect.isTrue (sql.Contains("SELECT [h].[CustomerID], [h].[OnlineOrderFlag] FROM")) ""
         }
 
         test "Select 1 Table and 1 Column" {
@@ -75,7 +72,7 @@ let tests =
 
             let sql = query.ToKataQuery() |> toSql
             //printfn "%s" sql
-            Expect.isTrue (sql.Contains("SELECT [Sales].[SalesOrderHeader].*, [Sales].[SalesOrderDetail].[LineTotal] FROM")) ""
+            Expect.isTrue (sql.Contains("SELECT [o].*, [d].[LineTotal] FROM")) ""
         }
 
         ptest "Where with Option Type" {
@@ -106,7 +103,7 @@ let tests =
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (([Person].[Address].[City] = @p0) OR ([Person].[Address].[City] = @p1))")) ""
+            Expect.isTrue (sql.Contains("WHERE (([a].[City] = @p0) OR ([a].[City] = @p1))")) ""
         }
 
         test "And Where" {
@@ -117,7 +114,7 @@ let tests =
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (([Person].[Address].[City] = @p0) AND ([Person].[Address].[City] = @p1))")) ""
+            Expect.isTrue (sql.Contains("WHERE (([a].[City] = @p0) AND ([a].[City] = @p1))")) ""
         }
 
         test "Where with AND and OR in Parenthesis" {
@@ -129,7 +126,7 @@ let tests =
     
             let sql = query.ToKataQuery() |> toSql
             Expect.isTrue 
-                (sql.Contains("WHERE (([Person].[Address].[City] = @p0) AND (([Person].[Address].[AddressLine2] = @p1) OR ([Person].[Address].[AddressLine2] IS NULL)))")) 
+                (sql.Contains("WHERE (([a].[City] = @p0) AND (([a].[AddressLine2] = @p1) OR ([a].[AddressLine2] IS NULL)))")) 
                 "Should wrap OR clause in parenthesis and each individual where clause in parenthesis."
         }
 
@@ -141,7 +138,7 @@ let tests =
                 }
     
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE (NOT (([Person].[Address].[City] = @p0) AND ([Person].[Address].[City] = @p1)))")) ""
+            Expect.isTrue (sql.Contains("WHERE (NOT (([a].[City] = @p0) AND ([a].[City] = @p1)))")) ""
         }
 
         test "Where Customer isIn List" {
@@ -152,7 +149,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ([Sales].[Customer].[CustomerID] IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE ([c].[CustomerID] IN (@p0, @p1, @p2))")) ""
         }
 
         test "Where Customer |=| List" {
@@ -163,7 +160,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ([Sales].[Customer].[CustomerID] IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE ([c].[CustomerID] IN (@p0, @p1, @p2))")) ""
         }
 
         test "Where Customer |=| Array" {
@@ -174,7 +171,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ([Sales].[Customer].[CustomerID] IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE ([c].[CustomerID] IN (@p0, @p1, @p2))")) ""
         }
         
         test "Where Customer |=| Seq" {            
@@ -187,7 +184,7 @@ let tests =
             let query = buildQuery([ 30018;29545;29954 ])
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ([Sales].[Customer].[CustomerID] IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE ([c].[CustomerID] IN (@p0, @p1, @p2))")) ""
         }
 
         test "Where Customer |<>| List" {
@@ -198,7 +195,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ([Sales].[Customer].[CustomerID] NOT IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE ([c].[CustomerID] NOT IN (@p0, @p1, @p2))")) ""
         }
 
         test "Inner Join" {
@@ -210,8 +207,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID])")) ""
+            Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID])")) ""
         }
 
         test "Left Join" {
@@ -223,8 +219,9 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID])")) ""
+            let expected = """SELECT [o].* FROM [Sales].[SalesOrderHeader] AS [o] 
+LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID])"""
+            Expect.equal sql expected ""
         }
         
         test "Inner Join - Multi Column" {
@@ -236,8 +233,7 @@ let tests =
                 }
         
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
-            Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID] AND [Sales].[SalesOrderHeader].[ModifiedDate] = [Sales].[SalesOrderDetail].[ModifiedDate])")) ""
+            Expect.isTrue (sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID] AND [o].[ModifiedDate] = [d].[ModifiedDate])")) ""
         }
         
         test "Left Join - Multi Column" {
@@ -250,7 +246,7 @@ let tests =
         
             let sql = query.ToKataQuery() |> toSql
             //printfn "%s" sql
-            Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] ON ([Sales].[SalesOrderHeader].[SalesOrderID] = [Sales].[SalesOrderDetail].[SalesOrderID] AND [Sales].[SalesOrderHeader].[ModifiedDate] = [Sales].[SalesOrderDetail].[ModifiedDate])")) ""
+            Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID] AND [o].[ModifiedDate] = [d].[ModifiedDate])")) ""
         }
 
         test "Join On Value Bug Fix Test" {
@@ -262,7 +258,11 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isNotNull sql "Shouldn't fail with exception"
+            Expect.equal sql
+                """SELECT [o].* FROM [Sales].[SalesOrderHeader] AS [o] 
+LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[AccountNumber])"""
+                "Bugged version was replacing TableMapping for original table with joined table."
+                
         }
 
         test "Delete Query with Where" {
@@ -405,10 +405,9 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            //printfn "%s" sql
             Expect.equal
                 sql
-                "SELECT COUNT([Sales].[SalesOrderHeader].[SalesOrderID]) FROM [Sales].[SalesOrderHeader]"
+                "SELECT COUNT([o].[SalesOrderID]) FROM [Sales].[SalesOrderHeader] AS [o]"
                 ""
         }
         
@@ -432,5 +431,23 @@ let tests =
 
             // should not throw exception
             ()
+        }
+
+        test "Self Join" {
+            // NOTE: I could not find a good self join example in AdventureWorks.
+            let query = 
+                select { 
+                    for p1 in productTable do
+                    join p2 in productTable on (p1.ProductID = p2.ProductID)
+                    where (p2.ListPrice > 10.00M)
+                    select p1
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal
+                sql
+                """SELECT [p1].* FROM [Production].[Product] AS [p1] 
+INNER JOIN [Production].[Product] AS [p2] ON ([p1].[ProductID] = [p2].[ProductID]) WHERE ([p2].[ListPrice] > @p0)"""
+                ""
         }
     ]

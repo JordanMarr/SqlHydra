@@ -5,7 +5,6 @@ module SqlHydra.Query.SelectBuilders
 open System
 open System.Linq.Expressions
 open System.Data.Common
-open System.Threading.Tasks
 open SqlKata
 
 type ContextType = 
@@ -44,19 +43,27 @@ type SelectBuilder<'Selected, 'Mapped> () =
         | :? QuerySource<'T, Query> as qs -> qs.Query
         | _ -> Query()            
 
-    let mergeTableMappings (a: Map<FQ.FQName, TableMapping>, b: Map<FQ.FQName, TableMapping>) =
+    let mergeTableMappings (a: Map<TableMappingKey, TableMapping>, b: Map<TableMappingKey, TableMapping>) =
         Map (Seq.concat [ (Map.toSeq a); (Map.toSeq b) ])
+            
+    let qualifyColumnWithAlias (alias: string) (col: Reflection.MemberInfo) = 
+        $"%s{alias}.%s{col.Name}"
 
     member val MapFn = Option<Func<'Selected, 'Mapped>>.None with get, set
+    
+    member this.For (state: QuerySource<'T>, [<ReflectedDefinition>] forExpr: FSharp.Quotations.Expr<'T -> QuerySource<'T>>) =
+        let tableAlias = QuotationVisitor.visitFor forExpr
+        let query = state |> getQueryOrDefault
+        let tblMaybe, tableMappings = TableMappings.tryGetByRootOrAlias tableAlias state.TableMappings
 
-    member this.For (state: QuerySource<'T>, f: 'T -> QuerySource<'T>) =
-        match state.TryGetOuterTableMapping() with
+        match tblMaybe with
         | Some tbl -> 
-            let query = state |> getQueryOrDefault
             QuerySource<'T, Query>(
-                query.From(match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name), 
-                state.TableMappings)
+                let from = match tbl.Schema with | Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name
+                query.From($"{from} as {tableAlias}"), tableMappings
+            )
         | None -> 
+            // Handles this scenario: `select (p.FirstName, p.LastName) into (fname, lname)`
             state :?> QuerySource<'T, Query>
 
     member this.Yield _ =
@@ -69,8 +76,8 @@ type SelectBuilder<'Selected, 'Mapped> () =
     /// Sets the WHERE condition
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
     member this.Where (state: QuerySource<'T, Query>, [<ProjectionParameter>] whereExpression) = 
-        let query = state.Query
-        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
+        let query = state.Query        
+        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression qualifyColumnWithAlias
         QuerySource<'T, Query>(query.Where(fun w -> where), state.TableMappings)
 
     /// Sets the SELECT statement and filters the query to include only the selected tables
@@ -81,17 +88,17 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let queryWithSelectedColumns =
             selections
             |> List.fold (fun (q: Query) -> function
-                | LinqExpressionVisitors.SelectedTable tbl -> 
+                | LinqExpressionVisitors.SelectedTable tableAlias -> 
                     // Select all columns in table
-                    q.Select($"%s{FQ.fullyQualifyTable state.TableMappings tbl}.*")
-                | LinqExpressionVisitors.SelectedColumn col -> 
+                    q.Select($"%s{tableAlias}.*")
+                | LinqExpressionVisitors.SelectedColumn (tableAlias, column) -> 
                     // Select a single column
-                    q.Select(FQ.fullyQualifyColumn state.TableMappings col)
-                | LinqExpressionVisitors.SelectedAggregateColumn (aggFn, col) -> 
-                    // Currently in v2.3.7, SqlKata doesn't support multiple inline aggregate functions.
+                    q.Select($"%s{tableAlias}.%s{column}")
+                | LinqExpressionVisitors.SelectedAggregateColumn (aggFn, tableAlias, column) -> 
+                    // Currently in v2.4.0, SqlKata doesn't support multiple inline aggregate functions.
                     // Use SelectRaw as a workaround until SqlKata supports multiple aggregates.
                     // https://github.com/sqlkata/querybuilder/pull/504
-                    let fqCol = FQ.fullyQualifyColumn state.TableMappings col
+                    let fqCol = $"%s{tableAlias}.%s{column}"
 
                     // SqlKata will translate curly braces to dialect-specific characters (ex: [] for mssql, "" for postgres)
                     let fqColWithCurlyBraces = 
@@ -110,23 +117,18 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let orderedQuery = 
             LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
             |> function 
-                | LinqExpressionVisitors.OrderByColumn p -> 
-                    state.Query.OrderBy(FQ.fullyQualifyColumn state.TableMappings p)
-                | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
-                    state.Query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p})")        
+                | LinqExpressionVisitors.OrderByColumn (tableAlias, p) -> 
+                    let fqCol = $"%s{tableAlias}.%s{p.Name}"
+                    state.Query.OrderBy(fqCol)
+                | LinqExpressionVisitors.OrderByAggregateColumn (aggType, tableAlias, p) -> 
+                    let fqCol = $"%s{tableAlias}.%s{p.Name}"
+                    state.Query.OrderByRaw($"%s{aggType}(%s{fqCol})")
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the ORDER BY for single column
     [<CustomOperation("thenBy", MaintainsVariableSpace = true)>]
     member this.ThenBy (state: QuerySource<'T, Query>, [<ProjectionParameter>] propertySelector) = 
-        let orderedQuery = 
-            LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
-            |> function 
-                | LinqExpressionVisitors.OrderByColumn p -> 
-                    state.Query.OrderBy(FQ.fullyQualifyColumn state.TableMappings p)
-                | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
-                    state.Query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p})")        
-        QuerySource<'T, Query>(orderedQuery, state.TableMappings)
+        this.OrderBy(state, propertySelector)
 
     /// Sets the ORDER BY DESC for single column
     [<CustomOperation("orderByDescending", MaintainsVariableSpace = true)>]
@@ -134,23 +136,18 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let orderedQuery = 
             LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
             |> function 
-                | LinqExpressionVisitors.OrderByColumn p -> 
-                    state.Query.OrderByDesc(FQ.fullyQualifyColumn state.TableMappings p)
-                | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
-                    state.Query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p}) DESC")        
+                | LinqExpressionVisitors.OrderByColumn (tableAlias, p) -> 
+                    let fqCol = $"%s{tableAlias}.%s{p.Name}"
+                    state.Query.OrderByDesc(fqCol)
+                | LinqExpressionVisitors.OrderByAggregateColumn (aggType, tableAlias, p) -> 
+                    let fqCol = $"%s{tableAlias}.%s{p.Name}"
+                    state.Query.OrderByRaw($"%s{aggType}(%s{fqCol}) DESC")
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the ORDER BY DESC for single column
     [<CustomOperation("thenByDescending", MaintainsVariableSpace = true)>]
     member this.ThenByDescending (state: QuerySource<'T, Query>, [<ProjectionParameter>] propertySelector) = 
-        let orderedQuery = 
-            LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector
-            |> function 
-                | LinqExpressionVisitors.OrderByColumn p -> 
-                    state.Query.OrderByDesc(FQ.fullyQualifyColumn state.TableMappings p)
-                | LinqExpressionVisitors.OrderByAggregateColumn (aggType, p) -> 
-                    state.Query.OrderByRaw($"{aggType}({FQ.fullyQualifyColumn state.TableMappings p}) DESC")        
-        QuerySource<'T, Query>(orderedQuery, state.TableMappings)
+        this.OrderByDescending(state, propertySelector)
 
     /// Sets the SKIP value for query
     [<CustomOperation("skip", MaintainsVariableSpace = true)>]
@@ -170,27 +167,49 @@ type SelectBuilder<'Selected, 'Mapped> () =
                       innerKeySelector: Expression<Func<'Inner,'Key>>, 
                       resultSelector: Expression<Func<'Outer,'Inner,'JoinResult>> ) = 
 
-        let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
-        let outerProperties = LinqExpressionVisitors.visitJoin<'Outer, 'Key> outerKeySelector
-        let innerProperties = LinqExpressionVisitors.visitJoin<'Inner, 'Key> innerKeySelector
+        let outerProperties = LinqExpressionVisitors.visitJoin<'Outer, 'Key> outerKeySelector // left
+        let innerProperties = LinqExpressionVisitors.visitJoin<'Inner, 'Key> innerKeySelector // right
+
+        let mergedTables = 
+            // Update outer table mappings with join aliases (accumulated outer/left mappings)
+            let outerTableMappings = 
+                outerProperties
+                |> List.fold (fun (mappings: Map<TableMappingKey, TableMapping>) joinPI -> 
+                    let _, updatedMappings = TableMappings.tryGetByRootOrAlias joinPI.Alias mappings
+                    updatedMappings
+                ) outerSource.TableMappings
+
+            // Update inner table mapping with join aliases (this will always be 1 mapping being joined)
+            let innerTableMappings = 
+                innerProperties
+                |> List.fold (fun (mappings: Map<TableMappingKey, TableMapping>) joinPI -> 
+                    let _, updatedMappings = TableMappings.tryGetByRootOrAlias joinPI.Alias mappings
+                    updatedMappings
+                ) innerSource.TableMappings
+        
+            mergeTableMappings (outerTableMappings, innerTableMappings)
 
         let outerQuery = outerSource |> getQueryOrDefault
-        let innerTableName = 
+        let innerTableNameAsAlias = 
             innerProperties 
-            |> Seq.map (fun p -> mergedTables.[FQ.fqName p.DeclaringType])
-            |> Seq.map (fun tbl -> 
-                match tbl.Schema with
-                | Some schema -> sprintf "%s.%s" schema tbl.Name
-                | None -> tbl.Name
+            |> Seq.map (fun p -> p, mergedTables[TableAliasKey p.Alias])
+            |> Seq.map (fun (p, tbl) -> 
+                let tblNm = 
+                    match tbl.Schema with
+                    | Some schema -> $"%s{schema}.%s{tbl.Name}"
+                    | None -> tbl.Name
+
+                $"%s{tblNm} AS %s{p.Alias}"
             )
             |> Seq.head
         
         let joinOn = 
-            let fq = FQ.fullyQualifyColumn mergedTables
             List.zip outerProperties innerProperties
-            |> List.fold (fun (j: Join) (outerProp, innerProp) -> j.On(fq outerProp, fq innerProp)) (Join())
+            |> List.fold (fun (j: Join) (outerProp, innerProp) -> 
+                j.On($"%s{outerProp.Alias}.%s{outerProp.Member.Name}", $"%s{innerProp.Alias}.%s{innerProp.Member.Name}")
+            ) (Join())
             
-        QuerySource<'JoinResult, Query>(outerQuery.Join(innerTableName, fun j -> joinOn), mergedTables)
+        QuerySource<'JoinResult, Query>(outerQuery.Join(innerTableNameAsAlias, fun j -> joinOn), mergedTables)
 
     /// LEFT JOIN table on one or more columns
     [<CustomOperation("leftJoin", MaintainsVariableSpace = true, IsLikeJoin = true, JoinConditionWord = "on")>]
@@ -200,38 +219,60 @@ type SelectBuilder<'Selected, 'Mapped> () =
                           innerKeySelector: Expression<Func<'Inner option,'Key>>, 
                           resultSelector: Expression<Func<'Outer,'Inner option,'JoinResult>> ) = 
 
-        let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
         let outerProperties = LinqExpressionVisitors.visitJoin<'Outer, 'Key> outerKeySelector
         let innerProperties = LinqExpressionVisitors.visitJoin<'Inner option, 'Key> innerKeySelector
+        
+        let mergedTables = 
+            // Update outer table mappings with join aliases
+            let outerTableMappings = 
+                outerProperties
+                |> List.fold (fun (mappings: Map<TableMappingKey, TableMapping>) joinPI -> 
+                    let _, updatedMappings = TableMappings.tryGetByRootOrAlias joinPI.Alias mappings
+                    updatedMappings
+                ) outerSource.TableMappings
+
+            // Update inner table mappings with join aliases
+            let innerTableMappings = 
+                innerProperties
+                |> List.fold (fun (mappings: Map<TableMappingKey, TableMapping>) joinPI -> 
+                    let _, updatedMappings = TableMappings.tryGetByRootOrAlias joinPI.Alias mappings
+                    updatedMappings
+                ) innerSource.TableMappings
+        
+            mergeTableMappings (outerTableMappings, innerTableMappings)
 
         let outerQuery = outerSource |> getQueryOrDefault
-        let innerTableName = 
+        let innerTableNameAsAlias = 
             innerProperties 
-            |> Seq.map (fun p -> mergedTables.[FQ.fqName p.DeclaringType])
-            |> Seq.map (fun tbl -> 
-                match tbl.Schema with
-                | Some schema -> sprintf "%s.%s" schema tbl.Name
-                | None -> tbl.Name
+            |> Seq.map (fun p -> p, mergedTables[TableAliasKey p.Alias])
+            |> Seq.map (fun (p, tbl) -> 
+                let tblNm = 
+                    match tbl.Schema with
+                    | Some schema -> $"%s{schema}.%s{tbl.Name}"
+                    | None -> tbl.Name
+
+                $"%s{tblNm} AS %s{p.Alias}"
             )
             |> Seq.head
 
         let joinOn = 
-            let fq = FQ.fullyQualifyColumn mergedTables
             List.zip outerProperties innerProperties
-            |> List.fold (fun (j: Join) (outerProp, innerProp) -> j.On(fq outerProp, fq innerProp)) (Join())
+            |> List.fold (fun (j: Join) (outerProp, innerProp) -> 
+                j.On($"%s{outerProp.Alias}.%s{outerProp.Member.Name}", $"%s{innerProp.Alias}.%s{innerProp.Member.Name}")
+            ) (Join())
             
-        QuerySource<'JoinResult, Query>(outerQuery.LeftJoin(innerTableName, fun j -> joinOn), mergedTables)
+        QuerySource<'JoinResult, Query>(outerQuery.LeftJoin(innerTableNameAsAlias, fun j -> joinOn), mergedTables)
 
     /// Sets the GROUP BY for one or more columns.
     [<CustomOperation("groupBy", MaintainsVariableSpace = true)>]
     member this.GroupBy (state: QuerySource<'T, Query>, [<ProjectionParameter>] propertySelector) = 
-        let properties = LinqExpressionVisitors.visitPropertiesSelector<'T, 'Prop> propertySelector (FQ.fullyQualifyColumn state.TableMappings)
+        let properties = LinqExpressionVisitors.visitPropertiesSelector<'T, 'Prop> propertySelector qualifyColumnWithAlias
         QuerySource<'T, Query>(state.Query.GroupBy(properties |> List.toArray), state.TableMappings)
 
     /// Sets the HAVING condition.
     [<CustomOperation("having", MaintainsVariableSpace = true)>]
     member this.Having (state: QuerySource<'T, Query>, [<ProjectionParameter>] havingExpression) = 
-        let having = LinqExpressionVisitors.visitHaving<'T> havingExpression (FQ.fullyQualifyColumn state.TableMappings)
+        let having = LinqExpressionVisitors.visitHaving<'T> havingExpression qualifyColumnWithAlias
         QuerySource<'T, Query>(state.Query.Having(fun w -> having), state.TableMappings)
 
     /// Sets query to return DISTINCT values

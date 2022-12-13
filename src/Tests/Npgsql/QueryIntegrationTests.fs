@@ -19,19 +19,19 @@ let openContext() =
     new QueryContext(conn, compiler)
 
 // Tables
-let personTable =           table<person.person>                    |> inSchema (nameof person)
-let addressTable =          table<person.address>                   |> inSchema (nameof person)
-let customerTable =         table<sales.customer>                   |> inSchema (nameof sales)
-let orderHeaderTable =      table<sales.salesorderheader>           |> inSchema (nameof sales)
-let orderDetailTable =      table<sales.salesorderdetail>           |> inSchema (nameof sales)
-let productTable =          table<production.product>               |> inSchema (nameof production)
-let subCategoryTable =      table<production.productsubcategory>    |> inSchema (nameof production)
-let categoryTable =         table<production.productcategory>       |> inSchema (nameof production)
-let currencyTable =         table<sales.currency>                   |> inSchema (nameof sales)
-let productReviewTable =    table<production.productreview>         |> inSchema (nameof production)
-let employeeTable =         table<humanresources.employee>          |> inSchema (nameof humanresources)
-let jsonSupportTable =      table<ext.jsonsupport>                  |> inSchema (nameof ext)
-let arraysTable =           table<ext.arrays>                       |> inSchema (nameof ext)
+let personTable =           table<person.person>
+let addressTable =          table<person.address>
+let customerTable =         table<sales.customer>
+let orderHeaderTable =      table<sales.salesorderheader>
+let orderDetailTable =      table<sales.salesorderdetail>
+let productTable =          table<production.product>
+let subCategoryTable =      table<production.productsubcategory>
+let categoryTable =         table<production.productcategory>
+let currencyTable =         table<sales.currency>
+let productReviewTable =    table<production.productreview>
+let employeeTable =         table<humanresources.employee>
+let jsonSupportTable =      table<ext.jsonsupport>
+let arraysTable =           table<ext.arrays>
 
 [<Tests>]
 let tests = 
