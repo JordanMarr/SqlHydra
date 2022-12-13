@@ -45,6 +45,11 @@ Target.create "BuildNet6" <| fun _ ->
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net6.0", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
+Target.create "BuildNet7" <| fun _ ->
+    generators @ [ tests ]
+    |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net7.0", pkg), pkg)
+    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
+
 Target.create "Build" <| fun _ ->
     printfn "Building all supported frameworks."
 
@@ -55,6 +60,10 @@ Target.create "TestNet5" <| fun _ ->
 Target.create "TestNet6" <| fun _ ->
     let exitCode = Shell.Exec(Tools.dotnet, "run --configuration Release --framework net6.0", tests)
     if exitCode <> 0 then failwith "Failed while running net6.0 tests"
+
+Target.create "TestNet7" <| fun _ ->
+    let exitCode = Shell.Exec(Tools.dotnet, "run --configuration Release --framework net7.0", tests)
+    if exitCode <> 0 then failwith "Failed while running net7.0 tests"
 
 Target.create "Test" <| fun _ ->
     printfn "Testing on all supported frameworks."
@@ -86,8 +95,8 @@ Target.create "Publish" <| fun _ ->
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not publish '{pkg}' package. Error: {code}")
 
 let dependencies = [
-    "Restore" ==> "BuildQuery" ==> "BuildNet5" ==> "BuildNet6" ==> "Build"
-    "Build" ==> "TestNet5" ==> "TestNet6" ==> "Test"
+    "Restore" ==> "BuildQuery" ==> "BuildNet5" ==> "BuildNet6" ==> "BuildNet7" ==> "Build"
+    "Build" ==> "TestNet5" ==> "TestNet6" ==> "TestNet7" ==> "Test"
     "Test" ==> "Pack" ==> "Publish"
 ]
 
