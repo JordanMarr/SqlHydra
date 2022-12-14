@@ -19,7 +19,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
         let tbl = tblMaybe |> Option.get
 
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
-            { query with Table = match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name }
+            { query with Table = $"{tbl.Schema}.{tbl.Name}" }
             , tableMappings)
 
     /// Sets the TABLE name for query.
@@ -28,7 +28,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
         let tbl = TableMappings.getFirst table.TableMappings
         let query = state |> getQueryOrDefault
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
-            { query with Table = match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name }
+            { query with Table = $"{tbl.Schema}.{tbl.Name}" }
             , state.TableMappings)
 
     member this.Yield _ =

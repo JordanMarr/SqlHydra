@@ -4,9 +4,6 @@ module SqlHydra.Query.UpdateBuilders
 
 open System
 open System.Linq.Expressions
-open System.Data.Common
-open System.Threading.Tasks
-open SqlKata
 
 let private prepareUpdateQuery<'Updated> spec = 
     if spec.Where = None && spec.UpdateAll = false
@@ -27,9 +24,7 @@ type UpdateBuilder<'Updated>() =
         let tblMaybe, tableMappings = TableMappings.tryGetByRootOrAlias tableAlias state.TableMappings
         let tbl = tblMaybe |> Option.get
 
-        QuerySource<'T, UpdateQuerySpec<'T>>(
-            { query with Table = match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name }
-            , tableMappings)
+        QuerySource<'T, UpdateQuerySpec<'T>>({ query with Table = $"{tbl.Schema}.{tbl.Name}" }, tableMappings)
 
     member this.Yield _ =
         QuerySource<'T>(Map.empty)

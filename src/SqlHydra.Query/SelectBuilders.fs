@@ -58,10 +58,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
 
         match tblMaybe with
         | Some tbl -> 
-            QuerySource<'T, Query>(
-                let from = match tbl.Schema with | Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name
-                query.From($"{from} as {tableAlias}"), tableMappings
-            )
+            QuerySource<'T, Query>(query.From($"{tbl.Schema}.{tbl.Name} as {tableAlias}"), tableMappings)
         | None -> 
             // Handles this scenario: `select (p.FirstName, p.LastName) into (fname, lname)`
             state :?> QuerySource<'T, Query>
@@ -193,14 +190,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let innerTableNameAsAlias = 
             innerProperties 
             |> Seq.map (fun p -> p, mergedTables[TableAliasKey p.Alias])
-            |> Seq.map (fun (p, tbl) -> 
-                let tblNm = 
-                    match tbl.Schema with
-                    | Some schema -> $"%s{schema}.%s{tbl.Name}"
-                    | None -> tbl.Name
-
-                $"%s{tblNm} AS %s{p.Alias}"
-            )
+            |> Seq.map (fun (p, tbl) -> $"%s{tbl.Schema}.%s{tbl.Name} AS %s{p.Alias}")
             |> Seq.head
         
         let joinOn = 
@@ -245,14 +235,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let innerTableNameAsAlias = 
             innerProperties 
             |> Seq.map (fun p -> p, mergedTables[TableAliasKey p.Alias])
-            |> Seq.map (fun (p, tbl) -> 
-                let tblNm = 
-                    match tbl.Schema with
-                    | Some schema -> $"%s{schema}.%s{tbl.Name}"
-                    | None -> tbl.Name
-
-                $"%s{tblNm} AS %s{p.Alias}"
-            )
+            |> Seq.map (fun (p, tbl) -> $"%s{tbl.Schema}.%s{tbl.Name} AS %s{p.Alias}")
             |> Seq.head
 
         let joinOn = 

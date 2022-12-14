@@ -5,7 +5,11 @@ open SqlKata
 open System.Collections.Generic
 open System
 
-type TableMapping = { Name: string; Schema: string option }
+type TableMapping = 
+    { 
+        Name: string
+        Schema: string 
+    }
 
 type TableMappingKey = 
     | Root
@@ -34,9 +38,7 @@ module FQ =
     /// Fully qualifies a column with: {?schema}.{table}.{column}
     let internal fullyQualifyColumn (tables: Map<TableMappingKey, TableMapping>) (tableAlias: string) (column: Reflection.MemberInfo) =
         let tbl = tables[TableAliasKey tableAlias]
-        match tbl.Schema with
-        | Some schema -> $"%s{schema}.%s{tbl.Name}.%s{column.Name}"
-        | None -> $"%s{tbl.Name}.%s{column.Name}"
+        $"%s{tbl.Schema}.%s{tbl.Name}.%s{column.Name}"
 
 /// Represents a collection that must contain at least on item.
 module AtLeastOne =

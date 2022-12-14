@@ -2,10 +2,6 @@
 [<AutoOpen>]
 module SqlHydra.Query.DeleteBuilders
 
-open System
-open System.Linq.Expressions
-open System.Data.Common
-open System.Threading.Tasks
 open SqlKata
 
 let private prepareDeleteQuery<'Deleted> (query: Query) = 
@@ -26,7 +22,7 @@ type DeleteBuilder<'Deleted>() =
         let tbl = tblMaybe |> Option.get
 
         QuerySource<'T, Query>(
-            query.From(match tbl.Schema with Some schema -> $"{schema}.{tbl.Name}" | None -> tbl.Name), 
+            query.From($"{tbl.Schema}.{tbl.Name}"), 
             tableMappings)
 
     member this.Yield _ =
