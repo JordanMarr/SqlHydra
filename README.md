@@ -38,7 +38,10 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
         <br /><sub><b>MangelMaxime</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=MangelMaxime" title="Doc">📖</a>
     </td>
     <td align="center"><a href="https://github.com/aciq"><img src="https://avatars.githubusercontent.com/u/36763595?v=4" width="100px;" alt=""/>
-        <br /><sub><b>aciq</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=aciq" title="Code">📖</a>
+        <br /><sub><b>aciq</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=aciq" title="Code">💻</a>
+    </td>
+    <td align="center"><a href="https://github.com/jwosty"><img src="https://avatars.githubusercontent.com/u/4031185?v=4" width="100px;" alt=""/>
+        <br /><sub><b>jwosty</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/issues/32" title="Code">💻</a>
     </td>
   </tr>
 </table>
@@ -132,10 +135,19 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
 
 ### Support for Postgres Enums
 Postgres enum types are generated as CLR enums!
-You will, however, still need to manually "register" your custom enums via `NpgsqlConnection.GlobalTypeMapper.MapEnum` method.
-See Npgsql docs on mapping enums [here](https://www.npgsql.org/doc/types/enums_and_composites.html).
+You will, however, still need to manually "register" your custom enums.
 
-Npgsql Mapping Example:
+If using `Npgsql` v7 or later:
+```F#
+// Global mapping should occur only once at startup:
+// `experiments.mood` is the generated enum, and "experiments.mood" is the "{schema}.{enum}".
+let dataSourceBuilder = NpgsqlDataSourceBuilder(DB.connectionString)
+dataSourceBuilder.MapEnum<ext.mood>("ext.mood") |> ignore
+```
+* See: [Npgsql Docs - type mappings update 1](https://www.npgsql.org/doc/release-notes/7.0.html#managing-type-mappings-at-the-connection-level-is-no-longer-supported)
+* See: [Npgsql Docs - type mappings update 2](https://www.npgsql.org/doc/release-notes/7.0.html#global-type-mappings-must-now-be-done-before-any-usage)
+
+If using `Npgsql` v6 or earlier:
 ```F#
 // Global mapping should occur only once at startup:
 // `experiments.mood` is the generated enum, and "experiments.mood" is the "{schema}.{enum}".
