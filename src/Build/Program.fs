@@ -92,7 +92,7 @@ Target.create "Publish" <| fun _ ->
         projDir </> "nupkg" </> "Release" </> nupkgFilename
     )
     |> List.map (fun nupkgFilepath -> Shell.Exec(Tools.dotnet, $"nuget push {nupkgFilepath} -s nuget.org -k {nugetKey}"), nupkgFilepath)
-    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not publish '{pkg}' package. Error: {code}")
+    |> List.iter (fun (code, pkg) -> if code <> 0 then printfn $"ERROR: Could not publish '{pkg}' package. Error: {code}") // Display error and continue
 
 let dependencies = [
     "Restore" ==> "BuildQuery" ==> "BuildNet5" ==> "BuildNet6" ==> "BuildNet7" ==> "Build"

@@ -13,6 +13,7 @@ let cfg =
         OutputFile = ""
         Namespace = "TestNS"
         IsCLIMutable = true
+        ProviderDbTypeAttributes = true
         Readers = Some { ReadersConfig.ReaderType = "Oracle.ManagedDataAccess.Client.OracleDataReader" } 
         Filters = { Includes = [ "OT/*" ]; Excludes = [ ] }
     }

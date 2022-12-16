@@ -24,12 +24,24 @@ let read(toml: string) =
     let generalTable = model.Get<TomlTable> "general"
     let readersTableMaybe = model.TryGet<TomlTable> "readers"
     let filtersTableMaybe = model.TryGet<TomlTable> "filters"
+    let queryIntTableMaybe = model.TryGet<TomlTable> "sqlhydra_query_integration"
 
     {
         Config.ConnectionString = generalTable.Get "connection"
         Config.OutputFile = generalTable.Get "output"
         Config.Namespace = generalTable.Get "namespace"
         Config.IsCLIMutable = generalTable.Get "cli_mutable"
+        Config.ProviderDbTypeAttributes = 
+            match queryIntTableMaybe with
+            | Some queryIntTable -> queryIntTable.Get "provider_db_type_attributes"
+            | None -> true
+        Config.Readers = 
+            readersTableMaybe
+            |> Option.map (fun rdrsTbl -> 
+                {
+                    ReadersConfig.ReaderType = rdrsTbl.Get<string> "reader_type"
+                }
+            )
         Config.Filters = 
             match filtersTableMaybe with
             | Some filtersTable -> 
@@ -39,15 +51,6 @@ let read(toml: string) =
                 }
             | None ->
                 FilterPatterns.Empty
-
-            
-        Config.Readers = 
-            readersTableMaybe
-            |> Option.map (fun rdrsTbl -> 
-                {
-                    ReadersConfig.ReaderType = rdrsTbl.Get<string> "reader_type"
-                }
-            )
     }
 
 /// Saves a Config to .toml file.
@@ -61,11 +64,14 @@ let save(cfg: Config) =
     general.Items.Add("cli_mutable", cfg.IsCLIMutable)
     doc.Tables.Add(general)
     
+    let queryInt = TableSyntax("sqlhydra_query_integration")
+    queryInt.Items.Add("provider_db_type_attributes", cfg.ProviderDbTypeAttributes)
+    doc.Tables.Add(queryInt)
+
     cfg.Readers |> Option.iter (fun readersConfig ->
         let readers = TableSyntax("readers")
         readers.Items.Add("reader_type", readersConfig.ReaderType)
-        doc.Tables.Add(readers)
-    )
+        doc.Tables.Add(readers))
 
     let filters = TableSyntax("filters")
     filters.Items.Add("include", cfg.Filters.Includes |> List.toArray)
