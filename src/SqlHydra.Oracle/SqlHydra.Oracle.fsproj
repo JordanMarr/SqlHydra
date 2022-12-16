@@ -1,25 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-	<TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
-	<Version>1.1.0</Version>
-	<Authors>Jordan Marr</Authors>
-	<Description>SqlHydra.Oracle is a dotnet tool that generates F# records for a Oracle database.</Description>
-	<PackageTags>F# fsharp data database orm sql</PackageTags>
-	<PackAsTool>true</PackAsTool>
-	<ToolCommandName>sqlhydra-oracle</ToolCommandName>
-	<PackageOutputPath>./nupkg</PackageOutputPath>
-	<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-	<PackageLicenseFile>LICENSE</PackageLicenseFile>
-	<PackageReleaseNotes></PackageReleaseNotes>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
+		<Version>1.1.1</Version>
+		<Authors>Jordan Marr</Authors>
+		<Description>SqlHydra.Oracle is a dotnet tool that generates F# records for a Oracle database.</Description>
+		<PackageTags>F# fsharp data database orm sql</PackageTags>
+		<PackAsTool>true</PackAsTool>
+		<ToolCommandName>sqlhydra-oracle</ToolCommandName>
+		<PackageOutputPath>./nupkg</PackageOutputPath>
+		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageReleaseNotes></PackageReleaseNotes>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="OracleDataTypes.fs" />
-    <Compile Include="OracleSchemaProvider.fs" />
-    <Compile Include="Program.fs" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="OracleDataTypes.fs" />
+		<Compile Include="OracleSchemaProvider.fs" />
+		<Compile Include="Program.fs" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Fantomas" Version="4.4.0" Condition="'$(TargetFramework)' == 'net5.0'" />
@@ -39,7 +39,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj" />
+		<ProjectReference Include="..\SqlHydra\SqlHydra.fsproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -48,5 +48,5 @@
 			<PackagePath></PackagePath>
 		</None>
 	</ItemGroup>
-	
+
 </Project>
