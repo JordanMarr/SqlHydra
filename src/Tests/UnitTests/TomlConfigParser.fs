@@ -20,6 +20,7 @@ let tests =
                     Config.OutputFile = "AdventureWorks.fs"
                     Config.Namespace = "SampleApp.AdventureWorks"
                     Config.IsCLIMutable = true
+                    Config.ProviderDbTypeAttributes = true
                     Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
                     Config.Filters = FilterPatterns.Empty
                 }
@@ -61,6 +62,7 @@ let tests =
                     Config.OutputFile = "AdventureWorks.fs"
                     Config.Namespace = "SampleApp.AdventureWorks"
                     Config.IsCLIMutable = true
+                    Config.ProviderDbTypeAttributes = true
                     Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
                     Config.Filters = FilterPatterns.Empty
                 }
@@ -86,6 +88,7 @@ let tests =
                     Config.OutputFile = "AdventureWorks.fs"
                     Config.Namespace = "SampleApp.AdventureWorks"
                     Config.IsCLIMutable = true
+                    Config.ProviderDbTypeAttributes = true
                     Config.Readers = None
                     Config.Filters = FilterPatterns.Empty
                 }

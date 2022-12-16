@@ -19,6 +19,7 @@ let cfg =
         OutputFile = ""
         Namespace = "TestNS"
         IsCLIMutable = true
+        ProviderDbTypeAttributes = true
         Readers = Some { ReadersConfig.ReaderType = "System.Data.Common.DbDataReader" } 
         Filters = FilterPatterns.Empty
     }
