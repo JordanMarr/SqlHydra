@@ -268,6 +268,17 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
                 
         }
 
+        test "Where Static Property" {
+            let query =
+                select {
+                    for o in orderHeaderTable do
+                    where (o.SalesOrderID = System.Int32.MaxValue)
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE ([o].[SalesOrderID] = @p0)")) ""
+        }
+
         test "Delete Query with Where" {
             let query = 
                 delete {
