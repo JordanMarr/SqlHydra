@@ -81,7 +81,8 @@ let newConfigWizard(app: AppInfo) =
             }
 
     AnsiConsole.MarkupLine($"[green]-[/] {app.Command}.toml has been created!")
-    AnsiConsole.MarkupLine($"[green]-[/] Please install the `{app.DefaultProvider}` NuGet package in your project.");
+    if config.Readers <> None then AnsiConsole.MarkupLine($"[green]-[/] Please install the `{app.DefaultProvider}` NuGet package in your project.")
+    if useCase = SqlHydraQueryIntegration then AnsiConsole.MarkupLine($"[green]-[/] Please install the `SqlHydra.Query` NuGet package in your project.")
     config
 
 /// Ex: "sqlhydra-mssql.toml"
