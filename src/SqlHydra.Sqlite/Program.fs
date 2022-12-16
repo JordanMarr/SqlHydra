@@ -32,5 +32,5 @@ let main argv =
 
     File.WriteAllText(cfg.OutputFile, formattedCode)
     Fsproj.addFileToProject(cfg)
-    AnsiConsole.MarkupLine($"[green]>[/] `{cfg.OutputFile}` has been generated!")
+    AnsiConsole.MarkupLine($"[green]-[/] `{cfg.OutputFile}` has been generated!")
     0

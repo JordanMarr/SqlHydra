@@ -90,6 +90,7 @@ type Config =
         OutputFile: string
         Namespace: string
         IsCLIMutable: bool
+        ProviderDbTypeAttributes: bool
         Filters: FilterPatterns
         Readers: ReadersConfig option
     }

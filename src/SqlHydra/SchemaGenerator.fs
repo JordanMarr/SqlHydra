@@ -65,8 +65,7 @@ let createTableRecord (cfg: Config) (tbl: Table) =
                     SynType.Create(col.TypeMapping.ClrType)
 
             let attributes = 
-                // Add ProviderDbTypeAttribute only if "Generate HydraReader" is enabled
-                if cfg.Readers.IsSome
+                if cfg.ProviderDbTypeAttributes
                 then createProviderDbTypeAttribute col.TypeMapping
                 else []
 
