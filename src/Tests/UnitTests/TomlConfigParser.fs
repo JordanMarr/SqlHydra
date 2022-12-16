@@ -34,6 +34,8 @@ let tests =
                 output = "AdventureWorks.fs"
                 namespace = "SampleApp.AdventureWorks"
                 cli_mutable = true
+                [sqlhydra_query_integration]
+                provider_db_type_attributes = true
                 [readers]
                 reader_type = "Microsoft.Data.SqlClient.SqlDataReader"
                 [filters]
