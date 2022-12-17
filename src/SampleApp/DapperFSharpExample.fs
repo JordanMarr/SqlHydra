@@ -1,65 +1,47 @@
 ﻿module SampleApp.DapperFSharpExample
 open System.Data
 open Microsoft.Data.SqlClient
-open Dapper.FSharp.LinqBuilders
 open Dapper.FSharp.MSSQL
 open SampleApp.AdventureWorks // Generated Types
 open FSharp.Control.Tasks.V2
+open System
 
 Dapper.FSharp.OptionTypes.register()
 
 let connect() = 
-    let cs = "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"
+    let cs = "Server=localhost,12019;Database=AdventureWorks;User=sa;Password=Password#123;Connect Timeout=3;TrustServerCertificate=True"
     let conn = new SqlConnection(cs) :> IDbConnection
     conn.Open()
     conn
 
 // Tables
-let customerTable =         table<SalesLT.Customer>         |> inSchema (nameof SalesLT)
-let customerAddressTable =  table<SalesLT.CustomerAddress>  |> inSchema (nameof SalesLT)
-let addressTable =          table<SalesLT.Address>          |> inSchema (nameof SalesLT)
-let productTable =          table<SalesLT.Product>          |> inSchema (nameof SalesLT)
-let categoryTable =         table<SalesLT.ProductCategory>  |> inSchema (nameof SalesLT)
+let customerTable =         table<Sales.Customer>         |> inSchema (nameof Sales)
+let orderHeaderTable =      table<Sales.SalesOrderHeader> |> inSchema (nameof Sales)
+let orderDetailTable =      table<Sales.SalesOrderDetail> |> inSchema (nameof Sales)
 
-let getAddressesForCity(conn: IDbConnection) (city: string) = 
+let getTop10Customers(conn: IDbConnection) = 
     select {
-        for a in addressTable do
-        where (a.City = city)
-    } 
-    |> conn.SelectAsync<SalesLT.Address>
-    
-let getCustomersWithAddresses(conn: IDbConnection) =
-    let query = 
-        select {
-            for c in customerTable do
-            join ca in customerAddressTable on (c.CustomerID = ca.CustomerID)
-            join a  in addressTable on (ca.AddressID = a.AddressID)
-            where (isIn c.CustomerID [30018;29545;29954;29897;29503;29559])
-            orderBy c.CustomerID
-        } 
-
-    let (sql, p, _) = query |> Deconstructor.select<SalesLT.Customer, SalesLT.CustomerAddress, SalesLT.Address>
-    
-    query |> conn.SelectAsyncOption<SalesLT.Customer, SalesLT.CustomerAddress, SalesLT.Address>
-
-let getProductsCategories(conn: IDbConnection) =
-    select {
-        for p in productTable do
-        join c in categoryTable on (p.ProductCategoryID = Some c.ProductCategoryID)
+        for c in customerTable do
+        where (c.CustomerID < 200)
         selectAll
-    }
-    |> conn.SelectAsyncOption<SalesLT.Product, SalesLT.ProductCategory>
+    } 
+    |> conn.SelectAsync<Sales.Customer>
+    
+let getOrders(conn: IDbConnection) =
+    select {
+        for o in orderHeaderTable do
+        leftJoin d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+        where (o.SalesOrderID > 43600 && o.SalesOrderID < 43700)
+        selectAll
+    } 
+    |> conn.SelectAsyncOption<Sales.SalesOrderHeader, Sales.SalesOrderDetail>
 
 let runQueries() = task {
     use conn = connect()
 
-    let! addresses = getAddressesForCity conn "Dallas"
-    printfn "Dallas Addresses: %A" addresses
+    let! customers = getTop10Customers(conn)
+    printfn "Customers: %A" customers
     
-    let! customers = getCustomersWithAddresses conn
-    printfn "Customer Addresses: %A" customers
-
-    // Dapper.FSharp is unable to download the product Thumbnail `byte[] option`
-    //let! productsCategories = getProductsCategories conn
-    //printfn "Products-Categories: %A" productsCategories
+    let! orders = getOrders conn
+    printfn "Orders: %A" orders
 }

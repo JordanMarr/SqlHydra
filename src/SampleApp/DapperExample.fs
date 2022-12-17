@@ -7,7 +7,7 @@ open Dapper
 open System.Data
 
 let connect() = 
-    let cs = "Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI;"
+    let cs = "Server=localhost,12019;Database=AdventureWorks;User=sa;Password=Password#123;Connect Timeout=3;TrustServerCertificate=True"
     let conn = new SqlConnection(cs)
     conn.Open()
     conn
@@ -20,30 +20,37 @@ let unwrapIDataReader (dapperReader: IDataReader) =
 let unwrapDbDataReader (dapperReader: Common.DbDataReader) = 
     (unbox<IWrappedDataReader> dapperReader).Reader :?> SqlDataReader
 
-let getProductsWithThumbnail(conn: SqlConnection) = task {
-    use reader = conn.ExecuteReader("SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL")
+let getTop10Products(conn: SqlConnection) = task {
+    use reader = conn.ExecuteReader("SELECT TOP 10 * FROM Production.Product p")
     let hydra = HydraReader(unwrapIDataReader reader)
     return [ 
         while reader.Read() do
-            hydra.``SalesLT.Product``.Read() 
+            hydra.``Production.Product``.Read()
     ]
 }
 
-let getProductsWithThumbnailAsync(conn: SqlConnection) = task {
-    use! reader = conn.ExecuteReaderAsync("SELECT TOP 2 * FROM SalesLT.Product p WHERE ThumbNailPhoto IS NOT NULL")
+let getOrderHeadersAndDetails(conn: SqlConnection) = task {
+    use! reader = conn.ExecuteReaderAsync(
+        """
+        SELECT TOP 10 *
+        FROM Purchasing.PurchaseOrderHeader h
+        LEFT JOIN Purchasing.PurchaseOrderDetail d ON h.PurchaseOrderId = d.PurchaseOrderId
+        """
+    )
     let hydra = HydraReader(unwrapDbDataReader reader)
-    return [ 
+    return [
         while reader.Read() do
-            hydra.``SalesLT.Product``.Read() 
+            hydra.``Purchasing.PurchaseOrderHeader``.Read(), 
+            hydra.``Purchasing.PurchaseOrderDetail``.ReadIfNotNull()
     ]
 }
 
 let runQueries() = task {
     use conn = connect()    
     
-    let! products = getProductsWithThumbnail conn
+    let! products = getTop10Products conn
     printfn "Products with Thumbnails Count: %i" (products |> Seq.length)
 
-    let! products2 = getProductsWithThumbnailAsync conn
-    printfn "Products with Thumbnails Count: %i" (products |> Seq.length)
+    let! orders = getOrderHeadersAndDetails(conn)
+    printfn "Orders: %A" orders
 }

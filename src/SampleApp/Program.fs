@@ -1,8 +1,13 @@
-﻿
+﻿module SampleApp.Program
+
 [<EntryPoint>]
 let main argv = 
-    
-    //SampleApp.DapperFSharpExample.runQueries() |> Async.AwaitTask |> Async.RunSynchronously
-    //SampleApp.ReaderExample.runQueries() |> Async.AwaitTask |> Async.RunSynchronously
-    SampleApp.DonaldExample.runQueries() |> Async.AwaitTask |> Async.RunSynchronously
-    0
+    task {
+        do! DapperFSharpExample.runQueries()
+        do! DapperExample.runQueries()
+        do! ReaderExample.runQueries()
+        do! DonaldExample.runQueries() 
+        return 0
+    }
+    |> Async.AwaitTask 
+    |> Async.RunSynchronously

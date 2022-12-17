@@ -16,7 +16,7 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Dapper.FSharp" Version="2.2.0" />
+    <PackageReference Include="Dapper.FSharp" Version="4.2.0" />
     <PackageReference Include="Donald" Version="6.2.2" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" />
     <PackageReference Include="TaskBuilder.fs" Version="2.1.0" />
