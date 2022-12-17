@@ -106,7 +106,7 @@ let tryLoadConfig(tomlFile: IO.FileInfo) =
     else 
         NotFound
 
-/// Creates a sqlhydra-*.toml file if necessary and then runs.
+/// Creates a sqlhydra-*.toml file if necessary.
 let getConfig(app: AppInfo, argv: string array) = 
     AnsiConsole.MarkupLine($"[blue]-[/] {app.Name}")
     AnsiConsole.MarkupLine($"[blue]-[/] v[yellow]{app.Version}[/]")
@@ -130,3 +130,17 @@ let getConfig(app: AppInfo, argv: string array) =
         let cfg = newConfigWizard(app)
         saveConfig(tomlFile, cfg)
         cfg
+
+/// Runs code generation for a given database provider.
+let run (app: AppInfo, argv: string[], getSchema: Config -> Schema) = 
+    let cfg = getConfig(app, argv)
+
+    let formattedCode = 
+        getSchema cfg
+        |> SchemaGenerator.generateModule cfg app
+        |> SchemaGenerator.toFormattedCode cfg app
+
+    IO.File.WriteAllText(cfg.OutputFile, formattedCode)
+    Fsproj.addFileToProject(cfg)
+    AnsiConsole.MarkupLine($"[green]-[/] `{cfg.OutputFile}` has been generated!")
+    0
