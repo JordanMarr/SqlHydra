@@ -447,6 +447,10 @@ select {
 }
 ```
 
+💥 The `join` `on` clause only supports simple column = column comparisons. Constant value parameters are not supported.
+Any custom filters that you might normally put in the `on` clause, especially those involving input parameters, will need to be moved to the `where` clause.
+This is because the F# `join` `on` syntax does not support complex filter clauses.
+
 #### Transforming Query Results
 
 To transform the query results use the `mapSeq`, `mapArray` or `mapList` operations. 
