@@ -1,32 +1,35 @@
 ﻿namespace TestNS
 
-type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
-        member __.Name = column
-        member __.IsNull() = getOrdinal column |> reader.IsDBNull
-        override __.ToString() = __.Name
 
-type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
-        inherit Column(reader, getOrdinal, column)
-        member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getter
+[<AutoOpen>]
+module ColumnReaders =
+    type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
+            member __.Name = column
+            member __.IsNull() = getOrdinal column |> reader.IsDBNull
+            override __.ToString() = __.Name
 
-type OptionalColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
-        inherit Column(reader, getOrdinal, column)
-        member __.Read(?alias) = 
-            match alias |> Option.defaultValue __.Name |> getOrdinal with
-            | o when reader.IsDBNull o -> None
-            | o -> Some (getter o)
+    type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getter
 
-type RequiredBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getValue: int -> obj, column) =
-        inherit Column(reader, getOrdinal, column)
-        member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getValue :?> byte[]
+    type OptionalColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = 
+                match alias |> Option.defaultValue __.Name |> getOrdinal with
+                | o when reader.IsDBNull o -> None
+                | o -> Some (getter o)
 
-type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getValue: int -> obj, column) =
-        inherit Column(reader, getOrdinal, column)
-        member __.Read(?alias) = 
-            match alias |> Option.defaultValue __.Name |> getOrdinal with
-            | o when reader.IsDBNull o -> None
-            | o -> Some (getValue o :?> byte[])
-        
+    type RequiredBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getValue: int -> obj, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getValue :?> byte[]
+
+    type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getValue: int -> obj, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = 
+                match alias |> Option.defaultValue __.Name |> getOrdinal with
+                | o when reader.IsDBNull o -> None
+                | o -> Some (getValue o :?> byte[])
+            
         
 module ext =
     type mood =

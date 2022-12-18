@@ -721,9 +721,9 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
 /// A list of static code text substitutions to the generated file.
 let substitutions (app: AppInfo) = 
 
-    let utilsGetDateOnly = """
-[<AutoOpen>]        
-module Utils =
+    let dataReaderExtensions = """
+[<AutoOpen>]
+module private DataReaderExtensions =
     type System.Data.IDataReader with
         member reader.GetDateOnly(ordinal: int) = 
             reader.GetDateTime(ordinal) |> System.DateOnly.FromDateTime
@@ -736,39 +736,42 @@ module Utils =
     [
         /// Reader classes at top of namespace
         "open Substitute.Extensions",
-        $"""type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
-        member __.Name = column
-        member __.IsNull() = getOrdinal column |> reader.IsDBNull
-        override __.ToString() = __.Name
+        $"""
+[<AutoOpen>]
+module ColumnReaders =
+    type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
+            member __.Name = column
+            member __.IsNull() = getOrdinal column |> reader.IsDBNull
+            override __.ToString() = __.Name
 
-type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
-        inherit Column(reader, getOrdinal, column)
-        member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getter
+    type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getter
 
-type OptionalColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
-        inherit Column(reader, getOrdinal, column)
-        member __.Read(?alias) = 
-            match alias |> Option.defaultValue __.Name |> getOrdinal with
-            | o when reader.IsDBNull o -> None
-            | o -> Some (getter o)
+    type OptionalColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = 
+                match alias |> Option.defaultValue __.Name |> getOrdinal with
+                | o when reader.IsDBNull o -> None
+                | o -> Some (getter o)
 
-type RequiredBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getValue: int -> obj, column) =
-        inherit Column(reader, getOrdinal, column)
-        member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getValue :?> byte[]
+    type RequiredBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getValue: int -> obj, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getValue :?> byte[]
 
-type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getValue: int -> obj, column) =
-        inherit Column(reader, getOrdinal, column)
-        member __.Read(?alias) = 
-            match alias |> Option.defaultValue __.Name |> getOrdinal with
-            | o when reader.IsDBNull o -> None
-            | o -> Some (getValue o :?> byte[])
-        {
+    type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getValue: int -> obj, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = 
+                match alias |> Option.defaultValue __.Name |> getOrdinal with
+                | o when reader.IsDBNull o -> None
+                | o -> Some (getValue o :?> byte[])
+            {
 #if NET6_0_OR_GREATER
-            utilsGetDateOnly
+                dataReaderExtensions
 #else
-            ""
+                ""
 #endif
-        }
+            }
         """
 
 
