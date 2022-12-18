@@ -319,7 +319,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                 // Function:
                                 SynExpr.CreateLongIdent(
                                     false
-                                    , LongIdentWithDots.CreateString($"{tbl.Schema}.{tbl.Name}Reader")
+                                    , LongIdentWithDots.CreateString($"{tbl.Schema}.Readers.{tbl.Name}Reader")
                                     , None
                                 )
                                 // Args:
@@ -669,12 +669,17 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                             cliMutableAttribute
                         
                         createTableRecord cfg tbl
-                        
-                        if cfg.Readers.IsSome then 
-                            createTableReaderClass cfg.Readers.Value tbl
                 ]
 
-            let memberDeclarations = enumDeclarations @ tableRecordDeclarations
+            let readersModule = 
+                match cfg.Readers with
+                | Some readers -> 
+                    let rm = SynComponentInfoRcd.Create [ Ident.Create "Readers" ]
+                    let tableReaderClasses = tables |> List.map (createTableReaderClass readers)
+                    [ SynModuleDecl.CreateNestedModule(rm, tableReaderClasses) ]
+                | None -> []
+
+            let memberDeclarations = enumDeclarations @ tableRecordDeclarations @ readersModule
 
             let hasEnumDefinitions = db.Enums.Length > 0
 

@@ -56,8 +56,11 @@ let tests =
 #if NET5_0
             do! Verifier.Verify("Verify Generated Code NET5", code, settings)
 #endif
-#if NET6_0_OR_GREATER
+#if NET6_0
             do! Verifier.Verify("Verify Generated Code NET6", code, settings)
+#endif
+#if NET7_0
+            do! Verifier.Verify("Verify Generated Code NET7", code, settings)
 #endif
         }
     
