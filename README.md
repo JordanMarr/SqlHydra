@@ -80,7 +80,6 @@ dotnet sqlhydra-mssql
 * The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
 * You can filter the generated schemas by manually editing the generated [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file.
 
-![hydra-console](https://user-images.githubusercontent.com/1030435/127790303-a69ca6ea-f0a7-4216-aa5d-c292b0dc3229.gif)
 
 ### Build Event (optional)
 
