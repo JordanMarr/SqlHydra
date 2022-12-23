@@ -314,10 +314,10 @@ This can be useful for various use cases, such as:
 
 
 ## Supported Frameworks
-Both .NET 5 and .NET 6 are now supported.
-(.NET 5 will be supported until Microsoft ends official support.)
+.NET 5 - .NET 7 are currently supported.
+(.NET 5 will be supported at least until Microsoft ends official support.)
 
-### .NET 6
+### .NET 6 and Greater
 The new .NET 6 `System.DateOnly` and `System.TimeOnly` types are now supported by all generators.
 (Note that if you are upgrading SqlHydra.Sqlite from .NET 5 to .NET 6, please refer to the [SqlHydra.Sqlite](#sqlhydrasqlite-) section for special instructions.)
 
@@ -343,11 +343,11 @@ SqlHydra.Query can be used with any library that accepts a data reader; however,
 open SqlHydra.Query
 
 // Tables
-let customerTable =         table<SalesLT.Customer>         |> inSchema (nameof SalesLT)
-let customerAddressTable =  table<SalesLT.CustomerAddress>  |> inSchema (nameof SalesLT)
-let addressTable =          table<SalesLT.Address>          |> inSchema (nameof SalesLT)
-let productTable =          table<SalesLT.Product>          |> inSchema (nameof SalesLT)
-let categoryTable =         table<SalesLT.ProductCategory>  |> inSchema (nameof SalesLT)
+let customerTable =         table<SalesLT.Customer>
+let customerAddressTable =  table<SalesLT.CustomerAddress>
+let addressTable =          table<SalesLT.Address>
+let productTable =          table<SalesLT.Product>
+let categoryTable =         table<SalesLT.ProductCategory>
 let errorLogTable =         table<dbo.ErrorLog>
 ```
 
