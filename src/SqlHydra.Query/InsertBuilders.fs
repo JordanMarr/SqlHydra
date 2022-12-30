@@ -14,7 +14,7 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
 
     member this.For (state: QuerySource<'T>, [<ReflectedDefinition>] forExpr: FSharp.Quotations.Expr<'T -> QuerySource<'T>>) =        
         let query = state |> getQueryOrDefault
-        let tableAlias = QuotationVisitor.visitFor forExpr
+        let tableAlias = QuotationVisitor.visitFor forExpr |> QuotationVisitor.allowUnderscore false
         let tblMaybe, tableMappings = TableMappings.tryGetByRootOrAlias tableAlias state.TableMappings
         let tbl = tblMaybe |> Option.get
 

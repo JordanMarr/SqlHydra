@@ -464,4 +464,49 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
 INNER JOIN [Production].[Product] AS [p2] ON ([p1].[ProductID] = [p2].[ProductID]) WHERE ([p2].[ListPrice] > @p0)"""
                 ""
         }
+
+        test "Underscore Assignment Edge Case - delete - should be valid" {
+            printfn "Starting..."
+
+            let query = 
+                delete {
+                    for _ in personTable do
+                    deleteAll
+                }
+
+            //let sql = query.ToKataQuery() |> toSql
+            () // Good
+        }
+
+        test "Underscore Assignment Edge Case - update - should fail with not supported" {
+            try
+                let person = Unchecked.defaultof<Person.Person>
+                let query = 
+                    update {
+                        for _ in personTable do
+                        entity person
+                        updateAll
+                    }
+
+                failwith "Should fail with NotSupportedException"
+            with 
+            | :? System.NotSupportedException -> () // Good
+            | ex -> failwith "Should fail with NotSupportedException"
+        }
+
+        test "Underscore Assignment Edge Case - insert - should fail with not supported" {
+            try
+                let person = Unchecked.defaultof<Person.Person>
+                let query = 
+                    insert {
+                        for _ in personTable do
+                        entity person
+                    }
+
+                failwith "Should fail with NotSupportedException"
+            with 
+            | :? System.NotSupportedException -> () // Good
+            | ex -> failwith "Should fail with NotSupportedException"
+        }
+        
     ]
