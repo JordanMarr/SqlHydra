@@ -326,7 +326,13 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
             | Property p1, MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryOne ->
                 // Handle property to subquery comparisons
                 let comparison = getComparison exp.NodeType
-                let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
+                let subqueryConst = 
+                    match subqueryExpr.Arguments.[0] with 
+                    | Constant c -> c 
+                    | MethodCall call -> 
+                        let o = Expression.Lambda(call).Compile().DynamicInvoke(call.Arguments)
+                        o :?> ConstantExpression
+                    | _ -> notImpl()
                 let selectSubquery = subqueryConst.Value :?> SelectQuery
                 let alias = visitAlias p1.Expression
                 let fqCol = qualifyColumn alias p1.Member

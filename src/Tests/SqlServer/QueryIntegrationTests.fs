@@ -126,6 +126,29 @@ let tests =
             Expect.equal (539.99M, 3578.2700M, 1597.4500M, 43, 68690.3500M) aggByCatID.[Some 2] "Expected CatID: 2 aggregates to match."
             Expect.equal (742.3500M, 2384.0700M, 1425.2481M, 22, 31355.4600M) aggByCatID.[Some 3] "Expected CatID: 3 aggregates to match."
         }
+        
+        testTask "Correlated Subquery" {
+            use ctx = openContext()
+            
+            let maxOrderQty (od: Sales.SalesOrderDetail) = 
+                select {
+                    for d in orderDetailTable do
+                    where (d.ProductID = od.ProductID)
+                    select (maxBy d.OrderQty)
+                }
+
+            let! results = 
+                select {
+                    for od in orderDetailTable do
+                    where (od.OrderQty = subqueryOne (maxOrderQty od))
+                    orderBy od.ProductID
+                    select (od.SalesOrderID, od.ProductID, od.OrderQty)
+                }
+                |> ctx.ReadAsync HydraReader.Read
+
+            gt0 results
+            
+        }
 
         testTask "Aggregate Subquery One" {
             use ctx = openContext()
