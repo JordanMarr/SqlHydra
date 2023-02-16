@@ -508,5 +508,31 @@ INNER JOIN [Production].[Product] AS [p2] ON ([p1].[ProductID] = [p2].[ProductID
             | :? System.NotSupportedException -> () // Good
             | ex -> failwith "Should fail with NotSupportedException"
         }
+
+        test "Correlated Subquery" {
+            let maxOrderQty = 
+                let od = correlatedTable<Sales.SalesOrderDetail>
+
+                select {
+                    for d in orderDetailTable do
+                    where (d.ProductID = od.ProductID)
+                    select (maxBy d.OrderQty)
+                }
+
+            let query = 
+                select {
+                    for od in orderDetailTable do
+                    where (od.OrderQty = subqueryOne maxOrderQty)
+                    orderBy od.ProductID
+                    select (od.SalesOrderID, od.ProductID, od.OrderQty)
+                }
+                
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal
+                sql
+                "SELECT..."
+                ""            
+        }
         
     ]

@@ -8,6 +8,10 @@ module Table =
         let ent = typeof<'T>
         let tables = Map [Root, { Name = ent.Name; Schema = ent.DeclaringType.Name}]
         QuerySource<'T>(tables)
+    
+    /// Maps the entity 'T to a correlated parent table of the exact same name.
+    let correlatedTable<'T> = 
+        Unchecked.defaultof<'T>
 
     /// Maps the entity 'T to a schema of the given name.
     [<System.Obsolete("The table schema is now automatically inferred from the declaring type.")>]
