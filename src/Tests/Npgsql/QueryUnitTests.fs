@@ -137,11 +137,11 @@ let tests =
             let query = 
                 select {
                     for a in addressTable do
-                    where (5L < a.addressid && 20L >= a.addressid)
+                    where (5 < a.addressid && 20 >= a.addressid)
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ((\"a\".\"addressid\" > @p0) AND (\"a\".\"addressid\" <= @p1))")) ""
+            Expect.isTrue (sql.Contains("WHERE ((\"a\".\"addressid\" > @p0) AND (\"a\".\"addressid\" <= @p1))")) sql
         }
 
         test "Where Not Binary" {

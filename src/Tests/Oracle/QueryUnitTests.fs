@@ -139,7 +139,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ((\"c\".\"CUSTOMER_ID\" > @p0) AND (\"c\".\"CUSTOMER_ID\" <= @p1))")) ""
+            Expect.isTrue (sql.Contains("WHERE ((\"c\".\"CUSTOMER_ID\" > :p0) AND (\"c\".\"CUSTOMER_ID\" <= :p1))")) sql
         }
 
         test "Where Not Binary" {
