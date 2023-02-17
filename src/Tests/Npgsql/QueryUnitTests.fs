@@ -133,6 +133,17 @@ let tests =
                 "Should wrap OR clause in parenthesis and each individual where clause in parenthesis."
         }
 
+        test "Where value and column are swapped" {
+            let query = 
+                select {
+                    for a in addressTable do
+                    where (5L < a.addressid && 20L >= a.addressid)
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE ((\"a\".\"addressid\" > @p0) AND (\"a\".\"addressid\" <= @p1))")) ""
+        }
+
         test "Where Not Binary" {
             let query = 
                 select {
