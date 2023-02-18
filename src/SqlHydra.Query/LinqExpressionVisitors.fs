@@ -227,6 +227,17 @@ let getComparison (expType: ExpressionType) =
     | ExpressionType.LessThanOrEqual -> "<="
     | _ -> notImplMsg "Unsupported comparison type"
 
+let reverseComparison (expType: ExpressionType) =
+    match expType with
+    | ExpressionType.GreaterThan -> ExpressionType.LessThan
+    | ExpressionType.GreaterThanOrEqual -> ExpressionType.LessThanOrEqual
+    | ExpressionType.LessThan -> ExpressionType.GreaterThan
+    | ExpressionType.LessThanOrEqual -> ExpressionType.GreaterThanOrEqual
+    | _ -> expType
+
+
+let getReverseComparison = getComparison << reverseComparison
+    
 let visitAlias (exp: Expression) = 
     let rec visit (exp: Expression) = 
         match exp with 
@@ -322,7 +333,7 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
             let rt = visit x.Right (Query())
             query.OrWhere(fun q -> lt).OrWhere(fun q -> rt)
         | BinaryCompare x ->
-            match x.Left, x.Right with            
+            match x.Left, x.Right with
             | Property p1, MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryOne ->
                 // Handle property to subquery comparisons
                 let comparison = getComparison exp.NodeType
@@ -341,23 +352,30 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
                     let alias = visitAlias p2.Expression
                     qualifyColumn alias p2.Member
                 query.WhereColumns(lt, comparison, rt)
+            | Property p, Value null | Value null, Property p when exp.NodeType = ExpressionType.Equal ->
+                // Handle column is null comparisons
+                let alias = visitAlias p.Expression
+                let fqCol = qualifyColumn alias p.Member
+                query.WhereNull(fqCol)
+            | Property p, Value null | Value null, Property p when exp.NodeType = ExpressionType.NotEqual ->
+                // Handle column is not null comparisons
+                let alias = visitAlias p.Expression
+                let fqCol = qualifyColumn alias p.Member
+                query.WhereNotNull(fqCol)
             | Property p, Value value ->
                 // Handle column to value comparisons
-                match exp.NodeType, value with
-                | ExpressionType.Equal, null -> 
-                    let alias = visitAlias p.Expression
-                    let fqCol = qualifyColumn alias p.Member
-                    query.WhereNull(fqCol)
-                | ExpressionType.NotEqual, null -> 
-                    let alias = visitAlias p.Expression
-                    let fqCol = qualifyColumn alias p.Member
-                    query.WhereNotNull(fqCol)
-                | _ ->                     
-                    let comparison = getComparison(exp.NodeType)
-                    let queryParameter = KataUtils.getQueryParameterForValue p.Member value
-                    let alias = visitAlias p.Expression
-                    let fqCol = qualifyColumn alias p.Member
-                    query.Where(fqCol, comparison, queryParameter)
+                let comparison = getComparison(exp.NodeType)
+                let queryParameter = KataUtils.getQueryParameterForValue p.Member value
+                let alias = visitAlias p.Expression
+                let fqCol = qualifyColumn alias p.Member
+                query.Where(fqCol, comparison, queryParameter)
+            | Value value, Property p ->
+                // Handle value to column comparisons
+                let comparison = getReverseComparison(exp.NodeType)
+                let queryParameter = KataUtils.getQueryParameterForValue p.Member value
+                let alias = visitAlias p.Expression
+                let fqCol = qualifyColumn alias p.Member
+                query.Where(fqCol, comparison, queryParameter)
             | Value v1, Value v2 ->
                 // Not implemented because I didn't want to embed logic to properly format strings, dates, etc.
                 // This can be easily added later if it is implemented in Dapper.FSharp.
