@@ -94,16 +94,18 @@ let createTableRecord (cfg: Config) (tbl: Table) =
 let createTableDeclaration (tbl: Table) =     
     [
         { SynBindingRcd.Let with 
-            Pattern = 
-                SynPatRcd.LongIdent(SynPatLongIdentRcd.Create(LongIdentWithDots.Create([ tbl.Name ]), SynArgPats.Empty)) // Good
-                //SynPatRcd.CreateNamed(Ident.Create(tbl.Name), SynPatRcd.CreateNull) // let Null as Addressed = List.empty
-                
+            Pattern = SynPatRcd.LongIdent(SynPatLongIdentRcd.Create(LongIdentWithDots.Create([ tbl.Name ]), SynArgPats.Empty)) // Good
             Expr = 
-                //SynExpr.CreateLongIdent(LongIdentWithDots.Create([ "SqlHydra"; "Query"; "Table"; $"table" ])) // Good
-                SynExpr.CreateTyped(
-                    SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "SqlHydra"; "Query"; "Table" ]), None)
-                    //{ SynExpr.Ident with   }
-                    , SynType.LongIdent(LongIdentWithDots.CreateString(tbl.Name))
+                SynExpr.TypeApp(
+                    SynExpr.CreateLongIdent(LongIdentWithDots.Create [ "SqlHydra"; "Query"; "Table"; "table" ]),
+                    range0,
+                    [
+                        SynType.Create(tbl.Name)
+                    ], // Type arguments
+                    [],
+                    None,
+                    range0,
+                    range0
                 )
         }
     ]
