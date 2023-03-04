@@ -24,7 +24,7 @@ let read(toml: string) =
     let generalTable = model.Get<TomlTable> "general"
     let readersTableMaybe = model.TryGet<TomlTable> "readers"
     let filtersTableMaybe = model.TryGet<TomlTable> "filters"
-    let queryIntTableMaybe = model.TryGet<TomlTable> "sqlhydra_query_integration"
+    let queryIntegrationTableMaybe = model.TryGet<TomlTable> "sqlhydra_query_integration"
 
     {
         Config.ConnectionString = generalTable.Get "connection"
@@ -32,9 +32,16 @@ let read(toml: string) =
         Config.Namespace = generalTable.Get "namespace"
         Config.IsCLIMutable = generalTable.Get "cli_mutable"
         Config.ProviderDbTypeAttributes = 
-            match queryIntTableMaybe with
-            | Some queryIntTable -> queryIntTable.Get "provider_db_type_attributes"
-            | None -> true
+            match queryIntegrationTableMaybe with
+            | Some queryIntegrationTable -> queryIntegrationTable.Get "provider_db_type_attributes"
+            | None -> true // Default to true if missing
+        Config.TableDeclarations = 
+            match queryIntegrationTableMaybe with
+            | Some queryIntegrationTable -> 
+                match queryIntegrationTable.TryGet "table_declarations" with
+                | Some tblDecl -> tblDecl
+                | None -> true // Default to true [sqlhydra_query_integration] table already exists
+            | None -> false // Default to false if [sqlhydra_query_integration] table is missing
         Config.Readers = 
             readersTableMaybe
             |> Option.map (fun rdrsTbl -> 

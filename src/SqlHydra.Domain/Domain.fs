@@ -86,11 +86,27 @@ type FilterPatterns =
 
 type Config = 
     {
+        /// General: Db conneciton string
         ConnectionString: string
+
+        /// General: path to the generated .fs output file
         OutputFile: string
+
+        /// General: namespace for the generated .fs output file
         Namespace: string
+
+        /// General: if true, makes generated table records CLIMutable
         IsCLIMutable: bool
+        
+        /// SqlHydra.Query Integration: generates support for creating Db specific parameter types
         ProviderDbTypeAttributes: bool
-        Filters: FilterPatterns
+        
+        /// SqlHydra.Query Integration: creates a SqlHydra.Query table declaration for each table
+        TableDeclarations: bool
+
+        /// Readers: provides a Db provider specific IDataReader type (for access to Db-specific features)
         Readers: ReadersConfig option
+        
+        /// Filters: optional filters for schemas and tables to generate
+        Filters: FilterPatterns
     }
