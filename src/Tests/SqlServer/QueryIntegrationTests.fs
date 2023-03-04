@@ -19,20 +19,6 @@ let openContext() =
     let conn = openConnection()
     new QueryContext(conn, compiler)
 
-// Tables
-let personTable =             table<Person.Person>
-let addressTable =            table<Person.Address>
-let customerTable =           table<Sales.Customer>
-let orderHeaderTable =        table<Sales.SalesOrderHeader>
-let orderDetailTable =        table<Sales.SalesOrderDetail>
-let productTable =            table<Production.Product>
-let subCategoryTable =        table<Production.ProductSubcategory>
-let categoryTable =           table<Production.ProductCategory>
-let errorLogTable =           table<dbo.ErrorLog>
-let employeeTable =           table<HumanResources.Employee>
-let shiftTable =              table<HumanResources.Shift>
-let dateTime2SupportTable =   table<ext.DateTime2Support>
-
 [<Tests>]
 let tests = 
     categoryList "SqlServer" "Query Integration Tests" [
@@ -42,7 +28,7 @@ let tests =
             
             let addresses =
                 select {
-                    for a in addressTable do
+                    for a in Person.Address do
                     where (a.City |=| [ "Seattle"; "Santa Cruz" ])
                 }
                 |> ctx.Read HydraReader.Read
@@ -56,7 +42,7 @@ let tests =
 
             let cities =
                 select {
-                    for a in addressTable do
+                    for a in Person.Address do
                     where (a.City =% "S%")
                     select a.City
                 }
@@ -71,8 +57,8 @@ let tests =
 
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+                    for o in Sales.SalesOrderHeader do
+                    join d in Sales.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
                     where (o.OnlineOrderFlag = true)
                     select (o, d)
                 }
@@ -88,9 +74,9 @@ let tests =
 
             let query = 
                 select {
-                    for p in productTable do
-                    join sc in subCategoryTable on (p.ProductSubcategoryID = Some sc.ProductSubcategoryID)
-                    join c in categoryTable on (sc.ProductCategoryID = c.ProductCategoryID)
+                    for p in Production.Product do
+                    join sc in Production.ProductSubcategory on (p.ProductSubcategoryID = Some sc.ProductSubcategoryID)
+                    join c in Production.ProductCategory on (sc.ProductCategoryID = c.ProductCategoryID)
                     select (c.Name, p)
                     take 5
                 }
@@ -106,7 +92,7 @@ let tests =
 
             let query =
                 select {
-                    for p in productTable do
+                    for p in Production.Product do
                     where (p.ProductSubcategoryID <> None)
                     groupBy p.ProductSubcategoryID
                     where (p.ProductSubcategoryID.Value |=| [ 1; 2; 3 ])
@@ -132,13 +118,13 @@ let tests =
 
             let avgListPrice = 
                 select {
-                    for p in productTable do
+                    for p in Production.Product do
                     select (avgBy p.ListPrice)
                 }
 
             let! productsWithHigherThanAvgPrice = 
                 select {
-                    for p in productTable do
+                    for p in Production.Product do
                     where (p.ListPrice > subqueryOne avgListPrice)
                     orderByDescending p.ListPrice
                     select (p.Name, p.ListPrice)
@@ -156,7 +142,7 @@ let tests =
 
             let! aggregates = 
                 select {
-                    for p in productTable do
+                    for p in Production.Product do
                     where (p.ProductSubcategoryID <> None)
                     groupBy p.ProductSubcategoryID
                     having (minBy p.ListPrice > 50M && maxBy p.ListPrice < 1000M)
@@ -172,7 +158,7 @@ let tests =
 
             let query = 
                 select {
-                        for p in productTable do
+                        for p in Production.Product do
                         where (p.ProductSubcategoryID <> None)
                         groupBy p.ProductSubcategoryID
                         orderByDescending (avgBy p.ListPrice)
@@ -192,7 +178,7 @@ let tests =
 
             let top5CategoryIdsWithHighestAvgPrices = 
                 select {
-                    for p in productTable do
+                    for p in Production.Product do
                     where (p.ProductSubcategoryID <> None)
                     groupBy p.ProductSubcategoryID
                     orderByDescending (avgBy p.ListPrice)
@@ -202,7 +188,7 @@ let tests =
 
             let! top5Categories =
                 select {
-                    for c in categoryTable do
+                    for c in Production.ProductCategory do
                     where (Some c.ProductCategoryID |=| subqueryMany top5CategoryIdsWithHighestAvgPrices)
                     select c.Name
                 }
@@ -216,13 +202,13 @@ let tests =
 
             let avgListPrice = 
                 select {
-                    for p in productTable do
+                    for p in Production.Product do
                     select (avgBy p.ListPrice)
                 } 
 
             let! productsWithAboveAveragePrice =
                 select {
-                    for p in productTable do
+                    for p in Production.Product do
                     where (p.ListPrice > subqueryOne avgListPrice)
                     select (p.Name, p.ListPrice)
                 }
@@ -236,7 +222,7 @@ let tests =
 
             let! values = 
                 select {
-                    for p in productTable do
+                    for p in Production.Product do
                     where (p.ProductSubcategoryID <> None)
                     select (p.ProductSubcategoryID, p.ListPrice)
                 }
@@ -264,7 +250,7 @@ let tests =
 
             let! errorLogId = 
                 insertTask (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     entity errorLog
                     getId e.ErrorLogID
                 }
@@ -291,7 +277,7 @@ let tests =
 
             let! result = 
                 insertTask (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     entity errorLog
                     getId e.ErrorLogID
                 }
@@ -304,7 +290,7 @@ let tests =
 
             let! result = 
                 updateTask (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     set e.ErrorNumber 123
                     set e.ErrorMessage "ERROR #123"
                     set e.ErrorLine (Some 999)
@@ -320,7 +306,7 @@ let tests =
 
             let! result = 
                 updateTask (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     set e.ErrorNumber 123
                     set e.ErrorMessage "ERROR #123"
                     set e.ErrorLine (Some 999)
@@ -349,7 +335,7 @@ let tests =
 
             let! result = 
                 updateTask (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     entity errorLog
                     excludeColumn e.ErrorLogID
                     where (e.ErrorLogID = errorLog.ErrorLogID)
@@ -363,7 +349,7 @@ let tests =
 
             let! result = 
                 deleteTask (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     where (e.ErrorLogID = 5)
                 }
 
@@ -375,7 +361,7 @@ let tests =
 
             let! result = 
                 deleteTask (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     where (e.ErrorLogID = 5)
                 }
 
@@ -402,7 +388,7 @@ let tests =
 
             let! _ = 
                 deleteTask (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     deleteAll
                 }
 
@@ -417,7 +403,7 @@ let tests =
             | Some errorLogs ->
                 let! rowsInserted =  
                     insertTask (Shared ctx) {
-                        for e in errorLogTable do
+                        for e in dbo.ErrorLog do
                         entities errorLogs
                         excludeColumn e.ErrorLogID
                     }
@@ -427,7 +413,7 @@ let tests =
 
             let! results =
                 select {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     select e.ErrorNumber
                 }
                 |> ctx.ReadAsync HydraReader.Read
@@ -446,7 +432,7 @@ let tests =
 
             let! deletedCount = 
                 deleteAsync (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     deleteAll
                 } 
                                 
@@ -459,7 +445,7 @@ let tests =
             | Some errorLogs ->            
                 let! rowsInserted = 
                     insertAsync (Shared ctx) {
-                        for e in errorLogTable do
+                        for e in dbo.ErrorLog do
                         entities errorLogs
                         excludeColumn e.ErrorLogID
                     }
@@ -469,13 +455,13 @@ let tests =
 
             let! results =
                 selectAsync HydraReader.Read (Shared ctx)  {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     select e.ErrorNumber
                 }
 
             let! distinctResults =
                 selectAsync HydraReader.Read (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     select e.ErrorNumber
                     distinct
                 }
@@ -493,7 +479,7 @@ let tests =
             for i in [0..2] do
                 let! result = 
                     insertTask (Shared ctx) {
-                        for e in errorLogTable do
+                        for e in dbo.ErrorLog do
                         entity stubbedErrorLog
                         getId e.ErrorLogID
                     }
@@ -501,7 +487,7 @@ let tests =
 
             let! count = 
                 select {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     count
                 }
                 |> ctx.CountAsync
@@ -519,7 +505,7 @@ let tests =
             for i in [0..2] do
                 let! result = 
                     insertTask (Shared ctx) {
-                        for e in errorLogTable do
+                        for e in dbo.ErrorLog do
                         entity stubbedErrorLog
                         getId e.ErrorLogID
                     }
@@ -527,7 +513,7 @@ let tests =
 
             let! count = 
                 selectTask HydraReader.Read (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     count
                 }
 
@@ -544,7 +530,7 @@ let tests =
             for i in [0..2] do
                 let! result = 
                     insertAsync (Shared ctx) {
-                        for e in errorLogTable do
+                        for e in dbo.ErrorLog do
                         entity stubbedErrorLog
                         getId e.ErrorLogID
                     }
@@ -552,7 +538,7 @@ let tests =
         
             let! count = 
                 selectAsync HydraReader.Read (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in dbo.ErrorLog do
                     count
                 }
         
@@ -573,7 +559,7 @@ let tests =
 
             let employees =
                 select {
-                    for e in employeeTable do
+                    for e in HumanResources.Employee do
                     where (e.BirthDate < maxBirthDate)
                     select e
                 }
@@ -593,7 +579,7 @@ let tests =
 
             let employeeBirthDates =
                 select {
-                    for e in employeeTable do
+                    for e in HumanResources.Employee do
                     where (e.BirthDate < maxBirthDate)
                     select e.BirthDate
                 }
@@ -613,7 +599,7 @@ let tests =
 
             let shiftsAfter930AM =
                 select {
-                    for s in shiftTable do
+                    for s in HumanResources.Shift do
                     where (s.StartTime >= minStartTime)
                 }
                 |> ctx.Read HydraReader.Read
@@ -630,7 +616,7 @@ let tests =
             
             let! employees =
                 selectTask HydraReader.Read (Shared ctx) {
-                    for e in employeeTable do
+                    for e in HumanResources.Employee do
                     select e
                 }
 
@@ -641,7 +627,7 @@ let tests =
 
             let! result = 
                 updateTask (Shared ctx) {
-                    for e in employeeTable do
+                    for e in HumanResources.Employee do
                     set e.BirthDate birthDate
                     where (e.BusinessEntityID = emp.BusinessEntityID)
                 }
@@ -650,7 +636,7 @@ let tests =
 
             let! refreshedEmp = 
                 selectTask HydraReader.Read (Shared ctx) {
-                    for e in employeeTable do
+                    for e in HumanResources.Employee do
                     where (e.BusinessEntityID = emp.BusinessEntityID)                    
                     tryHead
                 }
@@ -681,14 +667,14 @@ let tests =
 
             let! _ = 
                 insert {
-                    into dateTime2SupportTable 
+                    into ext.DateTime2Support 
                     entity entity'
                 }
                 |> ctx.InsertAsync
 
             let! retrievedBack = 
                 selectTask HydraReader.Read (Shared ctx) {
-                    for row in dateTime2SupportTable do
+                    for row in ext.DateTime2Support do
                     select row
                 }
 
@@ -697,14 +683,14 @@ let tests =
 
             let! fullPrecisionQuery = 
                 selectTask HydraReader.Read (Shared ctx) { 
-                    for row in dateTime2SupportTable do
+                    for row in ext.DateTime2Support do
                     where (row.MorePrecision = timestamp)
                     count
                 }
 
             let! lessPrecisionQuery = 
                 selectTask HydraReader.Read (Shared ctx) { 
-                    for row in dateTime2SupportTable do
+                    for row in ext.DateTime2Support do
                     where (row.LessPrecision = timestamp)
                     count
                 }
@@ -716,21 +702,21 @@ let tests =
 
             let! _ = 
                 updateTask (Shared ctx) {
-                    for row in dateTime2SupportTable do
+                    for row in ext.DateTime2Support do
                     set row.MorePrecision newTimestamp
                     where (row.MorePrecision = timestamp)
                 }
 
             let! _ = 
                 updateTask (Shared ctx) {
-                    for row in dateTime2SupportTable do
+                    for row in ext.DateTime2Support do
                     set row.LessPrecision newTimestamp
                     where (row.LessPrecision = timestamp)
                 }
 
             let! retrievedBack = 
                 selectTask HydraReader.Read (Shared ctx) {
-                    for row in dateTime2SupportTable do
+                    for row in ext.DateTime2Support do
                     select row
                 }
 

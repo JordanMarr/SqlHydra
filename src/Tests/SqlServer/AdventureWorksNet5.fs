@@ -41,6 +41,7 @@ module HumanResources =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Department = SqlHydra.Query.Table.table<Department>
     [<CLIMutable>]
     type Employee =
         { BusinessEntityID: int
@@ -60,6 +61,7 @@ module HumanResources =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Employee = SqlHydra.Query.Table.table<Employee>
     [<CLIMutable>]
     type EmployeeDepartmentHistory =
         { BusinessEntityID: int
@@ -70,6 +72,7 @@ module HumanResources =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let EmployeeDepartmentHistory = SqlHydra.Query.Table.table<EmployeeDepartmentHistory>
     [<CLIMutable>]
     type EmployeePayHistory =
         { BusinessEntityID: int
@@ -80,6 +83,7 @@ module HumanResources =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let EmployeePayHistory = SqlHydra.Query.Table.table<EmployeePayHistory>
     [<CLIMutable>]
     type JobCandidate =
         { JobCandidateID: int
@@ -87,6 +91,7 @@ module HumanResources =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let JobCandidate = SqlHydra.Query.Table.table<JobCandidate>
     [<CLIMutable>]
     type Shift =
         { ShiftID: byte
@@ -96,6 +101,7 @@ module HumanResources =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Shift = SqlHydra.Query.Table.table<Shift>
     module Readers =
         type DepartmentReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.DepartmentID = RequiredColumn(reader, getOrdinal, reader.GetInt16, "DepartmentID")
@@ -222,6 +228,7 @@ module Person =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Address = SqlHydra.Query.Table.table<Address>
     [<CLIMutable>]
     type AddressType =
         { AddressTypeID: int
@@ -230,6 +237,7 @@ module Person =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let AddressType = SqlHydra.Query.Table.table<AddressType>
     [<CLIMutable>]
     type BusinessEntity =
         { BusinessEntityID: int
@@ -237,6 +245,7 @@ module Person =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let BusinessEntity = SqlHydra.Query.Table.table<BusinessEntity>
     [<CLIMutable>]
     type BusinessEntityAddress =
         { BusinessEntityID: int
@@ -246,6 +255,7 @@ module Person =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let BusinessEntityAddress = SqlHydra.Query.Table.table<BusinessEntityAddress>
     [<CLIMutable>]
     type BusinessEntityContact =
         { BusinessEntityID: int
@@ -255,6 +265,7 @@ module Person =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let BusinessEntityContact = SqlHydra.Query.Table.table<BusinessEntityContact>
     [<CLIMutable>]
     type ContactType =
         { ContactTypeID: int
@@ -262,6 +273,7 @@ module Person =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ContactType = SqlHydra.Query.Table.table<ContactType>
     [<CLIMutable>]
     type CountryRegion =
         { CountryRegionCode: string
@@ -269,6 +281,7 @@ module Person =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let CountryRegion = SqlHydra.Query.Table.table<CountryRegion>
     [<CLIMutable>]
     type EmailAddress =
         { BusinessEntityID: int
@@ -278,6 +291,7 @@ module Person =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let EmailAddress = SqlHydra.Query.Table.table<EmailAddress>
     [<CLIMutable>]
     type Password =
         { BusinessEntityID: int
@@ -287,6 +301,7 @@ module Person =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Password = SqlHydra.Query.Table.table<Password>
     [<CLIMutable>]
     type Person =
         { BusinessEntityID: int
@@ -302,6 +317,7 @@ module Person =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Person = SqlHydra.Query.Table.table<Person>
     [<CLIMutable>]
     type PersonPhone =
         { BusinessEntityID: int
@@ -310,6 +326,7 @@ module Person =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let PersonPhone = SqlHydra.Query.Table.table<PersonPhone>
     [<CLIMutable>]
     type PhoneNumberType =
         { PhoneNumberTypeID: int
@@ -317,6 +334,7 @@ module Person =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let PhoneNumberType = SqlHydra.Query.Table.table<PhoneNumberType>
     [<CLIMutable>]
     type StateProvince =
         { StateProvinceID: int
@@ -329,6 +347,7 @@ module Person =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let StateProvince = SqlHydra.Query.Table.table<StateProvince>
     module Readers =
         type AddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.AddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "AddressID")
@@ -558,6 +577,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let BillOfMaterials = SqlHydra.Query.Table.table<BillOfMaterials>
     [<CLIMutable>]
     type Culture =
         { CultureID: string
@@ -565,6 +585,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Culture = SqlHydra.Query.Table.table<Culture>
     [<CLIMutable>]
     type Document =
         { DocumentLevel: Option<int16>
@@ -582,12 +603,14 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Document = SqlHydra.Query.Table.table<Document>
     [<CLIMutable>]
     type Illustration =
         { IllustrationID: int
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Illustration = SqlHydra.Query.Table.table<Illustration>
     [<CLIMutable>]
     type Location =
         { LocationID: int16
@@ -597,6 +620,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Location = SqlHydra.Query.Table.table<Location>
     [<CLIMutable>]
     type Product =
         { ProductID: int
@@ -629,6 +653,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Product = SqlHydra.Query.Table.table<Product>
     [<CLIMutable>]
     type ProductCategory =
         { ProductCategoryID: int
@@ -637,6 +662,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductCategory = SqlHydra.Query.Table.table<ProductCategory>
     [<CLIMutable>]
     type ProductCostHistory =
         { ProductID: int
@@ -648,6 +674,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductCostHistory = SqlHydra.Query.Table.table<ProductCostHistory>
     [<CLIMutable>]
     type ProductDescription =
         { ProductDescriptionID: int
@@ -656,12 +683,14 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductDescription = SqlHydra.Query.Table.table<ProductDescription>
     [<CLIMutable>]
     type ProductDocument =
         { ProductID: int
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductDocument = SqlHydra.Query.Table.table<ProductDocument>
     [<CLIMutable>]
     type ProductInventory =
         { ProductID: int
@@ -673,6 +702,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductInventory = SqlHydra.Query.Table.table<ProductInventory>
     [<CLIMutable>]
     type ProductListPriceHistory =
         { ProductID: int
@@ -684,6 +714,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductListPriceHistory = SqlHydra.Query.Table.table<ProductListPriceHistory>
     [<CLIMutable>]
     type ProductModel =
         { ProductModelID: int
@@ -692,6 +723,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductModel = SqlHydra.Query.Table.table<ProductModel>
     [<CLIMutable>]
     type ProductModelIllustration =
         { ProductModelID: int
@@ -699,6 +731,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductModelIllustration = SqlHydra.Query.Table.table<ProductModelIllustration>
     [<CLIMutable>]
     type ProductModelProductDescriptionCulture =
         { ProductModelID: int
@@ -707,6 +740,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductModelProductDescriptionCulture = SqlHydra.Query.Table.table<ProductModelProductDescriptionCulture>
     [<CLIMutable>]
     type ProductPhoto =
         { ProductPhotoID: int
@@ -717,6 +751,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductPhoto = SqlHydra.Query.Table.table<ProductPhoto>
     [<CLIMutable>]
     type ProductProductPhoto =
         { ProductID: int
@@ -725,6 +760,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductProductPhoto = SqlHydra.Query.Table.table<ProductProductPhoto>
     [<CLIMutable>]
     type ProductReview =
         { ProductReviewID: int
@@ -738,6 +774,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductReview = SqlHydra.Query.Table.table<ProductReview>
     [<CLIMutable>]
     type ProductSubcategory =
         { ProductSubcategoryID: int
@@ -747,6 +784,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductSubcategory = SqlHydra.Query.Table.table<ProductSubcategory>
     [<CLIMutable>]
     type ScrapReason =
         { ScrapReasonID: int16
@@ -754,6 +792,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ScrapReason = SqlHydra.Query.Table.table<ScrapReason>
     [<CLIMutable>]
     type TransactionHistory =
         { TransactionID: int
@@ -768,6 +807,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let TransactionHistory = SqlHydra.Query.Table.table<TransactionHistory>
     [<CLIMutable>]
     type TransactionHistoryArchive =
         { TransactionID: int
@@ -782,6 +822,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let TransactionHistoryArchive = SqlHydra.Query.Table.table<TransactionHistoryArchive>
     [<CLIMutable>]
     type UnitMeasure =
         { UnitMeasureCode: string
@@ -789,6 +830,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let UnitMeasure = SqlHydra.Query.Table.table<UnitMeasure>
     [<CLIMutable>]
     type WorkOrder =
         { WorkOrderID: int
@@ -806,6 +848,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let WorkOrder = SqlHydra.Query.Table.table<WorkOrder>
     [<CLIMutable>]
     type WorkOrderRouting =
         { WorkOrderID: int
@@ -826,6 +869,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let WorkOrderRouting = SqlHydra.Query.Table.table<WorkOrderRouting>
     module Readers =
         type BillOfMaterialsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BillOfMaterialsID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BillOfMaterialsID")
@@ -1322,6 +1366,7 @@ module Purchasing =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ProductVendor = SqlHydra.Query.Table.table<ProductVendor>
     [<CLIMutable>]
     type PurchaseOrderDetail =
         { PurchaseOrderID: int
@@ -1338,6 +1383,7 @@ module Purchasing =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let PurchaseOrderDetail = SqlHydra.Query.Table.table<PurchaseOrderDetail>
     [<CLIMutable>]
     type PurchaseOrderHeader =
         { PurchaseOrderID: int
@@ -1357,6 +1403,7 @@ module Purchasing =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let PurchaseOrderHeader = SqlHydra.Query.Table.table<PurchaseOrderHeader>
     [<CLIMutable>]
     type ShipMethod =
         { ShipMethodID: int
@@ -1367,6 +1414,7 @@ module Purchasing =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ShipMethod = SqlHydra.Query.Table.table<ShipMethod>
     [<CLIMutable>]
     type Vendor =
         { BusinessEntityID: int
@@ -1379,6 +1427,7 @@ module Purchasing =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Vendor = SqlHydra.Query.Table.table<Vendor>
     module Readers =
         type ProductVendorReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
@@ -1516,6 +1565,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let CountryRegionCurrency = SqlHydra.Query.Table.table<CountryRegionCurrency>
     [<CLIMutable>]
     type CreditCard =
         { CreditCardID: int
@@ -1526,6 +1576,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let CreditCard = SqlHydra.Query.Table.table<CreditCard>
     [<CLIMutable>]
     type Currency =
         { CurrencyCode: string
@@ -1533,6 +1584,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Currency = SqlHydra.Query.Table.table<Currency>
     [<CLIMutable>]
     type CurrencyRate =
         { CurrencyRateID: int
@@ -1545,6 +1597,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let CurrencyRate = SqlHydra.Query.Table.table<CurrencyRate>
     [<CLIMutable>]
     type Customer =
         { CustomerID: int
@@ -1556,6 +1609,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Customer = SqlHydra.Query.Table.table<Customer>
     [<CLIMutable>]
     type PersonCreditCard =
         { BusinessEntityID: int
@@ -1563,6 +1617,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let PersonCreditCard = SqlHydra.Query.Table.table<PersonCreditCard>
     [<CLIMutable>]
     type SalesOrderDetail =
         { SalesOrderID: int
@@ -1578,6 +1633,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let SalesOrderDetail = SqlHydra.Query.Table.table<SalesOrderDetail>
     [<CLIMutable>]
     type SalesOrderHeader =
         { SalesOrderID: int
@@ -1611,6 +1667,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let SalesOrderHeader = SqlHydra.Query.Table.table<SalesOrderHeader>
     [<CLIMutable>]
     type SalesOrderHeaderSalesReason =
         { SalesOrderID: int
@@ -1618,6 +1675,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let SalesOrderHeaderSalesReason = SqlHydra.Query.Table.table<SalesOrderHeaderSalesReason>
     [<CLIMutable>]
     type SalesPerson =
         { BusinessEntityID: int
@@ -1631,6 +1689,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let SalesPerson = SqlHydra.Query.Table.table<SalesPerson>
     [<CLIMutable>]
     type SalesPersonQuotaHistory =
         { BusinessEntityID: int
@@ -1641,6 +1700,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let SalesPersonQuotaHistory = SqlHydra.Query.Table.table<SalesPersonQuotaHistory>
     [<CLIMutable>]
     type SalesReason =
         { SalesReasonID: int
@@ -1649,6 +1709,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let SalesReason = SqlHydra.Query.Table.table<SalesReason>
     [<CLIMutable>]
     type SalesTaxRate =
         { SalesTaxRateID: int
@@ -1660,6 +1721,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let SalesTaxRate = SqlHydra.Query.Table.table<SalesTaxRate>
     [<CLIMutable>]
     type SalesTerritory =
         { TerritoryID: int
@@ -1674,6 +1736,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let SalesTerritory = SqlHydra.Query.Table.table<SalesTerritory>
     [<CLIMutable>]
     type SalesTerritoryHistory =
         { BusinessEntityID: int
@@ -1686,6 +1749,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let SalesTerritoryHistory = SqlHydra.Query.Table.table<SalesTerritoryHistory>
     [<CLIMutable>]
     type ShoppingCartItem =
         { ShoppingCartItemID: int
@@ -1697,6 +1761,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let ShoppingCartItem = SqlHydra.Query.Table.table<ShoppingCartItem>
     [<CLIMutable>]
     type SpecialOffer =
         { SpecialOfferID: int
@@ -1714,6 +1779,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let SpecialOffer = SqlHydra.Query.Table.table<SpecialOffer>
     [<CLIMutable>]
     type SpecialOfferProduct =
         { SpecialOfferID: int
@@ -1722,6 +1788,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let SpecialOfferProduct = SqlHydra.Query.Table.table<SpecialOfferProduct>
     [<CLIMutable>]
     type Store =
         { BusinessEntityID: int
@@ -1731,6 +1798,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let Store = SqlHydra.Query.Table.table<Store>
     module Readers =
         type CountryRegionCurrencyReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.CountryRegionCode = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionCode")
@@ -2128,6 +2196,7 @@ module dbo =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
+    let AWBuildVersion = SqlHydra.Query.Table.table<AWBuildVersion>
     [<CLIMutable>]
     type DatabaseLog =
         { DatabaseLogID: int
@@ -2139,6 +2208,7 @@ module dbo =
           Object: Option<string>
           TSQL: string }
 
+    let DatabaseLog = SqlHydra.Query.Table.table<DatabaseLog>
     [<CLIMutable>]
     type ErrorLog =
         { ErrorLogID: int
@@ -2152,6 +2222,7 @@ module dbo =
           ErrorLine: Option<int>
           ErrorMessage: string }
 
+    let ErrorLog = SqlHydra.Query.Table.table<ErrorLog>
     module Readers =
         type AWBuildVersionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.SystemInformationID = RequiredColumn(reader, getOrdinal, reader.GetByte, "SystemInformationID")
@@ -2220,11 +2291,13 @@ module ext =
           [<SqlHydra.ProviderDbType("DateTime2")>]
           MorePrecision: System.DateTime }
 
+    let DateTime2Support = SqlHydra.Query.Table.table<DateTime2Support>
     [<CLIMutable>]
     type GetIdGuidRepro =
         { Id: System.Guid
           EmailAddress: string }
 
+    let GetIdGuidRepro = SqlHydra.Query.Table.table<GetIdGuidRepro>
     module Readers =
         type DateTime2SupportReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ID")

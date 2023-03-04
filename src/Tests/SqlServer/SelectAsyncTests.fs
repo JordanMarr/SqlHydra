@@ -19,17 +19,6 @@ let openContext() =
     let conn = openConnection()
     new QueryContext(conn, compiler)
 
-// Tables
-let personTable =           table<Person.Person>                    |> inSchema (nameof Person)
-let customerTable =         table<Sales.Customer>                   |> inSchema (nameof Sales)
-let orderHeaderTable =      table<Sales.SalesOrderHeader>           |> inSchema (nameof Sales)
-let orderDetailTable =      table<Sales.SalesOrderDetail>           |> inSchema (nameof Sales)
-let productTable =          table<Production.Product>               |> inSchema (nameof Production)
-let subCategoryTable =      table<Production.ProductSubcategory>    |> inSchema (nameof Production)
-let categoryTable =         table<Production.ProductCategory>       |> inSchema (nameof Production)
-let errorLogTable =         table<dbo.ErrorLog>
-
-
 [<Tests>]
 let selectTests = 
     categoryList "SqlServer" "selectAsync" [
@@ -37,8 +26,8 @@ let selectTests =
         testAsync "selectAsync" {
             let! results = 
                 selectAsync HydraReader.Read (Create openContext) {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+                    for o in Sales.SalesOrderHeader do
+                    join d in Sales.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
                     take 10
                     mapArray $"{o.SalesOrderNumber} - {d.LineTotal} - {d.ModifiedDate.ToShortDateString()}"
                 }
@@ -49,7 +38,7 @@ let selectTests =
         testAsync "selectAsync - select" {
             let! results = 
                 selectAsync HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 10
                     select p
                 }
@@ -60,7 +49,7 @@ let selectTests =
         testAsync "selectAsync - toArray" {
             let! results = 
                 selectAsync HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 10
                     toArray
                 }
@@ -71,7 +60,7 @@ let selectTests =
         testAsync "selectAsync - mapList column" {
             let! results = 
                 selectAsync HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 10
                     mapList p.FirstName
                 }
@@ -82,7 +71,7 @@ let selectTests =
         testAsync "selectAsync - select entity - mapSeq column" {
             let! results = 
                 selectAsync HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 10
                     select p
                     mapSeq $"{p.FirstName} {p.LastName}"
@@ -94,7 +83,7 @@ let selectTests =
         testAsync "selectAsync - select columns into - mapList column" {
             let! results = 
                 selectAsync HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 10
                     select (p.FirstName, p.LastName) into (fname, lname)
                     mapList $"{fname} {lname}"
@@ -106,7 +95,7 @@ let selectTests =
         testAsync "selectAsync - count" {
             let! results = 
                 selectAsync HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     count
                 }
         
@@ -116,7 +105,7 @@ let selectTests =
         testAsync "selectAsync - tryHead - Selected" {
             let! result = 
                 selectAsync HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 1
                     tryHead
                 }
@@ -127,7 +116,7 @@ let selectTests =
         testAsync "selectAsync - tryHead - Mapped" {
             let! result = 
                 selectAsync HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 1
                     mapSeq $"{p.FirstName} {p.LastName}"
                     tryHead

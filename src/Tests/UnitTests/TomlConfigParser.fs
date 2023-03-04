@@ -21,6 +21,7 @@ let tests =
                     Config.Namespace = "SampleApp.AdventureWorks"
                     Config.IsCLIMutable = true
                     Config.ProviderDbTypeAttributes = true
+                    Config.TableDeclarations = true
                     Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
                     Config.Filters = FilterPatterns.Empty
                 }
@@ -36,6 +37,7 @@ let tests =
                 cli_mutable = true
                 [sqlhydra_query_integration]
                 provider_db_type_attributes = true
+                table_declarations
                 [readers]
                 reader_type = "Microsoft.Data.SqlClient.SqlDataReader"
                 [filters]
@@ -65,6 +67,7 @@ let tests =
                     Config.Namespace = "SampleApp.AdventureWorks"
                     Config.IsCLIMutable = true
                     Config.ProviderDbTypeAttributes = true
+                    Config.TableDeclarations = false
                     Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
                     Config.Filters = FilterPatterns.Empty
                 }
@@ -91,6 +94,7 @@ let tests =
                     Config.Namespace = "SampleApp.AdventureWorks"
                     Config.IsCLIMutable = true
                     Config.ProviderDbTypeAttributes = true
+                    Config.TableDeclarations = false
                     Config.Readers = None
                     Config.Filters = FilterPatterns.Empty
                 }
