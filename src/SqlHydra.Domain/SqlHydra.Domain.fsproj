@@ -4,6 +4,10 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <WarnOn>3390;$(WarnOn)</WarnOn>
+		<WarningsAsErrors>
+			<!-- Incomplete pattern matches on this expression. -->
+			FS0025
+		</WarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>
