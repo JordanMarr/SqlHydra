@@ -45,6 +45,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
+    let Address = SqlHydra.Query.Table.table<Address>
     [<CLIMutable>]
     type BuildVersion =
         { SystemInformationID: int64
@@ -52,6 +53,7 @@ module main =
           VersionDate: System.DateTime
           ModifiedDate: System.DateTime }
 
+    let BuildVersion = SqlHydra.Query.Table.table<BuildVersion>
     [<CLIMutable>]
     type Customer =
         { CustomerID: int64
@@ -70,6 +72,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
+    let Customer = SqlHydra.Query.Table.table<Customer>
     [<CLIMutable>]
     type CustomerAddress =
         { CustomerID: int64
@@ -78,6 +81,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
+    let CustomerAddress = SqlHydra.Query.Table.table<CustomerAddress>
     [<CLIMutable>]
     type ErrorLog =
         { ErrorLogID: int64
@@ -90,6 +94,7 @@ module main =
           ErrorLine: Option<int64>
           ErrorMessage: string }
 
+    let ErrorLog = SqlHydra.Query.Table.table<ErrorLog>
     [<CLIMutable>]
     type Product =
         { ProductID: int64
@@ -110,6 +115,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
+    let Product = SqlHydra.Query.Table.table<Product>
     [<CLIMutable>]
     type ProductCategory =
         { ProductCategoryID: int64
@@ -118,6 +124,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
+    let ProductCategory = SqlHydra.Query.Table.table<ProductCategory>
     [<CLIMutable>]
     type ProductDescription =
         { ProductDescriptionID: int64
@@ -125,6 +132,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
+    let ProductDescription = SqlHydra.Query.Table.table<ProductDescription>
     [<CLIMutable>]
     type ProductModel =
         { ProductModelID: int64
@@ -133,6 +141,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
+    let ProductModel = SqlHydra.Query.Table.table<ProductModel>
     [<CLIMutable>]
     type ProductModelProductDescription =
         { ProductModelID: int64
@@ -141,6 +150,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
+    let ProductModelProductDescription = SqlHydra.Query.Table.table<ProductModelProductDescription>
     [<CLIMutable>]
     type SalesOrderDetail =
         { SalesOrderID: int64
@@ -153,6 +163,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
+    let SalesOrderDetail = SqlHydra.Query.Table.table<SalesOrderDetail>
     [<CLIMutable>]
     type SalesOrderHeader =
         { SalesOrderID: int64
@@ -178,6 +189,7 @@ module main =
           rowguid: string
           ModifiedDate: System.DateTime }
 
+    let SalesOrderHeader = SqlHydra.Query.Table.table<SalesOrderHeader>
     module Readers =
         type AddressReader(reader: System.Data.Common.DbDataReader, getOrdinal) =
             member __.AddressID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "AddressID")

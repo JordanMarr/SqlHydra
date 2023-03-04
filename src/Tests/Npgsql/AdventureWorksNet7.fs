@@ -57,6 +57,8 @@ module ext =
           [<SqlHydra.ProviderDbType("Integer,Array")>]
           integer_array: int [] }
 
+    let arrays = SqlHydra.Query.Table.table<arrays>
+
     [<CLIMutable>]
     type jsonsupport =
         { id: int
@@ -65,8 +67,12 @@ module ext =
           [<SqlHydra.ProviderDbType("Jsonb")>]
           jsonb_field: string }
 
+    let jsonsupport = SqlHydra.Query.Table.table<jsonsupport>
+
     [<CLIMutable>]
     type person = { name: string; currentmood: mood }
+
+    let person = SqlHydra.Query.Table.table<person>
 
     module Readers =
         type arraysReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
@@ -114,6 +120,8 @@ module humanresources =
           groupname: string
           modifieddate: System.DateTime }
 
+    let department = SqlHydra.Query.Table.table<department>
+
     [<CLIMutable>]
     type employee =
         { businessentityid: int
@@ -132,6 +140,8 @@ module humanresources =
           modifieddate: System.DateTime
           organizationnode: Option<string> }
 
+    let employee = SqlHydra.Query.Table.table<employee>
+
     [<CLIMutable>]
     type employeedepartmenthistory =
         { businessentityid: int
@@ -141,6 +151,8 @@ module humanresources =
           enddate: Option<System.DateOnly>
           modifieddate: System.DateTime }
 
+    let employeedepartmenthistory = SqlHydra.Query.Table.table<employeedepartmenthistory>
+
     [<CLIMutable>]
     type employeepayhistory =
         { businessentityid: int
@@ -149,12 +161,16 @@ module humanresources =
           payfrequency: int16
           modifieddate: System.DateTime }
 
+    let employeepayhistory = SqlHydra.Query.Table.table<employeepayhistory>
+
     [<CLIMutable>]
     type jobcandidate =
         { jobcandidateid: int
           businessentityid: Option<int>
           resume: Option<string>
           modifieddate: System.DateTime }
+
+    let jobcandidate = SqlHydra.Query.Table.table<jobcandidate>
 
     [<CLIMutable>]
     type shift =
@@ -163,6 +179,8 @@ module humanresources =
           starttime: System.TimeOnly
           endtime: System.TimeOnly
           modifieddate: System.DateTime }
+
+    let shift = SqlHydra.Query.Table.table<shift>
 
     [<CLIMutable>]
     type vemployee =
@@ -185,6 +203,8 @@ module humanresources =
           countryregionname: Option<string>
           additionalcontactinfo: Option<string> }
 
+    let vemployee = SqlHydra.Query.Table.table<vemployee>
+
     [<CLIMutable>]
     type vemployeedepartment =
         { businessentityid: Option<int>
@@ -197,6 +217,8 @@ module humanresources =
           department: Option<string>
           groupname: Option<string>
           startdate: Option<System.DateOnly> }
+
+    let vemployeedepartment = SqlHydra.Query.Table.table<vemployeedepartment>
 
     [<CLIMutable>]
     type vemployeedepartmenthistory =
@@ -211,6 +233,8 @@ module humanresources =
           groupname: Option<string>
           startdate: Option<System.DateOnly>
           enddate: Option<System.DateOnly> }
+
+    let vemployeedepartmenthistory = SqlHydra.Query.Table.table<vemployeedepartmenthistory>
 
     [<CLIMutable>]
     type vjobcandidate =
@@ -231,6 +255,8 @@ module humanresources =
           WebSite: Option<string>
           modifieddate: Option<System.DateTime> }
 
+    let vjobcandidate = SqlHydra.Query.Table.table<vjobcandidate>
+
     [<CLIMutable>]
     type vjobcandidateeducation =
         { jobcandidateid: Option<int>
@@ -247,6 +273,8 @@ module humanresources =
           ``Edu.Loc.State``: Option<string>
           ``Edu.Loc.City``: Option<string> }
 
+    let vjobcandidateeducation = SqlHydra.Query.Table.table<vjobcandidateeducation>
+
     [<CLIMutable>]
     type vjobcandidateemployment =
         { jobcandidateid: Option<int>
@@ -260,6 +288,8 @@ module humanresources =
           ``Emp.Loc.CountryRegion``: Option<string>
           ``Emp.Loc.State``: Option<string>
           ``Emp.Loc.City``: Option<string> }
+
+    let vjobcandidateemployment = SqlHydra.Query.Table.table<vjobcandidateemployment>
 
     module Readers =
         type departmentReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
@@ -596,6 +626,8 @@ module pe =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let a = SqlHydra.Query.Table.table<a>
+
     [<CLIMutable>]
     type at =
         { id: Option<int>
@@ -604,12 +636,16 @@ module pe =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let at = SqlHydra.Query.Table.table<at>
+
     [<CLIMutable>]
     type be =
         { id: Option<int>
           businessentityid: Option<int>
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
+
+    let be = SqlHydra.Query.Table.table<be>
 
     [<CLIMutable>]
     type bea =
@@ -620,6 +656,8 @@ module pe =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let bea = SqlHydra.Query.Table.table<bea>
+
     [<CLIMutable>]
     type bec =
         { id: Option<int>
@@ -629,11 +667,15 @@ module pe =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let bec = SqlHydra.Query.Table.table<bec>
+
     [<CLIMutable>]
     type cr =
         { countryregioncode: Option<string>
           name: Option<string>
           modifieddate: Option<System.DateTime> }
+
+    let cr = SqlHydra.Query.Table.table<cr>
 
     [<CLIMutable>]
     type ct =
@@ -641,6 +683,8 @@ module pe =
           contacttypeid: Option<int>
           name: Option<string>
           modifieddate: Option<System.DateTime> }
+
+    let ct = SqlHydra.Query.Table.table<ct>
 
     [<CLIMutable>]
     type e =
@@ -650,6 +694,8 @@ module pe =
           emailaddress: Option<string>
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
+
+    let e = SqlHydra.Query.Table.table<e>
 
     [<CLIMutable>]
     type p =
@@ -668,6 +714,8 @@ module pe =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let p = SqlHydra.Query.Table.table<p>
+
     [<CLIMutable>]
     type pa =
         { id: Option<int>
@@ -677,12 +725,16 @@ module pe =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let pa = SqlHydra.Query.Table.table<pa>
+
     [<CLIMutable>]
     type pnt =
         { id: Option<int>
           phonenumbertypeid: Option<int>
           name: Option<string>
           modifieddate: Option<System.DateTime> }
+
+    let pnt = SqlHydra.Query.Table.table<pnt>
 
     [<CLIMutable>]
     type pp =
@@ -691,6 +743,8 @@ module pe =
           phonenumber: Option<string>
           phonenumbertypeid: Option<int>
           modifieddate: Option<System.DateTime> }
+
+    let pp = SqlHydra.Query.Table.table<pp>
 
     [<CLIMutable>]
     type sp =
@@ -703,6 +757,8 @@ module pe =
           territoryid: Option<int>
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
+
+    let sp = SqlHydra.Query.Table.table<sp>
 
     module Readers =
         type aReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
@@ -973,6 +1029,8 @@ module person =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let address = SqlHydra.Query.Table.table<address>
+
     [<CLIMutable>]
     type addresstype =
         { addresstypeid: int
@@ -980,11 +1038,15 @@ module person =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let addresstype = SqlHydra.Query.Table.table<addresstype>
+
     [<CLIMutable>]
     type businessentity =
         { businessentityid: int
           rowguid: System.Guid
           modifieddate: System.DateTime }
+
+    let businessentity = SqlHydra.Query.Table.table<businessentity>
 
     [<CLIMutable>]
     type businessentityaddress =
@@ -994,6 +1056,8 @@ module person =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let businessentityaddress = SqlHydra.Query.Table.table<businessentityaddress>
+
     [<CLIMutable>]
     type businessentitycontact =
         { businessentityid: int
@@ -1002,17 +1066,23 @@ module person =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let businessentitycontact = SqlHydra.Query.Table.table<businessentitycontact>
+
     [<CLIMutable>]
     type contacttype =
         { contacttypeid: int
           name: string
           modifieddate: System.DateTime }
 
+    let contacttype = SqlHydra.Query.Table.table<contacttype>
+
     [<CLIMutable>]
     type countryregion =
         { countryregioncode: string
           name: string
           modifieddate: System.DateTime }
+
+    let countryregion = SqlHydra.Query.Table.table<countryregion>
 
     [<CLIMutable>]
     type emailaddress =
@@ -1022,6 +1092,8 @@ module person =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let emailaddress = SqlHydra.Query.Table.table<emailaddress>
+
     [<CLIMutable>]
     type password =
         { businessentityid: int
@@ -1029,6 +1101,8 @@ module person =
           passwordsalt: string
           rowguid: System.Guid
           modifieddate: System.DateTime }
+
+    let password = SqlHydra.Query.Table.table<password>
 
     [<CLIMutable>]
     type person =
@@ -1046,6 +1120,8 @@ module person =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let person = SqlHydra.Query.Table.table<person>
+
     [<CLIMutable>]
     type personphone =
         { businessentityid: int
@@ -1053,11 +1129,15 @@ module person =
           phonenumbertypeid: int
           modifieddate: System.DateTime }
 
+    let personphone = SqlHydra.Query.Table.table<personphone>
+
     [<CLIMutable>]
     type phonenumbertype =
         { phonenumbertypeid: int
           name: string
           modifieddate: System.DateTime }
+
+    let phonenumbertype = SqlHydra.Query.Table.table<phonenumbertype>
 
     [<CLIMutable>]
     type stateprovince =
@@ -1069,6 +1149,8 @@ module person =
           territoryid: int
           rowguid: System.Guid
           modifieddate: System.DateTime }
+
+    let stateprovince = SqlHydra.Query.Table.table<stateprovince>
 
     [<CLIMutable>]
     type vadditionalcontactinfo =
@@ -1089,6 +1171,8 @@ module person =
           emailtelephonenumber: Option<string>
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
+
+    let vadditionalcontactinfo = SqlHydra.Query.Table.table<vadditionalcontactinfo>
 
     module Readers =
         type addressReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
@@ -1377,12 +1461,16 @@ module pr =
           perassemblyqty: Option<decimal>
           modifieddate: Option<System.DateTime> }
 
+    let bom = SqlHydra.Query.Table.table<bom>
+
     [<CLIMutable>]
     type c =
         { id: Option<string>
           cultureid: Option<string>
           name: Option<string>
           modifieddate: Option<System.DateTime> }
+
+    let c = SqlHydra.Query.Table.table<c>
 
     [<CLIMutable>]
     type d =
@@ -1400,12 +1488,16 @@ module pr =
           modifieddate: Option<System.DateTime>
           documentnode: Option<string> }
 
+    let d = SqlHydra.Query.Table.table<d>
+
     [<CLIMutable>]
     type i =
         { id: Option<int>
           illustrationid: Option<int>
           diagram: Option<string>
           modifieddate: Option<System.DateTime> }
+
+    let i = SqlHydra.Query.Table.table<i>
 
     [<CLIMutable>]
     type l =
@@ -1415,6 +1507,8 @@ module pr =
           costrate: Option<decimal>
           availability: Option<decimal>
           modifieddate: Option<System.DateTime> }
+
+    let l = SqlHydra.Query.Table.table<l>
 
     [<CLIMutable>]
     type p =
@@ -1445,6 +1539,8 @@ module pr =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let p = SqlHydra.Query.Table.table<p>
+
     [<CLIMutable>]
     type pc =
         { id: Option<int>
@@ -1452,6 +1548,8 @@ module pr =
           name: Option<string>
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
+
+    let pc = SqlHydra.Query.Table.table<pc>
 
     [<CLIMutable>]
     type pch =
@@ -1462,6 +1560,8 @@ module pr =
           standardcost: Option<decimal>
           modifieddate: Option<System.DateTime> }
 
+    let pch = SqlHydra.Query.Table.table<pch>
+
     [<CLIMutable>]
     type pd =
         { id: Option<int>
@@ -1470,12 +1570,16 @@ module pr =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let pd = SqlHydra.Query.Table.table<pd>
+
     [<CLIMutable>]
     type pdoc =
         { id: Option<int>
           productid: Option<int>
           modifieddate: Option<System.DateTime>
           documentnode: Option<string> }
+
+    let pdoc = SqlHydra.Query.Table.table<pdoc>
 
     [<CLIMutable>]
     type pi =
@@ -1488,6 +1592,8 @@ module pr =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let pi = SqlHydra.Query.Table.table<pi>
+
     [<CLIMutable>]
     type plph =
         { id: Option<int>
@@ -1496,6 +1602,8 @@ module pr =
           enddate: Option<System.DateTime>
           listprice: Option<decimal>
           modifieddate: Option<System.DateTime> }
+
+    let plph = SqlHydra.Query.Table.table<plph>
 
     [<CLIMutable>]
     type pm =
@@ -1507,11 +1615,15 @@ module pr =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let pm = SqlHydra.Query.Table.table<pm>
+
     [<CLIMutable>]
     type pmi =
         { productmodelid: Option<int>
           illustrationid: Option<int>
           modifieddate: Option<System.DateTime> }
+
+    let pmi = SqlHydra.Query.Table.table<pmi>
 
     [<CLIMutable>]
     type pmpdc =
@@ -1519,6 +1631,8 @@ module pr =
           productdescriptionid: Option<int>
           cultureid: Option<string>
           modifieddate: Option<System.DateTime> }
+
+    let pmpdc = SqlHydra.Query.Table.table<pmpdc>
 
     [<CLIMutable>]
     type pp =
@@ -1530,12 +1644,16 @@ module pr =
           largephotofilename: Option<string>
           modifieddate: Option<System.DateTime> }
 
+    let pp = SqlHydra.Query.Table.table<pp>
+
     [<CLIMutable>]
     type ppp =
         { productid: Option<int>
           productphotoid: Option<int>
           primary: bool
           modifieddate: Option<System.DateTime> }
+
+    let ppp = SqlHydra.Query.Table.table<ppp>
 
     [<CLIMutable>]
     type pr =
@@ -1549,6 +1667,8 @@ module pr =
           comments: Option<string>
           modifieddate: Option<System.DateTime> }
 
+    let pr = SqlHydra.Query.Table.table<pr>
+
     [<CLIMutable>]
     type psc =
         { id: Option<int>
@@ -1558,12 +1678,16 @@ module pr =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let psc = SqlHydra.Query.Table.table<psc>
+
     [<CLIMutable>]
     type sr =
         { id: Option<int>
           scrapreasonid: Option<int>
           name: Option<string>
           modifieddate: Option<System.DateTime> }
+
+    let sr = SqlHydra.Query.Table.table<sr>
 
     [<CLIMutable>]
     type th =
@@ -1578,6 +1702,8 @@ module pr =
           actualcost: Option<decimal>
           modifieddate: Option<System.DateTime> }
 
+    let th = SqlHydra.Query.Table.table<th>
+
     [<CLIMutable>]
     type tha =
         { id: Option<int>
@@ -1591,12 +1717,16 @@ module pr =
           actualcost: Option<decimal>
           modifieddate: Option<System.DateTime> }
 
+    let tha = SqlHydra.Query.Table.table<tha>
+
     [<CLIMutable>]
     type um =
         { id: Option<string>
           unitmeasurecode: Option<string>
           name: Option<string>
           modifieddate: Option<System.DateTime> }
+
+    let um = SqlHydra.Query.Table.table<um>
 
     [<CLIMutable>]
     type w =
@@ -1610,6 +1740,8 @@ module pr =
           duedate: Option<System.DateTime>
           scrapreasonid: Option<int16>
           modifieddate: Option<System.DateTime> }
+
+    let w = SqlHydra.Query.Table.table<w>
 
     [<CLIMutable>]
     type wr =
@@ -1626,6 +1758,8 @@ module pr =
           plannedcost: Option<decimal>
           actualcost: Option<decimal>
           modifieddate: Option<System.DateTime> }
+
+    let wr = SqlHydra.Query.Table.table<wr>
 
     module Readers =
         type bomReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
@@ -2192,11 +2326,15 @@ module production =
           perassemblyqty: decimal
           modifieddate: System.DateTime }
 
+    let billofmaterials = SqlHydra.Query.Table.table<billofmaterials>
+
     [<CLIMutable>]
     type culture =
         { cultureid: string
           name: string
           modifieddate: System.DateTime }
+
+    let culture = SqlHydra.Query.Table.table<culture>
 
     [<CLIMutable>]
     type document =
@@ -2214,11 +2352,15 @@ module production =
           modifieddate: System.DateTime
           documentnode: string }
 
+    let document = SqlHydra.Query.Table.table<document>
+
     [<CLIMutable>]
     type illustration =
         { illustrationid: int
           diagram: Option<string>
           modifieddate: System.DateTime }
+
+    let illustration = SqlHydra.Query.Table.table<illustration>
 
     [<CLIMutable>]
     type location =
@@ -2227,6 +2369,8 @@ module production =
           costrate: decimal
           availability: decimal
           modifieddate: System.DateTime }
+
+    let location = SqlHydra.Query.Table.table<location>
 
     [<CLIMutable>]
     type product =
@@ -2256,12 +2400,16 @@ module production =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let product = SqlHydra.Query.Table.table<product>
+
     [<CLIMutable>]
     type productcategory =
         { productcategoryid: int
           name: string
           rowguid: System.Guid
           modifieddate: System.DateTime }
+
+    let productcategory = SqlHydra.Query.Table.table<productcategory>
 
     [<CLIMutable>]
     type productcosthistory =
@@ -2271,6 +2419,8 @@ module production =
           standardcost: decimal
           modifieddate: System.DateTime }
 
+    let productcosthistory = SqlHydra.Query.Table.table<productcosthistory>
+
     [<CLIMutable>]
     type productdescription =
         { productdescriptionid: int
@@ -2278,11 +2428,15 @@ module production =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let productdescription = SqlHydra.Query.Table.table<productdescription>
+
     [<CLIMutable>]
     type productdocument =
         { productid: int
           modifieddate: System.DateTime
           documentnode: string }
+
+    let productdocument = SqlHydra.Query.Table.table<productdocument>
 
     [<CLIMutable>]
     type productinventory =
@@ -2294,6 +2448,8 @@ module production =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let productinventory = SqlHydra.Query.Table.table<productinventory>
+
     [<CLIMutable>]
     type productlistpricehistory =
         { productid: int
@@ -2301,6 +2457,8 @@ module production =
           enddate: Option<System.DateTime>
           listprice: decimal
           modifieddate: System.DateTime }
+
+    let productlistpricehistory = SqlHydra.Query.Table.table<productlistpricehistory>
 
     [<CLIMutable>]
     type productmodel =
@@ -2311,11 +2469,15 @@ module production =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let productmodel = SqlHydra.Query.Table.table<productmodel>
+
     [<CLIMutable>]
     type productmodelillustration =
         { productmodelid: int
           illustrationid: int
           modifieddate: System.DateTime }
+
+    let productmodelillustration = SqlHydra.Query.Table.table<productmodelillustration>
 
     [<CLIMutable>]
     type productmodelproductdescriptionculture =
@@ -2323,6 +2485,8 @@ module production =
           productdescriptionid: int
           cultureid: string
           modifieddate: System.DateTime }
+
+    let productmodelproductdescriptionculture = SqlHydra.Query.Table.table<productmodelproductdescriptionculture>
 
     [<CLIMutable>]
     type productphoto =
@@ -2333,12 +2497,16 @@ module production =
           largephotofilename: Option<string>
           modifieddate: System.DateTime }
 
+    let productphoto = SqlHydra.Query.Table.table<productphoto>
+
     [<CLIMutable>]
     type productproductphoto =
         { productid: int
           productphotoid: int
           primary: bool
           modifieddate: System.DateTime }
+
+    let productproductphoto = SqlHydra.Query.Table.table<productproductphoto>
 
     [<CLIMutable>]
     type productreview =
@@ -2351,6 +2519,8 @@ module production =
           comments: Option<string>
           modifieddate: System.DateTime }
 
+    let productreview = SqlHydra.Query.Table.table<productreview>
+
     [<CLIMutable>]
     type productsubcategory =
         { productsubcategoryid: int
@@ -2359,11 +2529,15 @@ module production =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let productsubcategory = SqlHydra.Query.Table.table<productsubcategory>
+
     [<CLIMutable>]
     type scrapreason =
         { scrapreasonid: int
           name: string
           modifieddate: System.DateTime }
+
+    let scrapreason = SqlHydra.Query.Table.table<scrapreason>
 
     [<CLIMutable>]
     type transactionhistory =
@@ -2377,6 +2551,8 @@ module production =
           actualcost: decimal
           modifieddate: System.DateTime }
 
+    let transactionhistory = SqlHydra.Query.Table.table<transactionhistory>
+
     [<CLIMutable>]
     type transactionhistoryarchive =
         { transactionid: int
@@ -2389,11 +2565,15 @@ module production =
           actualcost: decimal
           modifieddate: System.DateTime }
 
+    let transactionhistoryarchive = SqlHydra.Query.Table.table<transactionhistoryarchive>
+
     [<CLIMutable>]
     type unitmeasure =
         { unitmeasurecode: string
           name: string
           modifieddate: System.DateTime }
+
+    let unitmeasure = SqlHydra.Query.Table.table<unitmeasure>
 
     [<CLIMutable>]
     type vproductmodelcatalogdescription =
@@ -2423,6 +2603,8 @@ module production =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let vproductmodelcatalogdescription = SqlHydra.Query.Table.table<vproductmodelcatalogdescription>
+
     [<CLIMutable>]
     type vproductmodelinstructions =
         { productmodelid: Option<int>
@@ -2437,6 +2619,8 @@ module production =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let vproductmodelinstructions = SqlHydra.Query.Table.table<vproductmodelinstructions>
+
     [<CLIMutable>]
     type workorder =
         { workorderid: int
@@ -2448,6 +2632,8 @@ module production =
           duedate: System.DateTime
           scrapreasonid: Option<int16>
           modifieddate: System.DateTime }
+
+    let workorder = SqlHydra.Query.Table.table<workorder>
 
     [<CLIMutable>]
     type workorderrouting =
@@ -2463,6 +2649,8 @@ module production =
           plannedcost: decimal
           actualcost: Option<decimal>
           modifieddate: System.DateTime }
+
+    let workorderrouting = SqlHydra.Query.Table.table<workorderrouting>
 
     module Readers =
         type billofmaterialsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
@@ -3074,6 +3262,8 @@ module pu =
           rejectedqty: Option<decimal>
           modifieddate: Option<System.DateTime> }
 
+    let pod = SqlHydra.Query.Table.table<pod>
+
     [<CLIMutable>]
     type poh =
         { id: Option<int>
@@ -3090,6 +3280,8 @@ module pu =
           freight: Option<decimal>
           modifieddate: Option<System.DateTime> }
 
+    let poh = SqlHydra.Query.Table.table<poh>
+
     [<CLIMutable>]
     type pv =
         { id: Option<int>
@@ -3105,6 +3297,8 @@ module pu =
           unitmeasurecode: Option<string>
           modifieddate: Option<System.DateTime> }
 
+    let pv = SqlHydra.Query.Table.table<pv>
+
     [<CLIMutable>]
     type sm =
         { id: Option<int>
@@ -3114,6 +3308,8 @@ module pu =
           shiprate: Option<decimal>
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
+
+    let sm = SqlHydra.Query.Table.table<sm>
 
     [<CLIMutable>]
     type v =
@@ -3126,6 +3322,8 @@ module pu =
           activeflag: bool
           purchasingwebserviceurl: Option<string>
           modifieddate: Option<System.DateTime> }
+
+    let v = SqlHydra.Query.Table.table<v>
 
     module Readers =
         type podReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
@@ -3280,6 +3478,8 @@ module purchasing =
           unitmeasurecode: string
           modifieddate: System.DateTime }
 
+    let productvendor = SqlHydra.Query.Table.table<productvendor>
+
     [<CLIMutable>]
     type purchaseorderdetail =
         { purchaseorderid: int
@@ -3291,6 +3491,8 @@ module purchasing =
           receivedqty: decimal
           rejectedqty: decimal
           modifieddate: System.DateTime }
+
+    let purchaseorderdetail = SqlHydra.Query.Table.table<purchaseorderdetail>
 
     [<CLIMutable>]
     type purchaseorderheader =
@@ -3307,6 +3509,8 @@ module purchasing =
           freight: decimal
           modifieddate: System.DateTime }
 
+    let purchaseorderheader = SqlHydra.Query.Table.table<purchaseorderheader>
+
     [<CLIMutable>]
     type shipmethod =
         { shipmethodid: int
@@ -3315,6 +3519,8 @@ module purchasing =
           shiprate: decimal
           rowguid: System.Guid
           modifieddate: System.DateTime }
+
+    let shipmethod = SqlHydra.Query.Table.table<shipmethod>
 
     [<CLIMutable>]
     type vendor =
@@ -3327,6 +3533,8 @@ module purchasing =
           purchasingwebserviceurl: Option<string>
           modifieddate: System.DateTime }
 
+    let vendor = SqlHydra.Query.Table.table<vendor>
+
     [<CLIMutable>]
     type vvendorwithaddresses =
         { businessentityid: Option<int>
@@ -3338,6 +3546,8 @@ module purchasing =
           stateprovincename: Option<string>
           postalcode: Option<string>
           countryregionname: Option<string> }
+
+    let vvendorwithaddresses = SqlHydra.Query.Table.table<vvendorwithaddresses>
 
     [<CLIMutable>]
     type vvendorwithcontacts =
@@ -3353,6 +3563,8 @@ module purchasing =
           phonenumbertype: Option<string>
           emailaddress: Option<string>
           emailpromotion: Option<int> }
+
+    let vvendorwithcontacts = SqlHydra.Query.Table.table<vvendorwithcontacts>
 
     module Readers =
         type productvendorReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
@@ -3549,6 +3761,8 @@ module sa =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let c = SqlHydra.Query.Table.table<c>
+
     [<CLIMutable>]
     type cc =
         { id: Option<int>
@@ -3558,6 +3772,8 @@ module sa =
           expmonth: Option<int16>
           expyear: Option<int16>
           modifieddate: Option<System.DateTime> }
+
+    let cc = SqlHydra.Query.Table.table<cc>
 
     [<CLIMutable>]
     type cr =
@@ -3569,11 +3785,15 @@ module sa =
           endofdayrate: Option<decimal>
           modifieddate: Option<System.DateTime> }
 
+    let cr = SqlHydra.Query.Table.table<cr>
+
     [<CLIMutable>]
     type crc =
         { countryregioncode: Option<string>
           currencycode: Option<string>
           modifieddate: Option<System.DateTime> }
+
+    let crc = SqlHydra.Query.Table.table<crc>
 
     [<CLIMutable>]
     type cu =
@@ -3582,12 +3802,16 @@ module sa =
           name: Option<string>
           modifieddate: Option<System.DateTime> }
 
+    let cu = SqlHydra.Query.Table.table<cu>
+
     [<CLIMutable>]
     type pcc =
         { id: Option<int>
           businessentityid: Option<int>
           creditcardid: Option<int>
           modifieddate: Option<System.DateTime> }
+
+    let pcc = SqlHydra.Query.Table.table<pcc>
 
     [<CLIMutable>]
     type s =
@@ -3599,6 +3823,8 @@ module sa =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let s = SqlHydra.Query.Table.table<s>
+
     [<CLIMutable>]
     type sci =
         { id: Option<int>
@@ -3608,6 +3834,8 @@ module sa =
           productid: Option<int>
           datecreated: Option<System.DateTime>
           modifieddate: Option<System.DateTime> }
+
+    let sci = SqlHydra.Query.Table.table<sci>
 
     [<CLIMutable>]
     type so =
@@ -3624,6 +3852,8 @@ module sa =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let so = SqlHydra.Query.Table.table<so>
+
     [<CLIMutable>]
     type sod =
         { id: Option<int>
@@ -3637,6 +3867,8 @@ module sa =
           unitpricediscount: Option<decimal>
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
+
+    let sod = SqlHydra.Query.Table.table<sod>
 
     [<CLIMutable>]
     type soh =
@@ -3667,11 +3899,15 @@ module sa =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let soh = SqlHydra.Query.Table.table<soh>
+
     [<CLIMutable>]
     type sohsr =
         { salesorderid: Option<int>
           salesreasonid: Option<int>
           modifieddate: Option<System.DateTime> }
+
+    let sohsr = SqlHydra.Query.Table.table<sohsr>
 
     [<CLIMutable>]
     type sop =
@@ -3680,6 +3916,8 @@ module sa =
           productid: Option<int>
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
+
+    let sop = SqlHydra.Query.Table.table<sop>
 
     [<CLIMutable>]
     type sp =
@@ -3694,6 +3932,8 @@ module sa =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let sp = SqlHydra.Query.Table.table<sp>
+
     [<CLIMutable>]
     type spqh =
         { id: Option<int>
@@ -3703,6 +3943,8 @@ module sa =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let spqh = SqlHydra.Query.Table.table<spqh>
+
     [<CLIMutable>]
     type sr =
         { id: Option<int>
@@ -3710,6 +3952,8 @@ module sa =
           name: Option<string>
           reasontype: Option<string>
           modifieddate: Option<System.DateTime> }
+
+    let sr = SqlHydra.Query.Table.table<sr>
 
     [<CLIMutable>]
     type st =
@@ -3725,6 +3969,8 @@ module sa =
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
 
+    let st = SqlHydra.Query.Table.table<st>
+
     [<CLIMutable>]
     type sth =
         { id: Option<int>
@@ -3734,6 +3980,8 @@ module sa =
           enddate: Option<System.DateTime>
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
+
+    let sth = SqlHydra.Query.Table.table<sth>
 
     [<CLIMutable>]
     type tr =
@@ -3745,6 +3993,8 @@ module sa =
           name: Option<string>
           rowguid: Option<System.Guid>
           modifieddate: Option<System.DateTime> }
+
+    let tr = SqlHydra.Query.Table.table<tr>
 
     module Readers =
         type cReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
@@ -4187,6 +4437,8 @@ module sales =
           currencycode: string
           modifieddate: System.DateTime }
 
+    let countryregioncurrency = SqlHydra.Query.Table.table<countryregioncurrency>
+
     [<CLIMutable>]
     type creditcard =
         { creditcardid: int
@@ -4196,11 +4448,15 @@ module sales =
           expyear: int16
           modifieddate: System.DateTime }
 
+    let creditcard = SqlHydra.Query.Table.table<creditcard>
+
     [<CLIMutable>]
     type currency =
         { currencycode: string
           name: string
           modifieddate: System.DateTime }
+
+    let currency = SqlHydra.Query.Table.table<currency>
 
     [<CLIMutable>]
     type currencyrate =
@@ -4212,6 +4468,8 @@ module sales =
           endofdayrate: decimal
           modifieddate: System.DateTime }
 
+    let currencyrate = SqlHydra.Query.Table.table<currencyrate>
+
     [<CLIMutable>]
     type customer =
         { customerid: int
@@ -4221,11 +4479,15 @@ module sales =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let customer = SqlHydra.Query.Table.table<customer>
+
     [<CLIMutable>]
     type personcreditcard =
         { businessentityid: int
           creditcardid: int
           modifieddate: System.DateTime }
+
+    let personcreditcard = SqlHydra.Query.Table.table<personcreditcard>
 
     [<CLIMutable>]
     type salesorderdetail =
@@ -4239,6 +4501,8 @@ module sales =
           unitpricediscount: decimal
           rowguid: System.Guid
           modifieddate: System.DateTime }
+
+    let salesorderdetail = SqlHydra.Query.Table.table<salesorderdetail>
 
     [<CLIMutable>]
     type salesorderheader =
@@ -4268,11 +4532,15 @@ module sales =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let salesorderheader = SqlHydra.Query.Table.table<salesorderheader>
+
     [<CLIMutable>]
     type salesorderheadersalesreason =
         { salesorderid: int
           salesreasonid: int
           modifieddate: System.DateTime }
+
+    let salesorderheadersalesreason = SqlHydra.Query.Table.table<salesorderheadersalesreason>
 
     [<CLIMutable>]
     type salesperson =
@@ -4286,6 +4554,8 @@ module sales =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let salesperson = SqlHydra.Query.Table.table<salesperson>
+
     [<CLIMutable>]
     type salespersonquotahistory =
         { businessentityid: int
@@ -4294,12 +4564,16 @@ module sales =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let salespersonquotahistory = SqlHydra.Query.Table.table<salespersonquotahistory>
+
     [<CLIMutable>]
     type salesreason =
         { salesreasonid: int
           name: string
           reasontype: string
           modifieddate: System.DateTime }
+
+    let salesreason = SqlHydra.Query.Table.table<salesreason>
 
     [<CLIMutable>]
     type salestaxrate =
@@ -4310,6 +4584,8 @@ module sales =
           name: string
           rowguid: System.Guid
           modifieddate: System.DateTime }
+
+    let salestaxrate = SqlHydra.Query.Table.table<salestaxrate>
 
     [<CLIMutable>]
     type salesterritory =
@@ -4324,6 +4600,8 @@ module sales =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let salesterritory = SqlHydra.Query.Table.table<salesterritory>
+
     [<CLIMutable>]
     type salesterritoryhistory =
         { businessentityid: int
@@ -4333,6 +4611,8 @@ module sales =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let salesterritoryhistory = SqlHydra.Query.Table.table<salesterritoryhistory>
+
     [<CLIMutable>]
     type shoppingcartitem =
         { shoppingcartitemid: int
@@ -4341,6 +4621,8 @@ module sales =
           productid: int
           datecreated: System.DateTime
           modifieddate: System.DateTime }
+
+    let shoppingcartitem = SqlHydra.Query.Table.table<shoppingcartitem>
 
     [<CLIMutable>]
     type specialoffer =
@@ -4356,12 +4638,16 @@ module sales =
           rowguid: System.Guid
           modifieddate: System.DateTime }
 
+    let specialoffer = SqlHydra.Query.Table.table<specialoffer>
+
     [<CLIMutable>]
     type specialofferproduct =
         { specialofferid: int
           productid: int
           rowguid: System.Guid
           modifieddate: System.DateTime }
+
+    let specialofferproduct = SqlHydra.Query.Table.table<specialofferproduct>
 
     [<CLIMutable>]
     type store =
@@ -4371,6 +4657,8 @@ module sales =
           demographics: Option<string>
           rowguid: System.Guid
           modifieddate: System.DateTime }
+
+    let store = SqlHydra.Query.Table.table<store>
 
     [<CLIMutable>]
     type vindividualcustomer =
@@ -4393,6 +4681,8 @@ module sales =
           countryregionname: Option<string>
           demographics: Option<string> }
 
+    let vindividualcustomer = SqlHydra.Query.Table.table<vindividualcustomer>
+
     [<CLIMutable>]
     type vpersondemographics =
         { businessentityid: Option<int>
@@ -4408,6 +4698,8 @@ module sales =
           occupation: Option<string>
           homeownerflag: Option<bool>
           numbercarsowned: Option<int> }
+
+    let vpersondemographics = SqlHydra.Query.Table.table<vpersondemographics>
 
     [<CLIMutable>]
     type vsalesperson =
@@ -4434,6 +4726,8 @@ module sales =
           salesytd: Option<decimal>
           saleslastyear: Option<decimal> }
 
+    let vsalesperson = SqlHydra.Query.Table.table<vsalesperson>
+
     [<CLIMutable>]
     type vsalespersonsalesbyfiscalyears =
         { SalesPersonID: Option<int>
@@ -4444,6 +4738,8 @@ module sales =
           ``2013``: Option<decimal>
           ``2014``: Option<decimal> }
 
+    let vsalespersonsalesbyfiscalyears = SqlHydra.Query.Table.table<vsalespersonsalesbyfiscalyears>
+
     [<CLIMutable>]
     type vsalespersonsalesbyfiscalyearsdata =
         { salespersonid: Option<int>
@@ -4452,6 +4748,8 @@ module sales =
           salesterritory: Option<string>
           salestotal: Option<decimal>
           fiscalyear: Option<decimal> }
+
+    let vsalespersonsalesbyfiscalyearsdata = SqlHydra.Query.Table.table<vsalespersonsalesbyfiscalyearsdata>
 
     [<CLIMutable>]
     type vstorewithaddresses =
@@ -4464,6 +4762,8 @@ module sales =
           stateprovincename: Option<string>
           postalcode: Option<string>
           countryregionname: Option<string> }
+
+    let vstorewithaddresses = SqlHydra.Query.Table.table<vstorewithaddresses>
 
     [<CLIMutable>]
     type vstorewithcontacts =
@@ -4480,6 +4780,8 @@ module sales =
           emailaddress: Option<string>
           emailpromotion: Option<int> }
 
+    let vstorewithcontacts = SqlHydra.Query.Table.table<vstorewithcontacts>
+
     [<CLIMutable>]
     type vstorewithdemographics =
         { businessentityid: Option<int>
@@ -4494,6 +4796,8 @@ module sales =
           Brands: Option<string>
           Internet: Option<string>
           NumberEmployees: Option<int> }
+
+    let vstorewithdemographics = SqlHydra.Query.Table.table<vstorewithdemographics>
 
     module Readers =
         type countryregioncurrencyReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =

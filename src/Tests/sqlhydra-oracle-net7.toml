@@ -1,8 +1,11 @@
 [general]
-connection = "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=127.0.0.1)(PORT=1521)) (CONNECT_DATA=(SERVICE_NAME=XEPDB1))); User Id=OT;Password=Oracle1;"
+connection = "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=127.0.0.1)(PORT=1521)) (CONNECT_DATA=(SERVICE_NAME=XEPDB1))); User Id=OT;Password=Oracle2;"
 output = "Oracle/AdventureWorksNet7.fs"
 namespace = "Oracle.AdventureWorksNet7"
 cli_mutable = true
+[sqlhydra_query_integration]
+provider_db_type_attributes = true
+table_declarations = true
 [readers]
 reader_type = "Oracle.ManagedDataAccess.Client.OracleDataReader"
 [filters]
