@@ -13,15 +13,6 @@ open Sqlite.AdventureWorksNet6
 open Sqlite.AdventureWorksNet7
 #endif
 
-// Tables
-let addressTable =          table<main.Address>
-let customerTable =         table<main.Customer>
-let orderHeaderTable =      table<main.SalesOrderHeader>
-let orderDetailTable =      table<main.SalesOrderDetail>
-let productTable =          table<main.Product>
-let categoryTable =         table<main.ProductCategory>
-let errorLogTable =         table<main.ErrorLog>
-
 [<Tests>]
 let tests = 
     categoryList "Sqlite" "Query Unit Tests" [
@@ -30,7 +21,7 @@ let tests =
         test "Simple Where" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in main.Address do
                     where (a.City = "Dallas")
                     orderBy a.City
                 }
@@ -43,7 +34,7 @@ let tests =
         test "Select 1 Column" {
             let query =
                 select {
-                    for a in addressTable do
+                    for a in main.Address do
                     select (a.City)
                 }
 
@@ -54,7 +45,7 @@ let tests =
         test "Select 2 Columns" {
             let query =
                 select {
-                    for h in orderHeaderTable do
+                    for h in main.SalesOrderHeader do
                     select (h.CustomerID, h.OnlineOrderFlag)
                 }
 
@@ -66,8 +57,8 @@ let tests =
         test "Select 1 Table and 1 Column" {
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+                    for o in main.SalesOrderHeader do
+                    join d in main.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
                     where (o.OnlineOrderFlag = 1L)
                     select (o, d.LineTotal)
                 }
@@ -80,7 +71,7 @@ let tests =
         ptest "Where with Option Type" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in main.Address do
                     where (a.AddressLine2 <> None)
                 }
 
@@ -90,7 +81,7 @@ let tests =
         ptest "Where Not Like" {
             let query =
                 select {
-                    for a in addressTable do
+                    for a in main.Address do
                     where (a.City <>% "S%")
                 }
 
@@ -100,7 +91,7 @@ let tests =
         test "Or Where" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in main.Address do
                     where (a.City = "Chicago" || a.City = "Dallas")
                 }
     
@@ -111,7 +102,7 @@ let tests =
         test "And Where" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in main.Address do
                     where (a.City = "Chicago" && a.City = "Dallas")
                 }
     
@@ -122,7 +113,7 @@ let tests =
         test "Where with AND and OR in Parenthesis" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in main.Address do
                     where (a.City = "Chicago" && (a.AddressLine2 = Some "abc" || isNullValue a.AddressLine2))
                 }
     
@@ -135,7 +126,7 @@ let tests =
         test "Where value and column are swapped" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in main.Address do
                     where (5L < a.AddressID && 20L >= a.AddressID)
                 }
 
@@ -146,7 +137,7 @@ let tests =
         test "Where Not Binary" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in main.Address do
                     where (not (a.City = "Chicago" && a.City = "Dallas"))
                 }
     
@@ -157,7 +148,7 @@ let tests =
         test "Where Customer isIn List" {
             let query = 
                 select {
-                    for c in customerTable do
+                    for c in main.Customer do
                     where (isIn c.CustomerID [30018L;29545L;29954L])
                 }
 
@@ -168,7 +159,7 @@ let tests =
         test "Where Customer |=| List" {
             let query = 
                 select {
-                    for c in customerTable do
+                    for c in main.Customer do
                     where (c.CustomerID |=| [30018L;29545L;29954L])
                 }
 
@@ -179,7 +170,7 @@ let tests =
         test "Where Customer |=| Array" {
             let query = 
                 select {
-                    for c in customerTable do
+                    for c in main.Customer do
                     where (c.CustomerID |=| [| 30018L;29545L;29954L |])
                 }
 
@@ -190,7 +181,7 @@ let tests =
         test "Where Customer |=| Seq" {            
             let buildQuery (values: int64 seq) =                
                 select {
-                    for c in customerTable do
+                    for c in main.Customer do
                     where (c.CustomerID |=| values)
                 }
 
@@ -203,7 +194,7 @@ let tests =
         test "Where Customer |<>| List" {
             let query = 
                 select {
-                    for c in customerTable do
+                    for c in main.Customer do
                     where (c.CustomerID |<>| [ 30018L;29545L;29954L ])
                 }
 
@@ -214,8 +205,8 @@ let tests =
         test "Inner Join" {
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+                    for o in main.SalesOrderHeader do
+                    join d in main.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
                     select o
                 }
 
@@ -226,8 +217,8 @@ let tests =
         test "Left Join" {
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    leftJoin d in orderDetailTable on (o.SalesOrderID = d.Value.SalesOrderID)
+                    for o in main.SalesOrderHeader do
+                    leftJoin d in main.SalesOrderDetail on (o.SalesOrderID = d.Value.SalesOrderID)
                     select o
                 }
 
@@ -238,8 +229,8 @@ let tests =
         test "Inner Join - Multi Column" {
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on ((o.SalesOrderID, o.ModifiedDate) = (d.SalesOrderID, d.ModifiedDate))
+                    for o in main.SalesOrderHeader do
+                    join d in main.SalesOrderDetail on ((o.SalesOrderID, o.ModifiedDate) = (d.SalesOrderID, d.ModifiedDate))
                     select o
                 }
         
@@ -250,8 +241,8 @@ let tests =
         test "Left Join - Multi Column" {
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    leftJoin d in orderDetailTable on ((o.SalesOrderID, o.ModifiedDate) = (d.Value.SalesOrderID, d.Value.ModifiedDate))
+                    for o in main.SalesOrderHeader do
+                    leftJoin d in main.SalesOrderDetail on ((o.SalesOrderID, o.ModifiedDate) = (d.Value.SalesOrderID, d.Value.ModifiedDate))
                     select o
                 }
         
@@ -262,7 +253,7 @@ let tests =
         test "Delete Query with Where" {
             let query = 
                 delete {
-                    for c in customerTable do
+                    for c in main.Customer do
                     where (c.CustomerID |<>| [ 30018L;29545L;29954L ])
                 }
 
@@ -274,7 +265,7 @@ let tests =
         test "Delete All" {
             let query = 
                 delete {
-                    for c in customerTable do
+                    for c in main.Customer do
                     deleteAll
                 }
 
@@ -285,7 +276,7 @@ let tests =
         test "Update Query with Where" {
             let query = 
                 update {
-                    for c in customerTable do
+                    for c in main.Customer do
                     set c.FirstName "John"
                     set c.LastName "Doe"
                     where (c.CustomerID = 123L)
@@ -298,7 +289,7 @@ let tests =
         test "Update Query with No Where" {
             let query = 
                 update {
-                    for c in customerTable do
+                    for c in main.Customer do
                     set c.FirstName "John"
                     set c.LastName "Doe"
                     updateAll
@@ -312,7 +303,7 @@ let tests =
             try 
                 let query = 
                     update {
-                        for c in customerTable do
+                        for c in main.Customer do
                         set c.FirstName "John"
                         set c.LastName "Doe"
                     }
@@ -325,7 +316,7 @@ let tests =
             try 
                 let query = 
                     update {
-                        for c in customerTable do
+                        for c in main.Customer do
                         set c.FirstName "John"
                         set c.LastName "Doe"
                         where (c.CustomerID = 1L)
@@ -339,7 +330,7 @@ let tests =
             try 
                 let query = 
                     update {
-                        for c in customerTable do
+                        for c in main.Customer do
                         set c.FirstName "John"
                         set c.LastName "Doe"
                         updateAll
@@ -396,7 +387,7 @@ let tests =
         test "Inline Aggregates" {
             let query =
                 select {
-                    for o in orderHeaderTable do
+                    for o in main.SalesOrderHeader do
                     select (countBy o.SalesOrderID)
                 }
         
@@ -411,7 +402,7 @@ let tests =
         test "Implicit Casts" {
             let query =
                 select {
-                    for p in productTable do
+                    for p in main.Product do
                     where (p.ListPrice > 5)
                 }
 
@@ -423,7 +414,7 @@ let tests =
 
             let query =
                 select {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     where (e.ErrorSeverity = Some 1)
                 }
 
@@ -434,7 +425,7 @@ let tests =
         test "Implicit Casts Option" {
             let query =
                 select {
-                    for p in productTable do
+                    for p in main.Product do
                     where (p.Weight = Some 5)
                 }
 

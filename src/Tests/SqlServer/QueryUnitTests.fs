@@ -14,17 +14,6 @@ open SqlServer.AdventureWorksNet6
 open SqlServer.AdventureWorksNet7
 #endif
 
-// Tables
-let personTable =           table<Person.Person>
-let addressTable =          table<Person.Address>
-let customerTable =         table<Sales.Customer>
-let orderHeaderTable =      table<Sales.SalesOrderHeader>
-let orderDetailTable =      table<Sales.SalesOrderDetail>
-let productTable =          table<Production.Product>
-let subCategoryTable =      table<Production.ProductSubcategory>
-let categoryTable =         table<Production.ProductCategory>
-let errorLogTable =         table<dbo.ErrorLog>
-
 [<Tests>]
 let tests = 
     categoryList "SqlServer" "Query Unit Tests" [
@@ -33,7 +22,7 @@ let tests =
         test "Simple Where" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in Person.Address do
                     where (a.City = "Dallas")
                     orderBy a.City
                 }
@@ -45,7 +34,7 @@ let tests =
         test "Select 1 Column" {
             let query =
                 select {
-                    for a in addressTable do
+                    for a in Person.Address do
                     select (a.City)
                 }
 
@@ -56,7 +45,7 @@ let tests =
         test "Select 2 Columns" {
             let query =
                 select {
-                    for h in orderHeaderTable do
+                    for h in Sales.SalesOrderHeader do
                     select (h.CustomerID, h.OnlineOrderFlag)
                 }
 
@@ -67,8 +56,8 @@ let tests =
         test "Select 1 Table and 1 Column" {
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+                    for o in Sales.SalesOrderHeader do
+                    join d in Sales.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
                     where (o.OnlineOrderFlag = true)
                     select (o, d.LineTotal)
                 }
@@ -81,7 +70,7 @@ let tests =
         ptest "Where with Option Type" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in Person.Address do
                     where (a.AddressLine2 <> None)
                 }
 
@@ -91,7 +80,7 @@ let tests =
         ptest "Where Not Like" {
             let query =
                 select {
-                    for a in addressTable do
+                    for a in Person.Address do
                     where (a.City <>% "S%")
                 }
 
@@ -101,7 +90,7 @@ let tests =
         test "Or Where" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in Person.Address do
                     where (a.City = "Chicago" || a.City = "Dallas")
                 }
     
@@ -112,7 +101,7 @@ let tests =
         test "And Where" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in Person.Address do
                     where (a.City = "Chicago" && a.City = "Dallas")
                 }
     
@@ -123,7 +112,7 @@ let tests =
         test "Where with AND and OR in Parenthesis" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in Person.Address do
                     where (a.City = "Chicago" && (a.AddressLine2 = Some "abc" || isNullValue a.AddressLine2))
                 }
     
@@ -136,7 +125,7 @@ let tests =
         test "Where value and column are swapped" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in Person.Address do
                     where (5 < a.AddressID && 20 >= a.AddressID)
                 }
 
@@ -147,7 +136,7 @@ let tests =
         test "Where Not Binary" {
             let query = 
                 select {
-                    for a in addressTable do
+                    for a in Person.Address do
                     where (not (a.City = "Chicago" && a.City = "Dallas"))
                 }
     
@@ -158,7 +147,7 @@ let tests =
         test "Where Customer isIn List" {
             let query = 
                 select {
-                    for c in customerTable do
+                    for c in Sales.Customer do
                     where (isIn c.CustomerID [30018;29545;29954])
                 }
 
@@ -169,7 +158,7 @@ let tests =
         test "Where Customer |=| List" {
             let query = 
                 select {
-                    for c in customerTable do
+                    for c in Sales.Customer do
                     where (c.CustomerID |=| [30018;29545;29954])
                 }
 
@@ -180,7 +169,7 @@ let tests =
         test "Where Customer |=| Array" {
             let query = 
                 select {
-                    for c in customerTable do
+                    for c in Sales.Customer do
                     where (c.CustomerID |=| [| 30018;29545;29954 |])
                 }
 
@@ -191,7 +180,7 @@ let tests =
         test "Where Customer |=| Seq" {            
             let buildQuery (values: int seq) =                
                 select {
-                    for c in customerTable do
+                    for c in Sales.Customer do
                     where (c.CustomerID |=| values)
                 }
 
@@ -204,7 +193,7 @@ let tests =
         test "Where Customer |<>| List" {
             let query = 
                 select {
-                    for c in customerTable do
+                    for c in Sales.Customer do
                     where (c.CustomerID |<>| [ 30018;29545;29954 ])
                 }
 
@@ -215,8 +204,8 @@ let tests =
         test "Inner Join" {
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+                    for o in Sales.SalesOrderHeader do
+                    join d in Sales.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
                     select o
                 }
 
@@ -227,8 +216,8 @@ let tests =
         test "Left Join" {
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    leftJoin d in orderDetailTable on (o.SalesOrderID = d.Value.SalesOrderID)
+                    for o in Sales.SalesOrderHeader do
+                    leftJoin d in Sales.SalesOrderDetail on (o.SalesOrderID = d.Value.SalesOrderID)
                     select o
                 }
 
@@ -241,8 +230,8 @@ LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesO
         test "Inner Join - Multi Column" {
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on ((o.SalesOrderID, o.ModifiedDate) = (d.SalesOrderID, d.ModifiedDate))
+                    for o in Sales.SalesOrderHeader do
+                    join d in Sales.SalesOrderDetail on ((o.SalesOrderID, o.ModifiedDate) = (d.SalesOrderID, d.ModifiedDate))
                     select o
                 }
         
@@ -253,8 +242,8 @@ LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesO
         test "Left Join - Multi Column" {
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    leftJoin d in orderDetailTable on ((o.SalesOrderID, o.ModifiedDate) = (d.Value.SalesOrderID, d.Value.ModifiedDate))
+                    for o in Sales.SalesOrderHeader do
+                    leftJoin d in Sales.SalesOrderDetail on ((o.SalesOrderID, o.ModifiedDate) = (d.Value.SalesOrderID, d.Value.ModifiedDate))
                     select o
                 }
         
@@ -266,8 +255,8 @@ LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesO
         test "Join On Value Bug Fix Test" {
             let query = 
                 select {
-                    for o in orderHeaderTable do
-                    leftJoin d in orderHeaderTable on (o.AccountNumber.Value = d.Value.AccountNumber.Value)
+                    for o in Sales.SalesOrderHeader do
+                    leftJoin d in Sales.SalesOrderHeader on (o.AccountNumber.Value = d.Value.AccountNumber.Value)
                     select o
                 }
 
@@ -282,7 +271,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
         test "Where Static Property" {
             let query =
                 select {
-                    for o in orderHeaderTable do
+                    for o in Sales.SalesOrderHeader do
                     where (o.SalesOrderID = System.Int32.MaxValue)
                 }
 
@@ -293,7 +282,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
         test "Delete Query with Where" {
             let query = 
                 delete {
-                    for c in customerTable do
+                    for c in Sales.Customer do
                     where (c.CustomerID |<>| [ 30018;29545;29954 ])
                 }
 
@@ -305,7 +294,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
         test "Delete All" {
             let query = 
                 delete {
-                    for c in customerTable do
+                    for c in Sales.Customer do
                     deleteAll
                 }
 
@@ -316,7 +305,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
         test "Update Query with Where" {
             let query = 
                 update {
-                    for c in customerTable do
+                    for c in Sales.Customer do
                     set c.AccountNumber "123"
                     where (c.AccountNumber = "000")
                 }
@@ -328,7 +317,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
         test "Update Query with No Where" {
             let query = 
                 update {
-                    for c in customerTable do
+                    for c in Sales.Customer do
                     set c.AccountNumber "123"
                     updateAll
                 }
@@ -341,7 +330,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
             try 
                 let query = 
                     update {
-                        for c in customerTable do
+                        for c in Sales.Customer do
                         set c.AccountNumber "123"
                     }
                 failwith "Should fail because no `where` or `updateAll` exists."
@@ -353,7 +342,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
             try 
                 let query = 
                     update {
-                        for c in customerTable do
+                        for c in Sales.Customer do
                         set c.AccountNumber "123"
                         where (c.CustomerID = 1)
                     }
@@ -366,7 +355,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
             try 
                 let query = 
                     update {
-                        for c in customerTable do
+                        for c in Sales.Customer do
                         set c.AccountNumber "123"
                         updateAll
                     }
@@ -378,7 +367,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
         test "Insert Query without Identity" {
             let query = 
                 insert {
-                    into customerTable
+                    into Sales.Customer
                     entity 
                         { 
                             Sales.Customer.AccountNumber = "123"
@@ -401,7 +390,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
         test "Insert Query with Identity" {
             let query = 
                 insert {
-                    for c in customerTable do
+                    for c in Sales.Customer do
                     entity 
                         { 
                             Sales.Customer.AccountNumber = "123"
@@ -425,7 +414,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
         test "Inline Aggregates" {
             let query =
                 select {
-                    for o in orderHeaderTable do
+                    for o in Sales.SalesOrderHeader do
                     select (countBy o.SalesOrderID)
                 }
 
@@ -439,7 +428,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
         test "Implicit Casts" {
             let query =
                 select {
-                    for p in productTable do
+                    for p in Production.Product do
                     where (p.ListPrice > 5)
                 }
 
@@ -450,7 +439,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
         test "Implicit Casts Option" {
             let query =
                 select {
-                    for p in productTable do
+                    for p in Production.Product do
                     where (p.Weight = Some 5)
                 }
 
@@ -462,8 +451,8 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
             // NOTE: I could not find a good self join example in AdventureWorks.
             let query = 
                 select { 
-                    for p1 in productTable do
-                    join p2 in productTable on (p1.ProductID = p2.ProductID)
+                    for p1 in Production.Product do
+                    join p2 in Production.Product on (p1.ProductID = p2.ProductID)
                     where (p2.ListPrice > 10.00M)
                     select p1
                 }
@@ -481,7 +470,7 @@ INNER JOIN [Production].[Product] AS [p2] ON ([p1].[ProductID] = [p2].[ProductID
 
             let query = 
                 delete {
-                    for _ in personTable do
+                    for _ in Person.Person do
                     deleteAll
                 }
 
@@ -494,7 +483,7 @@ INNER JOIN [Production].[Product] AS [p2] ON ([p1].[ProductID] = [p2].[ProductID
                 let person = Unchecked.defaultof<Person.Person>
                 let query = 
                     update {
-                        for _ in personTable do
+                        for _ in Person.Person do
                         entity person
                         updateAll
                     }
@@ -510,7 +499,7 @@ INNER JOIN [Production].[Product] AS [p2] ON ([p1].[ProductID] = [p2].[ProductID
                 let person = Unchecked.defaultof<Person.Person>
                 let query = 
                     insert {
-                        for _ in personTable do
+                        for _ in Person.Person do
                         entity person
                     }
 

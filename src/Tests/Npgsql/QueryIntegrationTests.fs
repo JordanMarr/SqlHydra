@@ -21,21 +21,6 @@ let openContext() =
     conn.Open()
     new QueryContext(conn, compiler)
 
-// Tables
-let personTable =           table<person.person>
-let addressTable =          table<person.address>
-let customerTable =         table<sales.customer>
-let orderHeaderTable =      table<sales.salesorderheader>
-let orderDetailTable =      table<sales.salesorderdetail>
-let productTable =          table<production.product>
-let subCategoryTable =      table<production.productsubcategory>
-let categoryTable =         table<production.productcategory>
-let currencyTable =         table<sales.currency>
-let productReviewTable =    table<production.productreview>
-let employeeTable =         table<humanresources.employee>
-let jsonSupportTable =      table<ext.jsonsupport>
-let arraysTable =           table<ext.arrays>
-
 [<Tests>]
 let tests = 
     categoryList "Npgsql" "Query Integration Tests" [
@@ -45,7 +30,7 @@ let tests =
             
             let addresses =
                 select {
-                    for a in addressTable do
+                    for a in person.address do
                     where (a.city |=| [ "Seattle"; "Santa Cruz" ])
                 }
                 |> ctx.Read HydraReader.Read
@@ -59,7 +44,7 @@ let tests =
 
             let cities =
                 select {
-                    for a in addressTable do
+                    for a in person.address do
                     where (a.city =% "S%")
                     select a.city
                 }
@@ -74,8 +59,8 @@ let tests =
 
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on (o.salesorderid = d.salesorderid)
+                    for o in sales.salesorderheader do
+                    join d in sales.salesorderdetail on (o.salesorderid = d.salesorderid)
                     where (o.onlineorderflag = true)
                     select (o, d)
                 }
@@ -91,9 +76,9 @@ let tests =
 
             let query = 
                 select {
-                    for p in productTable do
-                    join sc in subCategoryTable on (p.productsubcategoryid = Some sc.productsubcategoryid)
-                    join c in categoryTable on (sc.productcategoryid = c.productcategoryid)
+                    for p in production.product do
+                    join sc in production.productsubcategory on (p.productsubcategoryid = Some sc.productsubcategoryid)
+                    join c in production.productcategory on (sc.productcategoryid = c.productcategoryid)
                     select (c.name, p)
                     take 5
                 }
@@ -109,7 +94,7 @@ let tests =
 
             let query =
                 select {
-                    for p in productTable do
+                    for p in production.product do
                     where (p.productsubcategoryid <> None)
                     groupBy p.productsubcategoryid
                     where (p.productsubcategoryid.Value |=| [ 1; 2; 3 ])
@@ -143,13 +128,13 @@ let tests =
 
             let avgListPrice = 
                 select {
-                    for p in productTable do
+                    for p in production.product do
                     select (avgBy p.listprice)
                 }
 
             let! productsWithHigherThanAvgPrice = 
                 select {
-                    for p in productTable do
+                    for p in production.product do
                     where (p.listprice > subqueryOne avgListPrice)
                     orderByDescending p.listprice
                     select (p.name, p.listprice)
@@ -167,7 +152,7 @@ let tests =
 
             let! aggregates = 
                 select {
-                    for p in productTable do
+                    for p in production.product do
                     where (p.productsubcategoryid <> None)
                     groupBy p.productsubcategoryid
                     having (minBy p.listprice > 50M && maxBy p.listprice < 1000M)
@@ -183,7 +168,7 @@ let tests =
 
             let! aggregates = 
                 select {
-                    for p in productTable do
+                    for p in production.product do
                     where (p.productsubcategoryid <> None)
                     groupBy p.productsubcategoryid
                     orderByDescending (avgBy p.listprice)
@@ -200,7 +185,7 @@ let tests =
 
             let top5CategoryIdsWithHighestAvgPrices = 
                 select {
-                    for p in productTable do
+                    for p in production.product do
                     where (p.productsubcategoryid <> None)
                     groupBy p.productsubcategoryid
                     orderByDescending (avgBy p.listprice)
@@ -210,7 +195,7 @@ let tests =
 
             let! top5Categories =
                 select {
-                    for c in categoryTable do
+                    for c in production.productcategory do
                     where (Some c.productcategoryid |=| subqueryMany top5CategoryIdsWithHighestAvgPrices)
                     select c.name
                 }
@@ -224,13 +209,13 @@ let tests =
 
             let avgListPrice = 
                 select {
-                    for p in productTable do
+                    for p in production.product do
                     select (avgBy p.listprice)
                 } 
 
             let! productsWithAboveAveragePrice =
                 select {
-                    for p in productTable do
+                    for p in production.product do
                     where (p.listprice > subqueryOne avgListPrice)
                     select (p.name, p.listprice)
                 }
@@ -244,7 +229,7 @@ let tests =
 
             let! values = 
                 select {
-                    for p in productTable do
+                    for p in production.product do
                     where (p.productsubcategoryid <> None)
                     select (p.productsubcategoryid, p.listprice)
                 }
@@ -259,7 +244,7 @@ let tests =
 
             let! results = 
                 insert {
-                    into currencyTable
+                    into sales.currency
                     entity 
                         {
                             sales.currency.currencycode = "BTC"
@@ -273,7 +258,7 @@ let tests =
 
             let! btc = 
                 select {
-                    for c in currencyTable do
+                    for c in sales.currency do
                     where (c.currencycode = "BTC")
                 }
                 |> ctx.ReadAsync HydraReader.Read
@@ -286,7 +271,7 @@ let tests =
 
             let! results = 
                 update {
-                    for c in currencyTable do
+                    for c in sales.currency do
                     set c.name "BitCoinzz"
                     where (c.currencycode = "BTC")
                 }
@@ -296,7 +281,7 @@ let tests =
 
             let! btc = 
                 select {
-                    for c in currencyTable do
+                    for c in sales.currency do
                     where (c.name = "BitCoinzz")
                 }
                 |> ctx.ReadAsync HydraReader.Read
@@ -309,14 +294,14 @@ let tests =
 
             let! _ = 
                 delete {
-                    for c in currencyTable do
+                    for c in sales.currency do
                     where (c.currencycode = "BTC")
                 }
                 |> ctx.DeleteAsync
 
             let! btc = 
                 select {
-                    for c in currencyTable do
+                    for c in sales.currency do
                     where (c.currencycode = "BTC")
                 }
                 |> ctx.ReadAsync HydraReader.Read
@@ -330,7 +315,7 @@ let tests =
             ctx.BeginTransaction()
             let! deletedCount =
                 delete {
-                    for r in productReviewTable do
+                    for r in production.productreview do
                     where (r.emailaddress = "gfisher@askjeeves.com")
                 }
                 |> ctx.DeleteAsync
@@ -340,7 +325,7 @@ let tests =
 
             let! prodReviewId = 
                 insertTask (Shared ctx) {
-                    for r in productReviewTable do
+                    for r in production.productreview do
                     entity 
                         {
                             production.productreview.productreviewid = 0 // PK
@@ -357,7 +342,7 @@ let tests =
 
             let! review = 
                 select {
-                    for r in productReviewTable do
+                    for r in production.productreview do
                     where (r.reviewername = "Gary Fisher")
                 }
                 |> ctx.ReadOneAsync HydraReader.Read
@@ -370,7 +355,7 @@ let tests =
 
             let! deletedCount = 
                 delete {
-                    for r in productReviewTable do
+                    for r in production.productreview do
                     where (r.productreviewid = prodReviewId)
                 }
                 |> ctx.DeleteAsync
@@ -379,7 +364,7 @@ let tests =
 
             let! reviews = 
                 select {
-                    for r in productReviewTable do
+                    for r in production.productreview do
                     where (r.reviewername = "Gary Fisher")
                 }
                 |> ctx.ReadAsync HydraReader.Read
@@ -409,7 +394,7 @@ let tests =
             | Some currencies ->
                 let! rowsInserted = 
                     insert {
-                        into currencyTable
+                        into sales.currency
                         entities currencies
                     }
                     |> ctx.InsertAsync
@@ -418,7 +403,7 @@ let tests =
 
                 let! results =
                     select {
-                        for c in currencyTable do
+                        for c in sales.currency do
                         where (c.currencycode =% "BC%")
                         orderBy c.currencycode
                         select c.currencycode
@@ -453,7 +438,7 @@ let tests =
             | Some currencies ->
                 let! rowsInserted = 
                     insertTask (Shared ctx) {
-                        for e in currencyTable do
+                        for e in sales.currency do
                         entities currencies
                     }
 
@@ -461,14 +446,14 @@ let tests =
 
                 let! results =
                     selectTask HydraReader.Read (Shared ctx) {
-                        for c in currencyTable do
+                        for c in sales.currency do
                         where (c.currencycode =% "BC%")
                         select c.name
                     }
 
                 let! distinctResults =
                     selectTask HydraReader.Read (Shared ctx) {
-                        for c in currencyTable do
+                        for c in sales.currency do
                         where (c.currencycode =% "BC%")
                         select c.name
                         distinct
@@ -488,7 +473,7 @@ let tests =
                 
             let getRowById id =
                 select {
-                    for e in jsonSupportTable do
+                    for e in ext.jsonsupport do
                         select e
                         where (e.id = id)
                 } |> ctx.ReadAsync HydraReader.Read
@@ -504,7 +489,7 @@ let tests =
                 
             let! insertedRowId = 
                 insert {
-                    for e in jsonSupportTable do
+                    for e in ext.jsonsupport do
                     entity entity'
                     getId e.id
                 }
@@ -521,7 +506,7 @@ let tests =
             let updatedJsonValue = """{"name":"test_2"}"""
             let! updatedRows =
                 update {
-                        for e in jsonSupportTable do
+                        for e in ext.jsonsupport do
                         set e.json_field updatedJsonValue
                         set e.jsonb_field updatedJsonValue
                         where (e.id = insertedRowId)
@@ -544,7 +529,7 @@ let tests =
                 // Insert of multiple entities
                 let! insertedNumberOfRows = 
                     insert {
-                        for e in jsonSupportTable do
+                        for e in ext.jsonsupport do
                         entities entities'
                     }
                     |> ctx.InsertAsync
@@ -625,14 +610,14 @@ let tests =
 
             let upsertCurrency currency = 
                 insertTask (Shared ctx) {
-                    for c in currencyTable do
+                    for c in sales.currency do
                     entity currency
                     onConflictDoUpdate c.currencycode (c.name, c.modifieddate)
                 }
 
             let queryCurrency code = 
                 select {
-                    for c in currencyTable do
+                    for c in sales.currency do
                     where (c.currencycode = code)
                 }
                 |> ctx.Read HydraReader.Read
@@ -662,7 +647,7 @@ let tests =
 
             let tryInsertCurrency currency = 
                 insert {
-                    for c in currencyTable do
+                    for c in sales.currency do
                     entity currency
                     onConflictDoNothing c.currencycode
                 }   
@@ -671,7 +656,7 @@ let tests =
             
             let queryCurrency code = 
                 select {
-                    for c in currencyTable do
+                    for c in sales.currency do
                     where (c.currencycode = code)
                 }
                 |> ctx.Read HydraReader.Read
@@ -700,7 +685,7 @@ let tests =
             
             let! employees =
                 selectTask HydraReader.Read (Shared ctx) {
-                    for e in employeeTable do
+                    for e in humanresources.employee do
                     select e
                 }
 
@@ -712,7 +697,7 @@ let tests =
             
             let! employeeBirthDates =
                 selectTask HydraReader.Read (Shared ctx) {
-                    for e in employeeTable do
+                    for e in humanresources.employee do
                     select e.birthdate
                 }
 
@@ -732,7 +717,7 @@ let tests =
 
             let! insertResults = 
                 insertTask (Shared ctx) {
-                    into arraysTable
+                    into ext.arrays
                     entity row
                 }
 
@@ -741,7 +726,7 @@ let tests =
             
             let! query1Result = 
                 selectTask HydraReader.Read (Shared ctx) {
-                    for r in arraysTable do
+                    for r in ext.arrays do
                     select r
                     tryHead
                 } 
@@ -750,7 +735,7 @@ let tests =
 
             let! query2Result = 
                 selectTask HydraReader.Read (Shared ctx) {
-                    for r in arraysTable do
+                    for r in ext.arrays do
                     select (r.integer_array, r.text_array)
                     tryHead
                 } 
@@ -767,7 +752,7 @@ let tests =
             
             let! employees =
                 selectTask HydraReader.Read (Shared ctx) {
-                    for e in employeeTable do
+                    for e in humanresources.employee do
                     select e
                 }
 
@@ -778,7 +763,7 @@ let tests =
 
             let! result = 
                 updateTask (Shared ctx) {
-                    for e in employeeTable do
+                    for e in humanresources.employee do
                     set e.birthdate birthDate
                     where (e.businessentityid = emp.businessentityid)
                 }
@@ -787,7 +772,7 @@ let tests =
 
             let! refreshedEmp = 
                 selectTask HydraReader.Read (Shared ctx) {
-                    for e in employeeTable do
+                    for e in humanresources.employee do
                     where (e.businessentityid = emp.businessentityid)                    
                     tryHead
                 }

@@ -4,6 +4,10 @@
 		<TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<Version>1.0.0</Version>
+		<WarningsAsErrors>
+			<!-- Incomplete pattern matches on this expression. -->
+			FS0025
+		</WarningsAsErrors>
 		<Authors>Jordan Marr</Authors>
 		<Description></Description>
 	</PropertyGroup>

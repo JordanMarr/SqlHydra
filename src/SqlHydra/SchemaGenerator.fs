@@ -91,6 +91,26 @@ let createTableRecord (cfg: Config) (tbl: Table) =
         
     SynModuleDecl.CreateSimpleType(recordCmpInfo, recordDef)
 
+let createTableDeclaration (tbl: Table) =     
+    [
+        { SynBindingRcd.Let with 
+            Pattern = SynPatRcd.LongIdent(SynPatLongIdentRcd.Create(LongIdentWithDots.Create([ tbl.Name ]), SynArgPats.Empty)) // Good
+            Expr = 
+                SynExpr.TypeApp(
+                    SynExpr.CreateLongIdent(LongIdentWithDots.Create [ "SqlHydra"; "Query"; "Table"; "table" ]),
+                    range0,
+                    [
+                        SynType.Create(tbl.Name)
+                    ], // Type arguments
+                    [],
+                    None,
+                    range0,
+                    range0
+                )
+        }
+    ]
+    |> SynModuleDecl.CreateLet
+
 /// Creates an enum definition.
 let createEnum (enum: Enum) = 
     let cmpInfo = 
@@ -669,6 +689,9 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                             cliMutableAttribute
                         
                         createTableRecord cfg tbl
+
+                        if cfg.TableDeclarations then
+                            createTableDeclaration tbl
                 ]
 
             let readersModule = 

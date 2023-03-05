@@ -56,6 +56,7 @@ let newConfigWizard(app: AppInfo) =
                 Config.Namespace = ns
                 Config.IsCLIMutable = true
                 Config.ProviderDbTypeAttributes = true
+                Config.TableDeclarations = true
                 Config.Readers = Some { ReadersConfig.ReaderType = app.DefaultReaderType } 
                 Config.Filters = FilterPatterns.Empty // User must manually configure filter in .toml file
             }
@@ -66,6 +67,7 @@ let newConfigWizard(app: AppInfo) =
                 Config.Namespace = ns
                 Config.IsCLIMutable = true
                 Config.ProviderDbTypeAttributes = false
+                Config.TableDeclarations = false
                 Config.Readers = None 
                 Config.Filters = FilterPatterns.Empty // User must manually configure filter in .toml file
             }
@@ -76,6 +78,7 @@ let newConfigWizard(app: AppInfo) =
                 Config.Namespace = ns
                 Config.IsCLIMutable = true
                 Config.ProviderDbTypeAttributes = false
+                Config.TableDeclarations = false
                 Config.Readers = Some { ReadersConfig.ReaderType = app.DefaultReaderType } 
                 Config.Filters = FilterPatterns.Empty // User must manually configure filter in .toml file
             }

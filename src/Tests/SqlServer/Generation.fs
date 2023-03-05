@@ -14,6 +14,7 @@ let cfg =
         Namespace = "TestNS"
         IsCLIMutable = true
         ProviderDbTypeAttributes = true
+        TableDeclarations = false
         Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" } 
         Filters = FilterPatterns.Empty
     }

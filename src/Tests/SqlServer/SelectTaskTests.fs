@@ -19,17 +19,6 @@ let openContext() =
     let conn = openConnection()
     new QueryContext(conn, compiler)
 
-// Tables
-let personTable =           table<Person.Person>                    |> inSchema (nameof Person)
-let customerTable =         table<Sales.Customer>                   |> inSchema (nameof Sales)
-let orderHeaderTable =      table<Sales.SalesOrderHeader>           |> inSchema (nameof Sales)
-let orderDetailTable =      table<Sales.SalesOrderDetail>           |> inSchema (nameof Sales)
-let productTable =          table<Production.Product>               |> inSchema (nameof Production)
-let subCategoryTable =      table<Production.ProductSubcategory>    |> inSchema (nameof Production)
-let categoryTable =         table<Production.ProductCategory>       |> inSchema (nameof Production)
-let errorLogTable =         table<dbo.ErrorLog>
-
-
 [<Tests>]
 let selectTests = 
     categoryList "SqlServer" "selectTask" [
@@ -37,7 +26,7 @@ let selectTests =
         testTask "selectTask" {
             let! results = 
                 selectTask HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 10
                 }
         
@@ -47,7 +36,7 @@ let selectTests =
         testTask "selectTask - select" {
             let! results = 
                 selectTask HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 10
                     select p
                 }
@@ -58,7 +47,7 @@ let selectTests =
         testTask "selectTask - toArray" {
             let! results = 
                 selectTask HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 10
                     toArray
                 }
@@ -69,7 +58,7 @@ let selectTests =
         testTask "selectTask - mapList column" {
             let! results = 
                 selectTask HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 10
                     mapList p.FirstName
                 }
@@ -80,7 +69,7 @@ let selectTests =
         testTask "selectTask - select entity - mapSeq column" {
             let! results = 
                 selectTask HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 10
                     select p
                     mapSeq $"{p.FirstName} {p.LastName}"
@@ -92,7 +81,7 @@ let selectTests =
         testTask "selectTask - select columns into - mapList column" {
             let! results = 
                 selectTask HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 10
                     select (p.FirstName, p.LastName) into (fname, lname)
                     mapList $"{fname} {lname}"
@@ -104,7 +93,7 @@ let selectTests =
         testTask "selectTask - count" {
             let! results = 
                 selectTask HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     count
                 }
         
@@ -114,7 +103,7 @@ let selectTests =
         testTask "selectTask - tryHead - Selected" {
             let! result = 
                 selectTask HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 1
                     tryHead
                 }
@@ -125,7 +114,7 @@ let selectTests =
         testTask "selectTask - tryHead - Mapped" {
             let! result = 
                 selectTask HydraReader.Read (Create openContext) {
-                    for p in personTable do
+                    for p in Person.Person do
                     take 1
                     mapSeq $"{p.FirstName} {p.LastName}"
                     tryHead

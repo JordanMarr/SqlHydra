@@ -3,9 +3,13 @@
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
-		<Version>1.1.1</Version>
+		<Version>1.2.0</Version>
 		<Authors>Jordan Marr</Authors>
 		<Description>SqlHydra.Oracle is a dotnet tool that generates F# records for a Oracle database.</Description>
+		<WarningsAsErrors>
+			<!-- Incomplete pattern matches on this expression. -->
+			FS0025
+		</WarningsAsErrors>
 		<PackageTags>F# fsharp data database orm sql</PackageTags>
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>sqlhydra-oracle</ToolCommandName>
