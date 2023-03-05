@@ -337,19 +337,7 @@ If you have .NET 5 and .NET 6 installed side-by-side but you want to continue ge
 SqlHydra.Query wraps the powerful [SqlKata](https://sqlkata.com/) query generator with F# computation expression builders for strongly typed query generation.
 SqlHydra.Query can be used with any library that accepts a data reader; however, is designed pair well with SqlHydra generated records and readers! 
 
-### Setup Tables
-
-```F#
-open SqlHydra.Query
-
-// Tables
-let customerTable =         table<SalesLT.Customer>
-let customerAddressTable =  table<SalesLT.CustomerAddress>
-let addressTable =          table<SalesLT.Address>
-let productTable =          table<SalesLT.Product>
-let categoryTable =         table<SalesLT.ProductCategory>
-let errorLogTable =         table<dbo.ErrorLog>
-```
+### Creating a Query Context
 
 ```F#
 /// Opens a connection and creates a QueryContext that will generate SQL Server dialect queries
@@ -358,6 +346,17 @@ let openContext() =
     let conn = new SqlConnection("Replace with your connection string")
     conn.Open()
     new QueryContext(conn, compiler)
+```
+
+### Tables
+SqlHydra v1.2 now generates a table declaration for each table record that can be used in query `from` statements.
+For example, if you have a `SalesLT.Person` table record, you will also have a `SalesLT.Person` binding.
+
+```F#
+select { 
+    for p in SalesLT.Person do
+    select p
+}
 ```
 
 ### Select Builder
@@ -378,7 +377,7 @@ Selecting city and state columns only:
 ```F#
 let getCities (cityFilter: string) = 
     selectTask HydraReader.Read (Create openContext) {
-        for a in addressTable do                                // Specifies a FROM table in the query
+        for a in SalesLT.Address do                             // Specifies a FROM table in the query
         where (a.City = cityFilter)                             // Specifies a WHERE clause in the query
         select (a.City, a.StateProvince) into selected          // Specifies which entities and/or columns to SELECT in the query
         mapList (                                               // Transforms the query results
@@ -403,7 +402,7 @@ Select `Address` entities where City starts with `S`:
 ```F#
 let getAddressesInCitiesStartingWithS () = 
         selectAsync HydraReader.Read (Create openContext) {
-            for a in addressTable do
+            for a in SalesLT.Address do
             where (a.City =% "S%")
         }
 ```
@@ -414,7 +413,7 @@ Select top 10 `Product` entities with inner joined category name:
 ```F#
 let getProductsWithCategory () = 
     selectTask HydraReader.Read (Create openContext) {
-        for p in productTable do
+        for p in SalesLT.Product do
         join c in categoryTable on (p.ProductCategoryID.Value = c.ProductCategoryID)
         select (p, c.Name)
         take 10
@@ -427,9 +426,9 @@ Select `Customer` with left joined `Address` where `CustomerID` is in a list of 
 ```F#
 let getCustomerAddressesInIds (customerIds: int list) =
     selectAsync HydraReader.Read (Create openContext) {
-        for c in customerTable do
-        leftJoin ca in customerAddressTable on (c.CustomerID = ca.Value.CustomerID)
-        leftJoin a  in addressTable on (ca.Value.AddressID = a.Value.AddressID)
+        for c in SalesLT.Customer do
+        leftJoin ca in SalesLT.CustomerAddress on (c.CustomerID = ca.Value.CustomerID)
+        leftJoin a  in SalesLT.Address on (ca.Value.AddressID = a.Value.AddressID)
         where (c.CustomerID |=| customerIds)
         orderBy c.CustomerID
         select (c, a)
@@ -440,8 +439,8 @@ To create a join query with multi-columns, use tuples:
 
 ```F#
 select {
-    for o in orderHeaderTable do
-    join d in orderDetailTable on ((o.SalesOrderID, o.ModifiedDate) = (d.SalesOrderID, d.ModifiedDate))
+    for o in SalesLT.OrderHeaders do
+    join d in SalesLT.OrderDetails on ((o.SalesOrderID, o.ModifiedDate) = (d.SalesOrderID, d.ModifiedDate))
     select (o, d)
 }
 ```
@@ -457,8 +456,8 @@ To transform the query results use the `mapSeq`, `mapArray` or `mapList` operati
 ```F#
     let! lineTotals =
         selectTask HydraReader.Read (Create openContext) {
-            for o in orderHeaderTable do
-            join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+            for o in SalesLT.OrderHeaders do
+            join d in SalesLT.OrderDetails on (o.SalesOrderID = d.SalesOrderID)
             where (o.OnlineOrderFlag = true)
             mapList (
                 {| 
@@ -477,8 +476,8 @@ If a custom subset of entities and/or columns has been selected in the query, yo
 ```F#
     let! lineTotals =
         selectTask HydraReader.Read (Create openContext) {
-            for o in orderHeaderTable do
-            join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+            for o in SalesLT.OrderHeaders do
+            join d in SalesLT.OrderDetails on (o.SalesOrderID = d.SalesOrderID)
             where (o.OnlineOrderFlag = true)
             select (o, d.OrderQty, d.UnitPrice) into selected  // project selected values so they can be mapped
             mapList (
@@ -508,7 +507,7 @@ _Aggregate functions (can be used in `select`, `having` and `orderBy` clauses):_
 /// Select categories with an avg product price > 500 and < 1000
 let getCategoriesWithHighAvgPrice () = 
     selectTask HydraReader.Read (Create openContext) {
-        for p in productTable do
+        for p in SalesLT.Product do
         where (p.ProductCategoryID <> None)
         groupBy p.ProductCategoryID
         having (minBy p.ListPrice > 500M && maxBy p.ListPrice < 1000M)
@@ -524,7 +523,7 @@ Alternative Row Count Query:
 ```F#
 let! customersWithNoSalesPersonCount =
     selectTask HydraReader.Read (Create openContext) {
-        for c in customerTable do
+        for c in SalesLT.Customer do
         where (c.SalesPerson = None)
         count
     }
@@ -538,7 +537,7 @@ _Use the `subqueryMany` function for subqueries that return multiple rows for co
 // Create a subquery that gets top 5 avg prices by category ID:
 let top5CategoryIdsWithHighestAvgPrices = 
     select {
-        for p in productTable do
+        for p in SalesLT.Product do
         where (p.ProductCategoryID <> None)
         groupBy p.ProductCategoryID
         orderByDescending (avgBy p.ListPrice)
@@ -549,7 +548,7 @@ let top5CategoryIdsWithHighestAvgPrices =
 // Get category names where the category ID is "IN" the subquery:
 let! top5Categories =
     selectTask HydraReader.Read (Create openContext) {
-        for c in categoryTable do
+        for c in SalesLT.ProductCategory do
         where (Some c.ProductCategoryID |=| subqueryMany top5CategoryIdsWithHighestAvgPrices)
         select c.Name
     }
@@ -561,14 +560,14 @@ _Use the `subqueryOne` function for subqueries that return a single value for co
 // Create a subquery that gets the avg list price (a single value):
 let avgListPrice = 
     select {
-        for p in productTable do
+        for p in SalesLT.Product do
         select (avgBy p.ListPrice)
     } 
 
 // Get products with a price > the average price
 let! productsWithAboveAveragePrice =
     selectTask HydraReader.Read (Create openContext) {
-        for p in productTable do
+        for p in SalesLT.Product do
         where (p.ListPrice > subqueryOne avgListPrice)
         select (p.Name, p.ListPrice)
     }
@@ -578,7 +577,7 @@ Distinct Query:
 ```F#
 let! distinctCustomerNames = 
     selectTask HydraReader.Read (Create openContext) {
-        for c in customerTable do
+        for c in SalesLT.Customer do
         select (c.FirstName, c.LastName)
         distinct
     }
@@ -596,7 +595,7 @@ Transformations (i.e. `.ToString()` or calling any functions is _not supported_ 
 let getCities () =
     let city = getCity() // DO prepare where parameters above and then pass into the where clause
     selectTask HydraReader.Read (Create openContext) {
-        for a in addressTable do
+        for a in SalesLT.Address do
         where (a.City = city)
         select (a.City, a.StateProvince) into (city, state)
         mapList $"City: %s{city}, State: %s{state}"   // DO transforms using the `mapSeq`, `mapArray` or `mapList` operations
@@ -607,7 +606,7 @@ let getCities () =
 ```F#
 let getCities () =
     selectTask HydraReader.Read (Create openContext) {
-        for a in addressTable do
+        for a in SalesLT.Address do
         where (a.City = getCity()) // DO NOT perform calculations or translations within the builder
         select ($"City: %s{city}, State: %s{state}")   // DO NOT transform results within the builder 
     }
@@ -646,7 +645,7 @@ let selectTask' ct = selectTask HydraReader.Read ct
 
 let! distinctCustomerNames = 
     selectTask' (Create openContext) {
-        for c in customerTable do
+        for c in SalesLT.Customer do
         select (c.FirstName, c.LastName)
         distinct
     }
@@ -660,7 +659,7 @@ For simple inserts with no identity column and no included/excluded columns, use
 ```F#
 let! rowsInserted = 
     insertTask (Create openContext) {
-        into personTable
+        into Person.Person
         entity 
             {
                 dbo.Person.ID = Guid.NewGuid()
@@ -683,7 +682,7 @@ By default, all record fields will be included as insert values, so when using a
 
 let! errorLogID =
     insertTask (Create openContext) {
-        for e in errorLogTable do
+        for e in dbo.ErrorLog do
         entity 
             {
                 dbo.ErrorLog.ErrorLogID = 0 // Adding `getId` below will ignore this value.
@@ -722,7 +721,7 @@ let currenciesMaybe =
 match currenciesMaybe with
 | Some currencies ->
     do! insertTask (Create openContext) {
-            into currencyTable
+            into Sales.Currency
             entities currencies
         } :> Task // upcast to Task if you want to ignore the resulting value
 | None ->
@@ -745,7 +744,7 @@ Upsert support has been added for Postgres and Sqlite only because they support 
     /// Inserts an address or updates it if it already exists.
     let upsertAddress address = 
         insertTask (Create openContext) {
-            for a in addressTable do
+            for a in Person.Address do
             entity address
             onConflictDoUpdate a.AddressID (
                 a.AddressLine1,
@@ -764,7 +763,7 @@ Upsert support has been added for Postgres and Sqlite only because they support 
     /// Tries to insert an address if it doesn't already exist.
     let tryInsertAddress address = 
         insertTask (Create openContext) {
-            for a in addressTable do
+            for a in Person.Address do
             entity address
             onConflictDoNothing a.AddressID
         }
@@ -778,7 +777,7 @@ To update individual columns, use the `set` operation.
 
 ```F#
 do! updateAsync (Create openContext) {
-        for e in errorLogTable do
+        for e in dbo.ErrorLog do
         set e.ErrorNumber 123
         set e.ErrorMessage "ERROR #123"
         set e.ErrorLine (Some 999)
@@ -796,7 +795,7 @@ NOTE: You may use `includeColumn` or `excludeColumn` multiple times - once for e
 ```F#
 let! rowsUpdated = 
     updateTask (Create openContext) {
-        for e in errorLogTable do
+        for e in dbo.ErrorLog do
         entity 
             {
                 dbo.ErrorLog.ErrorLogID = 0 // Add `excludeColumn` below to ignore an identity column
@@ -817,7 +816,7 @@ let! rowsUpdated =
 If you want to apply an update to all records in a table, you must use the `updateAll` keyword or else it will throw an exception (it's a safety precaution that may save you some trouble. 😊):
 ```F#
 update {
-    for c in customerTable do
+    for c in Sales.Customer do
     set c.AccountNumber "123"
     updateAll
 }
@@ -827,7 +826,7 @@ update {
 
 ```F#
 do! deleteTask (Create openContext) {
-        for e in errorLogTable do
+        for e in dbo.ErrorLog do
         where (e.ErrorLogID = 5)
     } :> Task // upcast to Task if you want to ignore the resulting value
 ```
@@ -836,7 +835,7 @@ If you want to delete all records in a table, you must use the `deleteAll` keywo
 ```F#
 let! rowsDeleted = 
     deleteTask (Create openContext) {
-        for c in customerTable do
+        for c in Sales.Customer do
         deleteAll
     }
     
