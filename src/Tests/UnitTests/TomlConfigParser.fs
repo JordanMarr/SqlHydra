@@ -37,7 +37,7 @@ let tests =
                 cli_mutable = true
                 [sqlhydra_query_integration]
                 provider_db_type_attributes = true
-                table_declarations
+                table_declarations = true
                 [readers]
                 reader_type = "Microsoft.Data.SqlClient.SqlDataReader"
                 [filters]

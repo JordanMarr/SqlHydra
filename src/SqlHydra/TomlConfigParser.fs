@@ -73,6 +73,7 @@ let save(cfg: Config) =
     
     let queryInt = TableSyntax("sqlhydra_query_integration")
     queryInt.Items.Add("provider_db_type_attributes", cfg.ProviderDbTypeAttributes)
+    queryInt.Items.Add("table_declarations", cfg.TableDeclarations)
     doc.Tables.Add(queryInt)
 
     cfg.Readers |> Option.iter (fun readersConfig ->
