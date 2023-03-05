@@ -20,14 +20,7 @@ let openContext() =
     let conn = openConnection()
     new QueryContext(conn, compiler)
 
-// Tables
-let addressTable =          table<main.Address>
-let customerTable =         table<main.Customer>
-let orderHeaderTable =      table<main.SalesOrderHeader>
-let orderDetailTable =      table<main.SalesOrderDetail>
-let productTable =          table<main.Product>
-let categoryTable =         table<main.ProductCategory>
-let errorLogTable =         table<main.ErrorLog>
+//let main.ErrorLog =         table<main.ErrorLog>
 
 [<Tests>]
 let tests = 
@@ -38,7 +31,7 @@ let tests =
             
             let addresses =
                 select {
-                    for a in addressTable do
+                    for a in main.Address do
                     where (a.City |=| [ "Seattle"; "Santa Cruz" ])
                 }
                 |> ctx.Read HydraReader.Read
@@ -52,7 +45,7 @@ let tests =
 
             let cities =
                 select {
-                    for a in addressTable do
+                    for a in main.Address do
                     where (a.City =% "S%")
                     select a.City
                 }
@@ -67,8 +60,8 @@ let tests =
 
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on (o.SalesOrderID = d.SalesOrderID)
+                    for o in main.SalesOrderHeader do
+                    join d in main.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
                     where (o.OnlineOrderFlag = 0L)
                     select (o, d)
                 }
@@ -84,7 +77,7 @@ let tests =
 
         //    let query = 
         //        select {
-        //            for p in productTable do
+        //            for p in main.Product do
         //            join sc in subCategoryTable on (p.ProductSubcategoryID = Some sc.ProductSubcategoryID)
         //            join c in categoryTable on (sc.ProductCategoryID = c.ProductCategoryID)
         //            select (c.Name, p)
@@ -102,7 +95,7 @@ let tests =
 
         //    let query =
         //        select {
-        //            for p in productTable do
+        //            for p in main.Product do
         //            where (p.ProductSubcategoryID <> None)
         //            groupBy p.ProductSubcategoryID
         //            where (p.ProductSubcategoryID.Value |=| [ 1; 2; 3 ])
@@ -128,13 +121,13 @@ let tests =
 
         //    let avgListPrice = 
         //        select {
-        //            for p in productTable do
+        //            for p in main.Product do
         //            select (avgBy p.ListPrice)
         //        }
 
         //    let! productsWithHigherThanAvgPrice = 
         //        select {
-        //            for p in productTable do
+        //            for p in main.Product do
         //            where (p.ListPrice > subqueryOne avgListPrice)
         //            orderByDescending p.ListPrice
         //            select (p.Name, p.ListPrice)
@@ -152,7 +145,7 @@ let tests =
 
         //    let! aggregates = 
         //        select {
-        //            for p in productTable do
+        //            for p in main.Product do
         //            where (p.ProductSubcategoryID <> None)
         //            groupBy p.ProductSubcategoryID
         //            having (minBy p.ListPrice > 50M && maxBy p.ListPrice < 1000M)
@@ -168,7 +161,7 @@ let tests =
 
         //    let! aggregates = 
         //        select {
-        //            for p in productTable do
+        //            for p in main.Product do
         //            where (p.ProductSubcategoryID <> None)
         //            groupBy p.ProductSubcategoryID
         //            orderByDescending (avgBy p.ListPrice)
@@ -185,7 +178,7 @@ let tests =
 
         //    let top5CategoryIdsWithHighestAvgPrices = 
         //        select {
-        //            for p in productTable do
+        //            for p in main.Product do
         //            where (p.ProductSubcategoryID <> None)
         //            groupBy p.ProductSubcategoryID
         //            orderByDescending (avgBy p.ListPrice)
@@ -209,13 +202,13 @@ let tests =
 
             let avgListPrice = 
                 select {
-                    for p in productTable do
+                    for p in main.Product do
                     select (avgBy p.ListPrice)
                 } 
 
             let! productsWithAboveAveragePrice =
                 select {
-                    for p in productTable do
+                    for p in main.Product do
                     where (p.ListPrice > subqueryOne avgListPrice)
                     select (p.Name, p.ListPrice)
                 }
@@ -229,7 +222,7 @@ let tests =
 
         //    let! values = 
         //        select {
-        //            for p in productTable do
+        //            for p in main.Product do
         //            where (p.ProductSubcategoryID <> None)
         //            select (p.ProductSubcategoryID, p.ListPrice)
         //        }
@@ -257,7 +250,7 @@ let tests =
 
             let errorLogId = 
                 insert {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     entity errorLog
                     getId e.ErrorLogID
                 }
@@ -285,7 +278,7 @@ let tests =
 
             let! result = 
                 insert {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     entity errorLog
                     getId e.ErrorLogID
                 }
@@ -299,7 +292,7 @@ let tests =
 
             let result = 
                 update {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     set e.ErrorNumber 123L
                     set e.ErrorMessage "ERROR #123"
                     set e.ErrorLine (Some 999L)
@@ -316,7 +309,7 @@ let tests =
 
             let! result = 
                 update {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     set e.ErrorNumber 123L
                     set e.ErrorMessage "ERROR #123"
                     set e.ErrorLine (Some 999L)
@@ -346,7 +339,7 @@ let tests =
 
             let result = 
                 update {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     entity errorLog
                     excludeColumn e.ErrorLogID
                     where (e.ErrorLogID = errorLog.ErrorLogID)
@@ -361,7 +354,7 @@ let tests =
 
             let result = 
                 delete {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     where (e.ErrorLogID = 5L)
                 }
                 |> ctx.Delete
@@ -374,7 +367,7 @@ let tests =
 
             let! result = 
                 delete {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     where (e.ErrorLogID = 5L)
                 }
                 |> ctx.DeleteAsync
@@ -402,7 +395,7 @@ let tests =
 
             let! _ = 
                 delete {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     deleteAll
                 }
                 |> ctx.DeleteAsync
@@ -418,7 +411,7 @@ let tests =
             | Some errorLogs ->
                 let! rowsInserted = 
                     insert {
-                        for e in errorLogTable do
+                        for e in main.ErrorLog do
                         entities errorLogs
                         excludeColumn e.ErrorLogID
                     }
@@ -430,7 +423,7 @@ let tests =
 
             let! results =
                 select {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     select e.ErrorNumber
                 }
                 |> ctx.ReadAsync HydraReader.Read
@@ -449,7 +442,7 @@ let tests =
 
             let! _ = 
                 deleteTask (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     deleteAll
                 }
 
@@ -462,7 +455,7 @@ let tests =
             | Some errorLogs -> 
                 let! rowsInserted = 
                     insertTask (Shared ctx) {
-                        for e in errorLogTable do
+                        for e in main.ErrorLog do
                         entities errorLogs
                         excludeColumn e.ErrorLogID
                     }
@@ -472,13 +465,13 @@ let tests =
 
             let! results =
                 selectTask HydraReader.Read (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     select e.ErrorNumber
                 }
 
             let! distinctResults =
                 selectTask HydraReader.Read (Shared ctx) {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     select e.ErrorNumber
                     distinct
                 }
@@ -496,7 +489,7 @@ let tests =
             for i in [0..2] do
                 let! result = 
                     insert {
-                        for e in errorLogTable do
+                        for e in main.ErrorLog do
                         entity stubbedErrorLog
                         getId e.ErrorLogID
                     }
@@ -505,7 +498,7 @@ let tests =
 
             let! count = 
                 select {
-                    for e in errorLogTable do
+                    for e in main.ErrorLog do
                     count
                 }
                 |> ctx.CountAsync
@@ -522,7 +515,7 @@ let tests =
 
             let upsertAddress address = 
                 insertTask (Shared ctx) {
-                    for a in addressTable do
+                    for a in main.Address do
                     entity address
                     onConflictDoUpdate a.AddressID (
                         a.AddressLine1,
@@ -537,7 +530,7 @@ let tests =
 
             let queryAddress id = 
                 selectTask HydraReader.Read (Shared ctx) {
-                    for a in addressTable do
+                    for a in main.Address do
                     where (a.AddressID = id)
                     toList
                 }

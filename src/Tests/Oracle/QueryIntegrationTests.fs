@@ -20,15 +20,6 @@ let openContext() =
     conn.Open()
     new QueryContext(conn, compiler)
 
-// Tables
-let regionsTable =          table<OT.REGIONS>
-let countriesTable =        table<OT.COUNTRIES>
-let customersTable =        table<OT.CUSTOMERS>
-let orderHeaderTable =      table<OT.ORDERS>
-let orderDetailTable =      table<OT.ORDER_ITEMS>
-let productTable =          table<OT.PRODUCTS>
-let categoryTable =         table<OT.PRODUCT_CATEGORIES>
-
 [<Tests>]
 let tests = 
     categoryList "Oracle" "Query Integration Tests" [
@@ -38,7 +29,7 @@ let tests =
             
             let addresses =
                 select {
-                    for c in customersTable do
+                    for c in OT.CUSTOMERS do
                     where (c.NAME |=| [ "Staples"; "Aflac" ])
                 }
                 |> ctx.Read HydraReader.Read
@@ -52,7 +43,7 @@ let tests =
 
             let cities =
                 select {
-                    for c in customersTable do
+                    for c in OT.CUSTOMERS do
                     where (c.ADDRESS =% "%Detroit%")
                     select c.ADDRESS
                 }
@@ -67,8 +58,8 @@ let tests =
 
             let query =
                 select {
-                    for o in orderHeaderTable do
-                    join d in orderDetailTable on (o.ORDER_ID = d.ORDER_ID)
+                    for o in OT.ORDERS do
+                    join d in OT.ORDER_ITEMS on (o.ORDER_ID = d.ORDER_ID)
                     where (o.STATUS = "Pending")
                     select (o, d)
                 }
@@ -84,8 +75,8 @@ let tests =
 
             let query = 
                 select {
-                    for p in productTable do
-                    join c in categoryTable on (p.CATEGORY_ID = c.CATEGORY_ID)
+                    for p in OT.PRODUCTS do
+                    join c in OT.PRODUCT_CATEGORIES on (p.CATEGORY_ID = c.CATEGORY_ID)
                     select (c.CATEGORY_NAME, p)
                     take 5
                 }
@@ -101,8 +92,8 @@ let tests =
 
             let query =
                 select {
-                    for p in productTable do
-                    join c in categoryTable on (p.CATEGORY_ID = c.CATEGORY_ID)
+                    for p in OT.PRODUCTS do
+                    join c in OT.PRODUCT_CATEGORIES on (p.CATEGORY_ID = c.CATEGORY_ID)
                     where (p.LIST_PRICE <> None)
                     groupBy p.CATEGORY_ID
                     select (p.CATEGORY_ID, minBy p.LIST_PRICE.Value, maxBy p.LIST_PRICE.Value, avgBy p.LIST_PRICE.Value, countBy p.LIST_PRICE.Value, sumBy p.LIST_PRICE.Value)
@@ -135,14 +126,14 @@ let tests =
 
             let avgListPrice = 
                 select {
-                    for p in productTable do
+                    for p in OT.PRODUCTS do
                     where (p.LIST_PRICE <> None)
                     select (avgBy p.LIST_PRICE.Value)
                 }
 
             let! productsWithHigherThanAvgPrice = 
                 select {
-                    for p in productTable do
+                    for p in OT.PRODUCTS do
                     where (p.LIST_PRICE.Value > subqueryOne avgListPrice)
                     orderByDescending p.LIST_PRICE
                     select (p.PRODUCT_NAME, p.LIST_PRICE.Value)
@@ -162,7 +153,7 @@ let tests =
 
             let! aggregates = 
                 select {
-                    for p in productTable do
+                    for p in OT.PRODUCTS do
                     where (p.LIST_PRICE <> None)
                     groupBy p.CATEGORY_ID
                     having (minBy p.LIST_PRICE.Value > 50M && maxBy p.LIST_PRICE.Value < 1000M)
@@ -179,7 +170,7 @@ let tests =
 
             let! aggregates = 
                 select {
-                    for p in productTable do
+                    for p in OT.PRODUCTS do
                     where (p.LIST_PRICE <> None)
                     groupBy p.CATEGORY_ID
                     orderByDescending (avgBy p.LIST_PRICE.Value)
@@ -198,7 +189,7 @@ let tests =
 
             let top5CategoryIdsWithHighestAvgPrices = 
                 select {
-                    for p in productTable do
+                    for p in OT.PRODUCTS do
                     where (p.LIST_PRICE <> None)
                     groupBy p.CATEGORY_ID
                     orderByDescending (avgBy p.LIST_PRICE.Value)
@@ -208,7 +199,7 @@ let tests =
 
             let! top5Categories =
                 select {
-                    for c in categoryTable do
+                    for c in OT.PRODUCT_CATEGORIES do
                     where (c.CATEGORY_ID |=| subqueryMany top5CategoryIdsWithHighestAvgPrices)
                     select c.CATEGORY_NAME
                 }
@@ -222,13 +213,13 @@ let tests =
 
             let avgListPrice = 
                 select {
-                    for p in productTable do
+                    for p in OT.PRODUCTS do
                     select (avgBy p.LIST_PRICE.Value)
                 } 
 
             let! productsWithAboveAveragePrice =
                 select {
-                    for p in productTable do
+                    for p in OT.PRODUCTS do
                     where (p.LIST_PRICE <> None && p.LIST_PRICE.Value > subqueryOne avgListPrice)
                     select (p.PRODUCT_NAME, p.LIST_PRICE.Value)
                 }
@@ -242,7 +233,7 @@ let tests =
 
             let! values = 
                 select {
-                    for p in productTable do
+                    for p in OT.PRODUCTS do
                     where (p.LIST_PRICE <> None)
                     select (p.CATEGORY_ID, p.LIST_PRICE)
                 }
@@ -257,7 +248,7 @@ let tests =
 
             let! results = 
                 insert {
-                    into countriesTable
+                    into OT.COUNTRIES
                     entity 
                         {
                             OT.COUNTRIES.COUNTRY_ID = "WL"
@@ -271,7 +262,7 @@ let tests =
 
             let! wl = 
                 select {
-                    for c in countriesTable do
+                    for c in OT.COUNTRIES do
                     where (c.COUNTRY_ID = "WL")
                 }
                 |> ctx.ReadAsync HydraReader.Read
@@ -284,7 +275,7 @@ let tests =
 
             let! results = 
                 update {
-                    for c in countriesTable do
+                    for c in OT.COUNTRIES do
                     set c.COUNTRY_NAME "Wonder Land"
                     where (c.COUNTRY_ID = "WL")
                 }
@@ -294,7 +285,7 @@ let tests =
 
             let! wl = 
                 select {
-                    for c in countriesTable do
+                    for c in OT.COUNTRIES do
                         where (c.COUNTRY_NAME = "Wonder Land")
                 }
                 |> ctx.ReadAsync HydraReader.Read
@@ -307,14 +298,14 @@ let tests =
 
             let! _ = 
                 delete {
-                    for c in countriesTable do
+                    for c in OT.COUNTRIES do
                     where (c.COUNTRY_ID = "WL")
                 }
                 |> ctx.DeleteAsync
 
             let! wl = 
                 select {
-                    for c in countriesTable do
+                    for c in OT.COUNTRIES do
                     where (c.COUNTRY_ID = "WL")
                 }
                 |> ctx.ReadAsync HydraReader.Read
@@ -328,7 +319,7 @@ let tests =
 
             let! regionId = 
                 insert {
-                    for r in regionsTable do
+                    for r in OT.REGIONS do
                     entity 
                         {
                             OT.REGIONS.REGION_ID = 0 // PK
@@ -340,7 +331,7 @@ let tests =
 
             let! region = 
                 select {
-                    for r in regionsTable do
+                    for r in OT.REGIONS do
                     where (r.REGION_ID = regionId)
                 }
                 |> ctx.ReadOneAsync HydraReader.Read
@@ -372,7 +363,7 @@ let tests =
             | Some countries ->
                 let! rowsInserted = 
                     insert {
-                        into countriesTable
+                        into OT.COUNTRIES
                         entities countries
                     }
                     |> ctx.InsertAsync
@@ -381,7 +372,7 @@ let tests =
 
                 let! results =
                     select {
-                        for c in countriesTable do
+                        for c in OT.COUNTRIES do
                         where (c.COUNTRY_ID =% "X%")
                         orderBy c.COUNTRY_ID
                         select c.COUNTRY_ID
@@ -416,7 +407,7 @@ let tests =
             | Some countries ->
                 let! rowsInserted = 
                     insertTask (Shared ctx) {
-                        for e in countriesTable do
+                        for e in OT.COUNTRIES do
                         entities countries
                     }
 
@@ -424,14 +415,14 @@ let tests =
 
                 let! results =
                     selectTask HydraReader.Read (Shared ctx) {
-                        for c in countriesTable do
+                        for c in OT.COUNTRIES do
                         where (c.COUNTRY_ID =% "X%")
                         select c.COUNTRY_NAME
                     }
 
                 let! distinctResults =
                     selectTask HydraReader.Read (Shared ctx) {
-                        for c in countriesTable do
+                        for c in OT.COUNTRIES do
                         where (c.COUNTRY_ID =% "X%")
                         select c.REGION_ID
                         distinct
