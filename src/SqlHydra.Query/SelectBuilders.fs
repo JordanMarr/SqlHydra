@@ -201,6 +201,46 @@ type SelectBuilder<'Selected, 'Mapped> () =
             
         QuerySource<'JoinResult, Query>(outerQuery.Join(innerTableNameAsAlias, fun j -> joinOn), mergedTables)
 
+    /// INNER JOIN table on one or more columns
+    [<CustomOperation("correlate", MaintainsVariableSpace = true, IsLikeJoin = true, JoinConditionWord = "on")>]
+    member this.Correlate (outerSource: QuerySource<'Outer>, 
+                      innerSource: QuerySource<'Inner>, 
+                      outerKeySelector: Expression<Func<'Outer,'Key>>, 
+                      innerKeySelector: Expression<Func<'Inner,'Key>>, 
+                      resultSelector: Expression<Func<'Outer,'Inner,'JoinResult>> ) = 
+
+        let outerProperties = LinqExpressionVisitors.visitJoin<'Outer, 'Key> outerKeySelector // left
+        let innerProperties = LinqExpressionVisitors.visitJoin<'Inner, 'Key> innerKeySelector // right
+
+        let mergedTables = 
+            // Update outer table mappings with join aliases (accumulated outer/left mappings)
+            let outerTableMappings = 
+                outerProperties
+                |> List.fold (fun (mappings: Map<TableMappingKey, TableMapping>) joinPI -> 
+                    let _, updatedMappings = TableMappings.tryGetByRootOrAlias joinPI.Alias mappings
+                    updatedMappings
+                ) outerSource.TableMappings
+
+            // Update inner table mapping with join aliases (this will always be 1 mapping being joined)
+            let innerTableMappings = 
+                innerProperties
+                |> List.fold (fun (mappings: Map<TableMappingKey, TableMapping>) joinPI -> 
+                    let _, updatedMappings = TableMappings.tryGetByRootOrAlias joinPI.Alias mappings
+                    updatedMappings
+                ) innerSource.TableMappings
+        
+            mergeTableMappings (outerTableMappings, innerTableMappings)
+
+        let outerQuery = outerSource |> getQueryOrDefault
+            
+        let query = 
+            List.zip outerProperties innerProperties
+            |> List.fold (fun (q: Query) (outerProp, innerProp) -> 
+                q.WhereColumns($"{outerProp.Alias}.{outerProp.Member.Name}", "=", $"{innerProp.Alias}.{innerProp.Member.Name}")
+            ) outerQuery
+
+        QuerySource<'JoinResult, Query>(query, mergedTables)
+
     /// LEFT JOIN table on one or more columns
     [<CustomOperation("leftJoin", MaintainsVariableSpace = true, IsLikeJoin = true, JoinConditionWord = "on")>]
     member this.LeftJoin (outerSource: QuerySource<'Outer>, 

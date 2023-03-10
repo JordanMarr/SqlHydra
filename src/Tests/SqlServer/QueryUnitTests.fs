@@ -511,11 +511,9 @@ INNER JOIN [Production].[Product] AS [p2] ON ([p1].[ProductID] = [p2].[ProductID
 
         test "Correlated Subquery" {
             let maxOrderQty = 
-                let od = correlatedTable<Sales.SalesOrderDetail>
-
                 select {
-                    for d in orderDetailTable do
-                    where (d.ProductID = od.ProductID)
+                    for d in table<Sales.SalesOrderDetail> do
+                    correlate od in table<Sales.SalesOrderDetail> on (d.ProductID = od.ProductID)
                     select (maxBy d.OrderQty)
                 }
 
@@ -531,7 +529,10 @@ INNER JOIN [Production].[Product] AS [p2] ON ([p1].[ProductID] = [p2].[ProductID
             let sql = query.ToKataQuery() |> toSql
             Expect.equal
                 sql
-                "SELECT..."
+                "SELECT [od].[SalesOrderID], [od].[ProductID], [od].[OrderQty] FROM [Sales].[SalesOrderDetail] AS [od] \
+                WHERE ([od].[OrderQty] = (\
+                    SELECT MAX([d].[OrderQty]) FROM [Sales].[SalesOrderDetail] AS [d] WHERE [d].[ProductID] = [od].[ProductID])\
+                ) ORDER BY [od].[ProductID]"
                 ""            
         }
         
