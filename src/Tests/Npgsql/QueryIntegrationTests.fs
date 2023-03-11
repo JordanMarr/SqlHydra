@@ -328,7 +328,7 @@ let tests =
                     for r in production.productreview do
                     entity 
                         {
-                            production.productreview.productreviewid = 0 // PK
+                            production.productreview.productreviewid = 9999 // PK
                             production.productreview.comments = Some "The ML Fork makes for a plush ride."
                             production.productreview.emailaddress = "gfisher@askjeeves.com"
                             production.productreview.modifieddate = System.DateTime.Today
