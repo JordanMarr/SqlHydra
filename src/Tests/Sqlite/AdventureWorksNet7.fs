@@ -226,7 +226,7 @@ module main =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { AddressID = __.AddressID.Read()
+                { Address.AddressID = __.AddressID.Read()
                   AddressLine1 = __.AddressLine1.Read()
                   AddressLine2 = __.AddressLine2.Read()
                   City = __.City.Read()
@@ -246,7 +246,7 @@ module main =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SystemInformationID = __.SystemInformationID.Read()
+                { BuildVersion.SystemInformationID = __.SystemInformationID.Read()
                   ``Database Version`` = __.``Database Version``.Read()
                   VersionDate = __.VersionDate.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
@@ -272,7 +272,7 @@ module main =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { CustomerID = __.CustomerID.Read()
+                { Customer.CustomerID = __.CustomerID.Read()
                   NameStyle = __.NameStyle.Read()
                   Title = __.Title.Read()
                   FirstName = __.FirstName.Read()
@@ -299,7 +299,7 @@ module main =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { CustomerID = __.CustomerID.Read()
+                { CustomerAddress.CustomerID = __.CustomerID.Read()
                   AddressID = __.AddressID.Read()
                   AddressType = __.AddressType.Read()
                   rowguid = __.rowguid.Read()
@@ -320,7 +320,7 @@ module main =
             member __.ErrorMessage = RequiredColumn(reader, getOrdinal, reader.GetString, "ErrorMessage")
 
             member __.Read() =
-                { ErrorLogID = __.ErrorLogID.Read()
+                { ErrorLog.ErrorLogID = __.ErrorLogID.Read()
                   ErrorTime = __.ErrorTime.Read()
                   UserName = __.UserName.Read()
                   ErrorNumber = __.ErrorNumber.Read()
@@ -353,7 +353,7 @@ module main =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductID = __.ProductID.Read()
+                { Product.ProductID = __.ProductID.Read()
                   Name = __.Name.Read()
                   ProductNumber = __.ProductNumber.Read()
                   Color = __.Color.Read()
@@ -382,7 +382,7 @@ module main =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductCategoryID = __.ProductCategoryID.Read()
+                { ProductCategory.ProductCategoryID = __.ProductCategoryID.Read()
                   ParentProductCategoryID = __.ParentProductCategoryID.Read()
                   Name = __.Name.Read()
                   rowguid = __.rowguid.Read()
@@ -398,7 +398,7 @@ module main =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductDescriptionID = __.ProductDescriptionID.Read()
+                { ProductDescription.ProductDescriptionID = __.ProductDescriptionID.Read()
                   Description = __.Description.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
@@ -414,7 +414,7 @@ module main =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductModelID = __.ProductModelID.Read()
+                { ProductModel.ProductModelID = __.ProductModelID.Read()
                   Name = __.Name.Read()
                   CatalogDescription = __.CatalogDescription.Read()
                   rowguid = __.rowguid.Read()
@@ -431,7 +431,7 @@ module main =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductModelID = __.ProductModelID.Read()
+                { ProductModelProductDescription.ProductModelID = __.ProductModelID.Read()
                   ProductDescriptionID = __.ProductDescriptionID.Read()
                   Culture = __.Culture.Read()
                   rowguid = __.rowguid.Read()
@@ -452,7 +452,7 @@ module main =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SalesOrderID = __.SalesOrderID.Read()
+                { SalesOrderDetail.SalesOrderID = __.SalesOrderID.Read()
                   SalesOrderDetailID = __.SalesOrderDetailID.Read()
                   OrderQty = __.OrderQty.Read()
                   ProductID = __.ProductID.Read()
@@ -490,7 +490,7 @@ module main =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SalesOrderID = __.SalesOrderID.Read()
+                { SalesOrderHeader.SalesOrderID = __.SalesOrderID.Read()
                   RevisionNumber = __.RevisionNumber.Read()
                   OrderDate = __.OrderDate.Read()
                   DueDate = __.DueDate.Read()

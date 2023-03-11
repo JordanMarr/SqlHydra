@@ -1,5 +1,5 @@
 [general]
-connection = "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=127.0.0.1)(PORT=1521)) (CONNECT_DATA=(SERVICE_NAME=XEPDB1))); User Id=OT;Password=Oracle2;"
+connection = "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=127.0.0.1)(PORT=1521)) (CONNECT_DATA=(SERVICE_NAME=XEPDB1))); User Id=OT;Password=Oracle1;"
 output = "Oracle/AdventureWorksNet6.fs"
 namespace = "Oracle.AdventureWorksNet6"
 cli_mutable = true

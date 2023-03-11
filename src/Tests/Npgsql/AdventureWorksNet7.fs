@@ -81,7 +81,7 @@ module ext =
             member __.integer_array = RequiredColumn(reader, getOrdinal, reader.GetFieldValue, "integer_array")
 
             member __.Read() =
-                { id = __.id.Read()
+                { arrays.id = __.id.Read()
                   text_array = __.text_array.Read()
                   integer_array = __.integer_array.Read() }
 
@@ -94,7 +94,7 @@ module ext =
             member __.jsonb_field = RequiredColumn(reader, getOrdinal, reader.GetString, "jsonb_field")
 
             member __.Read() =
-                { id = __.id.Read()
+                { jsonsupport.id = __.id.Read()
                   json_field = __.json_field.Read()
                   jsonb_field = __.jsonb_field.Read() }
 
@@ -106,7 +106,7 @@ module ext =
             member __.currentmood = RequiredColumn(reader, getOrdinal, reader.GetFieldValue, "currentmood")
 
             member __.Read() =
-                { name = __.name.Read()
+                { person.name = __.name.Read()
                   currentmood = __.currentmood.Read() }
 
             member __.ReadIfNotNull() =
@@ -299,7 +299,7 @@ module humanresources =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { departmentid = __.departmentid.Read()
+                { department.departmentid = __.departmentid.Read()
                   name = __.name.Read()
                   groupname = __.groupname.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -325,7 +325,7 @@ module humanresources =
             member __.organizationnode = OptionalColumn(reader, getOrdinal, reader.GetString, "organizationnode")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { employee.businessentityid = __.businessentityid.Read()
                   nationalidnumber = __.nationalidnumber.Read()
                   loginid = __.loginid.Read()
                   jobtitle = __.jobtitle.Read()
@@ -353,7 +353,7 @@ module humanresources =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { employeedepartmenthistory.businessentityid = __.businessentityid.Read()
                   departmentid = __.departmentid.Read()
                   shiftid = __.shiftid.Read()
                   startdate = __.startdate.Read()
@@ -371,7 +371,7 @@ module humanresources =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { employeepayhistory.businessentityid = __.businessentityid.Read()
                   ratechangedate = __.ratechangedate.Read()
                   rate = __.rate.Read()
                   payfrequency = __.payfrequency.Read()
@@ -387,7 +387,7 @@ module humanresources =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { jobcandidateid = __.jobcandidateid.Read()
+                { jobcandidate.jobcandidateid = __.jobcandidateid.Read()
                   businessentityid = __.businessentityid.Read()
                   resume = __.resume.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -403,7 +403,7 @@ module humanresources =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { shiftid = __.shiftid.Read()
+                { shift.shiftid = __.shiftid.Read()
                   name = __.name.Read()
                   starttime = __.starttime.Read()
                   endtime = __.endtime.Read()
@@ -433,7 +433,7 @@ module humanresources =
             member __.additionalcontactinfo = OptionalColumn(reader, getOrdinal, reader.GetString, "additionalcontactinfo")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { vemployee.businessentityid = __.businessentityid.Read()
                   title = __.title.Read()
                   firstname = __.firstname.Read()
                   middlename = __.middlename.Read()
@@ -468,7 +468,7 @@ module humanresources =
             member __.startdate = OptionalColumn(reader, getOrdinal, reader.GetDateOnly, "startdate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { vemployeedepartment.businessentityid = __.businessentityid.Read()
                   title = __.title.Read()
                   firstname = __.firstname.Read()
                   middlename = __.middlename.Read()
@@ -496,7 +496,7 @@ module humanresources =
             member __.enddate = OptionalColumn(reader, getOrdinal, reader.GetDateOnly, "enddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { vemployeedepartmenthistory.businessentityid = __.businessentityid.Read()
                   title = __.title.Read()
                   firstname = __.firstname.Read()
                   middlename = __.middlename.Read()
@@ -530,7 +530,7 @@ module humanresources =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { jobcandidateid = __.jobcandidateid.Read()
+                { vjobcandidate.jobcandidateid = __.jobcandidateid.Read()
                   businessentityid = __.businessentityid.Read()
                   ``Name.Prefix`` = __.``Name.Prefix``.Read()
                   ``Name.First`` = __.``Name.First``.Read()
@@ -566,7 +566,7 @@ module humanresources =
             member __.``Edu.Loc.City`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Edu.Loc.City")
 
             member __.Read() =
-                { jobcandidateid = __.jobcandidateid.Read()
+                { vjobcandidateeducation.jobcandidateid = __.jobcandidateid.Read()
                   ``Edu.Level`` = __.``Edu.Level``.Read()
                   ``Edu.StartDate`` = __.``Edu.StartDate``.Read()
                   ``Edu.EndDate`` = __.``Edu.EndDate``.Read()
@@ -597,7 +597,7 @@ module humanresources =
             member __.``Emp.Loc.City`` = OptionalColumn(reader, getOrdinal, reader.GetString, "Emp.Loc.City")
 
             member __.Read() =
-                { jobcandidateid = __.jobcandidateid.Read()
+                { vjobcandidateemployment.jobcandidateid = __.jobcandidateid.Read()
                   ``Emp.StartDate`` = __.``Emp.StartDate``.Read()
                   ``Emp.EndDate`` = __.``Emp.EndDate``.Read()
                   ``Emp.OrgName`` = __.``Emp.OrgName``.Read()
@@ -774,7 +774,7 @@ module pe =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { a.id = __.id.Read()
                   addressid = __.addressid.Read()
                   addressline1 = __.addressline1.Read()
                   addressline2 = __.addressline2.Read()
@@ -796,7 +796,7 @@ module pe =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { at.id = __.id.Read()
                   addresstypeid = __.addresstypeid.Read()
                   name = __.name.Read()
                   rowguid = __.rowguid.Read()
@@ -812,7 +812,7 @@ module pe =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { be.id = __.id.Read()
                   businessentityid = __.businessentityid.Read()
                   rowguid = __.rowguid.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -829,7 +829,7 @@ module pe =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { bea.id = __.id.Read()
                   businessentityid = __.businessentityid.Read()
                   addressid = __.addressid.Read()
                   addresstypeid = __.addresstypeid.Read()
@@ -848,7 +848,7 @@ module pe =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { bec.id = __.id.Read()
                   businessentityid = __.businessentityid.Read()
                   personid = __.personid.Read()
                   contacttypeid = __.contacttypeid.Read()
@@ -864,7 +864,7 @@ module pe =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { countryregioncode = __.countryregioncode.Read()
+                { cr.countryregioncode = __.countryregioncode.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -878,7 +878,7 @@ module pe =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { ct.id = __.id.Read()
                   contacttypeid = __.contacttypeid.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -895,7 +895,7 @@ module pe =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { e.id = __.id.Read()
                   businessentityid = __.businessentityid.Read()
                   emailaddressid = __.emailaddressid.Read()
                   emailaddress = __.emailaddress.Read()
@@ -922,7 +922,7 @@ module pe =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { p.id = __.id.Read()
                   businessentityid = __.businessentityid.Read()
                   persontype = __.persontype.Read()
                   namestyle = __.namestyle.Read()
@@ -949,7 +949,7 @@ module pe =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pa.id = __.id.Read()
                   businessentityid = __.businessentityid.Read()
                   passwordhash = __.passwordhash.Read()
                   passwordsalt = __.passwordsalt.Read()
@@ -966,7 +966,7 @@ module pe =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pnt.id = __.id.Read()
                   phonenumbertypeid = __.phonenumbertypeid.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -982,7 +982,7 @@ module pe =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pp.id = __.id.Read()
                   businessentityid = __.businessentityid.Read()
                   phonenumber = __.phonenumber.Read()
                   phonenumbertypeid = __.phonenumbertypeid.Read()
@@ -1003,7 +1003,7 @@ module pe =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { sp.id = __.id.Read()
                   stateprovinceid = __.stateprovinceid.Read()
                   stateprovincecode = __.stateprovincecode.Read()
                   countryregioncode = __.countryregioncode.Read()
@@ -1187,7 +1187,7 @@ module person =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { addressid = __.addressid.Read()
+                { address.addressid = __.addressid.Read()
                   addressline1 = __.addressline1.Read()
                   addressline2 = __.addressline2.Read()
                   city = __.city.Read()
@@ -1207,7 +1207,7 @@ module person =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { addresstypeid = __.addresstypeid.Read()
+                { addresstype.addresstypeid = __.addresstypeid.Read()
                   name = __.name.Read()
                   rowguid = __.rowguid.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -1221,7 +1221,7 @@ module person =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { businessentity.businessentityid = __.businessentityid.Read()
                   rowguid = __.rowguid.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -1236,7 +1236,7 @@ module person =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { businessentityaddress.businessentityid = __.businessentityid.Read()
                   addressid = __.addressid.Read()
                   addresstypeid = __.addresstypeid.Read()
                   rowguid = __.rowguid.Read()
@@ -1253,7 +1253,7 @@ module person =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { businessentitycontact.businessentityid = __.businessentityid.Read()
                   personid = __.personid.Read()
                   contacttypeid = __.contacttypeid.Read()
                   rowguid = __.rowguid.Read()
@@ -1268,7 +1268,7 @@ module person =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { contacttypeid = __.contacttypeid.Read()
+                { contacttype.contacttypeid = __.contacttypeid.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -1281,7 +1281,7 @@ module person =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { countryregioncode = __.countryregioncode.Read()
+                { countryregion.countryregioncode = __.countryregioncode.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -1296,7 +1296,7 @@ module person =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { emailaddress.businessentityid = __.businessentityid.Read()
                   emailaddressid = __.emailaddressid.Read()
                   emailaddress = __.emailaddress.Read()
                   rowguid = __.rowguid.Read()
@@ -1313,7 +1313,7 @@ module person =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { password.businessentityid = __.businessentityid.Read()
                   passwordhash = __.passwordhash.Read()
                   passwordsalt = __.passwordsalt.Read()
                   rowguid = __.rowguid.Read()
@@ -1338,7 +1338,7 @@ module person =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { person.businessentityid = __.businessentityid.Read()
                   persontype = __.persontype.Read()
                   namestyle = __.namestyle.Read()
                   title = __.title.Read()
@@ -1362,7 +1362,7 @@ module person =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { personphone.businessentityid = __.businessentityid.Read()
                   phonenumber = __.phonenumber.Read()
                   phonenumbertypeid = __.phonenumbertypeid.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -1376,7 +1376,7 @@ module person =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { phonenumbertypeid = __.phonenumbertypeid.Read()
+                { phonenumbertype.phonenumbertypeid = __.phonenumbertypeid.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -1394,7 +1394,7 @@ module person =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { stateprovinceid = __.stateprovinceid.Read()
+                { stateprovince.stateprovinceid = __.stateprovinceid.Read()
                   stateprovincecode = __.stateprovincecode.Read()
                   countryregioncode = __.countryregioncode.Read()
                   isonlystateprovinceflag = __.isonlystateprovinceflag.Read()
@@ -1426,7 +1426,7 @@ module person =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { vadditionalcontactinfo.businessentityid = __.businessentityid.Read()
                   firstname = __.firstname.Read()
                   middlename = __.middlename.Read()
                   lastname = __.lastname.Read()
@@ -1775,7 +1775,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { bom.id = __.id.Read()
                   billofmaterialsid = __.billofmaterialsid.Read()
                   productassemblyid = __.productassemblyid.Read()
                   componentid = __.componentid.Read()
@@ -1796,7 +1796,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { c.id = __.id.Read()
                   cultureid = __.cultureid.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -1820,7 +1820,7 @@ module pr =
             member __.documentnode = OptionalColumn(reader, getOrdinal, reader.GetString, "documentnode")
 
             member __.Read() =
-                { title = __.title.Read()
+                { d.title = __.title.Read()
                   owner = __.owner.Read()
                   folderflag = __.folderflag.Read()
                   filename = __.filename.Read()
@@ -1844,7 +1844,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { i.id = __.id.Read()
                   illustrationid = __.illustrationid.Read()
                   diagram = __.diagram.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -1861,7 +1861,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { l.id = __.id.Read()
                   locationid = __.locationid.Read()
                   name = __.name.Read()
                   costrate = __.costrate.Read()
@@ -1900,7 +1900,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { p.id = __.id.Read()
                   productid = __.productid.Read()
                   name = __.name.Read()
                   productnumber = __.productnumber.Read()
@@ -1938,7 +1938,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pc.id = __.id.Read()
                   productcategoryid = __.productcategoryid.Read()
                   name = __.name.Read()
                   rowguid = __.rowguid.Read()
@@ -1956,7 +1956,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pch.id = __.id.Read()
                   productid = __.productid.Read()
                   startdate = __.startdate.Read()
                   enddate = __.enddate.Read()
@@ -1974,7 +1974,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pd.id = __.id.Read()
                   productdescriptionid = __.productdescriptionid.Read()
                   description = __.description.Read()
                   rowguid = __.rowguid.Read()
@@ -1990,7 +1990,7 @@ module pr =
             member __.documentnode = OptionalColumn(reader, getOrdinal, reader.GetString, "documentnode")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pdoc.id = __.id.Read()
                   productid = __.productid.Read()
                   modifieddate = __.modifieddate.Read()
                   documentnode = __.documentnode.Read() }
@@ -2009,7 +2009,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pi.id = __.id.Read()
                   productid = __.productid.Read()
                   locationid = __.locationid.Read()
                   shelf = __.shelf.Read()
@@ -2030,7 +2030,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { plph.id = __.id.Read()
                   productid = __.productid.Read()
                   startdate = __.startdate.Read()
                   enddate = __.enddate.Read()
@@ -2050,7 +2050,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pm.id = __.id.Read()
                   productmodelid = __.productmodelid.Read()
                   name = __.name.Read()
                   catalogdescription = __.catalogdescription.Read()
@@ -2067,7 +2067,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productmodelid = __.productmodelid.Read()
+                { pmi.productmodelid = __.productmodelid.Read()
                   illustrationid = __.illustrationid.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -2081,7 +2081,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productmodelid = __.productmodelid.Read()
+                { pmpdc.productmodelid = __.productmodelid.Read()
                   productdescriptionid = __.productdescriptionid.Read()
                   cultureid = __.cultureid.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -2099,7 +2099,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pp.id = __.id.Read()
                   productphotoid = __.productphotoid.Read()
                   thumbnailphoto = __.thumbnailphoto.Read()
                   thumbnailphotofilename = __.thumbnailphotofilename.Read()
@@ -2117,7 +2117,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productid = __.productid.Read()
+                { ppp.productid = __.productid.Read()
                   productphotoid = __.productphotoid.Read()
                   primary = __.primary.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -2137,7 +2137,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pr.id = __.id.Read()
                   productreviewid = __.productreviewid.Read()
                   productid = __.productid.Read()
                   reviewername = __.reviewername.Read()
@@ -2159,7 +2159,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { psc.id = __.id.Read()
                   productsubcategoryid = __.productsubcategoryid.Read()
                   productcategoryid = __.productcategoryid.Read()
                   name = __.name.Read()
@@ -2176,7 +2176,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { sr.id = __.id.Read()
                   scrapreasonid = __.scrapreasonid.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -2197,7 +2197,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { th.id = __.id.Read()
                   transactionid = __.transactionid.Read()
                   productid = __.productid.Read()
                   referenceorderid = __.referenceorderid.Read()
@@ -2224,7 +2224,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { tha.id = __.id.Read()
                   transactionid = __.transactionid.Read()
                   productid = __.productid.Read()
                   referenceorderid = __.referenceorderid.Read()
@@ -2245,7 +2245,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { um.id = __.id.Read()
                   unitmeasurecode = __.unitmeasurecode.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -2266,7 +2266,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { w.id = __.id.Read()
                   workorderid = __.workorderid.Read()
                   productid = __.productid.Read()
                   orderqty = __.orderqty.Read()
@@ -2296,7 +2296,7 @@ module pr =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { wr.id = __.id.Read()
                   workorderid = __.workorderid.Read()
                   productid = __.productid.Read()
                   operationsequence = __.operationsequence.Read()
@@ -2665,7 +2665,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { billofmaterialsid = __.billofmaterialsid.Read()
+                { billofmaterials.billofmaterialsid = __.billofmaterialsid.Read()
                   productassemblyid = __.productassemblyid.Read()
                   componentid = __.componentid.Read()
                   startdate = __.startdate.Read()
@@ -2684,7 +2684,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { cultureid = __.cultureid.Read()
+                { culture.cultureid = __.cultureid.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -2707,7 +2707,7 @@ module production =
             member __.documentnode = RequiredColumn(reader, getOrdinal, reader.GetString, "documentnode")
 
             member __.Read() =
-                { title = __.title.Read()
+                { document.title = __.title.Read()
                   owner = __.owner.Read()
                   folderflag = __.folderflag.Read()
                   filename = __.filename.Read()
@@ -2730,7 +2730,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { illustrationid = __.illustrationid.Read()
+                { illustration.illustrationid = __.illustrationid.Read()
                   diagram = __.diagram.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -2745,7 +2745,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { locationid = __.locationid.Read()
+                { location.locationid = __.locationid.Read()
                   name = __.name.Read()
                   costrate = __.costrate.Read()
                   availability = __.availability.Read()
@@ -2782,7 +2782,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productid = __.productid.Read()
+                { product.productid = __.productid.Read()
                   name = __.name.Read()
                   productnumber = __.productnumber.Read()
                   makeflag = __.makeflag.Read()
@@ -2818,7 +2818,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productcategoryid = __.productcategoryid.Read()
+                { productcategory.productcategoryid = __.productcategoryid.Read()
                   name = __.name.Read()
                   rowguid = __.rowguid.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -2834,7 +2834,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productid = __.productid.Read()
+                { productcosthistory.productid = __.productid.Read()
                   startdate = __.startdate.Read()
                   enddate = __.enddate.Read()
                   standardcost = __.standardcost.Read()
@@ -2850,7 +2850,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productdescriptionid = __.productdescriptionid.Read()
+                { productdescription.productdescriptionid = __.productdescriptionid.Read()
                   description = __.description.Read()
                   rowguid = __.rowguid.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -2864,7 +2864,7 @@ module production =
             member __.documentnode = RequiredColumn(reader, getOrdinal, reader.GetString, "documentnode")
 
             member __.Read() =
-                { productid = __.productid.Read()
+                { productdocument.productid = __.productid.Read()
                   modifieddate = __.modifieddate.Read()
                   documentnode = __.documentnode.Read() }
 
@@ -2881,7 +2881,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productid = __.productid.Read()
+                { productinventory.productid = __.productid.Read()
                   locationid = __.locationid.Read()
                   shelf = __.shelf.Read()
                   bin = __.bin.Read()
@@ -2900,7 +2900,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productid = __.productid.Read()
+                { productlistpricehistory.productid = __.productid.Read()
                   startdate = __.startdate.Read()
                   enddate = __.enddate.Read()
                   listprice = __.listprice.Read()
@@ -2918,7 +2918,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productmodelid = __.productmodelid.Read()
+                { productmodel.productmodelid = __.productmodelid.Read()
                   name = __.name.Read()
                   catalogdescription = __.catalogdescription.Read()
                   instructions = __.instructions.Read()
@@ -2934,7 +2934,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productmodelid = __.productmodelid.Read()
+                { productmodelillustration.productmodelid = __.productmodelid.Read()
                   illustrationid = __.illustrationid.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -2948,7 +2948,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productmodelid = __.productmodelid.Read()
+                { productmodelproductdescriptionculture.productmodelid = __.productmodelid.Read()
                   productdescriptionid = __.productdescriptionid.Read()
                   cultureid = __.cultureid.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -2965,7 +2965,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productphotoid = __.productphotoid.Read()
+                { productphoto.productphotoid = __.productphotoid.Read()
                   thumbnailphoto = __.thumbnailphoto.Read()
                   thumbnailphotofilename = __.thumbnailphotofilename.Read()
                   largephoto = __.largephoto.Read()
@@ -2982,7 +2982,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productid = __.productid.Read()
+                { productproductphoto.productid = __.productid.Read()
                   productphotoid = __.productphotoid.Read()
                   primary = __.primary.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -3001,7 +3001,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productreviewid = __.productreviewid.Read()
+                { productreview.productreviewid = __.productreviewid.Read()
                   productid = __.productid.Read()
                   reviewername = __.reviewername.Read()
                   reviewdate = __.reviewdate.Read()
@@ -3021,7 +3021,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productsubcategoryid = __.productsubcategoryid.Read()
+                { productsubcategory.productsubcategoryid = __.productsubcategoryid.Read()
                   productcategoryid = __.productcategoryid.Read()
                   name = __.name.Read()
                   rowguid = __.rowguid.Read()
@@ -3036,7 +3036,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { scrapreasonid = __.scrapreasonid.Read()
+                { scrapreason.scrapreasonid = __.scrapreasonid.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -3055,7 +3055,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { transactionid = __.transactionid.Read()
+                { transactionhistory.transactionid = __.transactionid.Read()
                   productid = __.productid.Read()
                   referenceorderid = __.referenceorderid.Read()
                   referenceorderlineid = __.referenceorderlineid.Read()
@@ -3080,7 +3080,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { transactionid = __.transactionid.Read()
+                { transactionhistoryarchive.transactionid = __.transactionid.Read()
                   productid = __.productid.Read()
                   referenceorderid = __.referenceorderid.Read()
                   referenceorderlineid = __.referenceorderlineid.Read()
@@ -3099,7 +3099,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { unitmeasurecode = __.unitmeasurecode.Read()
+                { unitmeasure.unitmeasurecode = __.unitmeasurecode.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -3134,7 +3134,7 @@ module production =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productmodelid = __.productmodelid.Read()
+                { vproductmodelcatalogdescription.productmodelid = __.productmodelid.Read()
                   name = __.name.Read()
                   Summary = __.Summary.Read()
                   manufacturer = __.manufacturer.Read()
@@ -3177,7 +3177,7 @@ module production =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productmodelid = __.productmodelid.Read()
+                { vproductmodelinstructions.productmodelid = __.productmodelid.Read()
                   name = __.name.Read()
                   instructions = __.instructions.Read()
                   LocationID = __.LocationID.Read()
@@ -3204,7 +3204,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { workorderid = __.workorderid.Read()
+                { workorder.workorderid = __.workorderid.Read()
                   productid = __.productid.Read()
                   orderqty = __.orderqty.Read()
                   scrappedqty = __.scrappedqty.Read()
@@ -3232,7 +3232,7 @@ module production =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { workorderid = __.workorderid.Read()
+                { workorderrouting.workorderid = __.workorderid.Read()
                   productid = __.productid.Read()
                   operationsequence = __.operationsequence.Read()
                   locationid = __.locationid.Read()
@@ -3339,7 +3339,7 @@ module pu =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pod.id = __.id.Read()
                   purchaseorderid = __.purchaseorderid.Read()
                   purchaseorderdetailid = __.purchaseorderdetailid.Read()
                   duedate = __.duedate.Read()
@@ -3369,7 +3369,7 @@ module pu =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { poh.id = __.id.Read()
                   purchaseorderid = __.purchaseorderid.Read()
                   revisionnumber = __.revisionnumber.Read()
                   status = __.status.Read()
@@ -3401,7 +3401,7 @@ module pu =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pv.id = __.id.Read()
                   productid = __.productid.Read()
                   businessentityid = __.businessentityid.Read()
                   averageleadtime = __.averageleadtime.Read()
@@ -3427,7 +3427,7 @@ module pu =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { sm.id = __.id.Read()
                   shipmethodid = __.shipmethodid.Read()
                   name = __.name.Read()
                   shipbase = __.shipbase.Read()
@@ -3450,7 +3450,7 @@ module pu =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { v.id = __.id.Read()
                   businessentityid = __.businessentityid.Read()
                   accountnumber = __.accountnumber.Read()
                   name = __.name.Read()
@@ -3581,7 +3581,7 @@ module purchasing =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { productid = __.productid.Read()
+                { productvendor.productid = __.productid.Read()
                   businessentityid = __.businessentityid.Read()
                   averageleadtime = __.averageleadtime.Read()
                   standardprice = __.standardprice.Read()
@@ -3608,7 +3608,7 @@ module purchasing =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { purchaseorderid = __.purchaseorderid.Read()
+                { purchaseorderdetail.purchaseorderid = __.purchaseorderid.Read()
                   purchaseorderdetailid = __.purchaseorderdetailid.Read()
                   duedate = __.duedate.Read()
                   orderqty = __.orderqty.Read()
@@ -3636,7 +3636,7 @@ module purchasing =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { purchaseorderid = __.purchaseorderid.Read()
+                { purchaseorderheader.purchaseorderid = __.purchaseorderid.Read()
                   revisionnumber = __.revisionnumber.Read()
                   status = __.status.Read()
                   employeeid = __.employeeid.Read()
@@ -3661,7 +3661,7 @@ module purchasing =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { shipmethodid = __.shipmethodid.Read()
+                { shipmethod.shipmethodid = __.shipmethodid.Read()
                   name = __.name.Read()
                   shipbase = __.shipbase.Read()
                   shiprate = __.shiprate.Read()
@@ -3682,7 +3682,7 @@ module purchasing =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { vendor.businessentityid = __.businessentityid.Read()
                   accountnumber = __.accountnumber.Read()
                   name = __.name.Read()
                   creditrating = __.creditrating.Read()
@@ -3706,7 +3706,7 @@ module purchasing =
             member __.countryregionname = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregionname")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { vvendorwithaddresses.businessentityid = __.businessentityid.Read()
                   name = __.name.Read()
                   addresstype = __.addresstype.Read()
                   addressline1 = __.addressline1.Read()
@@ -3734,7 +3734,7 @@ module purchasing =
             member __.emailpromotion = OptionalColumn(reader, getOrdinal, reader.GetInt32, "emailpromotion")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { vvendorwithcontacts.businessentityid = __.businessentityid.Read()
                   name = __.name.Read()
                   contacttype = __.contacttype.Read()
                   title = __.title.Read()
@@ -4007,7 +4007,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { c.id = __.id.Read()
                   customerid = __.customerid.Read()
                   personid = __.personid.Read()
                   storeid = __.storeid.Read()
@@ -4028,7 +4028,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { cc.id = __.id.Read()
                   creditcardid = __.creditcardid.Read()
                   cardtype = __.cardtype.Read()
                   cardnumber = __.cardnumber.Read()
@@ -4049,7 +4049,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { currencyrateid = __.currencyrateid.Read()
+                { cr.currencyrateid = __.currencyrateid.Read()
                   currencyratedate = __.currencyratedate.Read()
                   fromcurrencycode = __.fromcurrencycode.Read()
                   tocurrencycode = __.tocurrencycode.Read()
@@ -4066,7 +4066,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { countryregioncode = __.countryregioncode.Read()
+                { crc.countryregioncode = __.countryregioncode.Read()
                   currencycode = __.currencycode.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -4080,7 +4080,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { cu.id = __.id.Read()
                   currencycode = __.currencycode.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -4095,7 +4095,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { pcc.id = __.id.Read()
                   businessentityid = __.businessentityid.Read()
                   creditcardid = __.creditcardid.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -4113,7 +4113,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { s.id = __.id.Read()
                   businessentityid = __.businessentityid.Read()
                   name = __.name.Read()
                   salespersonid = __.salespersonid.Read()
@@ -4134,7 +4134,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { sci.id = __.id.Read()
                   shoppingcartitemid = __.shoppingcartitemid.Read()
                   shoppingcartid = __.shoppingcartid.Read()
                   quantity = __.quantity.Read()
@@ -4160,7 +4160,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { so.id = __.id.Read()
                   specialofferid = __.specialofferid.Read()
                   description = __.description.Read()
                   discountpct = __.discountpct.Read()
@@ -4190,7 +4190,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { sod.id = __.id.Read()
                   salesorderid = __.salesorderid.Read()
                   salesorderdetailid = __.salesorderdetailid.Read()
                   carriertrackingnumber = __.carriertrackingnumber.Read()
@@ -4234,7 +4234,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { soh.id = __.id.Read()
                   salesorderid = __.salesorderid.Read()
                   revisionnumber = __.revisionnumber.Read()
                   orderdate = __.orderdate.Read()
@@ -4270,7 +4270,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { salesorderid = __.salesorderid.Read()
+                { sohsr.salesorderid = __.salesorderid.Read()
                   salesreasonid = __.salesreasonid.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -4285,7 +4285,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { sop.id = __.id.Read()
                   specialofferid = __.specialofferid.Read()
                   productid = __.productid.Read()
                   rowguid = __.rowguid.Read()
@@ -4307,7 +4307,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { sp.id = __.id.Read()
                   businessentityid = __.businessentityid.Read()
                   territoryid = __.territoryid.Read()
                   salesquota = __.salesquota.Read()
@@ -4330,7 +4330,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { spqh.id = __.id.Read()
                   businessentityid = __.businessentityid.Read()
                   quotadate = __.quotadate.Read()
                   salesquota = __.salesquota.Read()
@@ -4348,7 +4348,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { sr.id = __.id.Read()
                   salesreasonid = __.salesreasonid.Read()
                   name = __.name.Read()
                   reasontype = __.reasontype.Read()
@@ -4371,7 +4371,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { st.id = __.id.Read()
                   territoryid = __.territoryid.Read()
                   name = __.name.Read()
                   countryregioncode = __.countryregioncode.Read()
@@ -4396,7 +4396,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { sth.id = __.id.Read()
                   businessentityid = __.businessentityid.Read()
                   territoryid = __.territoryid.Read()
                   startdate = __.startdate.Read()
@@ -4418,7 +4418,7 @@ module sa =
             member __.modifieddate = OptionalColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { id = __.id.Read()
+                { tr.id = __.id.Read()
                   salestaxrateid = __.salestaxrateid.Read()
                   stateprovinceid = __.stateprovinceid.Read()
                   taxtype = __.taxtype.Read()
@@ -4806,7 +4806,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { countryregioncode = __.countryregioncode.Read()
+                { countryregioncurrency.countryregioncode = __.countryregioncode.Read()
                   currencycode = __.currencycode.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -4822,7 +4822,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { creditcardid = __.creditcardid.Read()
+                { creditcard.creditcardid = __.creditcardid.Read()
                   cardtype = __.cardtype.Read()
                   cardnumber = __.cardnumber.Read()
                   expmonth = __.expmonth.Read()
@@ -4838,7 +4838,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { currencycode = __.currencycode.Read()
+                { currency.currencycode = __.currencycode.Read()
                   name = __.name.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -4855,7 +4855,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { currencyrateid = __.currencyrateid.Read()
+                { currencyrate.currencyrateid = __.currencyrateid.Read()
                   currencyratedate = __.currencyratedate.Read()
                   fromcurrencycode = __.fromcurrencycode.Read()
                   tocurrencycode = __.tocurrencycode.Read()
@@ -4875,7 +4875,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { customerid = __.customerid.Read()
+                { customer.customerid = __.customerid.Read()
                   personid = __.personid.Read()
                   storeid = __.storeid.Read()
                   territoryid = __.territoryid.Read()
@@ -4891,7 +4891,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { personcreditcard.businessentityid = __.businessentityid.Read()
                   creditcardid = __.creditcardid.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -4911,7 +4911,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { salesorderid = __.salesorderid.Read()
+                { salesorderdetail.salesorderid = __.salesorderid.Read()
                   salesorderdetailid = __.salesorderdetailid.Read()
                   carriertrackingnumber = __.carriertrackingnumber.Read()
                   orderqty = __.orderqty.Read()
@@ -4953,7 +4953,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { salesorderid = __.salesorderid.Read()
+                { salesorderheader.salesorderid = __.salesorderid.Read()
                   revisionnumber = __.revisionnumber.Read()
                   orderdate = __.orderdate.Read()
                   duedate = __.duedate.Read()
@@ -4988,7 +4988,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { salesorderid = __.salesorderid.Read()
+                { salesorderheadersalesreason.salesorderid = __.salesorderid.Read()
                   salesreasonid = __.salesreasonid.Read()
                   modifieddate = __.modifieddate.Read() }
 
@@ -5007,7 +5007,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { salesperson.businessentityid = __.businessentityid.Read()
                   territoryid = __.territoryid.Read()
                   salesquota = __.salesquota.Read()
                   bonus = __.bonus.Read()
@@ -5028,7 +5028,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { salespersonquotahistory.businessentityid = __.businessentityid.Read()
                   quotadate = __.quotadate.Read()
                   salesquota = __.salesquota.Read()
                   rowguid = __.rowguid.Read()
@@ -5044,7 +5044,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { salesreasonid = __.salesreasonid.Read()
+                { salesreason.salesreasonid = __.salesreasonid.Read()
                   name = __.name.Read()
                   reasontype = __.reasontype.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -5062,7 +5062,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { salestaxrateid = __.salestaxrateid.Read()
+                { salestaxrate.salestaxrateid = __.salestaxrateid.Read()
                   stateprovinceid = __.stateprovinceid.Read()
                   taxtype = __.taxtype.Read()
                   taxrate = __.taxrate.Read()
@@ -5086,7 +5086,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { territoryid = __.territoryid.Read()
+                { salesterritory.territoryid = __.territoryid.Read()
                   name = __.name.Read()
                   countryregioncode = __.countryregioncode.Read()
                   group = __.group.Read()
@@ -5109,7 +5109,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { salesterritoryhistory.businessentityid = __.businessentityid.Read()
                   territoryid = __.territoryid.Read()
                   startdate = __.startdate.Read()
                   enddate = __.enddate.Read()
@@ -5128,7 +5128,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { shoppingcartitemid = __.shoppingcartitemid.Read()
+                { shoppingcartitem.shoppingcartitemid = __.shoppingcartitemid.Read()
                   shoppingcartid = __.shoppingcartid.Read()
                   quantity = __.quantity.Read()
                   productid = __.productid.Read()
@@ -5152,7 +5152,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { specialofferid = __.specialofferid.Read()
+                { specialoffer.specialofferid = __.specialofferid.Read()
                   description = __.description.Read()
                   discountpct = __.discountpct.Read()
                   ``type`` = __.``type``.Read()
@@ -5174,7 +5174,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { specialofferid = __.specialofferid.Read()
+                { specialofferproduct.specialofferid = __.specialofferid.Read()
                   productid = __.productid.Read()
                   rowguid = __.rowguid.Read()
                   modifieddate = __.modifieddate.Read() }
@@ -5191,7 +5191,7 @@ module sales =
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { store.businessentityid = __.businessentityid.Read()
                   name = __.name.Read()
                   salespersonid = __.salespersonid.Read()
                   demographics = __.demographics.Read()
@@ -5222,7 +5222,7 @@ module sales =
             member __.demographics = OptionalColumn(reader, getOrdinal, reader.GetString, "demographics")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { vindividualcustomer.businessentityid = __.businessentityid.Read()
                   title = __.title.Read()
                   firstname = __.firstname.Read()
                   middlename = __.middlename.Read()
@@ -5260,7 +5260,7 @@ module sales =
             member __.numbercarsowned = OptionalColumn(reader, getOrdinal, reader.GetInt32, "numbercarsowned")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { vpersondemographics.businessentityid = __.businessentityid.Read()
                   totalpurchaseytd = __.totalpurchaseytd.Read()
                   datefirstpurchase = __.datefirstpurchase.Read()
                   birthdate = __.birthdate.Read()
@@ -5302,7 +5302,7 @@ module sales =
             member __.saleslastyear = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "saleslastyear")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { vsalesperson.businessentityid = __.businessentityid.Read()
                   title = __.title.Read()
                   firstname = __.firstname.Read()
                   middlename = __.middlename.Read()
@@ -5338,7 +5338,7 @@ module sales =
             member __.``2014`` = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "2014")
 
             member __.Read() =
-                { SalesPersonID = __.SalesPersonID.Read()
+                { vsalespersonsalesbyfiscalyears.SalesPersonID = __.SalesPersonID.Read()
                   FullName = __.FullName.Read()
                   JobTitle = __.JobTitle.Read()
                   SalesTerritory = __.SalesTerritory.Read()
@@ -5358,7 +5358,7 @@ module sales =
             member __.fiscalyear = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "fiscalyear")
 
             member __.Read() =
-                { salespersonid = __.salespersonid.Read()
+                { vsalespersonsalesbyfiscalyearsdata.salespersonid = __.salespersonid.Read()
                   fullname = __.fullname.Read()
                   jobtitle = __.jobtitle.Read()
                   salesterritory = __.salesterritory.Read()
@@ -5380,7 +5380,7 @@ module sales =
             member __.countryregionname = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregionname")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { vstorewithaddresses.businessentityid = __.businessentityid.Read()
                   name = __.name.Read()
                   addresstype = __.addresstype.Read()
                   addressline1 = __.addressline1.Read()
@@ -5408,7 +5408,7 @@ module sales =
             member __.emailpromotion = OptionalColumn(reader, getOrdinal, reader.GetInt32, "emailpromotion")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { vstorewithcontacts.businessentityid = __.businessentityid.Read()
                   name = __.name.Read()
                   contacttype = __.contacttype.Read()
                   title = __.title.Read()
@@ -5439,7 +5439,7 @@ module sales =
             member __.NumberEmployees = OptionalColumn(reader, getOrdinal, reader.GetInt32, "NumberEmployees")
 
             member __.Read() =
-                { businessentityid = __.businessentityid.Read()
+                { vstorewithdemographics.businessentityid = __.businessentityid.Read()
                   name = __.name.Read()
                   AnnualSales = __.AnnualSales.Read()
                   AnnualRevenue = __.AnnualRevenue.Read()

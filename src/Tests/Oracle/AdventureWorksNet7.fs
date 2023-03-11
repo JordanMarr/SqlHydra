@@ -168,7 +168,7 @@ module OT =
             member __.PHONE = OptionalColumn(reader, getOrdinal, reader.GetString, "PHONE")
 
             member __.Read() =
-                { CONTACT_ID = __.CONTACT_ID.Read()
+                { CONTACTS.CONTACT_ID = __.CONTACT_ID.Read()
                   CUSTOMER_ID = __.CUSTOMER_ID.Read()
                   EMAIL = __.EMAIL.Read()
                   FIRST_NAME = __.FIRST_NAME.Read()
@@ -184,7 +184,7 @@ module OT =
             member __.REGION_ID = OptionalColumn(reader, getOrdinal, reader.GetInt64, "REGION_ID")
 
             member __.Read() =
-                { COUNTRY_ID = __.COUNTRY_ID.Read()
+                { COUNTRIES.COUNTRY_ID = __.COUNTRY_ID.Read()
                   COUNTRY_NAME = __.COUNTRY_NAME.Read()
                   REGION_ID = __.REGION_ID.Read() }
 
@@ -199,7 +199,7 @@ module OT =
             member __.WEBSITE = OptionalColumn(reader, getOrdinal, reader.GetString, "WEBSITE")
 
             member __.Read() =
-                { ADDRESS = __.ADDRESS.Read()
+                { CUSTOMERS.ADDRESS = __.ADDRESS.Read()
                   CREDIT_LIMIT = __.CREDIT_LIMIT.Read()
                   CUSTOMER_ID = __.CUSTOMER_ID.Read()
                   NAME = __.NAME.Read()
@@ -219,7 +219,7 @@ module OT =
             member __.PHONE = RequiredColumn(reader, getOrdinal, reader.GetString, "PHONE")
 
             member __.Read() =
-                { EMAIL = __.EMAIL.Read()
+                { EMPLOYEES.EMAIL = __.EMAIL.Read()
                   EMPLOYEE_ID = __.EMPLOYEE_ID.Read()
                   FIRST_NAME = __.FIRST_NAME.Read()
                   HIRE_DATE = __.HIRE_DATE.Read()
@@ -237,7 +237,7 @@ module OT =
             member __.WAREHOUSE_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "WAREHOUSE_ID")
 
             member __.Read() =
-                { PRODUCT_ID = __.PRODUCT_ID.Read()
+                { INVENTORIES.PRODUCT_ID = __.PRODUCT_ID.Read()
                   QUANTITY = __.QUANTITY.Read()
                   WAREHOUSE_ID = __.WAREHOUSE_ID.Read() }
 
@@ -253,7 +253,7 @@ module OT =
             member __.STATE = OptionalColumn(reader, getOrdinal, reader.GetString, "STATE")
 
             member __.Read() =
-                { ADDRESS = __.ADDRESS.Read()
+                { LOCATIONS.ADDRESS = __.ADDRESS.Read()
                   CITY = __.CITY.Read()
                   COUNTRY_ID = __.COUNTRY_ID.Read()
                   LOCATION_ID = __.LOCATION_ID.Read()
@@ -271,7 +271,7 @@ module OT =
             member __.STATUS = RequiredColumn(reader, getOrdinal, reader.GetString, "STATUS")
 
             member __.Read() =
-                { CUSTOMER_ID = __.CUSTOMER_ID.Read()
+                { ORDERS.CUSTOMER_ID = __.CUSTOMER_ID.Read()
                   ORDER_DATE = __.ORDER_DATE.Read()
                   ORDER_ID = __.ORDER_ID.Read()
                   SALESMAN_ID = __.SALESMAN_ID.Read()
@@ -288,7 +288,7 @@ module OT =
             member __.UNIT_PRICE = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "UNIT_PRICE")
 
             member __.Read() =
-                { ITEM_ID = __.ITEM_ID.Read()
+                { ORDER_ITEMS.ITEM_ID = __.ITEM_ID.Read()
                   ORDER_ID = __.ORDER_ID.Read()
                   PRODUCT_ID = __.PRODUCT_ID.Read()
                   QUANTITY = __.QUANTITY.Read()
@@ -306,7 +306,7 @@ module OT =
             member __.STANDARD_COST = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "STANDARD_COST")
 
             member __.Read() =
-                { CATEGORY_ID = __.CATEGORY_ID.Read()
+                { PRODUCTS.CATEGORY_ID = __.CATEGORY_ID.Read()
                   DESCRIPTION = __.DESCRIPTION.Read()
                   LIST_PRICE = __.LIST_PRICE.Read()
                   PRODUCT_ID = __.PRODUCT_ID.Read()
@@ -321,7 +321,7 @@ module OT =
             member __.CATEGORY_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "CATEGORY_NAME")
 
             member __.Read() =
-                { CATEGORY_ID = __.CATEGORY_ID.Read()
+                { PRODUCT_CATEGORIES.CATEGORY_ID = __.CATEGORY_ID.Read()
                   CATEGORY_NAME = __.CATEGORY_NAME.Read() }
 
             member __.ReadIfNotNull() =
@@ -332,7 +332,7 @@ module OT =
             member __.REGION_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "REGION_NAME")
 
             member __.Read() =
-                { REGION_ID = __.REGION_ID.Read()
+                { REGIONS.REGION_ID = __.REGION_ID.Read()
                   REGION_NAME = __.REGION_NAME.Read() }
 
             member __.ReadIfNotNull() =
@@ -344,7 +344,7 @@ module OT =
             member __.WAREHOUSE_NAME = OptionalColumn(reader, getOrdinal, reader.GetString, "WAREHOUSE_NAME")
 
             member __.Read() =
-                { LOCATION_ID = __.LOCATION_ID.Read()
+                { WAREHOUSES.LOCATION_ID = __.LOCATION_ID.Read()
                   WAREHOUSE_ID = __.WAREHOUSE_ID.Read()
                   WAREHOUSE_NAME = __.WAREHOUSE_NAME.Read() }
 
