@@ -574,6 +574,30 @@ let! productsWithAboveAveragePrice =
     }
 ```
 
+If the subquery is correlated with the parent query (i.e., the subquery references a row variable from the parent query), use the `correlate` keyword in the subquery to introduce the correlated variable. **Note: the variable name in the subquery must match the variable name in the parent query, because it determines the table alias in the generated SQL query.**
+
+```F#
+// Create a subquery that gets the min price for this product line,
+// referencing a row variable "outer" from the parent query:
+let lowestPriceByProductLine = 
+    select {
+        for inner in productTable do
+        correlate outer in productTable
+        where (inner.ProductLine = outer.ProductLine)
+        select (minBy inner.ListPrice)
+    }
+
+// Get the products whose price is the lowest of all prices in its product line.
+// The name "outer" needs to match the subquery.
+let! cheapestByProductLine = 
+    selectTask HydraReader.Read (Create openContext) {
+        for outer in productTable do
+        where (outer.ListPrice = subqueryOne lowestPriceByProductLine)
+        select (outer.Name, outer.ListPrice)
+    }
+```
+
+
 Distinct Query:
 ```F#
 let! distinctCustomerNames = 

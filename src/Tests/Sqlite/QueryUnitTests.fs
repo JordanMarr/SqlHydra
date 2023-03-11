@@ -252,7 +252,7 @@ let tests =
             let latestOrderByCustomer = 
                 select {
                     for d in table<main.SalesOrderHeader> do
-                    correlate od in correlatedTable<main.SalesOrderHeader>
+                    correlate od in table<main.SalesOrderHeader>
                     where (d.CustomerID = od.CustomerID)
                     select (maxBy d.OrderDate)
                 }

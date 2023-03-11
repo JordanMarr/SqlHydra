@@ -253,10 +253,26 @@ LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesO
         }
 
         test "Correlated Subquery" {
+
+            let lowestPriceByProductLine = 
+                select {
+                    for inner in productTable do
+                    correlate outer in productTable
+                    where (inner.ProductLine = outer.ProductLine)
+                    select (minBy inner.StandardCost)
+                }
+
+            let cheapestByProductLine = 
+                select {
+                    for outer in productTable do
+                    where (outer.StandardCost = subqueryOne lowestPriceByProductLine)
+                    select outer
+                }
+            
             let maxOrderQty = 
                 select {
                     for d in table<Sales.SalesOrderDetail> do
-                    correlate od in correlatedTable<Sales.SalesOrderDetail>
+                    correlate od in table<Sales.SalesOrderDetail>
                     where (d.ProductID = od.ProductID)
                     select (maxBy d.OrderQty)
                 }

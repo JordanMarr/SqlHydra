@@ -249,7 +249,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
     /// References a table variable from a correlated parent query from within a subquery.
     [<CustomOperation("correlate", MaintainsVariableSpace = true, IsLikeZip = true)>]
     member this.Correlate (outerSource: QuerySource<'Outer>, 
-                      CorrelatedTable innerSource: CorrelatedTable<'Inner>, 
+                      innerSource: QuerySource<'Inner>, 
                       resultSelector: Expression<Func<'Outer,'Inner,'JoinResult>> ) = 
 
         let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)

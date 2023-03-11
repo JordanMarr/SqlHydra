@@ -9,10 +9,6 @@ module Table =
         let tables = Map [Root, { Name = ent.Name; Schema = ent.DeclaringType.Name}]
         QuerySource<'T>(tables)
 
-    type CorrelatedTable<'T> = CorrelatedTable of QuerySource<'T>
-
-    let correlatedTable<'T> = CorrelatedTable table<'T>
-
     /// Maps the entity 'T to a schema of the given name.
     [<System.Obsolete("The table schema is now automatically inferred from the declaring type.")>]
     let inSchema<'T> (schemaName: string) (qs: QuerySource<'T>) =
