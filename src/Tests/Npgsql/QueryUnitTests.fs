@@ -249,6 +249,31 @@ let tests =
             Expect.isTrue (sql.Contains("LEFT JOIN \"sales\".\"salesorderdetail\" AS \"d\" ON (\"o\".\"salesorderid\" = \"d\".\"salesorderid\" AND \"o\".\"modifieddate\" = \"d\".\"modifieddate\")")) ""
         }
 
+        test "Correlated Subquery" {
+            let latestOrderByCustomer = 
+                select {
+                    for d in table<sales.salesorderheader> do
+                    correlate od in correlatedTable<sales.salesorderheader>
+                    where (d.customerid = od.customerid)
+                    select (maxBy d.orderdate)
+                }
+
+            let query = 
+                select {
+                    for od in table<sales.salesorderheader> do
+                    where (od.orderdate = subqueryOne latestOrderByCustomer)
+                }
+                
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal
+                sql
+                "SELECT * FROM \"sales\".\"salesorderheader\" AS \"od\" WHERE (\"od\".\"orderdate\" = \
+                (SELECT MAX(\"d\".\"orderdate\") FROM \"sales\".\"salesorderheader\" AS \"d\" \
+                WHERE (\"d\".\"customerid\" = \"od\".\"customerid\")))"
+                ""            
+        }
+
         test "Delete Query with Where" {
             let query = 
                 delete {

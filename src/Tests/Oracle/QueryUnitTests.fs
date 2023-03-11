@@ -249,6 +249,31 @@ let tests =
         //    Expect.isTrue (sql.Contains("LEFT JOIN \"Sales\".\"SalesOrderDetail\" ON (\"Sales\".\"SalesOrderHeader\".\"SalesOrderID\" = \"Sales\".\"SalesOrderDetail\".\"SalesOrderID\" AND \"Sales\".\"SalesOrderHeader\".\"ModifiedDate\" = \"Sales\".\"SalesOrderDetail\".\"ModifiedDate\")")) ""
         //}
 
+        test "Correlated Subquery" {
+            let latestOrderByCustomer = 
+                select {
+                    for d in table<OT.ORDERS> do
+                    correlate od in correlatedTable<OT.ORDERS>
+                    where (d.CUSTOMER_ID = od.CUSTOMER_ID)
+                    select (maxBy d.ORDER_DATE)
+                }
+
+            let query = 
+                select {
+                    for od in table<OT.ORDERS> do
+                    where (od.ORDER_DATE = subqueryOne latestOrderByCustomer)
+                }
+                
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal
+                sql
+                "SELECT * FROM \"OT\".\"ORDERS\" \"od\" WHERE (\"od\".\"ORDER_DATE\" = \
+                (SELECT MAX(\"d\".\"ORDER_DATE\") FROM \"OT\".\"ORDERS\" \"d\" \
+                WHERE (\"d\".\"CUSTOMER_ID\" = \"od\".\"CUSTOMER_ID\")))"
+                ""            
+        }
+
         test "Join On Value Bug Fix Test" {
             let query = 
                 select {
@@ -434,4 +459,5 @@ let tests =
                 "SELECT COUNT(\"o\".\"ORDER_ID\") FROM \"OT\".\"ORDERS\" \"o\""
                 ""
         }
+
     ]
