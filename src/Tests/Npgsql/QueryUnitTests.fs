@@ -252,15 +252,15 @@ let tests =
         test "Correlated Subquery" {
             let latestOrderByCustomer = 
                 select {
-                    for d in table<sales.salesorderheader> do
-                    correlate od in table<sales.salesorderheader>
+                    for d in sales.salesorderheader do
+                    correlate od in sales.salesorderheader
                     where (d.customerid = od.customerid)
                     select (maxBy d.orderdate)
                 }
 
             let query = 
                 select {
-                    for od in table<sales.salesorderheader> do
+                    for od in sales.salesorderheader do
                     where (od.orderdate = subqueryOne latestOrderByCustomer)
                 }
                 
