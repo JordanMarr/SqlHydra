@@ -246,6 +246,16 @@ type SelectBuilder<'Selected, 'Mapped> () =
             
         QuerySource<'JoinResult, Query>(outerQuery.LeftJoin(innerTableNameAsAlias, fun j -> joinOn), mergedTables)
 
+    /// References a table variable from a correlated parent query from within a subquery.
+    [<CustomOperation("correlate", MaintainsVariableSpace = true, IsLikeZip = true)>]
+    member this.Correlate (outerSource: QuerySource<'Outer>, 
+                      innerSource: QuerySource<'Inner>, 
+                      resultSelector: Expression<Func<'Outer,'Inner,'JoinResult>> ) = 
+
+        let mergedTables = mergeTableMappings (outerSource.TableMappings, innerSource.TableMappings)
+        let query = outerSource |> getQueryOrDefault
+        QuerySource<'JoinResult, Query>(query, mergedTables)
+
     /// Sets the GROUP BY for one or more columns.
     [<CustomOperation("groupBy", MaintainsVariableSpace = true)>]
     member this.GroupBy (state: QuerySource<'T, Query>, [<ProjectionParameter>] propertySelector) = 

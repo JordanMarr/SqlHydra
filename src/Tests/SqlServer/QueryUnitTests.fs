@@ -252,6 +252,50 @@ LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesO
             Expect.isTrue (sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID] AND [o].[ModifiedDate] = [d].[ModifiedDate])")) ""
         }
 
+        test "Correlated Subquery" {
+
+            let lowestPriceByProductLine = 
+                select {
+                    for inner in productTable do
+                    correlate outer in productTable
+                    where (inner.ProductLine = outer.ProductLine)
+                    select (minBy inner.StandardCost)
+                }
+
+            let cheapestByProductLine = 
+                select {
+                    for outer in productTable do
+                    where (outer.StandardCost = subqueryOne lowestPriceByProductLine)
+                    select outer
+                }
+            
+            let maxOrderQty = 
+                select {
+                    for d in table<Sales.SalesOrderDetail> do
+                    correlate od in table<Sales.SalesOrderDetail>
+                    where (d.ProductID = od.ProductID)
+                    select (maxBy d.OrderQty)
+                }
+
+            let query = 
+                select {
+                    for od in orderDetailTable do
+                    where (od.OrderQty = subqueryOne maxOrderQty)
+                    orderBy od.ProductID
+                    select (od.SalesOrderID, od.ProductID, od.OrderQty)
+                }
+                
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal
+                sql
+                "SELECT [od].[SalesOrderID], [od].[ProductID], [od].[OrderQty] FROM [Sales].[SalesOrderDetail] AS [od] \
+                WHERE ([od].[OrderQty] = (\
+                    SELECT MAX([d].[OrderQty]) FROM [Sales].[SalesOrderDetail] AS [d] WHERE ([d].[ProductID] = [od].[ProductID])\
+                )) ORDER BY [od].[ProductID]"
+                ""            
+        }
+
         test "Join On Value Bug Fix Test" {
             let query = 
                 select {
@@ -508,5 +552,6 @@ INNER JOIN [Production].[Product] AS [p2] ON ([p1].[ProductID] = [p2].[ProductID
             | :? System.NotSupportedException -> () // Good
             | ex -> failwith "Should fail with NotSupportedException"
         }
+
         
     ]
