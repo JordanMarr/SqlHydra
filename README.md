@@ -580,8 +580,8 @@ If the subquery is correlated with the parent query (i.e., the subquery referenc
 // referencing a row variable "outer" from the parent query:
 let lowestPriceByProductLine = 
     select {
-        for inner in productTable do
-        correlate outer in productTable
+        for inner in Production.Product do
+        correlate outer in Production.Product
         where (inner.ProductLine = outer.ProductLine)
         select (minBy inner.ListPrice)
     }
@@ -590,7 +590,7 @@ let lowestPriceByProductLine =
 // The name "outer" needs to match the subquery.
 let! cheapestByProductLine = 
     selectTask HydraReader.Read (Create openContext) {
-        for outer in productTable do
+        for outer in Production.Product do
         where (outer.ListPrice = subqueryOne lowestPriceByProductLine)
         select (outer.Name, outer.ListPrice)
     }
