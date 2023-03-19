@@ -1,1 +1,1 @@
-dotnet run --project ..\SqlHydra.SqlServer --framework net7.0 -- sqlhydra-mssql-net7.toml
+dotnet run --project ..\SqlHydra.Cli --framework net7.0 -- mssql -t sqlhydra-mssql-net7.toml

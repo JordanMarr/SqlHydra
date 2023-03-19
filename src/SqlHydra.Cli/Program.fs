@@ -22,7 +22,7 @@ let main argv =
         description "SqlHydra"
         inputs (
             Input.Argument<string>("Provider", "The database provider name: 'mssql', 'npgsql', 'sqlite', or 'oracle'"), 
-            Input.OptionMaybe<string>(["-o"; "--toml-output"], "The name of the toml file.")
+            Input.OptionMaybe<string>(["-t"; "--toml-output"], "The name of the toml file.")
         )
         setHandler handler
     }
