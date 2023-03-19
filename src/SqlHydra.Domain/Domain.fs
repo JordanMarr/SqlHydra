@@ -7,7 +7,6 @@ type AppInfo = {
     Command: string
     DefaultReaderType: string
     DefaultProvider: string
-    Version: string
 }
 
 type TypeMapping = 

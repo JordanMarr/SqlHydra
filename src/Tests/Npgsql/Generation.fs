@@ -1,11 +1,11 @@
 module Npgsql.Generation
 
 open Expecto
-open SqlHydra.Npgsql
 open SqlHydra
 open SqlHydra.Domain
 open VerifyTests
 open VerifyExpecto
+open SqlHydra.Npgsql
 
 let cfg = 
     {
@@ -15,7 +15,7 @@ let cfg =
         IsCLIMutable = true
         ProviderDbTypeAttributes = true
         TableDeclarations = false
-        Readers = Some { ReadersConfig.ReaderType = Program.app.DefaultReaderType } 
+        Readers = Some { ReadersConfig.ReaderType = AppInfo.app.DefaultReaderType } 
         Filters = FilterPatterns.Empty
     }
 
@@ -32,8 +32,8 @@ let tests =
 
         let getCode cfg =
             lazySchema.Value
-            |> SchemaGenerator.generateModule cfg SqlHydra.Npgsql.Program.app
-            |> SchemaGenerator.toFormattedCode cfg SqlHydra.Npgsql.Program.app
+            |> SchemaGenerator.generateModule cfg AppInfo.app
+            |> SchemaGenerator.toFormattedCode cfg AppInfo.app "---"
 
         let inCode (str: string) cfg = 
             let code = getCode cfg

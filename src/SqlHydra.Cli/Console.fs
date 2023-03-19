@@ -4,6 +4,14 @@ open Spectre.Console
 open SqlHydra.Domain
 open System
 
+type Args = 
+    {
+        App: AppInfo
+        TomlFile: string option
+        GetSchema: Config -> Schema
+        Version: string
+    }
+
 type LoadConfigResult = 
     | Valid of Config
     | Invalid of error: string
@@ -110,13 +118,13 @@ let tryLoadConfig(tomlFile: IO.FileInfo) =
         NotFound
 
 /// Creates a sqlhydra-*.toml file if necessary.
-let getConfig(app: AppInfo, tomlOutputFile: string option) = 
-    AnsiConsole.MarkupLine($"[blue]-[/] {app.Name}")
-    AnsiConsole.MarkupLine($"[blue]-[/] v[yellow]{app.Version}[/]")
+let getConfig(args: Args) = 
+    AnsiConsole.MarkupLine($"[blue]-[/] {args.App.Name}")
+    AnsiConsole.MarkupLine($"[blue]-[/] v[yellow]{args.Version}[/]")
 
     let tomlFile = 
-        match tomlOutputFile with 
-        | None -> IO.FileInfo(buildTomlFilename(app))
+        match args.TomlFile with 
+        | None -> IO.FileInfo(buildTomlFilename(args.App))
         | Some tomlFilePath -> IO.FileInfo(tomlFilePath)
 
     match tryLoadConfig(tomlFile) with
@@ -127,18 +135,18 @@ let getConfig(app: AppInfo, tomlOutputFile: string option) =
         failwith "Invalid toml config."
     | NotFound ->
         AnsiConsole.MarkupLine($"[blue]-[/] `{tomlFile.Name}` does not exist. Starting configuration wizard...")
-        let cfg = newConfigWizard(app)
+        let cfg = newConfigWizard(args.App)
         saveConfig(tomlFile, cfg)
         cfg
 
 /// Runs code generation for a given database provider.
-let run (app: AppInfo, tomlOutputFile: string option, getSchema: Config -> Schema) = 
-    let cfg = getConfig(app, tomlOutputFile)
+let run (args: Args) = 
+    let cfg = getConfig(args)
 
     let formattedCode = 
-        getSchema cfg
-        |> SchemaGenerator.generateModule cfg app
-        |> SchemaGenerator.toFormattedCode cfg app
+        args.GetSchema cfg
+        |> SchemaGenerator.generateModule cfg args.App
+        |> SchemaGenerator.toFormattedCode cfg args.App args.Version
 
     IO.File.WriteAllText(cfg.OutputFile, formattedCode)
     Fsproj.addFileToProject(cfg)

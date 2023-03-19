@@ -5,16 +5,24 @@ open FSharp.SystemCommandLine
 type private SelfRef = class end
 let version = System.Reflection.Assembly.GetAssembly(typeof<SelfRef>).GetName().Version |> string
 
-let handler (providerName: string, tomlOutput: string option) = 
+let handler (providerName: string, tomlFile: string option) = 
     let app, getSchema = 
         match providerName with
-        | "mssql" -> SqlServer.AppInfo.get version, SqlServer.SqlServerSchemaProvider.getSchema
-        | "npgsql" -> Npgsql.AppInfo.get version, Npgsql.NpgsqlSchemaProvider.getSchema
-        | "sqlite" -> Sqlite.AppInfo.get version, Sqlite.SqliteSchemaProvider.getSchema
-        | "oracle" -> Oracle.AppInfo.get version, Oracle.OracleSchemaProvider.getSchema
+        | "mssql" -> SqlServer.AppInfo.app, SqlServer.SqlServerSchemaProvider.getSchema
+        | "npgsql" -> Npgsql.AppInfo.app, Npgsql.NpgsqlSchemaProvider.getSchema
+        | "sqlite" -> Sqlite.AppInfo.app, Sqlite.SqliteSchemaProvider.getSchema
+        | "oracle" -> Oracle.AppInfo.app, Oracle.OracleSchemaProvider.getSchema
         | _ -> failwith "Unsupported db provider. Valid options are: 'mssql', 'npgsql', 'sqlite', or 'oracle'."
 
-    Console.run (app, tomlOutput, getSchema)
+    let args = 
+        {
+            Console.Args.App = app
+            Console.Args.GetSchema = getSchema
+            Console.Args.TomlFile = tomlFile
+            Console.Args.Version = version
+        }
+
+    Console.run (args)
 
 [<EntryPoint>]
 let main argv =

@@ -33,8 +33,8 @@ let tests =
 
         let getCode cfg = 
             lazySchema.Value
-            |> SchemaGenerator.generateModule cfg SqlHydra.Sqlite.Program.app
-            |> SchemaGenerator.toFormattedCode cfg SqlHydra.Sqlite.Program.app
+            |> SchemaGenerator.generateModule cfg AppInfo.app
+            |> SchemaGenerator.toFormattedCode cfg AppInfo.app "---"
 
         let inCode (str: string) cfg = 
             let code = getCode cfg

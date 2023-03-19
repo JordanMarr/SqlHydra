@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     <WarnOn>3390;$(WarnOn)</WarnOn>
     <Configurations>Debug;Release;DebugLocal</Configurations>
     <GenerateProgramFile>false</GenerateProgramFile>
@@ -16,14 +16,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Util.fs" />
-    <Compile Include="Sqlite\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
+    <!--<Compile Include="Sqlite\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />-->
     <Compile Include="Sqlite\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
     <Compile Include="Sqlite\AdventureWorksNet7.fs" Condition="'$(TargetFramework)' == 'net7.0'" />
     <Compile Include="Sqlite\DB.fs" />
     <Compile Include="Sqlite\QueryUnitTests.fs" />
     <Compile Include="Sqlite\QueryIntegrationTests.fs" />
     <Compile Include="Sqlite\Generation.fs" />
-    <Compile Include="SqlServer\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
+    <!--<Compile Include="SqlServer\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />-->
     <Compile Include="SqlServer\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
     <Compile Include="SqlServer\AdventureWorksNet7.fs" Condition="'$(TargetFramework)' == 'net7.0'" />
     <Compile Include="SqlServer\DB.fs" />
@@ -32,14 +32,14 @@
     <Compile Include="SqlServer\SelectTaskTests.fs" />
     <Compile Include="SqlServer\SelectAsyncTests.fs" />
     <Compile Include="SqlServer\Generation.fs" />
-    <Compile Include="Npgsql\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
+    <!--<Compile Include="Npgsql\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />-->
     <Compile Include="Npgsql\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
     <Compile Include="Npgsql\AdventureWorksNet7.fs" Condition="'$(TargetFramework)' == 'net7.0'" />
     <Compile Include="Npgsql\DB.fs" />
     <Compile Include="Npgsql\QueryUnitTests.fs" />
     <Compile Include="Npgsql\QueryIntegrationTests.fs" />
     <Compile Include="Npgsql\Generation.fs" />
-    <Compile Include="Oracle\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
+    <!--<Compile Include="Oracle\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />-->
     <Compile Include="Oracle\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
     <Compile Include="Oracle\AdventureWorksNet7.fs" Condition="'$(TargetFramework)' == 'net7.0'" />
     <Compile Include="Oracle\DB.fs" />
@@ -61,16 +61,17 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SqlHydra.Query\SqlHydra.Query.fsproj" />
+	  <ProjectReference Include="..\SqlHydra.Cli\SqlHydra.Cli.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Oracle\Verify\" />
     <Folder Include="TestData\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.3" Condition="'$(TargetFramework)' == 'net5.0'" />
+    <!--<PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.3" Condition="'$(TargetFramework)' == 'net5.0'" />-->
     <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" Condition="'$(TargetFramework)' == 'net6.0'" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
-    <PackageReference Include="FSharp.Core" Version="5.0.1" Condition="'$(TargetFramework)' == 'net5.0'" />
+    <!--<PackageReference Include="FSharp.Core" Version="5.0.1" Condition="'$(TargetFramework)' == 'net5.0'" />-->
     <PackageReference Include="FSharp.Core" Version="6.0.1" Condition="'$(TargetFramework)' == 'net6.0'" />
     <PackageReference Include="FSharp.Core" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
   </ItemGroup>
