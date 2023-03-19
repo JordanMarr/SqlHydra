@@ -5,9 +5,6 @@ open SqlHydra.Query
 open DB
 open SqlHydra.Query.NpgsqlExtensions
 open Swensen.Unquote
-#if NET5_0
-open Npgsql.AdventureWorksNet5
-#endif
 #if NET6_0
 open Npgsql.AdventureWorksNet6
 #endif
@@ -745,7 +742,6 @@ let tests =
             ctx.RollbackTransaction()
         }
 
-#if NET6_0_OR_GREATER
         testTask "Update Employee DateOnly" {
             use ctx = openContext()
             ctx.BeginTransaction()
@@ -785,6 +781,5 @@ let tests =
             
             ctx.RollbackTransaction()
         }
-#endif
 
     ]

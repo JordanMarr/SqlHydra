@@ -30,14 +30,8 @@ let supportedTypeMappings =
         "uuid",                         "System.Guid",          DbType.Guid,        None,                               nameof r.GetGuid,       Some NpgsqlDbType.Uuid
         // skipped unsupported types
         "interval",                     "System.TimeSpan",      DbType.Time,        None,                               nameof r.GetTimeSpan,   Some NpgsqlDbType.Interval
-#if NET5_0
-        "date",                         "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime,   Some NpgsqlDbType.Date
-        "time without time zone",       "System.TimeSpan",      DbType.Time,        None,                               nameof r.GetTimeSpan,   Some NpgsqlDbType.Time        
-#endif
-#if NET6_0_OR_GREATER
         "date",                         "System.DateOnly",      DbType.DateTime,    None,                               "GetDateOnly",          Some NpgsqlDbType.Date
         "time without time zone",       "System.TimeOnly",      DbType.Time,        None,                               "GetTimeOnly",          Some NpgsqlDbType.Time
-#endif
         "timestamp with time zone",     "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime,   Some NpgsqlDbType.TimestampTz 
         "timestamp without time zone",  "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime,   Some NpgsqlDbType.Timestamp
         "time with time zone",          "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime,   Some NpgsqlDbType.TimeTz

@@ -4,9 +4,6 @@ open Expecto
 open SqlHydra.Query
 open DB
 open Oracle.ManagedDataAccess.Client
-#if NET5_0
-open Oracle.AdventureWorksNet5
-#endif
 #if NET6_0
 open Oracle.AdventureWorksNet6
 #endif

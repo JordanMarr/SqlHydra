@@ -3,9 +3,6 @@
 open Expecto
 open SqlHydra.Query
 open DB
-#if NET5_0
-open Npgsql.AdventureWorksNet5
-#endif
 #if NET6_0
 open Npgsql.AdventureWorksNet6
 #endif

@@ -8,12 +8,7 @@ open Domain
 open System.Data
 open SqlHydra.SchemaFilters
 
-#if NET5_0
-let range0 = FSharp.Compiler.Range.range.Zero
-#endif
-#if NET6_0_OR_GREATER
 let range0 = FSharp.Compiler.Text.range.Zero
-#endif
 
 type SynExpr with
     static member FailWith msg = SynExpr.CreateApp(SynExpr.Ident(Ident.Create("failwith")), SynExpr.CreateConstString(msg))
@@ -749,18 +744,6 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
 /// A list of static code text substitutions to the generated file.
 let substitutions (app: AppInfo) = 
 
-    let dataReaderExtensions = """
-[<AutoOpen>]
-module private DataReaderExtensions =
-    type System.Data.IDataReader with
-        member reader.GetDateOnly(ordinal: int) = 
-            reader.GetDateTime(ordinal) |> System.DateOnly.FromDateTime
-    
-    type System.Data.Common.DbDataReader with
-        member reader.GetTimeOnly(ordinal: int) = 
-            reader.GetFieldValue(ordinal) |> System.TimeOnly.FromTimeSpan
-        """
-
     [
         /// Reader classes at top of namespace
         "open Substitute.Extensions",
@@ -793,13 +776,16 @@ module ColumnReaders =
                 match alias |> Option.defaultValue __.Name |> getOrdinal with
                 | o when reader.IsDBNull o -> None
                 | o -> Some (getValue o :?> byte[])
-            {
-#if NET6_0_OR_GREATER
-                dataReaderExtensions
-#else
-                ""
-#endif
-            }
+
+[<AutoOpen>]
+module private DataReaderExtensions =
+    type System.Data.IDataReader with
+        member reader.GetDateOnly(ordinal: int) = 
+            reader.GetDateTime(ordinal) |> System.DateOnly.FromDateTime
+    
+    type System.Data.Common.DbDataReader with
+        member reader.GetTimeOnly(ordinal: int) = 
+            reader.GetFieldValue(ordinal) |> System.TimeOnly.FromTimeSpan
         """
 
 

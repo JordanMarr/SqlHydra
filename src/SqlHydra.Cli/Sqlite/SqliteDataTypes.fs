@@ -51,14 +51,8 @@ let supportedTypeMappings =
         "datetime",         "System.DateTime",  DbType.DateTime,    nameof r.GetDateTime
         "smalldate",        "System.DateTime",  DbType.DateTime,    nameof r.GetDateTime 
         "timestamp",        "System.DateTime",  DbType.DateTime,    nameof r.GetDateTime 
-#if NET5_0
-        "date",             "System.DateTime",  DbType.DateTime,    nameof r.GetDateTime 
-        "time",             "System.DateTime",  DbType.DateTime,    nameof r.GetDateTime 
-#endif
-#if NET6_0_OR_GREATER
         "date",             "System.DateOnly",  DbType.DateTime,    "GetDateOnly"
         "time",             "System.TimeOnly",  DbType.DateTime,    "GetTimeOnly"
-#endif
         "uniqueidentifier", "System.Guid",      DbType.Guid,        nameof r.GetGuid
         "guid",             "System.Guid",      DbType.Guid,        nameof r.GetGuid 
     ]

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net5.0;net6.0;net7.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net6.0;net7.0</TargetFrameworks>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<WarnOn>3390;$(WarnOn)</WarnOn>
 		<Version>1.2.1</Version>
@@ -40,7 +40,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="SqlKata" Version="2.4.0" />
-		<PackageReference Update="FSharp.Core" Version="5.0.2" />
+		<PackageReference Update="FSharp.Core" Version="6.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

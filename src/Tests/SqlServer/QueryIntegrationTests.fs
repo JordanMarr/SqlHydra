@@ -4,9 +4,6 @@ open SqlHydra.Query
 open Expecto
 open DB
 
-#if NET5_0
-open SqlServer.AdventureWorksNet5
-#endif
 #if NET6_0
 open SqlServer.AdventureWorksNet6
 #endif
@@ -551,11 +548,7 @@ let tests =
         testTask "Query Employee Record with DateOnly" {
             use ctx = openContext()
             
-#if NET6_0_OR_GREATER
             let maxBirthDate = System.DateOnly(2005, 1, 1)
-#else
-            let maxBirthDate = System.DateTime(2005, 1, 1)
-#endif
 
             let employees =
                 select {
@@ -571,11 +564,7 @@ let tests =
         testTask "Query Employee Column with DateOnly" {
             use ctx = openContext()
             
-#if NET6_0_OR_GREATER
             let maxBirthDate = System.DateOnly(2005, 1, 1)
-#else
-            let maxBirthDate = System.DateTime(2005, 1, 1)
-#endif
 
             let employeeBirthDates =
                 select {
@@ -591,11 +580,7 @@ let tests =
         testTask "Query Shift with TimeOnly" {
             use ctx = openContext()
             
-#if NET6_0_OR_GREATER
             let minStartTime = System.TimeOnly(9, 30)
-#else
-            let minStartTime = System.TimeSpan(9, 30, 0)
-#endif
 
             let shiftsAfter930AM =
                 select {
@@ -609,7 +594,6 @@ let tests =
             gt0 shiftsAfter930AM
         }
 
-#if NET6_0_OR_GREATER
         testTask "Update Employee DateOnly" {
             use ctx = openContext()
             ctx.BeginTransaction()
@@ -649,7 +633,6 @@ let tests =
             
             ctx.RollbackTransaction()
         }
-#endif
 
         testTask "Insert, update, and select with both datetime and datetime2 precision" {
             use ctx = openContext ()
