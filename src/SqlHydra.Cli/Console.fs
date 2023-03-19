@@ -110,17 +110,14 @@ let tryLoadConfig(tomlFile: IO.FileInfo) =
         NotFound
 
 /// Creates a sqlhydra-*.toml file if necessary.
-let getConfig(app: AppInfo, argv: string array) = 
+let getConfig(app: AppInfo, tomlOutputFile: string option) = 
     AnsiConsole.MarkupLine($"[blue]-[/] {app.Name}")
     AnsiConsole.MarkupLine($"[blue]-[/] v[yellow]{app.Version}[/]")
 
     let tomlFile = 
-        match argv with 
-        | [| |] -> IO.FileInfo(buildTomlFilename(app))
-        | [| tomlFilePath |] -> IO.FileInfo(tomlFilePath)
-        | _ ->
-            AnsiConsole.MarkupLine($"[red]>[/] Invalid args: '{argv}'. Expected no args, or a .toml configuration file path.")
-            failwith "Invalid args."
+        match tomlOutputFile with 
+        | None -> IO.FileInfo(buildTomlFilename(app))
+        | Some tomlFilePath -> IO.FileInfo(tomlFilePath)
 
     match tryLoadConfig(tomlFile) with
     | Valid cfg -> 
@@ -135,8 +132,8 @@ let getConfig(app: AppInfo, argv: string array) =
         cfg
 
 /// Runs code generation for a given database provider.
-let run (app: AppInfo, argv: string[], getSchema: Config -> Schema) = 
-    let cfg = getConfig(app, argv)
+let run (app: AppInfo, tomlOutputFile: string option, getSchema: Config -> Schema) = 
+    let cfg = getConfig(app, tomlOutputFile)
 
     let formattedCode = 
         getSchema cfg
