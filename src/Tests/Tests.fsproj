@@ -60,12 +60,7 @@
     <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.12.20" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SqlHydra.Oracle\SqlHydra.Oracle.fsproj" />
     <ProjectReference Include="..\SqlHydra.Query\SqlHydra.Query.fsproj" />
-    <ProjectReference Include="..\SqlHydra.Npgsql\SqlHydra.Npgsql.fsproj" />
-    <ProjectReference Include="..\SqlHydra.Sqlite\SqlHydra.Sqlite.fsproj" />
-    <ProjectReference Include="..\SqlHydra.SqlServer\SqlHydra.SqlServer.fsproj" />
-    <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Oracle\Verify\" />

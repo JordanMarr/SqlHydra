@@ -10,17 +10,44 @@
 		</WarningsAsErrors>
 		<Authors>Jordan Marr</Authors>
 		<Description></Description>
+		<PackAsTool>true</PackAsTool>
+		<ToolCommandName>sqlhydra</ToolCommandName>
+		<PackageOutputPath>./nupkg</PackageOutputPath>
+		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<Compile Include="SchemaFilters.fs" />
+		<Compile Include="SqlServer\SqlServerDataTypes.fs" />
+		<Compile Include="SqlServer\SqlServerSchemaProvider.fs" />
+		<Compile Include="SqlServer\AppInfo.fs" />
+		<Compile Include="Sqlite\SqliteDataTypes.fs" />
+		<Compile Include="Sqlite\SqliteSchemaProvider.fs" />
+		<Compile Include="Sqlite\AppInfo.fs" />
+		<Compile Include="Oracle\OracleDataTypes.fs" />
+		<Compile Include="Oracle\OracleSchemaProvider.fs" />
+		<Compile Include="Oracle\AppInfo.fs" />
+		<Compile Include="Npgsql\NpgsqlDataTypes.fs" />
+		<Compile Include="Npgsql\NpgsqlSchemaProvider.fs" />
+		<Compile Include="Npgsql\AppInfo.fs" />
 		<Compile Include="SchemaGenerator.fs" />
 		<Compile Include="TomlConfigParser.fs" />
 		<Compile Include="Fsproj.fs" />
 		<Compile Include="Console.fs" />
+		<Compile Include="Program.fs" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Npgsql" Version="6.0.4" Condition="'$(TargetFramework)' == 'net5.0'" />
+		<PackageReference Include="Npgsql" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
+		<PackageReference Include="Npgsql" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
+		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.80" />
+		<PackageReference Include="System.Data.SQLite" Version="1.0.117" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.3" Condition="'$(TargetFramework)' == 'net5.0'" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" Condition="'$(TargetFramework)' == 'net6.0'" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
+		
 		<PackageReference Include="Fantomas" Version="4.4.0" Condition="'$(TargetFramework)' == 'net5.0'" />
 		<PackageReference Include="Fantomas" Version="4.5.10" Condition="'$(TargetFramework)' == 'net6.0'" />
 		<PackageReference Include="Fantomas" Version="4.5.10" Condition="'$(TargetFramework)' == 'net7.0'" />
@@ -39,5 +66,13 @@
 	<ItemGroup>
 		<ProjectReference Include="..\SqlHydra.Domain\SqlHydra.Domain.fsproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
+
 
 </Project>
