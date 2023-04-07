@@ -157,7 +157,7 @@ module SqlPatterns =
     let (|Property|_|) (exp: Expression) =
         let tryGetMember(x: Expression) = 
             match x with
-            | Member m when m.Expression.NodeType = ExpressionType.Parameter -> 
+            | Member m when m.Expression.NodeType = ExpressionType.Parameter || m.Expression.NodeType = ExpressionType.MemberAccess -> 
                 Some m
             | MethodCall opt when opt.Type |> isOptionType ->        
                 if opt.Arguments.Count > 0 then
@@ -166,7 +166,8 @@ module SqlPatterns =
                     | Member m -> Some m
                     | _ -> None
                 else None
-            | _ -> None
+            | _ -> 
+                None
 
         match exp with
         | Member m when m.Member.DeclaringType <> null && m.Member.DeclaringType |> isOptionType -> 

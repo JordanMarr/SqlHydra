@@ -218,12 +218,13 @@ let tests =
                 select {
                     for o in Sales.SalesOrderHeader do
                     leftJoin d in Sales.SalesOrderDetail on (o.SalesOrderID = d.Value.SalesOrderID)
+                    where (o.SalesOrderID = d.Value.SalesOrderID)
                     select o
                 }
 
             let sql = query.ToKataQuery() |> toSql
             let expected = """SELECT [o].* FROM [Sales].[SalesOrderHeader] AS [o] 
-LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID])"""
+LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID]) WHERE ([o].[SalesOrderID] = [d].[SalesOrderID])"""
             Expect.equal sql expected ""
         }
         
