@@ -573,6 +573,8 @@ let! productsWithAboveAveragePrice =
     }
 ```
 
+##### Correlated Subqueries
+
 If the subquery is correlated with the parent query (i.e., the subquery references a row variable from the parent query), use the `correlate` keyword in the subquery to introduce the correlated variable. **Note: the variable name in the subquery must match the variable name in the parent query, because it determines the table alias in the generated SQL query.**
 
 ```F#
