@@ -2,7 +2,7 @@
 
 open SqlHydra.Domain
 
-let app = 
+let info = 
     {
         AppInfo.Name = "SqlHydra.Npgsql"
         AppInfo.Command = "sqlhydra-npgsql"

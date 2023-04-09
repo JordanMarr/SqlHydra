@@ -33,8 +33,8 @@ let tests =
 
         let getCode cfg = 
             lazySchema.Value
-            |> SchemaGenerator.generateModule cfg AppInfo.app
-            |> SchemaGenerator.toFormattedCode cfg AppInfo.app "---"
+            |> SchemaGenerator.generateModule cfg AppInfo.info
+            |> SchemaGenerator.toFormattedCode cfg AppInfo.info "---"
 
         let inCode (str: string) cfg = 
             let code = getCode cfg

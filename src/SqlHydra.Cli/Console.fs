@@ -6,7 +6,7 @@ open System
 
 type Args = 
     {
-        App: AppInfo
+        AppInfo: AppInfo
         TomlFile: string option
         GetSchema: Config -> Schema
         Version: string
@@ -119,12 +119,12 @@ let tryLoadConfig(tomlFile: IO.FileInfo) =
 
 /// Creates a sqlhydra-*.toml file if necessary.
 let getConfig(args: Args) = 
-    AnsiConsole.MarkupLine($"[blue]-[/] {args.App.Name}")
+    AnsiConsole.MarkupLine($"[blue]-[/] {args.AppInfo.Name}")
     AnsiConsole.MarkupLine($"[blue]-[/] v[yellow]{args.Version}[/]")
 
     let tomlFile = 
         match args.TomlFile with 
-        | None -> IO.FileInfo(buildTomlFilename(args.App))
+        | None -> IO.FileInfo(buildTomlFilename(args.AppInfo))
         | Some tomlFilePath -> IO.FileInfo(tomlFilePath)
 
     match tryLoadConfig(tomlFile) with
@@ -135,7 +135,7 @@ let getConfig(args: Args) =
         failwith "Invalid toml config."
     | NotFound ->
         AnsiConsole.MarkupLine($"[blue]-[/] `{tomlFile.Name}` does not exist. Starting configuration wizard...")
-        let cfg = newConfigWizard(args.App)
+        let cfg = newConfigWizard(args.AppInfo)
         saveConfig(tomlFile, cfg)
         cfg
 
@@ -145,8 +145,8 @@ let run (args: Args) =
 
     let formattedCode = 
         args.GetSchema cfg
-        |> SchemaGenerator.generateModule cfg args.App
-        |> SchemaGenerator.toFormattedCode cfg args.App args.Version
+        |> SchemaGenerator.generateModule cfg args.AppInfo
+        |> SchemaGenerator.toFormattedCode cfg args.AppInfo args.Version
 
     IO.File.WriteAllText(cfg.OutputFile, formattedCode)
     Fsproj.addFileToProject(cfg)

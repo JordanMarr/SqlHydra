@@ -2,7 +2,7 @@
 
 open SqlHydra.Domain
 
-let app = 
+let info = 
     {
         AppInfo.Name = "SqlHydra.Sqlite"
         AppInfo.Command = "sqlhydra-sqlite"        
