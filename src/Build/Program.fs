@@ -91,7 +91,7 @@ Target.create "Publish" <| fun _ ->
         let nupkgFilename = $"{projName}.{version.Major}.{version.Minor}.{version.Build}.nupkg"
         projDir </> "nupkg" </> "Release" </> nupkgFilename
     )
-    |> List.map (fun nupkgFilepath -> Shell.Exec(Tools.dotnet, $"nuget push {nupkgFilepath} -s nuget.org -k {nugetKey}"), nupkgFilepath)
+    |> List.map (fun nupkgFilepath -> Shell.Exec(Tools.dotnet, $"nuget push {nupkgFilepath} -s nuget.org -k {nugetKey} --skip-duplicate"), nupkgFilepath)
     |> List.iter (fun (code, pkg) -> if code <> 0 then printfn $"ERROR: Could not publish '{pkg}' package. Error: {code}") // Display error and continue
 
 let dependencies = [
