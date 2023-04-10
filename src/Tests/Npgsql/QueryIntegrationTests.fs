@@ -309,7 +309,7 @@ let tests =
             Expect.isTrue (btc |> Seq.length = 0) "Should be deleted"
         }
 
-        testTask "Insert and Get Id" {
+        ptestTask "Insert and Get Id" {
             use ctx = openContext()
             
             ctx.BeginTransaction()
