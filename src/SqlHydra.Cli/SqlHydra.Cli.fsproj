@@ -47,13 +47,13 @@
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" Condition="'$(TargetFramework)' == 'net6.0'" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
 
-		<PackageReference Update="FSharp.Core" Version="6.0.1" />
+		<PackageReference Include="FSharp.Core" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
+		<PackageReference Include="FSharp.Core" Version="7.0.200" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Include="FSharp.SystemCommandLine" Version="0.15.0-beta4" />
 		<PackageReference Include="Fantomas" Version="4.5.10" Condition="'$(TargetFramework)' == 'net6.0'" />
 		<PackageReference Include="Fantomas" Version="4.5.10" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Include="FsAst" Version="0.10.0" Condition="'$(TargetFramework)' == 'net6.0'" />
 		<PackageReference Include="FsAst" Version="0.10.0" Condition="'$(TargetFramework)' == 'net7.0'" />
-		<PackageReference Include="FSharp.Core" Version="5.0.1" />
 		<PackageReference Include="Glob" Version="1.1.8" />
 		<PackageReference Include="Microsoft.Build" Version="16.11.0" />
 		<PackageReference Include="Spectre.Console" Version="0.41.0" />
