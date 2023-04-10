@@ -5,7 +5,6 @@ open SqlHydra.Domain
 let info = 
     {
         AppInfo.Name = "SqlHydra.Oracle"
-        AppInfo.Command = "sqlhydra-oracle"
         AppInfo.DefaultReaderType = "Oracle.ManagedDataAccess.Client.OracleDataReader"
         AppInfo.DefaultProvider = "Oracle.ManagedDataAccess.Core"
     }

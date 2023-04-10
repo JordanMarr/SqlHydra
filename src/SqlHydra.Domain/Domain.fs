@@ -4,7 +4,6 @@ open System.Data
 
 type AppInfo = {
     Name: string
-    Command: string
     DefaultReaderType: string
     DefaultProvider: string
 }
