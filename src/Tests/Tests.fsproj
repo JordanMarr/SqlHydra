@@ -52,10 +52,10 @@
 	<PackageReference Include="FSharp.Core" Version="7.0.200" Condition="'$(TargetFramework)' == 'net7.0'" />
     <PackageReference Include="Expecto" Version="9.0.4" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.10" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <PackageReference Include="Unquote" Version="6.1.0" />
-    <PackageReference Include="Verify.Expecto" Version="16.5.1" />
-    <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.12.20" />
+    <PackageReference Include="Verify.Expecto" Version="19.12.1" />
+    <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.13.3" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" Condition="'$(TargetFramework)' == 'net6.0'" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
   </ItemGroup>
