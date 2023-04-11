@@ -1,7 +1,0 @@
-{
-  "profiles": {
-    "SqlHydra.Sqlite": {
-      "commandName": "Project"
-    }
-  }
-}

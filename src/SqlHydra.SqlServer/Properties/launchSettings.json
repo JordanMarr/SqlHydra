@@ -1,7 +1,0 @@
-{
-  "profiles": {
-    "SqlHydra.SqlServer": {
-      "commandName": "Project"
-    }
-  }
-}
