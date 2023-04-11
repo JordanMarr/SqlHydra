@@ -18,7 +18,6 @@ let cli = path [ slnRoot; "SqlHydra.Cli" ]
 let tests = path [ slnRoot; "Tests" ]
 
 let allPackages = [ query; cli ]
-let toPublish = allPackages
 
 Target.create "Restore" <| fun _ ->
     [ cli; tests ]
@@ -31,12 +30,12 @@ Target.create "BuildQuery" <| fun _ ->
     |> (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release", pkg), pkg)
     |> (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
-Target.create "BuildNet6" <| fun _ ->
+Target.create "BuildCliNet6" <| fun _ ->
     [ cli; tests ]
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net6.0", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
-Target.create "BuildNet7" <| fun _ ->
+Target.create "BuildCliNet7" <| fun _ ->
     [ cli; tests ]
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net7.0", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
@@ -56,7 +55,7 @@ Target.create "Test" <| fun _ ->
     printfn "Testing on all supported frameworks."
 
 Target.create "Pack" <| fun _ ->
-    toPublish
+    allPackages
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "pack --configuration Release -o nupkg/Release", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}' package.'")
 
@@ -71,7 +70,7 @@ Target.create "Publish" <| fun _ ->
         let dllPath = projDir </> "bin" </> "Release" </> "net6.0" </> $"{projName}.dll"
         System.Reflection.AssemblyName.GetAssemblyName(dllPath).Version
 
-    toPublish
+    allPackages
     |> List.map (fun projDir ->
         let version = getProjectVersion projDir
         let projName = DirectoryInfo(projDir).Name
@@ -82,7 +81,7 @@ Target.create "Publish" <| fun _ ->
     |> List.iter (fun (code, pkg) -> if code <> 0 then printfn $"ERROR: Could not publish '{pkg}' package. Error: {code}") // Display error and continue
 
 let dependencies = [
-    "Restore" ==> "BuildQuery" ==> "BuildNet6" ==> "BuildNet7" ==> "Build"
+    "Restore" ==> "BuildQuery" ==> "BuildCliNet6" ==> "BuildCliNet7" ==> "Build"
     "Build" ==> "TestNet6" ==> "TestNet7" ==> "Test"
     "Test" ==> "Pack" ==> "Publish"
 ]
