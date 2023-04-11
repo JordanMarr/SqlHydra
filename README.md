@@ -2,10 +2,10 @@
 SqlHydra is a set of NuGet packages for working with databases in F# with an emphasis on type safety and convenience.
 
 
-### Generation Tool
+### SqlHydra.Cli
 [SqlHydra.Cli](#sqlhydracli-) is a dotnet tool that generates F# types and readers for SQL Server, PostgreSQL, Oracle and SQLite databases.
 
-### Query Library
+### SqlHydra.Query
 [SqlHydra.Query](#sqlhydraquery-) provides strongly typed Linq queries against generated types. 
         
 #### Notes
