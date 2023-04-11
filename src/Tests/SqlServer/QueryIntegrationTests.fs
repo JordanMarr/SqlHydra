@@ -711,11 +711,9 @@ let tests =
 
         testAsync "Guid getId Bug Repro Issue 38" {
             use ctx = openContext()
-            let tbl = table<ext.GetIdGuidRepro> |> inSchema (nameof ext)
-
             let! guid = 
                 insertAsync (Shared ctx) {
-                    for row in tbl do
+                    for row in ext.GetIdGuidRepro do
                     entity
                         {
                             ext.GetIdGuidRepro.Id = System.Guid.Empty // ignored

@@ -536,8 +536,6 @@ let tests =
         }
 
         testTask "Enum Tests" {
-            let expPerson = table<ext.person> |> inSchema (nameof ext)
-
             //Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>("experiments.mood") |> ignore
 
             use ctx = openContext ()
@@ -553,13 +551,13 @@ let tests =
 
             let! deleteResults =
                 deleteTask (Shared ctx) {
-                    for p in expPerson do
+                    for p in ext.person do
                     deleteAll
                 }
 
             let! insertResults = 
                 insertTask (Shared ctx) {
-                    into expPerson
+                    into ext.person
                     entity (
                         { 
                             ext.person.name = "john doe"
@@ -572,14 +570,14 @@ let tests =
 
             let! query1Results = 
                 selectTask HydraReader.Read (Shared ctx) {
-                    for p in expPerson do
+                    for p in ext.person do
                     select p
                     toList
                 } 
 
             let! updateResults = 
                 updateTask (Shared ctx) {
-                    for p in expPerson do
+                    for p in ext.person do
                     set p.currentmood ext.mood.happy
                     where (p.currentmood = ext.mood.ok)
                 }
@@ -588,7 +586,7 @@ let tests =
 
             let! query2Results = 
                 selectTask HydraReader.Read (Shared ctx) {
-                    for p in expPerson do
+                    for p in ext.person do
                     select p
                     toList
                 } 
