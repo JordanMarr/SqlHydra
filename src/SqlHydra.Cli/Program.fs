@@ -1,12 +1,9 @@
 ﻿module SqlHydra.Program
 
-open System.IO
+open System
 open FSharp.SystemCommandLine
 
-type SelfRef = class end
-let version = System.Reflection.Assembly.GetAssembly(typeof<SelfRef>).GetName().Version |> string
-
-let handler (provider: string, tomlFile: FileInfo option) = 
+let handler (provider: string, tomlFile: IO.FileInfo option) = 
 
     let info, getSchema = 
         match provider with
@@ -16,13 +13,13 @@ let handler (provider: string, tomlFile: FileInfo option) =
         | "oracle" -> Oracle.AppInfo.info, Oracle.OracleSchemaProvider.getSchema
         | _ -> failwith "Unsupported db provider. Valid options are: 'mssql', 'npgsql', 'sqlite', or 'oracle'."
 
-    let args = 
+    let args : Console.Args = 
         {
-            Console.Args.Provider = provider
-            Console.Args.AppInfo = info
-            Console.Args.GetSchema = getSchema
-            Console.Args.TomlFile = tomlFile |> Option.defaultWith (fun () -> FileInfo($"sqlhydra-{provider}.toml"))                    
-            Console.Args.Version = version
+            Provider = provider
+            AppInfo = info
+            GetSchema = getSchema
+            TomlFile = tomlFile |> Option.defaultWith (fun () -> IO.FileInfo($"sqlhydra-{provider}.toml"))                    
+            Version = Reflection.Assembly.GetAssembly(typeof<Console.Args>).GetName().Version |> string
         }
 
     Console.run args
@@ -33,7 +30,7 @@ let main argv =
         description "SqlHydra"
         inputs (
             Input.Argument<string>("provider", "The database provider name: 'mssql', 'npgsql', 'sqlite', or 'oracle'"), 
-            Input.OptionMaybe<FileInfo>(["-t"; "--toml-file"], "The toml configuration filename. Default: 'sqlhydra-{provider}.toml'")
+            Input.OptionMaybe<IO.FileInfo>(["-t"; "--toml-file"], "The toml configuration filename. Default: 'sqlhydra-{provider}.toml'")
         )
         setHandler handler
     }
