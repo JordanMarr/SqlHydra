@@ -67,13 +67,7 @@ Run the following commands from your project directory:
 
 ### Configure and Run
 
-Run the tool from the command line, passing in the provider type for your database. 
-
-Providers:
-* `mssql` - SQL Server
-* `npgsql` - PostgreSQL
-* `sqlite` - SQLite
-* `oracle` - Oracle
+Run the tool from the command line, passing in a database provider: `mssql`, `npgsql`, `sqlite`, `oracle`
 
 ```bat
 dotnet sqlhydra mssql
