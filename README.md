@@ -1,17 +1,15 @@
 # SqlHydra
-SqlHydra is a suite of NuGet packages for working with databases in F# with an emphasis on type safety and convenience.
+SqlHydra is a set of NuGet packages for working with databases in F# with an emphasis on type safety and convenience.
 
-### Generation Tools
-- [SqlHydra.SqlServer](#sqlhydrasqlserver-) is a dotnet tool that generates F# records for a SQL Server database.
-- [SqlHydra.Npgsql](#sqlhydranpgsql-) is a dotnet tool that generates F# records for a PostgreSQL database.
-- [SqlHydra.Oracle](#sqlhydraoracle-) is a dotnet tool that generates F# records for an Oracle database.
-- [SqlHydra.Sqlite](#sqlhydrasqlite-) is a dotnet tool that generates F# records for a SQLite database.
+
+### Generation Tool
+[SqlHydra.Cli](#sqlhydracli-) is a dotnet tool that generates F# types and readers for SQL Server, PostgreSQL, Oracle and SQLite databases.
 
 ### Query Library
-- [SqlHydra.Query](#sqlhydraquery-) provides strongly typed Linq queries against generated types. 
+[SqlHydra.Query](#sqlhydraquery-) provides strongly typed Linq queries against generated types. 
         
 #### Notes
-- The generation tools can be used alone or with any query library for creating strongly typed table records and data readers.
+- The generated code can be used alone or with any query library for creating strongly typed table records and data readers.
 - SqlHydra.Query is designed to be used with SqlHydra generated types. (If you would prefer to create your own types over using generated types, then I would recommend checking out [Dapper.FSharp](https://github.com/Dzoukr/Dapper.FSharp).)
 - SqlHydra.Query uses [SqlKata](https://sqlkata.com/) internally to generate provider-specific SQL queries.
 - _All SqlHydra NuGet packages will be released with matching major and minor version numbers._
@@ -60,25 +58,31 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 * [Contributing Wiki](https://github.com/JordanMarr/SqlHydra/wiki/Contributing)
 
 
-## SqlHydra.SqlServer [![NuGet version (SqlHydra.SqlServer)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.SqlServer/)
+## SqlHydra.Cli [![NuGet version (SqlHydra.Cli)](https://img.shields.io/nuget/v/SqlHydra.Cli.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Cli/)
 
 ### Local Install (recommended)
 Run the following commands from your project directory:
 1) `dotnet new tool-manifest`
-2) `dotnet tool install SqlHydra.SqlServer`
+2) `dotnet tool install SqlHydra.Cli`
 
 ### Configure and Run
 
-Run the tool from the command line (or add to a .bat|.cmd|.sh file):
+Run the tool from the command line, passing in the provider type for your database. 
+
+Providers:
+* `mssql` - SQL Server
+* `npgsql` - PostgreSQL
+* `sqlite` - SQLite
+* `oracle` - Oracle
 
 ```bat
-dotnet sqlhydra-mssql
+dotnet sqlhydra mssql
 ```
 
-* The configuration wizard will ask you some questions, create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and then run your new config.
-* If a .toml configuration file already exists, it will run.
+* If no .toml configuration file is detected, a configuration wizard will ask you some questions to create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and will then generate code using the new config.
+* If a .toml configuration file already exists, it will generate code.
 * The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
-* You can filter the generated schemas by manually editing the generated [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file.
+* By default, the generated toml file will be named `sqlhydra-{provider}.toml`
 
 
 ### Build Event (optional)
@@ -87,11 +91,11 @@ To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
 
 ```bat
   <Target Name="SqlHydra" BeforeTargets="Clean">
-    <Exec Command="dotnet sqlhydra-mssql" />
+    <Exec Command="dotnet sqlhydra mssql" />
   </Target>
 ```
 
-### Troubleshooting
+### SQL Server Troubleshooting
 
 The following exception may occur with the latest version of `Microsoft.Data.SqlClient`:
 ```
@@ -102,35 +106,6 @@ A connection was successfully established with the server, but then an error occ
 
 The most simple way to resolve this is to append `;TrustServerCertificate=True` to the connection string in your .toml configuration file.
 UPDATE: This behavior has been fixed in `Microsoft.Data.SqlClient` v4.1.1.
-
-## SqlHydra.Npgsql [![NuGet version (SqlHydra.Npgsql)](https://img.shields.io/nuget/v/SqlHydra.Npgsql.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Npgsql/)
-
-### Local Install (recommended)
-Run the following commands from your project directory:
-1) `dotnet new tool-manifest`
-2) `dotnet tool install SqlHydra.Npgsql`
-
-### Configure / Run
-
-Run the tool from the command line (or add to a .bat|.cmd|.sh file):
-
-```bat
-dotnet sqlhydra-npgsql
-```
-
-* The configuration wizard will ask you some questions, create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and then run your new config.
-* If a .toml configuration file already exists, it will run.
-* The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
-* You can filter the generated schemas by manually editing the generated [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file.
-
-### Build Event (optional)
-To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
-
-```bat
-  <Target Name="SqlHydra" BeforeTargets="Clean">
-    <Exec Command="dotnet sqlhydra-npgsql" />
-  </Target>
-```
 
 ### Support for Postgres Enums
 Postgres enum types are generated as CLR enums!
@@ -156,64 +131,6 @@ Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>(nameof experi
 ### Support for Postgres Arrays
 SqlHydra.Postgres [release v1.0.4](https://github.com/JordanMarr/SqlHydra/releases/tag/npgsql-arrays) adds support for `text[]` and `integer[]` column types.
 
-## SqlHydra.Oracle [![NuGet version (SqlHydra.Oracle)](https://img.shields.io/nuget/v/SqlHydra.Oracle.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Oracle/)
-
-### Local Install (recommended)
-Run the following commands from your project directory:
-1) `dotnet new tool-manifest`
-2) `dotnet tool install SqlHydra.Oracle`
-
-### Configure / Run
-
-Run the tool from the command line (or add to a .bat|.cmd|.sh file):
-
-```bat
-dotnet sqlhydra-oracle
-```
-
-* The configuration wizard will ask you some questions, create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and then run your new config.
-* If a .toml configuration file already exists, it will run.
-* The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
-* You can filter the generated schemas by manually editing the generated [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file.
-
-### Build Event (optional)
-To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
-
-```bat
-  <Target Name="SqlHydra" BeforeTargets="Clean">
-    <Exec Command="dotnet sqlhydra-oracle" />
-  </Target>
-```
-
-## SqlHydra.Sqlite [![NuGet version (SqlHydra.Sqlite)](https://img.shields.io/nuget/v/SqlHydra.SqlServer.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Sqlite/)
-
-### Local Install (recommended)
-Run the following commands from your project directory:
-1) `dotnet new tool-manifest`
-2) `dotnet tool install SqlHydra.Sqlite`
-
-### Configure / Run
-
-Run the tool from the command line (or add to a .bat|.cmd|.sh file):
-
-```bat
-dotnet sqlhydra-sqlite
-```
-
-* The configuration wizard will ask you some questions, create a new [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file for you, and then run your new config.
-* If a .toml configuration file already exists, it will run.
-* The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
-* You can filter the generated schemas by manually editing the generated [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration) file.
-
-### Build Event (optional)
-To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
-
-```bat
-  <Target Name="SqlHydra" BeforeTargets="Clean">
-    <Exec Command="dotnet sqlhydra-sqlite" />
-  </Target>
-```
-
 ### Sqlite Data Type Aliases
 Sqlite stores all data as either an `INTEGER`, `REAL`, `TEXT` or `BLOB` type.
 Fortunately, you can also use aliases for data types more commonly used in other databases in your table definitions and Sqlite will translate them to the appropriate type.
@@ -222,22 +139,8 @@ Using these type aliases also allows `SqlHydra.Sqlite` to generate the desired .
 Here is a list of valid data type aliases (or "affinity names"):
 https://www.sqlite.org/datatype3.html#affinity_name_examples
 
-### Upgrading to .NET 6
-If you are upgrading SqlHydra.Sqlite to a version that supports .NET 6 (SqlHydra.Sqlite v0.630.0 or above), you will need to manually update your `sqlhydra-sqlite.toml` configuration file. 
+## Generated Table Types for AdventureWorks
 
-Change `reader_type` from:
-```
-reader_type = "System.Data.IDataReader"
-```
-to:
-```
-reader_type = "System.Data.Common.DbDataReader"
-```
-
-This change is necessary to support the new .NET 6 `System.DateOnly` and `System.TimeOnly` types.
-(Note that v0.630.0 and above will now use `System.Data.Common.DbDataReader` by default when generating a new .toml configuration file.)
-
-## Example Output for AdventureWorks
 ```F#
 // This code was generated by SqlHydra.SqlServer.
 namespace SampleApp.AdventureWorks
@@ -292,8 +195,7 @@ module SalesLT =
     // etc...
 ```
 
-
-## Strongly Type Data Readers
+## Strongly Typed Data Readers
 The generated `HydraReader` class works in tandem with SqlHydra.Query for reading queried entities, but it can also be used on its own with any query library that returns an IDataReader.
 
 * [Using HydraReader automatically with SqlHydra.Query](#sqlhydraquery-)
@@ -305,33 +207,20 @@ The generated `HydraReader` class works in tandem with SqlHydra.Query for readin
 ## Generating Multiple TOML Files
 
 It is also possible to have more than one .toml file in the same project. By default, SqlHydra will create a .toml file named after the version of SqlHydra used.
-For example, running `dotnet sqlhydra-sqlite` will generate `sqlhydra-sqlite.toml`. 
+For example, running `dotnet sqlhydra sqlite` will generate `sqlhydra-sqlite.toml`. 
 
-However, you can also specify a name for your .toml file: `dotnet sqlhydra-sqlite "Shared.toml"`
+However, you can also specify a name for your .toml file: `dotnet sqlhydra sqlite -t "shared.toml"`
 This can be useful for various use cases, such as:
 * data migrations where you want to generate types for a source and a target database.
 * generating record types with different schema/table filters in separate files.
 
 
 ## Supported Frameworks
-.NET 5 - .NET 7 are currently supported.
-(.NET 5 will be supported at least until Microsoft ends official support.)
+.NET 6 - .NET 7 are currently supported.
+(If you still need support for .NET 5, use the deprecated `SqlHydra.SqlServer`, `SqlHydra.Sqlite`, `SqlHydra.Npgsql` or `SqlHydra.Oracle` tools.)
 
 ### .NET 6 and Greater
 The new .NET 6 `System.DateOnly` and `System.TimeOnly` types are now supported by all generators.
-(Note that if you are upgrading SqlHydra.Sqlite from .NET 5 to .NET 6, please refer to the [SqlHydra.Sqlite](#sqlhydrasqlite-) section for special instructions.)
-
-### .NET 5
-If you have .NET 5 and .NET 6 installed side-by-side but you want to continue generating types using .NET 5 (meaning you do not want your generated types to utilize the new `System.DateOnly` and `System.TimeOnly` types), you can add a `global.json` file to your project folder with the following:
-
-```json
-{
-  "sdk": {
-    "version": "5.0.0",
-    "rollForward": "latestFeature"
-  }
-}
-```
 
 ## SqlHydra.Query [![NuGet version (SqlHydra.Query)](https://img.shields.io/nuget/v/SqlHydra.Query.svg?style=flat-square)](https://www.nuget.org/packages/SqlHydra.Query/)
 SqlHydra.Query wraps the powerful [SqlKata](https://sqlkata.com/) query generator with F# computation expression builders for strongly typed query generation.
