@@ -9,6 +9,10 @@
 			<!-- Incomplete pattern matches on this expression. -->
 			FS0025
 		</WarningsAsErrors>
+		<NoWarn>
+			<!-- Duplicate Package -->
+			NU1504
+		</NoWarn>
 		<Authors>Jordan Marr</Authors>
 		<Description></Description>
 		<PackAsTool>true</PackAsTool>

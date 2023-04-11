@@ -3,6 +3,10 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     <WarnOn>3390;$(WarnOn)</WarnOn>
+	<NoWarn>
+	  <!-- Duplicate Package -->
+      NU1504
+	</NoWarn>
     <Configurations>Debug;Release;DebugLocal</Configurations>
     <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
@@ -48,8 +52,8 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-	<PackageReference Include="FSharp.Core" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
-	<PackageReference Include="FSharp.Core" Version="7.0.200" Condition="'$(TargetFramework)' == 'net7.0'" />
+	<!--<PackageReference Include="FSharp.Core" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
+	<PackageReference Include="FSharp.Core" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />-->
     <PackageReference Include="Expecto" Version="9.0.4" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.10" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />

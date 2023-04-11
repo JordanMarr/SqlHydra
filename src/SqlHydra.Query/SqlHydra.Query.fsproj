@@ -10,6 +10,10 @@
 			<!-- Incomplete pattern matches on this expression. -->
 			FS0025
 		</WarningsAsErrors>
+		<NoWarn>
+			<!-- Duplicate Package -->
+			NU1504
+		</NoWarn>
 		<Authors>Jordan Marr</Authors>
 		<PackageTags>F# fsharp data database orm sql</PackageTags>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -40,7 +44,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="SqlKata" Version="2.4.0" />
-		<PackageReference Update="FSharp.Core" Version="6.0.1" />
+		<PackageReference Update="FSharp.Core" Version="6.0.7" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
+		<PackageReference Include="FSharp.Core" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
+		<PackageReference Include="FSharp.Core" Version="7.0.200" Condition="'$(TargetFramework)' == 'net7.0'" />
 	</ItemGroup>
 
 	<ItemGroup>
