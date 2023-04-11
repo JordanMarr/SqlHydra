@@ -5,9 +5,6 @@ open Expecto
 open DB
 open SqlHydra.Query.SqliteExtensions
 open Swensen.Unquote
-#if NET5_0
-open Sqlite.AdventureWorksNet5
-#endif
 #if NET6_0
 open Sqlite.AdventureWorksNet6
 #endif

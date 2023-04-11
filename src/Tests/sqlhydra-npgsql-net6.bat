@@ -1,1 +1,1 @@
-dotnet run --project ..\SqlHydra.Npgsql --framework net6.0 -- sqlhydra-npgsql-net6.toml
+dotnet run --project ..\SqlHydra.Cli --framework net6.0 -- npgsql -t sqlhydra-npgsql-net6.toml

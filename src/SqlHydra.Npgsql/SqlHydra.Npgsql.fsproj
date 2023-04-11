@@ -46,7 +46,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj" />
+        <ProjectReference Include="..\SqlHydra\SqlHydra.Cli.fsproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -4,9 +4,6 @@ open Expecto
 open SqlHydra.Query
 open DB
 
-#if NET5_0
-open SqlServer.AdventureWorksNet5
-#endif
 #if NET6_0
 open SqlServer.AdventureWorksNet6
 #endif
@@ -194,11 +191,11 @@ let tests =
             let query = 
                 select {
                     for c in Sales.Customer do
-                    where (c.CustomerID |<>| [ 30018;29545;29954 ])
+                    where (c.PersonID.Value |<>| [ 30018;29545;29954 ]) // should work with option values
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE ([c].[CustomerID] NOT IN (@p0, @p1, @p2))")) ""
+            Expect.isTrue (sql.Contains("WHERE ([c].[PersonID] NOT IN (@p0, @p1, @p2))")) ""
         }
 
         test "Inner Join" {

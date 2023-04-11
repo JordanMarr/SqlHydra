@@ -4,6 +4,15 @@ open Spectre.Console
 open SqlHydra.Domain
 open System
 
+type Args = 
+    {
+        Provider: string
+        AppInfo: AppInfo
+        TomlFile: IO.FileInfo
+        GetSchema: Config -> Schema
+        Version: string
+    }
+
 type LoadConfigResult = 
     | Valid of Config
     | Invalid of error: string
@@ -40,7 +49,8 @@ let multiSelectDU<'T> (title: string) (options: 'T seq) =
     answer
 
 /// Presents a series of user prompts to create a new config file.
-let newConfigWizard(app: AppInfo) = 
+let newConfigWizard (args: Args) = 
+    let app = args.AppInfo
     let connection = 
         let cn = AnsiConsole.Ask<string>("[blue]-[/] Enter a database [green]Connection String[/]:")
         cn.Replace(@"\\", @"\") // Fix if user copies an escaped backslash from an existing config
@@ -83,14 +93,10 @@ let newConfigWizard(app: AppInfo) =
                 Config.Filters = FilterPatterns.Empty // User must manually configure filter in .toml file
             }
 
-    AnsiConsole.MarkupLine($"[green]-[/] {app.Command}.toml has been created!")
+    AnsiConsole.MarkupLine($"[green]-[/] {args.TomlFile.Name} has been created!")
     if config.Readers <> None then AnsiConsole.MarkupLine($"[green]-[/] Please install the `{app.DefaultProvider}` NuGet package in your project.")
     if useCase = SqlHydraQueryIntegration then AnsiConsole.MarkupLine($"[green]-[/] Please install the `SqlHydra.Query` NuGet package in your project.")
     config
-
-/// Ex: "sqlhydra-mssql.toml"
-let buildTomlFilename(app: AppInfo) =
-    $"{app.Command}.toml"
 
 /// Saves a config as toml.
 let saveConfig (tomlFile: IO.FileInfo, cfg: Config) = 
@@ -110,40 +116,31 @@ let tryLoadConfig(tomlFile: IO.FileInfo) =
         NotFound
 
 /// Creates a sqlhydra-*.toml file if necessary.
-let getConfig(app: AppInfo, argv: string array) = 
-    AnsiConsole.MarkupLine($"[blue]-[/] {app.Name}")
-    AnsiConsole.MarkupLine($"[blue]-[/] v[yellow]{app.Version}[/]")
+let getOrCreateConfig (args: Args) = 
+    AnsiConsole.MarkupLine($"[blue]-[/] {args.AppInfo.Name}")
+    AnsiConsole.MarkupLine($"[blue]-[/] v[yellow]{args.Version}[/]")
 
-    let tomlFile = 
-        match argv with 
-        | [| |] -> IO.FileInfo(buildTomlFilename(app))
-        | [| tomlFilePath |] -> IO.FileInfo(tomlFilePath)
-        | _ ->
-            AnsiConsole.MarkupLine($"[red]>[/] Invalid args: '{argv}'. Expected no args, or a .toml configuration file path.")
-            failwith "Invalid args."
-
-    match tryLoadConfig(tomlFile) with
+    match tryLoadConfig(args.TomlFile) with
     | Valid cfg -> 
         cfg
     | Invalid exMsg -> 
-        Console.WriteLine($"> Unable to deserialize '{tomlFile.FullName}'. \n{exMsg}")
+        Console.WriteLine($"> Unable to deserialize '{args.TomlFile.FullName}'. \n{exMsg}")
         failwith "Invalid toml config."
     | NotFound ->
-        AnsiConsole.MarkupLine($"[blue]-[/] `{tomlFile.Name}` does not exist. Starting configuration wizard...")
-        let cfg = newConfigWizard(app)
-        saveConfig(tomlFile, cfg)
+        AnsiConsole.MarkupLine($"[blue]-[/] `{args.TomlFile.Name}` does not exist. Starting configuration wizard...")
+        let cfg = newConfigWizard(args)
+        saveConfig(args.TomlFile, cfg)
         cfg
 
 /// Runs code generation for a given database provider.
-let run (app: AppInfo, argv: string[], getSchema: Config -> Schema) = 
-    let cfg = getConfig(app, argv)
+let run (args: Args) = 
+    let cfg = getOrCreateConfig(args)
 
     let formattedCode = 
-        getSchema cfg
-        |> SchemaGenerator.generateModule cfg app
-        |> SchemaGenerator.toFormattedCode cfg app
+        args.GetSchema cfg
+        |> SchemaGenerator.generateModule cfg args.AppInfo
+        |> SchemaGenerator.toFormattedCode cfg args.AppInfo args.Version
 
     IO.File.WriteAllText(cfg.OutputFile, formattedCode)
     Fsproj.addFileToProject(cfg)
     AnsiConsole.MarkupLine($"[green]-[/] `{cfg.OutputFile}` has been generated!")
-    0

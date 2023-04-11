@@ -1,8 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     <WarnOn>3390;$(WarnOn)</WarnOn>
+	<NoWarn>
+	    <!-- Duplicate Package -->
+		NU1504
+		<!-- Implicit Conversion -->
+	    3391
+	</NoWarn>
     <Configurations>Debug;Release;DebugLocal</Configurations>
     <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
@@ -16,14 +22,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Util.fs" />
-    <Compile Include="Sqlite\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
     <Compile Include="Sqlite\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
     <Compile Include="Sqlite\AdventureWorksNet7.fs" Condition="'$(TargetFramework)' == 'net7.0'" />
     <Compile Include="Sqlite\DB.fs" />
     <Compile Include="Sqlite\QueryUnitTests.fs" />
     <Compile Include="Sqlite\QueryIntegrationTests.fs" />
     <Compile Include="Sqlite\Generation.fs" />
-    <Compile Include="SqlServer\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
     <Compile Include="SqlServer\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
     <Compile Include="SqlServer\AdventureWorksNet7.fs" Condition="'$(TargetFramework)' == 'net7.0'" />
     <Compile Include="SqlServer\DB.fs" />
@@ -32,14 +36,12 @@
     <Compile Include="SqlServer\SelectTaskTests.fs" />
     <Compile Include="SqlServer\SelectAsyncTests.fs" />
     <Compile Include="SqlServer\Generation.fs" />
-    <Compile Include="Npgsql\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
     <Compile Include="Npgsql\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
     <Compile Include="Npgsql\AdventureWorksNet7.fs" Condition="'$(TargetFramework)' == 'net7.0'" />
     <Compile Include="Npgsql\DB.fs" />
     <Compile Include="Npgsql\QueryUnitTests.fs" />
     <Compile Include="Npgsql\QueryIntegrationTests.fs" />
     <Compile Include="Npgsql\Generation.fs" />
-    <Compile Include="Oracle\AdventureWorksNet5.fs" Condition="'$(TargetFramework)' == 'net5.0'" />
     <Compile Include="Oracle\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
     <Compile Include="Oracle\AdventureWorksNet7.fs" Condition="'$(TargetFramework)' == 'net7.0'" />
     <Compile Include="Oracle\DB.fs" />
@@ -52,32 +54,24 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
+	<PackageReference Include="FSharp.Core" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
+	<PackageReference Include="FSharp.Core" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
     <PackageReference Include="Expecto" Version="9.0.4" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.10" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <PackageReference Include="Unquote" Version="6.1.0" />
-    <PackageReference Include="Verify.Expecto" Version="16.5.1" />
-    <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.12.20" />
+    <PackageReference Include="Verify.Expecto" Version="19.12.1" />
+    <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.13.3" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" Condition="'$(TargetFramework)' == 'net6.0'" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SqlHydra.Oracle\SqlHydra.Oracle.fsproj" />
     <ProjectReference Include="..\SqlHydra.Query\SqlHydra.Query.fsproj" />
-    <ProjectReference Include="..\SqlHydra.Npgsql\SqlHydra.Npgsql.fsproj" />
-    <ProjectReference Include="..\SqlHydra.Sqlite\SqlHydra.Sqlite.fsproj" />
-    <ProjectReference Include="..\SqlHydra.SqlServer\SqlHydra.SqlServer.fsproj" />
-    <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj" />
+	  <ProjectReference Include="..\SqlHydra.Cli\SqlHydra.Cli.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Oracle\Verify\" />
     <Folder Include="TestData\" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.3" Condition="'$(TargetFramework)' == 'net5.0'" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" Condition="'$(TargetFramework)' == 'net6.0'" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
-    <PackageReference Include="FSharp.Core" Version="5.0.1" Condition="'$(TargetFramework)' == 'net5.0'" />
-    <PackageReference Include="FSharp.Core" Version="6.0.1" Condition="'$(TargetFramework)' == 'net6.0'" />
-    <PackageReference Include="FSharp.Core" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
   </ItemGroup>
   <!--<Target Name="SqlHydra" BeforeTargets="Clean">
     <Exec Command="sqlhydra-mssql.bat" />

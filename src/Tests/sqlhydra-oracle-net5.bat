@@ -1,1 +1,0 @@
-dotnet run --project ..\SqlHydra.Oracle --framework net5.0 -- sqlhydra-oracle-net5.toml

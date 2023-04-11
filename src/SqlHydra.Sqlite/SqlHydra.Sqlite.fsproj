@@ -47,7 +47,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\SqlHydra.Domain\SqlHydra.Domain.fsproj" />
-        <ProjectReference Include="..\SqlHydra\SqlHydra.fsproj">
+        <ProjectReference Include="..\SqlHydra\SqlHydra.Cli.fsproj">
             <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
             <IncludeAssets>SqlHydra.dll</IncludeAssets>
         </ProjectReference>

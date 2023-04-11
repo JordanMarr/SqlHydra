@@ -14,18 +14,13 @@ let path xs = Path.Combine(Array.ofList xs)
 let slnRoot = Files.findParent __SOURCE_DIRECTORY__ "SqlHydra.sln";
 
 let query = path [ slnRoot; "SqlHydra.Query" ]
-let mssql = path [ slnRoot; "SqlHydra.SqlServer" ]
-let npgsql = path [ slnRoot; "SqlHydra.Npgsql" ]
-let sqlite = path [ slnRoot; "SqlHydra.Sqlite" ]
-let oracle = path [ slnRoot; "SqlHydra.Oracle" ]
+let cli = path [ slnRoot; "SqlHydra.Cli" ]
 let tests = path [ slnRoot; "Tests" ]
 
-let generators = [ mssql; npgsql; sqlite; oracle ]
-let allPackages = query :: generators
-let toPublish = allPackages
+let allPackages = [ query; cli ]
 
 Target.create "Restore" <| fun _ ->
-    allPackages @ [ tests ]
+    [ cli; tests ]
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "restore", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not restore '{pkg}' package.")
 
@@ -35,27 +30,18 @@ Target.create "BuildQuery" <| fun _ ->
     |> (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release", pkg), pkg)
     |> (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
-Target.create "BuildNet5" <| fun _ ->
-    generators @ [ tests ]
-    |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net5.0", pkg), pkg)
-    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
-
-Target.create "BuildNet6" <| fun _ ->
-    generators @ [ tests ]
+Target.create "BuildCliNet6" <| fun _ ->
+    [ cli; tests ]
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net6.0", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
-Target.create "BuildNet7" <| fun _ ->
-    generators @ [ tests ]
+Target.create "BuildCliNet7" <| fun _ ->
+    [ cli; tests ]
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net7.0", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
 Target.create "Build" <| fun _ ->
     printfn "Building all supported frameworks."
-
-Target.create "TestNet5" <| fun _ ->
-    let exitCode = Shell.Exec(Tools.dotnet, "run --configuration Release --framework net5.0", tests)
-    if exitCode <> 0 then failwith "Failed while running net5.0 tests"
 
 Target.create "TestNet6" <| fun _ ->
     let exitCode = Shell.Exec(Tools.dotnet, "run --configuration Release --framework net6.0", tests)
@@ -69,7 +55,7 @@ Target.create "Test" <| fun _ ->
     printfn "Testing on all supported frameworks."
 
 Target.create "Pack" <| fun _ ->
-    toPublish
+    allPackages
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "pack --configuration Release -o nupkg/Release", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}' package.'")
 
@@ -84,7 +70,7 @@ Target.create "Publish" <| fun _ ->
         let dllPath = projDir </> "bin" </> "Release" </> "net6.0" </> $"{projName}.dll"
         System.Reflection.AssemblyName.GetAssemblyName(dllPath).Version
 
-    toPublish
+    allPackages
     |> List.map (fun projDir ->
         let version = getProjectVersion projDir
         let projName = DirectoryInfo(projDir).Name
@@ -95,8 +81,8 @@ Target.create "Publish" <| fun _ ->
     |> List.iter (fun (code, pkg) -> if code <> 0 then printfn $"ERROR: Could not publish '{pkg}' package. Error: {code}") // Display error and continue
 
 let dependencies = [
-    "Restore" ==> "BuildQuery" ==> "BuildNet5" ==> "BuildNet6" ==> "BuildNet7" ==> "Build"
-    "Build" ==> "TestNet5" ==> "TestNet6" ==> "TestNet7" ==> "Test"
+    "Restore" ==> "BuildQuery" ==> "BuildCliNet6" ==> "BuildCliNet7" ==> "Build"
+    "Build" ==> "TestNet6" ==> "TestNet7" ==> "Test"
     "Test" ==> "Pack" ==> "Publish"
 ]
 
