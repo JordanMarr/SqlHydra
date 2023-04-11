@@ -6,7 +6,7 @@ open System
 
 type Args = 
     {
-        ProviderArg: string
+        Provider: string
         AppInfo: AppInfo
         TomlFile: IO.FileInfo
         GetSchema: Config -> Schema

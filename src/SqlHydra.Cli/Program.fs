@@ -18,16 +18,10 @@ let handler (provider: string, tomlFileMaybe: FileInfo option) =
 
     let args = 
         {
-            Console.Args.ProviderArg = provider
+            Console.Args.Provider = provider
             Console.Args.AppInfo = info
             Console.Args.GetSchema = getSchema
-            Console.Args.TomlFile = 
-                match tomlFileMaybe with
-                | Some tomlFile -> 
-                    tomlFile
-                | None -> 
-                    FileInfo($"sqlhydra-{provider}.toml")
-                    //FileInfo(Path.Combine(System.Environment.CurrentDirectory, $"sqlhydra-{provider}.toml"))
+            Console.Args.TomlFile = tomlFileMaybe |> Option.defaultWith (fun () -> FileInfo($"sqlhydra-{provider}.toml"))                    
             Console.Args.Version = version
         }
 
