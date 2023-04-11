@@ -6,7 +6,7 @@ open FSharp.SystemCommandLine
 type SelfRef = class end
 let version = System.Reflection.Assembly.GetAssembly(typeof<SelfRef>).GetName().Version |> string
 
-let handler (provider: string, tomlFileMaybe: FileInfo option) = 
+let handler (provider: string, tomlFile: FileInfo option) = 
 
     let info, getSchema = 
         match provider with
@@ -21,7 +21,7 @@ let handler (provider: string, tomlFileMaybe: FileInfo option) =
             Console.Args.Provider = provider
             Console.Args.AppInfo = info
             Console.Args.GetSchema = getSchema
-            Console.Args.TomlFile = tomlFileMaybe |> Option.defaultWith (fun () -> FileInfo($"sqlhydra-{provider}.toml"))                    
+            Console.Args.TomlFile = tomlFile |> Option.defaultWith (fun () -> FileInfo($"sqlhydra-{provider}.toml"))                    
             Console.Args.Version = version
         }
 
@@ -32,8 +32,8 @@ let main argv =
     rootCommand argv {
         description "SqlHydra"
         inputs (
-            Input.Argument<string>("Provider", "The database provider name: 'mssql', 'npgsql', 'sqlite', or 'oracle'"), 
-            Input.OptionMaybe<FileInfo>(["-t"; "--toml-file"], "The name of the toml configuration file.")
+            Input.Argument<string>("provider", "The database provider name: 'mssql', 'npgsql', 'sqlite', or 'oracle'"), 
+            Input.OptionMaybe<FileInfo>(["-t"; "--toml-file"], "The toml configuration filename. Default: 'sqlhydra-{provider}.toml'")
         )
         setHandler handler
     }
