@@ -153,29 +153,28 @@ module SqlPatterns =
     let isOptionType (t: Type) = 
         t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>>
 
+    let tryGetMember(x: Expression) = 
+        match x with
+        | Member m when m.Expression.NodeType = ExpressionType.Parameter || m.Expression.NodeType = ExpressionType.MemberAccess -> 
+            Some m
+        | MethodCall opt when opt.Type |> isOptionType ->        
+            if opt.Arguments.Count > 0 then
+                // Option.Some
+                match opt.Arguments.[0] with
+                | Member m -> Some m
+                | _ -> None
+            else None
+        | _ -> 
+            None
+
     /// A property member, a property wrapped in 'Some', or an option 'Value'.
     let (|Property|_|) (exp: Expression) =
-        let tryGetMember(x: Expression) = 
-            match x with
-            | Member m when m.Expression.NodeType = ExpressionType.Parameter || m.Expression.NodeType = ExpressionType.MemberAccess -> 
-                Some m
-            | MethodCall opt when opt.Type |> isOptionType ->        
-                if opt.Arguments.Count > 0 then
-                    // Option.Some
-                    match opt.Arguments.[0] with
-                    | Member m -> Some m
-                    | _ -> None
-                else None
-            | _ -> 
-                None
-
         match exp with
         | Member m when m.Member.DeclaringType <> null && m.Member.DeclaringType |> isOptionType -> 
             // Handles option '.Value'
             tryGetMember m.Expression
         | _ -> 
-            tryGetMember exp
-            
+            tryGetMember exp            
 
     /// A constant value or an optional constant value
     let (|Value|_|) (exp: Expression) =
@@ -194,7 +193,12 @@ module SqlPatterns =
             | _ -> notImplMsg(sprintf "Unable to unwrap where value for '%s'" m.Member.Name)
         | Member m when m.Expression.NodeType = ExpressionType.MemberAccess -> 
             // Extract constant value from nested object/properties
-            notImplMsg "Nested property value extraction is not supported in 'where' statements. Try manually unwrapping and passing in the value."
+            let rec unwrapMember (m: MemberExpression) =
+                match m.Expression with
+                | Constant c -> Some c.Value
+                | Member m -> unwrapMember m
+                | _ -> None
+            unwrapMember m
         | Constant c -> Some c.Value
         | ImplConvertConstant c -> Some c.Value
         | MethodCall opt when opt.Type |> isOptionType ->        

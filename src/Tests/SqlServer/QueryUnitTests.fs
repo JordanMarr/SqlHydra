@@ -224,6 +224,20 @@ let tests =
 LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID]) WHERE ([o].[SalesOrderID] = [d].[SalesOrderID])"""
             Expect.equal sql expected ""
         }
+
+        test "Optional Property Value in Where" {     
+            let date = System.DateTime(2023,1,1)
+
+            let query = 
+                select {
+                    for wo in Production.WorkOrder do
+                    where (wo.EndDate = None || wo.EndDate.Value >= date)
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            let expected = """SELECT * FROM [Production].[WorkOrder] AS [wo] WHERE (([wo].[EndDate] IS NULL) OR ([wo].[EndDate] >= @p0))"""
+            Expect.equal sql expected ""
+        }
         
         test "Inner Join - Multi Column" {
             let query =
