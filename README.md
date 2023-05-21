@@ -78,6 +78,39 @@ dotnet sqlhydra mssql
 * The generated .fs file will automatically be added to your .fsproj as `Visible="false"`.
 * By default, the generated toml file will be named `sqlhydra-{provider}.toml`
 
+### TOML Creation Wizard
+The wizard will ask the following questions:
+
+```
+- Enter a database Connection String:
+```
+This is the [connection string](https://www.connectionstrings.com/) that SqlHydra can use to query table and column metadata.
+
+```
+- Enter an Output Filename (Ex: AdventureWorks.fs):
+```
+This is the filename that your generated types will be added to. (This file will be automatically added to your fsproj.)
+
+```
+- Enter a Namespace (Ex: MyApp.AdventureWorks):
+```
+This is the namespace that your generated table record types will be created in.
+
+```
+- Select a use case:
+
+> SqlHydra.Query integration (default)
+  Other data library
+  Standalone      
+```
+
+Selecting a use case will set the base configuration options in your TOML file. 
+* "SqlHyrda.Query integration" should be chosen if you plan on using the SqlHydra.Query NuGet package to query your database using the generated types.
+* "Other data library" should be chosen if you plan on using a 3rd party data library (ex: Dapper.FSharp, Donald, Npgsql.FSharp, ADO.NET, and many others)
+* "Standalone" means that you will only be using the generated read-only querying methods that will be generated.
+
+For more details, see the [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration).
+
 
 ### Build Event (optional)
 
