@@ -79,7 +79,7 @@ dotnet sqlhydra mssql
 * By default, the generated toml file will be named `sqlhydra-{provider}.toml`
 
 ### TOML Creation Wizard
-The wizard will ask the following questions:
+The wizard will prompt you for the following input:
 
 ```
 - Enter a database Connection String:
