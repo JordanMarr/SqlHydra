@@ -35,7 +35,7 @@ let supportedTypeMappings =
         "timestamp with time zone",     "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime,   Some NpgsqlDbType.TimestampTz 
         "timestamp without time zone",  "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime,   Some NpgsqlDbType.Timestamp
         "time with time zone",          "System.DateTime",      DbType.DateTime,    None,                               nameof r.GetDateTime,   Some NpgsqlDbType.TimeTz
-        "bytea",                        "byte[]",               DbType.Binary,      None,                               nameof r.GetValue,      None
+        "bytea",                        "byte[]",               DbType.Binary,      None,                               nameof r.GetFieldValue, None
         // skipped unsupported types
         "name",                         "string",               DbType.String,      None,                               nameof r.GetString,     None
         "(internal) char",              "char",                 DbType.String,      None,                               nameof r.GetChar,       Some NpgsqlDbType.Char

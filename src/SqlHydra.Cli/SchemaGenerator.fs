@@ -150,11 +150,9 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
                     SynExpr.CreateLongIdent(
                         false
                         , LongIdentWithDots.CreateString(
-                            match col.TypeMapping.DbType, col.IsNullable with
-                            | DbType.Binary, true -> "OptionalBinaryColumn"
-                            | DbType.Binary, false -> "RequiredBinaryColumn"
-                            | _, true -> "OptionalColumn"
-                            | _, false -> "RequiredColumn"
+                            if col.IsNullable
+                            then "OptionalColumn"
+                            else "RequiredColumn"
                         )
                         , None
                     )
@@ -569,25 +567,34 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                 Expr = 
                     let t = SynExpr.Ident(Ident.Create("t"))
                     let eq = SynExpr.Ident(Ident.Create("="))
-                    let typeDef (typeNm: string) = 
-                        let synType = 
-                            if typeNm.EndsWith("[]") then 
-                                // Ex: "byte[]"
-                                let tn = typeNm.Replace("[]", "").Trim()
-                                SynType.Array(0, SynType.Create(tn), range0)
-                            else
-                                SynType.Create(typeNm)
+                    let getSynType (typeNm: string) = 
+                        if typeNm.EndsWith("[]") then 
+                            // Ex: "byte[]"
+                            let tn = typeNm.Replace("[]", "").Trim()
+                            SynType.Array(0, SynType.Create(tn), range0)
+                        else
+                            SynType.Create(typeNm)
+                    let typeDef (synType: SynType) = 
                         SynExpr.TypeApp(SynExpr.Ident(Ident.Create("typedefof")), range0, [ synType ], [], None, range0, range0)
 
                     let buildIf elseClause (ptr: PrimitiveTypeReader) = 
+                        let fieldType = getSynType ptr.ClrType
+                        let isArray = ptr.ClrType.EndsWith("[]")
                         SynExpr.IfThenElse(
-                            SynExpr.CreateApp(t, SynExpr.CreateApp(eq, typeDef ptr.ClrType))
+                            SynExpr.CreateApp(t, SynExpr.CreateApp(eq, typeDef fieldType))
                             , SynExpr.CreateApp(
                                 SynExpr.CreateIdentString("Some")
                                 , SynExpr.CreateParen(
                                     SynExpr.CreateApp(
                                         SynExpr.CreateIdent(Ident.Create("wrap")),
-                                        SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "reader"; ptr.ReaderMethod ]), None)
+                                        (
+                                            // Use generic "GetFieldValue<>" for array types to avoid boxing (see issue #57).
+                                            // Otherwise, use ReaderMethod because some db providers have custom logic for certain types (i.e. Oracle GetDecimal).
+                                            if isArray then
+                                                SynExpr.TypeApp(SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "reader"; "GetFieldValue" ]), None), range0, [ fieldType ], [], None, range0, range0)
+                                            else
+                                                SynExpr.CreateLongIdent(false, LongIdentWithDots.Create([ "reader"; ptr.ReaderMethod ]), None)
+                                        )
                                     )
                                 )
                             )
@@ -765,17 +772,6 @@ module ColumnReaders =
                 match alias |> Option.defaultValue __.Name |> getOrdinal with
                 | o when reader.IsDBNull o -> None
                 | o -> Some (getter o)
-
-    type RequiredBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getValue: int -> obj, column) =
-            inherit Column(reader, getOrdinal, column)
-            member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getValue :?> byte[]
-
-    type OptionalBinaryColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getValue: int -> obj, column) =
-            inherit Column(reader, getOrdinal, column)
-            member __.Read(?alias) = 
-                match alias |> Option.defaultValue __.Name |> getOrdinal with
-                | o when reader.IsDBNull o -> None
-                | o -> Some (getValue o :?> byte[])
 
 [<AutoOpen>]
 module private DataReaderExtensions =

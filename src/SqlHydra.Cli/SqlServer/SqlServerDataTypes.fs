@@ -33,11 +33,11 @@ let supportedTypeMappings =
         "DATETIME",             "System.DateTime",                          DbType.DateTime,            Some (nameof DbType.DateTime),  nameof r.GetDateTime
         "DATETIME2",            "System.DateTime",                          DbType.DateTime2,           Some (nameof DbType.DateTime2), nameof r.GetDateTime
         "SMALLDATETIME",        "System.DateTime",                          DbType.DateTime,            Some (nameof DbType.DateTime),  nameof r.GetDateTime        
-        "VARBINARY",            "byte[]",                                   DbType.Binary,              None,                           nameof r.GetValue
-        "BINARY",               "byte[]",                                   DbType.Binary,              None,                           nameof r.GetValue
-        "IMAGE",                "byte[]",                                   DbType.Binary,              None,                           nameof r.GetValue
-        "ROWVERSION",           "byte[]",                                   DbType.Binary,              None,                           nameof r.GetValue
-        "SQL_VARIANT",          "obj",                                      DbType.Object,              None,                           nameof r.GetValue
+        "VARBINARY",            "byte[]",                                   DbType.Binary,              None,                           nameof r.GetFieldValue
+        "BINARY",               "byte[]",                                   DbType.Binary,              None,                           nameof r.GetFieldValue
+        "IMAGE",                "byte[]",                                   DbType.Binary,              None,                           nameof r.GetFieldValue
+        "ROWVERSION",           "byte[]",                                   DbType.Binary,              None,                           nameof r.GetFieldValue
+        "SQL_VARIANT",          "obj",                                      DbType.Object,              None,                           nameof r.GetFieldValue
         
         // UNSUPPORTED COLUMN TYPES
         //"XML",                  "System.Data.SqlTypes.SqlXml",              DbType.Xml,               None,                           nameof r.GetSqlXml

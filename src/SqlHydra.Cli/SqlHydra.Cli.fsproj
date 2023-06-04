@@ -4,7 +4,7 @@
 		<OutputType>Exe</OutputType>
 		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<Version>2.0.0</Version>
+		<Version>2.0.1</Version>
 		<WarningsAsErrors>
 			<!-- Incomplete pattern matches on this expression. -->
 			FS0025
@@ -48,10 +48,10 @@
 		<PackageReference Include="FSharp.Core" Version="7.0.200" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Include="Npgsql" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
 		<PackageReference Include="Npgsql" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
-		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.80" />
+		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.100" />
 		<PackageReference Include="System.Data.SQLite" Version="1.0.117" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" Condition="'$(TargetFramework)' == 'net6.0'" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Include="FSharp.SystemCommandLine" Version="0.15.0-beta4" />
 		<PackageReference Include="Fantomas" Version="4.5.10" Condition="'$(TargetFramework)' == 'net6.0'" />
 		<PackageReference Include="Fantomas" Version="4.5.10" Condition="'$(TargetFramework)' == 'net7.0'" />

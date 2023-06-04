@@ -31,10 +31,10 @@ let supportedTypeMappings =
         "TIMESTAMP WITH LOCAL TIME ZONE",   "System.DateTime",              DbType.Date,                nameof r.GetDateTime
         "TIMESTAMP WITH TIME ZONE",         "System.DateTime",              DbType.Date,                nameof r.GetDateTime
         "INTERVAL DAY TO SECOND",           "System.TimeSpan",              DbType.Time,                nameof r.GetTimeSpan
-        "BFILE",                            "byte[]",                       DbType.Binary,              nameof r.GetValue
-        "BLOB",                             "byte[]",                       DbType.Binary,              nameof r.GetValue
-        "LONG RAW",                         "byte[]",                       DbType.Binary,              nameof r.GetValue
-        "RAW",                              "byte[]",                       DbType.Binary,              nameof r.GetValue
+        "BFILE",                            "byte[]",                       DbType.Binary,              nameof r.GetFieldValue
+        "BLOB",                             "byte[]",                       DbType.Binary,              nameof r.GetFieldValue
+        "LONG RAW",                         "byte[]",                       DbType.Binary,              nameof r.GetFieldValue
+        "RAW",                              "byte[]",                       DbType.Binary,              nameof r.GetFieldValue
     ]
 
 let typeMappingsByName =

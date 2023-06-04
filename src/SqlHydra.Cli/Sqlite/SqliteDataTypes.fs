@@ -31,12 +31,12 @@ let supportedTypeMappings =
         "autoincrement",    "int64",            DbType.Int64,       nameof r.GetInt64
         "long",             "int64",            DbType.Int64,       nameof r.GetInt64
         "bigint",           "int64",            DbType.Int64,       nameof r.GetInt64
-        "binary",           "byte[]",           DbType.Binary,      nameof r.GetValue
-        "varbinary",        "byte[]",           DbType.Binary,      nameof r.GetValue
-        "blob",             "byte[]",           DbType.Binary,      nameof r.GetValue
-        "image",            "byte[]",           DbType.Binary,      nameof r.GetValue
-        "general",          "byte[]",           DbType.Binary,      nameof r.GetValue
-        "oleobject",        "byte[]",           DbType.Binary,      nameof r.GetValue
+        "binary",           "byte[]",           DbType.Binary,      nameof r.GetFieldValue
+        "varbinary",        "byte[]",           DbType.Binary,      nameof r.GetFieldValue
+        "blob",             "byte[]",           DbType.Binary,      nameof r.GetFieldValue
+        "image",            "byte[]",           DbType.Binary,      nameof r.GetFieldValue
+        "general",          "byte[]",           DbType.Binary,      nameof r.GetFieldValue
+        "oleobject",        "byte[]",           DbType.Binary,      nameof r.GetFieldValue
         "varchar",          "string",           DbType.String,      nameof r.GetString
         "nvarchar",         "string",           DbType.String,      nameof r.GetString
         "memo",             "string",           DbType.String,      nameof r.GetString
