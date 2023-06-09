@@ -49,9 +49,11 @@ module HumanResources =
           LoginID: string
           OrganizationLevel: Option<int16>
           JobTitle: string
+          [<SqlHydra.ProviderDbType("Date")>]
           BirthDate: System.DateOnly
           MaritalStatus: string
           Gender: string
+          [<SqlHydra.ProviderDbType("Date")>]
           HireDate: System.DateOnly
           SalariedFlag: bool
           VacationHours: int16
@@ -68,7 +70,9 @@ module HumanResources =
         { BusinessEntityID: int
           DepartmentID: int16
           ShiftID: byte
+          [<SqlHydra.ProviderDbType("Date")>]
           StartDate: System.DateOnly
+          [<SqlHydra.ProviderDbType("Date")>]
           EndDate: Option<System.DateOnly>
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
@@ -100,7 +104,9 @@ module HumanResources =
     type Shift =
         { ShiftID: byte
           Name: string
+          [<SqlHydra.ProviderDbType("Time")>]
           StartTime: System.TimeOnly
+          [<SqlHydra.ProviderDbType("Time")>]
           EndTime: System.TimeOnly
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }

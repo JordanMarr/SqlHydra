@@ -577,23 +577,6 @@ let tests =
             gt0 employeeBirthDates
         }
 
-        testTask "Query Shift with TimeOnly" {
-            use ctx = openContext()
-            
-            let minStartTime = System.TimeOnly(9, 30)
-
-            let shiftsAfter930AM =
-                select {
-                    for s in HumanResources.Shift do
-                    where (s.StartTime >= minStartTime)
-                }
-                |> ctx.Read HydraReader.Read
-
-            // There are 3 shifts: day, evening and night. 
-            // Results should contain 2 shifts: evening and night
-            gt0 shiftsAfter930AM
-        }
-
         testTask "Update Employee DateOnly" {
             use ctx = openContext()
             ctx.BeginTransaction()
@@ -631,6 +614,67 @@ let tests =
             
             Expect.isTrue (actualBirthDate = Some birthDate) ""
             
+            ctx.RollbackTransaction()
+        }
+
+        testTask "Query Shift Record with TimeOnly" {
+            use ctx = openContext()
+            
+            let minStartTime = System.TimeOnly(9, 30)
+
+            let shiftsAfter930AM =
+                select {
+                    for s in HumanResources.Shift do
+                    where (s.StartTime >= minStartTime)
+                }
+                |> ctx.Read HydraReader.Read
+
+            // There are 3 shifts: day, evening and night. 
+            // Results should contain 2 shifts: evening and night
+            gt0 shiftsAfter930AM
+        }
+
+        testTask "Query Shift Column with TimeOnly" {
+            use ctx = openContext()
+            
+            let minStartTime = System.TimeOnly(9, 30)
+
+            let shiftsAfter930AM =
+                select {
+                    for s in HumanResources.Shift do
+                    where (s.StartTime >= minStartTime)
+                    select s.StartTime
+                }
+                |> ctx.Read HydraReader.Read
+
+            // There are 3 shifts: day, evening and night. 
+            // Results should contain 2 shifts: evening and night
+            gt0 shiftsAfter930AM
+        }
+
+        testTask "Update Shift with TimeOnly" {
+            use ctx = openContext()
+            ctx.BeginTransaction()
+            
+            let minStartTime = System.TimeOnly(9, 30)
+            let updatedStartTime = System.TimeOnly(10, 30)
+
+            do! updateTask (Shared ctx) {
+                    for s in HumanResources.Shift do
+                    set s.StartTime updatedStartTime
+                    where (s.StartTime >= minStartTime)
+                }
+
+            let! shiftsat1030AM =
+                selectTask HydraReader.Read (Shared ctx) {
+                    for s in HumanResources.Shift do
+                    where (s.StartTime = updatedStartTime)
+                } 
+
+            // There are 3 shifts: day, evening and night. 
+            // Results should contain 2 shifts: evening and night
+            gt0 shiftsat1030AM
+
             ctx.RollbackTransaction()
         }
 

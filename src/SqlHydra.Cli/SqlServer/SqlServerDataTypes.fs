@@ -28,8 +28,8 @@ let supportedTypeMappings =
         "TEXT",                 "string",                                   DbType.String,              None,                           nameof r.GetString
         "NTEXT",                "string",                                   DbType.String,              None,                           nameof r.GetString
         "DATETIMEOFFSET",       "System.DateTimeOffset",                    DbType.DateTimeOffset,      None,                           nameof r.GetDateTimeOffset
-        "DATE",                 "System.DateOnly",                          DbType.Date,                None,                           "GetDateOnly"
-        "TIME",                 "System.TimeOnly",                          DbType.Time,                None,                           "GetTimeOnly"
+        "DATE",                 "System.DateOnly",                          DbType.Date,                Some (nameof DbType.Date),      "GetDateOnly"
+        "TIME",                 "System.TimeOnly",                          DbType.Time,                Some (nameof DbType.Time),      "GetTimeOnly"
         "DATETIME",             "System.DateTime",                          DbType.DateTime,            Some (nameof DbType.DateTime),  nameof r.GetDateTime
         "DATETIME2",            "System.DateTime",                          DbType.DateTime2,           Some (nameof DbType.DateTime2), nameof r.GetDateTime
         "SMALLDATETIME",        "System.DateTime",                          DbType.DateTime,            Some (nameof DbType.DateTime),  nameof r.GetDateTime        

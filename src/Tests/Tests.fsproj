@@ -63,7 +63,7 @@
     <PackageReference Include="Verify.Expecto" Version="19.12.1" />
     <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.13.3" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" Condition="'$(TargetFramework)' == 'net6.0'" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" Condition="'$(TargetFramework)' == 'net7.0'" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SqlHydra.Query\SqlHydra.Query.fsproj" />
