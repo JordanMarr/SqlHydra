@@ -324,6 +324,17 @@ let getAddressesInCitiesStartingWithS () =
         }
 ```
 
+Try to select a single row (this example returns a `decimal option`):
+```F#
+let tryGetOrderTotal (orderId: int) = 
+        selectAsync HydraReader.Read (Create openContext) {
+            for o in SalesLT.Order do
+            where (o.Id = orderId)
+            select o.Total
+            tryHead
+        }
+```
+
 #### Joins
 
 Select top 10 `Product` entities with inner joined category name:
