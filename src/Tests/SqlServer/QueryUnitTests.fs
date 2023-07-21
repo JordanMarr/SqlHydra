@@ -13,9 +13,9 @@ open SqlServer.AdventureWorksNet7
 
 [<Tests>]
 let tests = 
+    /// String comparisons against generated queries.
     categoryList "SqlServer" "Query Unit Tests" [
 
-        /// String comparisons against generated queries.
         test "Simple Where" {
             let query = 
                 select {
@@ -25,7 +25,19 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.isTrue (sql.Contains("WHERE")) ""
+            Expect.equal sql "SELECT * FROM [Person].[Address] AS [a] WHERE ([a].[City] = @p0) ORDER BY [a].[City]" "Query should match."
+        }
+
+        test "Simple Where - kata" {
+            let query = 
+                select {
+                    for a in Person.Address do
+                    kata (fun query -> query.Where("a.City", "Dallas"))
+                    orderBy a.City
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal sql "SELECT * FROM [Person].[Address] AS [a] WHERE [a].[City] = @p0 ORDER BY [a].[City]" "Query should match."
         }
 
         test "Select 1 Column" {
