@@ -70,6 +70,12 @@ type SelectBuilder<'Selected, 'Mapped> () =
     member this.Zero _ = 
         QuerySource<'T>(Map.empty)
 
+    /// Provides direct access to the underlying SqlKata.Query.
+    [<CustomOperation("kata", MaintainsVariableSpace = true)>]
+    member this.Kata (state: QuerySource<'T, Query>, kata) = 
+        let query = state.Query
+        QuerySource<'T, Query>(query |> kata, state.TableMappings)
+
     /// Sets the WHERE condition
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
     member this.Where (state: QuerySource<'T, Query>, [<ProjectionParameter>] whereExpression) = 
