@@ -91,12 +91,11 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
 
     /// Returns an ADO.NET data reader for a given query.
     member this.GetReaderAsyncWithOptions<'T, 'Reader when 'Reader :> DbDataReader> (query: SelectQuery<'T>, ?cancel: CancellationToken) = 
-        async { // Must wrap in async to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
+        task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
             let cmd = this.BuildCommand(query.ToKataQuery()) // do not dispose cmd
-            let! reader = cmd.ExecuteReaderAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
+            let! reader = cmd.ExecuteReaderAsync(cancel |> Option.defaultValue CancellationToken.None)
             return reader :?> 'Reader
         }
-        |> Async.StartImmediateAsTask
 
     /// Executes a select query with a given readEntity builder function.
     member this.Read<'Entity, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
@@ -115,9 +114,9 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
     /// Executes a select query with a given readEntity builder function and optional args.
     member this.ReadAsyncWithOptions<'Entity, 'Reader when 'Reader :> DbDataReader> 
         (query: SelectQuery<'Entity>, readEntityBuilder: 'Reader -> (unit -> 'Entity), ?cancel: CancellationToken) = 
-        async { // Must wrap in async to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
+        task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
             use cmd = this.BuildCommand (query.ToKataQuery())
-            use! reader = cmd.ExecuteReaderAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
+            use! reader = cmd.ExecuteReaderAsync(cancel |> Option.defaultValue CancellationToken.None)
             let readEntity = readEntityBuilder (reader :?> 'Reader)
             return
                 seq [| 
@@ -125,7 +124,6 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                         readEntity () 
                 |]
         }
-        |> Async.StartImmediateAsTask
 
     /// Executes a select query with a given readEntity builder function for a single (option) result.
     member this.ReadOne<'Entity, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
@@ -138,11 +136,10 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
     /// Executes a select query with a given readEntity builder function for a single (option) result with optional args.
     member this.ReadOneAsyncWithOptions<'Entity, 'Reader when 'Reader :> DbDataReader>
         (query: SelectQuery<'Entity>, readEntityBuilder: 'Reader -> (unit -> 'Entity), ?cancel: CancellationToken) = 
-        async { // Must wrap in async to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
-            let! entities = this.ReadAsyncWithOptions (query, readEntityBuilder, cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
+        task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
+            let! entities = this.ReadAsyncWithOptions (query, readEntityBuilder, cancel |> Option.defaultValue CancellationToken.None)
             return entities |> Seq.tryHead
         }
-        |> Async.StartImmediateAsTask
 
     member this.Insert<'T, 'InsertReturn when 'InsertReturn : struct> (iq: InsertQuery<'T, 'InsertReturn>) = 
         let query = iq.ToKataQuery()
@@ -207,7 +204,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         this.InsertAsyncWithOptions(query)
     
     member this.InsertAsyncWithOptions<'T, 'InsertReturn when 'InsertReturn : struct> (iq: InsertQuery<'T, 'InsertReturn>, ?cancel: CancellationToken) = 
-        async { // Must wrap in async to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
+        task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
             let query = iq.ToKataQuery()
             use cmd = this.BuildCommand(query)
 
@@ -247,11 +244,11 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                     outputParam.DbType <- Data.DbType.Decimal
                     outputParam.Direction <- Data.ParameterDirection.Output
                     cmd.Parameters.Add(outputParam) |> ignore
-                    let! _ = cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
+                    let! _ = cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None)
                     // 'InsertReturn type set via `getId` in the builder
                     return Convert.ChangeType(outputParam.Value, typeof<'InsertReturn>) :?> 'InsertReturn
                 else
-                    let! identity = cmd.ExecuteScalarAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
+                    let! identity = cmd.ExecuteScalarAsync(cancel |> Option.defaultValue CancellationToken.None)
                     // 'InsertReturn type set via `getId` in the builder
                     return Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
@@ -263,11 +260,10 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 if compiler :? SqlKata.Compilers.OracleCompiler && iq.Spec.Entities.Length > 1 
                 then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixMultiInsertQuery 
                         
-                let! results = cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
+                let! results = cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None)
                 // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
                 return Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
         }
-        |> Async.StartImmediateAsTask
     
     member this.Update (query: UpdateQuery<'T>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
@@ -277,11 +273,10 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         this.UpdateAsyncWithOptions(query)
     
     member this.UpdateAsyncWithOptions (query: UpdateQuery<'T>, ?cancel: CancellationToken) = 
-        async { // Must wrap in async to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
+        task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
             use cmd = this.BuildCommand(query.ToKataQuery())
-            return! cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
+            return! cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None)
         }
-        |> Async.StartImmediateAsTask
 
     member this.Delete (query: DeleteQuery<'T>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
@@ -291,11 +286,10 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         this.DeleteAsyncWithOptions(query)
 
     member this.DeleteAsyncWithOptions (query: DeleteQuery<'T>, ?cancel: CancellationToken) = 
-        async { // Must wrap in async to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
+        task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
             use cmd = this.BuildCommand(query.ToKataQuery())
-            return! cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
+            return! cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None)
         }
-        |> Async.StartImmediateAsTask
 
     member this.Count (query: SelectQuery<int>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
@@ -307,12 +301,9 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         this.CountAsyncWithOptions(query)
 
     member this.CountAsyncWithOptions (query: SelectQuery<int>, ?cancel: CancellationToken) = 
-        async { // Must wrap in async to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
+        task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
             use cmd = this.BuildCommand(query.ToKataQuery())
-            let! count = cmd.ExecuteScalarAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
-            return 
-                match count with
-                | :? int64 as value -> Convert.ToInt32 value
-                | _ -> count :?> int
+            match! cmd.ExecuteScalarAsync(cancel |> Option.defaultValue CancellationToken.None) with
+            | :? int64 as count -> return Convert.ToInt32 count
+            | count -> return count :?> int
         }
-        |> Async.StartImmediateAsTask
