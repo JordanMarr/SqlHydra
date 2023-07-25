@@ -247,7 +247,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                     outputParam.DbType <- Data.DbType.Decimal
                     outputParam.Direction <- Data.ParameterDirection.Output
                     cmd.Parameters.Add(outputParam) |> ignore
-                    let! _ = cmd.ExecuteNonQueryAsync() |> Async.AwaitTask
+                    let! _ = cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None) |> Async.AwaitTask
                     // 'InsertReturn type set via `getId` in the builder
                     return Convert.ChangeType(outputParam.Value, typeof<'InsertReturn>) :?> 'InsertReturn
                 else
