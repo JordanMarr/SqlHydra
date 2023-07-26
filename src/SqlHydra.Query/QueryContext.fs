@@ -47,21 +47,52 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
 
     member val Transaction : DbTransaction option = None with get,set
 
-    member this.BeginTransaction(?isolationLevel: Data.IsolationLevel) = 
+    member this.BeginTransaction(?isolationLevel: Data.IsolationLevel) =
         this.Transaction <- 
             match isolationLevel with
             | Some il -> conn.BeginTransaction(il) |> Some
             | None -> conn.BeginTransaction() |> Some
 
-    member this.CommitTransaction() = 
+#if NETSTANDARD2_1_OR_GREATER
+    // Return ValueTask to mirror DbConnection.BeginTransactionAsync, so that if F# ever gets a ValueTask CE we can use it here
+    member this.BeginTransactionAsync(?isolationLevel: Data.IsolationLevel, ?cancellationToken: CancellationToken) = ValueTask <| task {
+        let! trans =
+            match isolationLevel with
+            | Some il -> conn.BeginTransactionAsync(il, ?cancellationToken = cancellationToken)
+            | None -> conn.BeginTransactionAsync(?cancellationToken = cancellationToken)
+        this.Transaction <- Some trans
+    }
+#endif
+    
+    member this.CommitTransaction() =
         match this.Transaction with
         | Some t -> t.Commit(); this.Transaction <- None
         | None -> failwith "No transaction was started."
+        
+#if NETSTANDARD2_1_OR_GREATER
+    member this.CommitTransactionAsync(?cancellationToken: CancellationToken) = task { 
+        match this.Transaction with
+        | Some t ->
+            do! t.CommitAsync(?cancellationToken = cancellationToken)
+            this.Transaction <- None
+        | None -> failwith "No transaction was started."
+    }
+#endif
 
     member this.RollbackTransaction() =
         match this.Transaction with
         | Some t -> t.Rollback(); this.Transaction <- None
         | None -> failwith "No transaction was started."
+        
+#if NETSTANDARD2_1_OR_GREATER
+    member this.RollbackTransactionAsync(?cancellationToken: CancellationToken) = task {
+        match this.Transaction with
+        | Some t ->
+            do! t.RollbackAsync(?cancellationToken = cancellationToken)
+            this.Transaction <- None
+        | None -> failwith "No transaction was started."
+    }
+#endif
 
     member private this.TrySetTransaction(cmd: DbCommand) =
         this.Transaction |> Option.iter (fun t -> cmd.Transaction <- t)
