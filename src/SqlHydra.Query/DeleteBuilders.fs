@@ -72,16 +72,15 @@ type DeleteTaskBuilder<'Deleted>(ct: ContextType, cancellationToken: Cancellatio
     new(ct) = DeleteTaskBuilder(ct, CancellationToken.None)
 
     member this.Run (state: QuerySource<'Deleted, Query>) = 
-        Async.StartImmediateAsTask (cancellationToken = cancellationToken, computation = async {
+        task {
             let deleteQuery = state.Query |> prepareDeleteQuery
             let ctx = ContextUtils.getContext ct
             try
-                let! cancel = Async.CancellationToken
-                let! result = ctx.DeleteAsyncWithOptions (deleteQuery, cancel) |> Async.AwaitTask
+                let! result = ctx.DeleteAsyncWithOptions (deleteQuery, cancellationToken) |> Async.AwaitTask
                 return result
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
-        })
+        }
     
 /// Builds and returns a delete query that can be manually run by piping into QueryContext delete methods
 let delete<'Deleted> = 

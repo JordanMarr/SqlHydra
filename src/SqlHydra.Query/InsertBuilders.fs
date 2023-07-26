@@ -110,16 +110,15 @@ type InsertTaskBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct:
     new(ct) = InsertTaskBuilder(ct, CancellationToken.None)
 
     member this.Run (state: QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>) = 
-        Async.StartImmediateAsTask(cancellationToken = cancellationToken, computation = async {
+        task {
             let ctx = ContextUtils.getContext ct
             try 
                 let insertQuery = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
-                let! cancel = Async.CancellationToken
-                let! insertReturn = ctx.InsertAsyncWithOptions (insertQuery, cancel) |> Async.AwaitTask
+                let! insertReturn = ctx.InsertAsyncWithOptions (insertQuery, cancellationToken) |> Async.AwaitTask
                 return insertReturn
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
-        })
+        }
 
 
 /// Builds an insert query that can be manually run by piping into QueryContext insert methods

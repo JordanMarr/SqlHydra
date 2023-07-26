@@ -112,16 +112,15 @@ type UpdateTaskBuilder<'Updated>(ct: ContextType, cancellationToken: Cancellatio
     new(ct) = UpdateTaskBuilder(ct, CancellationToken.None)
 
     member this.Run (state: QuerySource<'Updated, UpdateQuerySpec<'Updated>>) = 
-        Async.StartImmediateAsTask (cancellationToken = cancellationToken, computation = async {
+        task {
             let updateQuery = state.Query |> prepareUpdateQuery
             let ctx = ContextUtils.getContext ct
             try
-                let! cancel = Async.CancellationToken
-                let! result = ctx.UpdateAsyncWithOptions (updateQuery, cancel) |> Async.AwaitTask
+                let! result = ctx.UpdateAsyncWithOptions (updateQuery, cancellationToken) |> Async.AwaitTask
                 return result
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
-        })
+        }
 
 
 /// Builds and returns an update query that can be manually run by piping into QueryContext update methods
