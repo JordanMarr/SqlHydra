@@ -1,6 +1,7 @@
-﻿namespace SqlHydra.Query
+namespace SqlHydra.Query
 
 open System
+open System.Collections.Generic
 open System.Data.Common
 open System.Threading
 open SqlKata
@@ -114,15 +115,23 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
     /// Executes a select query with a given readEntity builder function and optional args.
     member this.ReadAsyncWithOptions<'Entity, 'Reader when 'Reader :> DbDataReader> 
         (query: SelectQuery<'Entity>, readEntityBuilder: 'Reader -> (unit -> 'Entity), ?cancel: CancellationToken) = 
+        
+        let cancel = defaultArg cancel CancellationToken.None
+        
         task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
             use cmd = this.BuildCommand (query.ToKataQuery())
-            use! reader = cmd.ExecuteReaderAsync(cancel |> Option.defaultValue CancellationToken.None)
+            use! reader = cmd.ExecuteReaderAsync(cancel)
             let readEntity = readEntityBuilder (reader :?> 'Reader)
-            return
-                seq [| 
-                    while reader.Read() do
-                        readEntity () 
-                |]
+            let results = List<'Entity>()
+            
+            let! initialMoreEntities = reader.ReadAsync(cancel)
+            let mutable moreEntities = initialMoreEntities
+            while moreEntities && not cancel.IsCancellationRequested do
+                results.Add(readEntity ())
+                let! moreEntities' = reader.ReadAsync(cancel)
+                moreEntities <- moreEntities'
+            
+            return results
         }
 
     /// Executes a select query with a given readEntity builder function for a single (option) result.
@@ -259,7 +268,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 // Fix Oracle multi-insert query
                 if compiler :? SqlKata.Compilers.OracleCompiler && iq.Spec.Entities.Length > 1 
                 then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixMultiInsertQuery 
-                        
+                
                 let! results = cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None)
                 // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
                 return Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
