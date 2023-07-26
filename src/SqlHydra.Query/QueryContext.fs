@@ -4,6 +4,7 @@ open System
 open System.Collections.Generic
 open System.Data.Common
 open System.Threading
+open System.Threading.Tasks
 open SqlKata
 
 /// Contains methods that compile and read a query.
@@ -28,7 +29,19 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             conn.Dispose()
             this.Transaction |> Option.iter (fun t -> t.Dispose())
             this.Transaction <- None
-
+    
+#if NETSTANDARD2_1_OR_GREATER
+    interface IAsyncDisposable with
+        member this.DisposeAsync() =
+            task {
+                do! conn.DisposeAsync()
+                match this.Transaction with
+                | Some t -> do! t.DisposeAsync()
+                | None -> ()
+                this.Transaction <- None
+            } |> ValueTask
+#endif
+    
     member this.Connection = conn
     member this.Compiler = compiler
 
