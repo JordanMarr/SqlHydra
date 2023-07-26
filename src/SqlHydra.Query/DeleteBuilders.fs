@@ -2,6 +2,7 @@
 [<AutoOpen>]
 module SqlHydra.Query.DeleteBuilders
 
+open System.Threading
 open SqlKata
 
 let private prepareDeleteQuery<'Deleted> (query: Query) = 
@@ -55,8 +56,9 @@ type DeleteAsyncBuilder<'Deleted>(ct: ContextType) =
         async {
             let deleteQuery = state.Query |> prepareDeleteQuery
             let ctx = ContextUtils.getContext ct
-            try 
-                let! result = deleteQuery |> ctx.DeleteAsync |> Async.AwaitTask
+            try
+                let! cancel = Async.CancellationToken
+                let! result = ctx.DeleteAsyncWithOptions (deleteQuery, cancel) |> Async.AwaitTask
                 return result
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
@@ -64,20 +66,22 @@ type DeleteAsyncBuilder<'Deleted>(ct: ContextType) =
 
 
 /// A delete builder that returns a Task result.
-type DeleteTaskBuilder<'Deleted>(ct: ContextType) =
+type DeleteTaskBuilder<'Deleted>(ct: ContextType, cancellationToken: CancellationToken) =
     inherit DeleteBuilder<'Deleted>()
+    
+    new(ct) = DeleteTaskBuilder(ct, CancellationToken.None)
 
     member this.Run (state: QuerySource<'Deleted, Query>) = 
-        async {
+        Async.StartImmediateAsTask (cancellationToken = cancellationToken, computation = async {
             let deleteQuery = state.Query |> prepareDeleteQuery
             let ctx = ContextUtils.getContext ct
-            try 
-                let! result = deleteQuery |> ctx.DeleteAsync |> Async.AwaitTask
+            try
+                let! cancel = Async.CancellationToken
+                let! result = ctx.DeleteAsyncWithOptions (deleteQuery, cancel) |> Async.AwaitTask
                 return result
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
-        }
-        |> Async.StartImmediateAsTask
+        })
     
 /// Builds and returns a delete query that can be manually run by piping into QueryContext delete methods
 let delete<'Deleted> = 
@@ -90,3 +94,8 @@ let deleteAsync<'Deleted> ct =
 /// Builds and returns a delete query that returns a Task result
 let deleteTask<'Deleted> ct = 
     DeleteTaskBuilder<'Deleted>(ct)
+    
+/// Builds and returns a delete query with a QueryContext and a CancellationToken - returns a Task result
+let deleteTaskCancellable<'Deleted> ct cancellationToken = 
+    DeleteTaskBuilder<'Deleted>(ct, cancellationToken)
+    

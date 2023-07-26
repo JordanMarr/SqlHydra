@@ -5,6 +5,7 @@ module SqlHydra.Query.SelectBuilders
 open System
 open System.Linq.Expressions
 open System.Data.Common
+open System.Threading
 open SqlKata
 
 type ContextType = 
@@ -345,32 +346,34 @@ type SelectQueryBuilder<'Selected, 'Mapped> () =
 
 /// A select builder that returns a Task result.
 type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
-    readEntityBuilder: 'Reader -> (unit -> 'Selected), ct: ContextType) =
+    readEntityBuilder: 'Reader -> (unit -> 'Selected), ct: ContextType, cancellationToken: CancellationToken) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
+    new(readEntityBuilder, ct) = SelectTaskBuilder(readEntityBuilder, ct, CancellationToken.None)
+    
     member this.RunSelected(query: Query, resultModifier) =
-        async {
+        Async.StartImmediateAsTask (cancellationToken = cancellationToken, computation = async {
             let ctx = ContextUtils.getContext ct
             try 
                 let selectQuery = SelectQuery<'Selected>(query)
-                let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
+                let! cancel = Async.CancellationToken
+                let! results = ctx.ReadAsyncWithOptions (selectQuery, readEntityBuilder, cancel) |> Async.AwaitTask
                 return results |> resultModifier
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
-        }
-        |> Async.StartImmediateAsTask
+        })
 
     member this.RunMapped(query: Query, resultModifier) =
-        async {
+        Async.StartImmediateAsTask (cancellationToken = cancellationToken, computation = async {
             let ctx = ContextUtils.getContext ct
             try 
                 let selectQuery = SelectQuery<'Selected>(query)
-                let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
+                let! cancel = Async.CancellationToken
+                let! results = ctx.ReadAsyncWithOptions (selectQuery, readEntityBuilder, cancel) |> Async.AwaitTask
                 return results |> Seq.map this.MapFn.Value.Invoke |> resultModifier
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
-        }
-        |> Async.StartImmediateAsTask
+        })
 
     /// Run: default
     /// Called when no mapSeq, mapArray or mapList is present; 
@@ -408,12 +411,12 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
 
     // Run: count
     member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =
-        async {
+        Async.StartImmediateAsTask (cancellationToken = cancellationToken, computation = async {
             let ctx = ContextUtils.getContext ct
-            try return! ctx.CountAsync (SelectQuery<int>(state.Query)) |> Async.AwaitTask
+            let! cancel = Async.CancellationToken
+            try return! ctx.CountAsyncWithOptions (SelectQuery<int>(state.Query), cancel) |> Async.AwaitTask
             finally ContextUtils.disposeIfNotShared ct ctx
-        }
-        |> Async.StartImmediateAsTask
+        })
 
 
 /// A select builder that returns an Async result.
@@ -426,7 +429,8 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
             let ctx = ContextUtils.getContext ct
             try 
                 let selectQuery = SelectQuery<'Selected>(query)
-                let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
+                let! cancel = Async.CancellationToken
+                let! results = ctx.ReadAsyncWithOptions (selectQuery, readEntityBuilder, cancel) |> Async.AwaitTask
                 return results |> resultModifier
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
@@ -437,7 +441,8 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
             let ctx = ContextUtils.getContext ct
             try 
                 let selectQuery = SelectQuery<'Selected>(query)
-                let! results = selectQuery |> ctx.ReadAsync readEntityBuilder |> Async.AwaitTask
+                let! cancel = Async.CancellationToken
+                let! results = ctx.ReadAsyncWithOptions (selectQuery, readEntityBuilder, cancel) |> Async.AwaitTask
                 return results |> Seq.map this.MapFn.Value.Invoke |> resultModifier
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
@@ -481,7 +486,8 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
     member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =
         async {
             let ctx = ContextUtils.getContext ct
-            try return! ctx.CountAsync (SelectQuery<int>(state.Query)) |> Async.AwaitTask
+            let! cancel = Async.CancellationToken
+            try return! ctx.CountAsyncWithOptions (SelectQuery<int>(state.Query), cancel) |> Async.AwaitTask
             finally ContextUtils.disposeIfNotShared ct ctx
         }
 
@@ -497,4 +503,8 @@ let selectAsync<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readE
 /// Builds a select query with a HydraReader.Read function and QueryContext - returns a Task query result
 let selectTask<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ct = 
     SelectTaskBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, ct)
+    
+/// Builds a select query with a HydraReader.Read function, QueryContext, and CancellationToken - returns a Task query result
+let selectTaskCancellable<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ct (cancellationToken: CancellationToken) = 
+    SelectTaskBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, ct, cancellationToken)
 

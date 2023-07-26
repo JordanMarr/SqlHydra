@@ -3,6 +3,7 @@
 module SqlHydra.Query.InsertBuilders
 
 open System
+open System.Threading
 
 /// The base insert builder that contains all common operations
 type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
@@ -94,7 +95,8 @@ type InsertAsyncBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct
             let ctx = ContextUtils.getContext ct            
             try 
                 let insertQuery = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
-                let! insertReturn = insertQuery |> ctx.InsertAsync |> Async.AwaitTask
+                let! cancel = Async.CancellationToken
+                let! insertReturn = ctx.InsertAsyncWithOptions (insertQuery, cancel) |> Async.AwaitTask
                 return insertReturn
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
@@ -102,20 +104,22 @@ type InsertAsyncBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct
 
 
 /// An insert builder that returns an Async result.
-type InsertTaskBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct: ContextType) =
+type InsertTaskBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct: ContextType, cancellationToken: CancellationToken) =
     inherit InsertBuilder<'Inserted, 'InsertReturn>()
+    
+    new(ct) = InsertTaskBuilder(ct, CancellationToken.None)
 
     member this.Run (state: QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>) = 
-        async {
+        Async.StartImmediateAsTask(cancellationToken = cancellationToken, computation = async {
             let ctx = ContextUtils.getContext ct
             try 
                 let insertQuery = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
-                let! insertReturn = insertQuery |> ctx.InsertAsync |> Async.AwaitTask
+                let! cancel = Async.CancellationToken
+                let! insertReturn = ctx.InsertAsyncWithOptions (insertQuery, cancel) |> Async.AwaitTask
                 return insertReturn
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
-        }
-        |> Async.StartImmediateAsTask
+        })
 
 
 /// Builds an insert query that can be manually run by piping into QueryContext insert methods
@@ -129,3 +133,7 @@ let insertAsync<'Inserted, 'InsertReturn when 'InsertReturn : struct> ct =
 /// Builds an insert query that returns a Task result
 let insertTask<'Inserted, 'InsertReturn when 'InsertReturn : struct> ct = 
     InsertTaskBuilder<'Inserted, 'InsertReturn>(ct)
+    
+/// Builds an insert query with a CancellationToken - returns a Task result
+let insertTaskCancellable<'Inserted, 'InsertReturn when 'InsertReturn : struct> ct cancellationToken =
+    InsertTaskBuilder<'Inserted, 'InsertReturn>(ct, cancellationToken)

@@ -4,6 +4,7 @@ module SqlHydra.Query.UpdateBuilders
 
 open System
 open System.Linq.Expressions
+open System.Threading
 
 let private prepareUpdateQuery<'Updated> spec = 
     if spec.Where = None && spec.UpdateAll = false
@@ -95,8 +96,9 @@ type UpdateAsyncBuilder<'Updated>(ct: ContextType) =
         async {
             let updateQuery = state.Query |> prepareUpdateQuery
             let ctx = ContextUtils.getContext ct
-            try 
-                let! result = updateQuery |> ctx.UpdateAsync |> Async.AwaitTask
+            try
+                let! cancel = Async.CancellationToken
+                let! result = ctx.UpdateAsyncWithOptions (updateQuery, cancel) |> Async.AwaitTask
                 return result
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
@@ -104,20 +106,22 @@ type UpdateAsyncBuilder<'Updated>(ct: ContextType) =
 
 
 /// An update builder that returns a Task result.
-type UpdateTaskBuilder<'Updated>(ct: ContextType) =
+type UpdateTaskBuilder<'Updated>(ct: ContextType, cancellationToken: CancellationToken) =
     inherit UpdateBuilder<'Updated>()
+    
+    new(ct) = UpdateTaskBuilder(ct, CancellationToken.None)
 
     member this.Run (state: QuerySource<'Updated, UpdateQuerySpec<'Updated>>) = 
-        async {
+        Async.StartImmediateAsTask (cancellationToken = cancellationToken, computation = async {
             let updateQuery = state.Query |> prepareUpdateQuery
             let ctx = ContextUtils.getContext ct
-            try 
-                let! result = updateQuery |> ctx.UpdateAsync |> Async.AwaitTask
+            try
+                let! cancel = Async.CancellationToken
+                let! result = ctx.UpdateAsyncWithOptions (updateQuery, cancel) |> Async.AwaitTask
                 return result
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
-        }
-        |> Async.StartImmediateAsTask
+        })
 
 
 /// Builds and returns an update query that can be manually run by piping into QueryContext update methods
@@ -131,3 +135,8 @@ let updateAsync<'Updated> ct =
 /// Builds an update query that returns a Task result
 let updateTask<'Updated> ct = 
     UpdateTaskBuilder<'Updated>(ct)
+    
+/// Builds an update query with a QueryContext and CancellationToken - returns a Task result
+let updateTaskCancellable<'Updated> ct cancellationToken = 
+    UpdateTaskBuilder<'Updated>(ct, cancellationToken)
+    
