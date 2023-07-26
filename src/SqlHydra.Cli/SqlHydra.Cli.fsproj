@@ -14,7 +14,8 @@
 			NU1504
 		</NoWarn>
 		<Authors>Jordan Marr</Authors>
-		<Description></Description>
+		<Description>SqlHydra.Cli is a dotnet tool that generates F# types for SQL Server, PostgreSQL, Sqlite and Oracle databases.</Description>
+		<PackageTags>F# fsharp data database orm sql codegen typeprovider</PackageTags>
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>sqlhydra</ToolCommandName>
 		<PackageOutputPath>./nupkg</PackageOutputPath>

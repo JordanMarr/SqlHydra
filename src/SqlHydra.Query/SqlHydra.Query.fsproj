@@ -5,7 +5,7 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<WarnOn>3390;$(WarnOn)</WarnOn>
 		<Version>2.0.3-beta</Version>
-		<Description>SqlHydra.Query is an F# query builder powered by SqlKata.Query that supports SQL Server, PostgreSQL and Sqlite.</Description>
+		<Description>SqlHydra.Query is an F# query builder powered by SqlKata.Query that supports SQL Server, PostgreSQL, Sqlite and Oracle.</Description>
 		<WarningsAsErrors>
 			<!-- Incomplete pattern matches on this expression. -->
 			FS0025
