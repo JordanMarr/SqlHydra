@@ -1,10 +1,8 @@
 namespace SqlHydra.Query
 
 open System
-open System.Collections.Generic
 open System.Data.Common
 open System.Threading
-open System.Threading.Tasks
 open SqlKata
 
 /// Contains methods that compile and read a query.
@@ -159,23 +157,21 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
     /// Executes a select query with a given readEntity builder function and optional args.
     member this.ReadAsyncWithOptions<'Entity, 'Reader when 'Reader :> DbDataReader> 
         (query: SelectQuery<'Entity>, readEntityBuilder: 'Reader -> (unit -> 'Entity), ?cancel: CancellationToken) = 
-        
-        let cancel = defaultArg cancel CancellationToken.None
-        
         task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
+            let cancel = defaultArg cancel CancellationToken.None
             use cmd = this.BuildCommand (query.ToKataQuery())
             use! reader = cmd.ExecuteReaderAsync(cancel)
             let readEntity = readEntityBuilder (reader :?> 'Reader)
-            let results = List<'Entity>()
+            let results = ResizeArray<'Entity>()
             
-            let! initialMoreEntities = reader.ReadAsync(cancel)
-            let mutable moreEntities = initialMoreEntities
-            while moreEntities && not cancel.IsCancellationRequested do
+            let! hasMore = reader.ReadAsync(cancel)
+            let mutable hasMore = hasMore
+            while hasMore && not cancel.IsCancellationRequested do
                 results.Add(readEntity ())
-                let! moreEntities' = reader.ReadAsync(cancel)
-                moreEntities <- moreEntities'
+                let! hasMore' = reader.ReadAsync(cancel)
+                hasMore <- hasMore'
             
-            return results
+            return results :> seq<'Entity>
         }
 
     /// Executes a select query with a given readEntity builder function for a single (option) result.
