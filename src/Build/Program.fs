@@ -6,16 +6,16 @@ open Fake.Core
 open Fake.DotNet
 open Fake.IO.FileSystemOperators
 open Fake.Core.TargetOperators
+open System.Xml.Linq
 
 // Initialize FAKE context
 Setup.context()
 
-let path xs = Path.Combine(Array.ofList xs)
 let slnRoot = Files.findParent __SOURCE_DIRECTORY__ "SqlHydra.sln";
 
-let query = path [ slnRoot; "SqlHydra.Query" ]
-let cli = path [ slnRoot; "SqlHydra.Cli" ]
-let tests = path [ slnRoot; "Tests" ]
+let query = slnRoot </> "SqlHydra.Query"
+let cli = slnRoot </> "SqlHydra.Cli"
+let tests = slnRoot </> "Tests"
 
 let allPackages = [ query; cli ]
 
@@ -67,14 +67,16 @@ Target.create "Publish" <| fun _ ->
     
     let getProjectVersion (projDir: string) = 
         let projName = DirectoryInfo(projDir).Name
-        let dllPath = projDir </> "bin" </> "Release" </> "net6.0" </> $"{projName}.dll"
-        System.Reflection.AssemblyName.GetAssemblyName(dllPath).Version
+        let doc = XDocument.Load($"{projDir}/{projName}.fsproj")
+        doc.Descendants("Version") |> Seq.tryHead
+        |> Option.map (fun versionElement -> versionElement.Value)
+        |> Option.defaultWith (fun () -> failwith $"Could not find a <Version> element in '{projName}.fsproj'.")
 
     allPackages
     |> List.map (fun projDir ->
-        let version = getProjectVersion projDir
         let projName = DirectoryInfo(projDir).Name
-        let nupkgFilename = $"{projName}.{version.Major}.{version.Minor}.{version.Build}.nupkg"
+        let version = getProjectVersion projDir
+        let nupkgFilename = $"%s{projName}.%s{version}.nupkg"
         projDir </> "nupkg" </> "Release" </> nupkgFilename
     )
     |> List.map (fun nupkgFilepath -> Shell.Exec(Tools.dotnet, $"nuget push {nupkgFilepath} -s nuget.org -k {nugetKey} --skip-duplicate"), nupkgFilepath)
