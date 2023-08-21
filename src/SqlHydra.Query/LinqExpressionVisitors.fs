@@ -331,11 +331,11 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
                 then query.WhereNull(fqCol)
                 else query.WhereNotNull(fqCol)
             | _ -> notImpl()
-        | BoolMember m -> // `where user.IsEnabled`
+        | BoolMember (Property m) -> // `where user.IsEnabled`; `where (user.IsEnabled.Value)`
             let alias = visitAlias m.Expression
             let fqCol = qualifyColumn alias m.Member
             query.Where(fqCol, "=", true)
-        | Not (BoolMember m) -> // `where (not user.IsEnabled)`. NOTE: This must exist before `Not` handler.
+        | Not (BoolMember (Property m)) -> // `where (not user.IsEnabled)`; `where (not user.IsEnabled.Value); NOTE: This must exist before `Not` handler.
             let alias = visitAlias m.Expression
             let fqCol = qualifyColumn alias m.Member
             query.Where(fqCol, "=", false)
