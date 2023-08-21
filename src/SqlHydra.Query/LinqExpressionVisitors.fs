@@ -120,15 +120,6 @@ module VisitorPatterns =
         | Member m when m.Type = typeof<bool> -> Some m
         | _ -> None
 
-    let (|NotBoolMember|_|) (exp: Expression) = 
-        match exp.NodeType with
-        | ExpressionType.Not -> 
-            let unaryExp = exp :?> UnaryExpression
-            match unaryExp.Operand with
-            | Member m when m.Type = typeof<bool> -> Some m
-            | _ -> None
-        | _ -> None
-
     let (|Parameter|_|) (exp: Expression) =
         match exp.NodeType with
         | ExpressionType.Parameter -> Some (exp :?> ParameterExpression)
@@ -139,7 +130,7 @@ module SqlPatterns =
 
     let (|Not|_|) (exp: Expression) = 
         match exp.NodeType with
-        | ExpressionType.Not -> Some (exp :?> UnaryExpression)
+        | ExpressionType.Not -> Some ((exp :?> UnaryExpression).Operand)
         | _ -> None
 
     let (|BinaryAnd|_|) (exp: Expression) =
@@ -344,12 +335,12 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
             let alias = visitAlias m.Expression
             let fqCol = qualifyColumn alias m.Member
             query.Where(fqCol, "=", true)
-        | NotBoolMember m -> // `where (not user.IsEnabled)`. NOTE: This must exist before `Not` handler.
+        | Not (BoolMember m) -> // `where (not user.IsEnabled)`. NOTE: This must exist before `Not` handler.
             let alias = visitAlias m.Expression
             let fqCol = qualifyColumn alias m.Member
             query.Where(fqCol, "=", false)
-        | Not x ->
-            let operand = visit x.Operand (Query())
+        | Not operand ->
+            let operand = visit operand (Query())
             query.WhereNot(fun q -> operand)
         | BinaryAnd x ->
             let lt = visit x.Left (Query())
@@ -418,8 +409,8 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string 
     let rec visit (exp: Expression) (query: Query) : Query =
         match exp with
         | Lambda x -> visit x.Body query
-        | Not x -> 
-            let operand = visit x.Operand (Query())
+        | Not operand -> 
+            let operand = visit operand (Query())
             query.HavingNot(fun q -> operand)
         | MethodCall m when m.Method.Name = "Invoke" ->
             // Handle tuples
