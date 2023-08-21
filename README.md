@@ -457,6 +457,31 @@ let! customersWithNoSalesPersonCount =
     }
 ```
 
+💥 In some cases when selecting an aggregate of a non-NULL column, the database will still return NULL if the query result set is empty, for example if selecting the MAX of an INT column in an empty table. This is not supported and will throw an exception. If your query might return NULL for the aggregate of a non-NULL column, you may include `Some` in the aggregate to support parsing the NULL as an `Option` value:
+
+❌ INCORRECT:
+```F#
+/// Select the minimum item price above a threshold
+let getNextLowestPrice threshold = 
+    selectTask HydraReader.Read (Create openContext) {
+        for p in SalesLT.Product do
+        where (p.ListPrice > threshold)
+        select (minBy p.ListPrice)
+    }
+```
+
+✅ CORRECT:
+```F#
+/// Select the minimum item price above a threshold
+let getNextLowestPrice threshold = 
+    selectTask HydraReader.Read (Create openContext) {
+        for p in SalesLT.Product do
+        where (p.ListPrice > threshold)
+        select (minBy (Some p.ListPrice))
+    }
+```
+
+
 #### WHERE Subqueries
 
 _Use the `subqueryMany` function for subqueries that return multiple rows for comparison:_
