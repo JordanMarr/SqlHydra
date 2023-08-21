@@ -115,6 +115,20 @@ module VisitorPatterns =
         | ExpressionType.MemberAccess -> Some (exp :?> MemberExpression)
         | _ -> None
 
+    let (|BoolMember|_|) (exp: Expression) = 
+        match exp with
+        | Member m when m.Type = typeof<bool> -> Some m
+        | _ -> None
+
+    let (|NotBoolMember|_|) (exp: Expression) = 
+        match exp.NodeType with
+        | ExpressionType.Not -> 
+            let unaryExp = exp :?> UnaryExpression
+            match unaryExp.Operand with
+            | Member m when m.Type = typeof<bool> -> Some m
+            | _ -> None
+        | _ -> None
+
     let (|Parameter|_|) (exp: Expression) =
         match exp.NodeType with
         | ExpressionType.Parameter -> Some (exp :?> ParameterExpression)
@@ -256,9 +270,6 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
     let rec visit (exp: Expression) (query: Query) : Query =
         match exp with
         | Lambda x -> visit x.Body query
-        | Not x -> 
-            let operand = visit x.Operand (Query())
-            query.WhereNot(fun q -> operand)
         | MethodCall m when m.Method.Name = "Invoke" ->
             // Handle tuples
             visit m.Object (Query())
@@ -329,6 +340,17 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
                 then query.WhereNull(fqCol)
                 else query.WhereNotNull(fqCol)
             | _ -> notImpl()
+        | BoolMember m -> // `where user.IsEnabled`
+            let alias = visitAlias m.Expression
+            let fqCol = qualifyColumn alias m.Member
+            query.Where(fqCol, "=", true)
+        | NotBoolMember m -> // `where (not user.IsEnabled)`. NOTE: This must exist before `Not` handler.
+            let alias = visitAlias m.Expression
+            let fqCol = qualifyColumn alias m.Member
+            query.Where(fqCol, "=", false)
+        | Not x ->
+            let operand = visit x.Operand (Query())
+            query.WhereNot(fun q -> operand)
         | BinaryAnd x ->
             let lt = visit x.Left (Query())
             let rt = visit x.Right (Query())

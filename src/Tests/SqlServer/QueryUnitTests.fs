@@ -76,6 +76,28 @@ let tests =
             Expect.isTrue (sql.Contains("SELECT [o].*, [d].[LineTotal] FROM")) ""
         }
 
+        test "Where bool" {
+            let query =
+                select {
+                    for o in Sales.SalesOrderHeader do
+                    where o.OnlineOrderFlag
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE ([o].[OnlineOrderFlag] = cast(1 as bit))")) ""
+        }
+
+        test "Where bool negated" {
+            let query =
+                select {
+                    for o in Sales.SalesOrderHeader do
+                    where (not o.OnlineOrderFlag)
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE ([o].[OnlineOrderFlag] = cast(0 as bit))")) ""
+        }
+
         ptest "Where with Option Type" {
             let query = 
                 select {
