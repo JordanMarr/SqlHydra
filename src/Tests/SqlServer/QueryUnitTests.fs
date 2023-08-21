@@ -11,6 +11,11 @@ open SqlServer.AdventureWorksNet6
 open SqlServer.AdventureWorksNet7
 #endif
 
+type OptionalBoolEntity = 
+    {
+        QuestionAnswered: bool option
+    }
+
 [<Tests>]
 let tests = 
     /// String comparisons against generated queries.
@@ -96,6 +101,28 @@ let tests =
 
             let sql = query.ToKataQuery() |> toSql
             Expect.isTrue (sql.Contains("WHERE ([o].[OnlineOrderFlag] = cast(0 as bit))")) ""
+        }
+
+        test "Where bool option" {
+            let query =
+                select {
+                    for o in table<OptionalBoolEntity> do
+                    where o.QuestionAnswered.Value
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE ([o].[QuestionAnswered] = cast(1 as bit))")) ""
+        }
+
+        test "Where bool option negated" {
+            let query =
+                select {
+                    for o in table<OptionalBoolEntity> do
+                    where (not o.QuestionAnswered.Value)
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE ([o].[QuestionAnswered] = cast(0 as bit))")) ""
         }
 
         ptest "Where with Option Type" {
