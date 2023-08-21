@@ -81,7 +81,7 @@ let tests =
             Expect.isTrue (sql.Contains("SELECT [o].*, [d].[LineTotal] FROM")) ""
         }
 
-        test "Where bool" {
+        test "Where bool is true" {
             let query =
                 select {
                     for o in Sales.SalesOrderHeader do
@@ -92,7 +92,7 @@ let tests =
             Expect.isTrue (sql.Contains("WHERE ([o].[OnlineOrderFlag] = cast(1 as bit))")) ""
         }
 
-        test "Where bool negated" {
+        test "Where bool is false" {
             let query =
                 select {
                     for o in Sales.SalesOrderHeader do
@@ -103,7 +103,7 @@ let tests =
             Expect.isTrue (sql.Contains("WHERE ([o].[OnlineOrderFlag] = cast(0 as bit))")) ""
         }
 
-        test "Where bool option" {
+        test "Where bool option is true" {
             let query =
                 select {
                     for o in table<OptionalBoolEntity> do
@@ -114,7 +114,7 @@ let tests =
             Expect.isTrue (sql.Contains("WHERE ([o].[QuestionAnswered] = cast(1 as bit))")) ""
         }
 
-        test "Where bool option negated" {
+        test "Where bool option is false" {
             let query =
                 select {
                     for o in table<OptionalBoolEntity> do
@@ -123,6 +123,17 @@ let tests =
 
             let sql = query.ToKataQuery() |> toSql
             Expect.isTrue (sql.Contains("WHERE ([o].[QuestionAnswered] = cast(0 as bit))")) ""
+        }
+
+        test "Where bool option is false or null" {
+            let query =
+                select {
+                    for o in table<OptionalBoolEntity> do
+                    where (not o.QuestionAnswered.Value || o.QuestionAnswered = None)
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.isTrue (sql.Contains("WHERE (([o].[QuestionAnswered] = cast(0 as bit)) OR ([o].[QuestionAnswered] IS NULL))")) ""
         }
 
         ptest "Where with Option Type" {
