@@ -11,4 +11,4 @@ reader_type = "Oracle.ManagedDataAccess.Client.OracleDataReader"
 [filters]
 include = [ "OT/*" ]
 exclude = [ ]
-restrictions = { Tables = [ "OT" ], Views = [], Columns = [] }
+restrictions = { Tables = [ "OT" ], Views = [ "OT" ], Columns = [ "OT" ] }
