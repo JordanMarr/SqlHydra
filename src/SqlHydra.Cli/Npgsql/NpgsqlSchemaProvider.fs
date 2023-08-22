@@ -104,10 +104,10 @@ let getSchema (cfg: Config) : Schema =
         |> Seq.cast<DataRow>
         |> Seq.map (fun tbl -> 
             {| 
-                TableCatalog = tbl["TABLE_CATALOG"] :?> string
-                TableSchema = tbl["TABLE_SCHEMA"] :?> string
-                TableName  = tbl["TABLE_NAME"] :?> string
-                TableType = "view"
+                Catalog = tbl["TABLE_CATALOG"] :?> string
+                Schema = tbl["TABLE_SCHEMA"] :?> string
+                Name  = tbl["TABLE_NAME"] :?> string
+                Type = "view"
             |}
         )
 
@@ -116,21 +116,22 @@ let getSchema (cfg: Config) : Schema =
         |> Seq.cast<DataRow>
         |> Seq.map (fun tbl -> 
             {| 
-                TableCatalog = tbl["TABLE_CATALOG"] :?> string
-                TableSchema = tbl["TABLE_SCHEMA"] :?> string
-                TableName  = tbl["TABLE_NAME"] :?> string
-                TableType = tbl["TABLE_TYPE"] :?> string 
+                Catalog = tbl["TABLE_CATALOG"] :?> string
+                Schema = tbl["TABLE_SCHEMA"] :?> string
+                Name  = tbl["TABLE_NAME"] :?> string
+                Type = tbl["TABLE_TYPE"] :?> string 
             |}
         )
-        |> Seq.filter (fun tbl -> tbl.TableType <> "SYSTEM_TABLE")
+        |> Seq.filter (fun tbl -> tbl.Type <> "SYSTEM_TABLE")
         |> Seq.append views
+        |> SchemaFilters.filterTables cfg.Filters
         |> Seq.map (fun tbl -> 
             let tableColumns = 
                 allColumns
                 |> Seq.filter (fun col -> 
-                    col.TableCatalog = tbl.TableCatalog && 
-                    col.TableSchema = tbl.TableSchema &&
-                    col.TableName = tbl.TableName
+                    col.TableCatalog = tbl.Catalog && 
+                    col.TableSchema = tbl.Schema &&
+                    col.TableName = tbl.Name
                 )
 
             let mappedColumns = 
@@ -185,13 +186,14 @@ let getSchema (cfg: Config) : Schema =
 
             let filteredColumns = 
                 supportedColumns
-                |> SchemaFilters.filterColumns cfg.Filters tbl.TableSchema tbl.TableName
+                |> SchemaFilters.filterColumns cfg.Filters tbl.Schema tbl.Name
+                |> Seq.toList
 
             { 
-                Table.Catalog = tbl.TableCatalog
-                Table.Schema = tbl.TableSchema
-                Table.Name =  tbl.TableName
-                Table.Type = if tbl.TableType = "table" then TableType.Table else TableType.View
+                Table.Catalog = tbl.Catalog
+                Table.Schema = tbl.Schema
+                Table.Name =  tbl.Name
+                Table.Type = if tbl.Type = "table" then TableType.Table else TableType.View
                 Table.Columns = filteredColumns
                 Table.TotalColumns = tableColumns |> Seq.length
             }

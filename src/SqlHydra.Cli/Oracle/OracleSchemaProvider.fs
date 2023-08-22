@@ -71,10 +71,10 @@ let getSchema (cfg: Config) : Schema =
         |> Seq.filter (fun view -> not (systemOwners.Contains(view.["OWNER"] :?> string)))
         |> Seq.map (fun view -> 
             {| 
-                TableCatalog = view.["OWNER"] :?> string
-                TableSchema = view.["OWNER"] :?> string
-                TableName  = view.["VIEW_NAME"] :?> string
-                TableType = "view"
+                Catalog = view.["OWNER"] :?> string
+                Schema = view.["OWNER"] :?> string
+                Name  = view.["VIEW_NAME"] :?> string
+                Type = "view"
             |}
         )
         |> Seq.toList
@@ -84,25 +84,26 @@ let getSchema (cfg: Config) : Schema =
         |> Seq.cast<DataRow>
         |> Seq.map (fun tbl -> 
             {| 
-                TableCatalog = tbl.["OWNER"] :?> string
-                TableSchema = tbl.["OWNER"] :?> string
-                TableName  = tbl.["TABLE_NAME"] :?> string
-                TableType = tbl.["TYPE"] :?> string // [ "view"; "User"; "System" ]
+                Catalog = tbl.["OWNER"] :?> string
+                Schema = tbl.["OWNER"] :?> string
+                Name  = tbl.["TABLE_NAME"] :?> string
+                Type = tbl.["TYPE"] :?> string // [ "view"; "User"; "System" ]
             |}
         )
-        |> Seq.filter (fun tbl -> System.String.Compare(tbl.TableType, "System", true) <> 0) // Exclude system
+        |> Seq.filter (fun tbl -> System.String.Compare(tbl.Type, "System", true) <> 0) // Exclude system
         |> Seq.append views
+        |> SchemaFilters.filterTables cfg.Filters
         |> Seq.map (fun tbl -> 
             let tableColumns = 
                 columns
                 |> Seq.filter (fun col -> 
-                    col.TableCatalog = tbl.TableCatalog && 
-                    col.TableSchema = tbl.TableSchema &&
-                    col.TableName = tbl.TableName
-                )
-
+                    col.TableCatalog = tbl.Catalog && 
+                    col.TableSchema = tbl.Schema &&
+                    col.TableName = tbl.Name
+                )                
+                
             let supportedColumns = 
-                tableColumns
+                tableColumns                
                 |> Seq.choose (fun col -> 
                     OracleDataTypes.tryFindTypeMapping (col.ProviderTypeName, col.Precision, col.Scale)
                     |> Option.map (fun typeMapping ->
@@ -114,17 +115,17 @@ let getSchema (cfg: Config) : Schema =
                         }
                     )
                 )
+
+            let filteredColumns =
+                supportedColumns
+                |> SchemaFilters.filterColumns cfg.Filters tbl.Schema tbl.Name
                 |> Seq.toList
 
-            let filteredColumns = 
-                supportedColumns
-                |> SchemaFilters.filterColumns cfg.Filters tbl.TableSchema tbl.TableName
-
             { 
-                Table.Catalog = tbl.TableCatalog
-                Table.Schema = tbl.TableSchema
-                Table.Name =  tbl.TableName
-                Table.Type = if System.String.Compare(tbl.TableType, "view", true) = 0 then TableType.View else TableType.Table
+                Table.Catalog = tbl.Catalog
+                Table.Schema = tbl.Schema
+                Table.Name =  tbl.Name
+                Table.Type = if System.String.Compare(tbl.Type, "view", true) = 0 then TableType.View else TableType.Table
                 Table.Columns = filteredColumns
                 Table.TotalColumns = tableColumns |> Seq.length
             }

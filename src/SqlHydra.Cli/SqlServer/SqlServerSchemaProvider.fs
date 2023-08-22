@@ -58,17 +58,21 @@ let getSchema (cfg: Config) : Schema =
         sTables.Rows
         |> Seq.cast<DataRow>
         |> Seq.map (fun tbl -> 
-            let tableCatalog = tbl.["TABLE_CATALOG"] :?> string
-            let tableSchema = tbl.["TABLE_SCHEMA"] :?> string
-            let tableName  = tbl.["TABLE_NAME"] :?> string
-            let tableType = tbl.["TABLE_TYPE"] :?> string
-
+            {| 
+                Catalog = tbl.["TABLE_CATALOG"] :?> string
+                Schema = tbl.["TABLE_SCHEMA"] :?> string
+                Name  = tbl.["TABLE_NAME"] :?> string
+                Type = tbl.["TABLE_TYPE"] :?> string 
+            |}
+        )
+        |> SchemaFilters.filterTables cfg.Filters
+        |> Seq.map (fun tbl ->             
             let tableColumns = 
                 allColumns
                 |> Seq.filter (fun col -> 
-                    col.TableCatalog = tableCatalog && 
-                    col.TableSchema = tableSchema &&
-                    col.TableName = tableName
+                    col.TableCatalog = tbl.Catalog && 
+                    col.TableSchema = tbl.Schema &&
+                    col.TableName = tbl.Name
                 )
 
             let supportedColumns = 
@@ -88,13 +92,14 @@ let getSchema (cfg: Config) : Schema =
 
             let filteredColumns = 
                 supportedColumns
-                |> SchemaFilters.filterColumns cfg.Filters tableSchema tableName
+                |> SchemaFilters.filterColumns cfg.Filters tbl.Schema tbl.Name
+                |> Seq.toList
 
             { 
-                Table.Catalog = tableCatalog
-                Table.Schema = tableSchema
-                Table.Name =  tableName
-                Table.Type = if tableType = "BASE TABLE" then TableType.Table else TableType.View
+                Table.Catalog = tbl.Catalog
+                Table.Schema = tbl.Schema
+                Table.Name =  tbl.Name
+                Table.Type = if tbl.Type = "BASE TABLE" then TableType.Table else TableType.View
                 Table.Columns = filteredColumns
                 Table.TotalColumns = tableColumns |> Seq.length
             }

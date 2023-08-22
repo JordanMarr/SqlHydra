@@ -3,7 +3,7 @@ module SqlHydra.SchemaFilters
 open GlobExpressions
 open SqlHydra.Domain
 
-let filterTables (filters: FilterPatterns) (tables: Table list) = 
+let inline filterTables (filters: FilterPatterns) (tables: 'Table seq when 'Table : (member Schema: string) and 'Table : (member Name: string)) = 
     let isTableFilter (filter: string) = not (filter.Contains ".")
     let includeFilters = filters.Includes |> List.filter isTableFilter
     let excludeFilters = filters.Excludes |> List.filter isTableFilter
@@ -12,8 +12,8 @@ let filterTables (filters: FilterPatterns) (tables: Table list) =
     | [], [] -> 
         tables
     | _ -> 
-        let getPath (tbl: Table) = $"{tbl.Schema}/{tbl.Name}"
-        let tablesByPath = tables |> List.map (fun t -> getPath t, t) |> Map.ofList
+        let getPath (tbl: 'Table) = $"{tbl.Schema}/{tbl.Name}"
+        let tablesByPath = tables |> Seq.map (fun t -> getPath t, t) |> Map.ofSeq
         let tablePaths = tablesByPath |> Map.toList |> List.map fst
 
         let getMatchingTablePaths = 
@@ -29,7 +29,7 @@ let filterTables (filters: FilterPatterns) (tables: Table list) =
         let filteredTables = filteredPaths |> Seq.map (fun path -> tablesByPath.[path]) |> Seq.toList
         filteredTables
 
-let filterColumns (filters: FilterPatterns) (schema: string) (table: string) (columns: Column list) = 
+let inline filterColumns (filters: FilterPatterns) (schema: string) (table: string) (columns: Column seq when 'Column : (member Name: string)) = 
     let isColumnFilter (filter: string) = filter.Contains "."
     let includeFilters = filters.Includes |> List.filter isColumnFilter
     let excludeFilters = filters.Excludes |> List.filter isColumnFilter
@@ -38,8 +38,8 @@ let filterColumns (filters: FilterPatterns) (schema: string) (table: string) (co
     | [], [] -> 
         columns
     | _ -> 
-        let getPath (col: Column) = $"{schema}/{table}.{col.Name}"
-        let columnsByPath = columns |> List.map (fun c -> getPath c, c) |> Map.ofList
+        let getPath (col: 'Column) = $"{schema}/{table}.{col.Name}"
+        let columnsByPath = columns |> Seq.map (fun c -> getPath c, c) |> Map.ofSeq
         let columnPaths = columnsByPath |> Map.toList |> List.map fst
         
         let getMatchingColumnPaths = 
