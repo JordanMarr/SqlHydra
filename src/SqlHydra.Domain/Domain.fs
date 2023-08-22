@@ -75,11 +75,12 @@ type ReadersConfig =
         ReaderType: string
     }
 
-type FilterPatterns = 
+type Filters = 
     {
+        /// Glob patterns to include "{schema}/{table}.{column}"
         Includes: string list
-        Excludes: string list
-        
+        /// Glob patterns to exclude "{schema}/{table}.{column}"
+        Excludes: string list        
         /// Restrictions applied to GetSchema() calls. Ex: Map [ "Tables", [| "dbo" |]; "Views", [||]; "Columns", [||] ]
         Restrictions: Map<string, string array>
     }
@@ -112,5 +113,5 @@ type Config =
         Readers: ReadersConfig option
         
         /// Filters: optional filters for schemas, tables and columns
-        Filters: FilterPatterns
+        Filters: Filters
     }

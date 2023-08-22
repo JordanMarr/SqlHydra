@@ -22,7 +22,7 @@ let cfg =
         ProviderDbTypeAttributes = true
         TableDeclarations = false
         Readers = Some { ReadersConfig.ReaderType = "System.Data.Common.DbDataReader" } 
-        Filters = FilterPatterns.Empty
+        Filters = Filters.Empty
     }
 
 [<Tests>]

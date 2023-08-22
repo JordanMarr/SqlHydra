@@ -23,7 +23,7 @@ let tests =
                     Config.ProviderDbTypeAttributes = true
                     Config.TableDeclarations = true
                     Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
-                    Config.Filters = FilterPatterns.Empty
+                    Config.Filters = Filters.Empty
                 }
 
             let toml = TomlConfigParser.save(cfg)
@@ -69,7 +69,7 @@ let tests =
                     Config.ProviderDbTypeAttributes = true
                     Config.TableDeclarations = false
                     Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
-                    Config.Filters = FilterPatterns.Empty
+                    Config.Filters = Filters.Empty
                 }
 
             let cfg = TomlConfigParser.read(toml)
@@ -96,7 +96,7 @@ let tests =
                     Config.ProviderDbTypeAttributes = true
                     Config.TableDeclarations = false
                     Config.Readers = None
-                    Config.Filters = FilterPatterns.Empty
+                    Config.Filters = Filters.Empty
                 }
 
             let cfg = TomlConfigParser.read(toml)

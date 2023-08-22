@@ -68,7 +68,7 @@ let newConfigWizard (args: Args) =
                 Config.ProviderDbTypeAttributes = true
                 Config.TableDeclarations = true
                 Config.Readers = Some { ReadersConfig.ReaderType = app.DefaultReaderType } 
-                Config.Filters = FilterPatterns.Empty // User must manually configure filter in .toml file
+                Config.Filters = Filters.Empty // User must manually configure filter in .toml file
             }
         | OtherDataLibrary -> 
             { 
@@ -79,7 +79,7 @@ let newConfigWizard (args: Args) =
                 Config.ProviderDbTypeAttributes = false
                 Config.TableDeclarations = false
                 Config.Readers = None 
-                Config.Filters = FilterPatterns.Empty // User must manually configure filter in .toml file
+                Config.Filters = Filters.Empty // User must manually configure filter in .toml file
             }
         | Standalone -> 
             { 
@@ -90,7 +90,7 @@ let newConfigWizard (args: Args) =
                 Config.ProviderDbTypeAttributes = false
                 Config.TableDeclarations = false
                 Config.Readers = Some { ReadersConfig.ReaderType = app.DefaultReaderType } 
-                Config.Filters = FilterPatterns.Empty // User must manually configure filter in .toml file
+                Config.Filters = Filters.Empty // User must manually configure filter in .toml file
             }
 
     AnsiConsole.MarkupLine($"[green]-[/] {args.TomlFile.Name} has been created!")

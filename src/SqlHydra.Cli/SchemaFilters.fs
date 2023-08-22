@@ -3,7 +3,8 @@ module SqlHydra.SchemaFilters
 open GlobExpressions
 open SqlHydra.Domain
 
-let inline filterTables (filters: FilterPatterns) (tables: 'Table seq when 'Table : (member Schema: string) and 'Table : (member Name: string)) = 
+/// Applies glob include and exclude patterns to filter schemas and tables.
+let inline filterTables (filters: Filters) (tables: 'Table seq when 'Table : (member Schema: string) and 'Table : (member Name: string)) = 
     let isTableFilter (filter: string) = not (filter.Contains ".")
     let includeFilters = filters.Includes |> List.filter isTableFilter
     let excludeFilters = filters.Excludes |> List.filter isTableFilter
@@ -29,7 +30,8 @@ let inline filterTables (filters: FilterPatterns) (tables: 'Table seq when 'Tabl
         let filteredTables = filteredPaths |> Seq.map (fun path -> tablesByPath.[path]) |> Seq.toList
         filteredTables
 
-let inline filterColumns (filters: FilterPatterns) (schema: string) (table: string) (columns: Column seq when 'Column : (member Name: string)) = 
+/// Applies glob include and exclude patterns to filter columns.
+let inline filterColumns (filters: Filters) (schema: string) (table: string) (columns: Column seq when 'Column : (member Name: string)) = 
     let isColumnFilter (filter: string) = filter.Contains "."
     let includeFilters = filters.Includes |> List.filter isColumnFilter
     let excludeFilters = filters.Excludes |> List.filter isColumnFilter

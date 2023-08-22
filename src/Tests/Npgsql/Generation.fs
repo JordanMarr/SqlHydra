@@ -16,7 +16,7 @@ let cfg =
         ProviderDbTypeAttributes = true
         TableDeclarations = false
         Readers = Some { ReadersConfig.ReaderType = AppInfo.info.DefaultReaderType } 
-        Filters = FilterPatterns.Empty
+        Filters = Filters.Empty
     }
 
 [<Tests>]

@@ -53,9 +53,9 @@ let read(toml: string) =
             match filtersTableMaybe with
             | Some filtersTable -> 
                 {
-                    FilterPatterns.Includes = filtersTable.Get "include" |> Seq.cast<string> |> Seq.toList
-                    FilterPatterns.Excludes = filtersTable.Get "exclude" |> Seq.cast<string> |> Seq.toList
-                    FilterPatterns.Restrictions = 
+                    Filters.Includes = filtersTable.Get "include" |> Seq.cast<string> |> Seq.toList
+                    Filters.Excludes = filtersTable.Get "exclude" |> Seq.cast<string> |> Seq.toList
+                    Filters.Restrictions = 
                         match filtersTable.TryGet<TomlTable> "restrictions" with
                         | Some restrictions -> 
                             restrictions 
@@ -71,7 +71,7 @@ let read(toml: string) =
                             Map.empty
                 }
             | None ->
-                FilterPatterns.Empty
+                Filters.Empty
     }
 
 /// Saves a Config to .toml file.
