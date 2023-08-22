@@ -79,8 +79,14 @@ type FilterPatterns =
     {
         Includes: string list
         Excludes: string list
+        
+        /// Restrictions applied to GetSchema() calls. Ex: Map [ "Tables", [| "dbo" |]; "Views", [||]; "Columns", [||] ]
+        Restrictions: Map<string, string array>
     }
-    static member Empty = { Includes = []; Excludes = [] }
+    static member Empty = { Includes = []; Excludes = []; Restrictions = Map.empty }
+    member this.TryGetRestrictionsByKey (key: string) = 
+        this.Restrictions.TryFind key 
+        |> Option.defaultValue [||]        
 
 type Config = 
     {
@@ -105,6 +111,6 @@ type Config =
         /// Readers: provides a Db provider specific IDataReader type (for access to Db-specific features)
         Readers: ReadersConfig option
         
-        /// Filters: optional filters for schemas and tables to generate
+        /// Filters: optional filters for schemas, tables and columns
         Filters: FilterPatterns
     }

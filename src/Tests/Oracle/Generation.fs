@@ -16,7 +16,7 @@ let cfg =
         ProviderDbTypeAttributes = true
         TableDeclarations = false
         Readers = Some { ReadersConfig.ReaderType = "Oracle.ManagedDataAccess.Client.OracleDataReader" } 
-        Filters = { Includes = [ "OT/*" ]; Excludes = [ ] }
+        Filters = { Includes = [ "OT/*" ]; Excludes = [ ]; Restrictions = Map.empty }
     }
 
 [<Tests>]

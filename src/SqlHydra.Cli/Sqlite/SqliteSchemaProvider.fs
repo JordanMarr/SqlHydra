@@ -13,8 +13,8 @@ let dbNullOpt<'T> (o: obj) : 'T option =
 let getSchema (cfg: Config) : Schema = 
     use conn = new SQLiteConnection(cfg.ConnectionString)
     conn.Open()
-    let sTables = conn.GetSchema("Tables")
-    let sColumns = conn.GetSchema("Columns")
+    let sTables = conn.GetSchema("Tables", cfg.Filters.TryGetRestrictionsByKey("Tables"))
+    let sColumns = conn.GetSchema("Columns", cfg.Filters.TryGetRestrictionsByKey("Columns"))
 
     // SQLite only supports one schema per file.
     // We will override to be main; otherwise, all columns will have "sqlite_default_schema"

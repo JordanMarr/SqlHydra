@@ -32,7 +32,7 @@ let getSchema (cfg: Config) : Schema =
         |> Set.ofList
 
     let allColumns = 
-        let sColumns = conn.GetSchema("Columns")
+        let sColumns = conn.GetSchema("Columns", cfg.Filters.TryGetRestrictionsByKey("Columns"))
 
         sColumns.Rows
         |> Seq.cast<DataRow>
@@ -53,7 +53,7 @@ let getSchema (cfg: Config) : Schema =
         |> Seq.sortBy (fun column -> column.OrdinalPosition)
 
     let tables = 
-        let sTables = conn.GetSchema("Tables")
+        let sTables = conn.GetSchema("Tables", cfg.Filters.TryGetRestrictionsByKey("Tables"))
 
         sTables.Rows
         |> Seq.cast<DataRow>

@@ -8,9 +8,9 @@ open SqlHydra
 let getSchema (cfg: Config) : Schema =
     use conn = new OracleConnection(cfg.ConnectionString)
     conn.Open()
-    let sTables = conn.GetSchema("Tables")
-    let sColumns = conn.GetSchema("Columns")
-    let sViews = conn.GetSchema("Views")
+    let sTables = conn.GetSchema("Tables", cfg.Filters.TryGetRestrictionsByKey("Tables"))
+    let sColumns = conn.GetSchema("Columns", cfg.Filters.TryGetRestrictionsByKey("Columns"))
+    let sViews = conn.GetSchema("Views", cfg.Filters.TryGetRestrictionsByKey("Views"))
 
     let systemOwners = 
         ["SYS"; "MDSYS"; "OLAPSYS"; "WMSYS"; "CTXSYS"; "XDB"; "GSMADMIN_INTERNAL"; "ORDSYS"; "ORDDATA"; "LBACSYS"; "SYSTEM"] 

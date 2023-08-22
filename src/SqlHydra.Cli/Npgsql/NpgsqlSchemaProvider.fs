@@ -10,9 +10,9 @@ let getSchema (cfg: Config) : Schema =
     // NOTE: GetSchema will fail if a Postgres enum doesn't exists in a custom schema but not in public schema.
     // Error: "type {enum name} does not exist"
     // This is a Postgres issue, not a SqlHydra issue.
-    let sTables = conn.GetSchema("Tables")
-    let sColumns = conn.GetSchema("Columns")
-    let sViews = conn.GetSchema("Views")
+    let sTables = conn.GetSchema("Tables", cfg.Filters.TryGetRestrictionsByKey("Tables"))
+    let sColumns = conn.GetSchema("Columns", cfg.Filters.TryGetRestrictionsByKey("Columns"))
+    let sViews = conn.GetSchema("Views", cfg.Filters.TryGetRestrictionsByKey("Views"))
     
     let pks = 
         let sql =

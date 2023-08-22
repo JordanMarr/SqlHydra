@@ -30,6 +30,7 @@ let tests =
             let filters = { 
                 Includes = [ "*.*" ]
                 Excludes = [ ] 
+                Restrictions = Map.empty
             }
 
             let filteredColumns = columns |> filterColumns filters "dbo" "Person"
@@ -46,6 +47,7 @@ let tests =
             let filters = { 
                 Includes = [ "*.*" ]
                 Excludes = [ "dbo/Person.FName"; "*/Person.LName" ] 
+                Restrictions = Map.empty
             }
 
             let filteredColumns = columns |> filterColumns filters "dbo" "Person"
@@ -62,6 +64,7 @@ let tests =
             let filters = { 
                 Includes = [ "*.*" ]
                 Excludes = [ "Instrument.Age" ] 
+                Restrictions = Map.empty
             }
 
             let filteredColumns = columns |> filterColumns filters "dbo" "Person"
@@ -78,6 +81,7 @@ let tests =
             let filters = { 
                 Includes = [ "*.*" ]
                 Excludes = [ "*._*" ] 
+                Restrictions = Map.empty
             }
 
             let filteredColumns = columns |> filterColumns filters "dbo" "Person"

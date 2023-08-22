@@ -29,6 +29,7 @@ let tests =
             let filters = { 
                 Includes = [ ]
                 Excludes = [ ] 
+                Restrictions = Map.empty
             }
 
             let filteredTables = tables |> filterTables filters
@@ -45,6 +46,7 @@ let tests =
             let filters = { 
                 Includes = [ "dbo/*" ]
                 Excludes = [ ] 
+                Restrictions = Map.empty
             }
 
             let filteredTables = tables |> filterTables filters
@@ -61,6 +63,7 @@ let tests =
             let filters = { 
                 Includes = [ "*" ]
                 Excludes = [ "dbo/*" ] 
+                Restrictions = Map.empty
             }
 
             let filteredTables = tables |> filterTables filters
@@ -77,6 +80,7 @@ let tests =
             let filters = { 
                 Includes = [ "dbo/*" ]
                 Excludes = [ "*/*1" ] 
+                Restrictions = Map.empty
             }
 
             let filteredTables = tables |> filterTables filters
@@ -93,6 +97,7 @@ let tests =
             let filters = { 
                 Includes = [ "dbo/tbl1"; "prod/tbl2" ]
                 Excludes = [ ] 
+                Restrictions = Map.empty
             }
 
             let filteredTables = tables |> filterTables filters

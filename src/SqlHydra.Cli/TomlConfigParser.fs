@@ -55,6 +55,20 @@ let read(toml: string) =
                 {
                     FilterPatterns.Includes = filtersTable.Get "include" |> Seq.cast<string> |> Seq.toList
                     FilterPatterns.Excludes = filtersTable.Get "exclude" |> Seq.cast<string> |> Seq.toList
+                    FilterPatterns.Restrictions = 
+                        match filtersTable.TryGet<TomlTable> "restrictions" with
+                        | Some restrictions -> 
+                            restrictions 
+                            |> Seq.map (fun kvp -> 
+                                kvp.Key, 
+                                    kvp.Value :?> TomlArray 
+                                    |> Seq.cast<string> 
+                                    |> Seq.toArray 
+                                    |> Array.map (fun s -> if s = "" then null else s) // GetSchema expects nulls for missing values, not empty strings.
+                            )
+                            |> Map.ofSeq
+                        | None ->
+                            Map.empty
                 }
             | None ->
                 FilterPatterns.Empty

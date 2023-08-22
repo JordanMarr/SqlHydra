@@ -121,6 +121,37 @@ let tests =
                 { 
                     Includes = [ "products/*"; "dbo/*" ]
                     Excludes = [ "products/system*" ] 
+                    Restrictions = Map.empty
+                }
+
+            let cfg = TomlConfigParser.read(toml)
+    
+            Expect.equal cfg.Filters expectedFilters ""
+        }
+
+        test "Read: should parse schema restrictions"  {
+            let toml = 
+                """
+                [general]
+                connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+                output = "AdventureWorks.fs"
+                namespace = "SampleApp.AdventureWorks"
+                cli_mutable = true
+                [filters]
+                include = []
+                exclude = []
+                restrictions = { "Tables" = [ "products" ], "Columns" = [ "", "Price" ] }
+                """
+
+            let expectedFilters =
+                { 
+                    Includes = []
+                    Excludes = [] 
+                    Restrictions = 
+                        Map [ 
+                            "Tables", [| "products" |]
+                            "Columns", [| null; "Price" |] 
+                        ]
                 }
 
             let cfg = TomlConfigParser.read(toml)
