@@ -56,7 +56,7 @@ let tests =
                 select {
                     for o in sales.salesorderheader do
                     join d in sales.salesorderdetail on (o.salesorderid = d.salesorderid)
-                    where (o.onlineorderflag = true)
+                    where o.onlineorderflag
                     select (o, d.unitprice)
                 }
 

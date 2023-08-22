@@ -56,7 +56,7 @@ let tests =
                 select {
                     for o in Sales.SalesOrderHeader do
                     join d in Sales.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
-                    where (o.OnlineOrderFlag = true)
+                    where o.OnlineOrderFlag
                     select (o, d)
                 }
 
