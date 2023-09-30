@@ -8,33 +8,43 @@ let private r : Oracle.ManagedDataAccess.Client.OracleDataReader = null
 /// A list of supported column type mappings
 let supportedTypeMappings =
     [   // https://docs.oracle.com/cd/B19306_01/win.102/b14306/appendixa.htm
-        "PLS_INTEGER",                      "int",                          DbType.Int32,               nameof r.GetInt32
-        "LONG",                             "int64",                        DbType.Int64,               nameof r.GetInt64
-        "NUMBER",                           "decimal",                      DbType.Decimal,             nameof r.GetDecimal
-        "FLOAT",                            "double",                       DbType.Double,              nameof r.GetDouble
-        "BINARY_DOUBLE",                    "double",                       DbType.Double,              nameof r.GetDouble
-        "BINARY_FLOAT",                     "System.Single",                DbType.Single,              nameof r.GetFieldValue
-        "REAL",                             "System.Single",                DbType.Single,              nameof r.GetFieldValue
-        "ROWID",                            "string",                       DbType.String,              nameof r.GetString
-        "UROWID",                           "string",                       DbType.String,              nameof r.GetString
-        "VARCHAR",                          "string",                       DbType.String,              nameof r.GetString
-        "VARCHAR2",                         "string",                       DbType.String,              nameof r.GetString
-        "NVARCHAR",                         "string",                       DbType.String,              nameof r.GetString
-        "NVARCHAR2",                        "string",                       DbType.String,              nameof r.GetString
-        "CHAR",                             "string",                       DbType.String,              nameof r.GetString
-        "XMLType",                          "string",                       DbType.String,              nameof r.GetString
-        "NCHAR",                            "string",                       DbType.StringFixedLength,   nameof r.GetString
-        "TEXT",                             "string",                       DbType.String,              nameof r.GetString
-        "NTEXT",                            "string",                       DbType.String,              nameof r.GetString
-        "DATE",                             "System.DateTime",              DbType.Date,                nameof r.GetDateTime
-        "TIMESTAMP",                        "System.DateTime",              DbType.Date,                nameof r.GetDateTime
-        "TIMESTAMP WITH LOCAL TIME ZONE",   "System.DateTime",              DbType.Date,                nameof r.GetDateTime
-        "TIMESTAMP WITH TIME ZONE",         "System.DateTime",              DbType.Date,                nameof r.GetDateTime
-        "INTERVAL DAY TO SECOND",           "System.TimeSpan",              DbType.Time,                nameof r.GetTimeSpan
-        "BFILE",                            "byte[]",                       DbType.Binary,              nameof r.GetFieldValue
-        "BLOB",                             "byte[]",                       DbType.Binary,              nameof r.GetFieldValue
-        "LONG RAW",                         "byte[]",                       DbType.Binary,              nameof r.GetFieldValue
-        "RAW",                              "byte[]",                       DbType.Binary,              nameof r.GetFieldValue
+        "PLS_INTEGER",                                  "int",                          DbType.Int32,               nameof r.GetInt32
+        "LONG",                                         "int64",                        DbType.Int64,               nameof r.GetInt64
+        "NUMBER",                                       "decimal",                      DbType.Decimal,             nameof r.GetDecimal
+        "FLOAT",                                        "double",                       DbType.Double,              nameof r.GetDouble
+        "BINARY_DOUBLE",                                "double",                       DbType.Double,              nameof r.GetDouble
+        "BINARY_FLOAT",                                 "System.Single",                DbType.Single,              nameof r.GetFieldValue
+        "REAL",                                         "System.Single",                DbType.Single,              nameof r.GetFieldValue
+        "ROWID",                                        "string",                       DbType.String,              nameof r.GetString
+        "UROWID",                                       "string",                       DbType.String,              nameof r.GetString
+        "VARCHAR",                                      "string",                       DbType.String,              nameof r.GetString
+        "VARCHAR2",                                     "string",                       DbType.String,              nameof r.GetString
+        "NVARCHAR",                                     "string",                       DbType.String,              nameof r.GetString
+        "NVARCHAR2",                                    "string",                       DbType.String,              nameof r.GetString
+        "CHAR",                                         "string",                       DbType.String,              nameof r.GetString
+        "XMLType",                                      "string",                       DbType.String,              nameof r.GetString
+        "NCHAR",                                        "string",                       DbType.StringFixedLength,   nameof r.GetString
+        "TEXT",                                         "string",                       DbType.String,              nameof r.GetString
+        "NTEXT",                                        "string",                       DbType.String,              nameof r.GetString
+        "CLOB",                                         "string",                       DbType.String,              nameof r.GetString
+        "NCLOB",                                        "string",                       DbType.String,              nameof r.GetString
+        "DATE",                                         "System.DateTime",              DbType.Date,                nameof r.GetDateTime        
+        "TIMESTAMP",                                    "System.DateTime",              DbType.Date,                nameof r.GetDateTime
+        "TIMESTAMP WITH LOCAL TIME ZONE",               "System.DateTime",              DbType.Date,                nameof r.GetDateTime
+        "TIMESTAMP WITH TIME ZONE",                     "System.DateTime",              DbType.Date,                nameof r.GetDateTime
+        "INTERVAL DAY TO SECOND",                       "System.TimeSpan",              DbType.Time,                nameof r.GetTimeSpan
+
+        for x in 0 .. 9 do
+            $"TIMESTAMP({x})",                          "System.DateTime",              DbType.Date,                nameof r.GetDateTime
+            $"TIMESTAMP({x}) WITH LOCAL TIME ZONE",     "System.DateTime",              DbType.Date,                nameof r.GetDateTime
+            $"TIMESTAMP({x}) WITH TIME ZONE",           "System.DateTime",              DbType.Date,                nameof r.GetDateTime
+            for y in 0 .. 9 do
+                $"INTERVAL DAY({x}) TO SECOND({y})",    "System.TimeSpan",              DbType.Time,                nameof r.GetTimeSpan
+
+        "BFILE",                                        "byte[]",                       DbType.Binary,              nameof r.GetFieldValue
+        "BLOB",                                         "byte[]",                       DbType.Binary,              nameof r.GetFieldValue
+        "LONG RAW",                                     "byte[]",                       DbType.Binary,              nameof r.GetFieldValue
+        "RAW",                                          "byte[]",                       DbType.Binary,              nameof r.GetFieldValue
     ]
 
 let typeMappingsByName =
