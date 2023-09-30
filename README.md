@@ -105,9 +105,9 @@ This is the namespace that your generated table record types will be created in.
 ```
 
 Selecting a use case will set the base configuration options in your TOML file. 
-* "SqlHydra.Query integration (default)" should be chosen if you plan on using the SqlHydra.Query NuGet package to query your database using the generated types. This option will generated additional metadata that is utilized by the SqlHydra.Query package to recognize things like provider-specific parameter types. This use case will also generate a `HydraReader` class that SqlHydra.Query depends on for reading data into the generated types.
-* "Other data library" should be chosen if you plan on using a 3rd party data library (ex: Dapper.FSharp, Donald, Npgsql.FSharp, ADO.NET, and many others). This use case only generates the table record types. No `HydraReader` class is generated.
-* "Standalone" means that you will only be using the generated read-only querying methods that will be generated. This use case creates the table record types and the `HydraReader` for reading them. (It does not create the additional metadata used by SqlHydra.Query.)
+* __SqlHydra.Query integration (default)__ should be chosen if you plan on using the SqlHydra.Query NuGet package to query your database using the generated types. This option will generated additional metadata that is utilized by the SqlHydra.Query package to recognize things like provider-specific parameter types. This use case will also generate a `HydraReader` class that SqlHydra.Query depends on for reading data into the generated types.
+* __Other data library__ should be chosen if you plan on using a 3rd party data library (ex: Dapper.FSharp, Donald, Npgsql.FSharp, ADO.NET, and many others). This use case only generates the table record types. No `HydraReader` class is generated.
+* __Standalone__ means that you will only be using the generated read-only querying methods that will be generated. This use case creates the table record types and the `HydraReader` for reading them. (It does not create the additional metadata used by SqlHydra.Query.)
 
 For more details, see the [.toml configuration](https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration).
 
@@ -709,7 +709,7 @@ match currenciesMaybe with
 
 #### Upsert
 Upsert support has been added for Postgres and Sqlite only because they support `ON CONFLICT DO ___` which provides atomic upsert capabilities.
-(Unfortunately, SQL Server and Oracle only have MERGE which can suffer from concurrency issues.)
+(Unfortunately, SQL Server and Oracle only have MERGE which can suffer from concurrency issues. For SQL Server bulk operations, please try my [SqlBulkTools.Fsharp](https://github.com/JordanMarr/SqlBulkTools.FSharp) library.)
 
 **Postgres:**
 `open SqlHydra.Query.NpgsqlExtensions`
