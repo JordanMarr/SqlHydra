@@ -1,5 +1,6 @@
 ﻿module Oracle.QueryUnitTests
 
+open System
 open Expecto
 open SqlHydra.Query
 open DB
@@ -316,7 +317,20 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.equal "UPDATE \"OT\".\"CUSTOMERS\" SET \"NAME\" = :p0 WHERE (\"OT\".\"CUSTOMERS\".\"NAME\" = :p1)" sql ""
+            Expect.equal """UPDATE "OT"."CUSTOMERS" SET "NAME" = :p0 WHERE ("OT"."CUSTOMERS"."NAME" = :p1)""" sql ""
+        }
+
+        test "Update Query with multiple Wheres" {
+            let query = 
+                update {
+                    for c in OT.CUSTOMERS do
+                    set c.NAME "Smith"
+                    where (c.NAME = "Doe")
+                    where (c.CUSTOMER_ID = 123L)
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal """UPDATE "OT"."CUSTOMERS" SET "NAME" = :p0 WHERE ("OT"."CUSTOMERS"."NAME" = :p1 AND ("OT"."CUSTOMERS"."CUSTOMER_ID" = :p2))""" sql ""
         }
 
         test "Update Query with No Where" {
@@ -367,6 +381,30 @@ let tests =
                 () //Assert.Pass()
             with ex ->
                 () //Assert.Pass("Should not fail because `where` is present.")
+        }
+
+        test "Update with where followed by updateAll should fail" {
+            Expect.throwsT<InvalidOperationException> (fun _ ->
+                update {
+                    for c in OT.CUSTOMERS do
+                    set c.NAME "Smith"
+                    where (c.CUSTOMER_ID = 1)
+                    updateAll
+                }
+                |> ignore
+            ) ""
+        }
+
+        test "Update with updateAll followed by where should fail" {
+            Expect.throwsT<InvalidOperationException> (fun _ ->
+                update {
+                    for c in OT.CUSTOMERS do
+                    set c.NAME "Smith"
+                    updateAll
+                    where (c.CUSTOMER_ID = 1)
+                }
+                |> ignore
+            ) ""
         }
 
         test "Insert Query without Identity" {

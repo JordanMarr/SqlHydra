@@ -75,13 +75,21 @@ type UpdateBuilder<'Updated>() =
     member this.Where (state: QuerySource<'T>, [<ProjectionParameter>] whereExpression) = 
         let query = state |> getQueryOrDefault
         let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
-        QuerySource<'T, UpdateQuerySpec<'T>>({ query with Where = Some where }, state.TableMappings)
+        if query.UpdateAll then
+            raise (new InvalidOperationException("Cannot have `where` clause in a query where `updateAll` has been used."))
+        let where' = 
+            match query.Where with
+            | None -> Some where
+            | Some w -> w.Where(fun w -> where) |> Some
+        QuerySource<'T, UpdateQuerySpec<'T>>({ query with Where = where'; UpdateAll = false }, state.TableMappings)
 
     /// A safeguard that verifies that all records in the table should be updated.
     [<CustomOperation("updateAll", MaintainsVariableSpace = true)>]
     member this.UpdateAll (state:QuerySource<'T>) = 
         let query = state |> getQueryOrDefault
-        QuerySource<'T, UpdateQuerySpec<'T>>({ query with UpdateAll = true }, state.TableMappings)
+        if query.Where |> Option.isSome then
+            raise (new InvalidOperationException("Cannot have `updateAll` clause in a query where `where` has been used."))
+        QuerySource<'T, UpdateQuerySpec<'T>>({ query with UpdateAll = true; Where = None }, state.TableMappings)
 
     /// Unwraps the query
     member this.Run (state: QuerySource<'Updated>) =
