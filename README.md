@@ -265,6 +265,17 @@ let openContext() =
     new QueryContext(conn, compiler)
 ```
 
+#### Query Logging
+
+You can, optionally, set a logger function that will be executed before a query is run.
+This is a handy way to log queries and uses the same API as SqlKata: https://sqlkata.com/docs/execution/logging.
+The function take a compiled query as a parameter and returns a unit.
+
+```F#
+    let ctx = new QueryContext(conn, compiler)
+    ctx.Logger <- fun (compiledQuery: SqlResult) -> printfn "%O" compiledQuery // The %O format calls the ToString() method.
+```
+
 ### Tables
 SqlHydra v1.2 now generates a table declaration for each table record that can be used in query `from` statements.
 For example, if you have a `SalesLT.Person` table record, you will also have a `SalesLT.Person` binding.
