@@ -39,7 +39,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
         <br /><sub><b>aciq</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=aciq" title="Code">💻</a>
     </td>
     <td align="center"><a href="https://github.com/jwosty"><img src="https://avatars.githubusercontent.com/u/4031185?v=4&s=100" width="100px;" alt=""/>
-        <br /><sub><b>jwosty</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/issues/32" title="Code">💻</a>
+        <br /><sub><b>jwosty</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=jwosty" title="Code">💻</a>
     </td>
     <td align="center"><a href="https://github.com/devinlyons"><img src="https://avatars.githubusercontent.com/u/8211199?v=4&s=100" width="100px;" alt=""/>
         <br /><sub><b>devinlyons</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=devinlyons" title="Code">💻</a>
