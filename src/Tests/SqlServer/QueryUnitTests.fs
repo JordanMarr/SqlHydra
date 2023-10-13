@@ -1,5 +1,6 @@
 ﻿module SqlServer.QueryUnitTests
 
+open System
 open Expecto
 open SqlHydra.Query
 open DB
@@ -426,6 +427,19 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
             Expect.equal "UPDATE [Sales].[Customer] SET [AccountNumber] = @p0 WHERE ([Sales].[Customer].[AccountNumber] = @p1)" sql ""
         }
 
+        test "Update Query with multiple Wheres" {
+            let query = 
+                update {
+                    for c in Sales.Customer do
+                    set c.AccountNumber "123"
+                    where (c.AccountNumber = "000")
+                    where (c.CustomerID = 123)
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal sql "UPDATE [Sales].[Customer] SET [AccountNumber] = @p0 WHERE ([Sales].[Customer].[AccountNumber] = @p1 AND ([Sales].[Customer].[CustomerID] = @p2)" ""
+        }
+
         test "Update Query with No Where" {
             let query = 
                 update {
@@ -474,6 +488,30 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
                 () //Assert.Pass()
             with ex ->
                 () //Assert.Pass("Should not fail because `where` is present.")
+        }
+
+        test "Update with where followed by updateAll should fail" {
+            Expect.throwsT<InvalidOperationException> (fun _ ->
+                update {
+                    for c in Sales.Customer do
+                    set c.AccountNumber "123"
+                    where (c.CustomerID = 1)
+                    updateAll
+                }
+                |> ignore
+            ) ""
+        }
+
+        test "Update with updateAll followed by where should fail" {
+            Expect.throwsT<InvalidOperationException> (fun _ ->
+                update {
+                    for c in Sales.Customer do
+                    set c.AccountNumber "123"
+                    updateAll
+                    where (c.CustomerID = 1)
+                }
+                |> ignore
+            ) ""
         }
 
         test "Insert Query without Identity" {

@@ -1,5 +1,6 @@
 ﻿module Sqlite.QueryUnitTests
 
+open System
 open Expecto
 open SqlHydra.Query
 open DB
@@ -305,7 +306,21 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.equal sql "UPDATE \"main\".\"Customer\" SET \"FirstName\" = @p0, \"LastName\" = @p1 WHERE (\"main\".\"Customer\".\"CustomerID\" = @p2)" ""
+            Expect.equal sql """UPDATE "main"."Customer" SET "FirstName" = @p0, "LastName" = @p1 WHERE ("main"."Customer"."CustomerID" = @p2)""" ""
+        }
+
+        test "Update Query with multiple Wheres" {
+            let query = 
+                update {
+                    for c in main.Customer do
+                    set c.FirstName "John"
+                    set c.LastName "Doe"
+                    where (c.CustomerID = 123L)
+                    where (c.FirstName = "Bob")
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal sql """UPDATE "main"."Customer" SET "FirstName" = @p0, "LastName" = @p1 WHERE ("main"."Customer"."CustomerID" = @p2 AND ("main"."Customer"."FirstName" @p3))""" ""
         }
 
         test "Update Query with No Where" {
@@ -360,6 +375,32 @@ let tests =
                 () //Assert.Pass()
             with ex ->
                 () //Assert.Pass("Should not fail because `where` is present.")
+        }
+
+        test "Update with where followed by updateAll should fail" {
+            Expect.throwsT<InvalidOperationException> (fun _ ->
+                update {
+                    for c in main.Customer do
+                    set c.FirstName "John"
+                    set c.LastName "Doe"
+                    where (c.CustomerID = 1L)
+                    updateAll
+                }
+                |> ignore
+            ) ""
+        }
+
+        test "Update with updateAll followed by where should fail" {
+            Expect.throwsT<InvalidOperationException> (fun _ ->
+                update {
+                    for c in main.Customer do
+                    set c.FirstName "John"
+                    set c.LastName "Doe"
+                    updateAll
+                    where (c.CustomerID = 1L)
+                }
+                |> ignore
+            ) ""
         }
 
         //test "Insert Query without Identity" {

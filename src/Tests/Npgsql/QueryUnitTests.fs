@@ -1,5 +1,6 @@
 ﻿module Npgsql.QueryUnitTests
 
+open System
 open Expecto
 open SqlHydra.Query
 open DB
@@ -306,6 +307,19 @@ let tests =
             Expect.equal "UPDATE \"sales\".\"customer\" SET \"personid\" = @p0 WHERE (\"sales\".\"customer\".\"personid\" = @p1)" sql ""
         }
 
+        test "Update Query with multiple Wheres" {
+            let query = 
+                update {
+                    for c in sales.customer do
+                    set c.personid (Some 123)
+                    where (c.personid = Some 456)
+                    where (c.customerid = 789)
+                }
+
+            let sql = query.ToKataQuery() |> toSql
+            Expect.equal """UPDATE "sales"."customer" SET "personid" = @p0 WHERE ("sales"."customer"."personid" = @p1 AND ("sales"."customer"."customerid" = @p2))""" sql ""
+        }
+
         test "Update Query with No Where" {
             let query = 
                 update {
@@ -354,6 +368,30 @@ let tests =
                 () //Assert.Pass()
             with ex ->
                 () //Assert.Pass("Should not fail because `where` is present.")
+        }
+
+        test "Update with where followed by updateAll should fail" {
+            Expect.throwsT<InvalidOperationException> (fun _ ->
+                update {
+                    for c in sales.customer do
+                    set c.customerid 123
+                    where (c.customerid = 1)
+                    updateAll
+                }
+                |> ignore
+            ) ""
+        }
+
+        test "Update with updateAll followed by where should fail" {
+            Expect.throwsT<InvalidOperationException> (fun _ ->
+                update {
+                    for c in sales.customer do
+                    set c.customerid 123
+                    updateAll
+                    where (c.customerid = 1)
+                }
+                |> ignore
+            ) ""
         }
                 
         test "Insert Query" {
