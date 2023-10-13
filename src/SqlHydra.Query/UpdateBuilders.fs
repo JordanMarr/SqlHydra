@@ -8,7 +8,7 @@ open System.Threading
 
 let private prepareUpdateQuery<'Updated> spec = 
     if spec.Where = None && spec.UpdateAll = false
-    then failwith "An `update` expression must either contain a `where` clause or `updateAll`."
+    then invalidOp "An `update` expression must either contain a `where` clause or `updateAll`."
     UpdateQuery<'Updated>(spec)
 
 /// The base update builder that contains all common operations
@@ -76,7 +76,7 @@ type UpdateBuilder<'Updated>() =
         let query = state |> getQueryOrDefault
         let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
         if query.UpdateAll then
-            raise (new InvalidOperationException("Cannot have `where` clause in a query where `updateAll` has been used."))
+            invalidOp "Cannot have `where` clause in a query where `updateAll` has been used."
         let where' = 
             match query.Where with
             | None -> Some where
@@ -87,8 +87,8 @@ type UpdateBuilder<'Updated>() =
     [<CustomOperation("updateAll", MaintainsVariableSpace = true)>]
     member this.UpdateAll (state:QuerySource<'T>) = 
         let query = state |> getQueryOrDefault
-        if query.Where |> Option.isSome then
-            raise (new InvalidOperationException("Cannot have `updateAll` clause in a query where `where` has been used."))
+        if query.Where |> Option.isSome then 
+            invalidOp "Cannot have `updateAll` clause in a query where `where` has been used."
         QuerySource<'T, UpdateQuerySpec<'T>>({ query with UpdateAll = true; Where = None }, state.TableMappings)
 
     /// Unwraps the query

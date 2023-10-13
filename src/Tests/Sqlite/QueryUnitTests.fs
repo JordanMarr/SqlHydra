@@ -320,7 +320,7 @@ let tests =
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.equal sql """UPDATE "main"."Customer" SET "FirstName" = @p0, "LastName" = @p1 WHERE ("main"."Customer"."CustomerID" = @p2 AND ("main"."Customer"."FirstName" @p3))""" ""
+            Expect.equal sql """UPDATE "main"."Customer" SET "FirstName" = @p0, "LastName" = @p1 WHERE ("main"."Customer"."CustomerID" = @p2 AND ("main"."Customer"."FirstName" = @p3))""" ""
         }
 
         test "Update Query with No Where" {

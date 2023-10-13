@@ -437,7 +437,7 @@ LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[Accou
                 }
 
             let sql = query.ToKataQuery() |> toSql
-            Expect.equal sql "UPDATE [Sales].[Customer] SET [AccountNumber] = @p0 WHERE ([Sales].[Customer].[AccountNumber] = @p1 AND ([Sales].[Customer].[CustomerID] = @p2)" ""
+            Expect.equal sql "UPDATE [Sales].[Customer] SET [AccountNumber] = @p0 WHERE ([Sales].[Customer].[AccountNumber] = @p1 AND ([Sales].[Customer].[CustomerID] = @p2))" ""
         }
 
         test "Update Query with No Where" {
