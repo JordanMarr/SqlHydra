@@ -26,20 +26,23 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/MargaretKrutikova"><img src="https://avatars.githubusercontent.com/u/5932274?v=4?s=100" width="100px;" alt=""/>
         <br /><sub><b>MargaretKrutikova</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/pull/10" title="Code">💻</a>
     </td>
-    <td align="center"><a href="https://github.com/Jmaharman"><img src="https://avatars.githubusercontent.com/u/215359?v=4?s=100" width="100px;" alt=""/>
+    <td align="center"><a href="https://github.com/Jmaharman"><img src="https://avatars.githubusercontent.com/u/215359?v=4&s=100" width="100px;" alt=""/>
         <br /><sub><b>Jmaharman</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=Jmaharman" title="Code">💻</a>
     </td>
-    <td align="center"><a href="https://github.com/ntwilson"><img src="https://avatars.githubusercontent.com/u/15835006?v=4?s=100" width="100px;" alt=""/>
+    <td align="center"><a href="https://github.com/ntwilson"><img src="https://avatars.githubusercontent.com/u/15835006?v=4&s=100" width="100px;" alt=""/>
         <br /><sub><b>ntwilson</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=ntwilson" title="Code">💻</a>
     </td>
-    <td align="center"><a href="https://github.com/MangelMaxime"><img src="https://avatars.githubusercontent.com/u/4760796?v=4?s=100" width="100px;" alt=""/>
+    <td align="center"><a href="https://github.com/MangelMaxime"><img src="https://avatars.githubusercontent.com/u/4760796?v=4&s=100" width="100px;" alt=""/>
         <br /><sub><b>MangelMaxime</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=MangelMaxime" title="Doc">📖</a>
     </td>
-    <td align="center"><a href="https://github.com/aciq"><img src="https://avatars.githubusercontent.com/u/36763595?v=4" width="100px;" alt=""/>
+    <td align="center"><a href="https://github.com/aciq"><img src="https://avatars.githubusercontent.com/u/36763595?v=4&s=100" width="100px;" alt=""/>
         <br /><sub><b>aciq</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=aciq" title="Code">💻</a>
     </td>
-    <td align="center"><a href="https://github.com/jwosty"><img src="https://avatars.githubusercontent.com/u/4031185?v=4" width="100px;" alt=""/>
+    <td align="center"><a href="https://github.com/jwosty"><img src="https://avatars.githubusercontent.com/u/4031185?v=4&s=100" width="100px;" alt=""/>
         <br /><sub><b>jwosty</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/issues/32" title="Code">💻</a>
+    </td>
+    <td align="center"><a href="https://github.com/devinlyons"><img src="https://avatars.githubusercontent.com/u/8211199?v=4&s=100" width="100px;" alt=""/>
+        <br /><sub><b>devinlyons</b></sub></a><br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=devinlyons" title="Code">💻</a>
     </td>
   </tr>
 </table>
