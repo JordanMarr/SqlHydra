@@ -276,7 +276,9 @@ The function take a compiled query as a parameter and returns a unit.
 
 ```F#
     let ctx = new QueryContext(conn, compiler)
-    ctx.Logger <- printfn "SQL: %O" // %O Calls ToString() on the SqlKata.SqlResult.
+    #if DEBUG
+    ctx.Logger <- printfn "SQL: %O"
+    #endif
 ```
 
 ### Tables
