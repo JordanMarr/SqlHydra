@@ -43,6 +43,8 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
     member this.Connection = conn
     member this.Compiler = compiler
 
+    member val Logger : SqlResult -> unit = (fun _ -> ()) with get,set
+
     member val Transaction : DbTransaction option = None with get,set
 
     member this.BeginTransaction(?isolationLevel: Data.IsolationLevel) =
@@ -96,7 +98,8 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         this.Transaction |> Option.iter (fun t -> cmd.Transaction <- t)
 
     /// Builds a DbCommand with CommandText and Parameters from a SqlKata compiled query.
-    member this.BuildCommand(compiledQuery: SqlResult) =        
+    member this.BuildCommand(compiledQuery: SqlResult) = 
+        this.Logger compiledQuery
         let cmd = conn.CreateCommand()
         cmd |> this.TrySetTransaction
         cmd.CommandText <- compiledQuery.Sql
