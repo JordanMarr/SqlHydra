@@ -221,7 +221,7 @@ module SalesLT =
           ModifiedDate: System.DateTime
           CustomerID: int
           NameStyle: bool
-          FirstName: string
+          FirstName: stringf
           MiddleName: Option<string>
           Title: Option<string>
           Suffix: Option<string>
@@ -760,6 +760,27 @@ Upsert support has been added for Postgres and Sqlite only because they support 
         }
 ```
 
+Or, if you have multiple addresses to upsert:
+
+```F#
+    /// Inserts an address or updates it if it already exists.
+    let upsertAddress addresses =
+        let addresses =  addresses |> AtLeastOne.tryCreate |> Option.get
+ 
+        insertTask (Create openContext) {
+            for a in Person.Address do
+            entities addresses
+            onConflictDoUpdate a.AddressID (
+                a.AddressLine1,
+                a.AddressLine2,
+                a.City,
+                a.StateProvince,
+                a.CountryRegion,
+                a.PostalCode,
+                a.ModifiedDate
+            )
+        }
+```
 
 ```F#
     /// Tries to insert an address if it doesn't already exist.
