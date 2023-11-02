@@ -871,3 +871,25 @@ let! rowsDeleted =
     
 printfn "Rows deleted: %i" rowsDeleted
 ```
+
+## Custom SqlKata Queries
+
+SqlKata supports a lot of custom query operations, many of which are not supported by SqlHydra query builders.
+The `kata` custom operation allows you to manipulate the underlying SqlKata query directly.
+For example, you could use this to conditionally add columns to the WHERE or ORDER BY clauses:
+
+```F#
+let getCustomers filters = 
+  select {
+      for c in main.Customer do
+      where (c.FirstName = "John")
+      kata (fun query -> 
+          match filters.LastName with
+          | Some lastName -> query.Where("c.LastName", lastName)
+          | None -> query
+      )
+      kata (fun query -> 
+          query.OrderBy(filters.SortColumns)
+      )
+  }
+```
