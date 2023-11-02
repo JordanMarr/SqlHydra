@@ -765,21 +765,23 @@ Or, if you have multiple addresses to upsert:
 ```F#
     /// Inserts multiple addresses or updates them if they already exist.
     let upsertAddress addresses =
-        let addresses =  addresses |> AtLeastOne.tryCreate |> Option.get
- 
-        insertTask (Create openContext) {
-            for a in Person.Address do
-            entities addresses
-            onConflictDoUpdate a.AddressID (
-                a.AddressLine1,
-                a.AddressLine2,
-                a.City,
-                a.StateProvince,
-                a.CountryRegion,
-                a.PostalCode,
-                a.ModifiedDate
-            )
-        }
+        match addresses |> AtLeastOne.tryCreate with
+        | Some addresses -> 
+            insertTask (Create openContext) {
+                for a in Person.Address do
+                entities addresses
+                onConflictDoUpdate a.AddressID (
+                    a.AddressLine1,
+                    a.AddressLine2,
+                    a.City,
+                    a.StateProvince,
+                    a.CountryRegion,
+                    a.PostalCode,
+                    a.ModifiedDate
+                )
+            }
+        | None ->
+            printfn "No addresses to insert."
 ```
 
 ```F#
