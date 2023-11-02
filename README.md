@@ -763,7 +763,7 @@ Upsert support has been added for Postgres and Sqlite only because they support 
 Or, if you have multiple addresses to upsert:
 
 ```F#
-    /// Inserts an address or updates it if it already exists.
+    /// Inserts multiple addresses or updates them if they already exist.
     let upsertAddress addresses =
         let addresses =  addresses |> AtLeastOne.tryCreate |> Option.get
  
