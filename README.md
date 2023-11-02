@@ -221,7 +221,7 @@ module SalesLT =
           ModifiedDate: System.DateTime
           CustomerID: int
           NameStyle: bool
-          FirstName: stringf
+          FirstName: string
           MiddleName: Option<string>
           Title: Option<string>
           Suffix: Option<string>
