@@ -782,6 +782,7 @@ Or, if you have multiple addresses to upsert:
             }
         | None ->
             printfn "No addresses to insert."
+            0
 ```
 
 ```F#
