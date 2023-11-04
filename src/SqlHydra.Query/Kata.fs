@@ -58,6 +58,11 @@ type QueryParameter =
         Value: obj
         ProviderDbType: string option
     }
+    /// Provides a more compact representation of the QueryParameter when logging queries.
+    override this.ToString() = 
+        match this.ProviderDbType with
+        | Some providerDbType -> $"%s{providerDbType}: {this.Value}"
+        | None -> $"obj: {this.Value}"
 
 type InsertType = 
     | Insert
