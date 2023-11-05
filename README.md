@@ -51,6 +51,10 @@ Thanks goes to these wonderful people:
         <a href="https://github.com/devinlyons"><img src="https://avatars.githubusercontent.com/u/8211199?v=4&s=100" style="width: 100px" alt=""/>
         <br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=devinlyons" title="Code">💻</a>
     </td>
+    <td align="center">
+        <a href="https://github.com/EverybodyKurts"><img src="https://avatars.githubusercontent.com/u/879734?v=4&s=100" style="width: 100px" alt=""/>
+        <br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=EverybodyKurts" title="Code">💻</a>
+    </td>
   </tr>
 </table>
 
@@ -760,6 +764,30 @@ Upsert support has been added for Postgres and Sqlite only because they support 
         }
 ```
 
+Or, if you have multiple addresses to upsert:
+
+```F#
+    /// Inserts multiple addresses or updates them if they already exist.
+    let upsertAddress addresses =
+        match addresses |> AtLeastOne.tryCreate with
+        | Some addresses -> 
+            insertTask (Create openContext) {
+                for a in Person.Address do
+                entities addresses
+                onConflictDoUpdate a.AddressID (
+                    a.AddressLine1,
+                    a.AddressLine2,
+                    a.City,
+                    a.StateProvince,
+                    a.CountryRegion,
+                    a.PostalCode,
+                    a.ModifiedDate
+                )
+            }
+        | None ->
+            printfn "No addresses to insert."
+            0
+```
 
 ```F#
     /// Tries to insert an address if it doesn't already exist.
@@ -842,4 +870,26 @@ let! rowsDeleted =
     }
     
 printfn "Rows deleted: %i" rowsDeleted
+```
+
+## Custom SqlKata Queries
+
+SqlKata supports a lot of custom query operations, many of which are not supported by SqlHydra query builders.
+The `kata` custom operation allows you to manipulate the underlying SqlKata query directly.
+For example, you could use this to conditionally add columns to the WHERE or ORDER BY clauses:
+
+```F#
+let getCustomers filters = 
+  select {
+      for c in main.Customer do
+      where (c.FirstName = "John")
+      kata (fun query -> 
+          match filters.LastName with
+          | Some lastName -> query.Where("c.LastName", lastName)
+          | None -> query
+      )
+      kata (fun query -> 
+          query.OrderBy(filters.SortColumns)
+      )
+  }
 ```
