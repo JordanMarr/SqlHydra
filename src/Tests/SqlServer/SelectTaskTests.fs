@@ -18,7 +18,7 @@ let openContext() =
     new QueryContext(conn, compiler)
 
 [<Test>]
-let ``select Task``() = task {
+let ``selectTask - no select``() = task {
     let! results = 
         selectTask HydraReader.Read (Create openContext) {
             for p in Person.Person do
