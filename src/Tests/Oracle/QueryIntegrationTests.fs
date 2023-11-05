@@ -4,7 +4,6 @@ open Expecto
 open SqlHydra.Query
 open Oracle.ManagedDataAccess.Client
 open NUnit.Framework
-open System.Threading.Tasks
 open DB
 
 #if NET6_0
