@@ -5,13 +5,13 @@ open System
 open Expecto
 open SqlHydra.Query
 open DB
+open NUnit.Framework
 #if NET6_0
 open Sqlite.AdventureWorksNet6
 #endif
 #if NET7_0
 open Sqlite.AdventureWorksNet7
 #endif
-open NUnit.Framework
 
 [<Test>]
 let ``Simple Where``() = 
