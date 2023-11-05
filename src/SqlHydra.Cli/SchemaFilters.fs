@@ -31,7 +31,7 @@ let inline filterTables (filters: Filters) (tables: 'Table seq when 'Table : (me
         filteredTables
 
 /// Applies glob include and exclude patterns to filter columns.
-let inline filterColumns (filters: Filters) (schema: string) (table: string) (columns: Column seq when 'Column : (member Name: string)) = 
+let inline filterColumns (filters: Filters) (schema: string) (table: string) (columns: 'Column seq when 'Column : (member Name: string)) = 
     let isColumnFilter (filter: string) = filter.Contains "."
     let includeFilters = filters.Includes |> List.filter isColumnFilter
     let excludeFilters = filters.Excludes |> List.filter isColumnFilter

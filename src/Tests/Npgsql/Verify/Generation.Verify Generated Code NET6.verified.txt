@@ -38,7 +38,8 @@ module ext =
 
     [<CLIMutable>]
     type arrays =
-        { id: string
+        { [<SqlHydra.ProviderDbType("Text")>]
+          id: string
           [<SqlHydra.ProviderDbType("Text,Array")>]
           text_array: string []
           [<SqlHydra.ProviderDbType("Integer,Array")>]
@@ -46,14 +47,18 @@ module ext =
 
     [<CLIMutable>]
     type jsonsupport =
-        { id: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: int
           [<SqlHydra.ProviderDbType("Json")>]
           json_field: string
           [<SqlHydra.ProviderDbType("Jsonb")>]
           jsonb_field: string }
 
     [<CLIMutable>]
-    type person = { name: string; currentmood: mood }
+    type person =
+        { [<SqlHydra.ProviderDbType("Text")>]
+          name: string
+          currentmood: mood }
 
     module Readers =
         type arraysReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
@@ -96,65 +101,110 @@ module ext =
 module hr =
     [<CLIMutable>]
     type d =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           departmentid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           groupname: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type e =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           nationalidnumber: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           loginid: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           jobtitle: Option<string>
+          [<SqlHydra.ProviderDbType("Date")>]
           birthdate: Option<System.DateOnly>
+          [<SqlHydra.ProviderDbType("Char")>]
           maritalstatus: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           gender: Option<string>
+          [<SqlHydra.ProviderDbType("Date")>]
           hiredate: Option<System.DateOnly>
+          [<SqlHydra.ProviderDbType("Boolean")>]
           salariedflag: bool
+          [<SqlHydra.ProviderDbType("Smallint")>]
           vacationhours: Option<int16>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           sickleavehours: Option<int16>
+          [<SqlHydra.ProviderDbType("Boolean")>]
           currentflag: bool
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           organizationnode: Option<string> }
 
     [<CLIMutable>]
     type edh =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           departmentid: Option<int16>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           shiftid: Option<int16>
+          [<SqlHydra.ProviderDbType("Date")>]
           startdate: Option<System.DateOnly>
+          [<SqlHydra.ProviderDbType("Date")>]
           enddate: Option<System.DateOnly>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type eph =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           ratechangedate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           rate: Option<decimal>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           payfrequency: Option<int16>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type jc =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           jobcandidateid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Xml")>]
           resume: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type s =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           shiftid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Time")>]
           starttime: Option<System.TimeOnly>
+          [<SqlHydra.ProviderDbType("Time")>]
           endtime: Option<System.TimeOnly>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     module Readers =
@@ -293,156 +343,274 @@ module hr =
 module humanresources =
     [<CLIMutable>]
     type department =
-        { departmentid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          departmentid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           groupname: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type employee =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           nationalidnumber: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           loginid: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           jobtitle: string
+          [<SqlHydra.ProviderDbType("Date")>]
           birthdate: System.DateOnly
+          [<SqlHydra.ProviderDbType("Char")>]
           maritalstatus: string
+          [<SqlHydra.ProviderDbType("Char")>]
           gender: string
+          [<SqlHydra.ProviderDbType("Date")>]
           hiredate: System.DateOnly
+          [<SqlHydra.ProviderDbType("Boolean")>]
           salariedflag: bool
+          [<SqlHydra.ProviderDbType("Smallint")>]
           vacationhours: int16
+          [<SqlHydra.ProviderDbType("Smallint")>]
           sickleavehours: int16
+          [<SqlHydra.ProviderDbType("Boolean")>]
           currentflag: bool
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime
+          [<SqlHydra.ProviderDbType("Varchar")>]
           organizationnode: Option<string> }
 
     [<CLIMutable>]
     type employeedepartmenthistory =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Smallint")>]
           departmentid: int16
+          [<SqlHydra.ProviderDbType("Smallint")>]
           shiftid: int16
+          [<SqlHydra.ProviderDbType("Date")>]
           startdate: System.DateOnly
+          [<SqlHydra.ProviderDbType("Date")>]
           enddate: Option<System.DateOnly>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type employeepayhistory =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           ratechangedate: System.DateTime
+          [<SqlHydra.ProviderDbType("Numeric")>]
           rate: decimal
+          [<SqlHydra.ProviderDbType("Smallint")>]
           payfrequency: int16
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type jobcandidate =
-        { jobcandidateid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          jobcandidateid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Xml")>]
           resume: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type shift =
-        { shiftid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          shiftid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Time")>]
           starttime: System.TimeOnly
+          [<SqlHydra.ProviderDbType("Time")>]
           endtime: System.TimeOnly
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type vemployee =
-        { businessentityid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           title: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           firstname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           middlename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           lastname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           suffix: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           jobtitle: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           phonenumber: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           phonenumbertype: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           emailaddress: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           emailpromotion: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline1: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline2: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           city: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           stateprovincename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           postalcode: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           countryregionname: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           additionalcontactinfo: Option<string> }
 
     [<CLIMutable>]
     type vemployeedepartment =
-        { businessentityid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           title: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           firstname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           middlename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           lastname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           suffix: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           jobtitle: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           department: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           groupname: Option<string>
+          [<SqlHydra.ProviderDbType("Date")>]
           startdate: Option<System.DateOnly> }
 
     [<CLIMutable>]
     type vemployeedepartmenthistory =
-        { businessentityid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           title: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           firstname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           middlename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           lastname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           suffix: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           shift: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           department: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           groupname: Option<string>
+          [<SqlHydra.ProviderDbType("Date")>]
           startdate: Option<System.DateOnly>
+          [<SqlHydra.ProviderDbType("Date")>]
           enddate: Option<System.DateOnly> }
 
     [<CLIMutable>]
     type vjobcandidate =
-        { jobcandidateid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          jobcandidateid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Name.Prefix``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Name.First``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Name.Middle``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Name.Last``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Name.Suffix``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           Skills: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Addr.Type``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Addr.Loc.CountryRegion``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Addr.Loc.State``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Addr.Loc.City``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Addr.PostalCode``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           EMail: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           WebSite: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type vjobcandidateeducation =
-        { jobcandidateid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          jobcandidateid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Edu.Level``: Option<string>
+          [<SqlHydra.ProviderDbType("Date")>]
           ``Edu.StartDate``: Option<System.DateOnly>
+          [<SqlHydra.ProviderDbType("Date")>]
           ``Edu.EndDate``: Option<System.DateOnly>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Edu.Degree``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Edu.Major``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Edu.Minor``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Edu.GPA``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Edu.GPAScale``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Edu.School``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Edu.Loc.CountryRegion``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Edu.Loc.State``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Edu.Loc.City``: Option<string> }
 
     [<CLIMutable>]
     type vjobcandidateemployment =
-        { jobcandidateid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          jobcandidateid: Option<int>
+          [<SqlHydra.ProviderDbType("Date")>]
           ``Emp.StartDate``: Option<System.DateOnly>
+          [<SqlHydra.ProviderDbType("Date")>]
           ``Emp.EndDate``: Option<System.DateOnly>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Emp.OrgName``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Emp.JobTitle``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Emp.Responsibility``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Emp.FunctionCategory``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Emp.IndustryCategory``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Emp.Loc.CountryRegion``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Emp.Loc.State``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``Emp.Loc.City``: Option<string> }
 
     module Readers =
@@ -769,123 +937,205 @@ module humanresources =
 module pe =
     [<CLIMutable>]
     type a =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           addressid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline1: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline2: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           city: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           stateprovinceid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           postalcode: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           spatiallocation: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type at =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           addresstypeid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type be =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type bea =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           addressid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           addresstypeid: Option<int>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type bec =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           personid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           contacttypeid: Option<int>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type cr =
-        { countryregioncode: Option<string>
+        { [<SqlHydra.ProviderDbType("Varchar")>]
+          countryregioncode: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type ct =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           contacttypeid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type e =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           emailaddressid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           emailaddress: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type p =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Char")>]
           persontype: Option<string>
+          [<SqlHydra.ProviderDbType("Boolean")>]
           namestyle: bool
+          [<SqlHydra.ProviderDbType("Varchar")>]
           title: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           firstname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           middlename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           lastname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           suffix: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           emailpromotion: Option<int>
+          [<SqlHydra.ProviderDbType("Xml")>]
           additionalcontactinfo: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           demographics: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pa =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           passwordhash: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           passwordsalt: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pnt =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           phonenumbertypeid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pp =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           phonenumber: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           phonenumbertypeid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type sp =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           stateprovinceid: Option<int>
+          [<SqlHydra.ProviderDbType("Char")>]
           stateprovincecode: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           countryregioncode: Option<string>
+          [<SqlHydra.ProviderDbType("Boolean")>]
           isonlystateprovinceflag: bool
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           territoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     module Readers =
@@ -1147,131 +1397,218 @@ module pe =
 module person =
     [<CLIMutable>]
     type address =
-        { addressid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          addressid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline1: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline2: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           city: string
+          [<SqlHydra.ProviderDbType("Integer")>]
           stateprovinceid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           postalcode: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           spatiallocation: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type addresstype =
-        { addresstypeid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          addresstypeid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type businessentity =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type businessentityaddress =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           addressid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           addresstypeid: int
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type businessentitycontact =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           personid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           contacttypeid: int
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type contacttype =
-        { contacttypeid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          contacttypeid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type countryregion =
-        { countryregioncode: string
+        { [<SqlHydra.ProviderDbType("Varchar")>]
+          countryregioncode: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type emailaddress =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           emailaddressid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           emailaddress: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type password =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           passwordhash: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           passwordsalt: string
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type person =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Char")>]
           persontype: string
+          [<SqlHydra.ProviderDbType("Boolean")>]
           namestyle: bool
+          [<SqlHydra.ProviderDbType("Varchar")>]
           title: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           firstname: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           middlename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           lastname: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           suffix: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           emailpromotion: int
+          [<SqlHydra.ProviderDbType("Xml")>]
           additionalcontactinfo: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           demographics: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type personphone =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           phonenumber: string
+          [<SqlHydra.ProviderDbType("Integer")>]
           phonenumbertypeid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type phonenumbertype =
-        { phonenumbertypeid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          phonenumbertypeid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type stateprovince =
-        { stateprovinceid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          stateprovinceid: int
+          [<SqlHydra.ProviderDbType("Char")>]
           stateprovincecode: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           countryregioncode: string
+          [<SqlHydra.ProviderDbType("Boolean")>]
           isonlystateprovinceflag: bool
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Integer")>]
           territoryid: int
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type vadditionalcontactinfo =
-        { businessentityid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           firstname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           middlename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           lastname: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           telephonenumber: Option<string>
+          [<SqlHydra.ProviderDbType("Text")>]
           telephonespecialinstructions: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           street: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           city: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           stateprovince: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           postalcode: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           countryregion: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           homeaddressspecialinstructions: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           emailaddress: Option<string>
+          [<SqlHydra.ProviderDbType("Text")>]
           emailspecialinstructions: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           emailtelephonenumber: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     module Readers =
@@ -1550,265 +1887,453 @@ module person =
 module pr =
     [<CLIMutable>]
     type bom =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           billofmaterialsid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productassemblyid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           componentid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           startdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           enddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Char")>]
           unitmeasurecode: Option<string>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           bomlevel: Option<int16>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           perassemblyqty: Option<decimal>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type c =
-        { id: Option<string>
+        { [<SqlHydra.ProviderDbType("Char")>]
+          id: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           cultureid: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type d =
-        { title: Option<string>
+        { [<SqlHydra.ProviderDbType("Varchar")>]
+          title: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           owner: Option<int>
+          [<SqlHydra.ProviderDbType("Boolean")>]
           folderflag: bool
+          [<SqlHydra.ProviderDbType("Varchar")>]
           filename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           fileextension: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           revision: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           changenumber: Option<int>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           status: Option<int16>
+          [<SqlHydra.ProviderDbType("Text")>]
           documentsummary: Option<string>
+          [<SqlHydra.ProviderDbType("Bytea")>]
           document: Option<byte []>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           documentnode: Option<string> }
 
     [<CLIMutable>]
     type i =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           illustrationid: Option<int>
+          [<SqlHydra.ProviderDbType("Xml")>]
           diagram: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type l =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           locationid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           costrate: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           availability: Option<decimal>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type p =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           productnumber: Option<string>
+          [<SqlHydra.ProviderDbType("Boolean")>]
           makeflag: bool
+          [<SqlHydra.ProviderDbType("Boolean")>]
           finishedgoodsflag: bool
+          [<SqlHydra.ProviderDbType("Varchar")>]
           color: Option<string>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           safetystocklevel: Option<int16>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           reorderpoint: Option<int16>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           standardcost: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           listprice: Option<decimal>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           size: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           sizeunitmeasurecode: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           weightunitmeasurecode: Option<string>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           weight: Option<decimal>
+          [<SqlHydra.ProviderDbType("Integer")>]
           daystomanufacture: Option<int>
+          [<SqlHydra.ProviderDbType("Char")>]
           productline: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           ``class``: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           style: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productsubcategoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productmodelid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           sellstartdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           sellenddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           discontinueddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pc =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productcategoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pch =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           startdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           enddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           standardcost: Option<decimal>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pd =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productdescriptionid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           description: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pdoc =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           documentnode: Option<string> }
 
     [<CLIMutable>]
     type pi =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           locationid: Option<int16>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           shelf: Option<string>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           bin: Option<int16>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           quantity: Option<int16>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type plph =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           startdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           enddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           listprice: Option<decimal>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pm =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productmodelid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           catalogdescription: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           instructions: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pmi =
-        { productmodelid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productmodelid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           illustrationid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pmpdc =
-        { productmodelid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productmodelid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productdescriptionid: Option<int>
+          [<SqlHydra.ProviderDbType("Char")>]
           cultureid: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pp =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productphotoid: Option<int>
+          [<SqlHydra.ProviderDbType("Bytea")>]
           thumbnailphoto: Option<byte []>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           thumbnailphotofilename: Option<string>
+          [<SqlHydra.ProviderDbType("Bytea")>]
           largephoto: Option<byte []>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           largephotofilename: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type ppp =
-        { productid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productphotoid: Option<int>
+          [<SqlHydra.ProviderDbType("Boolean")>]
           primary: bool
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pr =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productreviewid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           reviewername: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           reviewdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           emailaddress: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           rating: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           comments: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type psc =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productsubcategoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productcategoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type sr =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           scrapreasonid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type th =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           transactionid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           referenceorderid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           referenceorderlineid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           transactiondate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Char")>]
           transactiontype: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           quantity: Option<int>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           actualcost: Option<decimal>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type tha =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           transactionid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           referenceorderid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           referenceorderlineid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           transactiondate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Char")>]
           transactiontype: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           quantity: Option<int>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           actualcost: Option<decimal>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type um =
-        { id: Option<string>
+        { [<SqlHydra.ProviderDbType("Char")>]
+          id: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           unitmeasurecode: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type w =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           workorderid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           orderqty: Option<int>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           scrappedqty: Option<int16>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           startdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           enddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           duedate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           scrapreasonid: Option<int16>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type wr =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           workorderid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           operationsequence: Option<int16>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           locationid: Option<int16>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           scheduledstartdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           scheduledenddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           actualstartdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           actualenddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           actualresourcehrs: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           plannedcost: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           actualcost: Option<decimal>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     module Readers =
@@ -2366,286 +2891,489 @@ module pr =
 module production =
     [<CLIMutable>]
     type billofmaterials =
-        { billofmaterialsid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          billofmaterialsid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           productassemblyid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           componentid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           startdate: System.DateTime
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           enddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Char")>]
           unitmeasurecode: string
+          [<SqlHydra.ProviderDbType("Smallint")>]
           bomlevel: int16
+          [<SqlHydra.ProviderDbType("Numeric")>]
           perassemblyqty: decimal
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type culture =
-        { cultureid: string
+        { [<SqlHydra.ProviderDbType("Char")>]
+          cultureid: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type document =
-        { title: string
+        { [<SqlHydra.ProviderDbType("Varchar")>]
+          title: string
+          [<SqlHydra.ProviderDbType("Integer")>]
           owner: int
+          [<SqlHydra.ProviderDbType("Boolean")>]
           folderflag: bool
+          [<SqlHydra.ProviderDbType("Varchar")>]
           filename: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           fileextension: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           revision: string
+          [<SqlHydra.ProviderDbType("Integer")>]
           changenumber: int
+          [<SqlHydra.ProviderDbType("Smallint")>]
           status: int16
+          [<SqlHydra.ProviderDbType("Text")>]
           documentsummary: Option<string>
+          [<SqlHydra.ProviderDbType("Bytea")>]
           document: Option<byte []>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime
+          [<SqlHydra.ProviderDbType("Varchar")>]
           documentnode: string }
 
     [<CLIMutable>]
     type illustration =
-        { illustrationid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          illustrationid: int
+          [<SqlHydra.ProviderDbType("Xml")>]
           diagram: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type location =
-        { locationid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          locationid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Numeric")>]
           costrate: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           availability: decimal
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type product =
-        { productid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           productnumber: string
+          [<SqlHydra.ProviderDbType("Boolean")>]
           makeflag: bool
+          [<SqlHydra.ProviderDbType("Boolean")>]
           finishedgoodsflag: bool
+          [<SqlHydra.ProviderDbType("Varchar")>]
           color: Option<string>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           safetystocklevel: int16
+          [<SqlHydra.ProviderDbType("Smallint")>]
           reorderpoint: int16
+          [<SqlHydra.ProviderDbType("Numeric")>]
           standardcost: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           listprice: decimal
+          [<SqlHydra.ProviderDbType("Varchar")>]
           size: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           sizeunitmeasurecode: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           weightunitmeasurecode: Option<string>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           weight: Option<decimal>
+          [<SqlHydra.ProviderDbType("Integer")>]
           daystomanufacture: int
+          [<SqlHydra.ProviderDbType("Char")>]
           productline: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           ``class``: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           style: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productsubcategoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productmodelid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           sellstartdate: System.DateTime
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           sellenddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           discontinueddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type productcategory =
-        { productcategoryid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productcategoryid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type productcosthistory =
-        { productid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           startdate: System.DateTime
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           enddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           standardcost: decimal
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type productdescription =
-        { productdescriptionid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productdescriptionid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           description: string
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type productdocument =
-        { productid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime
+          [<SqlHydra.ProviderDbType("Varchar")>]
           documentnode: string }
 
     [<CLIMutable>]
     type productinventory =
-        { productid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productid: int
+          [<SqlHydra.ProviderDbType("Smallint")>]
           locationid: int16
+          [<SqlHydra.ProviderDbType("Varchar")>]
           shelf: string
+          [<SqlHydra.ProviderDbType("Smallint")>]
           bin: int16
+          [<SqlHydra.ProviderDbType("Smallint")>]
           quantity: int16
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type productlistpricehistory =
-        { productid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           startdate: System.DateTime
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           enddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           listprice: decimal
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type productmodel =
-        { productmodelid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productmodelid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Xml")>]
           catalogdescription: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           instructions: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type productmodelillustration =
-        { productmodelid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productmodelid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           illustrationid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type productmodelproductdescriptionculture =
-        { productmodelid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productmodelid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           productdescriptionid: int
+          [<SqlHydra.ProviderDbType("Char")>]
           cultureid: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type productphoto =
-        { productphotoid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productphotoid: int
+          [<SqlHydra.ProviderDbType("Bytea")>]
           thumbnailphoto: Option<byte []>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           thumbnailphotofilename: Option<string>
+          [<SqlHydra.ProviderDbType("Bytea")>]
           largephoto: Option<byte []>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           largephotofilename: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type productproductphoto =
-        { productid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           productphotoid: int
+          [<SqlHydra.ProviderDbType("Boolean")>]
           primary: bool
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type productreview =
-        { productreviewid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productreviewid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           reviewername: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           reviewdate: System.DateTime
+          [<SqlHydra.ProviderDbType("Varchar")>]
           emailaddress: string
+          [<SqlHydra.ProviderDbType("Integer")>]
           rating: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           comments: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type productsubcategory =
-        { productsubcategoryid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productsubcategoryid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           productcategoryid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type scrapreason =
-        { scrapreasonid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          scrapreasonid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type transactionhistory =
-        { transactionid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          transactionid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           referenceorderid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           referenceorderlineid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           transactiondate: System.DateTime
+          [<SqlHydra.ProviderDbType("Char")>]
           transactiontype: string
+          [<SqlHydra.ProviderDbType("Integer")>]
           quantity: int
+          [<SqlHydra.ProviderDbType("Numeric")>]
           actualcost: decimal
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type transactionhistoryarchive =
-        { transactionid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          transactionid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           referenceorderid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           referenceorderlineid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           transactiondate: System.DateTime
+          [<SqlHydra.ProviderDbType("Char")>]
           transactiontype: string
+          [<SqlHydra.ProviderDbType("Integer")>]
           quantity: int
+          [<SqlHydra.ProviderDbType("Numeric")>]
           actualcost: decimal
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type unitmeasure =
-        { unitmeasurecode: string
+        { [<SqlHydra.ProviderDbType("Char")>]
+          unitmeasurecode: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type vproductmodelcatalogdescription =
-        { productmodelid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productmodelid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           Summary: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           manufacturer: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           copyright: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           producturl: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           warrantyperiod: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           warrantydescription: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           noofyears: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           maintenancedescription: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           wheel: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           saddle: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           pedal: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           bikeframe: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           crankset: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           pictureangle: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           picturesize: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           productphotoid: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           material: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           color: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           productline: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           style: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           riderexperience: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type vproductmodelinstructions =
-        { productmodelid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productmodelid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           instructions: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           LocationID: Option<int>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           SetupHours: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           MachineHours: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           LaborHours: Option<decimal>
+          [<SqlHydra.ProviderDbType("Integer")>]
           LotSize: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           Step: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type workorder =
-        { workorderid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          workorderid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           orderqty: int
+          [<SqlHydra.ProviderDbType("Smallint")>]
           scrappedqty: int16
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           startdate: System.DateTime
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           enddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           duedate: System.DateTime
+          [<SqlHydra.ProviderDbType("Smallint")>]
           scrapreasonid: Option<int16>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type workorderrouting =
-        { workorderid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          workorderid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: int
+          [<SqlHydra.ProviderDbType("Smallint")>]
           operationsequence: int16
+          [<SqlHydra.ProviderDbType("Smallint")>]
           locationid: int16
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           scheduledstartdate: System.DateTime
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           scheduledenddate: System.DateTime
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           actualstartdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           actualenddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           actualresourcehrs: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           plannedcost: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           actualcost: Option<decimal>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     module Readers =
@@ -3247,68 +3975,119 @@ module production =
 module pu =
     [<CLIMutable>]
     type pod =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           purchaseorderid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           purchaseorderdetailid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           duedate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           orderqty: Option<int16>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           unitprice: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           receivedqty: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           rejectedqty: Option<decimal>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type poh =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           purchaseorderid: Option<int>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           revisionnumber: Option<int16>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           status: Option<int16>
+          [<SqlHydra.ProviderDbType("Integer")>]
           employeeid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           vendorid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           shipmethodid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           orderdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           shipdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           subtotal: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           taxamt: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           freight: Option<decimal>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pv =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           averageleadtime: Option<int>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           standardprice: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           lastreceiptcost: Option<decimal>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           lastreceiptdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Integer")>]
           minorderqty: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           maxorderqty: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           onorderqty: Option<int>
+          [<SqlHydra.ProviderDbType("Char")>]
           unitmeasurecode: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type sm =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           shipmethodid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           shipbase: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           shiprate: Option<decimal>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type v =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           accountnumber: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           creditrating: Option<int16>
+          [<SqlHydra.ProviderDbType("Boolean")>]
           preferredvendorstatus: bool
+          [<SqlHydra.ProviderDbType("Boolean")>]
           activeflag: bool
+          [<SqlHydra.ProviderDbType("Varchar")>]
           purchasingwebserviceurl: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     module Readers =
@@ -3452,90 +4231,157 @@ module pu =
 module purchasing =
     [<CLIMutable>]
     type productvendor =
-        { productid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           averageleadtime: int
+          [<SqlHydra.ProviderDbType("Numeric")>]
           standardprice: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           lastreceiptcost: Option<decimal>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           lastreceiptdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Integer")>]
           minorderqty: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           maxorderqty: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           onorderqty: Option<int>
+          [<SqlHydra.ProviderDbType("Char")>]
           unitmeasurecode: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type purchaseorderdetail =
-        { purchaseorderid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          purchaseorderid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           purchaseorderdetailid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           duedate: System.DateTime
+          [<SqlHydra.ProviderDbType("Smallint")>]
           orderqty: int16
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: int
+          [<SqlHydra.ProviderDbType("Numeric")>]
           unitprice: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           receivedqty: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           rejectedqty: decimal
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type purchaseorderheader =
-        { purchaseorderid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          purchaseorderid: int
+          [<SqlHydra.ProviderDbType("Smallint")>]
           revisionnumber: int16
+          [<SqlHydra.ProviderDbType("Smallint")>]
           status: int16
+          [<SqlHydra.ProviderDbType("Integer")>]
           employeeid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           vendorid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           shipmethodid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           orderdate: System.DateTime
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           shipdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           subtotal: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           taxamt: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           freight: decimal
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type shipmethod =
-        { shipmethodid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          shipmethodid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Numeric")>]
           shipbase: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           shiprate: decimal
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type vendor =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           accountnumber: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Smallint")>]
           creditrating: int16
+          [<SqlHydra.ProviderDbType("Boolean")>]
           preferredvendorstatus: bool
+          [<SqlHydra.ProviderDbType("Boolean")>]
           activeflag: bool
+          [<SqlHydra.ProviderDbType("Varchar")>]
           purchasingwebserviceurl: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type vvendorwithaddresses =
-        { businessentityid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addresstype: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline1: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline2: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           city: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           stateprovincename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           postalcode: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           countryregionname: Option<string> }
 
     [<CLIMutable>]
     type vvendorwithcontacts =
-        { businessentityid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           contacttype: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           title: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           firstname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           middlename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           lastname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           suffix: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           phonenumber: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           phonenumbertype: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           emailaddress: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           emailpromotion: Option<int> }
 
     module Readers =
@@ -3725,209 +4571,359 @@ module purchasing =
 module sa =
     [<CLIMutable>]
     type c =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           customerid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           personid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           storeid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           territoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type cc =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           creditcardid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           cardtype: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           cardnumber: Option<string>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           expmonth: Option<int16>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           expyear: Option<int16>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type cr =
-        { currencyrateid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          currencyrateid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           currencyratedate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Char")>]
           fromcurrencycode: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           tocurrencycode: Option<string>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           averagerate: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           endofdayrate: Option<decimal>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type crc =
-        { countryregioncode: Option<string>
+        { [<SqlHydra.ProviderDbType("Varchar")>]
+          countryregioncode: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           currencycode: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type cu =
-        { id: Option<string>
+        { [<SqlHydra.ProviderDbType("Char")>]
+          id: Option<string>
+          [<SqlHydra.ProviderDbType("Char")>]
           currencycode: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type pcc =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           creditcardid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type s =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           salespersonid: Option<int>
+          [<SqlHydra.ProviderDbType("Xml")>]
           demographics: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type sci =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           shoppingcartitemid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           shoppingcartid: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           quantity: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           datecreated: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type so =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           specialofferid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           description: Option<string>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           discountpct: Option<decimal>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``type``: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           category: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           startdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           enddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Integer")>]
           minqty: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           maxqty: Option<int>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type sod =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           salesorderid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           salesorderdetailid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           carriertrackingnumber: Option<string>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           orderqty: Option<int16>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           specialofferid: Option<int>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           unitprice: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           unitpricediscount: Option<decimal>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type soh =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           salesorderid: Option<int>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           revisionnumber: Option<int16>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           orderdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           duedate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           shipdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           status: Option<int16>
+          [<SqlHydra.ProviderDbType("Boolean")>]
           onlineorderflag: bool
+          [<SqlHydra.ProviderDbType("Varchar")>]
           purchaseordernumber: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           accountnumber: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           customerid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           salespersonid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           territoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           billtoaddressid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           shiptoaddressid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           shipmethodid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           creditcardid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           creditcardapprovalcode: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           currencyrateid: Option<int>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           subtotal: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           taxamt: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           freight: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           totaldue: Option<decimal>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           comment: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type sohsr =
-        { salesorderid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          salesorderid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           salesreasonid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type sop =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           specialofferid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: Option<int>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type sp =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           territoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           salesquota: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           bonus: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           commissionpct: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           salesytd: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           saleslastyear: Option<decimal>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type spqh =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           quotadate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           salesquota: Option<decimal>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type sr =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           salesreasonid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           reasontype: Option<string>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type st =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           territoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           countryregioncode: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           group: Option<string>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           salesytd: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           saleslastyear: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           costytd: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           costlastyear: Option<decimal>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type sth =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           territoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           startdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           enddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     [<CLIMutable>]
     type tr =
-        { id: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          id: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           salestaxrateid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           stateprovinceid: Option<int>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           taxtype: Option<int16>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           taxrate: Option<decimal>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: Option<System.Guid>
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
     module Readers =
@@ -4367,316 +5363,549 @@ module sa =
 module sales =
     [<CLIMutable>]
     type countryregioncurrency =
-        { countryregioncode: string
+        { [<SqlHydra.ProviderDbType("Varchar")>]
+          countryregioncode: string
+          [<SqlHydra.ProviderDbType("Char")>]
           currencycode: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type creditcard =
-        { creditcardid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          creditcardid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           cardtype: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           cardnumber: string
+          [<SqlHydra.ProviderDbType("Smallint")>]
           expmonth: int16
+          [<SqlHydra.ProviderDbType("Smallint")>]
           expyear: int16
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type currency =
-        { currencycode: string
+        { [<SqlHydra.ProviderDbType("Char")>]
+          currencycode: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type currencyrate =
-        { currencyrateid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          currencyrateid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           currencyratedate: System.DateTime
+          [<SqlHydra.ProviderDbType("Char")>]
           fromcurrencycode: string
+          [<SqlHydra.ProviderDbType("Char")>]
           tocurrencycode: string
+          [<SqlHydra.ProviderDbType("Numeric")>]
           averagerate: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           endofdayrate: decimal
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type customer =
-        { customerid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          customerid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           personid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           storeid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           territoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type personcreditcard =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           creditcardid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type salesorderdetail =
-        { salesorderid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          salesorderid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           salesorderdetailid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           carriertrackingnumber: Option<string>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           orderqty: int16
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           specialofferid: int
+          [<SqlHydra.ProviderDbType("Numeric")>]
           unitprice: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           unitpricediscount: decimal
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type salesorderheader =
-        { salesorderid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          salesorderid: int
+          [<SqlHydra.ProviderDbType("Smallint")>]
           revisionnumber: int16
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           orderdate: System.DateTime
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           duedate: System.DateTime
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           shipdate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Smallint")>]
           status: int16
+          [<SqlHydra.ProviderDbType("Boolean")>]
           onlineorderflag: bool
+          [<SqlHydra.ProviderDbType("Varchar")>]
           purchaseordernumber: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           accountnumber: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           customerid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           salespersonid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           territoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           billtoaddressid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           shiptoaddressid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           shipmethodid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           creditcardid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           creditcardapprovalcode: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           currencyrateid: Option<int>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           subtotal: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           taxamt: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           freight: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           totaldue: Option<decimal>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           comment: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type salesorderheadersalesreason =
-        { salesorderid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          salesorderid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           salesreasonid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type salesperson =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           territoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           salesquota: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           bonus: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           commissionpct: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           salesytd: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           saleslastyear: decimal
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type salespersonquotahistory =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           quotadate: System.DateTime
+          [<SqlHydra.ProviderDbType("Numeric")>]
           salesquota: decimal
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type salesreason =
-        { salesreasonid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          salesreasonid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           reasontype: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type salestaxrate =
-        { salestaxrateid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          salestaxrateid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           stateprovinceid: int
+          [<SqlHydra.ProviderDbType("Smallint")>]
           taxtype: int16
+          [<SqlHydra.ProviderDbType("Numeric")>]
           taxrate: decimal
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type salesterritory =
-        { territoryid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          territoryid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           countryregioncode: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           group: string
+          [<SqlHydra.ProviderDbType("Numeric")>]
           salesytd: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           saleslastyear: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           costytd: decimal
+          [<SqlHydra.ProviderDbType("Numeric")>]
           costlastyear: decimal
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type salesterritoryhistory =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           territoryid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           startdate: System.DateTime
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           enddate: Option<System.DateTime>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type shoppingcartitem =
-        { shoppingcartitemid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          shoppingcartitemid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           shoppingcartid: string
+          [<SqlHydra.ProviderDbType("Integer")>]
           quantity: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: int
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           datecreated: System.DateTime
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type specialoffer =
-        { specialofferid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          specialofferid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           description: string
+          [<SqlHydra.ProviderDbType("Numeric")>]
           discountpct: decimal
+          [<SqlHydra.ProviderDbType("Varchar")>]
           ``type``: string
+          [<SqlHydra.ProviderDbType("Varchar")>]
           category: string
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           startdate: System.DateTime
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           enddate: System.DateTime
+          [<SqlHydra.ProviderDbType("Integer")>]
           minqty: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           maxqty: Option<int>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type specialofferproduct =
-        { specialofferid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          specialofferid: int
+          [<SqlHydra.ProviderDbType("Integer")>]
           productid: int
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type store =
-        { businessentityid: int
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: int
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: string
+          [<SqlHydra.ProviderDbType("Integer")>]
           salespersonid: Option<int>
+          [<SqlHydra.ProviderDbType("Xml")>]
           demographics: Option<string>
+          [<SqlHydra.ProviderDbType("Uuid")>]
           rowguid: System.Guid
+          [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
     type vindividualcustomer =
-        { businessentityid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           title: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           firstname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           middlename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           lastname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           suffix: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           phonenumber: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           phonenumbertype: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           emailaddress: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           emailpromotion: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addresstype: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline1: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline2: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           city: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           stateprovincename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           postalcode: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           countryregionname: Option<string>
+          [<SqlHydra.ProviderDbType("Xml")>]
           demographics: Option<string> }
 
     [<CLIMutable>]
     type vpersondemographics =
-        { businessentityid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Money")>]
           totalpurchaseytd: Option<decimal>
+          [<SqlHydra.ProviderDbType("Date")>]
           datefirstpurchase: Option<System.DateOnly>
+          [<SqlHydra.ProviderDbType("Date")>]
           birthdate: Option<System.DateOnly>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           maritalstatus: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           yearlyincome: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           gender: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           totalchildren: Option<int>
+          [<SqlHydra.ProviderDbType("Integer")>]
           numberchildrenathome: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           education: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           occupation: Option<string>
+          [<SqlHydra.ProviderDbType("Boolean")>]
           homeownerflag: Option<bool>
+          [<SqlHydra.ProviderDbType("Integer")>]
           numbercarsowned: Option<int> }
 
     [<CLIMutable>]
     type vsalesperson =
-        { businessentityid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           title: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           firstname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           middlename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           lastname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           suffix: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           jobtitle: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           phonenumber: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           phonenumbertype: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           emailaddress: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           emailpromotion: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline1: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline2: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           city: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           stateprovincename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           postalcode: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           countryregionname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           territoryname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           territorygroup: Option<string>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           salesquota: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           salesytd: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           saleslastyear: Option<decimal> }
 
     [<CLIMutable>]
     type vsalespersonsalesbyfiscalyears =
-        { SalesPersonID: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          SalesPersonID: Option<int>
+          [<SqlHydra.ProviderDbType("Text")>]
           FullName: Option<string>
+          [<SqlHydra.ProviderDbType("Text")>]
           JobTitle: Option<string>
+          [<SqlHydra.ProviderDbType("Text")>]
           SalesTerritory: Option<string>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           ``2012``: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           ``2013``: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           ``2014``: Option<decimal> }
 
     [<CLIMutable>]
     type vsalespersonsalesbyfiscalyearsdata =
-        { salespersonid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          salespersonid: Option<int>
+          [<SqlHydra.ProviderDbType("Text")>]
           fullname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           jobtitle: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           salesterritory: Option<string>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           salestotal: Option<decimal>
+          [<SqlHydra.ProviderDbType("Numeric")>]
           fiscalyear: Option<decimal> }
 
     [<CLIMutable>]
     type vstorewithaddresses =
-        { businessentityid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addresstype: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline1: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           addressline2: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           city: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           stateprovincename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           postalcode: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           countryregionname: Option<string> }
 
     [<CLIMutable>]
     type vstorewithcontacts =
-        { businessentityid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           contacttype: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           title: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           firstname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           middlename: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           lastname: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           suffix: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           phonenumber: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           phonenumbertype: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           emailaddress: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           emailpromotion: Option<int> }
 
     [<CLIMutable>]
     type vstorewithdemographics =
-        { businessentityid: Option<int>
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          businessentityid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           name: Option<string>
+          [<SqlHydra.ProviderDbType("Money")>]
           AnnualSales: Option<decimal>
+          [<SqlHydra.ProviderDbType("Money")>]
           AnnualRevenue: Option<decimal>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           BankName: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           BusinessType: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           YearOpened: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           Specialty: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           SquareFeet: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           Brands: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
           Internet: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
           NumberEmployees: Option<int> }
 
     module Readers =
