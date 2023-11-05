@@ -20,7 +20,9 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             setProviderDbType param "NpgsqlDbType" type'
         | Some type', :? SqlKata.Compilers.SqlServerCompiler ->
             setProviderDbType param "SqlDbType" type'
-        | _ -> ()    
+        | _ -> ()
+
+    let mutable logger = fun (r: SqlResult) -> ()
         
     interface IDisposable with
         member this.Dispose() = 
@@ -43,7 +45,17 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
     member this.Connection = conn
     member this.Compiler = compiler
 
-    member val Logger : SqlResult -> unit = (fun _ -> ()) with get,set
+    /// Logs a SqlKata compiled query with a user provided log function.
+    /// Ex: queryContext.Logger <- printfn "SQL: %O"
+    member this.Logger
+        with get () = logger
+        // Wrap the SqlResult to override query logging
+        and set fn = logger <- LoggedSqlResult >> unbox<SqlResult> >> fn
+
+    /// Updates the SqlResult with the latest cmd.CommandText and then logs the query.
+    member private this.LogCommand (sqlResult: SqlResult, cmd: DbCommand) = 
+        sqlResult.Sql <- cmd.CommandText
+        this.Logger sqlResult
 
     member val Transaction : DbTransaction option = None with get,set
 
@@ -98,8 +110,9 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         this.Transaction |> Option.iter (fun t -> cmd.Transaction <- t)
 
     /// Builds a DbCommand with CommandText and Parameters from a SqlKata compiled query.
-    member this.BuildCommand(compiledQuery: SqlResult) = 
-        this.Logger compiledQuery
+    member this.BuildCommand(compiledQuery: SqlResult, ?log: bool) = 
+        let log = defaultArg log true
+        if log then this.Logger compiledQuery
         let cmd = conn.CreateCommand()
         cmd |> this.TrySetTransaction
         cmd.CommandText <- compiledQuery.Sql
@@ -123,7 +136,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
 
     /// Builds an ADO.NET DbCommand from a SqlKata query.
     member this.BuildCommand(query: Query) =
-        let compiledQuery = query |> compiler.Compile
+        let compiledQuery = compiler.Compile(query)
         this.BuildCommand(compiledQuery)
 
     /// Returns an ADO.NET data reader for a given query.
@@ -194,8 +207,8 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         }
 
     member this.Insert<'T, 'InsertReturn when 'InsertReturn : struct> (iq: InsertQuery<'T, 'InsertReturn>) = 
-        let query = iq.ToKataQuery()
-        use cmd = this.BuildCommand(query)
+        let compiledQuery = iq.ToKataQuery() |> compiler.Compile
+        use cmd = this.BuildCommand(compiledQuery, log = false) // We will log manually below to capture query changes
 
         // Applies on conflict modifier if in spec
         let applyOnConflict =
@@ -225,6 +238,8 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             elif compiler :? SqlKata.Compilers.SqlServerCompiler && typeof<'InsertReturn> = typeof<System.Guid>
             then cmd.CommandText <- cmd.CommandText |> Fixes.MsSql.fixGuidIdentityQuery identityField
 
+            this.LogCommand(compiledQuery, cmd)
+
             // Execute insert and return identity
             if compiler :? SqlKata.Compilers.OracleCompiler then
                 let outputParam = cmd.CreateParameter()
@@ -248,6 +263,8 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             if compiler :? SqlKata.Compilers.OracleCompiler && iq.Spec.Entities.Length > 1 
             then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixMultiInsertQuery 
                     
+            this.LogCommand(compiledQuery, cmd)
+
             let results = cmd.ExecuteNonQuery()
             // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
             Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
@@ -257,8 +274,8 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
     
     member this.InsertAsyncWithOptions<'T, 'InsertReturn when 'InsertReturn : struct> (iq: InsertQuery<'T, 'InsertReturn>, ?cancel: CancellationToken) = 
         task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
-            let query = iq.ToKataQuery()
-            use cmd = this.BuildCommand(query)
+            let compiledQuery = iq.ToKataQuery() |> compiler.Compile
+            use cmd = this.BuildCommand(compiledQuery, log = false) // We will log manually below to capture query changes
 
             // Applies on conflict modifier if in spec
             let applyOnConflict =
@@ -288,6 +305,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 elif compiler :? SqlKata.Compilers.SqlServerCompiler && typeof<'InsertReturn> = typeof<System.Guid>
                 then cmd.CommandText <- cmd.CommandText |> Fixes.MsSql.fixGuidIdentityQuery identityField
                 
+                this.LogCommand(compiledQuery, cmd)
 
                 // Execute insert and return identity
                 if compiler :? SqlKata.Compilers.OracleCompiler then
@@ -312,6 +330,8 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 if compiler :? SqlKata.Compilers.OracleCompiler && iq.Spec.Entities.Length > 1 
                 then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixMultiInsertQuery 
                 
+                this.LogCommand(compiledQuery, cmd)
+
                 let! results = cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None)
                 // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
                 return Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn

@@ -53,6 +53,7 @@ module AtLeastOne =
     let getSeq { Items = atLeastOne } = 
         atLeastOne
 
+/// Wraps a SqlKata query parameter to provide the generated ProviderDbType attribute value.
 type QueryParameter = 
     {
         Value: obj
@@ -63,6 +64,17 @@ type QueryParameter =
         match this.ProviderDbType with
         | Some providerDbType -> $"%s{providerDbType}: {this.Value}"
         | None -> $"obj: {this.Value}"
+
+/// Wraps a SqlResult to customize query logging.
+type LoggedSqlResult(r: SqlResult) = 
+    inherit SqlResult()
+    override this.ToString() = 
+        let sb = Text.StringBuilder()
+        sb.AppendLine(r.Sql) |> ignore
+        let parameters = SqlKata.Helper.Flatten(r.Bindings)
+        for p in parameters do
+            sb.AppendLine($"- {p}") |> ignore
+        sb.ToString()
 
 type InsertType = 
     | Insert
