@@ -1,161 +1,158 @@
-﻿module UnitTests.TomlConfigParser
+﻿module UnitTests.``TOML Config Parser``
 
 open Expecto
 open System
 open SqlHydra
 open SqlHydra.Domain
+open NUnit.Framework
 open System.Globalization
 
 /// Compare two strings ignoring white space and line breaks
 let assertEqual (s1: string, s2: string) = 
     Expect.isTrue (String.Compare(s1, s2, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) = 0) ""
 
-[<Tests>]
-let tests = 
-    categoryList "Unit Tests" "TOML Config Parser" [
-        test "Save: All" {
-            let cfg = 
-                {
-                    Config.ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
-                    Config.OutputFile = "AdventureWorks.fs"
-                    Config.Namespace = "SampleApp.AdventureWorks"
-                    Config.IsCLIMutable = true
-                    Config.ProviderDbTypeAttributes = true
-                    Config.TableDeclarations = true
-                    Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
-                    Config.Filters = Filters.Empty
-                }
-
-            let toml = TomlConfigParser.save(cfg)
-    
-            let expected = 
-                """
-                [general]
-                connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
-                output = "AdventureWorks.fs"
-                namespace = "SampleApp.AdventureWorks"
-                cli_mutable = true
-                [sqlhydra_query_integration]
-                provider_db_type_attributes = true
-                table_declarations = true
-                [readers]
-                reader_type = "Microsoft.Data.SqlClient.SqlDataReader"
-                [filters]
-                include = []
-                exclude = []
-                """
-
-            assertEqual(expected, toml)
-        }
-    
-        test "Read: with no filters" {
-            let toml = 
-                """
-                [general]
-                connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
-                output = "AdventureWorks.fs"
-                namespace = "SampleApp.AdventureWorks"
-                cli_mutable = true
-                [readers]
-                reader_type = "Microsoft.Data.SqlClient.SqlDataReader"
-                """
-
-            let expected = 
-                {
-                    Config.ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
-                    Config.OutputFile = "AdventureWorks.fs"
-                    Config.Namespace = "SampleApp.AdventureWorks"
-                    Config.IsCLIMutable = true
-                    Config.ProviderDbTypeAttributes = true
-                    Config.TableDeclarations = false
-                    Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
-                    Config.Filters = Filters.Empty
-                }
-
-            let cfg = TomlConfigParser.read(toml)
-    
-            Expect.equal cfg expected ""
+[<Test>]
+let ``Save: All``() = 
+    let cfg = 
+        {
+            Config.ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+            Config.OutputFile = "AdventureWorks.fs"
+            Config.Namespace = "SampleApp.AdventureWorks"
+            Config.IsCLIMutable = true
+            Config.ProviderDbTypeAttributes = true
+            Config.TableDeclarations = true
+            Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
+            Config.Filters = Filters.Empty
         }
 
-        test "Read: when no readers section should be None"  {
-            let toml = 
-                """
-                [general]
-                connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
-                output = "AdventureWorks.fs"
-                namespace = "SampleApp.AdventureWorks"
-                cli_mutable = true
-                """
+    let toml = TomlConfigParser.save(cfg)
 
-            let expected = 
-                {
-                    Config.ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
-                    Config.OutputFile = "AdventureWorks.fs"
-                    Config.Namespace = "SampleApp.AdventureWorks"
-                    Config.IsCLIMutable = true
-                    Config.ProviderDbTypeAttributes = true
-                    Config.TableDeclarations = false
-                    Config.Readers = None
-                    Config.Filters = Filters.Empty
-                }
+    let expected = 
+        """
+        [general]
+        connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+        output = "AdventureWorks.fs"
+        namespace = "SampleApp.AdventureWorks"
+        cli_mutable = true
+        [sqlhydra_query_integration]
+        provider_db_type_attributes = true
+        table_declarations = true
+        [readers]
+        reader_type = "Microsoft.Data.SqlClient.SqlDataReader"
+        [filters]
+        include = []
+        exclude = []
+        """
 
-            let cfg = TomlConfigParser.read(toml)
-    
-            Expect.equal cfg expected ""
+    assertEqual(expected, toml)
+
+[<Test>]
+let ``Read: with no filters``() = 
+    let toml = 
+        """
+        [general]
+        connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+        output = "AdventureWorks.fs"
+        namespace = "SampleApp.AdventureWorks"
+        cli_mutable = true
+        [readers]
+        reader_type = "Microsoft.Data.SqlClient.SqlDataReader"
+        """
+
+    let expected = 
+        {
+            Config.ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+            Config.OutputFile = "AdventureWorks.fs"
+            Config.Namespace = "SampleApp.AdventureWorks"
+            Config.IsCLIMutable = true
+            Config.ProviderDbTypeAttributes = true
+            Config.TableDeclarations = false
+            Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
+            Config.Filters = Filters.Empty
         }
 
-        test "Read: should parse filters"  {
-            let toml = 
-                """
-                [general]
-                connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
-                output = "AdventureWorks.fs"
-                namespace = "SampleApp.AdventureWorks"
-                cli_mutable = true
-                [filters]
-                include = [ "products/*", "dbo/*" ]
-                exclude = [ "products/system*" ]                
-                """
+    let cfg = TomlConfigParser.read(toml)
 
-            let expectedFilters =
-                { 
-                    Includes = [ "products/*"; "dbo/*" ]
-                    Excludes = [ "products/system*" ] 
-                    Restrictions = Map.empty
-                }
+    Expect.equal cfg expected ""
 
-            let cfg = TomlConfigParser.read(toml)
-    
-            Expect.equal cfg.Filters expectedFilters ""
+[<Test>]
+let ``Read: when no readers section should be None``() = 
+    let toml = 
+        """
+        [general]
+        connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+        output = "AdventureWorks.fs"
+        namespace = "SampleApp.AdventureWorks"
+        cli_mutable = true
+        """
+
+    let expected = 
+        {
+            Config.ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+            Config.OutputFile = "AdventureWorks.fs"
+            Config.Namespace = "SampleApp.AdventureWorks"
+            Config.IsCLIMutable = true
+            Config.ProviderDbTypeAttributes = true
+            Config.TableDeclarations = false
+            Config.Readers = None
+            Config.Filters = Filters.Empty
         }
 
-        test "Read: should parse schema restrictions"  {
-            let toml = 
-                """
-                [general]
-                connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
-                output = "AdventureWorks.fs"
-                namespace = "SampleApp.AdventureWorks"
-                cli_mutable = true
-                [filters]
-                include = []
-                exclude = []
-                restrictions = { "Tables" = [ "products" ], "Columns" = [ "", "Price" ] }
-                """
+    let cfg = TomlConfigParser.read(toml)
 
-            let expectedFilters =
-                { 
-                    Includes = []
-                    Excludes = [] 
-                    Restrictions = 
-                        Map [ 
-                            "Tables", [| "products" |]
-                            "Columns", [| null; "Price" |] 
-                        ]
-                }
+    Expect.equal cfg expected ""
 
-            let cfg = TomlConfigParser.read(toml)
-    
-            Expect.equal cfg.Filters expectedFilters ""
+[<Test>]
+let ``Read: should parse filters``() = 
+    let toml = 
+        """
+        [general]
+        connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+        output = "AdventureWorks.fs"
+        namespace = "SampleApp.AdventureWorks"
+        cli_mutable = true
+        [filters]
+        include = [ "products/*", "dbo/*" ]
+        exclude = [ "products/system*" ]                
+        """
+
+    let expectedFilters =
+        { 
+            Includes = [ "products/*"; "dbo/*" ]
+            Excludes = [ "products/system*" ] 
+            Restrictions = Map.empty
         }
-    ]
+
+    let cfg = TomlConfigParser.read(toml)
+
+    Expect.equal cfg.Filters expectedFilters ""
+
+[<Test>]
+let ``Read: should parse schema restrictions``() = 
+    let toml = 
+        """
+        [general]
+        connection = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+        output = "AdventureWorks.fs"
+        namespace = "SampleApp.AdventureWorks"
+        cli_mutable = true
+        [filters]
+        include = []
+        exclude = []
+        restrictions = { "Tables" = [ "products" ], "Columns" = [ "", "Price" ] }
+        """
+
+    let expectedFilters =
+        { 
+            Includes = []
+            Excludes = [] 
+            Restrictions = 
+                Map [ 
+                    "Tables", [| "products" |]
+                    "Columns", [| null; "Price" |] 
+                ]
+        }
+
+    let cfg = TomlConfigParser.read(toml)
+
+    Expect.equal cfg.Filters expectedFilters ""
