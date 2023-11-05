@@ -1,4 +1,4 @@
-module Sqlite.``Generation Integration Tests``
+module Sqlite.Generation
 
 open Expecto
 open VerifyTests
