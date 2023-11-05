@@ -44,11 +44,11 @@ Target.create "Build" <| fun _ ->
     printfn "Building all supported frameworks."
 
 Target.create "TestNet6" <| fun _ ->
-    let exitCode = Shell.Exec(Tools.dotnet, "run --configuration Release --framework net6.0", tests)
+    let exitCode = Shell.Exec(Tools.dotnet, "test --configuration Release --framework net6.0", tests)
     if exitCode <> 0 then failwith "Failed while running net6.0 tests"
 
 Target.create "TestNet7" <| fun _ ->
-    let exitCode = Shell.Exec(Tools.dotnet, "run --configuration Release --framework net7.0", tests)
+    let exitCode = Shell.Exec(Tools.dotnet, "test --configuration Release --framework net7.0", tests)
     if exitCode <> 0 then failwith "Failed while running net7.0 tests"
 
 Target.create "Test" <| fun _ ->

@@ -9,16 +9,16 @@
 		<!-- Implicit Conversion -->
 	    3391
 	</NoWarn>
-    <Configurations>Debug;Release;DebugLocal</Configurations>
+    <Configurations>Debug;Release;DebugDocker</Configurations>
     <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLocal|AnyCPU'">
-    <DefineConstants>TRACE;LOCALHOST</DefineConstants>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDocker|AnyCPU'">
+    <DefineConstants>TRACE;DOCKERHOST</DefineConstants>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>TRACE;LOCALHOST</DefineConstants>
+    <DefineConstants>TRACE;</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Util.fs" />
