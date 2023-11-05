@@ -59,6 +59,8 @@
     <PackageReference Include="Expecto" Version="9.0.4" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.10" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="Unquote" Version="6.1.0" />
     <PackageReference Include="Verify.Expecto" Version="19.12.1" />
     <PackageReference Include="YoloDev.Expecto.TestSdk" Version="0.13.3" />
