@@ -2,10 +2,10 @@
 
 open Microsoft.Data.SqlClient
 
-#if LOCALHOST // localhost
-let server = "localhost,12019"
-#else // devcontainer
+#if DOCKERHOST // devcontainer
 let server = "mssql"
+#else
+let server = "localhost,12019"
 #endif
 
 let connectionString = $@"Server={server};Database=AdventureWorks;User=sa;Password=Password#123;Connect Timeout=3;TrustServerCertificate=True"
