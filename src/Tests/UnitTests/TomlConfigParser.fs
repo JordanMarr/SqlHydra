@@ -1,15 +1,15 @@
 ﻿module UnitTests.``TOML Config Parser``
 
-open Expecto
 open System
 open SqlHydra
 open SqlHydra.Domain
 open NUnit.Framework
+open Swensen.Unquote
 open System.Globalization
 
 /// Compare two strings ignoring white space and line breaks
 let assertEqual (s1: string, s2: string) = 
-    Expect.isTrue (String.Compare(s1, s2, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) = 0) ""
+    Assert.IsTrue (String.Compare(s1, s2, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) = 0)
 
 [<Test>]
 let ``Save: All``() = 
@@ -73,7 +73,7 @@ let ``Read: with no filters``() =
 
     let cfg = TomlConfigParser.read(toml)
 
-    Expect.equal cfg expected ""
+    cfg =! expected
 
 [<Test>]
 let ``Read: when no readers section should be None``() = 
@@ -100,7 +100,7 @@ let ``Read: when no readers section should be None``() =
 
     let cfg = TomlConfigParser.read(toml)
 
-    Expect.equal cfg expected ""
+    cfg =! expected
 
 [<Test>]
 let ``Read: should parse filters``() = 
@@ -125,7 +125,7 @@ let ``Read: should parse filters``() =
 
     let cfg = TomlConfigParser.read(toml)
 
-    Expect.equal cfg.Filters expectedFilters ""
+    cfg.Filters =! expectedFilters
 
 [<Test>]
 let ``Read: should parse schema restrictions``() = 
@@ -155,4 +155,4 @@ let ``Read: should parse schema restrictions``() =
 
     let cfg = TomlConfigParser.read(toml)
 
-    Expect.equal cfg.Filters expectedFilters ""
+    cfg.Filters =! expectedFilters

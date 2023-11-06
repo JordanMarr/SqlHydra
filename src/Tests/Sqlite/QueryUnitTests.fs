@@ -1,11 +1,10 @@
 ﻿
 module Sqlite.``Query Unit Tests``
 
-open System
-open Expecto
 open SqlHydra.Query
 open DB
 open NUnit.Framework
+open Swensen.Unquote
 #if NET6_0
 open Sqlite.AdventureWorksNet6
 #endif
@@ -15,163 +14,162 @@ open Sqlite.AdventureWorksNet7
 
 [<Test>]
 let ``Simple Where``() = 
-    let query = 
+    let sql = 
         select {
             for a in main.Address do
             where (a.City = "Dallas")
             orderBy a.City
         }
-
-    let sql = query.ToKataQuery() |> toSql
-    //printfn "%s" sql
-    Expect.isTrue (sql.Contains("WHERE")) ""
+        |> toSql
+    
+    sql.Contains("WHERE") =! true
 
 [<Test>]
 let ``Select 1 Column``() = 
-    let query =
+    let sql =
         select {
             for a in main.Address do
             select (a.City)
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.equal sql "SELECT \"a\".\"City\" FROM \"main\".\"Address\" AS \"a\"" ""
+    sql =! "SELECT \"a\".\"City\" FROM \"main\".\"Address\" AS \"a\""
 
 [<Test>]
 let ``Select 2 Columns``() = 
-    let query =
+    let sql =
         select {
             for h in main.SalesOrderHeader do
             select (h.CustomerID, h.OnlineOrderFlag)
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    //printfn "%s" sql
-    Expect.isTrue (sql.Contains("SELECT \"h\".\"CustomerID\", \"h\".\"OnlineOrderFlag\" FROM")) ""
+    sql.Contains("SELECT \"h\".\"CustomerID\", \"h\".\"OnlineOrderFlag\" FROM") =! true
 
 [<Test>]
 let ``Select 1 Table and 1 Column``() = 
-    let query =
+    let sql =
         select {
             for o in main.SalesOrderHeader do
             join d in main.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
             where (o.OnlineOrderFlag = 1L)
             select (o, d.LineTotal)
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    //printfn "%s" sql
-    Expect.isTrue (sql.Contains("SELECT \"o\".*, \"d\".\"LineTotal\" FROM")) ""
+    sql.Contains("SELECT \"o\".*, \"d\".\"LineTotal\" FROM") =! true
 
 [<Test>]
 let ``Where with Option Type``() = 
-    let query = 
+    let sql = 
         select {
             for a in main.Address do
             where (a.AddressLine2 <> None)
         }
+        |> toSql
 
-    query.ToKataQuery() |> toSql |> printfn "%s"
+    sql.Contains("IS NOT NULL") =! true
 
 [<Test>]
 let ``Where Not Like``() = 
-    let query =
+    let sql =
         select {
             for a in main.Address do
             where (a.City <>% "S%")
         }
+        |> toSql
 
-    query.ToKataQuery() |> toSql |> printfn "%s"
+    sql =! """SELECT * FROM "main"."Address" AS "a" WHERE (NOT (LOWER("a"."City") like @p0))"""
 
 [<Test>]
 let ``Or Where``() = 
-    let query = 
+    let sql = 
         select {
             for a in main.Address do
             where (a.City = "Chicago" || a.City = "Dallas")
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("WHERE ((\"a\".\"City\" = @p0) OR (\"a\".\"City\" = @p1))")) ""
+    sql.Contains("WHERE ((\"a\".\"City\" = @p0) OR (\"a\".\"City\" = @p1))") =! true
 
 [<Test>]
 let ``And Where``() = 
-    let query = 
+    let sql = 
         select {
             for a in main.Address do
             where (a.City = "Chicago" && a.City = "Dallas")
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("WHERE ((\"a\".\"City\" = @p0) AND (\"a\".\"City\" = @p1))")) ""
+    sql.Contains("WHERE ((\"a\".\"City\" = @p0) AND (\"a\".\"City\" = @p1))") =! true
 
 [<Test>]
 let ``Where with AND and OR in Parenthesis``() = 
-    let query = 
+    let sql = 
         select {
             for a in main.Address do
             where (a.City = "Chicago" && (a.AddressLine2 = Some "abc" || isNullValue a.AddressLine2))
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue 
-        (sql.Contains("WHERE ((\"a\".\"City\" = @p0) AND ((\"a\".\"AddressLine2\" = @p1) OR (\"a\".\"AddressLine2\" IS NULL)))")) 
-        "Should wrap OR clause in parenthesis and each individual where clause in parenthesis."
+    Assert.IsTrue( 
+        sql.Contains("WHERE ((\"a\".\"City\" = @p0) AND ((\"a\".\"AddressLine2\" = @p1) OR (\"a\".\"AddressLine2\" IS NULL)))"),
+        "Should wrap OR clause in parenthesis and each individual where clause in parenthesis.")
 
 [<Test>]
 let ``Where value and column are swapped``() = 
-    let query = 
+    let sql = 
         select {
             for a in main.Address do
             where (5L < a.AddressID && 20L >= a.AddressID)
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("WHERE ((\"a\".\"AddressID\" > @p0) AND (\"a\".\"AddressID\" <= @p1))")) sql
+    sql.Contains("WHERE ((\"a\".\"AddressID\" > @p0) AND (\"a\".\"AddressID\" <= @p1))") =! true
 
 [<Test>]
 let ``Where Not Binary``() = 
-    let query = 
+    let sql = 
         select {
             for a in main.Address do
             where (not (a.City = "Chicago" && a.City = "Dallas"))
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("WHERE (NOT ((\"a\".\"City\" = @p0) AND (\"a\".\"City\" = @p1)))")) ""
+    sql.Contains("WHERE (NOT ((\"a\".\"City\" = @p0) AND (\"a\".\"City\" = @p1)))") =! true
 
 [<Test>]
 let ``Where Customer isIn List``() = 
-    let query = 
+    let sql = 
         select {
             for c in main.Customer do
             where (isIn c.CustomerID [30018L;29545L;29954L])
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("WHERE (\"c\".\"CustomerID\" IN (@p0, @p1, @p2))")) ""
+    sql.Contains("WHERE (\"c\".\"CustomerID\" IN (@p0, @p1, @p2))") =! true
 
 [<Test>]
 let ``Where Customer |=| List``() = 
-    let query = 
+    let sql = 
         select {
             for c in main.Customer do
             where (c.CustomerID |=| [30018L;29545L;29954L])
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("WHERE (\"c\".\"CustomerID\" IN (@p0, @p1, @p2))")) ""
+    sql.Contains("WHERE (\"c\".\"CustomerID\" IN (@p0, @p1, @p2))") =! true
 
 [<Test>]
 let ``Where Customer |=| Array``() = 
-    let query = 
+    let sql = 
         select {
             for c in main.Customer do
             where (c.CustomerID |=| [| 30018L;29545L;29954L |])
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("WHERE (\"c\".\"CustomerID\" IN (@p0, @p1, @p2))")) ""
+    sql.Contains("WHERE (\"c\".\"CustomerID\" IN (@p0, @p1, @p2))") =! true
 
 [<Test>]
 let ``Where Customer |=| Seq``() = 
@@ -181,69 +179,68 @@ let ``Where Customer |=| Seq``() =
             where (c.CustomerID |=| values)
         }
 
-    let query = buildQuery([ 30018L;29545L;29954L ])
-
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("WHERE (\"c\".\"CustomerID\" IN (@p0, @p1, @p2))")) ""
+    let query = buildQuery [ 30018L;29545L;29954L ]
+    let sql = toSql query
+    sql.Contains("WHERE (\"c\".\"CustomerID\" IN (@p0, @p1, @p2))") =! true
 
 [<Test>]
 let ``Where Customer |<>| List``() = 
-    let query = 
+    let sql = 
         select {
             for c in main.Customer do
             where (c.CustomerID |<>| [ 30018L;29545L;29954L ])
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("WHERE (\"c\".\"CustomerID\" NOT IN (@p0, @p1, @p2))")) ""
+    sql.Contains("WHERE (\"c\".\"CustomerID\" NOT IN (@p0, @p1, @p2))") =! true
 
 [<Test>]
 let ``Inner Join``() = 
-    let query =
+    let sql =
         select {
             for o in main.SalesOrderHeader do
             join d in main.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
             select o
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("INNER JOIN \"main\".\"SalesOrderDetail\" AS \"d\" ON (\"o\".\"SalesOrderID\" = \"d\".\"SalesOrderID\")")) ""
+    sql.Contains("INNER JOIN \"main\".\"SalesOrderDetail\" AS \"d\" ON (\"o\".\"SalesOrderID\" = \"d\".\"SalesOrderID\")") =! true
 
 [<Test>]
 let ``Left Join``() = 
-    let query =
+    let sql =
         select {
             for o in main.SalesOrderHeader do
             leftJoin d in main.SalesOrderDetail on (o.SalesOrderID = d.Value.SalesOrderID)
             select o
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("LEFT JOIN \"main\".\"SalesOrderDetail\" AS \"d\" ON (\"o\".\"SalesOrderID\" = \"d\".\"SalesOrderID\")")) ""
+    sql.Contains("LEFT JOIN \"main\".\"SalesOrderDetail\" AS \"d\" ON (\"o\".\"SalesOrderID\" = \"d\".\"SalesOrderID\")") =! true
 
 [<Test>]
 let ``Inner Join - Multi Column``() = 
-    let query =
+    let sql =
         select {
             for o in main.SalesOrderHeader do
             join d in main.SalesOrderDetail on ((o.SalesOrderID, o.ModifiedDate) = (d.SalesOrderID, d.ModifiedDate))
             select o
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("INNER JOIN \"main\".\"SalesOrderDetail\" AS \"d\" ON (\"o\".\"SalesOrderID\" = \"d\".\"SalesOrderID\" AND \"o\".\"ModifiedDate\" = \"d\".\"ModifiedDate\")")) ""
+    sql.Contains("INNER JOIN \"main\".\"SalesOrderDetail\" AS \"d\" ON (\"o\".\"SalesOrderID\" = \"d\".\"SalesOrderID\" AND \"o\".\"ModifiedDate\" = \"d\".\"ModifiedDate\")") =! true
 
 [<Test>]
 let ``Left Join - Multi Column``() = 
-    let query =
+    let sql =
         select {
             for o in main.SalesOrderHeader do
             leftJoin d in main.SalesOrderDetail on ((o.SalesOrderID, o.ModifiedDate) = (d.Value.SalesOrderID, d.Value.ModifiedDate))
             select o
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("LEFT JOIN \"main\".\"SalesOrderDetail\" AS \"d\" ON (\"o\".\"SalesOrderID\" = \"d\".\"SalesOrderID\" AND \"o\".\"ModifiedDate\" = \"d\".\"ModifiedDate\")")) ""
+    sql.Contains("LEFT JOIN \"main\".\"SalesOrderDetail\" AS \"d\" ON (\"o\".\"SalesOrderID\" = \"d\".\"SalesOrderID\" AND \"o\".\"ModifiedDate\" = \"d\".\"ModifiedDate\")") =! true
 
 [<Test>]
 let ``Correlated Subquery``() = 
@@ -255,60 +252,57 @@ let ``Correlated Subquery``() =
             select (maxBy d.OrderDate)
         }
 
-    let query = 
+    let sql = 
         select {
             for od in main.SalesOrderHeader do
             where (od.OrderDate = subqueryOne latestOrderByCustomer)
-        }
-        
+        }        
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.equal
-        sql
+    sql =!
         "SELECT * FROM \"main\".\"SalesOrderHeader\" AS \"od\" WHERE (\"od\".\"OrderDate\" = \
         (SELECT MAX(\"d\".\"OrderDate\") FROM \"main\".\"SalesOrderHeader\" AS \"d\" \
         WHERE (\"d\".\"CustomerID\" = \"od\".\"CustomerID\")))"
-        ""            
 
 [<Test>]
 let ``Delete Query with Where``() = 
-    let query = 
+    let sql = 
         delete {
             for c in main.Customer do
             where (c.CustomerID |<>| [ 30018L;29545L;29954L ])
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.isTrue (sql.Contains("DELETE FROM \"main\".\"Customer\"")) ""
-    Expect.isTrue (sql.Contains("WHERE (\"main\".\"Customer\".\"CustomerID\" NOT IN (@p0, @p1, @p2))")) ""
+    sql.Contains("DELETE FROM \"main\".\"Customer\"") =! true
+    sql.Contains("WHERE (\"main\".\"Customer\".\"CustomerID\" NOT IN (@p0, @p1, @p2))") =! true
 
 [<Test>]
 let ``Delete All``() = 
-    let query = 
+    let sql = 
         delete {
             for c in main.Customer do
             deleteAll
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.equal sql "DELETE FROM \"main\".\"Customer\"" ""
+    sql =! "DELETE FROM \"main\".\"Customer\""
 
 [<Test>]
 let ``Update Query with Where``() = 
-    let query = 
+    let sql = 
         update {
             for c in main.Customer do
             set c.FirstName "John"
             set c.LastName "Doe"
             where (c.CustomerID = 123L)
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.equal sql """UPDATE "main"."Customer" SET "FirstName" = @p0, "LastName" = @p1 WHERE ("main"."Customer"."CustomerID" = @p2)""" ""
+    sql =! """UPDATE "main"."Customer" SET "FirstName" = @p0, "LastName" = @p1 WHERE ("main"."Customer"."CustomerID" = @p2)"""
 
 [<Test>]
 let ``Update Query with multiple Wheres``() = 
-    let query = 
+    let sql = 
         update {
             for c in main.Customer do
             set c.FirstName "John"
@@ -316,27 +310,27 @@ let ``Update Query with multiple Wheres``() =
             where (c.CustomerID = 123L)
             where (c.FirstName = "Bob")
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.equal sql """UPDATE "main"."Customer" SET "FirstName" = @p0, "LastName" = @p1 WHERE ("main"."Customer"."CustomerID" = @p2 AND ("main"."Customer"."FirstName" = @p3))""" ""
+    sql =! """UPDATE "main"."Customer" SET "FirstName" = @p0, "LastName" = @p1 WHERE ("main"."Customer"."CustomerID" = @p2 AND ("main"."Customer"."FirstName" = @p3))"""
 
 [<Test>]
 let ``Update Query with No Where``() = 
-    let query = 
+    let sql = 
         update {
             for c in main.Customer do
             set c.FirstName "John"
             set c.LastName "Doe"
             updateAll
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.equal "UPDATE \"main\".\"Customer\" SET \"FirstName\" = @p0, \"LastName\" = @p1" sql ""
+    "UPDATE \"main\".\"Customer\" SET \"FirstName\" = @p0, \"LastName\" = @p1" =! sql
 
 [<Test>]
 let ``Update should fail without where or updateAll``() = 
     try 
-        let query = 
+        let _ = 
             update {
                 for c in main.Customer do
                 set c.FirstName "John"
@@ -349,7 +343,7 @@ let ``Update should fail without where or updateAll``() =
 [<Test>]
 let ``Update should pass because where exists``() = 
     try 
-        let query = 
+        let _ = 
             update {
                 for c in main.Customer do
                 set c.FirstName "John"
@@ -362,34 +356,33 @@ let ``Update should pass because where exists``() =
 
 [<Test>]
 let ``Update should pass because updateAll exists``() = 
-    try 
-        let query = 
-            update {
-                for c in main.Customer do
-                set c.FirstName "John"
-                set c.LastName "Doe"
-                updateAll
-            }
-        () //Assert.Pass()
-    with ex ->
-        () //Assert.Pass("Should not fail because `where` is present.")
+    update {
+        for c in main.Customer do
+        set c.FirstName "John"
+        set c.LastName "Doe"
+        updateAll
+    }
+    |> ignore
+    Assert.Pass()    
 
 [<Test>]
 let ``Update with where followed by updateAll should fail``() = 
-    Expect.throwsT<InvalidOperationException> (fun _ ->
+    try
         update {
             for c in main.Customer do
             set c.FirstName "John"
             set c.LastName "Doe"
             where (c.CustomerID = 1L)
             updateAll
-        }
+        } 
         |> ignore
-    ) ""
+        Assert.Fail()
+    with ex ->
+        Assert.Pass()
 
 [<Test>]
 let ``Update with updateAll followed by where should fail``() = 
-    Expect.throwsT<InvalidOperationException> (fun _ ->
+    try
         update {
             for c in main.Customer do
             set c.FirstName "John"
@@ -398,11 +391,13 @@ let ``Update with updateAll followed by where should fail``() =
             where (c.CustomerID = 1L)
         }
         |> ignore
-    ) ""
+        Assert.Fail()
+    with ex ->
+        Assert.Pass()    
 
 [<Test>]
 let ``Insert Query with Identity``() = 
-    let query = 
+    let sql = 
         insert {
             for b in table<main.BuildVersion> do
             entity 
@@ -414,31 +409,24 @@ let ``Insert Query with Identity``() =
                 }
             getId b.SystemInformationID
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Expect.equal 
-        sql 
-        "INSERT INTO \"main\".\"BuildVersion\" (\"Database Version\", \"VersionDate\", \"ModifiedDate\") VALUES (@p0, @p1, @p2);select last_insert_rowid() as id" 
-        ""
+    sql =! "INSERT INTO \"main\".\"BuildVersion\" (\"Database Version\", \"VersionDate\", \"ModifiedDate\") VALUES (@p0, @p1, @p2);select last_insert_rowid() as id" 
 
 [<Test>]
 let ``Inline Aggregates``() = 
-    let query =
+    let sql =
         select {
             for o in main.SalesOrderHeader do
             select (countBy o.SalesOrderID)
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    //printfn "%s" sql
-    Expect.equal
-        sql
-        "SELECT COUNT(\"o\".\"SalesOrderID\") FROM \"main\".\"SalesOrderHeader\" AS \"o\""
-        ""
+    sql =! "SELECT COUNT(\"o\".\"SalesOrderID\") FROM \"main\".\"SalesOrderHeader\" AS \"o\""
 
 [<Test>]
 let ``Implicit Casts``() = 
-    let query =
+    let _ =
         select {
             for p in main.Product do
             where (p.ListPrice > 5)
@@ -449,8 +437,7 @@ let ``Implicit Casts``() =
 
 [<Test>]
 let ``Implicit Casts Option aciq's example``() = 
-
-    let query =
+    let _ =
         select {
             for e in main.ErrorLog do
             where (e.ErrorSeverity = Some 1)
@@ -461,7 +448,7 @@ let ``Implicit Casts Option aciq's example``() =
 
 [<Test>]
 let ``Implicit Casts Option``() = 
-    let query =
+    let _ =
         select {
             for p in main.Product do
             where (p.Weight = Some 5)

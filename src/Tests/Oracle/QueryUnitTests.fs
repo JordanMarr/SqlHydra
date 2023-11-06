@@ -1,6 +1,7 @@
 ﻿module Oracle.``Query Unit Tests``
 
 open System
+open Swensen.Unquote
 open SqlHydra.Query
 open NUnit.Framework
 open DB
@@ -14,160 +15,163 @@ open Oracle.AdventureWorksNet7
 
 [<Test>]
 let ``Simple Where``() = 
-    let query = 
+    let sql = 
         select {
             for c in OT.CUSTOMERS do
             where (c.NAME = "John Doe")
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    //printfn "%s" sql
-    Assert.IsTrue (sql.Contains("WHERE"))
+    sql.Contains("WHERE") =! true
 
 [<Test>]
 let ``Select 1 Column``() = 
-    let query =
+    let sql =
         select {
             for c in OT.CUSTOMERS do
             select c.NAME
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("SELECT \"c\".\"NAME\" FROM"))
+    sql.Contains("SELECT \"c\".\"NAME\" FROM") =! true
 
 [<Test>]
 let ``Select 2 Columns``() = 
-    let query =
+    let sql = 
         select {
             for o in OT.ORDERS do
             select (o.CUSTOMER_ID, o.STATUS)
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
     Assert.IsTrue (sql.Contains("SELECT \"o\".\"CUSTOMER_ID\", \"o\".\"STATUS\" FROM"))
 
 [<Test>]
 let ``Select 1 Table and 1 Column``() = 
-    let query =
+    let sql = 
         select {
             for o in OT.ORDERS do
             join d in OT.ORDER_ITEMS on (o.ORDER_ID = d.ORDER_ID)
             where (o.STATUS = "Pending")
             select (o, d.UNIT_PRICE)
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("SELECT \"o\".*, \"d\".\"UNIT_PRICE\" FROM"))
+    sql.Contains("SELECT \"o\".*, \"d\".\"UNIT_PRICE\" FROM") =! true
 
 [<Test>]
 let ``Where with Option Type``() = 
-    let query = 
+    let sql =  
         select {
             for c in OT.CONTACTS do
             where (c.PHONE <> None)
         }
+        |> toSql
 
-    query.ToKataQuery() |> toSql |> printfn "%s"
+    sql.Contains("IS NOT") =! true
+
 
 [<Test>]
 let ``Where Not Like``() = 
-    let query =
+    let sql = 
         select {
             for c in OT.CUSTOMERS do
             where (c.ADDRESS <>% "S%")
         }
+        |> toSql
 
-    query.ToKataQuery() |> toSql |> printfn "%s"
+    sql =! """SELECT * FROM "OT"."CUSTOMERS" "c" WHERE (NOT (LOWER("c"."ADDRESS") like :p0))"""
+
 
 [<Test>]
 let ``Or Where``() = 
-    let query = 
+    let sql =  
         select {
             for c in OT.CUSTOMERS do
             where (c.NAME = "Smith" || c.NAME = "Doe")
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("WHERE ((\"c\".\"NAME\" = :p0) OR (\"c\".\"NAME\" = :p1))"))
+    sql.Contains("WHERE ((\"c\".\"NAME\" = :p0) OR (\"c\".\"NAME\" = :p1))") =! true
 
 [<Test>]
 let ``And Where``() = 
-    let query = 
+    let sql =  
         select {
             for c in OT.CUSTOMERS do
             where (c.NAME = "Smith" && c.NAME = "Doe")
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("WHERE ((\"c\".\"NAME\" = :p0) AND (\"c\".\"NAME\" = :p1))"))
+    sql.Contains("WHERE ((\"c\".\"NAME\" = :p0) AND (\"c\".\"NAME\" = :p1))") =! true
 
 [<Test>]
 let ``Where with AND and OR in Parenthesis``() = 
-    let query = 
+    let sql =  
         select {
             for c in OT.CUSTOMERS do
             where (c.NAME = "John" && (c.NAME = "Smith" || isNullValue c.ADDRESS))
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
     Assert.IsTrue(
         sql.Contains("WHERE ((\"c\".\"NAME\" = :p0) AND ((\"c\".\"NAME\" = :p1) OR (\"c\".\"ADDRESS\" IS NULL)))"),
         "Should wrap OR clause in parenthesis and each individual where clause in parenthesis.")
 
 [<Test>]
 let ``Where value and column are swapped``() = 
-    let query = 
+    let sql =  
         select {
             for c in OT.CUSTOMERS do
             where (5L < c.CUSTOMER_ID && 20L >= c.CUSTOMER_ID)
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("WHERE ((\"c\".\"CUSTOMER_ID\" > :p0) AND (\"c\".\"CUSTOMER_ID\" <= :p1))"))
+    sql.Contains("WHERE ((\"c\".\"CUSTOMER_ID\" > :p0) AND (\"c\".\"CUSTOMER_ID\" <= :p1))") =! true
 
 [<Test>]
 let ``Where Not Binary``() = 
-    let query = 
+    let sql =  
         select {
             for c in OT.CUSTOMERS do
             where (not (c.NAME = "Smith" && c.NAME = "Doe"))
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("WHERE (NOT ((\"c\".\"NAME\" = :p0) AND (\"c\".\"NAME\" = :p1)))"))
+    sql.Contains("WHERE (NOT ((\"c\".\"NAME\" = :p0) AND (\"c\".\"NAME\" = :p1)))") =! true
 
 [<Test>]
 let ``Where Customer isIn List``() = 
-    let query = 
+    let sql =  
         select {
             for c in OT.CUSTOMERS do
             where (isIn c.CUSTOMER_ID [1L;2L;3L])
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))"))
+    sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))") =! true
 
 [<Test>]
 let ``Where Customer |=| List``() = 
-    let query = 
+    let sql =  
         select {
             for c in OT.CUSTOMERS do
             where (c.CUSTOMER_ID |=| [1L;2L;3L])
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))"))
+    sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))") =! true
 
 [<Test>]
 let ``Where Customer |=| Array``() = 
-    let query = 
+    let sql =  
         select {
             for c in OT.CUSTOMERS do
             where (c.CUSTOMER_ID |=| [| 1L;2L;3L |])
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))"))
+    sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))") =! true
 
 [<Test>]
 let ``Where Customer |=| Seq``() = 
@@ -177,45 +181,43 @@ let ``Where Customer |=| Seq``() =
             where (c.CUSTOMER_ID |=| values)
         }
 
-    let query = buildQuery([ 1L;2L;3L ])
-
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))"))
+    let sql =  buildQuery([ 1L;2L;3L ]) |> toSql
+    sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" IN (:p0, :p1, :p2))") =! true
 
 [<Test>]
 let ``Where Customer |<>| List``() = 
-    let query = 
+    let sql =  
         select {
             for c in OT.CUSTOMERS do
             where (c.CUSTOMER_ID |<>| [ 1L;2L;3L ])
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" NOT IN (:p0, :p1, :p2))"))
+    sql.Contains("WHERE (\"c\".\"CUSTOMER_ID\" NOT IN (:p0, :p1, :p2))") =! true
 
 [<Test>]
 let ``Inner Join``() = 
-    let query =
+    let sql = 
         select {
             for o in OT.ORDERS do
             join d in OT.ORDER_ITEMS on (o.ORDER_ID = d.ORDER_ID)
             select o
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("INNER JOIN \"OT\".\"ORDER_ITEMS\" \"d\" ON (\"o\".\"ORDER_ID\" = \"d\".\"ORDER_ID\")"))
+    sql.Contains("INNER JOIN \"OT\".\"ORDER_ITEMS\" \"d\" ON (\"o\".\"ORDER_ID\" = \"d\".\"ORDER_ID\")") =! true
 
 [<Test>]
 let ``Left Join``() = 
-    let query =
+    let sql = 
         select {
             for o in OT.ORDERS do
             leftJoin d in OT.ORDER_ITEMS on (o.ORDER_ID = d.Value.ORDER_ID)
             select o
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("LEFT JOIN \"OT\".\"ORDER_ITEMS\" \"d\" ON (\"o\".\"ORDER_ID\" = \"d\".\"ORDER_ID\")"))
+    sql.Contains("LEFT JOIN \"OT\".\"ORDER_ITEMS\" \"d\" ON (\"o\".\"ORDER_ID\" = \"d\".\"ORDER_ID\")") =! true
 
 [<Test>]
 let ``Correlated Subquery``() = 
@@ -227,96 +229,94 @@ let ``Correlated Subquery``() =
             select (maxBy d.ORDER_DATE)
         }
 
-    let query = 
+    let sql =  
         select {
             for od in OT.ORDERS do
             where (od.ORDER_DATE = subqueryOne latestOrderByCustomer)
         }
-        
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.AreEqual(
-        sql,
+    sql =!
         "SELECT * FROM \"OT\".\"ORDERS\" \"od\" WHERE (\"od\".\"ORDER_DATE\" = \
         (SELECT MAX(\"d\".\"ORDER_DATE\") FROM \"OT\".\"ORDERS\" \"d\" \
-        WHERE (\"d\".\"CUSTOMER_ID\" = \"od\".\"CUSTOMER_ID\")))")
+        WHERE (\"d\".\"CUSTOMER_ID\" = \"od\".\"CUSTOMER_ID\")))"
 
 [<Test>]
 let ``Join On Value Bug Fix Test``() = 
-    let query = 
+    let sql =  
         select {
             for o in OT.ORDERS do
             leftJoin d in OT.ORDERS on (o.SALESMAN_ID.Value = d.Value.SALESMAN_ID.Value)
             select o
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
     Assert.IsNotNull sql
 
 [<Test>]
 let ``Delete Query with Where``() = 
-    let query = 
+    let sql =  
         delete {
             for c in OT.CUSTOMERS do
             where (c.CUSTOMER_ID |<>| [ 1L;2L;3L ])
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.IsTrue (sql.Contains("DELETE FROM \"OT\".\"CUSTOMERS\""))
-    Assert.IsTrue (sql.Contains("WHERE (\"OT\".\"CUSTOMERS\".\"CUSTOMER_ID\" NOT IN (:p0, :p1, :p2))"))
+    sql.Contains("DELETE FROM \"OT\".\"CUSTOMERS\"") =! true
+    sql.Contains("WHERE (\"OT\".\"CUSTOMERS\".\"CUSTOMER_ID\" NOT IN (:p0, :p1, :p2))") =! true
 
 [<Test>]
 let ``Delete All``() = 
-    let query = 
+    let sql =  
         delete {
             for c in OT.CUSTOMERS do
             deleteAll
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.AreEqual("DELETE FROM \"OT\".\"CUSTOMERS\"", sql)
+    sql =! "DELETE FROM \"OT\".\"CUSTOMERS\""
 
 [<Test>]
 let ``Update Query with Where``() = 
-    let query = 
+    let sql =  
         update {
             for c in OT.CUSTOMERS do
             set c.NAME "Smith"
             where (c.NAME = "Doe")
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.AreEqual("""UPDATE "OT"."CUSTOMERS" SET "NAME" = :p0 WHERE ("OT"."CUSTOMERS"."NAME" = :p1)""", sql)
+    sql =! """UPDATE "OT"."CUSTOMERS" SET "NAME" = :p0 WHERE ("OT"."CUSTOMERS"."NAME" = :p1)"""
 
 [<Test>]
 let ``Update Query with multiple Wheres``() = 
-    let query = 
+    let sql =  
         update {
             for c in OT.CUSTOMERS do
             set c.NAME "Smith"
             where (c.NAME = "Doe")
             where (c.CUSTOMER_ID = 123L)
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.AreEqual("""UPDATE "OT"."CUSTOMERS" SET "NAME" = :p0 WHERE ("OT"."CUSTOMERS"."NAME" = :p1 AND ("OT"."CUSTOMERS"."CUSTOMER_ID" = :p2))""", sql)
+    sql =! """UPDATE "OT"."CUSTOMERS" SET "NAME" = :p0 WHERE ("OT"."CUSTOMERS"."NAME" = :p1 AND ("OT"."CUSTOMERS"."CUSTOMER_ID" = :p2))"""
 
 [<Test>]
 let ``Update Query with No Where``() = 
-    let query = 
+    let sql =  
         update {
             for c in OT.CUSTOMERS do
             set c.NAME "Smith"
             updateAll
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.AreEqual("UPDATE \"OT\".\"CUSTOMERS\" SET \"NAME\" = :p0", sql)
+    sql =! "UPDATE \"OT\".\"CUSTOMERS\" SET \"NAME\" = :p0"
 
 [<Test>]
 let ``Update should fail without where or updateAll``() = 
     try 
-        let query = 
+        let sql =  
             update {
                 for c in OT.CUSTOMERS do
                 set c.NAME "Smith"
@@ -328,54 +328,56 @@ let ``Update should fail without where or updateAll``() =
 [<Test>]
 let ``Update should pass because where exists``() = 
     try 
-        let query = 
-            update {
-                for c in OT.CUSTOMERS do
-                set c.NAME "Smith"
-                where (c.CUSTOMER_ID = 1)
-            }
-        () //Assert.Pass()
+        update {
+            for c in OT.CUSTOMERS do
+            set c.NAME "Smith"
+            where (c.CUSTOMER_ID = 1)
+        }
+        |> ignore
     with ex ->
-        () //Assert.Pass("Should not fail because `where` is present.")
+        Assert.Fail()
 
 [<Test>]
 let ``Update should pass because updateAll exists``() = 
     try 
-        let query = 
-            update {
-                for c in OT.CUSTOMERS do
-                set c.NAME "Smith"
-                updateAll
-            }
-        () //Assert.Pass()
+        update {
+            for c in OT.CUSTOMERS do
+            set c.NAME "Smith"
+            updateAll
+        }
+        |> ignore
     with ex ->
-        () //Assert.Pass("Should not fail because `where` is present.")
+        Assert.Fail()
 
 [<Test>]
 let ``Update with where followed by updateAll should fail``() = 
-    Assert.Throws<InvalidOperationException> (fun _ ->
+    try
         update {
             for c in OT.CUSTOMERS do
             set c.NAME "Smith"
             where (c.CUSTOMER_ID = 1)
             updateAll
         } |> ignore
-    ) |> ignore
+        Assert.Fail()
+    with ex ->
+        ()
 
 [<Test>]
 let ``Update with updateAll followed by where should fail``() = 
-    Assert.Throws<InvalidOperationException> (fun _ ->
+    try
         update {
             for c in OT.CUSTOMERS do
             set c.NAME "Smith"
             updateAll
             where (c.CUSTOMER_ID = 1)
         } |> ignore
-    ) |> ignore
+        Assert.Fail()
+    with ex ->
+        ()
 
 [<Test>]
 let ``Insert Query without Identity``() = 
-    let query = 
+    let sql =  
         insert {
             into OT.COUNTRIES
             entity
@@ -385,15 +387,13 @@ let ``Insert Query without Identity``() =
                     OT.COUNTRIES.COUNTRY_NAME = "Wonderland"
                 }
         }
-    
-    let sql = query.ToKataQuery() |> toSql
-    Assert.AreEqual(
-        sql,
-        "INSERT INTO \"OT\".\"COUNTRIES\" (\"COUNTRY_ID\", \"COUNTRY_NAME\", \"REGION_ID\") VALUES (:p0, :p1, :p2)")
+        |> toSql
+
+    sql =! "INSERT INTO \"OT\".\"COUNTRIES\" (\"COUNTRY_ID\", \"COUNTRY_NAME\", \"REGION_ID\") VALUES (:p0, :p1, :p2)"
 
 [<Test>]
 let ``Insert Query with Identity``() = 
-    let query = 
+    let sql =  
         insert {
             for r in OT.REGIONS do
             entity 
@@ -403,11 +403,9 @@ let ``Insert Query with Identity``() =
                 }
             getId r.REGION_ID
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.AreEqual(
-        sql,
-        "INSERT INTO \"OT\".\"REGIONS\" (\"REGION_NAME\") VALUES (:p0)")
+    sql =! "INSERT INTO \"OT\".\"REGIONS\" (\"REGION_NAME\") VALUES (:p0)"
 
 [<Test>]
 let ``Multiple Inserts Fix``() = 
@@ -424,13 +422,13 @@ let ``Multiple Inserts Fix``() =
 
     match countriesAL1 with
     | Some countries ->
-        let query = 
+        let sql =  
             insert {
                 into OT.COUNTRIES
                 entities countries
             }
+            |> toSql
 
-        let sql = query.ToKataQuery() |> toSql
         let expected = 
             let sb = new System.Text.StringBuilder()
             sb.AppendLine("INSERT ALL") |> ignore
@@ -444,15 +442,16 @@ let ``Multiple Inserts Fix``() =
 
         Assert.AreEqual(fixedQuery, expected, "SqlKata multiple insert query should be overriden to match.")
         
-    | None -> ()
+    | None -> 
+        ()
 
 [<Test>]
 let ``Inline Aggregates``() = 
-    let query =
+    let sql = 
         select {
             for o in OT.ORDERS do
             select (countBy o.ORDER_ID)
         }
+        |> toSql
 
-    let sql = query.ToKataQuery() |> toSql
-    Assert.AreEqual(sql, "SELECT COUNT(\"o\".\"ORDER_ID\") FROM \"OT\".\"ORDERS\" \"o\"")
+    sql =! "SELECT COUNT(\"o\".\"ORDER_ID\") FROM \"OT\".\"ORDERS\" \"o\""

@@ -1,6 +1,6 @@
 ﻿module Oracle.``Query Integration Tests``
 
-open Expecto
+open Swensen.Unquote
 open SqlHydra.Query
 open Oracle.ManagedDataAccess.Client
 open NUnit.Framework
@@ -31,7 +31,7 @@ let ``Where Name Contains``() = task {
         |> ctx.Read HydraReader.Read
 
     gt0 addresses
-    Expect.isTrue (addresses |> Seq.forall (fun a -> a.NAME = "Staples" || a.NAME = "Aflac")) "Expected only 'Staples' or 'Aflac'."
+    Assert.IsTrue(addresses |> Seq.forall (fun a -> a.NAME = "Staples" || a.NAME = "Aflac"), "Expected only 'Staples' or 'Aflac'.")
 }
 
 [<Test>]
@@ -47,7 +47,7 @@ let ``Select Address Column Where Address Contains Detroit``() = task {
         |> ctx.Read HydraReader.Read
 
     gt0 cities
-    Expect.isTrue (cities |> Seq.choose id |> Seq.forall (fun city -> city.Contains "Detroit")) "Expected all cities to contain 'Detroit'."
+    Assert.IsTrue(cities |> Seq.choose id |> Seq.forall (fun city -> city.Contains "Detroit"), "Expected all cities to contain 'Detroit'.")
 }
 
 [<Test>]
@@ -61,8 +61,6 @@ let ``Inner Join Orders-Details``() = task {
             where (o.STATUS = "Pending")
             select (o, d)
         }
-
-    //query.ToKataQuery() |> toSql |> printfn "%s"
 
     let! results = query |> ctx.ReadAsync HydraReader.Read
     gt0 results
@@ -81,8 +79,6 @@ let ``Product with Category name``() = task {
         }
 
     let! rows = query |> ctx.ReadAsync HydraReader.Read
-    //printfn "Results: %A" rows
-    //query.ToKataQuery() |> toSql |> printfn "%s"
     gt0 rows
 }
 
@@ -100,9 +96,6 @@ let ``Select Column Aggregates From Product IDs 1-3``() = task {
         }
 
     let! aggregates = query |> ctx.ReadAsync HydraReader.Read
-    //let sql = query.ToKataQuery() |> toSql 
-    //sql |> printfn "%s"
-
     gt0 aggregates
 
     let aggByCatID = 
@@ -110,11 +103,12 @@ let ``Select Column Aggregates From Product IDs 1-3``() = task {
         |> Seq.map (fun (catId, minPrice, maxPrice, avgPrice, priceCount, sumPrice) -> catId, (minPrice, maxPrice, avgPrice, priceCount, sumPrice)) 
         |> Map.ofSeq
     
-    let dc (actual: decimal) (expected: decimal) = Expect.floatClose Accuracy.medium (float actual) (float expected) "Expected values to be close"
+    let dc (actual: decimal) (expected: decimal) = 
+        Assert.AreEqual(float actual, float expected, 0.001, "Expected values to be close")
 
     let verifyAggregateValuesFor (catId: int64) (xMinPrice, xMaxPrice, xAvgPrice, xPriceCount, xSumPrice) =
         let aMinPrice, aMaxPrice, aAvgPrice, aPriceCount, aSumPrice = aggByCatID.[catId]
-        dc aMinPrice xMinPrice; dc aMaxPrice xMaxPrice; dc aAvgPrice xAvgPrice; Expect.equal aPriceCount xPriceCount ""; dc aSumPrice xSumPrice
+        dc aMinPrice xMinPrice; dc aMaxPrice xMaxPrice; dc aAvgPrice xAvgPrice; Assert.AreEqual(aPriceCount, xPriceCount); dc aSumPrice xSumPrice
     
     verifyAggregateValuesFor 1 (554.99M, 3410.46M, 1386.966M, 70, 97087.65M)
     verifyAggregateValuesFor 2 (739.99M, 5499.99M, 1406.098M, 50, 70304.9M)
@@ -144,7 +138,7 @@ let ``Aggregate Subquery One``() = task {
     let avgListPrice = 438.6662M
 
     gt0 productsWithHigherThanAvgPrice
-    Expect.isTrue (productsWithHigherThanAvgPrice |> Seq.forall (fun (nm, price) -> price > avgListPrice)) "Expected all prices to be > than avg price of $438.67."
+    Assert.IsTrue(productsWithHigherThanAvgPrice |> Seq.forall (fun (nm, price) -> price > avgListPrice), "Expected all prices to be > than avg price of $438.67.")
 }
 
 // This stopped working after implementing columns with table aliases.
@@ -246,7 +240,7 @@ let ``Select Columns with Option``() = task {
         |> ctx.ReadAsync HydraReader.Read
 
     gt0 values
-    Expect.isTrue (values |> Seq.forall (fun (catId, price) -> price <> None)) "Expected subcategories to all have a value."
+    Assert.IsTrue(values |> Seq.forall (fun (catId, price) -> price <> None), "Expected subcategories to all have a value.")
 }
 
 [<Test>]
@@ -265,7 +259,7 @@ let ``Insert Country``() = task {
         }
         |> ctx.InsertAsync
 
-    Expect.isTrue (results = 1) ""
+    results =! 1
 
     let! wl = 
         select {
@@ -289,7 +283,7 @@ let ``Update Country``() = task {
         }
         |> ctx.UpdateAsync
 
-    Expect.isTrue (results > 0) ""
+    results >! 0
 
     let! wl = 
         select {
@@ -319,7 +313,7 @@ let ``Delete Country``() = task {
         }
         |> ctx.ReadAsync HydraReader.Read
 
-    Expect.isTrue (wl |> Seq.length = 0) "Should be deleted"
+    Assert.IsTrue(wl |> Seq.length = 0, "Should be deleted")
 }
 
 [<Test>]
@@ -348,7 +342,7 @@ let ``Insert and Get Id``() = task {
     
     match region with
     | Some (r: OT.REGIONS) -> 
-        Expect.isTrue (r.REGION_ID > 0) "Expected REGION_ID to be greater than 0"
+        Assert.IsTrue(r.REGION_ID > 0, "Expected REGION_ID to be greater than 0")
     | None -> 
         failwith "Expected to query a region row."
 }
@@ -379,7 +373,7 @@ let ``Multiple Inserts``() = task {
             }
             |> ctx.InsertAsync
 
-        Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+        Assert.AreEqual(rowsInserted, 3, "Expected 3 rows to be inserted")
 
         let! results =
             select {
@@ -392,8 +386,9 @@ let ``Multiple Inserts``() = task {
 
         let codes = results |> Seq.toList
 
-        Expect.equal codes [ "X0"; "X1"; "X2" ] ""
-    | None -> ()
+        codes =! [ "X0"; "X1"; "X2" ]
+    | None -> 
+        ()
 
     ctx.RollbackTransaction()
 }
@@ -423,7 +418,7 @@ let ``Distinct Test``() = task {
                 entities countries
             }
 
-        Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+        Assert.AreEqual(rowsInserted, 3, "Expected 3 rows to be inserted")
 
         let! results =
             selectTask HydraReader.Read (Shared ctx) {
@@ -440,8 +435,8 @@ let ``Distinct Test``() = task {
                 distinct
             }
 
-        Expect.equal (results |> Seq.length) 3 ""
-        Expect.equal (distinctResults |> Seq.length) 1 ""
+        results |> Seq.length =! 3
+        distinctResults |> Seq.length =! 1
     | None -> ()
 
     ctx.RollbackTransaction()

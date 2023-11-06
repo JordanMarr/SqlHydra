@@ -1,6 +1,6 @@
 ﻿module UnitTests.``Column Filters``
 
-open Expecto
+open Swensen.Unquote
 open NUnit.Framework
 open SqlHydra.Domain
 open SqlHydra.SchemaFilters
@@ -14,7 +14,7 @@ let col nm =
     }
 
 let equalLists lst1 lst2 = 
-    Expect.equal (Set lst1) (Set lst2) "Lists are not equal"
+    Assert.AreEqual(Set lst1, Set lst2, "Lists are not equal")
 
 [<Test>]
 let ``Include All and No Excludes``() = 

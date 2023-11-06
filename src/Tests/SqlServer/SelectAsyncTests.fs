@@ -1,7 +1,7 @@
 ﻿module SqlServer.``selectAsync Tests``
 
 open SqlHydra.Query
-open Expecto
+open Swensen.Unquote
 open NUnit.Framework
 open DB
 
@@ -101,7 +101,7 @@ let ``selectAsync - count``() = async {
             count
         }
         
-    Expect.isTrue (results > 0) ""
+    results >! 0
 }
 
 [<Test>]
@@ -113,7 +113,7 @@ let ``selectAsync - tryHead - Selected``() = async {
             tryHead
         }
         
-    Expect.isSome result ""
+    result |> Option.isSome =! true
 }
 
 [<Test>]
@@ -126,6 +126,6 @@ let ``selectAsync - tryHead - Mapped``() = async {
             tryHead
         }
         
-    Expect.isSome result ""
+    result |> Option.isSome =! true
 }
 

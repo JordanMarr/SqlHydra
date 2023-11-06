@@ -1,11 +1,10 @@
 ﻿module SqlServer.``Query Integration Tests``
 
 open SqlHydra.Query
-open Expecto
 open DB
 open NUnit.Framework
 open System.Threading.Tasks
-
+open Swensen.Unquote
 #if NET6_0
 open SqlServer.AdventureWorksNet6
 #endif
@@ -43,7 +42,7 @@ let ``Where City Starts With S``() = task {
         |> ctx.Read HydraReader.Read
 
     gt0 addresses
-    Expect.isTrue (addresses |> Seq.forall (fun a -> a.City = "Seattle" || a.City = "Santa Cruz")) "Expected only 'Seattle' or 'Santa Cruz'."
+    Assert.IsTrue(addresses |> Seq.forall (fun a -> a.City = "Seattle" || a.City = "Santa Cruz"), "Expected only 'Seattle' or 'Santa Cruz'.")
 }
 
 [<Test>]
@@ -59,7 +58,7 @@ let ``Select City Column Where City Starts with S``() = task {
         |> ctx.Read HydraReader.Read
 
     gt0 cities
-    Expect.isTrue (cities |> Seq.forall (fun city -> city.StartsWith "S")) "Expected all cities to start with 'S'."
+    Assert.IsTrue(cities |> Seq.forall (fun city -> city.StartsWith "S"), "Expected all cities to start with 'S'.")
 }
 
 [<Test>]
@@ -73,8 +72,6 @@ let ``Inner Join Orders-Details``() = task {
             where o.OnlineOrderFlag
             select (o, d)
         }
-
-    //query.ToKataQuery() |> toSql |> printfn "%s"
 
     let! results = query |> ctx.ReadAsync HydraReader.Read
     gt0 results
@@ -94,8 +91,6 @@ let ``Product with Category Name``() = task {
         }
 
     let! rows = query |> ctx.ReadAsync HydraReader.Read
-    //printfn "Results: %A" rows
-    //query.ToKataQuery() |> toSql |> printfn "%s"
     gt0 rows
 }
 
@@ -113,7 +108,6 @@ let ``Select Column Aggregates From Product IDs 1-3``() = task {
         }
 
     let! aggregates = query |> ctx.ReadAsync HydraReader.Read
-    //query.ToKataQuery() |> toSql |> printfn "%s"
 
     gt0 aggregates
             
@@ -121,9 +115,10 @@ let ``Select Column Aggregates From Product IDs 1-3``() = task {
         aggregates 
         |> Seq.map (fun (catId, minPrice, maxPrice, avgPrice, priceCount, sumPrice) -> catId, (minPrice, maxPrice, avgPrice, priceCount, sumPrice)) 
         |> Map.ofSeq
-    Expect.equal (539.99M, 3399.99M, 1683.365M, 32, 53867.6800M) aggByCatID.[Some 1] "Expected CatID: 1 aggregates to match."
-    Expect.equal (539.99M, 3578.2700M, 1597.4500M, 43, 68690.3500M) aggByCatID.[Some 2] "Expected CatID: 2 aggregates to match."
-    Expect.equal (742.3500M, 2384.0700M, 1425.2481M, 22, 31355.4600M) aggByCatID.[Some 3] "Expected CatID: 3 aggregates to match."
+
+    Assert.AreEqual((539.99M, 3399.99M, 1683.365M, 32, 53867.6800M), aggByCatID.[Some 1], "Expected CatID: 1 aggregates to match.")
+    Assert.AreEqual((539.99M, 3578.2700M, 1597.4500M, 43, 68690.3500M), aggByCatID.[Some 2], "Expected CatID: 2 aggregates to match.")
+    Assert.AreEqual((742.3500M, 2384.0700M, 1425.2481M, 22, 31355.4600M), aggByCatID.[Some 3], "Expected CatID: 3 aggregates to match.")
 }
 
 [<Test>]
@@ -148,7 +143,7 @@ let ``Aggregate Subquery One``() = task {
     let avgListPrice = 438.6662M
             
     gt0 productsWithHigherThanAvgPrice
-    Expect.isTrue (productsWithHigherThanAvgPrice |> Seq.forall (fun (nm, price) -> price > avgListPrice)) "Expected all prices to be > than avg price of $438.67."
+    Assert.IsTrue(productsWithHigherThanAvgPrice |> Seq.forall (fun (nm, price) -> price > avgListPrice), "Expected all prices to be > than avg price of $438.67.")
 }
 
 [<Test>]
@@ -181,8 +176,6 @@ let ``Sorted Aggregates - Top 5 categories with highest avg price products``() =
                 select (p.ProductSubcategoryID, avgBy p.ListPrice)
                 take 5
         }
-
-    let sql = query.ToKataQuery() |> DB.toSql
 
     let! aggregates = query |> ctx.ReadAsync HydraReader.Read
 
@@ -248,7 +241,7 @@ let ``Select Columns with Option``() = task {
         |> ctx.ReadAsync HydraReader.Read
 
     gt0 values
-    Expect.isTrue (values |> Seq.forall (fun (catId, price) -> catId <> None)) "Expected subcategories to all have a value."
+    Assert.IsTrue(values |> Seq.forall (fun (catId, price) -> catId <> None), "Expected subcategories to all have a value.")
 }
 
 [<Test>]
@@ -275,8 +268,7 @@ let ``InsertGetId Test``() = task {
             getId e.ErrorLogID
         }
 
-    printfn "Identity: %i" errorLogId
-    Expect.isTrue (errorLogId > 0) "Expected returned ID to be > 0"
+    errorLogId >! 0
 }
 
 [<Test>]
@@ -303,7 +295,7 @@ let ``InsertGetIdAsync Test``() = task {
             getId e.ErrorLogID
         }
 
-    printfn "Identity: %i" result
+    result >! 0
 }
 
 [<Test>]
@@ -320,7 +312,7 @@ let ``Update Set Individual Fields``() = task {
             where (e.ErrorLogID = 1)
         }
 
-    Expect.isTrue (result > 0) ""
+    result >! 0
 }
 
 [<Test>]
@@ -337,7 +329,7 @@ let ``UpdateAsync Set Individual Fields``() = task {
             where (e.ErrorLogID = 1)
         }
 
-    printfn "result: %i" result
+    result =! 1
 }
 
 [<Test>]
@@ -365,33 +357,37 @@ let ``Update Entity``() = task {
             where (e.ErrorLogID = errorLog.ErrorLogID)
         }
 
-    printfn "result: %i" result
+    result =! 1
 }
 
 [<Test>]
 let ``Delete Test``() = task {
     use ctx = openContext()
+    ctx.BeginTransaction()
 
     let! result = 
         deleteTask (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorLogID = 5)
+            where (e.ErrorLogID = 1)
         }
 
-    printfn "result: %i" result
+    result =! 1
+    ctx.RollbackTransaction()
 }
 
 [<Test>]
 let ``DeleteAsync Test``() = task {
     use ctx = openContext()
+    ctx.BeginTransaction()
 
     let! result = 
         deleteTask (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorLogID = 5)
+            where (e.ErrorLogID = 1)
         }
 
-    printfn "result: %i" result
+    result =! 1
+    ctx.RollbackTransaction()
 }
 
 [<Test>]
@@ -422,7 +418,7 @@ let ``Multiple Inserts``() = task {
                 excludeColumn e.ErrorLogID
             }
 
-        Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+        rowsInserted =! 3
     | None -> ()
 
     let! results =
@@ -434,7 +430,7 @@ let ``Multiple Inserts``() = task {
 
     let errorNumbers = results |> Seq.toList
     
-    Expect.equal errorNumbers [ 400; 401; 402 ] ""
+    errorNumbers =! [ 400; 401; 402 ]
 
     ctx.RollbackTransaction()
 }
@@ -465,7 +461,7 @@ let ``Distinct Test``() = task {
                 excludeColumn e.ErrorLogID
             }
 
-        Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+        rowsInserted =! 3
     | None -> ()
 
     let! results =
@@ -481,8 +477,8 @@ let ``Distinct Test``() = task {
             distinct
         }
 
-    Expect.equal (results |> Seq.length) 3 ""
-    Expect.equal (distinctResults |> Seq.length) 1 ""
+    results |> Seq.length =! 3
+    distinctResults |> Seq.length =! 1
 
     ctx.RollbackTransaction()
 }
@@ -508,9 +504,7 @@ let ``Count Test``() = task {
         }
         |> ctx.CountAsync
 
-    printfn "Count: %i" count
-    Expect.isTrue (count > 0) ""
-
+    count >! 0
     ctx.RollbackTransaction()
 }
 
@@ -534,9 +528,7 @@ let ``Count Test Task``() = task {
             count
         }
 
-    printfn "Count: %i" count
-    Expect.isTrue (count > 0) ""
-
+    count >! 0
     ctx.RollbackTransaction()
 }
         
@@ -560,9 +552,7 @@ let ``Count Test Async``() = task {
             count
         }
         
-    printfn "Count: %i" count
-    Expect.isTrue (count > 0) ""
-        
+    count >! 0        
     ctx.RollbackTransaction()
 }
 
@@ -623,7 +613,7 @@ let ``Update Employee DateOnly``() = task {
             where (e.BusinessEntityID = emp.BusinessEntityID)
         }
 
-    Expect.isTrue (result = 1) "Should update exactly one record."
+    result =! 1
 
     let! refreshedEmp = 
         selectTask HydraReader.Read (Shared ctx) {
@@ -636,8 +626,7 @@ let ``Update Employee DateOnly``() = task {
         (refreshedEmp : HumanResources.Employee option)
         |> Option.map (fun e -> e.BirthDate)
             
-    Expect.isTrue (actualBirthDate = Some birthDate) ""
-            
+    actualBirthDate =! Some birthDate            
     ctx.RollbackTransaction()
 }
 
@@ -733,8 +722,8 @@ let ``Insert, update, and select with both datetime and datetime2 precision``() 
             select row
         }
 
-    Expect.equal [timestamp] [for (row: ext.DateTime2Support) in retrievedBack -> row.MorePrecision] "INSERT: Expected DATETIME2 to be stored with full precision"
-    Expect.notEqual [timestamp] [for (row: ext.DateTime2Support) in retrievedBack -> row.LessPrecision] "INSERT: Expected a loss of precision when storing a DATETIME"
+    Assert.AreEqual([timestamp], [for (row: ext.DateTime2Support) in retrievedBack -> row.MorePrecision], "INSERT: Expected DATETIME2 to be stored with full precision")
+    Assert.AreNotEqual([timestamp], [for (row: ext.DateTime2Support) in retrievedBack -> row.LessPrecision], "INSERT: Expected a loss of precision when storing a DATETIME")
 
     let! fullPrecisionQuery = 
         selectTask HydraReader.Read (Shared ctx) { 
@@ -750,8 +739,8 @@ let ``Insert, update, and select with both datetime and datetime2 precision``() 
             count
         }
 
-    Expect.equal fullPrecisionQuery 1 "SELECT: Expected precision of a DATETIME2 query parameter to match the precision in the database"
-    Expect.equal lessPrecisionQuery 1 "SELECT: Expected precision of a DATETIME query parameter to match the precision in the database"
+    Assert.AreEqual(fullPrecisionQuery, 1, "SELECT: Expected precision of a DATETIME2 query parameter to match the precision in the database")
+    Assert.AreEqual(lessPrecisionQuery, 1, "SELECT: Expected precision of a DATETIME query parameter to match the precision in the database")
 
     let newTimestamp = System.DateTime(baseTimestamp.Ticks + 2345678L)
 
@@ -775,9 +764,8 @@ let ``Insert, update, and select with both datetime and datetime2 precision``() 
             select row
         }
 
-    Expect.equal [newTimestamp] [for (row: ext.DateTime2Support) in retrievedBack -> row.MorePrecision] "UPDATE: Expected DATETIME2 to be stored with full precision"
-    Expect.notEqual [newTimestamp] [for (row: ext.DateTime2Support) in retrievedBack -> row.LessPrecision] "UPDATE: Expected a loss of precision when storing a DATETIME"
-    
+    Assert.AreEqual([newTimestamp], [for (row: ext.DateTime2Support) in retrievedBack -> row.MorePrecision], "UPDATE: Expected DATETIME2 to be stored with full precision")
+    Assert.AreNotEqual([newTimestamp], [for (row: ext.DateTime2Support) in retrievedBack -> row.LessPrecision], "UPDATE: Expected a loss of precision when storing a DATETIME")
     ctx.RollbackTransaction ()
 }
 
@@ -796,5 +784,5 @@ let ``Guid getId Bug Repro Issue 38``() = task {
             getId row.Id
         }
 
-    Expect.notEqual guid (System.Guid.Empty) "Guid should not be empty."
+    guid <>! System.Guid.Empty
 }

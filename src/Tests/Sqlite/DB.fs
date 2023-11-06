@@ -22,7 +22,10 @@ let openConnection() =
     conn.Open()
     conn
 
-
-let toSql (query: SqlKata.Query) = 
+let toSql (query: SqlHydra.Query.SelectQuery) = 
     let compiler = SqlKata.Compilers.SqliteCompiler()
-    compiler.Compile(query).Sql
+    let sql = compiler.Compile(query.ToKataQuery()).Sql
+    #if DEBUG
+    printfn "toSql: %s" sql
+    #endif
+    sql

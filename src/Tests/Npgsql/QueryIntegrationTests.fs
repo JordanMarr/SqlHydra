@@ -1,10 +1,9 @@
 ﻿module Npgsql.``Query Integration Tests``
 
-open Expecto
+open Swensen.Unquote
 open SqlHydra.Query
 open SqlHydra.Query.NpgsqlExtensions
 open NUnit.Framework
-open Swensen.Unquote
 open System.Threading.Tasks
 open DB
 #if NET6_0
@@ -32,7 +31,7 @@ let ``Where City Contains``() = task {
         |> ctx.Read HydraReader.Read
 
     gt0 addresses
-    Expect.isTrue (addresses |> Seq.forall (fun a -> a.city = "Seattle" || a.city = "Santa Cruz")) "Expected only 'Seattle' or 'Santa Cruz'."
+    Assert.IsTrue(addresses |> Seq.forall (fun a -> a.city = "Seattle" || a.city = "Santa Cruz"), "Expected only 'Seattle' or 'Santa Cruz'.")
 }
 
 [<Test>]
@@ -48,7 +47,7 @@ let ``Select city Column Where city Starts with S``() = task {
         |> ctx.Read HydraReader.Read
 
     gt0 cities
-    Expect.isTrue (cities |> Seq.forall (fun city -> city.StartsWith "S")) "Expected all cities to start with 'S'."
+    Assert.IsTrue(cities |> Seq.forall (fun city -> city.StartsWith "S"), "Expected all cities to start with 'S'.")
 }
 
 [<Test>]
@@ -62,8 +61,6 @@ let ``Inner Join Orders-Details``() = task {
             where o.onlineorderflag
             select (o, d)
         }
-
-    //query.ToKataQuery() |> toSql |> printfn "%s"
 
     let! results = query |> ctx.ReadAsync HydraReader.Read
     gt0 results
@@ -83,8 +80,6 @@ let ``Product with Category name``() = task {
         }
 
     let! rows = query |> ctx.ReadAsync HydraReader.Read
-    //printfn "Results: %A" rows
-    //query.ToKataQuery() |> toSql |> printfn "%s"
     gt0 rows
 }
 
@@ -102,8 +97,6 @@ let ``Select Column Aggregates From Product IDs 1-3``() = task {
         }
 
     let! aggregates = query |> ctx.ReadAsync HydraReader.Read
-    //let sql = query.ToKataQuery() |> toSql 
-    //sql |> printfn "%s"
 
     gt0 aggregates
 
@@ -112,11 +105,12 @@ let ``Select Column Aggregates From Product IDs 1-3``() = task {
         |> Seq.map (fun (catId, minPrice, maxPrice, avgPrice, priceCount, sumPrice) -> catId, (minPrice, maxPrice, avgPrice, priceCount, sumPrice)) 
         |> Map.ofSeq
     
-    let dc (actual: decimal) (expected: decimal) = Expect.floatClose Accuracy.medium (float actual) (float expected) "Expected values to be close"
+    let dc (actual: decimal) (expected: decimal) = 
+        Assert.AreEqual(float actual, float expected, 0.0001, "Expected values to be close")
 
     let verifyAggregateValuesFor (catId: int) (xMinPrice, xMaxPrice, xAvgPrice, xPriceCount, xSumPrice) =
         let aMinPrice, aMaxPrice, aAvgPrice, aPriceCount, aSumPrice = aggByCatID.[Some catId]
-        dc aMinPrice xMinPrice; dc aMaxPrice xMaxPrice; dc aAvgPrice xAvgPrice; Expect.equal aPriceCount xPriceCount ""; dc aSumPrice xSumPrice
+        dc aMinPrice xMinPrice; dc aMaxPrice xMaxPrice; dc aAvgPrice xAvgPrice; Assert.AreEqual(aPriceCount, xPriceCount); dc aSumPrice xSumPrice
     
     verifyAggregateValuesFor 1 (539.99M, 3399.99M, 1683.365M, 32, 53867.6800M)
     verifyAggregateValuesFor 2 (539.99M, 3578.2700M, 1597.4500M, 43, 68690.3500M)
@@ -145,7 +139,7 @@ let ``Aggregate Subquery One``() = task {
     let avgListPrice = 438.6662M
 
     gt0 productsWithHigherThanAvgPrice
-    Expect.isTrue (productsWithHigherThanAvgPrice |> Seq.forall (fun (nm, price) -> price > avgListPrice)) "Expected all prices to be > than avg price of $438.67."
+    Assert.IsTrue(productsWithHigherThanAvgPrice |> Seq.forall (fun (nm, price) -> price > avgListPrice), "Expected all prices to be > than avg price of $438.67.")
 }
 
 [<Test>]
@@ -242,7 +236,7 @@ let ``Select Columns with Option``() = task {
         |> ctx.ReadAsync HydraReader.Read
 
     gt0 values
-    Expect.isTrue (values |> Seq.forall (fun (catId, price) -> catId <> None)) "Expected subcategories to all have a value."
+    Assert.IsTrue(values |> Seq.forall (fun (catId, price) -> catId <> None), "Expected subcategories to all have a value.")
 }
 
 [<Test>]
@@ -261,7 +255,7 @@ let ``Insert Currency``() = task {
         }
         |> ctx.InsertAsync
 
-    Expect.isTrue (results = 1) ""
+    results =! 1
 
     let! btc = 
         select {
@@ -285,7 +279,7 @@ let ``Update Currency``() = task {
         }
         |> ctx.UpdateAsync
 
-    Expect.isTrue (results > 0) ""
+    results >! 0
 
     let! btc = 
         select {
@@ -315,7 +309,7 @@ let ``Delete Currency``() = task {
         }
         |> ctx.ReadAsync HydraReader.Read
 
-    Expect.isTrue (btc |> Seq.length = 0) "Should be deleted"
+    Assert.IsTrue(btc |> Seq.length = 0, "Should be deleted")
 }
 
 [<Test; Ignore "Ignore">]
@@ -359,7 +353,7 @@ let ``Insert and Get Id``() = task {
             
     match review with
     | Some (rev : production.productreview) -> 
-        Expect.isTrue (prodReviewId > 0) "Expected productreviewid to be greater than 0"
+        Assert.IsTrue(prodReviewId > 0, "Expected productreviewid to be greater than 0")
     | None -> 
         failwith "Expected to query a review row."
 
@@ -370,7 +364,7 @@ let ``Insert and Get Id``() = task {
         }
         |> ctx.DeleteAsync
 
-    Expect.equal deletedCount 1 "Expected exactly one review to be deleted"
+    Assert.AreEqual(deletedCount, 1, "Expected exactly one review to be deleted")
 
     let! reviews = 
         select {
@@ -379,8 +373,7 @@ let ``Insert and Get Id``() = task {
         }
         |> ctx.ReadAsync HydraReader.Read
 
-    Expect.equal (reviews |> Seq.length) 0 "Expected no reviews to be queryable"
-
+    Assert.AreEqual(reviews |> Seq.length, 0, "Expected no reviews to be queryable")
     ctx.CommitTransaction()
 }
 
@@ -410,7 +403,7 @@ let ``Multiple Inserts``() = task {
             }
             |> ctx.InsertAsync
 
-        Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+        Assert.AreEqual(rowsInserted, 3, "Expected 3 rows to be inserted")
 
         let! results =
             select {
@@ -423,7 +416,7 @@ let ``Multiple Inserts``() = task {
 
         let codes = results |> Seq.toList
     
-        Expect.equal codes [ "BC0"; "BC1"; "BC2" ] ""
+        codes =! [ "BC0"; "BC1"; "BC2" ]
     | None -> ()
 
     ctx.RollbackTransaction()
@@ -454,7 +447,7 @@ let ``Distinct Test``() = task {
                 entities currencies
             }
 
-        Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+        Assert.AreEqual(rowsInserted, 3, "Expected 3 rows to be inserted")
 
         let! results =
             selectTask HydraReader.Read (Shared ctx) {
@@ -471,9 +464,10 @@ let ``Distinct Test``() = task {
                 distinct
             }
 
-        Expect.equal (results |> Seq.length) 3 ""
-        Expect.equal (distinctResults |> Seq.length) 1 ""
-    | None -> ()
+        results |> Seq.length =! 3
+        distinctResults |> Seq.length =! 1
+    | None -> 
+        ()
 
     ctx.RollbackTransaction()
 }
@@ -482,7 +476,8 @@ let ``Distinct Test``() = task {
 let ``Insert, Update and Read npgsql provider specific db fields``() = task {
     use ctx = openContext ()
             
-    let expectJsonEqual (dbValue: string) = Expect.equal (dbValue.Replace(" ", ""))
+    let expectJsonEqual (dbValue: string) (jsonValue: string) err = 
+        Assert.AreEqual(dbValue.Replace(" ", ""), jsonValue, err)
                 
     let getRowById id =
         select {
@@ -509,11 +504,12 @@ let ``Insert, Update and Read npgsql provider specific db fields``() = task {
         |> ctx.InsertAsync
                   
     let! selectedRows = getRowById insertedRowId
-
-    Expect.wantSome (selectedRows |> Seq.tryHead) "Select returned empty set"
-    |> fun (row: ext.jsonsupport) ->
-            expectJsonEqual row.json_field jsonValue "Json field after insert doesn't match"
-            expectJsonEqual row.jsonb_field jsonValue "Jsonb field after insert doesn't match"
+    match selectedRows |> Seq.tryHead with
+    | Some row ->
+        expectJsonEqual row.json_field jsonValue "Json field after insert doesn't match"
+        expectJsonEqual row.jsonb_field jsonValue "Jsonb field after insert doesn't match"
+    | None ->
+        failwith "Expected Some"
      
     // Simple update of one entity
     let updatedJsonValue = """{"name":"test_2"}"""
@@ -526,14 +522,15 @@ let ``Insert, Update and Read npgsql provider specific db fields``() = task {
             }
             |> ctx.UpdateAsync
         
-    Expect.equal updatedRows 1 "Expected 1 row to be updated"
+    Assert.AreEqual(updatedRows, 1, "Expected 1 row to be updated")
             
     let! selectedRowsAfterUpdate = getRowById insertedRowId
-
-    Expect.wantSome (selectedRowsAfterUpdate |> Seq.tryHead) "Select returned empty set"
-    |> fun (row: ext.jsonsupport) ->
-            expectJsonEqual row.json_field  updatedJsonValue "Json field after update doesn't match"
-            expectJsonEqual row.jsonb_field updatedJsonValue "Jsonb field after update doesn't match"
+    match selectedRowsAfterUpdate |> Seq.tryHead with
+    | Some row ->
+        expectJsonEqual row.json_field  updatedJsonValue "Json field after update doesn't match"
+        expectJsonEqual row.jsonb_field updatedJsonValue "Jsonb field after update doesn't match"
+    | None -> 
+        failwith "Expected Some"
                    
     let entities = [entity'; entity'] |> AtLeastOne.tryCreate
 
@@ -547,8 +544,9 @@ let ``Insert, Update and Read npgsql provider specific db fields``() = task {
             }
             |> ctx.InsertAsync
             
-        Expect.equal insertedNumberOfRows 2 "Failed insert multiple entities"
-    | None -> ()
+        Assert.AreEqual(insertedNumberOfRows, 2, "Failed insert multiple entities")
+    | None -> 
+        ()
 }
 
 [<Test>]
@@ -583,7 +581,7 @@ let ``Enum Tests``() = task {
             )
         }
 
-    Expect.isTrue (insertResults > 0) "Expected insert results > 0"
+    Assert.IsTrue(insertResults > 0, "Expected insert results > 0")
 
     let! query1Results = 
         selectTask HydraReader.Read (Shared ctx) {
@@ -599,7 +597,7 @@ let ``Enum Tests``() = task {
             where (p.currentmood = ext.mood.ok)
         }
 
-    Expect.isTrue (updateResults > 0) "Expected update results > 0"
+    Assert.IsTrue(updateResults > 0, "Expected update results > 0")
 
     let! query2Results = 
         selectTask HydraReader.Read (Shared ctx) {
@@ -608,12 +606,7 @@ let ``Enum Tests``() = task {
             toList
         } 
 
-    Expect.isTrue (
-        query2Results 
-        |> List.forall (fun (p: ext.person) -> 
-            p.currentmood = ext.mood.happy
-        )
-    ) ""
+    query2Results |> List.forall (fun (p: ext.person) -> p.currentmood = ext.mood.happy) =! true
 }
 
 [<Test>]
@@ -737,7 +730,7 @@ let ``Test Array Columns``() = task {
             entity row
         }
 
-    Expect.isTrue (insertResults > 0) "Expected insert results > 0"
+    Assert.IsTrue(insertResults > 0, "Expected insert results > 0")
 
             
     let! query1Result = 
@@ -747,7 +740,7 @@ let ``Test Array Columns``() = task {
             tryHead
         } 
                             
-    Expect.equal query1Result (Some row) "Expected query result to match inserted row."
+    Assert.AreEqual(query1Result, Some row, "Expected query result to match inserted row.")
 
     let! query2Result = 
         selectTask HydraReader.Read (Shared ctx) {
@@ -756,7 +749,7 @@ let ``Test Array Columns``() = task {
             tryHead
         } 
 
-    Expect.equal query2Result (Some (row.integer_array, row.text_array)) "Expected to query individually selected array columns."
+    Assert.AreEqual(query2Result, Some (row.integer_array, row.text_array), "Expected to query individually selected array columns.")
 
     ctx.RollbackTransaction()
 }
@@ -784,7 +777,7 @@ let ``Update Employee DateOnly``() = task {
             where (e.businessentityid = emp.businessentityid)
         }
 
-    Expect.isTrue (result = 1) "Should update exactly one record."
+    result =! 1
 
     let! refreshedEmp = 
         selectTask HydraReader.Read (Shared ctx) {
@@ -797,7 +790,7 @@ let ``Update Employee DateOnly``() = task {
         (refreshedEmp : humanresources.employee option)
         |> Option.map (fun e -> e.birthdate)
             
-    Expect.isTrue (actualBirthDate = Some birthDate) ""
+    actualBirthDate =! Some birthDate
             
     ctx.RollbackTransaction()
 }

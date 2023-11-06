@@ -1,7 +1,6 @@
 ﻿module Sqlite.``Query Integration Tests``
 
 open SqlHydra.Query
-open Expecto
 open DB
 open SqlHydra.Query.SqliteExtensions
 open Swensen.Unquote
@@ -44,7 +43,7 @@ let ``Where City Starts With S``() = task {
         |> ctx.Read HydraReader.Read
 
     gt0 addresses
-    Expect.isTrue (addresses |> Seq.forall (fun a -> a.City = "Seattle" || a.City = "Santa Cruz")) "Expected only 'Seattle' or 'Santa Cruz'."
+    Assert.IsTrue(addresses |> Seq.forall (fun a -> a.City = "Seattle" || a.City = "Santa Cruz"), "Expected only 'Seattle' or 'Santa Cruz'.")
 }
 
 [<Test>]
@@ -60,7 +59,7 @@ let ``Select City Column Where City Starts with S``() = task {
         |> ctx.Read HydraReader.Read
 
     gt0 cities
-    Expect.isTrue (cities |> Seq.forall (fun city -> city.StartsWith "S")) "Expected all cities to start with 'S'."
+    Assert.IsTrue(cities |> Seq.forall (fun city -> city.StartsWith "S"), "Expected all cities to start with 'S'.")
 }
 
 [<Test>]
@@ -74,8 +73,6 @@ let ``Inner Join Orders-Details``() = task {
             where (o.OnlineOrderFlag = 0L)
             select (o, d)
         }
-
-    //query.ToKataQuery() |> toSql |> printfn "%s"
 
     let! results = query |> ctx.ReadAsync HydraReader.Read
     gt0 results
@@ -127,8 +124,7 @@ let ``InsertGetId Test``() = task {
         }
         |> ctx.Insert
 
-    //printfn "Identity: %i" errorLogId
-    Expect.isTrue (errorLogId > 0L) "Expected returned ID to be > 0"
+    Assert.IsTrue(errorLogId > 0L, "Expected returned ID to be > 0")
 }
 
 [<Test>]
@@ -156,7 +152,7 @@ let ``InsertGetIdAsync Test``() = task {
         }
         |> ctx.InsertAsync
 
-    printfn "Identity: %i" result
+    result >! 0L
 }
 
 [<Test>]
@@ -281,9 +277,10 @@ let ``Multiple Inserts``() = task {
             }
             |> ctx.InsertAsync
 
-        Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+        Assert.AreEqual(rowsInserted, 3, "Expected 3 rows to be inserted")
 
-    | None -> ()
+    | None -> 
+        ()
 
     let! results =
         select {
@@ -294,7 +291,7 @@ let ``Multiple Inserts``() = task {
 
     let errorNumbers = results |> Seq.toList
     
-    Expect.equal errorNumbers [ 400L; 401L; 402L ] ""
+    errorNumbers =! [ 400L; 401L; 402L ]
 
     ctx.RollbackTransaction()
 }
@@ -326,9 +323,10 @@ let ``Distinct Test``() = task {
             }
             |> ctx.InsertAsync
 
-        Expect.equal rowsInserted 3 "Expected 3 rows to be inserted"
+        Assert.AreEqual(rowsInserted, 3, "Expected 3 rows to be inserted")
 
-    | None -> ()
+    | None -> 
+        ()
 
     let! results =
         selectTask HydraReader.Read (Shared ctx) {
@@ -343,8 +341,8 @@ let ``Distinct Test``() = task {
             distinct
         }
 
-    Expect.equal (results |> Seq.length) 3 ""
-    Expect.equal (distinctResults |> Seq.length) 1 ""
+    results |> Seq.length =! 3
+    distinctResults |> Seq.length =! 1
 
     ctx.RollbackTransaction()
 }
@@ -371,9 +369,7 @@ let ``Count Test``() = task {
         }
         |> ctx.CountAsync
 
-    printfn "Count: %i" count
-    Expect.isTrue (count > 0) ""
-
+    count >! 0
     ctx.RollbackTransaction()
 }
 
