@@ -635,3 +635,17 @@ let ``Underscore Assignment Edge Case - insert - should fail with not supported`
     with 
     | :? System.NotSupportedException -> Assert.Pass()
     | ex -> Assert.Fail("Should fail with NotSupportedException")
+
+[<Test>]
+let ``Individual column from a leftJoin table should be optional if Some``() = 
+    let query = 
+        select {
+            for o in Sales.SalesOrderHeader do
+            leftJoin d in Sales.SalesOrderDetail on (o.SalesOrderID = d.Value.SalesOrderID)
+            select (Some d.Value.OrderQty)
+        }
+        
+    let sql = query |> toSql
+    sql =! """SELECT [d].[OrderQty] FROM [Sales].[SalesOrderHeader] AS [o] 
+LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID])"""
+

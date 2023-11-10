@@ -322,12 +322,12 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
                 | nameof like | nameof op_EqualsPercent -> query.WhereLike(fqCol, pattern, false)
                 | _ -> query.WhereNotLike(fqCol, pattern, false)
             | _ -> notImpl()
-        | MethodCall m when m.Method.Name = nameof isNullValue || m.Method.Name = nameof isNotNullValue ->
+        | MethodCall m when List.contains m.Method.Name [ nameof isNullValue; "IsNull"; nameof isNotNullValue ] ->
             match m.Arguments.[0] with
             | Property p -> 
                 let alias = visitAlias p.Expression
                 let fqCol = qualifyColumn alias p.Member
-                if m.Method.Name = nameof isNullValue
+                if m.Method.Name = nameof isNullValue || m.Method.Name = "IsNull" // CompiledName for `isNull` = `IsNull`
                 then query.WhereNull(fqCol)
                 else query.WhereNotNull(fqCol)
             | _ -> notImpl()
@@ -668,6 +668,9 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
         | MethodCall m when m.Method.Name = "Invoke" ->
             // Handle tuples
             visit m.Object
+        | MethodCall m when m.Method.Name = "Some" ->
+            // Columns selected from leftJoined tables may be wrapped in `Some` to make them optional.
+            visit m.Arguments.[0]
         | AggregateColumn (aggType, p) -> 
             let alias = visitAlias p.Expression
             [ SelectedAggregateColumn (aggType, alias, p.Member.Name) ]            

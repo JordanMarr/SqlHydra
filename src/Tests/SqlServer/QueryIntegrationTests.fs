@@ -786,3 +786,25 @@ let ``Guid getId Bug Repro Issue 38``() = task {
 
     guid <>! System.Guid.Empty
 }
+
+[<Test>]
+let ``Individual column from a leftJoin table should be optional if Some``() = task {
+    let! results = 
+        selectTask HydraReader.Read (Create openContext)  {
+            for o in Sales.SalesOrderHeader do
+            leftJoin sr in Sales.SalesOrderHeaderSalesReason on (o.SalesOrderID = sr.Value.SalesOrderID)
+            leftJoin r in Sales.SalesReason on (sr.Value.SalesReasonID = r.Value.SalesReasonID)
+            where (isNullValue r.Value.Name)
+            select (o.SalesOrderID, Some r.Value.ReasonType, Some r.Value.Name)
+            take 10
+        }
+
+    let reasonsExist = 
+        results 
+        |> Seq.forall (fun (id, reasonType, name) -> 
+            reasonType <> None && name <> None
+        )
+
+    gt0 results
+    reasonsExist =! false
+}
