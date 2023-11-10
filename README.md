@@ -462,6 +462,18 @@ If a custom subset of entities and/or columns has been selected in the query, yo
         }
 ```
 
+You can also use `mapSeq` in conjunction with `tryHead` to map a single result:
+
+```F#
+        selectAsync HydraReader.Read (Create openContext) {
+            for o in SalesLT.Order do
+            where (o.Id = orderId)
+            select o.Total
+            mapSeq {| GrandTotal = o.Total |}
+            tryHead
+        }
+```
+
 
 #### Aggregates
 
