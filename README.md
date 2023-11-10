@@ -390,6 +390,20 @@ let getCustomerAddressesInIds (customerIds: int list) =
     }
 ```
 
+When selecting individual columns from a left joined table, you can force non-optional columns to be optional by wrapping them in `Some`:
+
+```F#
+let getCustomerZipCodes (customerId: int) =
+    selectAsync HydraReader.Read (Create openContext) {
+        for c in SalesLT.Customer do
+        leftJoin ca in SalesLT.CustomerAddress on (c.CustomerID = ca.Value.CustomerID)
+        leftJoin a  in SalesLT.Address on (ca.Value.AddressID = a.Value.AddressID)
+        where (c.CustomerID = customerId)
+        orderBy c.CustomerID
+        select (c, Some a.Value.ZipCode)
+    }
+```
+
 To create a join query with multi-columns, use tuples:
 
 ```F#
