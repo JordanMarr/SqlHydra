@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.191.1/containers/dotnet-fsharp
 {
-	"name": "F# (.NET)",
+	"name": "SqlHydra Dev Container",
 	// "build": {
 	// 	"dockerfile": "Dockerfile",
 	// 	"args": {
@@ -14,17 +14,20 @@
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
 	"workspaceFolder": "/../../workspace",
+	
+	"customizations": {
+		"vscode": {
+			"settings": {
 
-	// Set *default* container specific settings.json values on container create.
-	"settings": {},
-
-	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": [
-		"Ionide.Ionide-fsharp",
-		"ms-dotnettools.csharp",
-		"ckolkman.vscode-postgres",
-		"ms-mssql.mssql"
-	],
+			},
+			"extensions": [
+				"Ionide.Ionide-fsharp",
+				"ms-dotnettools.csharp",
+				"ckolkman.vscode-postgres",
+				"ms-mssql.mssql"
+			]
+		}
+	}
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
@@ -33,5 +36,5 @@
 	// "postCreateCommand": "dotnet restore",
 
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "vscode"
+	// "remoteUser": "vscode"
 }
