@@ -8,8 +8,8 @@ open Swensen.Unquote
 #if NET6_0
 open Sqlite.AdventureWorksNet6
 #endif
-#if NET7_0
-open Sqlite.AdventureWorksNet7
+#if NET8_0
+open Sqlite.AdventureWorksNet8
 #endif
 
 [<Test>]

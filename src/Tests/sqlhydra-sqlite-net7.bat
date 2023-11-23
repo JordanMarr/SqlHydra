@@ -1,1 +1,0 @@
-dotnet run --project ..\SqlHydra.Cli --framework net7.0 -- sqlite -t sqlhydra-sqlite-net7.toml

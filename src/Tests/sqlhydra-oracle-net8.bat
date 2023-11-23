@@ -1,0 +1,1 @@
+dotnet run --project ..\SqlHydra.Cli --framework net8.0 -- oracle -t sqlhydra-oracle-net8.toml

@@ -1,7 +1,7 @@
 [general]
 connection = "Server=localhost,12019;Database=AdventureWorks;User=sa;Password=Password#123;TrustServerCertificate=True"
-output = "SqlServer/AdventureWorksNet7.fs"
-namespace = "SqlServer.AdventureWorksNet7"
+output = "SqlServer/AdventureWorksNet8.fs"
+namespace = "SqlServer.AdventureWorksNet8"
 cli_mutable = true
 [sqlhydra_query_integration]
 provider_db_type_attributes = true

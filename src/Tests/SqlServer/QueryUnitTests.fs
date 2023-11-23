@@ -8,8 +8,8 @@ open NUnit.Framework
 #if NET6_0
 open SqlServer.AdventureWorksNet6
 #endif
-#if NET7_0
-open SqlServer.AdventureWorksNet7
+#if NET8_0
+open SqlServer.AdventureWorksNet8
 #endif
 
 type OptionalBoolEntity = 

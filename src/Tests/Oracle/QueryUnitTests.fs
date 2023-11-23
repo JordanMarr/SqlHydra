@@ -9,8 +9,8 @@ open DB
 #if NET6_0
 open Oracle.AdventureWorksNet6
 #endif
-#if NET7_0
-open Oracle.AdventureWorksNet7
+#if NET8_0
+open Oracle.AdventureWorksNet8
 #endif
 
 [<Test>]

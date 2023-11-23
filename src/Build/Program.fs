@@ -36,8 +36,13 @@ Target.create "BuildCliNet6" <| fun _ ->
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
 Target.create "BuildCliNet7" <| fun _ ->
-    [ cli; tests ]
+    [ cli; ] // tests ] Skip tests for net7.0 (only testing two at a time: net6.0 and net8.0)
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net7.0", pkg), pkg)
+    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
+
+Target.create "BuildCliNet8" <| fun _ ->
+    [ cli; tests ]
+    |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net8.0", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
 Target.create "Build" <| fun _ ->
@@ -47,9 +52,9 @@ Target.create "TestNet6" <| fun _ ->
     let exitCode = Shell.Exec(Tools.dotnet, "test --configuration Release --framework net6.0", tests)
     if exitCode <> 0 then failwith "Failed while running net6.0 tests"
 
-Target.create "TestNet7" <| fun _ ->
-    let exitCode = Shell.Exec(Tools.dotnet, "test --configuration Release --framework net7.0", tests)
-    if exitCode <> 0 then failwith "Failed while running net7.0 tests"
+Target.create "TestNet8" <| fun _ ->
+    let exitCode = Shell.Exec(Tools.dotnet, "test --configuration Release --framework net8.0", tests)
+    if exitCode <> 0 then failwith "Failed while running net8.0 tests"
 
 Target.create "Test" <| fun _ ->
     printfn "Testing on all supported frameworks."
@@ -83,8 +88,9 @@ Target.create "Publish" <| fun _ ->
     |> List.iter (fun (code, pkg) -> if code <> 0 then printfn $"ERROR: Could not publish '{pkg}' package. Error: {code}") // Display error and continue
 
 let dependencies = [
-    "Restore" ==> "BuildQuery" ==> "BuildCliNet6" ==> "BuildCliNet7" ==> "Build"
-    "Build" ==> "TestNet6" ==> "TestNet7" ==> "Test"
+    "Restore" ==> "BuildQuery" ==> "BuildCliNet6" ==> "BuildCliNet7" ==> "BuildCliNet8" ==> "Build"
+    "Build" ==> "TestNet6" ==> "TestNet8" ==> "Test"
+    //"BuildCliNet8" ==> "TestNet8" ==> "Test"
     "Test" ==> "Pack" ==> "Publish"
 ]
 

@@ -7,8 +7,8 @@ open DB
 #if NET6_0
 open Npgsql.AdventureWorksNet6
 #endif
-#if NET7_0
-open Npgsql.AdventureWorksNet7
+#if NET8_0
+open Npgsql.AdventureWorksNet8
 #endif
 
 [<Test>]

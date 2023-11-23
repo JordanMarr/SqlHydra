@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <WarnOn>3390;$(WarnOn)</WarnOn>
 	<NoWarn>
 	    <!-- Duplicate Package -->
@@ -23,13 +23,13 @@
   <ItemGroup>
     <Compile Include="Util.fs" />
     <Compile Include="Sqlite\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
-    <Compile Include="Sqlite\AdventureWorksNet7.fs" Condition="'$(TargetFramework)' == 'net7.0'" />
+    <Compile Include="Sqlite\AdventureWorksNet8.fs" Condition="'$(TargetFramework)' == 'net8.0'" />
     <Compile Include="Sqlite\DB.fs" />
     <Compile Include="Sqlite\QueryUnitTests.fs" />
     <Compile Include="Sqlite\QueryIntegrationTests.fs" />
     <Compile Include="Sqlite\Generation.fs" />
     <Compile Include="SqlServer\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
-    <Compile Include="SqlServer\AdventureWorksNet7.fs" Condition="'$(TargetFramework)' == 'net7.0'" />
+    <Compile Include="SqlServer\AdventureWorksNet8.fs" Condition="'$(TargetFramework)' == 'net8.0'" />
     <Compile Include="SqlServer\DB.fs" />
     <Compile Include="SqlServer\QueryUnitTests.fs" />
     <Compile Include="SqlServer\QueryIntegrationTests.fs" />
@@ -37,13 +37,13 @@
     <Compile Include="SqlServer\SelectAsyncTests.fs" />
     <Compile Include="SqlServer\Generation.fs" />
     <Compile Include="Npgsql\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
-    <Compile Include="Npgsql\AdventureWorksNet7.fs" Condition="'$(TargetFramework)' == 'net7.0'" />
+    <Compile Include="Npgsql\AdventureWorksNet8.fs" Condition="'$(TargetFramework)' == 'net8.0'" />
     <Compile Include="Npgsql\DB.fs" />
     <Compile Include="Npgsql\QueryUnitTests.fs" />
     <Compile Include="Npgsql\QueryIntegrationTests.fs" />
     <Compile Include="Npgsql\Generation.fs" />
     <Compile Include="Oracle\AdventureWorksNet6.fs" Condition="'$(TargetFramework)' == 'net6.0'" />
-    <Compile Include="Oracle\AdventureWorksNet7.fs" Condition="'$(TargetFramework)' == 'net7.0'" />
+    <Compile Include="Oracle\AdventureWorksNet8.fs" Condition="'$(TargetFramework)' == 'net8.0'" />
     <Compile Include="Oracle\DB.fs" />
     <Compile Include="Oracle\QueryUnitTests.fs" />
     <Compile Include="Oracle\QueryIntegrationTests.fs" />
@@ -53,16 +53,14 @@
     <Compile Include="UnitTests\TableFilters.fs" />
   </ItemGroup>
   <ItemGroup>
-	<PackageReference Include="FSharp.Core" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
-	<PackageReference Include="FSharp.Core" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.10" />
+	<PackageReference Update="FSharp.Core" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
+	<PackageReference Update="FSharp.Core" Version="8.0.100" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <PackageReference Include="NUnit" Version="3.14.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="Unquote" Version="6.1.0" />
     <PackageReference Include="Verify.NUnit" Version="22.1.4" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" Condition="'$(TargetFramework)' == 'net6.0'" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" Condition="'$(TargetFramework)' == 'net7.0'" />
+	<PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.10" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SqlHydra.Query\SqlHydra.Query.fsproj" />
