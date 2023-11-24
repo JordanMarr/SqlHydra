@@ -156,6 +156,7 @@ If using `Npgsql` v6 or earlier:
 // `experiments.mood` is the generated enum, and "experiments.mood" is the "{schema}.{enum}".
 Npgsql.NpgsqlConnection.GlobalTypeMapper.MapEnum<experiments.mood>(nameof experiments.mood) |> ignore
 ```
+💥 `Npgsql` v8.0.0 fails when inserting an enum. 
 
 ### Support for Postgres Arrays
 SqlHydra.Cli supports `text[]` and `integer[]` column types.
@@ -258,7 +259,7 @@ This can be useful for various use cases, such as:
 
 
 ## Supported Frameworks
-.NET 6 - .NET 7 are currently supported.
+.NET 6 - .NET 8 are currently supported.
 (If you still need support for .NET 5, use the deprecated `SqlHydra.SqlServer`, `SqlHydra.Sqlite`, `SqlHydra.Npgsql` or `SqlHydra.Oracle` tools.)
 
 ### .NET 6 and Greater
