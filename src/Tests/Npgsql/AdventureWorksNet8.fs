@@ -63,7 +63,6 @@ module ext =
     type person =
         { [<SqlHydra.ProviderDbType("Text")>]
           name: string
-          [<SqlHydra.ProviderDbType("Text")>]
           currentmood: mood }
 
     let person = SqlHydra.Query.Table.table<person>
