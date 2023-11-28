@@ -1,14 +1,15 @@
 ﻿module SqlHydra.Console
 
+open System
 open Spectre.Console
 open SqlHydra.Domain
-open System
 
 type Args = 
     {
         Provider: string
         AppInfo: AppInfo
         TomlFile: IO.FileInfo
+        Project: IO.FileInfo
         GetSchema: Config -> Schema
         Version: string
     }
@@ -142,5 +143,5 @@ let run (args: Args) =
         |> SchemaGenerator.toFormattedCode cfg args.AppInfo args.Version
 
     IO.File.WriteAllText(cfg.OutputFile, formattedCode)
-    Fsproj.addFileToProject(cfg)
+    Fsproj.addFileToProject args.Project cfg
     AnsiConsole.MarkupLine($"[green]-[/] `{cfg.OutputFile}` has been generated!")

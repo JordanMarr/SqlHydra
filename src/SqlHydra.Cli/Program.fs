@@ -3,7 +3,7 @@
 open System
 open FSharp.SystemCommandLine
 
-let handler (provider: string, tomlFile: IO.FileInfo option) = 
+let handler (provider: string, tomlFile: IO.FileInfo option, project: IO.FileInfo option) = 
 
     let info, getSchema = 
         match provider with
@@ -13,12 +13,19 @@ let handler (provider: string, tomlFile: IO.FileInfo option) =
         | "oracle" -> Oracle.AppInfo.info, Oracle.OracleSchemaProvider.getSchema
         | _ -> failwith "Unsupported db provider. Valid options are: 'mssql', 'npgsql', 'sqlite', or 'oracle'."
 
+    let projectOrFirstFound = 
+        project
+        |> Option.map (fun p -> if p.Exists then p else failwith $"Unable to find the specified project file: '{p.FullName}'.")
+        |> Option.orElse (IO.DirectoryInfo(".").EnumerateFiles("*.fsproj") |> Seq.tryHead)
+        |> Option.defaultWith (fun () -> failwith "Unable to find a .fsproj file in the run directory. Please specify one using the `--project` option.")
+
     let args : Console.Args = 
         {
             Provider = provider
             AppInfo = info
             GetSchema = getSchema
-            TomlFile = tomlFile |> Option.defaultWith (fun () -> IO.FileInfo($"sqlhydra-{provider}.toml"))                    
+            TomlFile = tomlFile |> Option.defaultWith (fun () -> IO.FileInfo($"sqlhydra-{provider}.toml"))
+            Project = projectOrFirstFound
             Version = Reflection.Assembly.GetAssembly(typeof<Console.Args>).GetName().Version |> string
         }
 
@@ -30,7 +37,8 @@ let main argv =
         description "SqlHydra"
         inputs (
             Input.Argument<string>("provider", "The database provider name: 'mssql', 'npgsql', 'sqlite', or 'oracle'"), 
-            Input.OptionMaybe<IO.FileInfo>(["-t"; "--toml-file"], "The toml configuration filename. Default: 'sqlhydra-{provider}.toml'")
+            Input.OptionMaybe<IO.FileInfo>(["-t"; "--toml-file"], "The toml configuration filename. Default: 'sqlhydra-{provider}.toml'"),
+            Input.OptionMaybe<IO.FileInfo>(["-p"; "--project"], "The project file to update. If not configured, the first .fsproj found in the run directory will be used.")
         )
         setHandler handler
     }
