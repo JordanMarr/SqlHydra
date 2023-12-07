@@ -1,6 +1,7 @@
 ﻿module SqlHydra.Console
 
 open System
+open System.IO
 open Spectre.Console
 open SqlHydra.Domain
 
@@ -8,8 +9,8 @@ type Args =
     {
         Provider: string
         AppInfo: AppInfo
-        TomlFile: IO.FileInfo
-        Project: IO.FileInfo
+        TomlFile: FileInfo
+        Project: FileInfo
         GetSchema: Config -> Schema
         Version: string
     }
@@ -100,15 +101,15 @@ let newConfigWizard (args: Args) =
     config
 
 /// Saves a config as toml.
-let saveConfig (tomlFile: IO.FileInfo, cfg: Config) = 
+let saveConfig (tomlFile: FileInfo, cfg: Config) = 
     let toml = TomlConfigParser.save(cfg)
-    IO.File.WriteAllText(tomlFile.FullName, toml)
+    File.WriteAllText(tomlFile.FullName, toml)
 
 /// Reads a config from toml.
-let tryLoadConfig(tomlFile: IO.FileInfo) = 
+let tryLoadConfig(tomlFile: FileInfo) = 
     if tomlFile.Exists then
         try            
-            let toml = IO.File.ReadAllText(tomlFile.FullName)
+            let toml = File.ReadAllText(tomlFile.FullName)
             let config = TomlConfigParser.read(toml)
             Valid config
         with ex -> 
@@ -137,11 +138,17 @@ let getOrCreateConfig (args: Args) =
 let run (args: Args) = 
     let cfg = getOrCreateConfig(args)
 
+    // The generated file should be created relative to the .fsproj directory.
+    let outputFile = Path.Combine(args.Project.Directory.FullName, cfg.OutputFile) |> FileInfo
+
+    // Ensure the output directory exists (`cfg.OutputFile` may contain subdirectories).
+    outputFile.Directory.Create()
+
     let formattedCode = 
         args.GetSchema cfg
         |> SchemaGenerator.generateModule cfg args.AppInfo
         |> SchemaGenerator.toFormattedCode cfg args.AppInfo args.Version
 
-    IO.File.WriteAllText(cfg.OutputFile, formattedCode)
+    File.WriteAllText(outputFile.FullName, formattedCode)
     Fsproj.addFileToProject args.Project cfg
-    AnsiConsole.MarkupLine($"[green]-[/] `{cfg.OutputFile}` has been generated!")
+    AnsiConsole.MarkupLine($"[green]-[/] '{outputFile.FullName}' has been generated!")

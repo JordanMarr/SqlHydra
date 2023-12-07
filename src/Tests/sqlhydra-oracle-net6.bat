@@ -1,1 +1,1 @@
-dotnet run --project ..\SqlHydra.Cli --framework net6.0 -- oracle -t sqlhydra-oracle-net6.toml
+dotnet run --project ..\SqlHydra.Cli --framework net6.0 -- oracle -t sqlhydra-oracle-net6.toml -p ./Tests.fsproj
