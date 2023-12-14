@@ -920,3 +920,26 @@ let getCustomers filters =
       )
   }
 ```
+
+## Custom SQL Queries
+
+Sometimes it is easier to just write a custom SQL query. This can be helpful when you have a very custom query, or are using SQL constructs that do not yet exist in `SqlHydra.Query`. 
+You can do this while still maintaining the benefits of the strongly typed generated `HydraReader`.
+
+```F#
+let getTop10Products(conn: SqlConnection) = task {
+    let sql = $"SELECT TOP 10 * FROM {nameof dbo.Product} p"
+    use cmd = new SqlCommand(sql, conn)
+    use! reader = cmd.ExecuteReaderAsync()
+    let hydra = HydraReader(reader)
+
+    return [
+        while reader.Read() do
+            hydra.``dbo.Product``.Read()
+    ]
+}
+```
+
+See more examples of using the generated `HydraReader`:
+https://github.com/JordanMarr/SqlHydra/wiki/DataReaders
+
