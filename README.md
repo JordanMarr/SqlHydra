@@ -128,10 +128,11 @@ For more details, see the [.toml configuration](https://github.com/JordanMarr/Sq
 
 ### Build Event (optional)
 
-To regenerate after a Rebuild, you can run SqlHydra from an fsproj build event:
+To regenerate after a Rebuild (only when in Debug mode), you can run SqlHydra from an fsproj build event:
 
 ```bat
-  <Target Name="SqlHydra" BeforeTargets="Clean">
+  <!-- Regenerate entities on Rebuild in Debug mode -->
+  <Target Name="SqlHydra" BeforeTargets="Clean" Condition="'$(Configuration)' == 'Debug'">
     <Exec Command="dotnet sqlhydra mssql" />
   </Target>
 ```
