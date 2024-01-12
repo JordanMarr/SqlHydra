@@ -13,6 +13,7 @@ type Args =
         Project: FileInfo
         GetSchema: Config -> Schema
         Version: string
+        ConnectionString: string option
     }
 
 type LoadConfigResult = 
@@ -136,8 +137,14 @@ let getOrCreateConfig (args: Args) =
 
 /// Runs code generation for a given database provider.
 let run (args: Args) = 
-    let cfg = getOrCreateConfig(args)
-
+    let cfg = 
+        getOrCreateConfig(args)
+        |> fun cfg -> 
+            // CLI connection string overrides toml file connection string.
+            match args.ConnectionString with
+            | Some cs -> { cfg with ConnectionString = cs }
+            | None -> cfg
+    
     // The generated file should be created relative to the .fsproj directory.
     let outputFile = Path.Combine(args.Project.Directory.FullName, cfg.OutputFile) |> FileInfo
 

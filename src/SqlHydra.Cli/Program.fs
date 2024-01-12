@@ -3,7 +3,7 @@
 open System
 open FSharp.SystemCommandLine
 
-let handler (provider: string, tomlFile: IO.FileInfo option, project: IO.FileInfo option) = 
+let handler (provider: string, tomlFile: IO.FileInfo option, project: IO.FileInfo option, connString: string option) = 
 
     let info, getSchema = 
         match provider with
@@ -27,6 +27,7 @@ let handler (provider: string, tomlFile: IO.FileInfo option, project: IO.FileInf
             TomlFile = tomlFile |> Option.defaultWith (fun () -> IO.FileInfo($"sqlhydra-{provider}.toml"))
             Project = projectOrFirstFound
             Version = Reflection.Assembly.GetAssembly(typeof<Console.Args>).GetName().Version |> string
+            ConnectionString = connString
         }
 
     Console.run args
@@ -38,7 +39,8 @@ let main argv =
         inputs (
             Input.Argument<string>("provider", "The database provider name: 'mssql', 'npgsql', 'sqlite', or 'oracle'"), 
             Input.OptionMaybe<IO.FileInfo>(["-t"; "--toml-file"], "The toml configuration filename. Default: 'sqlhydra-{provider}.toml'"),
-            Input.OptionMaybe<IO.FileInfo>(["-p"; "--project"], "The project file to update. If not configured, the first .fsproj found in the run directory will be used.")
+            Input.OptionMaybe<IO.FileInfo>(["-p"; "--project"], "The project file to update. If not configured, the first .fsproj found in the run directory will be used."),
+            Input.OptionMaybe<string>(["-cs"; "--connection-string"], "The DB connection string to use. This will override the connection string in the toml file.")
         )
         setHandler handler
     }
