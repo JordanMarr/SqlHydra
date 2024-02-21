@@ -234,18 +234,22 @@ type SelectQuery() =
 
 type SelectQuery<'T>(query: SqlKata.Query) = 
     inherit SelectQuery()
+    member this.KataQuery = query
     override this.ToKataQuery() = query
 
 type DeleteQuery<'T>(query: SqlKata.Query) = 
     inherit SelectQuery()
+    member this.KataQuery = query
     override this.ToKataQuery() = query
 
 type UpdateQuery<'T>(spec: UpdateQuerySpec<'T>) =
     inherit SelectQuery()
-    member internal this.Spec = spec
-    override this.ToKataQuery() = spec |> KataUtils.fromUpdate
+    member this.Spec = spec
+    member this.KataQuery = spec |> KataUtils.fromUpdate
+    override this.ToKataQuery() = this.KataQuery
 
 type InsertQuery<'T, 'Identity>(spec: InsertQuerySpec<'T, 'Identity>) =
     inherit SelectQuery()
-    member internal this.Spec = spec
-    override this.ToKataQuery() = spec |> KataUtils.fromInsert
+    member this.Spec = spec
+    member this.KataQuery = spec |> KataUtils.fromInsert
+    override this.ToKataQuery() = this.KataQuery
