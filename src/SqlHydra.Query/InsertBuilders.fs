@@ -43,12 +43,20 @@ type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>() =
             { spec with Entities = [ value ] }
             , state.TableMappings)
 
-    /// Sets multiple values for INSERT
+    /// Sets multiple values for INSERT. (Must have at least one value.)
     [<CustomOperation("entities", MaintainsVariableSpace = true)>]
     member this.Entities (state:QuerySource<'T>, entities: AtLeastOne.AtLeastOne<'T>) = 
         let spec = state |> getQueryOrDefault
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
             { spec with Entities = entities |> AtLeastOne.getSeq |> Seq.toList }
+            , state.TableMappings)
+
+    /// Sets multiple values for INSERT. (Should have at least one value.)
+    [<CustomOperation("entities", MaintainsVariableSpace = true)>]
+    member this.Entities (state:QuerySource<'T>, entities: 'T seq) = 
+        let spec = state |> getQueryOrDefault
+        QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
+            { spec with Entities = entities |> Seq.toList }
             , state.TableMappings)
 
     /// Includes a column in the insert query.
@@ -96,8 +104,11 @@ type InsertAsyncBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct
             try 
                 let insertQuery = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
                 let! cancel = Async.CancellationToken
-                let! insertReturn = ctx.InsertAsyncWithOptions (insertQuery, cancel) |> Async.AwaitTask
-                return insertReturn
+                if state.Query.Entities |> Seq.isEmpty then
+                    return Unchecked.defaultof<'InsertReturn>
+                else
+                    let! insertReturn = ctx.InsertAsyncWithOptions (insertQuery, cancel) |> Async.AwaitTask
+                    return insertReturn
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
         }
@@ -114,8 +125,11 @@ type InsertTaskBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct:
             let ctx = ContextUtils.getContext ct
             try 
                 let insertQuery = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
-                let! insertReturn = ctx.InsertAsyncWithOptions (insertQuery, cancellationToken) |> Async.AwaitTask
-                return insertReturn
+                if state.Query.Entities |> Seq.isEmpty then
+                    return Unchecked.defaultof<'InsertReturn>
+                else
+                    let! insertReturn = ctx.InsertAsyncWithOptions (insertQuery, cancellationToken)
+                    return insertReturn
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
         }
