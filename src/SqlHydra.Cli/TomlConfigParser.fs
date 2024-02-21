@@ -31,6 +31,7 @@ let read(toml: string) =
         Config.OutputFile = generalTable.Get "output"
         Config.Namespace = generalTable.Get "namespace"
         Config.IsCLIMutable = generalTable.Get "cli_mutable"
+        Config.IsMutableProperties = generalTable.TryGet "mutable_properties" |> Option.defaultValue false
         Config.ProviderDbTypeAttributes = 
             match queryIntegrationTableMaybe with
             | Some queryIntegrationTable -> queryIntegrationTable.Get "provider_db_type_attributes"

@@ -19,6 +19,7 @@ let ``Save: All``() =
             Config.OutputFile = "AdventureWorks.fs"
             Config.Namespace = "SampleApp.AdventureWorks"
             Config.IsCLIMutable = true
+            Config.IsMutableProperties = false
             Config.ProviderDbTypeAttributes = true
             Config.TableDeclarations = true
             Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
@@ -65,6 +66,7 @@ let ``Read: with no filters``() =
             Config.OutputFile = "AdventureWorks.fs"
             Config.Namespace = "SampleApp.AdventureWorks"
             Config.IsCLIMutable = true
+            Config.IsMutableProperties = false
             Config.ProviderDbTypeAttributes = true
             Config.TableDeclarations = false
             Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
@@ -92,6 +94,7 @@ let ``Read: when no readers section should be None``() =
             Config.OutputFile = "AdventureWorks.fs"
             Config.Namespace = "SampleApp.AdventureWorks"
             Config.IsCLIMutable = true
+            Config.IsMutableProperties = false
             Config.ProviderDbTypeAttributes = true
             Config.TableDeclarations = false
             Config.Readers = None

@@ -102,6 +102,9 @@ type Config =
 
         /// General: if true, makes generated table records CLIMutable
         IsCLIMutable: bool
+
+        /// General: if true, makes generated table record properties mutable
+        IsMutableProperties: bool
         
         /// SqlHydra.Query Integration: generates support for creating Db specific parameter types
         ProviderDbTypeAttributes: bool
