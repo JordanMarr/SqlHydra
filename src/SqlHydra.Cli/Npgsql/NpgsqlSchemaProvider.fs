@@ -13,6 +13,7 @@ let getSchema (cfg: Config) : Schema =
     let sTables = conn.GetSchema("Tables", cfg.Filters.TryGetRestrictionsByKey("Tables"))
     let sColumns = conn.GetSchema("Columns", cfg.Filters.TryGetRestrictionsByKey("Columns"))
     let sViews = conn.GetSchema("Views", cfg.Filters.TryGetRestrictionsByKey("Views"))
+    let sMaterializedViews = conn.GetSchema("MaterializedViews", cfg.Filters.TryGetRestrictionsByKey("MaterializedViews"))
     
     let pks = 
         let sql =
@@ -111,6 +112,18 @@ let getSchema (cfg: Config) : Schema =
             |}
         )
 
+    let materializedViews = 
+        sMaterializedViews.Rows
+        |> Seq.cast<DataRow>
+        |> Seq.map (fun tbl -> 
+            {| 
+                Catalog = tbl["TABLE_CATALOG"] :?> string
+                Schema = tbl["TABLE_SCHEMA"] :?> string
+                Name  = tbl["TABLE_NAME"] :?> string
+                Type = "materialized view"
+            |}
+        )
+
     let tables = 
         sTables.Rows
         |> Seq.cast<DataRow>
@@ -124,8 +137,9 @@ let getSchema (cfg: Config) : Schema =
         )
         |> Seq.filter (fun tbl -> tbl.Type <> "SYSTEM_TABLE")
         |> Seq.append views
+        |> Seq.append materializedViews
         |> SchemaFilters.filterTables cfg.Filters
-        |> Seq.map (fun tbl -> 
+        |> Seq.choose (fun tbl -> 
             let tableColumns = 
                 allColumns
                 |> Seq.filter (fun col -> 
@@ -189,14 +203,17 @@ let getSchema (cfg: Config) : Schema =
                 |> SchemaFilters.filterColumns cfg.Filters tbl.Schema tbl.Name
                 |> Seq.toList
 
-            { 
-                Table.Catalog = tbl.Catalog
-                Table.Schema = tbl.Schema
-                Table.Name =  tbl.Name
-                Table.Type = if tbl.Type = "table" then TableType.Table else TableType.View
-                Table.Columns = filteredColumns
-                Table.TotalColumns = tableColumns |> Seq.length
-            }
+            if filteredColumns |> Seq.isEmpty then 
+                None
+            else
+                Some { 
+                    Table.Catalog = tbl.Catalog
+                    Table.Schema = tbl.Schema
+                    Table.Name =  tbl.Name
+                    Table.Type = if tbl.Type = "table" then TableType.Table else TableType.View
+                    Table.Columns = filteredColumns
+                    Table.TotalColumns = tableColumns |> Seq.length
+                }
         )
         |> Seq.toList
 
