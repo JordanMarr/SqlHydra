@@ -820,21 +820,21 @@ let ``DiffService Diff`` () =
     let incoming : HumanResources.Department list = 
         [
             { DepartmentID = 1s; Name = "Engineering"; GroupName = "Research and Development"; ModifiedDate = today }
-            { DepartmentID = 2s; Name = "Sales"; GroupName = "Sales & Marketing"; ModifiedDate = today }
-            { DepartmentID = 3s; Name = "Marketing"; GroupName = "Sales and Marketing"; ModifiedDate = today }
+            { DepartmentID = 2s; Name = "Sales"; GroupName = "$ales"; ModifiedDate = today }
+            { DepartmentID = 3s; Name = "Marketing"; GroupName = "Marketing"; ModifiedDate = today }
         ]
 
     let existing : HumanResources.Department list = 
         [
             { DepartmentID = 1s; Name = "Engineering"; GroupName = "Research and Development"; ModifiedDate = today }
-            { DepartmentID = 2s; Name = "Sales"; GroupName = "Sales and Marketing"; ModifiedDate = today }
+            { DepartmentID = 2s; Name = "Sales"; GroupName = "Sales"; ModifiedDate = today }
             { DepartmentID = 4s; Name = "Finance"; GroupName = "Finance"; ModifiedDate = today }
         ]
 
     let diff = Diff.Compare(incoming, existing, _.DepartmentID)
-    diff.Added =! [ { DepartmentID = 3s; Name = "Marketing"; GroupName = "Sales and Marketing"; ModifiedDate = today } ]
+    diff.Added =! [ { DepartmentID = 3s; Name = "Marketing"; GroupName = "Marketing"; ModifiedDate = today } ]
     diff.Removed =! [ { DepartmentID = 4s; Name = "Finance"; GroupName = "Finance"; ModifiedDate = today } ]
-    diff.Changed =! [ { DepartmentID = 2s; Name = "Sales"; GroupName = "Sales & Marketing"; ModifiedDate = today } ]
+    diff.Changed =! [ { DepartmentID = 2s; Name = "Sales"; GroupName = "$ales"; ModifiedDate = today } ]
 
 [<Test>]
 let ``DiffService Save`` () = task {
@@ -876,7 +876,7 @@ let ``DiffService Save`` () = task {
                     where (dept.DepartmentID = changed.DepartmentID)
                 }
             )
-            .SaveTask(ctx)
+            .SaveTask(ctx, createTransaction = false)
 
     saveResults.Deleted =! 0
     saveResults.Updated =! 1

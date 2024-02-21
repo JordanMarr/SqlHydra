@@ -27,14 +27,14 @@ and DiffResult<'T>(added: 'T seq, changed: 'T seq, removed: 'T seq) =
     let mutable totalUpdated = 0
     let mutable totalDeleted = 0
 
-    let mutable insertRow = None
-    let mutable insertRows = None
-    let mutable updateRow = None
-    let mutable deleteRow = None
+    let mutable insertEachRow = None
+    let mutable insertAllRows = None
+    let mutable updateEachRow = None
+    let mutable deleteEachRow = None
 
-    member this.Added = added
-    member this.Changed = changed
-    member this.Removed = removed
+    member this.Added = added |> Seq.toList
+    member this.Changed = changed |> Seq.toList
+    member this.Removed = removed |> Seq.toList
 
     /// Allows the caller to insert each Added entity into the database.
     member this.Add<'TRow, 'Identity when 'Identity : struct>(insertQuery: 'T -> InsertQuery<'TRow, 'Identity>) = 
@@ -45,7 +45,7 @@ and DiffResult<'T>(added: 'T seq, changed: 'T seq, removed: 'T seq) =
                     let! _ = ctx.InsertAsync(insertQuery)
                     totalInserted <- totalInserted + 1
             }
-        insertRow <- Some doInsertFn
+        insertEachRow <- Some doInsertFn
         this
 
     /// Allows the caller to insert all Added entities into the database.
@@ -59,8 +59,8 @@ and DiffResult<'T>(added: 'T seq, changed: 'T seq, removed: 'T seq) =
                 else 
                     ()
             }
-        insertRows <- 
-            if this.Added |> Seq.length > 1 
+        insertAllRows <- 
+            if this.Added |> Seq.length >= 1 
             then Some doInsertFn 
             else None
         this
@@ -73,7 +73,7 @@ and DiffResult<'T>(added: 'T seq, changed: 'T seq, removed: 'T seq) =
                     let! rowsUpdated = ctx.UpdateAsync(updateQuery row)
                     totalUpdated <- totalUpdated + rowsUpdated
             }
-        updateRow <- Some doUpdateFn
+        updateEachRow <- Some doUpdateFn
         this
 
     /// Allows the caller to delete each Removed entity from the database.
@@ -84,7 +84,7 @@ and DiffResult<'T>(added: 'T seq, changed: 'T seq, removed: 'T seq) =
                     let! rowsDeleted = ctx.DeleteAsync(deleteQuery row)
                     totalDeleted <- totalDeleted + rowsDeleted
             }
-        deleteRow <- Some doDeleteFn
+        deleteEachRow <- Some doDeleteFn
         this
 
     /// Saves the diffed records to the database. useTransaction defaults to true.
@@ -96,17 +96,17 @@ and DiffResult<'T>(added: 'T seq, changed: 'T seq, removed: 'T seq) =
                 if createTransaction then
                     ctx.BeginTransaction()
 
-                if deleteRow.IsSome then
-                    do! deleteRow.Value ctx
+                if deleteEachRow.IsSome then
+                    do! deleteEachRow.Value ctx
 
-                if updateRow.IsSome then
-                    do! updateRow.Value ctx
+                if updateEachRow.IsSome then
+                    do! updateEachRow.Value ctx
 
-                if insertRow.IsSome then
-                    do! insertRow.Value ctx
+                if insertEachRow.IsSome then
+                    do! insertEachRow.Value ctx
 
-                if insertRows.IsSome then
-                    do! insertRows.Value ctx
+                if insertAllRows.IsSome then
+                    do! insertAllRows.Value ctx
 
                 if createTransaction then
                     ctx.CommitTransaction()
