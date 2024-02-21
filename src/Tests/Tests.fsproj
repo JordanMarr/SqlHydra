@@ -62,7 +62,7 @@
     <PackageReference Include="Verify.NUnit" Version="22.1.4" />
 	<PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.10" />
     <PackageReference Include="Npgsql" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
-	<PackageReference Include="Npgsql" Version="7.0.0" Condition="'$(TargetFramework)' == 'net8.0'" /><!-- Npgsql v8.0.0 fails enum insert test -->
+	<PackageReference Include="Npgsql" Version="8.0.2" Condition="'$(TargetFramework)' == 'net8.0'" /><!-- Npgsql v8.0.0 fails enum insert test -->
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SqlHydra.Query\SqlHydra.Query.fsproj" />
