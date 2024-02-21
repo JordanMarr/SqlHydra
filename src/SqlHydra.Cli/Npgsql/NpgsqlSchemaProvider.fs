@@ -13,7 +13,11 @@ let getSchema (cfg: Config) : Schema =
     let sTables = conn.GetSchema("Tables", cfg.Filters.TryGetRestrictionsByKey("Tables"))
     let sColumns = conn.GetSchema("Columns", cfg.Filters.TryGetRestrictionsByKey("Columns"))
     let sViews = conn.GetSchema("Views", cfg.Filters.TryGetRestrictionsByKey("Views"))
+#if NET8_0_OR_GREATER
     let sMaterializedViews = conn.GetSchema("MaterializedViews", cfg.Filters.TryGetRestrictionsByKey("MaterializedViews"))
+#else
+    let sMaterializedViews = new DataTable()
+#endif
     
     let pks = 
         let sql =
