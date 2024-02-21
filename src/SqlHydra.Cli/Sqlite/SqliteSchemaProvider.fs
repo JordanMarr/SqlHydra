@@ -50,7 +50,7 @@ let getSchema (cfg: Config) : Schema =
         )
         |> Seq.filter (fun tbl -> tbl.Type <> "SYSTEM_TABLE")
         |> SchemaFilters.filterTables cfg.Filters
-        |> Seq.map (fun tbl -> 
+        |> Seq.choose (fun tbl -> 
             let tableColumns = 
                 allColumns
                 |> Seq.filter (fun col -> 
@@ -79,14 +79,17 @@ let getSchema (cfg: Config) : Schema =
                 |> SchemaFilters.filterColumns cfg.Filters tbl.Schema tbl.Name
                 |> Seq.toList
 
-            { 
-                Table.Catalog = tbl.Catalog
-                Table.Schema = tbl.Schema
-                Table.Name =  tbl.Name
-                Table.Type = if tbl.Type = "table" then TableType.Table else TableType.View
-                Table.Columns = filteredColumns
-                Table.TotalColumns = tableColumns |> Seq.length
-            }
+            if filteredColumns |> Seq.isEmpty then 
+                None
+            else 
+                Some { 
+                    Table.Catalog = tbl.Catalog
+                    Table.Schema = tbl.Schema
+                    Table.Name =  tbl.Name
+                    Table.Type = if tbl.Type = "table" then TableType.Table else TableType.View
+                    Table.Columns = filteredColumns
+                    Table.TotalColumns = tableColumns |> Seq.length
+                }
         )
         |> Seq.toList
 

@@ -93,7 +93,7 @@ let getSchema (cfg: Config) : Schema =
         |> Seq.filter (fun tbl -> System.String.Compare(tbl.Type, "System", true) <> 0) // Exclude system
         |> Seq.append views
         |> SchemaFilters.filterTables cfg.Filters
-        |> Seq.map (fun tbl -> 
+        |> Seq.choose (fun tbl -> 
             let tableColumns = 
                 columns
                 |> Seq.filter (fun col -> 
@@ -121,14 +121,17 @@ let getSchema (cfg: Config) : Schema =
                 |> SchemaFilters.filterColumns cfg.Filters tbl.Schema tbl.Name
                 |> Seq.toList
 
-            { 
-                Table.Catalog = tbl.Catalog
-                Table.Schema = tbl.Schema
-                Table.Name =  tbl.Name
-                Table.Type = if System.String.Compare(tbl.Type, "view", true) = 0 then TableType.View else TableType.Table
-                Table.Columns = filteredColumns
-                Table.TotalColumns = tableColumns |> Seq.length
-            }
+            if filteredColumns |> Seq.isEmpty then 
+                None
+            else
+                Some { 
+                    Table.Catalog = tbl.Catalog
+                    Table.Schema = tbl.Schema
+                    Table.Name =  tbl.Name
+                    Table.Type = if System.String.Compare(tbl.Type, "view", true) = 0 then TableType.View else TableType.Table
+                    Table.Columns = filteredColumns
+                    Table.TotalColumns = tableColumns |> Seq.length
+                }
         )
         |> Seq.filter (fun t -> not (systemOwners.Contains t.Schema)) // Exclude Oracle system tables
         |> Seq.toList
