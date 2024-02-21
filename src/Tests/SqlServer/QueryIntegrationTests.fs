@@ -808,3 +808,109 @@ let ``Individual column from a leftJoin table should be optional if Some``() = t
     gt0 results
     reasonsExist =! false
 }
+    
+type Person = { Id: int; Name: string; Age: int }
+let mkPerson id name age = { Id = id; Name = name; Age = age }
+
+[<Test>]
+let ``DiffService Diff`` () = 
+    let today = System.DateTime.Today
+
+    // Test DiffService.Diff using HumanResources.Department record
+    let incoming : HumanResources.Department list = 
+        [
+            { DepartmentID = 1s; Name = "Engineering"; GroupName = "Research and Development"; ModifiedDate = today }
+            { DepartmentID = 2s; Name = "Sales"; GroupName = "Sales & Marketing"; ModifiedDate = today }
+            { DepartmentID = 3s; Name = "Marketing"; GroupName = "Sales and Marketing"; ModifiedDate = today }
+        ]
+
+    let existing : HumanResources.Department list = 
+        [
+            { DepartmentID = 1s; Name = "Engineering"; GroupName = "Research and Development"; ModifiedDate = today }
+            { DepartmentID = 2s; Name = "Sales"; GroupName = "Sales and Marketing"; ModifiedDate = today }
+            { DepartmentID = 4s; Name = "Finance"; GroupName = "Finance"; ModifiedDate = today }
+        ]
+
+    let diff = Diff.Compare(incoming, existing, _.DepartmentID)
+    diff.Added =! [ { DepartmentID = 3s; Name = "Marketing"; GroupName = "Sales and Marketing"; ModifiedDate = today } ]
+    diff.Removed =! [ { DepartmentID = 4s; Name = "Finance"; GroupName = "Finance"; ModifiedDate = today } ]
+    diff.Changed =! [ { DepartmentID = 2s; Name = "Sales"; GroupName = "Sales & Marketing"; ModifiedDate = today } ]
+
+[<Test>]
+let ``DiffService Save`` () = task {
+    use ctx = openContext()
+    let today = System.DateTime.Today
+
+    let! existingDepartments = 
+        selectTask HydraReader.Read (Shared ctx) {
+            for d in HumanResources.Department do
+            toList
+        }
+
+    let updatedDepartments = 
+        existingDepartments 
+        |> List.map (fun d -> 
+            if d.Name = "Engineering" 
+            then { d with Name = "Eng. Dept." } // Update Engineering dept
+            else d
+        )
+        |> List.append [ // Insert App Dev dept
+            { DepartmentID = 17s; Name = "App Dev"; GroupName = "Software"; ModifiedDate = today } 
+        ]
+    
+    ctx.BeginTransaction()
+
+    let! saveResults = 
+        Diff.Compare(updatedDepartments, existingDepartments, _.DepartmentID)
+            .AddAll(fun added -> 
+                insert {
+                    for row in HumanResources.Department do
+                    entities added
+                    excludeColumn row.DepartmentID
+                }
+            )
+            .Change(fun changed -> 
+                update {
+                    for dept in HumanResources.Department do
+                    set dept.Name changed.Name
+                    where (dept.DepartmentID = changed.DepartmentID)
+                }
+            )
+            .SaveTask(ctx)
+
+    saveResults.Deleted =! 0
+    saveResults.Updated =! 1
+    saveResults.Inserted =! 1
+
+    // Pull departments again, verify, then try delete.
+    let! existingDepartments = 
+        selectTask HydraReader.Read (Shared ctx) {
+            for d in HumanResources.Department do
+            toList
+        }
+
+    let appDev = existingDepartments |> List.tryFind (fun d -> d.Name = "App Dev")
+    appDev.IsSome =! true
+
+    let updatedDepartments = 
+        updatedDepartments
+        |> List.filter (fun d -> d.Name <> "App Dev")
+
+    let! saveResults = 
+        Diff.Compare(updatedDepartments, existingDepartments, _.DepartmentID)
+            .Remove(fun removed -> 
+                delete {
+                    for row in HumanResources.Department do
+                    where (row.DepartmentID = removed.DepartmentID)
+                }
+            )
+            .SaveTask(ctx, createTransaction = false)
+
+    saveResults.Deleted =! 1
+    saveResults.Updated =! 0
+    saveResults.Inserted =! 0
+
+    ctx.RollbackTransaction()
+}
+
+    
