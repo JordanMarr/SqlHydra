@@ -4,6 +4,7 @@ open Swensen.Unquote
 open SqlHydra.Query
 open DB
 open NUnit.Framework
+open System
 
 #if NET6_0
 open SqlServer.AdventureWorksNet6
@@ -136,7 +137,7 @@ let ``Where with Option Type``() =
     let sql =  
         select {
             for a in Person.Address do
-            where (a.AddressLine2 <> None)
+            where (a.AddressLine2 <> null)
         }
         |> toSql
 
@@ -180,7 +181,7 @@ let ``Where with AND and OR in Parenthesis``() =
     let sql =  
         select {
             for a in Person.Address do
-            where (a.City = "Chicago" && (a.AddressLine2 = Some "abc" || isNullValue a.AddressLine2))
+            where (a.City = "Chicago" && (a.AddressLine2 = "abc" || isNullValue a.AddressLine2))
         }
         |> toSql
 
@@ -299,7 +300,7 @@ let ``Optional Property Value in Where``() =
     let sql =  
         select {
             for wo in Production.WorkOrder do
-            where (wo.EndDate = None || wo.EndDate.Value >= date)
+            where (wo.EndDate = Null || wo.EndDate.Value >= date)
         }
         |> toSql
 
@@ -359,7 +360,7 @@ let ``Join On Value Bug Fix Test``() =
     let sql =  
         select {
             for o in Sales.SalesOrderHeader do
-            leftJoin d in Sales.SalesOrderHeader on (o.AccountNumber.Value = d.Value.AccountNumber.Value)
+            leftJoin d in Sales.SalesOrderHeader on (o.AccountNumber = d.Value.AccountNumber)
             select o
         }
         |> toSql
@@ -514,9 +515,9 @@ let ``Insert Query without Identity``() =
                     Sales.Customer.AccountNumber = "123"
                     Sales.Customer.rowguid = System.Guid.NewGuid()
                     Sales.Customer.ModifiedDate = System.DateTime.Now
-                    Sales.Customer.PersonID = None
-                    Sales.Customer.StoreID = None
-                    Sales.Customer.TerritoryID = None
+                    Sales.Customer.PersonID = Null
+                    Sales.Customer.StoreID = Null
+                    Sales.Customer.TerritoryID = Null
                     Sales.Customer.CustomerID = 0
                 }
         }
@@ -534,9 +535,9 @@ let ``Insert Query with Identity``() =
                     Sales.Customer.AccountNumber = "123"
                     Sales.Customer.rowguid = System.Guid.NewGuid()
                     Sales.Customer.ModifiedDate = System.DateTime.Now
-                    Sales.Customer.PersonID = None
-                    Sales.Customer.StoreID = None
-                    Sales.Customer.TerritoryID = None
+                    Sales.Customer.PersonID = Null
+                    Sales.Customer.StoreID = Null
+                    Sales.Customer.TerritoryID = Null
                     Sales.Customer.CustomerID = 0
                 }
             getId c.CustomerID
@@ -572,7 +573,7 @@ let ``Implicit Casts Option``() =
     let sql = 
         select {
             for p in Production.Product do
-            where (p.Weight = Some 5)
+            where (p.Weight = 5.0M)
         }
 
     // should not throw exception

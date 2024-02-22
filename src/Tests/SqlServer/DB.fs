@@ -25,3 +25,5 @@ let toSql (query: SqlHydra.Query.SelectQuery) =
     printfn "toSql: %s" sql
     #endif
     sql
+
+let Null = System.Nullable()

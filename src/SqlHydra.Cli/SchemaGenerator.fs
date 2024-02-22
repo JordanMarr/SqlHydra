@@ -162,7 +162,7 @@ let createTableReaderClass (cfg: Config) (rdrCfg: ReadersConfig) (tbl: Table) =
                                 else 
                                     if col.TypeMapping.IsValueType() 
                                     then "NullableColumn"
-                                    else "RequiredColumn"
+                                    else "NullableRefColumn"
                             else 
                                 "RequiredColumn"
                         )
@@ -557,6 +557,11 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                                     , SynType.Create("bool")
                                                     , range0
                                                 )
+                                                SynPat.Typed(
+                                                    SynPat.LongIdent(LongIdentWithDots.CreateString("isNullable"), None, None, SynArgPats.Empty, None, range0)
+                                                    , SynType.Create("bool")
+                                                    , range0
+                                                )
                                             ], range0
                                         ), range0
                                     )
@@ -598,7 +603,11 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                                 SynExpr.CreateIdentString("Some")
                                 , SynExpr.CreateParen(
                                     SynExpr.CreateApp(
-                                        SynExpr.CreateIdent(Ident.Create("wrap")),
+                                        let wrapFnName = 
+                                            if ptr.ClrType |> isValueType
+                                            then "wrapValue"
+                                            else "wrapRef"
+                                        SynExpr.CreateIdent(Ident.Create(wrapFnName)),
                                         (
                                             // Use generic "GetFieldValue<>" for array types to avoid boxing (see issue #57).
                                             // Otherwise, use ReaderMethod because some db providers have custom logic for certain types (i.e. Oracle GetDecimal).
@@ -784,6 +793,13 @@ module ColumnReaders =
                 | o when reader.IsDBNull o -> None
                 | o -> Some (getter o)
 
+    type NullableRefColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = 
+                match alias |> Option.defaultValue __.Name |> getOrdinal with
+                | o when reader.IsDBNull o -> null
+                | o -> (getter o) |> unbox
+
     type NullableColumn<'T, 'Reader when 'T : struct and 'T : (new : unit -> 'T) and 'T :> System.ValueType and 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
             inherit Column(reader, getOrdinal, column)
             member __.Read(?alias) = 
@@ -820,10 +836,14 @@ module private DataReaderExtensions =
 
         // "wrap" fn in GetPrimitiveReader
         "let wrap = \"wrap-placeholder\"",
-        """let wrap get (ord: int) = 
-            if isOpt 
-            then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+        """let wrapValue get (ord: int) = 
+            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            elif isNullable then (if reader.IsDBNull ord then System.Nullable() else get ord |> System.Nullable) |> box
             else get ord |> box 
+
+        let wrapRef get (ord: int) = 
+            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            else get ord |> box
         """
 
         // HydraReader Read Method Body
@@ -837,12 +857,12 @@ module private DataReaderExtensions =
             ordinal
             
         let buildEntityReadFn (t: System.Type) = 
-            let t, isOpt = 
-                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> 
-                then t.GenericTypeArguments.[0], true
-                else t, false
+            let t, isOpt, isNullable = 
+                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> then t.GenericTypeArguments.[0], true, false
+                elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>> then t.GenericTypeArguments.[0], false, true
+                else t, false, false
             
-            match HydraReader.GetPrimitiveReader(t, reader, isOpt) with
+            match HydraReader.GetPrimitiveReader(t, reader, isOpt, isNullable) with
             | Some primitiveReader -> 
                 let ord = getOrdinalAndIncrement()
                 fun () -> primitiveReader ord

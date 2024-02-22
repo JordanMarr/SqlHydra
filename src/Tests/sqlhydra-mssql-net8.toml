@@ -3,6 +3,7 @@ connection = "Server=localhost,12019;Database=AdventureWorks;User=sa;Password=Pa
 output = "SqlServer/AdventureWorksNet8.fs"
 namespace = "SqlServer.AdventureWorksNet8"
 cli_mutable = true
+option_types = false
 [sqlhydra_query_integration]
 provider_db_type_attributes = true
 table_declarations = true
