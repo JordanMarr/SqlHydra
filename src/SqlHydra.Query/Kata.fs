@@ -134,7 +134,7 @@ module internal KataUtils =
             match value.GetType() with
             | t when t.IsGenericType && t.Name.StartsWith("FSharpOption") -> 
                 t.GetProperty("Value").GetValue(value)
-            | t when t.IsGenericType && t.GetGenericTypeDefinition() = typeof<Nullable<_>> -> 
+            | t when t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Nullable<_>> -> 
                 t.GetProperty("Value").GetValue(value)
             | _ -> value
             |> function 
