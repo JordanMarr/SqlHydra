@@ -19,6 +19,13 @@ module ColumnReaders =
                 | o when reader.IsDBNull o -> None
                 | o -> Some (getter o)
 
+    type NullableColumn<'T, 'Reader when 'T : struct and 'T : (new : unit -> 'T) and 'T :> System.ValueType and 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = 
+                match alias |> Option.defaultValue __.Name |> getOrdinal with
+                | o when reader.IsDBNull o -> System.Nullable<'T>()
+                | o -> System.Nullable<'T> (getter o)
+
 [<AutoOpen>]
 module private DataReaderExtensions =
     type System.Data.IDataReader with
