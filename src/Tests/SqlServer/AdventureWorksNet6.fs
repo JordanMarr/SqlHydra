@@ -3162,29 +3162,33 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         | "ext.GetIdGuidRepro", true -> __.``ext.GetIdGuidRepro``.ReadIfNotNull >> box
         | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
-    static member private GetPrimitiveReader(t: System.Type, reader: Microsoft.Data.SqlClient.SqlDataReader, isOpt: bool) =
-        let wrap get (ord: int) = 
-            if isOpt 
-            then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+    static member private GetPrimitiveReader(t: System.Type, reader: Microsoft.Data.SqlClient.SqlDataReader, isOpt: bool, isNullable: bool) =
+        let wrapValue get (ord: int) = 
+            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            elif isNullable then (if reader.IsDBNull ord then System.Nullable() else get ord |> System.Nullable) |> box
             else get ord |> box 
+
+        let wrapRef get (ord: int) = 
+            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            else get ord |> box
         
 
-        if t = typedefof<System.Guid> then Some(wrap reader.GetGuid)
-        else if t = typedefof<bool> then Some(wrap reader.GetBoolean)
-        else if t = typedefof<int> then Some(wrap reader.GetInt32)
-        else if t = typedefof<int64> then Some(wrap reader.GetInt64)
-        else if t = typedefof<int16> then Some(wrap reader.GetInt16)
-        else if t = typedefof<byte> then Some(wrap reader.GetByte)
-        else if t = typedefof<double> then Some(wrap reader.GetDouble)
-        else if t = typedefof<System.Single> then Some(wrap reader.GetFloat)
-        else if t = typedefof<decimal> then Some(wrap reader.GetDecimal)
-        else if t = typedefof<string> then Some(wrap reader.GetString)
-        else if t = typedefof<System.DateTimeOffset> then Some(wrap reader.GetDateTimeOffset)
-        else if t = typedefof<System.DateOnly> then Some(wrap reader.GetDateOnly)
-        else if t = typedefof<System.TimeOnly> then Some(wrap reader.GetTimeOnly)
-        else if t = typedefof<System.DateTime> then Some(wrap reader.GetDateTime)
-        else if t = typedefof<byte []> then Some(wrap reader.GetFieldValue<byte []>)
-        else if t = typedefof<obj> then Some(wrap reader.GetFieldValue)
+        if t = typedefof<System.Guid> then Some(wrapValue reader.GetGuid)
+        else if t = typedefof<bool> then Some(wrapValue reader.GetBoolean)
+        else if t = typedefof<int> then Some(wrapValue reader.GetInt32)
+        else if t = typedefof<int64> then Some(wrapValue reader.GetInt64)
+        else if t = typedefof<int16> then Some(wrapValue reader.GetInt16)
+        else if t = typedefof<byte> then Some(wrapValue reader.GetByte)
+        else if t = typedefof<double> then Some(wrapValue reader.GetDouble)
+        else if t = typedefof<System.Single> then Some(wrapValue reader.GetFloat)
+        else if t = typedefof<decimal> then Some(wrapValue reader.GetDecimal)
+        else if t = typedefof<string> then Some(wrapRef reader.GetString)
+        else if t = typedefof<System.DateTimeOffset> then Some(wrapValue reader.GetDateTimeOffset)
+        else if t = typedefof<System.DateOnly> then Some(wrapValue reader.GetDateOnly)
+        else if t = typedefof<System.TimeOnly> then Some(wrapValue reader.GetTimeOnly)
+        else if t = typedefof<System.DateTime> then Some(wrapValue reader.GetDateTime)
+        else if t = typedefof<byte []> then Some(wrapRef reader.GetFieldValue<byte []>)
+        else if t = typedefof<obj> then Some(wrapRef reader.GetFieldValue)
         else None
 
     static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
@@ -3196,12 +3200,12 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
             ordinal
             
         let buildEntityReadFn (t: System.Type) = 
-            let t, isOpt = 
-                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> 
-                then t.GenericTypeArguments.[0], true
-                else t, false
+            let t, isOpt, isNullable = 
+                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> then t.GenericTypeArguments.[0], true, false
+                elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>> then t.GenericTypeArguments.[0], false, true
+                else t, false, false
             
-            match HydraReader.GetPrimitiveReader(t, reader, isOpt) with
+            match HydraReader.GetPrimitiveReader(t, reader, isOpt, isNullable) with
             | Some primitiveReader -> 
                 let ord = getOrdinalAndIncrement()
                 fun () -> primitiveReader ord
