@@ -158,6 +158,16 @@ module SqlPatterns =
     let isOptionType (t: Type) = 
         t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>>
 
+    let isNullableType (t: Type) = 
+        t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Nullable<_>>
+
+    let isOptionOrNullableType (t: Type) = 
+        t.IsGenericType && (
+            let genericTypeDef = t.GetGenericTypeDefinition()
+            genericTypeDef = typedefof<Option<_>> || 
+            genericTypeDef = typedefof<Nullable<_>>
+        )
+
     let tryGetMember(x: Expression) = 
         match x with
         | Member m when m.Expression.NodeType = ExpressionType.Parameter || m.Expression.NodeType = ExpressionType.MemberAccess -> 
@@ -169,13 +179,20 @@ module SqlPatterns =
                 | Member m -> Some m
                 | _ -> None
             else None
+        | MethodCall nul when nul.Type |> isNullableType -> 
+            if nul.Arguments.Count > 0 then
+                // Nullable.Value
+                match nul.Arguments.[0] with
+                | Member m -> Some m
+                | _ -> None
+            else None
         | _ -> 
             None
 
     /// A property member, a property wrapped in 'Some', or an option 'Value'.
     let (|Property|_|) (exp: Expression) =
         match exp with
-        | Member m when m.Member.DeclaringType <> null && m.Member.DeclaringType |> isOptionType -> 
+        | Member m when m.Member.DeclaringType <> null && m.Member.DeclaringType |> isOptionOrNullableType -> 
             // Handles option '.Value'
             tryGetMember m.Expression
         | _ -> 
@@ -206,7 +223,7 @@ module SqlPatterns =
             unwrapMember m
         | Constant c -> Some c.Value
         | ImplConvertConstant c -> Some c.Value
-        | MethodCall opt when opt.Type |> isOptionType ->        
+        | MethodCall opt when opt.Type |> isOptionOrNullableType ->        
             if opt.Arguments.Count > 0 then
                 // Option.Some
                 match opt.Arguments.[0] with
@@ -216,6 +233,20 @@ module SqlPatterns =
             else
                 // Option.None
                 Some null
+        | :? UnaryExpression as ue ->
+            // Handles unary expressions
+            match ue.Operand with
+            | Constant c -> Some c.Value
+            | _ -> None
+        | Member m when m.Type.Name.StartsWith("Nullable") -> 
+            // Handles nullable types
+            // Extract constant value from nested object/properties
+            let rec unwrapMember (m: MemberExpression) =
+                match m.Expression with
+                | Constant c -> Some c.Value
+                | Member m -> unwrapMember m
+                | _ -> None
+            unwrapMember m
         | _ -> None
 
     let (|AggregateColumn|_|) (exp: Expression) =
@@ -597,7 +628,7 @@ let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'
             let alias = visitAlias p.Expression
             OrderByAggregateColumn (aggType, alias, p.Member)
         | Member m -> 
-            if m.Member.DeclaringType |> isOptionType then 
+            if m.Member.DeclaringType |> isOptionOrNullableType then 
                 visit m.Expression
             else 
                 let alias = visitAlias m.Expression
@@ -628,7 +659,7 @@ let visitJoin<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
             n.Arguments |> Seq.map visit |> Seq.toList |> List.collect id
         | Member m -> 
             let alias = visitAlias m.Expression
-            if m.Member.DeclaringType |> isOptionType
+            if m.Member.DeclaringType |> isOptionOrNullableType
             then visit m.Expression
             else [ { Alias = alias; Member = m.Member } ]
         | Property p -> 
@@ -647,7 +678,7 @@ let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Pro
             // Handle tuples
             visit m.Object
         | Member m -> 
-            if m.Member.DeclaringType |> isOptionType
+            if m.Member.DeclaringType |> isOptionOrNullableType
             then visit m.Expression
             else m.Member
         | Property p -> p.Member
@@ -681,7 +712,7 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
         | Parameter p -> 
             [ SelectedTable p.Name ]
         | Member m -> 
-            if m.Member.DeclaringType |> isOptionType then 
+            if m.Member.DeclaringType |> isOptionOrNullableType then 
                 visit m.Expression
             else 
                 let alias = visitAlias m.Expression
