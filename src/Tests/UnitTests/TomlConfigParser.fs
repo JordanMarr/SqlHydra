@@ -15,15 +15,16 @@ let assertEqual (s1: string, s2: string) =
 let ``Save: All``() = 
     let cfg = 
         {
-            Config.ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
-            Config.OutputFile = "AdventureWorks.fs"
-            Config.Namespace = "SampleApp.AdventureWorks"
-            Config.IsCLIMutable = true
-            Config.IsMutableProperties = false
-            Config.ProviderDbTypeAttributes = true
-            Config.TableDeclarations = true
-            Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
-            Config.Filters = Filters.Empty
+            ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+            OutputFile = "AdventureWorks.fs"
+            Namespace = "SampleApp.AdventureWorks"
+            IsCLIMutable = true
+            IsMutableProperties = false
+            UseOptionTypes = true
+            ProviderDbTypeAttributes = true
+            TableDeclarations = true
+            Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
+            Filters = Filters.Empty
         }
 
     let toml = TomlConfigParser.save(cfg)
@@ -62,15 +63,16 @@ let ``Read: with no filters``() =
 
     let expected = 
         {
-            Config.ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
-            Config.OutputFile = "AdventureWorks.fs"
-            Config.Namespace = "SampleApp.AdventureWorks"
-            Config.IsCLIMutable = true
-            Config.IsMutableProperties = false
-            Config.ProviderDbTypeAttributes = true
-            Config.TableDeclarations = false
-            Config.Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
-            Config.Filters = Filters.Empty
+            ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+            OutputFile = "AdventureWorks.fs"
+            Namespace = "SampleApp.AdventureWorks"
+            IsCLIMutable = true
+            IsMutableProperties = false
+            UseOptionTypes = true
+            ProviderDbTypeAttributes = true
+            TableDeclarations = false
+            Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
+            Filters = Filters.Empty
         }
 
     let cfg = TomlConfigParser.read(toml)
@@ -90,15 +92,16 @@ let ``Read: when no readers section should be None``() =
 
     let expected = 
         {
-            Config.ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
-            Config.OutputFile = "AdventureWorks.fs"
-            Config.Namespace = "SampleApp.AdventureWorks"
-            Config.IsCLIMutable = true
-            Config.IsMutableProperties = false
-            Config.ProviderDbTypeAttributes = true
-            Config.TableDeclarations = false
-            Config.Readers = None
-            Config.Filters = Filters.Empty
+            ConnectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=AdventureWorksLT2019;Integrated Security=SSPI"
+            OutputFile = "AdventureWorks.fs"
+            Namespace = "SampleApp.AdventureWorks"
+            IsCLIMutable = true
+            IsMutableProperties = false
+            UseOptionTypes = true
+            ProviderDbTypeAttributes = true
+            TableDeclarations = false
+            Readers = None
+            Filters = Filters.Empty
         }
 
     let cfg = TomlConfigParser.read(toml)

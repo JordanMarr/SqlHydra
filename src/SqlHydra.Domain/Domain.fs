@@ -8,6 +8,9 @@ type AppInfo = {
     DefaultProvider: string
 }
 
+let private valueTypes = 
+    Set [ "bool"; "int"; "int64"; "int16"; "byte"; "decimal"; "double"; "System.Single"; "System.DateTimeOffset"; "System.DateTime"; "System.DateOnly"; "System.TimeOnly" ]
+
 type TypeMapping = 
     {
         ClrType: string
@@ -16,6 +19,8 @@ type TypeMapping =
         ColumnTypeAlias: string
         ReaderMethod: string
     }
+    member this.IsValueType() = 
+        valueTypes.Contains this.ClrType
 
 type Column = 
     {
@@ -105,6 +110,9 @@ type Config =
 
         /// General: if true, makes generated table record properties mutable
         IsMutableProperties: bool
+
+        /// General: if true, generates nullable properties as F# Option types. If false, uses .NET nullable types.
+        UseOptionTypes: bool
         
         /// SqlHydra.Query Integration: generates support for creating Db specific parameter types
         ProviderDbTypeAttributes: bool

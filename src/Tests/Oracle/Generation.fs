@@ -14,6 +14,7 @@ let cfg =
         Namespace = "TestNS"
         IsCLIMutable = true
         IsMutableProperties = false
+        UseOptionTypes = true
         ProviderDbTypeAttributes = true
         TableDeclarations = false
         Readers = Some { ReadersConfig.ReaderType = "Oracle.ManagedDataAccess.Client.OracleDataReader" } 

@@ -66,7 +66,13 @@ let createTableRecord (cfg: Config) (tbl: Table) =
 
             let type' =
                 if col.IsNullable then
-                    SynType.Option(field)
+                    if cfg.UseOptionTypes then 
+                        SynType.Option(field)
+                    elif col.TypeMapping.IsValueType() then 
+                        let nullable = SynType.CreateLongIdent(LongIdentWithDots.CreateString("System.Nullable"))
+                        SynType.App(nullable, None, [field], [], None, false, range0)
+                    else
+                        field
                 else
                     field
             
@@ -130,7 +136,7 @@ let createEnum (enum: Enum) =
     SynModuleDecl.CreateSimpleType(cmpInfo, enumDef)
 
 /// Creates a "{tbl.Name}Reader" class that reads columns for a given table/record.
-let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) = 
+let createTableReaderClass (cfg: Config) (rdrCfg: ReadersConfig) (tbl: Table) = 
     let classId = Ident.CreateLong(tbl.Name + "Reader")
     let classCmpInfo = SynComponentInfo.ComponentInfo(SynAttributes.Empty, [], [], classId, PreXmlDoc.Empty, false, None, range0)
 
@@ -150,9 +156,15 @@ let createTableReaderClass (rdrCfg: ReadersConfig) (tbl: Table) =
                     SynExpr.CreateLongIdent(
                         false
                         , LongIdentWithDots.CreateString(
-                            if col.IsNullable
-                            then "OptionalColumn"
-                            else "RequiredColumn"
+                            if col.IsNullable then 
+                                if cfg.UseOptionTypes 
+                                then "OptionalColumn"
+                                else 
+                                    if col.TypeMapping.IsValueType() 
+                                    then "NullableColumn"
+                                    else "RequiredColumn"
+                            else 
+                                "RequiredColumn"
                         )
                         , None
                     )
@@ -704,7 +716,7 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                 match cfg.Readers with
                 | Some readers -> 
                     let rm = SynComponentInfoRcd.Create [ Ident.Create "Readers" ]
-                    let tableReaderClasses = tables |> List.map (createTableReaderClass readers)
+                    let tableReaderClasses = tables |> List.map (createTableReaderClass cfg readers)
                     [ SynModuleDecl.CreateNestedModule(rm, tableReaderClasses) ]
                 | None -> []
 
@@ -771,6 +783,13 @@ module ColumnReaders =
                 match alias |> Option.defaultValue __.Name |> getOrdinal with
                 | o when reader.IsDBNull o -> None
                 | o -> Some (getter o)
+
+    type NullableColumn<'T, 'Reader when 'T : struct and 'T : (new : unit -> 'T) and 'T :> System.ValueType and 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = 
+                match alias |> Option.defaultValue __.Name |> getOrdinal with
+                | o when reader.IsDBNull o -> System.Nullable<'T>()
+                | o -> System.Nullable<'T> (getter o)
 
 [<AutoOpen>]
 module private DataReaderExtensions =
