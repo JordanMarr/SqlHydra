@@ -158,11 +158,11 @@ let createTableReaderClass (cfg: Config) (rdrCfg: ReadersConfig) (tbl: Table) =
                         , LongIdentWithDots.CreateString(
                             if col.IsNullable then 
                                 if cfg.UseOptionTypes 
-                                then "OptionalColumn"
+                                then "OptionColumn"
                                 else 
                                     if col.TypeMapping.IsValueType() 
-                                    then "NullableColumn"
-                                    else "NullableRefColumn"
+                                    then "NullableValueColumn"
+                                    else "NullableObjectColumn"
                             else 
                                 "RequiredColumn"
                         )
@@ -786,21 +786,21 @@ module ColumnReaders =
             inherit Column(reader, getOrdinal, column)
             member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getter
 
-    type OptionalColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+    type OptionColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
             inherit Column(reader, getOrdinal, column)
             member __.Read(?alias) = 
                 match alias |> Option.defaultValue __.Name |> getOrdinal with
                 | o when reader.IsDBNull o -> None
                 | o -> Some (getter o)
 
-    type NullableRefColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+    type NullableObjectColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
             inherit Column(reader, getOrdinal, column)
             member __.Read(?alias) = 
                 match alias |> Option.defaultValue __.Name |> getOrdinal with
                 | o when reader.IsDBNull o -> null
                 | o -> (getter o) |> unbox
 
-    type NullableColumn<'T, 'Reader when 'T : struct and 'T : (new : unit -> 'T) and 'T :> System.ValueType and 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+    type NullableValueColumn<'T, 'Reader when 'T : struct and 'T : (new : unit -> 'T) and 'T :> System.ValueType and 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
             inherit Column(reader, getOrdinal, column)
             member __.Read(?alias) = 
                 match alias |> Option.defaultValue __.Name |> getOrdinal with
