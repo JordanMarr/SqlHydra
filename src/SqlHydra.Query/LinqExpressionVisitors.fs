@@ -186,6 +186,8 @@ module SqlPatterns =
                 | Member m -> Some m
                 | _ -> None
             else None
+        | Unary u when u.Operand.NodeType = ExpressionType.MemberAccess -> 
+            Some (u.Operand :?> MemberExpression)
         | _ -> 
             None
 
@@ -233,9 +235,8 @@ module SqlPatterns =
             else
                 // Option.None
                 Some null
-        | :? UnaryExpression as ue ->
-            // Handles unary expressions
-            match ue.Operand with
+        | Unary u -> 
+            match u.Operand with
             | Constant c -> Some c.Value
             | _ -> None
         | Member m when m.Type.Name.StartsWith("Nullable") -> 
