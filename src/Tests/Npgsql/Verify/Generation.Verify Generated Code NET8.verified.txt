@@ -19,6 +19,13 @@ module ColumnReaders =
                 | o when reader.IsDBNull o -> None
                 | o -> Some (getter o)
 
+    type NullableRefColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = 
+                match alias |> Option.defaultValue __.Name |> getOrdinal with
+                | o when reader.IsDBNull o -> null
+                | o -> (getter o) |> unbox
+
     type NullableColumn<'T, 'Reader when 'T : struct and 'T : (new : unit -> 'T) and 'T :> System.ValueType and 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
             inherit Column(reader, getOrdinal, column)
             member __.Read(?alias) = 
@@ -7222,40 +7229,44 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         | "sales.vstorewithdemographics", true -> __.``sales.vstorewithdemographics``.ReadIfNotNull >> box
         | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
-    static member private GetPrimitiveReader(t: System.Type, reader: Npgsql.NpgsqlDataReader, isOpt: bool) =
-        let wrap get (ord: int) = 
-            if isOpt 
-            then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+    static member private GetPrimitiveReader(t: System.Type, reader: Npgsql.NpgsqlDataReader, isOpt: bool, isNullable: bool) =
+        let wrapValue get (ord: int) = 
+            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            elif isNullable then (if reader.IsDBNull ord then System.Nullable() else get ord |> System.Nullable) |> box
             else get ord |> box 
+
+        let wrapRef get (ord: int) = 
+            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            else get ord |> box
         
 
-        if t = typedefof<bool> then Some(wrap reader.GetBoolean)
-        else if t = typedefof<bool []> then Some(wrap reader.GetFieldValue<bool []>)
-        else if t = typedefof<int16> then Some(wrap reader.GetInt16)
-        else if t = typedefof<int16 []> then Some(wrap reader.GetFieldValue<int16 []>)
-        else if t = typedefof<int> then Some(wrap reader.GetInt32)
-        else if t = typedefof<int []> then Some(wrap reader.GetFieldValue<int []>)
-        else if t = typedefof<int64> then Some(wrap reader.GetInt64)
-        else if t = typedefof<int64 []> then Some(wrap reader.GetFieldValue<int64 []>)
-        else if t = typedefof<double> then Some(wrap reader.GetDouble)
-        else if t = typedefof<double []> then Some(wrap reader.GetFieldValue<double []>)
-        else if t = typedefof<decimal> then Some(wrap reader.GetDecimal)
-        else if t = typedefof<decimal []> then Some(wrap reader.GetFieldValue<decimal []>)
-        else if t = typedefof<string> then Some(wrap reader.GetString)
-        else if t = typedefof<string []> then Some(wrap reader.GetFieldValue<string []>)
-        else if t = typedefof<System.Guid> then Some(wrap reader.GetGuid)
-        else if t = typedefof<System.Guid []> then Some(wrap reader.GetFieldValue<System.Guid []>)
-        else if t = typedefof<System.TimeSpan> then Some(wrap reader.GetTimeSpan)
-        else if t = typedefof<System.TimeSpan []> then Some(wrap reader.GetFieldValue<System.TimeSpan []>)
-        else if t = typedefof<System.DateOnly> then Some(wrap reader.GetDateOnly)
-        else if t = typedefof<System.DateOnly []> then Some(wrap reader.GetFieldValue<System.DateOnly []>)
-        else if t = typedefof<System.TimeOnly> then Some(wrap reader.GetTimeOnly)
-        else if t = typedefof<System.TimeOnly []> then Some(wrap reader.GetFieldValue<System.TimeOnly []>)
-        else if t = typedefof<System.DateTime> then Some(wrap reader.GetDateTime)
-        else if t = typedefof<System.DateTime []> then Some(wrap reader.GetFieldValue<System.DateTime []>)
-        else if t = typedefof<byte []> then Some(wrap reader.GetFieldValue<byte []>)
-        else if t = typedefof<char> then Some(wrap reader.GetChar)
-        else if t = typedefof<char []> then Some(wrap reader.GetFieldValue<char []>)
+        if t = typedefof<bool> then Some(wrapValue reader.GetBoolean)
+        else if t = typedefof<bool []> then Some(wrapRef reader.GetFieldValue<bool []>)
+        else if t = typedefof<int16> then Some(wrapValue reader.GetInt16)
+        else if t = typedefof<int16 []> then Some(wrapRef reader.GetFieldValue<int16 []>)
+        else if t = typedefof<int> then Some(wrapValue reader.GetInt32)
+        else if t = typedefof<int []> then Some(wrapRef reader.GetFieldValue<int []>)
+        else if t = typedefof<int64> then Some(wrapValue reader.GetInt64)
+        else if t = typedefof<int64 []> then Some(wrapRef reader.GetFieldValue<int64 []>)
+        else if t = typedefof<double> then Some(wrapValue reader.GetDouble)
+        else if t = typedefof<double []> then Some(wrapRef reader.GetFieldValue<double []>)
+        else if t = typedefof<decimal> then Some(wrapValue reader.GetDecimal)
+        else if t = typedefof<decimal []> then Some(wrapRef reader.GetFieldValue<decimal []>)
+        else if t = typedefof<string> then Some(wrapRef reader.GetString)
+        else if t = typedefof<string []> then Some(wrapRef reader.GetFieldValue<string []>)
+        else if t = typedefof<System.Guid> then Some(wrapValue reader.GetGuid)
+        else if t = typedefof<System.Guid []> then Some(wrapRef reader.GetFieldValue<System.Guid []>)
+        else if t = typedefof<System.TimeSpan> then Some(wrapRef reader.GetTimeSpan)
+        else if t = typedefof<System.TimeSpan []> then Some(wrapRef reader.GetFieldValue<System.TimeSpan []>)
+        else if t = typedefof<System.DateOnly> then Some(wrapValue reader.GetDateOnly)
+        else if t = typedefof<System.DateOnly []> then Some(wrapRef reader.GetFieldValue<System.DateOnly []>)
+        else if t = typedefof<System.TimeOnly> then Some(wrapValue reader.GetTimeOnly)
+        else if t = typedefof<System.TimeOnly []> then Some(wrapRef reader.GetFieldValue<System.TimeOnly []>)
+        else if t = typedefof<System.DateTime> then Some(wrapValue reader.GetDateTime)
+        else if t = typedefof<System.DateTime []> then Some(wrapRef reader.GetFieldValue<System.DateTime []>)
+        else if t = typedefof<byte []> then Some(wrapRef reader.GetFieldValue<byte []>)
+        else if t = typedefof<char> then Some(wrapRef reader.GetChar)
+        else if t = typedefof<char []> then Some(wrapRef reader.GetFieldValue<char []>)
         else None
 
     static member Read(reader: Npgsql.NpgsqlDataReader) = 
@@ -7267,12 +7278,12 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
             ordinal
             
         let buildEntityReadFn (t: System.Type) = 
-            let t, isOpt = 
-                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> 
-                then t.GenericTypeArguments.[0], true
-                else t, false
+            let t, isOpt, isNullable = 
+                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> then t.GenericTypeArguments.[0], true, false
+                elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>> then t.GenericTypeArguments.[0], false, true
+                else t, false, false
             
-            match HydraReader.GetPrimitiveReader(t, reader, isOpt) with
+            match HydraReader.GetPrimitiveReader(t, reader, isOpt, isNullable) with
             | Some primitiveReader -> 
                 let ord = getOrdinalAndIncrement()
                 fun () -> primitiveReader ord
