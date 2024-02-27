@@ -32,7 +32,15 @@ let read(toml: string) =
         Config.Namespace = generalTable.Get "namespace"
         Config.IsCLIMutable = generalTable.Get "cli_mutable"
         Config.IsMutableProperties = generalTable.TryGet "mutable_properties" |> Option.defaultValue false
-        Config.UseOptionTypes = generalTable.TryGet "option_types" |> Option.defaultValue true
+        Config.NullablePropertyType = 
+            generalTable.TryGet "nullable_property_type" 
+            |> Option.map (fun (value: string) -> 
+                match value.ToLower() with
+                | "option" -> NullablePropertyType.Option
+                | "nullable" -> NullablePropertyType.Nullable
+                | _ -> NullablePropertyType.Option
+            )
+            |> Option.defaultValue NullablePropertyType.Option
         Config.ProviderDbTypeAttributes = 
             match queryIntegrationTableMaybe with
             | Some queryIntegrationTable -> queryIntegrationTable.Get "provider_db_type_attributes"

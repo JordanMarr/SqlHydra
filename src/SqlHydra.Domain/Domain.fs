@@ -114,8 +114,8 @@ type Config =
         /// General: if true, makes generated table record properties mutable
         IsMutableProperties: bool
 
-        /// General: if true, generates nullable properties as F# Option types. If false, uses .NET nullable types.
-        UseOptionTypes: bool
+        /// General: determines whether to use F# Option or System.Nullable for nullable columns.
+        NullablePropertyType: NullablePropertyType
         
         /// SqlHydra.Query Integration: generates support for creating Db specific parameter types
         ProviderDbTypeAttributes: bool
@@ -129,3 +129,8 @@ type Config =
         /// Filters: optional filters for schemas, tables and columns
         Filters: Filters
     }
+
+and [<RequireQualifiedAccess>] 
+    NullablePropertyType = 
+    | Option
+    | Nullable

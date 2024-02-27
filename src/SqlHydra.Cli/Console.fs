@@ -69,7 +69,7 @@ let newConfigWizard (args: Args) =
                 Config.Namespace = ns
                 Config.IsCLIMutable = true
                 Config.IsMutableProperties = false
-                Config.UseOptionTypes = true
+                Config.NullablePropertyType = NullablePropertyType.Option
                 Config.ProviderDbTypeAttributes = true
                 Config.TableDeclarations = true
                 Config.Readers = Some { ReadersConfig.ReaderType = app.DefaultReaderType } 
@@ -82,7 +82,7 @@ let newConfigWizard (args: Args) =
                 Config.Namespace = ns
                 Config.IsCLIMutable = true
                 Config.IsMutableProperties = false
-                Config.UseOptionTypes = true
+                Config.NullablePropertyType = NullablePropertyType.Option
                 Config.ProviderDbTypeAttributes = false
                 Config.TableDeclarations = false
                 Config.Readers = None 
@@ -95,7 +95,7 @@ let newConfigWizard (args: Args) =
                 Config.Namespace = ns
                 Config.IsCLIMutable = true
                 Config.IsMutableProperties = false
-                Config.UseOptionTypes = true
+                Config.NullablePropertyType = NullablePropertyType.Option
                 Config.ProviderDbTypeAttributes = false
                 Config.TableDeclarations = false
                 Config.Readers = Some { ReadersConfig.ReaderType = app.DefaultReaderType } 

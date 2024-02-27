@@ -64,23 +64,23 @@ let createTableRecord (cfg: Config) (tbl: Table) =
                 then createProviderDbTypeAttribute col.TypeMapping
                 else []
 
-            let type' =
+            let columnPropertyType =
                 if col.IsNullable then
-                    if cfg.UseOptionTypes then 
+                    match cfg.NullablePropertyType with
+                    | NullablePropertyType.Option ->
                         SynType.Option(field)
-                    elif col.TypeMapping.IsValueType() then 
-                        let nullable = SynType.CreateLongIdent(LongIdentWithDots.CreateString("System.Nullable"))
-                        SynType.App(nullable, None, [field], [], None, false, range0)
-                    else
-                        field
-                else
+                    | NullablePropertyType.Nullable ->
+                        if col.TypeMapping.IsValueType() 
+                        then SynType.App(SynType.CreateLongIdent(LongIdentWithDots.CreateString("System.Nullable")), None, [field], [], None, false, range0)
+                        else field
+                else 
                     field
             
             {   
                 Attributes = attributes
                 IsStatic = false
                 Id = Some (Ident.Create(col.Name))
-                Type = type'
+                Type = columnPropertyType
                 IsMutable = cfg.IsMutableProperties
                 XmlDoc = PreXmlDoc.Empty
                 Access = None
@@ -157,12 +157,13 @@ let createTableReaderClass (cfg: Config) (rdrCfg: ReadersConfig) (tbl: Table) =
                         false
                         , LongIdentWithDots.CreateString(
                             if col.IsNullable then 
-                                if cfg.UseOptionTypes 
-                                then "OptionColumn"
-                                else 
+                                match cfg.NullablePropertyType with
+                                | NullablePropertyType.Option ->
+                                    "OptionColumn"                  // Returns None for DBNull.Value
+                                | NullablePropertyType.Nullable ->
                                     if col.TypeMapping.IsValueType() 
-                                    then "NullableValueColumn"
-                                    else "NullableObjectColumn"
+                                    then "NullableValueColumn"      // Returns System.Nullable<> for DBNull.Value
+                                    else "NullableObjectColumn"     // Returns null for DBNull.Value
                             else 
                                 "RequiredColumn"
                         )
