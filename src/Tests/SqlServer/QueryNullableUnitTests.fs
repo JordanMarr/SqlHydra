@@ -15,89 +15,8 @@ open SqlServer.AdventureWorksNullableNet8
 
 type OptionalBoolEntity = 
     {
-        QuestionAnswered: bool option
+        QuestionAnswered: bool Nullable
     }
-
-[<Test>]
-let ``Simple Where``() = 
-    let sql = 
-        select {
-            for a in Person.Address do
-            where (a.City = "Dallas")
-            orderBy a.City
-        }
-        |> toSql
-
-    sql =! "SELECT * FROM [Person].[Address] AS [a] WHERE ([a].[City] = @p0) ORDER BY [a].[City]"
-
-[<Test>]
-let ``Simple Where - kata``() = 
-    let sql = 
-        select {
-            for a in Person.Address do
-            kata (fun query -> query.Where("a.City", "Dallas"))
-            orderBy a.City
-        }
-        |> toSql
-
-    sql =! "SELECT * FROM [Person].[Address] AS [a] WHERE [a].[City] = @p0 ORDER BY [a].[City]"
-
-[<Test>]
-let ``Select 1 Column``() = 
-    let sql =
-        select {
-            for a in Person.Address do
-            select (a.City)
-        }
-        |> toSql
-
-    sql.Contains("SELECT [a].[City] FROM") =! true
-
-[<Test>]
-let ``Select 2 Columns``() = 
-    let sql =
-        select {
-            for h in Sales.SalesOrderHeader do
-            select (h.CustomerID, h.OnlineOrderFlag)
-        }
-        |> toSql
-
-    sql.Contains("SELECT [h].[CustomerID], [h].[OnlineOrderFlag] FROM") =! true
-
-[<Test>]
-let ``Select 1 Table and 1 Column``() = 
-    let sql =
-        select {
-            for o in Sales.SalesOrderHeader do
-            join d in Sales.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
-            where o.OnlineOrderFlag
-            select (o, d.LineTotal)
-        }
-        |> toSql
-
-    sql.Contains("SELECT [o].*, [d].[LineTotal] FROM") =! true
-
-[<Test>]
-let ``Where bool is true``() = 
-    let sql =
-        select {
-            for o in Sales.SalesOrderHeader do
-            where o.OnlineOrderFlag
-        }
-        |> toSql
-
-    sql.Contains("WHERE ([o].[OnlineOrderFlag] = cast(1 as bit))") =! true
-
-[<Test>]
-let ``Where bool is false``() = 
-    let sql = 
-        select {
-            for o in Sales.SalesOrderHeader do
-            where (not o.OnlineOrderFlag)
-        }
-        |> toSql
-
-    sql.Contains("WHERE ([o].[OnlineOrderFlag] = cast(0 as bit))") =! true
 
 [<Test>]
 let ``Where bool option is true``() = 
@@ -126,14 +45,14 @@ let ``Where bool option is false or null``() =
     let sql = 
         select {
             for o in table<OptionalBoolEntity> do
-            where (not o.QuestionAnswered.Value || o.QuestionAnswered = None)
+            where (not o.QuestionAnswered.Value || not o.QuestionAnswered.HasValue)
         }
         |> toSql
 
     sql.Contains("WHERE (([o].[QuestionAnswered] = cast(0 as bit)) OR ([o].[QuestionAnswered] IS NULL))") =! true
 
-[<Test; Ignore "Ignore">]
-let ``Where with Option Type``() = 
+[<Test>]
+let ``Where with Nullable Object Type``() = 
     let sql =  
         select {
             for a in Person.Address do
@@ -142,118 +61,6 @@ let ``Where with Option Type``() =
         |> toSql
 
     sql.Contains("IS NOT NULL") =! true
-
-[<Test; Ignore "Ignore">]
-let ``Where Not Like``() = 
-    let sql = 
-        select {
-            for a in Person.Address do
-            where (a.City <>% "S%")
-        }
-        |> toSql
-
-    sql.Contains("NOT LIKE") =! true
-
-[<Test>]
-let ``Or Where``() = 
-    let sql =  
-        select {
-            for a in Person.Address do
-            where (a.City = "Chicago" || a.City = "Dallas")
-        }
-        |> toSql
-
-    sql.Contains("WHERE (([a].[City] = @p0) OR ([a].[City] = @p1))") =! true
-
-[<Test>]
-let ``And Where``() = 
-    let sql =  
-        select {
-            for a in Person.Address do
-            where (a.City = "Chicago" && a.City = "Dallas")
-        }
-        |> toSql
-
-    sql.Contains("WHERE (([a].[City] = @p0) AND ([a].[City] = @p1))") =! true
-
-[<Test>]
-let ``Where with AND and OR in Parenthesis``() = 
-    let sql =  
-        select {
-            for a in Person.Address do
-            where (a.City = "Chicago" && (a.AddressLine2 = "abc" || isNullValue a.AddressLine2))
-        }
-        |> toSql
-
-    Assert.IsTrue( 
-        sql.Contains("WHERE (([a].[City] = @p0) AND (([a].[AddressLine2] = @p1) OR ([a].[AddressLine2] IS NULL)))"),
-        "Should wrap OR clause in parenthesis and each individual where clause in parenthesis.")
-
-[<Test>]
-let ``Where value and column are swapped``() = 
-    let sql =  
-        select {
-            for a in Person.Address do
-            where (5 < a.AddressID && 20 >= a.AddressID)
-        }
-        |> toSql
-
-    sql.Contains("WHERE (([a].[AddressID] > @p0) AND ([a].[AddressID] <= @p1))") =! true
-
-[<Test>]
-let ``Where Not Binary``() = 
-    let sql =  
-        select {
-            for a in Person.Address do
-            where (not (a.City = "Chicago" && a.City = "Dallas"))
-        }
-        |> toSql
-
-    sql.Contains("WHERE (NOT (([a].[City] = @p0) AND ([a].[City] = @p1)))") =! true
-
-[<Test>]
-let ``Where Customer isIn List``() = 
-    let sql =  
-        select {
-            for c in Sales.Customer do
-            where (isIn c.CustomerID [30018;29545;29954])
-        }
-        |> toSql
-
-    sql.Contains("WHERE ([c].[CustomerID] IN (@p0, @p1, @p2))") =! true
-
-[<Test>]
-let ``Where Customer |=| List``() = 
-    let sql =  
-        select {
-            for c in Sales.Customer do
-            where (c.CustomerID |=| [30018;29545;29954])
-        }
-        |> toSql
-
-    sql.Contains("WHERE ([c].[CustomerID] IN (@p0, @p1, @p2))") =! true
-
-[<Test>]
-let ``Where Customer |=| Array``() = 
-    let sql =  
-        select {
-            for c in Sales.Customer do
-            where (c.CustomerID |=| [| 30018;29545;29954 |])
-        }
-        |> toSql
-
-    sql.Contains("WHERE ([c].[CustomerID] IN (@p0, @p1, @p2))") =! true
-
-[<Test>]
-let ``Where Customer |=| Seq``() = 
-    let buildQuery (values: int seq) =                
-        select {
-            for c in Sales.Customer do
-            where (c.CustomerID |=| values)
-        }
-
-    let sql =  buildQuery [ 30018;29545;29954 ] |> toSql
-    sql.Contains("WHERE ([c].[CustomerID] IN (@p0, @p1, @p2))") =! true
 
 [<Test>]
 let ``Where Customer |<>| List``() = 
@@ -267,109 +74,18 @@ let ``Where Customer |<>| List``() =
     sql.Contains("WHERE ([c].[PersonID] NOT IN (@p0, @p1, @p2))") =! true
 
 [<Test>]
-let ``Inner Join``() = 
-    let sql = 
-        select {
-            for o in Sales.SalesOrderHeader do
-            join d in Sales.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
-            select o
-        }
-        |> toSql
-
-    sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID])") =! true
-
-[<Test>]
-let ``Left Join``() = 
-    let sql = 
-        select {
-            for o in Sales.SalesOrderHeader do
-            leftJoin d in Sales.SalesOrderDetail on (o.SalesOrderID = d.Value.SalesOrderID)
-            where (o.SalesOrderID = d.Value.SalesOrderID)
-            select o
-        }
-        |> toSql
-
-    let expected = """SELECT [o].* FROM [Sales].[SalesOrderHeader] AS [o] 
-LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID]) WHERE ([o].[SalesOrderID] = [d].[SalesOrderID])"""
-    sql =! expected
-
-[<Test>]
-let ``Optional Property Value in Where``() = 
+let ``Nullable Property Value in Where``() = 
     let date = System.DateTime(2023,1,1)
 
     let sql =  
         select {
             for wo in Production.WorkOrder do
-            where (wo.EndDate = Null || wo.EndDate.Value >= date)
+            where (wo.EndDate.HasValue = false || wo.EndDate.Value >= date)
         }
         |> toSql
 
     sql =! """SELECT * FROM [Production].[WorkOrder] AS [wo] WHERE (([wo].[EndDate] IS NULL) OR ([wo].[EndDate] >= @p0))"""
 
-[<Test>]
-let ``Inner Join - Multi Column``() = 
-    let sql = 
-        select {
-            for o in Sales.SalesOrderHeader do
-            join d in Sales.SalesOrderDetail on ((o.SalesOrderID, o.ModifiedDate) = (d.SalesOrderID, d.ModifiedDate))
-            select o
-        }
-        |> toSql
-
-    sql.Contains("INNER JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID] AND [o].[ModifiedDate] = [d].[ModifiedDate])") =! true
-
-[<Test>]
-let ``Left Join - Multi Column``() = 
-    let sql = 
-        select {
-            for o in Sales.SalesOrderHeader do
-            leftJoin d in Sales.SalesOrderDetail on ((o.SalesOrderID, o.ModifiedDate) = (d.Value.SalesOrderID, d.Value.ModifiedDate))
-            select o
-        }
-        |> toSql
-
-    sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID] AND [o].[ModifiedDate] = [d].[ModifiedDate])") =! true
-
-[<Test>]
-let ``Correlated Subquery``() = 
-    let maxOrderQty = 
-        select {
-            for d in Sales.SalesOrderDetail do
-            correlate od in Sales.SalesOrderDetail
-            where (d.ProductID = od.ProductID)
-            select (maxBy d.OrderQty)
-        }
-
-    let sql =  
-        select {
-            for od in Sales.SalesOrderDetail do
-            where (od.OrderQty = subqueryOne maxOrderQty)
-            orderBy od.ProductID
-            select (od.SalesOrderID, od.ProductID, od.OrderQty)
-        }
-        |> toSql
-
-    sql =!
-        "SELECT [od].[SalesOrderID], [od].[ProductID], [od].[OrderQty] FROM [Sales].[SalesOrderDetail] AS [od] \
-        WHERE ([od].[OrderQty] = (\
-            SELECT MAX([d].[OrderQty]) FROM [Sales].[SalesOrderDetail] AS [d] WHERE ([d].[ProductID] = [od].[ProductID])\
-        )) ORDER BY [od].[ProductID]"
-
-[<Test>]
-let ``Join On Value Bug Fix Test``() = 
-    let sql =  
-        select {
-            for o in Sales.SalesOrderHeader do
-            leftJoin d in Sales.SalesOrderHeader on (o.AccountNumber = d.Value.AccountNumber)
-            select o
-        }
-        |> toSql
-
-    Assert.AreEqual(sql,
-        """SELECT [o].* FROM [Sales].[SalesOrderHeader] AS [o] 
-LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[AccountNumber])""",
-        "Bugged version was replacing TableMapping for original table with joined table.")
-        
 [<Test>]
 let ``Where Static Property``() = 
     let sql = 
@@ -515,9 +231,9 @@ let ``Insert Query without Identity``() =
                     Sales.Customer.AccountNumber = "123"
                     Sales.Customer.rowguid = System.Guid.NewGuid()
                     Sales.Customer.ModifiedDate = System.DateTime.Now
-                    Sales.Customer.PersonID = Null
-                    Sales.Customer.StoreID = Null
-                    Sales.Customer.TerritoryID = Null
+                    Sales.Customer.PersonID = Nullable()
+                    Sales.Customer.StoreID = Nullable()
+                    Sales.Customer.TerritoryID = Nullable()
                     Sales.Customer.CustomerID = 0
                 }
         }
@@ -535,9 +251,9 @@ let ``Insert Query with Identity``() =
                     Sales.Customer.AccountNumber = "123"
                     Sales.Customer.rowguid = System.Guid.NewGuid()
                     Sales.Customer.ModifiedDate = System.DateTime.Now
-                    Sales.Customer.PersonID = Null
-                    Sales.Customer.StoreID = Null
-                    Sales.Customer.TerritoryID = Null
+                    Sales.Customer.PersonID = Nullable()
+                    Sales.Customer.StoreID = Nullable()
+                    Sales.Customer.TerritoryID = Nullable()
                     Sales.Customer.CustomerID = 0
                 }
             getId c.CustomerID
@@ -545,108 +261,3 @@ let ``Insert Query with Identity``() =
         |> toSql
 
     sql =! "INSERT INTO [Sales].[Customer] ([PersonID], [StoreID], [TerritoryID], [AccountNumber], [rowguid], [ModifiedDate]) VALUES (@p0, @p1, @p2, @p3, @p4, @p5);SELECT scope_identity() as Id" 
-
-[<Test>]
-let ``Inline Aggregates``() = 
-    let sql = 
-        select {
-            for o in Sales.SalesOrderHeader do
-            select (countBy o.SalesOrderID)
-        }
-        |> toSql
-
-    sql =! "SELECT COUNT([o].[SalesOrderID]) FROM [Sales].[SalesOrderHeader] AS [o]"
-
-[<Test>]
-let ``Implicit Casts``() = 
-    let sql = 
-        select {
-            for p in Production.Product do
-            where (p.ListPrice > 5)
-        }
-
-    // should not throw exception
-    Assert.Pass()
-
-[<Test>]
-let ``Implicit Casts Option``() = 
-    let sql = 
-        select {
-            for p in Production.Product do
-            where (p.Weight = 5.0M)
-        }
-
-    // should not throw exception
-    Assert.Pass()
-
-[<Test>]
-let ``Self Join``() = 
-    // NOTE: I could not find a good self join example in AdventureWorks.
-    let sql =  
-        select { 
-            for p1 in Production.Product do
-            join p2 in Production.Product on (p1.ProductID = p2.ProductID)
-            where (p2.ListPrice > 10.00M)
-            select p1
-        }
-        |> toSql
-
-    sql =!
-        """SELECT [p1].* FROM [Production].[Product] AS [p1] 
-INNER JOIN [Production].[Product] AS [p2] ON ([p1].[ProductID] = [p2].[ProductID]) WHERE ([p2].[ListPrice] > @p0)"""
-
-[<Test>]
-let ``Underscore Assignment Edge Case - delete - should be valid``() = 
-    let sql =  
-        delete {
-            for _ in Person.Person do
-            deleteAll
-        }
-
-    // should not throw exception
-    Assert.Pass()
-
-[<Test>]
-let ``Underscore Assignment Edge Case - update - should fail with not supported``() = 
-    try
-        let person = Unchecked.defaultof<Person.Person>
-        let sql =  
-            update {
-                for _ in Person.Person do
-                entity person
-                updateAll
-            }
-
-        Assert.Fail("Should fail with NotSupportedException")
-    with 
-    | :? System.NotSupportedException -> Assert.Pass()
-    | ex -> Assert.Fail("Should fail with NotSupportedException")
-
-[<Test>]
-let ``Underscore Assignment Edge Case - insert - should fail with not supported``() = 
-    try
-        let person = Unchecked.defaultof<Person.Person>
-        let sql =  
-            insert {
-                for _ in Person.Person do
-                entity person
-            }
-
-        Assert.Fail("Should fail with NotSupportedException")
-    with 
-    | :? System.NotSupportedException -> Assert.Pass()
-    | ex -> Assert.Fail("Should fail with NotSupportedException")
-
-[<Test>]
-let ``Individual column from a leftJoin table should be optional if Some``() = 
-    let query = 
-        select {
-            for o in Sales.SalesOrderHeader do
-            leftJoin d in Sales.SalesOrderDetail on (o.SalesOrderID = d.Value.SalesOrderID)
-            select (Some d.Value.OrderQty)
-        }
-        
-    let sql = query |> toSql
-    sql =! """SELECT [d].[OrderQty] FROM [Sales].[SalesOrderHeader] AS [o] 
-LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID])"""
-

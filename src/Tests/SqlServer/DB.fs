@@ -26,4 +26,3 @@ let toSql (query: SqlHydra.Query.SelectQuery) =
     #endif
     sql
 
-let Null = System.Nullable()
