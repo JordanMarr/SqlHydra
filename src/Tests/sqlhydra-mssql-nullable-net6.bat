@@ -1,0 +1,1 @@
+dotnet run --project ..\SqlHydra.Cli --framework net6.0 -- mssql -t sqlhydra-mssql-nullable-net6.toml -p ./Tests.fsproj

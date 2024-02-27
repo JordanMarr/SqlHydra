@@ -21,7 +21,7 @@ let cfg =
         Namespace = "TestNS"
         IsCLIMutable = true
         IsMutableProperties = false
-        UseOptionTypes = true
+        NullablePropertyType = NullablePropertyType.Option
         ProviderDbTypeAttributes = true
         TableDeclarations = false
         Readers = Some { ReadersConfig.ReaderType = "System.Data.Common.DbDataReader" } 

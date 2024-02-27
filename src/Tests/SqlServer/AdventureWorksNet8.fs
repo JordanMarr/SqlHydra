@@ -68,7 +68,7 @@ module HumanResources =
           [<SqlHydra.ProviderDbType("NVarChar")>]
           LoginID: string
           [<SqlHydra.ProviderDbType("SmallInt")>]
-          OrganizationLevel: System.Nullable<int16>
+          OrganizationLevel: Option<int16>
           [<SqlHydra.ProviderDbType("NVarChar")>]
           JobTitle: string
           [<SqlHydra.ProviderDbType("Date")>]
@@ -105,7 +105,7 @@ module HumanResources =
           [<SqlHydra.ProviderDbType("Date")>]
           StartDate: System.DateOnly
           [<SqlHydra.ProviderDbType("Date")>]
-          EndDate: System.Nullable<System.DateOnly>
+          EndDate: Option<System.DateOnly>
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
@@ -131,7 +131,7 @@ module HumanResources =
         { [<SqlHydra.ProviderDbType("Int")>]
           JobCandidateID: int
           [<SqlHydra.ProviderDbType("Int")>]
-          BusinessEntityID: System.Nullable<int>
+          BusinessEntityID: Option<int>
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
@@ -172,7 +172,7 @@ module HumanResources =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.NationalIDNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "NationalIDNumber")
             member __.LoginID = RequiredColumn(reader, getOrdinal, reader.GetString, "LoginID")
-            member __.OrganizationLevel = NullableValueColumn(reader, getOrdinal, reader.GetInt16, "OrganizationLevel")
+            member __.OrganizationLevel = OptionColumn(reader, getOrdinal, reader.GetInt16, "OrganizationLevel")
             member __.JobTitle = RequiredColumn(reader, getOrdinal, reader.GetString, "JobTitle")
             member __.BirthDate = RequiredColumn(reader, getOrdinal, reader.GetDateOnly, "BirthDate")
             member __.MaritalStatus = RequiredColumn(reader, getOrdinal, reader.GetString, "MaritalStatus")
@@ -210,7 +210,7 @@ module HumanResources =
             member __.DepartmentID = RequiredColumn(reader, getOrdinal, reader.GetInt16, "DepartmentID")
             member __.ShiftID = RequiredColumn(reader, getOrdinal, reader.GetByte, "ShiftID")
             member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateOnly, "StartDate")
-            member __.EndDate = NullableValueColumn(reader, getOrdinal, reader.GetDateOnly, "EndDate")
+            member __.EndDate = OptionColumn(reader, getOrdinal, reader.GetDateOnly, "EndDate")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
@@ -243,7 +243,7 @@ module HumanResources =
 
         type JobCandidateReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.JobCandidateID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "JobCandidateID")
-            member __.BusinessEntityID = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
+            member __.BusinessEntityID = OptionColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
@@ -279,7 +279,7 @@ module Person =
           [<SqlHydra.ProviderDbType("NVarChar")>]
           AddressLine1: string
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          AddressLine2: string
+          AddressLine2: Option<string>
           [<SqlHydra.ProviderDbType("NVarChar")>]
           City: string
           [<SqlHydra.ProviderDbType("Int")>]
@@ -376,7 +376,7 @@ module Person =
           [<SqlHydra.ProviderDbType("Int")>]
           EmailAddressID: int
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          EmailAddress: string
+          EmailAddress: Option<string>
           [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
           [<SqlHydra.ProviderDbType("DateTime")>]
@@ -408,15 +408,15 @@ module Person =
           [<SqlHydra.ProviderDbType("Bit")>]
           NameStyle: bool
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          Title: string
+          Title: Option<string>
           [<SqlHydra.ProviderDbType("NVarChar")>]
           FirstName: string
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          MiddleName: string
+          MiddleName: Option<string>
           [<SqlHydra.ProviderDbType("NVarChar")>]
           LastName: string
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          Suffix: string
+          Suffix: Option<string>
           [<SqlHydra.ProviderDbType("Int")>]
           EmailPromotion: int
           [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
@@ -475,7 +475,7 @@ module Person =
         type AddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.AddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "AddressID")
             member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
-            member __.AddressLine2 = NullableObjectColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
+            member __.AddressLine2 = OptionColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
             member __.City = RequiredColumn(reader, getOrdinal, reader.GetString, "City")
             member __.StateProvinceID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "StateProvinceID")
             member __.PostalCode = RequiredColumn(reader, getOrdinal, reader.GetString, "PostalCode")
@@ -586,7 +586,7 @@ module Person =
         type EmailAddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.EmailAddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailAddressID")
-            member __.EmailAddress = NullableObjectColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
+            member __.EmailAddress = OptionColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
@@ -621,11 +621,11 @@ module Person =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.PersonType = RequiredColumn(reader, getOrdinal, reader.GetString, "PersonType")
             member __.NameStyle = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "NameStyle")
-            member __.Title = NullableObjectColumn(reader, getOrdinal, reader.GetString, "Title")
+            member __.Title = OptionColumn(reader, getOrdinal, reader.GetString, "Title")
             member __.FirstName = RequiredColumn(reader, getOrdinal, reader.GetString, "FirstName")
-            member __.MiddleName = NullableObjectColumn(reader, getOrdinal, reader.GetString, "MiddleName")
+            member __.MiddleName = OptionColumn(reader, getOrdinal, reader.GetString, "MiddleName")
             member __.LastName = RequiredColumn(reader, getOrdinal, reader.GetString, "LastName")
-            member __.Suffix = NullableObjectColumn(reader, getOrdinal, reader.GetString, "Suffix")
+            member __.Suffix = OptionColumn(reader, getOrdinal, reader.GetString, "Suffix")
             member __.EmailPromotion = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailPromotion")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
@@ -703,13 +703,13 @@ module Production =
         { [<SqlHydra.ProviderDbType("Int")>]
           BillOfMaterialsID: int
           [<SqlHydra.ProviderDbType("Int")>]
-          ProductAssemblyID: System.Nullable<int>
+          ProductAssemblyID: Option<int>
           [<SqlHydra.ProviderDbType("Int")>]
           ComponentID: int
           [<SqlHydra.ProviderDbType("DateTime")>]
           StartDate: System.DateTime
           [<SqlHydra.ProviderDbType("DateTime")>]
-          EndDate: System.Nullable<System.DateTime>
+          EndDate: Option<System.DateTime>
           [<SqlHydra.ProviderDbType("NChar")>]
           UnitMeasureCode: string
           [<SqlHydra.ProviderDbType("SmallInt")>]
@@ -735,7 +735,7 @@ module Production =
     [<CLIMutable>]
     type Document =
         { [<SqlHydra.ProviderDbType("SmallInt")>]
-          DocumentLevel: System.Nullable<int16>
+          DocumentLevel: Option<int16>
           [<SqlHydra.ProviderDbType("NVarChar")>]
           Title: string
           [<SqlHydra.ProviderDbType("Int")>]
@@ -753,9 +753,9 @@ module Production =
           [<SqlHydra.ProviderDbType("TinyInt")>]
           Status: byte
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          DocumentSummary: string
+          DocumentSummary: Option<string>
           [<SqlHydra.ProviderDbType("VarBinary")>]
-          Document: byte []
+          Document: Option<byte []>
           [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
           [<SqlHydra.ProviderDbType("DateTime")>]
@@ -800,7 +800,7 @@ module Production =
           [<SqlHydra.ProviderDbType("Bit")>]
           FinishedGoodsFlag: bool
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          Color: string
+          Color: Option<string>
           [<SqlHydra.ProviderDbType("SmallInt")>]
           SafetyStockLevel: int16
           [<SqlHydra.ProviderDbType("SmallInt")>]
@@ -810,31 +810,31 @@ module Production =
           [<SqlHydra.ProviderDbType("Money")>]
           ListPrice: decimal
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          Size: string
+          Size: Option<string>
           [<SqlHydra.ProviderDbType("NChar")>]
-          SizeUnitMeasureCode: string
+          SizeUnitMeasureCode: Option<string>
           [<SqlHydra.ProviderDbType("NChar")>]
-          WeightUnitMeasureCode: string
+          WeightUnitMeasureCode: Option<string>
           [<SqlHydra.ProviderDbType("Decimal")>]
-          Weight: System.Nullable<decimal>
+          Weight: Option<decimal>
           [<SqlHydra.ProviderDbType("Int")>]
           DaysToManufacture: int
           [<SqlHydra.ProviderDbType("NChar")>]
-          ProductLine: string
+          ProductLine: Option<string>
           [<SqlHydra.ProviderDbType("NChar")>]
-          Class: string
+          Class: Option<string>
           [<SqlHydra.ProviderDbType("NChar")>]
-          Style: string
+          Style: Option<string>
           [<SqlHydra.ProviderDbType("Int")>]
-          ProductSubcategoryID: System.Nullable<int>
+          ProductSubcategoryID: Option<int>
           [<SqlHydra.ProviderDbType("Int")>]
-          ProductModelID: System.Nullable<int>
+          ProductModelID: Option<int>
           [<SqlHydra.ProviderDbType("DateTime")>]
           SellStartDate: System.DateTime
           [<SqlHydra.ProviderDbType("DateTime")>]
-          SellEndDate: System.Nullable<System.DateTime>
+          SellEndDate: Option<System.DateTime>
           [<SqlHydra.ProviderDbType("DateTime")>]
-          DiscontinuedDate: System.Nullable<System.DateTime>
+          DiscontinuedDate: Option<System.DateTime>
           [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
           [<SqlHydra.ProviderDbType("DateTime")>]
@@ -862,7 +862,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           StartDate: System.DateTime
           [<SqlHydra.ProviderDbType("DateTime")>]
-          EndDate: System.Nullable<System.DateTime>
+          EndDate: Option<System.DateTime>
           [<SqlHydra.ProviderDbType("Money")>]
           StandardCost: decimal
           [<SqlHydra.ProviderDbType("DateTime")>]
@@ -918,7 +918,7 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           StartDate: System.DateTime
           [<SqlHydra.ProviderDbType("DateTime")>]
-          EndDate: System.Nullable<System.DateTime>
+          EndDate: Option<System.DateTime>
           [<SqlHydra.ProviderDbType("Money")>]
           ListPrice: decimal
           [<SqlHydra.ProviderDbType("DateTime")>]
@@ -968,13 +968,13 @@ module Production =
         { [<SqlHydra.ProviderDbType("Int")>]
           ProductPhotoID: int
           [<SqlHydra.ProviderDbType("VarBinary")>]
-          ThumbNailPhoto: byte []
+          ThumbNailPhoto: Option<byte []>
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          ThumbnailPhotoFileName: string
+          ThumbnailPhotoFileName: Option<string>
           [<SqlHydra.ProviderDbType("VarBinary")>]
-          LargePhoto: byte []
+          LargePhoto: Option<byte []>
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          LargePhotoFileName: string
+          LargePhotoFileName: Option<string>
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
@@ -1008,7 +1008,7 @@ module Production =
           [<SqlHydra.ProviderDbType("Int")>]
           Rating: int
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          Comments: string
+          Comments: Option<string>
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
@@ -1112,11 +1112,11 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           StartDate: System.DateTime
           [<SqlHydra.ProviderDbType("DateTime")>]
-          EndDate: System.Nullable<System.DateTime>
+          EndDate: Option<System.DateTime>
           [<SqlHydra.ProviderDbType("DateTime")>]
           DueDate: System.DateTime
           [<SqlHydra.ProviderDbType("SmallInt")>]
-          ScrapReasonID: System.Nullable<int16>
+          ScrapReasonID: Option<int16>
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
@@ -1137,15 +1137,15 @@ module Production =
           [<SqlHydra.ProviderDbType("DateTime")>]
           ScheduledEndDate: System.DateTime
           [<SqlHydra.ProviderDbType("DateTime")>]
-          ActualStartDate: System.Nullable<System.DateTime>
+          ActualStartDate: Option<System.DateTime>
           [<SqlHydra.ProviderDbType("DateTime")>]
-          ActualEndDate: System.Nullable<System.DateTime>
+          ActualEndDate: Option<System.DateTime>
           [<SqlHydra.ProviderDbType("Decimal")>]
-          ActualResourceHrs: System.Nullable<decimal>
+          ActualResourceHrs: Option<decimal>
           [<SqlHydra.ProviderDbType("Money")>]
           PlannedCost: decimal
           [<SqlHydra.ProviderDbType("Money")>]
-          ActualCost: System.Nullable<decimal>
+          ActualCost: Option<decimal>
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
@@ -1154,10 +1154,10 @@ module Production =
     module Readers =
         type BillOfMaterialsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BillOfMaterialsID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BillOfMaterialsID")
-            member __.ProductAssemblyID = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "ProductAssemblyID")
+            member __.ProductAssemblyID = OptionColumn(reader, getOrdinal, reader.GetInt32, "ProductAssemblyID")
             member __.ComponentID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ComponentID")
             member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
-            member __.EndDate = NullableValueColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
+            member __.EndDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
             member __.UnitMeasureCode = RequiredColumn(reader, getOrdinal, reader.GetString, "UnitMeasureCode")
             member __.BOMLevel = RequiredColumn(reader, getOrdinal, reader.GetInt16, "BOMLevel")
             member __.PerAssemblyQty = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PerAssemblyQty")
@@ -1191,7 +1191,7 @@ module Production =
                 if __.CultureID.IsNull() then None else Some(__.Read())
 
         type DocumentReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
-            member __.DocumentLevel = NullableValueColumn(reader, getOrdinal, reader.GetInt16, "DocumentLevel")
+            member __.DocumentLevel = OptionColumn(reader, getOrdinal, reader.GetInt16, "DocumentLevel")
             member __.Title = RequiredColumn(reader, getOrdinal, reader.GetString, "Title")
             member __.Owner = RequiredColumn(reader, getOrdinal, reader.GetInt32, "Owner")
             member __.FolderFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "FolderFlag")
@@ -1200,8 +1200,8 @@ module Production =
             member __.Revision = RequiredColumn(reader, getOrdinal, reader.GetString, "Revision")
             member __.ChangeNumber = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ChangeNumber")
             member __.Status = RequiredColumn(reader, getOrdinal, reader.GetByte, "Status")
-            member __.DocumentSummary = NullableObjectColumn(reader, getOrdinal, reader.GetString, "DocumentSummary")
-            member __.Document = NullableObjectColumn(reader, getOrdinal, reader.GetFieldValue, "Document")
+            member __.DocumentSummary = OptionColumn(reader, getOrdinal, reader.GetString, "DocumentSummary")
+            member __.Document = OptionColumn(reader, getOrdinal, reader.GetFieldValue, "Document")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
@@ -1257,24 +1257,24 @@ module Production =
             member __.ProductNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "ProductNumber")
             member __.MakeFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "MakeFlag")
             member __.FinishedGoodsFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "FinishedGoodsFlag")
-            member __.Color = NullableObjectColumn(reader, getOrdinal, reader.GetString, "Color")
+            member __.Color = OptionColumn(reader, getOrdinal, reader.GetString, "Color")
             member __.SafetyStockLevel = RequiredColumn(reader, getOrdinal, reader.GetInt16, "SafetyStockLevel")
             member __.ReorderPoint = RequiredColumn(reader, getOrdinal, reader.GetInt16, "ReorderPoint")
             member __.StandardCost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "StandardCost")
             member __.ListPrice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "ListPrice")
-            member __.Size = NullableObjectColumn(reader, getOrdinal, reader.GetString, "Size")
-            member __.SizeUnitMeasureCode = NullableObjectColumn(reader, getOrdinal, reader.GetString, "SizeUnitMeasureCode")
-            member __.WeightUnitMeasureCode = NullableObjectColumn(reader, getOrdinal, reader.GetString, "WeightUnitMeasureCode")
-            member __.Weight = NullableValueColumn(reader, getOrdinal, reader.GetDecimal, "Weight")
+            member __.Size = OptionColumn(reader, getOrdinal, reader.GetString, "Size")
+            member __.SizeUnitMeasureCode = OptionColumn(reader, getOrdinal, reader.GetString, "SizeUnitMeasureCode")
+            member __.WeightUnitMeasureCode = OptionColumn(reader, getOrdinal, reader.GetString, "WeightUnitMeasureCode")
+            member __.Weight = OptionColumn(reader, getOrdinal, reader.GetDecimal, "Weight")
             member __.DaysToManufacture = RequiredColumn(reader, getOrdinal, reader.GetInt32, "DaysToManufacture")
-            member __.ProductLine = NullableObjectColumn(reader, getOrdinal, reader.GetString, "ProductLine")
-            member __.Class = NullableObjectColumn(reader, getOrdinal, reader.GetString, "Class")
-            member __.Style = NullableObjectColumn(reader, getOrdinal, reader.GetString, "Style")
-            member __.ProductSubcategoryID = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "ProductSubcategoryID")
-            member __.ProductModelID = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
+            member __.ProductLine = OptionColumn(reader, getOrdinal, reader.GetString, "ProductLine")
+            member __.Class = OptionColumn(reader, getOrdinal, reader.GetString, "Class")
+            member __.Style = OptionColumn(reader, getOrdinal, reader.GetString, "Style")
+            member __.ProductSubcategoryID = OptionColumn(reader, getOrdinal, reader.GetInt32, "ProductSubcategoryID")
+            member __.ProductModelID = OptionColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
             member __.SellStartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "SellStartDate")
-            member __.SellEndDate = NullableValueColumn(reader, getOrdinal, reader.GetDateTime, "SellEndDate")
-            member __.DiscontinuedDate = NullableValueColumn(reader, getOrdinal, reader.GetDateTime, "DiscontinuedDate")
+            member __.SellEndDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "SellEndDate")
+            member __.DiscontinuedDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "DiscontinuedDate")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
@@ -1326,7 +1326,7 @@ module Production =
         type ProductCostHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
-            member __.EndDate = NullableValueColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
+            member __.EndDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
             member __.StandardCost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "StandardCost")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
@@ -1390,7 +1390,7 @@ module Production =
         type ProductListPriceHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
-            member __.EndDate = NullableValueColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
+            member __.EndDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
             member __.ListPrice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "ListPrice")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
@@ -1449,10 +1449,10 @@ module Production =
 
         type ProductPhotoReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductPhotoID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductPhotoID")
-            member __.ThumbNailPhoto = NullableObjectColumn(reader, getOrdinal, reader.GetFieldValue, "ThumbNailPhoto")
-            member __.ThumbnailPhotoFileName = NullableObjectColumn(reader, getOrdinal, reader.GetString, "ThumbnailPhotoFileName")
-            member __.LargePhoto = NullableObjectColumn(reader, getOrdinal, reader.GetFieldValue, "LargePhoto")
-            member __.LargePhotoFileName = NullableObjectColumn(reader, getOrdinal, reader.GetString, "LargePhotoFileName")
+            member __.ThumbNailPhoto = OptionColumn(reader, getOrdinal, reader.GetFieldValue, "ThumbNailPhoto")
+            member __.ThumbnailPhotoFileName = OptionColumn(reader, getOrdinal, reader.GetString, "ThumbnailPhotoFileName")
+            member __.LargePhoto = OptionColumn(reader, getOrdinal, reader.GetFieldValue, "LargePhoto")
+            member __.LargePhotoFileName = OptionColumn(reader, getOrdinal, reader.GetString, "LargePhotoFileName")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
@@ -1488,7 +1488,7 @@ module Production =
             member __.ReviewDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ReviewDate")
             member __.EmailAddress = RequiredColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
             member __.Rating = RequiredColumn(reader, getOrdinal, reader.GetInt32, "Rating")
-            member __.Comments = NullableObjectColumn(reader, getOrdinal, reader.GetString, "Comments")
+            member __.Comments = OptionColumn(reader, getOrdinal, reader.GetString, "Comments")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
@@ -1604,9 +1604,9 @@ module Production =
             member __.StockedQty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "StockedQty")
             member __.ScrappedQty = RequiredColumn(reader, getOrdinal, reader.GetInt16, "ScrappedQty")
             member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
-            member __.EndDate = NullableValueColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
+            member __.EndDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
             member __.DueDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "DueDate")
-            member __.ScrapReasonID = NullableValueColumn(reader, getOrdinal, reader.GetInt16, "ScrapReasonID")
+            member __.ScrapReasonID = OptionColumn(reader, getOrdinal, reader.GetInt16, "ScrapReasonID")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
@@ -1631,11 +1631,11 @@ module Production =
             member __.LocationID = RequiredColumn(reader, getOrdinal, reader.GetInt16, "LocationID")
             member __.ScheduledStartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ScheduledStartDate")
             member __.ScheduledEndDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ScheduledEndDate")
-            member __.ActualStartDate = NullableValueColumn(reader, getOrdinal, reader.GetDateTime, "ActualStartDate")
-            member __.ActualEndDate = NullableValueColumn(reader, getOrdinal, reader.GetDateTime, "ActualEndDate")
-            member __.ActualResourceHrs = NullableValueColumn(reader, getOrdinal, reader.GetDecimal, "ActualResourceHrs")
+            member __.ActualStartDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "ActualStartDate")
+            member __.ActualEndDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "ActualEndDate")
+            member __.ActualResourceHrs = OptionColumn(reader, getOrdinal, reader.GetDecimal, "ActualResourceHrs")
             member __.PlannedCost = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "PlannedCost")
-            member __.ActualCost = NullableValueColumn(reader, getOrdinal, reader.GetDecimal, "ActualCost")
+            member __.ActualCost = OptionColumn(reader, getOrdinal, reader.GetDecimal, "ActualCost")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
@@ -1667,15 +1667,15 @@ module Purchasing =
           [<SqlHydra.ProviderDbType("Money")>]
           StandardPrice: decimal
           [<SqlHydra.ProviderDbType("Money")>]
-          LastReceiptCost: System.Nullable<decimal>
+          LastReceiptCost: Option<decimal>
           [<SqlHydra.ProviderDbType("DateTime")>]
-          LastReceiptDate: System.Nullable<System.DateTime>
+          LastReceiptDate: Option<System.DateTime>
           [<SqlHydra.ProviderDbType("Int")>]
           MinOrderQty: int
           [<SqlHydra.ProviderDbType("Int")>]
           MaxOrderQty: int
           [<SqlHydra.ProviderDbType("Int")>]
-          OnOrderQty: System.Nullable<int>
+          OnOrderQty: Option<int>
           [<SqlHydra.ProviderDbType("NChar")>]
           UnitMeasureCode: string
           [<SqlHydra.ProviderDbType("DateTime")>]
@@ -1727,7 +1727,7 @@ module Purchasing =
           [<SqlHydra.ProviderDbType("DateTime")>]
           OrderDate: System.DateTime
           [<SqlHydra.ProviderDbType("DateTime")>]
-          ShipDate: System.Nullable<System.DateTime>
+          ShipDate: Option<System.DateTime>
           [<SqlHydra.ProviderDbType("Money")>]
           SubTotal: decimal
           [<SqlHydra.ProviderDbType("Money")>]
@@ -1773,7 +1773,7 @@ module Purchasing =
           [<SqlHydra.ProviderDbType("Bit")>]
           ActiveFlag: bool
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          PurchasingWebServiceURL: string
+          PurchasingWebServiceURL: Option<string>
           [<SqlHydra.ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
@@ -1785,11 +1785,11 @@ module Purchasing =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.AverageLeadTime = RequiredColumn(reader, getOrdinal, reader.GetInt32, "AverageLeadTime")
             member __.StandardPrice = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "StandardPrice")
-            member __.LastReceiptCost = NullableValueColumn(reader, getOrdinal, reader.GetDecimal, "LastReceiptCost")
-            member __.LastReceiptDate = NullableValueColumn(reader, getOrdinal, reader.GetDateTime, "LastReceiptDate")
+            member __.LastReceiptCost = OptionColumn(reader, getOrdinal, reader.GetDecimal, "LastReceiptCost")
+            member __.LastReceiptDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "LastReceiptDate")
             member __.MinOrderQty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "MinOrderQty")
             member __.MaxOrderQty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "MaxOrderQty")
-            member __.OnOrderQty = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "OnOrderQty")
+            member __.OnOrderQty = OptionColumn(reader, getOrdinal, reader.GetInt32, "OnOrderQty")
             member __.UnitMeasureCode = RequiredColumn(reader, getOrdinal, reader.GetString, "UnitMeasureCode")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
@@ -1846,7 +1846,7 @@ module Purchasing =
             member __.VendorID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "VendorID")
             member __.ShipMethodID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ShipMethodID")
             member __.OrderDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "OrderDate")
-            member __.ShipDate = NullableValueColumn(reader, getOrdinal, reader.GetDateTime, "ShipDate")
+            member __.ShipDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "ShipDate")
             member __.SubTotal = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SubTotal")
             member __.TaxAmt = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TaxAmt")
             member __.Freight = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "Freight")
@@ -1897,7 +1897,7 @@ module Purchasing =
             member __.CreditRating = RequiredColumn(reader, getOrdinal, reader.GetByte, "CreditRating")
             member __.PreferredVendorStatus = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "PreferredVendorStatus")
             member __.ActiveFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "ActiveFlag")
-            member __.PurchasingWebServiceURL = NullableObjectColumn(reader, getOrdinal, reader.GetString, "PurchasingWebServiceURL")
+            member __.PurchasingWebServiceURL = OptionColumn(reader, getOrdinal, reader.GetString, "PurchasingWebServiceURL")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
@@ -1977,11 +1977,11 @@ module Sales =
         { [<SqlHydra.ProviderDbType("Int")>]
           CustomerID: int
           [<SqlHydra.ProviderDbType("Int")>]
-          PersonID: System.Nullable<int>
+          PersonID: Option<int>
           [<SqlHydra.ProviderDbType("Int")>]
-          StoreID: System.Nullable<int>
+          StoreID: Option<int>
           [<SqlHydra.ProviderDbType("Int")>]
-          TerritoryID: System.Nullable<int>
+          TerritoryID: Option<int>
           [<SqlHydra.ProviderDbType("VarChar")>]
           AccountNumber: string
           [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
@@ -2009,7 +2009,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("Int")>]
           SalesOrderDetailID: int
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          CarrierTrackingNumber: string
+          CarrierTrackingNumber: Option<string>
           [<SqlHydra.ProviderDbType("SmallInt")>]
           OrderQty: int16
           [<SqlHydra.ProviderDbType("Int")>]
@@ -2040,7 +2040,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           DueDate: System.DateTime
           [<SqlHydra.ProviderDbType("DateTime")>]
-          ShipDate: System.Nullable<System.DateTime>
+          ShipDate: Option<System.DateTime>
           [<SqlHydra.ProviderDbType("TinyInt")>]
           Status: byte
           [<SqlHydra.ProviderDbType("Bit")>]
@@ -2048,15 +2048,15 @@ module Sales =
           [<SqlHydra.ProviderDbType("NVarChar")>]
           SalesOrderNumber: string
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          PurchaseOrderNumber: string
+          PurchaseOrderNumber: Option<string>
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          AccountNumber: string
+          AccountNumber: Option<string>
           [<SqlHydra.ProviderDbType("Int")>]
           CustomerID: int
           [<SqlHydra.ProviderDbType("Int")>]
-          SalesPersonID: System.Nullable<int>
+          SalesPersonID: Option<int>
           [<SqlHydra.ProviderDbType("Int")>]
-          TerritoryID: System.Nullable<int>
+          TerritoryID: Option<int>
           [<SqlHydra.ProviderDbType("Int")>]
           BillToAddressID: int
           [<SqlHydra.ProviderDbType("Int")>]
@@ -2064,11 +2064,11 @@ module Sales =
           [<SqlHydra.ProviderDbType("Int")>]
           ShipMethodID: int
           [<SqlHydra.ProviderDbType("Int")>]
-          CreditCardID: System.Nullable<int>
+          CreditCardID: Option<int>
           [<SqlHydra.ProviderDbType("VarChar")>]
-          CreditCardApprovalCode: string
+          CreditCardApprovalCode: Option<string>
           [<SqlHydra.ProviderDbType("Int")>]
-          CurrencyRateID: System.Nullable<int>
+          CurrencyRateID: Option<int>
           [<SqlHydra.ProviderDbType("Money")>]
           SubTotal: decimal
           [<SqlHydra.ProviderDbType("Money")>]
@@ -2078,7 +2078,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("Money")>]
           TotalDue: decimal
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          Comment: string
+          Comment: Option<string>
           [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
           [<SqlHydra.ProviderDbType("DateTime")>]
@@ -2102,9 +2102,9 @@ module Sales =
         { [<SqlHydra.ProviderDbType("Int")>]
           BusinessEntityID: int
           [<SqlHydra.ProviderDbType("Int")>]
-          TerritoryID: System.Nullable<int>
+          TerritoryID: Option<int>
           [<SqlHydra.ProviderDbType("Money")>]
-          SalesQuota: System.Nullable<decimal>
+          SalesQuota: Option<decimal>
           [<SqlHydra.ProviderDbType("Money")>]
           Bonus: decimal
           [<SqlHydra.ProviderDbType("SmallMoney")>]
@@ -2201,7 +2201,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("DateTime")>]
           StartDate: System.DateTime
           [<SqlHydra.ProviderDbType("DateTime")>]
-          EndDate: System.Nullable<System.DateTime>
+          EndDate: Option<System.DateTime>
           [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
           [<SqlHydra.ProviderDbType("DateTime")>]
@@ -2245,7 +2245,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("Int")>]
           MinQty: int
           [<SqlHydra.ProviderDbType("Int")>]
-          MaxQty: System.Nullable<int>
+          MaxQty: Option<int>
           [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
           [<SqlHydra.ProviderDbType("DateTime")>]
@@ -2273,7 +2273,7 @@ module Sales =
           [<SqlHydra.ProviderDbType("NVarChar")>]
           Name: string
           [<SqlHydra.ProviderDbType("Int")>]
-          SalesPersonID: System.Nullable<int>
+          SalesPersonID: Option<int>
           [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
           [<SqlHydra.ProviderDbType("DateTime")>]
@@ -2350,9 +2350,9 @@ module Sales =
 
         type CustomerReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.CustomerID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "CustomerID")
-            member __.PersonID = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "PersonID")
-            member __.StoreID = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "StoreID")
-            member __.TerritoryID = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
+            member __.PersonID = OptionColumn(reader, getOrdinal, reader.GetInt32, "PersonID")
+            member __.StoreID = OptionColumn(reader, getOrdinal, reader.GetInt32, "StoreID")
+            member __.TerritoryID = OptionColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
             member __.AccountNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "AccountNumber")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
@@ -2385,7 +2385,7 @@ module Sales =
         type SalesOrderDetailReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.SalesOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderID")
             member __.SalesOrderDetailID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderDetailID")
-            member __.CarrierTrackingNumber = NullableObjectColumn(reader, getOrdinal, reader.GetString, "CarrierTrackingNumber")
+            member __.CarrierTrackingNumber = OptionColumn(reader, getOrdinal, reader.GetString, "CarrierTrackingNumber")
             member __.OrderQty = RequiredColumn(reader, getOrdinal, reader.GetInt16, "OrderQty")
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.SpecialOfferID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SpecialOfferID")
@@ -2416,26 +2416,26 @@ module Sales =
             member __.RevisionNumber = RequiredColumn(reader, getOrdinal, reader.GetByte, "RevisionNumber")
             member __.OrderDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "OrderDate")
             member __.DueDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "DueDate")
-            member __.ShipDate = NullableValueColumn(reader, getOrdinal, reader.GetDateTime, "ShipDate")
+            member __.ShipDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "ShipDate")
             member __.Status = RequiredColumn(reader, getOrdinal, reader.GetByte, "Status")
             member __.OnlineOrderFlag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "OnlineOrderFlag")
             member __.SalesOrderNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "SalesOrderNumber")
-            member __.PurchaseOrderNumber = NullableObjectColumn(reader, getOrdinal, reader.GetString, "PurchaseOrderNumber")
-            member __.AccountNumber = NullableObjectColumn(reader, getOrdinal, reader.GetString, "AccountNumber")
+            member __.PurchaseOrderNumber = OptionColumn(reader, getOrdinal, reader.GetString, "PurchaseOrderNumber")
+            member __.AccountNumber = OptionColumn(reader, getOrdinal, reader.GetString, "AccountNumber")
             member __.CustomerID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "CustomerID")
-            member __.SalesPersonID = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "SalesPersonID")
-            member __.TerritoryID = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
+            member __.SalesPersonID = OptionColumn(reader, getOrdinal, reader.GetInt32, "SalesPersonID")
+            member __.TerritoryID = OptionColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
             member __.BillToAddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BillToAddressID")
             member __.ShipToAddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ShipToAddressID")
             member __.ShipMethodID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ShipMethodID")
-            member __.CreditCardID = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "CreditCardID")
-            member __.CreditCardApprovalCode = NullableObjectColumn(reader, getOrdinal, reader.GetString, "CreditCardApprovalCode")
-            member __.CurrencyRateID = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "CurrencyRateID")
+            member __.CreditCardID = OptionColumn(reader, getOrdinal, reader.GetInt32, "CreditCardID")
+            member __.CreditCardApprovalCode = OptionColumn(reader, getOrdinal, reader.GetString, "CreditCardApprovalCode")
+            member __.CurrencyRateID = OptionColumn(reader, getOrdinal, reader.GetInt32, "CurrencyRateID")
             member __.SubTotal = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SubTotal")
             member __.TaxAmt = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TaxAmt")
             member __.Freight = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "Freight")
             member __.TotalDue = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "TotalDue")
-            member __.Comment = NullableObjectColumn(reader, getOrdinal, reader.GetString, "Comment")
+            member __.Comment = OptionColumn(reader, getOrdinal, reader.GetString, "Comment")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
@@ -2485,8 +2485,8 @@ module Sales =
 
         type SalesPersonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
-            member __.TerritoryID = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
-            member __.SalesQuota = NullableValueColumn(reader, getOrdinal, reader.GetDecimal, "SalesQuota")
+            member __.TerritoryID = OptionColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
+            member __.SalesQuota = OptionColumn(reader, getOrdinal, reader.GetDecimal, "SalesQuota")
             member __.Bonus = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "Bonus")
             member __.CommissionPct = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "CommissionPct")
             member __.SalesYTD = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SalesYTD")
@@ -2592,7 +2592,7 @@ module Sales =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.TerritoryID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
             member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
-            member __.EndDate = NullableValueColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
+            member __.EndDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
@@ -2635,7 +2635,7 @@ module Sales =
             member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
             member __.EndDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
             member __.MinQty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "MinQty")
-            member __.MaxQty = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "MaxQty")
+            member __.MaxQty = OptionColumn(reader, getOrdinal, reader.GetInt32, "MaxQty")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
@@ -2673,7 +2673,7 @@ module Sales =
         type StoreReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
-            member __.SalesPersonID = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "SalesPersonID")
+            member __.SalesPersonID = OptionColumn(reader, getOrdinal, reader.GetInt32, "SalesPersonID")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
@@ -2712,9 +2712,9 @@ module dbo =
           [<SqlHydra.ProviderDbType("NVarChar")>]
           Event: string
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          Schema: string
+          Schema: Option<string>
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          Object: string
+          Object: Option<string>
           [<SqlHydra.ProviderDbType("NVarChar")>]
           TSQL: string }
 
@@ -2731,13 +2731,13 @@ module dbo =
           [<SqlHydra.ProviderDbType("Int")>]
           ErrorNumber: int
           [<SqlHydra.ProviderDbType("Int")>]
-          ErrorSeverity: System.Nullable<int>
+          ErrorSeverity: Option<int>
           [<SqlHydra.ProviderDbType("Int")>]
-          ErrorState: System.Nullable<int>
+          ErrorState: Option<int>
           [<SqlHydra.ProviderDbType("NVarChar")>]
-          ErrorProcedure: string
+          ErrorProcedure: Option<string>
           [<SqlHydra.ProviderDbType("Int")>]
-          ErrorLine: System.Nullable<int>
+          ErrorLine: Option<int>
           [<SqlHydra.ProviderDbType("NVarChar")>]
           ErrorMessage: string }
 
@@ -2764,8 +2764,8 @@ module dbo =
             member __.PostTime = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "PostTime")
             member __.DatabaseUser = RequiredColumn(reader, getOrdinal, reader.GetString, "DatabaseUser")
             member __.Event = RequiredColumn(reader, getOrdinal, reader.GetString, "Event")
-            member __.Schema = NullableObjectColumn(reader, getOrdinal, reader.GetString, "Schema")
-            member __.Object = NullableObjectColumn(reader, getOrdinal, reader.GetString, "Object")
+            member __.Schema = OptionColumn(reader, getOrdinal, reader.GetString, "Schema")
+            member __.Object = OptionColumn(reader, getOrdinal, reader.GetString, "Object")
             member __.TSQL = RequiredColumn(reader, getOrdinal, reader.GetString, "TSQL")
 
             member __.Read() =
@@ -2785,10 +2785,10 @@ module dbo =
             member __.ErrorTime = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ErrorTime")
             member __.UserName = RequiredColumn(reader, getOrdinal, reader.GetString, "UserName")
             member __.ErrorNumber = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ErrorNumber")
-            member __.ErrorSeverity = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "ErrorSeverity")
-            member __.ErrorState = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "ErrorState")
-            member __.ErrorProcedure = NullableObjectColumn(reader, getOrdinal, reader.GetString, "ErrorProcedure")
-            member __.ErrorLine = NullableValueColumn(reader, getOrdinal, reader.GetInt32, "ErrorLine")
+            member __.ErrorSeverity = OptionColumn(reader, getOrdinal, reader.GetInt32, "ErrorSeverity")
+            member __.ErrorState = OptionColumn(reader, getOrdinal, reader.GetInt32, "ErrorState")
+            member __.ErrorProcedure = OptionColumn(reader, getOrdinal, reader.GetString, "ErrorProcedure")
+            member __.ErrorLine = OptionColumn(reader, getOrdinal, reader.GetInt32, "ErrorLine")
             member __.ErrorMessage = RequiredColumn(reader, getOrdinal, reader.GetString, "ErrorMessage")
 
             member __.Read() =

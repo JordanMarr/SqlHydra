@@ -1,15 +1,16 @@
-﻿module SqlServer.``Query Integration Tests``
+﻿module SqlServer.``Query Nullable Integration Tests``
 
 open SqlHydra.Query
 open DB
+open System
 open NUnit.Framework
 open System.Threading.Tasks
 open Swensen.Unquote
 #if NET6_0
-open SqlServer.AdventureWorksNet6
+open SqlServer.AdventureWorksNullableNet6
 #endif
 #if NET8_0
-open SqlServer.AdventureWorksNet8
+open SqlServer.AdventureWorksNullableNet8
 #endif
 
 let openContext() = 
@@ -21,12 +22,12 @@ let stubbedErrorLog =
     {
         dbo.ErrorLog.ErrorLogID = 0 // Exclude
         dbo.ErrorLog.ErrorTime = System.DateTime.Now
-        dbo.ErrorLog.ErrorLine = None
+        dbo.ErrorLog.ErrorLine = Nullable()
         dbo.ErrorLog.ErrorMessage = "TEST INSERT ASYNC"
         dbo.ErrorLog.ErrorNumber = 400
-        dbo.ErrorLog.ErrorProcedure = (Some "Procedure 400")
-        dbo.ErrorLog.ErrorSeverity = None
-        dbo.ErrorLog.ErrorState = None
+        dbo.ErrorLog.ErrorProcedure = "Procedure 400"
+        dbo.ErrorLog.ErrorSeverity = Nullable()
+        dbo.ErrorLog.ErrorState = Nullable()
         dbo.ErrorLog.UserName = "jmarr"
     }
 
@@ -84,7 +85,7 @@ let ``Product with Category Name``() = task {
     let query = 
         select {
             for p in Production.Product do
-            join sc in Production.ProductSubcategory on (p.ProductSubcategoryID = Some sc.ProductSubcategoryID)
+            join sc in Production.ProductSubcategory on (p.ProductSubcategoryID = sc.ProductSubcategoryID)
             join c in Production.ProductCategory on (sc.ProductCategoryID = c.ProductCategoryID)
             select (c.Name, p)
             take 5
@@ -101,7 +102,7 @@ let ``Select Column Aggregates From Product IDs 1-3``() = task {
     let query =
         select {
             for p in Production.Product do
-            where (p.ProductSubcategoryID <> None)
+            where (isNotNullValue p.ProductSubcategoryID)
             groupBy p.ProductSubcategoryID
             where (p.ProductSubcategoryID.Value |=| [ 1; 2; 3 ])
             select (p.ProductSubcategoryID, minBy p.ListPrice, maxBy p.ListPrice, avgBy p.ListPrice, countBy p.ListPrice, sumBy p.ListPrice)
@@ -113,12 +114,12 @@ let ``Select Column Aggregates From Product IDs 1-3``() = task {
             
     let aggByCatID = 
         aggregates 
-        |> Seq.map (fun (catId, minPrice, maxPrice, avgPrice, priceCount, sumPrice) -> catId, (minPrice, maxPrice, avgPrice, priceCount, sumPrice)) 
+        |> Seq.map (fun (catId, minPrice, maxPrice, avgPrice, priceCount, sumPrice) -> catId.Value, (minPrice, maxPrice, avgPrice, priceCount, sumPrice)) 
         |> Map.ofSeq
 
-    Assert.AreEqual((539.99M, 3399.99M, 1683.365M, 32, 53867.6800M), aggByCatID.[Some 1], "Expected CatID: 1 aggregates to match.")
-    Assert.AreEqual((539.99M, 3578.2700M, 1597.4500M, 43, 68690.3500M), aggByCatID.[Some 2], "Expected CatID: 2 aggregates to match.")
-    Assert.AreEqual((742.3500M, 2384.0700M, 1425.2481M, 22, 31355.4600M), aggByCatID.[Some 3], "Expected CatID: 3 aggregates to match.")
+    Assert.AreEqual((539.99M, 3399.99M, 1683.365M, 32, 53867.6800M), aggByCatID.[1], "Expected CatID: 1 aggregates to match.")
+    Assert.AreEqual((539.99M, 3578.2700M, 1597.4500M, 43, 68690.3500M), aggByCatID.[2], "Expected CatID: 2 aggregates to match.")
+    Assert.AreEqual((742.3500M, 2384.0700M, 1425.2481M, 22, 31355.4600M), aggByCatID.[3], "Expected CatID: 3 aggregates to match.")
 }
 
 [<Test>]
@@ -153,7 +154,7 @@ let ``Select Column Aggregates``() = task {
     let! aggregates = 
         select {
             for p in Production.Product do
-            where (p.ProductSubcategoryID <> None)
+            where (isNotNullValue p.ProductSubcategoryID)
             groupBy p.ProductSubcategoryID
             having (minBy p.ListPrice > 50M && maxBy p.ListPrice < 1000M)
             select (p.ProductSubcategoryID, minBy p.ListPrice, maxBy p.ListPrice)
@@ -170,7 +171,7 @@ let ``Sorted Aggregates - Top 5 categories with highest avg price products``() =
     let query = 
         select {
                 for p in Production.Product do
-                where (p.ProductSubcategoryID <> None)
+                where (p.ProductSubcategoryID <> Null)
                 groupBy p.ProductSubcategoryID
                 orderByDescending (avgBy p.ListPrice)
                 select (p.ProductSubcategoryID, avgBy p.ListPrice)
@@ -189,7 +190,7 @@ let ``Where subqueryMany``() = task {
     let top5CategoryIdsWithHighestAvgPrices = 
         select {
             for p in Production.Product do
-            where (p.ProductSubcategoryID <> None)
+            where (isNotNullValue p.ProductSubcategoryID)
             groupBy p.ProductSubcategoryID
             orderByDescending (avgBy p.ListPrice)
             select (p.ProductSubcategoryID)
@@ -199,7 +200,7 @@ let ``Where subqueryMany``() = task {
     let! top5Categories =
         select {
             for c in Production.ProductCategory do
-            where (Some c.ProductCategoryID |=| subqueryMany top5CategoryIdsWithHighestAvgPrices)
+            where (Nullable c.ProductCategoryID |=| subqueryMany top5CategoryIdsWithHighestAvgPrices)
             select c.Name
         }
         |> ctx.ReadAsync HydraReader.Read
@@ -235,13 +236,13 @@ let ``Select Columns with Option``() = task {
     let! values = 
         select {
             for p in Production.Product do
-            where (p.ProductSubcategoryID <> None)
+            where (isNotNullValue p.ProductSubcategoryID.HasValue)
             select (p.ProductSubcategoryID, p.ListPrice)
         }
         |> ctx.ReadAsync HydraReader.Read
 
     gt0 values
-    Assert.IsTrue(values |> Seq.forall (fun (catId, price) -> catId <> None), "Expected subcategories to all have a value.")
+    Assert.IsTrue(values |> Seq.forall (fun (catId, price) -> catId.HasValue), "Expected subcategories to all have a value.")
 }
 
 [<Test>]
@@ -252,12 +253,12 @@ let ``InsertGetId Test``() = task {
         {
             dbo.ErrorLog.ErrorLogID = 0 // Exclude
             dbo.ErrorLog.ErrorTime = System.DateTime.Now
-            dbo.ErrorLog.ErrorLine = None
+            dbo.ErrorLog.ErrorLine = Null
             dbo.ErrorLog.ErrorMessage = "TEST"
             dbo.ErrorLog.ErrorNumber = 400
-            dbo.ErrorLog.ErrorProcedure = (Some "Procedure 400")
-            dbo.ErrorLog.ErrorSeverity = None
-            dbo.ErrorLog.ErrorState = None
+            dbo.ErrorLog.ErrorProcedure = "Procedure 400"
+            dbo.ErrorLog.ErrorSeverity = Null
+            dbo.ErrorLog.ErrorState = Null
             dbo.ErrorLog.UserName = "jmarr"
         }
 
@@ -279,12 +280,12 @@ let ``InsertGetIdAsync Test``() = task {
         {
             dbo.ErrorLog.ErrorLogID = 0 // Exclude
             dbo.ErrorLog.ErrorTime = System.DateTime.Now
-            dbo.ErrorLog.ErrorLine = None
+            dbo.ErrorLog.ErrorLine = Null
             dbo.ErrorLog.ErrorMessage = "TEST INSERT ASYNC"
             dbo.ErrorLog.ErrorNumber = 400
-            dbo.ErrorLog.ErrorProcedure = (Some "Procedure 400")
-            dbo.ErrorLog.ErrorSeverity = None
-            dbo.ErrorLog.ErrorState = None
+            dbo.ErrorLog.ErrorProcedure = "Procedure 400"
+            dbo.ErrorLog.ErrorSeverity = Null
+            dbo.ErrorLog.ErrorState = Null
             dbo.ErrorLog.UserName = "jmarr"
         }
 
@@ -307,8 +308,8 @@ let ``Update Set Individual Fields``() = task {
             for e in dbo.ErrorLog do
             set e.ErrorNumber 123
             set e.ErrorMessage "ERROR #123"
-            set e.ErrorLine (Some 999)
-            set e.ErrorProcedure None
+            set e.ErrorLine 999
+            set e.ErrorProcedure null
             where (e.ErrorLogID = 1)
         }
 
@@ -324,8 +325,8 @@ let ``UpdateAsync Set Individual Fields``() = task {
             for e in dbo.ErrorLog do
             set e.ErrorNumber 123
             set e.ErrorMessage "ERROR #123"
-            set e.ErrorLine (Some 999)
-            set e.ErrorProcedure None
+            set e.ErrorLine 999
+            set e.ErrorProcedure null
             where (e.ErrorLogID = 1)
         }
 
@@ -340,12 +341,12 @@ let ``Update Entity``() = task {
         {
             dbo.ErrorLog.ErrorLogID = 2
             dbo.ErrorLog.ErrorTime = System.DateTime.Now
-            dbo.ErrorLog.ErrorLine = Some 888
+            dbo.ErrorLog.ErrorLine = 888
             dbo.ErrorLog.ErrorMessage = "ERROR #2"
             dbo.ErrorLog.ErrorNumber = 500
-            dbo.ErrorLog.ErrorProcedure = None
-            dbo.ErrorLog.ErrorSeverity = None
-            dbo.ErrorLog.ErrorState = None
+            dbo.ErrorLog.ErrorProcedure = null
+            dbo.ErrorLog.ErrorSeverity = Nullable()
+            dbo.ErrorLog.ErrorState = Nullable()
             dbo.ErrorLog.UserName = "jmarr"
         }
 

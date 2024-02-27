@@ -20,7 +20,7 @@ let ``Save: All``() =
             Namespace = "SampleApp.AdventureWorks"
             IsCLIMutable = true
             IsMutableProperties = false
-            UseOptionTypes = true
+            NullablePropertyType = NullablePropertyType.Option
             ProviderDbTypeAttributes = true
             TableDeclarations = true
             Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
@@ -68,7 +68,7 @@ let ``Read: with no filters``() =
             Namespace = "SampleApp.AdventureWorks"
             IsCLIMutable = true
             IsMutableProperties = false
-            UseOptionTypes = true
+            NullablePropertyType = NullablePropertyType.Option
             ProviderDbTypeAttributes = true
             TableDeclarations = false
             Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
@@ -97,7 +97,7 @@ let ``Read: when no readers section should be None``() =
             Namespace = "SampleApp.AdventureWorks"
             IsCLIMutable = true
             IsMutableProperties = false
-            UseOptionTypes = true
+            NullablePropertyType = NullablePropertyType.Option
             ProviderDbTypeAttributes = true
             TableDeclarations = false
             Readers = None
