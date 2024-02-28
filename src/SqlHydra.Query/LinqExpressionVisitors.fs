@@ -194,7 +194,7 @@ module SqlPatterns =
     /// A property member, a property wrapped in 'Some', or an option 'Value'.
     let (|Property|_|) (exp: Expression) =
         match exp with
-        | Member m when m.Member.DeclaringType <> null && m.Member.DeclaringType |> isOptionOrNullableType -> 
+        | Member m when m.Member.DeclaringType <> null && m.Member.DeclaringType |> isOptionType -> 
             // Handles option '.Value'
             tryGetMember m.Expression
         | _ -> 
@@ -384,16 +384,18 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
             query.OrWhere(fun q -> lt).OrWhere(fun q -> rt)
         | BinaryCompare x ->
             match x.Left, x.Right with
+            
+            // Handle property to subquery comparisons
             | Property p1, MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryOne ->
-                // Handle property to subquery comparisons
                 let comparison = getComparison exp.NodeType
                 let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
                 let selectSubquery = subqueryConst.Value :?> SelectQuery
                 let alias = visitAlias p1.Expression
                 let fqCol = qualifyColumn alias p1.Member
                 query.Where(fqCol, comparison, selectSubquery.ToKataQuery())
+            
+            // Handle col to col comparisons
             | Property p1, Property p2 ->
-                // Handle col to col comparisons
                 let lt = 
                     let alias = visitAlias p1.Expression
                     qualifyColumn alias p1.Member
@@ -402,25 +404,54 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
                     let alias = visitAlias p2.Expression
                     qualifyColumn alias p2.Member
                 query.WhereColumns(lt, comparison, rt)
+
+            // Column = null comparisons
             | Property p, Value null | Value null, Property p when exp.NodeType = ExpressionType.Equal ->
-                // Handle column is null comparisons
                 let alias = visitAlias p.Expression
                 let fqCol = qualifyColumn alias p.Member
                 query.WhereNull(fqCol)
+            
+            // Column <> null comparisons
             | Property p, Value null | Value null, Property p when exp.NodeType = ExpressionType.NotEqual ->
-                // Handle column is not null comparisons
                 let alias = visitAlias p.Expression
                 let fqCol = qualifyColumn alias p.Member
                 query.WhereNotNull(fqCol)
+            
+            // Nullable.HasValue null check
+            | Property p, Value value | Value value, Property p when p.Member.DeclaringType |> isNullableType && p.Member.Name = "HasValue" && exp.NodeType = ExpressionType.Equal ->
+                let alias = visitAlias p.Expression
+                let m = tryGetMember p.Expression
+                let fqCol = qualifyColumn alias m.Value.Member
+                match value :?> bool with
+                | true -> query.WhereNotNull(fqCol)
+                | false -> query.WhereNull(fqCol)            
+            // Nullable.HasValue null check
+            | Property p, Value value | Value value, Property p when p.Member.DeclaringType |> isNullableType && p.Member.Name = "HasValue" && exp.NodeType = ExpressionType.NotEqual ->
+                let alias = visitAlias p.Expression
+                let fqCol = qualifyColumn alias p.Member
+                match value :?> bool with
+                | true -> query.WhereNull(fqCol)
+                | false -> query.WhereNotNull(fqCol)
+
+            // Nullable.Value comparisons
+            | Property p, Value value | Value value, Property p when p.Member.DeclaringType |> isNullableType && p.Member.Name = "Value" ->
+                let comparison = getComparison exp.NodeType
+                let queryParameter = KataUtils.getQueryParameterForValue p.Member value
+                let alias = visitAlias p.Expression
+                let m = tryGetMember p.Expression
+                let fqCol = qualifyColumn alias m.Value.Member
+                query.Where(fqCol, comparison, queryParameter)
+
+            // Column to value comparisons
             | Property p, Value value ->
-                // Handle column to value comparisons
                 let comparison = getComparison(exp.NodeType)
                 let queryParameter = KataUtils.getQueryParameterForValue p.Member value
                 let alias = visitAlias p.Expression
                 let fqCol = qualifyColumn alias p.Member
                 query.Where(fqCol, comparison, queryParameter)
+            
+            // Value to column comparisons
             | Value value, Property p ->
-                // Handle value to column comparisons
                 let comparison = getReverseComparison(exp.NodeType)
                 let queryParameter = KataUtils.getQueryParameterForValue p.Member value
                 let alias = visitAlias p.Expression
@@ -428,7 +459,6 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
                 query.Where(fqCol, comparison, queryParameter)
             | Value v1, Value v2 ->
                 // Not implemented because I didn't want to embed logic to properly format strings, dates, etc.
-                // This can be easily added later if it is implemented in Dapper.FSharp.
                 notImplMsg("Value to value comparisons are not currently supported. Ex: where (1 = 1)")
             | _ ->
                 notImpl()
