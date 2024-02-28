@@ -369,28 +369,28 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
             | _ -> notImpl()
         
         // Nullable / Option .HasValue / .IsSome `where user.HasValue`; `where user.IsSome`
-        | BoolMember (Property p) when p.Member.Name = "HasValue" || p.Member.Name = "IsSome" -> 
+        | BoolMember (Property p) when p.Member.DeclaringType |> isOptionOrNullableType && p.Member.Name = "HasValue" || p.Member.Name = "IsSome" -> 
             let alias = visitAlias p.Expression
             let m = tryGetMember p.Expression
             let fqCol = qualifyColumn alias m.Value.Member
             query.WhereNotNull(fqCol)
 
         // Negated Nullable / Option .HasValue/ .IsSome `where (not user.HasValue)`; `where (not user.IsSome)`
-        | Not (BoolMember (Property p))  when p.Member.Name = "HasValue" || p.Member.Name = "IsSome" -> // `where (not user.HasValue)`; `where (not user.IsSome)`
+        | Not (BoolMember (Property p)) when p.Member.DeclaringType |> isOptionOrNullableType && p.Member.Name = "HasValue" || p.Member.Name = "IsSome" -> // `where (not user.HasValue)`; `where (not user.IsSome)`
             let alias = visitAlias p.Expression
             let m = tryGetMember p.Expression
             let fqCol = qualifyColumn alias m.Value.Member
             query.WhereNull(fqCol)
 
         // Option.IsNone `where user.IsNone`
-        | BoolMember (Property p) when p.Member.Name = "IsNone" -> 
+        | BoolMember (Property p) when p.Member.DeclaringType |> isOptionType && p.Member.Name = "IsNone" -> 
             let alias = visitAlias p.Expression
             let m = tryGetMember p.Expression
             let fqCol = qualifyColumn alias m.Value.Member
             query.WhereNull(fqCol)
 
         // Negated Option.IsNone `where (not user.IsNone)`
-        | Not (BoolMember (Property p)) when p.Member.Name = "IsNone" -> 
+        | Not (BoolMember (Property p)) when p.Member.DeclaringType |> isOptionType && p.Member.Name = "IsNone" -> 
             let alias = visitAlias p.Expression
             let m = tryGetMember p.Expression
             let fqCol = qualifyColumn alias m.Value.Member
