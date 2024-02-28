@@ -87,6 +87,32 @@ let ``Nullable Property Value in Where``() =
     sql =! """SELECT * FROM [Production].[WorkOrder] AS [wo] WHERE (([wo].[EndDate] IS NULL) OR ([wo].[EndDate] >= @p0))"""
 
 [<Test>]
+let ``Nullable Property HasValue Not Null Check``() = 
+    let date = System.DateTime(2023,1,1)
+
+    let sql =  
+        select {
+            for wo in Production.WorkOrder do
+            where (wo.EndDate.HasValue)
+        }
+        |> toSql
+
+    sql =! """SELECT * FROM [Production].[WorkOrder] AS [wo] WHERE ([wo].[EndDate] IS NOT NULL)"""
+
+[<Test>]
+let ``Nullable Property HasValue Null Check``() = 
+    let date = System.DateTime(2023,1,1)
+
+    let sql =  
+        select {
+            for wo in Production.WorkOrder do
+            where (not wo.EndDate.HasValue)
+        }
+        |> toSql
+
+    sql =! """SELECT * FROM [Production].[WorkOrder] AS [wo] WHERE ([wo].[EndDate] IS NULL)"""
+
+[<Test>]
 let ``Where Static Property``() = 
     let sql = 
         select {

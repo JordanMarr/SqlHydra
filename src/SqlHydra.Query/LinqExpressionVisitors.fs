@@ -344,6 +344,8 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
             | Property p, MethodCall c when c.Method.Name = "CreateSequence" ->
                 notImplMsg "Unable to unwrap sequence expression. Please use a list or array instead."
             | _ -> notImpl()
+
+        // like / notLike fns
         | MethodCall m when List.contains m.Method.Name [ nameof like; nameof notLike; nameof op_EqualsPercent; nameof op_LessGreaterPercent ] ->
             match m.Arguments.[0], m.Arguments.[1] with
             | Property p, Value value -> 
@@ -354,6 +356,8 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
                 | nameof like | nameof op_EqualsPercent -> query.WhereLike(fqCol, pattern, false)
                 | _ -> query.WhereNotLike(fqCol, pattern, false)
             | _ -> notImpl()
+
+        // isNull / isNotNull fns
         | MethodCall m when List.contains m.Method.Name [ nameof isNullValue; "IsNull"; nameof isNotNullValue ] ->
             match m.Arguments.[0] with
             | Property p -> 
@@ -363,10 +367,41 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
                 then query.WhereNull(fqCol)
                 else query.WhereNotNull(fqCol)
             | _ -> notImpl()
-        | BoolMember (Property m) -> // `where user.IsEnabled`; `where (user.IsEnabled.Value)`
+        
+        // Nullable / Option .HasValue / .IsSome `where user.HasValue`; `where user.IsSome`
+        | BoolMember (Property p) when p.Member.Name = "HasValue" || p.Member.Name = "IsSome" -> 
+            let alias = visitAlias p.Expression
+            let m = tryGetMember p.Expression
+            let fqCol = qualifyColumn alias m.Value.Member
+            query.WhereNotNull(fqCol)
+
+        // Negated Nullable / Option .HasValue/ .IsSome `where (not user.HasValue)`; `where (not user.IsSome)`
+        | Not (BoolMember (Property p))  when p.Member.Name = "HasValue" || p.Member.Name = "IsSome" -> // `where (not user.HasValue)`; `where (not user.IsSome)`
+            let alias = visitAlias p.Expression
+            let m = tryGetMember p.Expression
+            let fqCol = qualifyColumn alias m.Value.Member
+            query.WhereNull(fqCol)
+
+        // Option.IsNone `where user.IsNone`
+        | BoolMember (Property p) when p.Member.Name = "IsNone" -> 
+            let alias = visitAlias p.Expression
+            let m = tryGetMember p.Expression
+            let fqCol = qualifyColumn alias m.Value.Member
+            query.WhereNull(fqCol)
+
+        // Negated Option.IsNone `where (not user.IsNone)`
+        | Not (BoolMember (Property p)) when p.Member.Name = "IsNone" -> 
+            let alias = visitAlias p.Expression
+            let m = tryGetMember p.Expression
+            let fqCol = qualifyColumn alias m.Value.Member
+            query.WhereNotNull(fqCol)
+
+        // Bool property `where user.IsEnabled`; `where (user.IsEnabled.Value)`
+        | BoolMember (Property m) ->
             let alias = visitAlias m.Expression
             let fqCol = qualifyColumn alias m.Member
             query.Where(fqCol, "=", true)
+
         | Not (BoolMember (Property m)) -> // `where (not user.IsEnabled)`; `where (not user.IsEnabled.Value); NOTE: This must exist before `Not` handler.
             let alias = visitAlias m.Expression
             let fqCol = qualifyColumn alias m.Member
@@ -458,7 +493,6 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
                 let fqCol = qualifyColumn alias p.Member
                 query.Where(fqCol, comparison, queryParameter)
             | Value v1, Value v2 ->
-                // Not implemented because I didn't want to embed logic to properly format strings, dates, etc.
                 notImplMsg("Value to value comparisons are not currently supported. Ex: where (1 = 1)")
             | _ ->
                 notImpl()
