@@ -1611,6 +1611,19 @@ module person =
           [<SqlHydra.ProviderDbType("Timestamp")>]
           modifieddate: Option<System.DateTime> }
 
+    [<CLIMutable>]
+    type vstateprovincecountryregion =
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          stateprovinceid: Option<int>
+          [<SqlHydra.ProviderDbType("Name")>]
+          stateprovincename: Option<string>
+          [<SqlHydra.ProviderDbType("Integer")>]
+          territoryid: Option<int>
+          [<SqlHydra.ProviderDbType("Varchar")>]
+          countryregioncode: Option<string>
+          [<SqlHydra.ProviderDbType("Name")>]
+          countryregionname: Option<string> }
+
     module Readers =
         type addressReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.addressid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "addressid")
@@ -1883,6 +1896,23 @@ module person =
 
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
+
+        type vstateprovincecountryregionReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+            member __.stateprovinceid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "stateprovinceid")
+            member __.stateprovincename = OptionalColumn(reader, getOrdinal, reader.GetString, "stateprovincename")
+            member __.territoryid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
+            member __.countryregioncode = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
+            member __.countryregionname = OptionalColumn(reader, getOrdinal, reader.GetString, "countryregionname")
+
+            member __.Read() =
+                { vstateprovincecountryregion.stateprovinceid = __.stateprovinceid.Read()
+                  stateprovincename = __.stateprovincename.Read()
+                  territoryid = __.territoryid.Read()
+                  countryregioncode = __.countryregioncode.Read()
+                  countryregionname = __.countryregionname.Read() }
+
+            member __.ReadIfNotNull() =
+                if __.stateprovinceid.IsNull() then None else Some(__.Read())
 
 module pr =
     [<CLIMutable>]
@@ -3251,6 +3281,17 @@ module production =
           modifieddate: System.DateTime }
 
     [<CLIMutable>]
+    type vproductanddescription =
+        { [<SqlHydra.ProviderDbType("Integer")>]
+          productid: Option<int>
+          [<SqlHydra.ProviderDbType("Name")>]
+          name: Option<string>
+          [<SqlHydra.ProviderDbType("Name")>]
+          productmodel: Option<string>
+          [<SqlHydra.ProviderDbType("Varchar")>]
+          description: Option<string> }
+
+    [<CLIMutable>]
     type vproductmodelcatalogdescription =
         { [<SqlHydra.ProviderDbType("Integer")>]
           productmodelid: Option<int>
@@ -3829,6 +3870,21 @@ module production =
 
             member __.ReadIfNotNull() =
                 if __.unitmeasurecode.IsNull() then None else Some(__.Read())
+
+        type vproductanddescriptionReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+            member __.productid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productid")
+            member __.name = OptionalColumn(reader, getOrdinal, reader.GetString, "name")
+            member __.productmodel = OptionalColumn(reader, getOrdinal, reader.GetString, "productmodel")
+            member __.description = OptionalColumn(reader, getOrdinal, reader.GetString, "description")
+
+            member __.Read() =
+                { vproductanddescription.productid = __.productid.Read()
+                  name = __.name.Read()
+                  productmodel = __.productmodel.Read()
+                  description = __.description.Read() }
+
+            member __.ReadIfNotNull() =
+                if __.productid.IsNull() then None else Some(__.Read())
 
         type vproductmodelcatalogdescriptionReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productmodelid = OptionalColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
@@ -6625,6 +6681,7 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     let lazypersonphonenumbertype = lazy (person.Readers.phonenumbertypeReader (reader, buildGetOrdinal 3))
     let lazypersonstateprovince = lazy (person.Readers.stateprovinceReader (reader, buildGetOrdinal 8))
     let lazypersonvadditionalcontactinfo = lazy (person.Readers.vadditionalcontactinfoReader (reader, buildGetOrdinal 17))
+    let lazypersonvstateprovincecountryregion = lazy (person.Readers.vstateprovincecountryregionReader (reader, buildGetOrdinal 5))
     let lazyprbom = lazy (pr.Readers.bomReader (reader, buildGetOrdinal 10))
     let lazyprc = lazy (pr.Readers.cReader (reader, buildGetOrdinal 4))
     let lazyprd = lazy (pr.Readers.dReader (reader, buildGetOrdinal 13))
@@ -6673,6 +6730,7 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     let lazyproductiontransactionhistory = lazy (production.Readers.transactionhistoryReader (reader, buildGetOrdinal 9))
     let lazyproductiontransactionhistoryarchive = lazy (production.Readers.transactionhistoryarchiveReader (reader, buildGetOrdinal 9))
     let lazyproductionunitmeasure = lazy (production.Readers.unitmeasureReader (reader, buildGetOrdinal 3))
+    let lazyproductionvproductanddescription = lazy (production.Readers.vproductanddescriptionReader (reader, buildGetOrdinal 4))
     let lazyproductionvproductmodelcatalogdescription = lazy (production.Readers.vproductmodelcatalogdescriptionReader (reader, buildGetOrdinal 25))
     let lazyproductionvproductmodelinstructions = lazy (production.Readers.vproductmodelinstructionsReader (reader, buildGetOrdinal 11))
     let lazyproductionworkorder = lazy (production.Readers.workorderReader (reader, buildGetOrdinal 9))
@@ -6783,6 +6841,7 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     member __.``person.phonenumbertype`` = lazypersonphonenumbertype.Value
     member __.``person.stateprovince`` = lazypersonstateprovince.Value
     member __.``person.vadditionalcontactinfo`` = lazypersonvadditionalcontactinfo.Value
+    member __.``person.vstateprovincecountryregion`` = lazypersonvstateprovincecountryregion.Value
     member __.``pr.bom`` = lazyprbom.Value
     member __.``pr.c`` = lazyprc.Value
     member __.``pr.d`` = lazyprd.Value
@@ -6831,6 +6890,7 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     member __.``production.transactionhistory`` = lazyproductiontransactionhistory.Value
     member __.``production.transactionhistoryarchive`` = lazyproductiontransactionhistoryarchive.Value
     member __.``production.unitmeasure`` = lazyproductionunitmeasure.Value
+    member __.``production.vproductanddescription`` = lazyproductionvproductanddescription.Value
     member __.``production.vproductmodelcatalogdescription`` = lazyproductionvproductmodelcatalogdescription.Value
     member __.``production.vproductmodelinstructions`` = lazyproductionvproductmodelinstructions.Value
     member __.``production.workorder`` = lazyproductionworkorder.Value
@@ -6993,6 +7053,8 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         | "person.stateprovince", true -> __.``person.stateprovince``.ReadIfNotNull >> box
         | "person.vadditionalcontactinfo", false -> __.``person.vadditionalcontactinfo``.Read >> box
         | "person.vadditionalcontactinfo", true -> __.``person.vadditionalcontactinfo``.ReadIfNotNull >> box
+        | "person.vstateprovincecountryregion", false -> __.``person.vstateprovincecountryregion``.Read >> box
+        | "person.vstateprovincecountryregion", true -> __.``person.vstateprovincecountryregion``.ReadIfNotNull >> box
         | "pr.bom", false -> __.``pr.bom``.Read >> box
         | "pr.bom", true -> __.``pr.bom``.ReadIfNotNull >> box
         | "pr.c", false -> __.``pr.c``.Read >> box
@@ -7089,6 +7151,8 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         | "production.transactionhistoryarchive", true -> __.``production.transactionhistoryarchive``.ReadIfNotNull >> box
         | "production.unitmeasure", false -> __.``production.unitmeasure``.Read >> box
         | "production.unitmeasure", true -> __.``production.unitmeasure``.ReadIfNotNull >> box
+        | "production.vproductanddescription", false -> __.``production.vproductanddescription``.Read >> box
+        | "production.vproductanddescription", true -> __.``production.vproductanddescription``.ReadIfNotNull >> box
         | "production.vproductmodelcatalogdescription", false -> __.``production.vproductmodelcatalogdescription``.Read >> box
         | "production.vproductmodelcatalogdescription", true -> __.``production.vproductmodelcatalogdescription``.ReadIfNotNull >> box
         | "production.vproductmodelinstructions", false -> __.``production.vproductmodelinstructions``.Read >> box
@@ -7246,9 +7310,13 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         else if t = typedefof<System.TimeOnly []> then Some(wrap reader.GetFieldValue<System.TimeOnly []>)
         else if t = typedefof<System.DateTime> then Some(wrap reader.GetDateTime)
         else if t = typedefof<System.DateTime []> then Some(wrap reader.GetFieldValue<System.DateTime []>)
+        else if t = typedefof<System.DateTimeOffset> then Some(wrap reader.GetDateTime)
+        else if t = typedefof<System.DateTimeOffset []> then Some(wrap reader.GetFieldValue<System.DateTimeOffset []>)
         else if t = typedefof<byte []> then Some(wrap reader.GetFieldValue<byte []>)
         else if t = typedefof<char> then Some(wrap reader.GetChar)
         else if t = typedefof<char []> then Some(wrap reader.GetFieldValue<char []>)
+        else if t = typedefof<float> then Some(wrap reader.GetFloat)
+        else if t = typedefof<float []> then Some(wrap reader.GetFieldValue<float []>)
         else None
 
     static member Read(reader: Npgsql.NpgsqlDataReader) = 
