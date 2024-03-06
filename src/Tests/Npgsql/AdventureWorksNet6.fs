@@ -7285,9 +7285,13 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         else if t = typedefof<System.TimeOnly []> then Some(wrap reader.GetFieldValue<System.TimeOnly []>)
         else if t = typedefof<System.DateTime> then Some(wrap reader.GetDateTime)
         else if t = typedefof<System.DateTime []> then Some(wrap reader.GetFieldValue<System.DateTime []>)
+        else if t = typedefof<System.DateTimeOffset> then Some(wrap reader.GetDateTime)
+        else if t = typedefof<System.DateTimeOffset []> then Some(wrap reader.GetFieldValue<System.DateTimeOffset []>)
         else if t = typedefof<byte []> then Some(wrap reader.GetFieldValue<byte []>)
         else if t = typedefof<char> then Some(wrap reader.GetChar)
         else if t = typedefof<char []> then Some(wrap reader.GetFieldValue<char []>)
+        else if t = typedefof<float> then Some(wrap reader.GetFloat)
+        else if t = typedefof<float []> then Some(wrap reader.GetFieldValue<float []>)
         else None
 
     static member Read(reader: Npgsql.NpgsqlDataReader) = 
