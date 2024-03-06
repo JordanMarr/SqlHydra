@@ -38,6 +38,7 @@
 		<Compile Include="Npgsql\NpgsqlSchemaProvider.fs" />
 		<Compile Include="Npgsql\AppInfo.fs" />
 		<Compile Include="SchemaGenerator.fs" />
+		<Compile Include="SchemaGeneratorFab.fs" />
 		<Compile Include="TomlConfigParser.fs" />
 		<Compile Include="Fsproj.fs" />
 		<Compile Include="Console.fs" />
@@ -48,6 +49,7 @@
 		<PackageReference Update="FSharp.Core" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
 		<PackageReference Update="FSharp.Core" Version="7.0.200" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Update="FSharp.Core" Version="8.0.100" Condition="'$(TargetFramework)' == 'net8.0'" />
+		<PackageReference Include="Fabulous.AST" Version="0.7.0" />
 		<PackageReference Include="Npgsql" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
 		<PackageReference Include="Npgsql" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Include="Npgsql" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
