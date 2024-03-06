@@ -130,6 +130,87 @@ let getSchema (cfg: Config) : Schema =
             |}
         )
 
+    let materializedViewColumns = 
+        let sql = 
+            """
+            SELECT 
+                pg_namespace.nspname AS table_schema,
+                pg_class.relname AS table_name, 
+                pg_class.relkind, 
+                pg_attribute.attname AS column_name,
+                pg_attribute.attnum AS ordinal_position,
+                pg_type.typname AS data_type,
+                pg_attribute.attnotnull AS not_null
+            FROM pg_class 
+            INNER JOIN pg_namespace on (pg_class.relnamespace = pg_namespace.oid) 
+            INNER JOIN pg_attribute on (pg_class.oid = pg_attribute.attrelid)
+            INNER JOIN pg_type on (pg_attribute.atttypid = pg_type.oid)
+            WHERE 
+                -- get ordinary tables (r), views (v), and materialized views (m)
+                relkind in ('r', 'v', 'm') AND
+                -- filter out any "weird" columns 
+                pg_attribute.attnum >= 1 AND
+                -- filter out internal schemas
+                pg_namespace.nspname not in ('pg_catalog', 'information_schema')
+            ORDER BY 
+                table_schema, 
+                table_name, 
+                ordinal_position
+    
+            """
+
+        use cmd = new Npgsql.NpgsqlCommand(sql, conn)
+        use rdr = cmd.ExecuteReader()
+        [
+            while rdr.Read() do
+                {| 
+                    //TableCatalog = rdr["TABLE_CATALOG"] :?> string
+                    TableSchema = rdr["TABLE_SCHEMA"] :?> string
+                    TableName = rdr["TABLE_NAME"] :?> string
+                    ColumnName = rdr["COLUMN_NAME"] :?> string
+                    ProviderTypeName = rdr["DATA_TYPE"] :?> string
+                    OrdinalPosition = rdr["ORDINAL_POSITION"] :?> int16
+                    IsNullable = rdr["not_null"] :?> bool |> not
+                |}
+        ]
+        |> Seq.sortBy (fun column -> column.OrdinalPosition)
+        |> Seq.groupBy (fun col -> col.TableSchema, col.TableName)
+        |> Map.ofSeq
+
+    let matViews = 
+        materializedViews
+        |> Seq.choose (fun tbl -> 
+            let columns = 
+                match materializedViewColumns.TryFind(tbl.Schema, tbl.Name) with
+                | Some cols -> 
+                    cols
+                    |> Seq.choose (fun col -> 
+                        NpgsqlDataTypes.tryFindTypeMapping(col.ProviderTypeName)
+                        |> Option.map (fun typeMapping ->
+                            { 
+                                Column.Name = col.ColumnName
+                                Column.IsNullable = col.IsNullable
+                                Column.TypeMapping = typeMapping
+                                Column.IsPK = pks.Contains(col.TableSchema, col.TableName, col.ColumnName)
+                            }
+                        )
+                    )
+                    |> Seq.toList
+                | None -> []
+
+            if columns.Length > 0 then
+                Some { 
+                    Table.Catalog = tbl.Catalog
+                    Table.Schema = tbl.Schema
+                    Table.Name =  tbl.Name
+                    Table.Type = TableType.View
+                    Table.Columns = columns
+                    Table.TotalColumns = columns |> Seq.length
+                }
+            else None
+        )
+        |> Seq.toList
+
     let tables = 
         sTables.Rows
         |> Seq.cast<DataRow>
@@ -143,7 +224,6 @@ let getSchema (cfg: Config) : Schema =
         )
         |> Seq.filter (fun tbl -> tbl.Type <> "SYSTEM_TABLE")
         |> Seq.append views
-        |> Seq.append materializedViews
         |> SchemaFilters.filterTables cfg.Filters
         |> Seq.choose (fun tbl -> 
             let tableColumns = 
@@ -224,7 +304,7 @@ let getSchema (cfg: Config) : Schema =
         |> Seq.toList
 
     { 
-        Tables = tables
+        Tables = tables @ matViews
         Enums = enums
         PrimitiveTypeReaders = NpgsqlDataTypes.primitiveTypeReaders
     }
