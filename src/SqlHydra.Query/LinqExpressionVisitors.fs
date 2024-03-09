@@ -194,7 +194,7 @@ module SqlPatterns =
     /// A property member, a property wrapped in 'Some', or an option 'Value'.
     let (|Property|_|) (exp: Expression) =
         match exp with
-        | Member m when m.Member.DeclaringType <> null && m.Member.DeclaringType |> isOptionType -> 
+        | Member m when m.Member.DeclaringType <> null && m.Member.DeclaringType |> isOptionOrNullableType && m.Member.Name = "Value" -> 
             // Handles option '.Value'
             tryGetMember m.Expression
         | _ -> 
@@ -369,14 +369,14 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
             | _ -> notImpl()
         
         // Nullable / Option .HasValue / .IsSome `where user.HasValue`; `where user.IsSome`
-        | BoolMember (Property p) when p.Member.DeclaringType |> isOptionOrNullableType && p.Member.Name = "HasValue" || p.Member.Name = "IsSome" -> 
+        | BoolMember (Property p) when p.Member.DeclaringType |> isOptionOrNullableType && List.contains p.Member.Name ["HasValue"; "IsSome"] -> 
             let alias = visitAlias p.Expression
             let m = tryGetMember p.Expression
             let fqCol = qualifyColumn alias m.Value.Member
             query.WhereNotNull(fqCol)
 
         // Negated Nullable / Option .HasValue/ .IsSome `where (not user.HasValue)`; `where (not user.IsSome)`
-        | Not (BoolMember (Property p)) when p.Member.DeclaringType |> isOptionOrNullableType && p.Member.Name = "HasValue" || p.Member.Name = "IsSome" -> // `where (not user.HasValue)`; `where (not user.IsSome)`
+        | Not (BoolMember (Property p)) when p.Member.DeclaringType |> isOptionOrNullableType && List.contains p.Member.Name ["HasValue"; "IsSome"] -> // `where (not user.HasValue)`; `where (not user.IsSome)`
             let alias = visitAlias p.Expression
             let m = tryGetMember p.Expression
             let fqCol = qualifyColumn alias m.Value.Member
