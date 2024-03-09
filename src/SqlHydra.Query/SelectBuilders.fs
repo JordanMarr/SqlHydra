@@ -36,6 +36,8 @@ module ResultModifier =
 
     type Count<'T>(qs) = inherit ModifierBase<'T>(qs)
 
+    type Head<'T>(qs) = inherit ModifierBase<'T>(qs)
+
 /// The base select builder that contains all common operations
 type SelectBuilder<'Selected, 'Mapped> () =
 
@@ -333,6 +335,26 @@ type SelectBuilder<'Selected, 'Mapped> () =
     member this.TryHead (state: QuerySource<'Mapped list, Query>) = 
         QuerySource<'Mapped option, Query>(state.Query, state.TableMappings)
 
+    /// Applies Seq.head to the 'Selected query results.
+    [<CustomOperation("head", MaintainsVariableSpace = true)>]
+    member this.Head (state: QuerySource<'Selected, Query>) = 
+        QuerySource<ResultModifier.Head<'Selected>, Query>(state.Query, state.TableMappings)
+
+    /// Applies Seq.head to the 'Mapped query results.
+    [<CustomOperation("head", MaintainsVariableSpace = true)>]
+    member this.Head (state: QuerySource<'Mapped seq, Query>) = 
+        QuerySource<ResultModifier.Head<'Mapped>, Query>(state.Query, state.TableMappings)
+
+    /// Applies Seq.head to the 'Selected query results.
+    [<CustomOperation("head", MaintainsVariableSpace = true)>]
+    member this.Head (state: QuerySource<'Mapped array, Query>) = 
+        QuerySource<ResultModifier.Head<'Mapped>, Query>(state.Query, state.TableMappings)
+    
+    /// Applies Seq.head to the 'Selected query results.
+    [<CustomOperation("head", MaintainsVariableSpace = true)>]
+    member this.Head (state: QuerySource<'Mapped list, Query>) = 
+        QuerySource<ResultModifier.Head<'Mapped>, Query>(state.Query, state.TableMappings)
+
 /// A select builder that returns a select query.
 type SelectQueryBuilder<'Selected, 'Mapped> () = 
     inherit SelectBuilder<'Selected, 'Mapped>()
@@ -345,7 +367,7 @@ type SelectQueryBuilder<'Selected, 'Mapped> () =
 
 
 /// A select builder that returns a Task result.
-type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
+type SelectTaskBuilder<'Selected, 'Mapped, 'Reader & #DbDataReader> (
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ct: ContextType, cancellationToken: CancellationToken) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
@@ -406,6 +428,14 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
     // Run: tryHead - 'Mapped
     member this.Run(state: QuerySource<'Mapped option, Query>) =
         this.RunMapped(state.Query, Seq.tryHead)
+    
+    // Run: head - 'Selected
+    member this.Run(state: QuerySource<ResultModifier.Head<'Selected>, Query>) =
+        this.RunSelected(state.Query, Seq.head)
+
+    // Run: head - 'Mapped
+    member this.Run(state: QuerySource<ResultModifier.Head<'Mapped>, Query>) =
+        this.RunMapped(state.Query, Seq.head)
 
     // Run: count
     member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =
@@ -417,7 +447,7 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader>
 
 
 /// A select builder that returns an Async result.
-type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (
+type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader & #DbDataReader> (
     readEntityBuilder: 'Reader -> (unit -> 'Selected), ct: ContextType) =
     inherit SelectBuilder<'Selected, 'Mapped>()
     
@@ -479,6 +509,14 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader
     member this.Run(state: QuerySource<'Mapped option, Query>) =
         this.RunMapped(state.Query, Seq.tryHead)
 
+    // Run: head - 'Selected
+    member this.Run(state: QuerySource<ResultModifier.Head<'Selected>, Query>) =
+        this.RunSelected(state.Query, Seq.head)
+
+    // Run: head - 'Mapped
+    member this.Run(state: QuerySource<ResultModifier.Head<'Mapped>, Query>) =
+        this.RunMapped(state.Query, Seq.head)
+
     // Run: count
     member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =
         async {
@@ -494,14 +532,14 @@ let select<'Selected, 'Mapped> =
     SelectQueryBuilder<'Selected, 'Mapped>()
 
 /// Builds a select query with a HydraReader.Read function and QueryContext - returns an Async query result
-let selectAsync<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ct = 
+let selectAsync<'Selected, 'Mapped, 'Reader & #DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ct = 
     SelectAsyncBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, ct)
 
 /// Builds a select query with a HydraReader.Read function and QueryContext - returns a Task query result
-let selectTask<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ct = 
+let selectTask<'Selected, 'Mapped, 'Reader & #DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ct = 
     SelectTaskBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, ct)
     
 /// Builds a select query with a HydraReader.Read function, QueryContext, and CancellationToken - returns a Task query result
-let selectTaskCancellable<'Selected, 'Mapped, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ct (cancellationToken: CancellationToken) = 
+let selectTaskCancellable<'Selected, 'Mapped, 'Reader & #DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Selected)) ct (cancellationToken: CancellationToken) = 
     SelectTaskBuilder<'Selected, 'Mapped, 'Reader>(readEntityBuilder, ct, cancellationToken)
 

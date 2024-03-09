@@ -302,14 +302,11 @@ let ``InsertGetIdAsync Test``() = task {
 let ``Update Set Individual Fields``() = task {
     use ctx = openContext()
 
-    let! head = 
+    let! row = 
         selectAsync HydraReader.Read (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorMessage = "TEST INSERT ASYNC")
-            tryHead
+            head
         }
-
-    let row = head.Value
 
     let! result = 
         updateTask (Shared ctx) {
@@ -328,14 +325,11 @@ let ``Update Set Individual Fields``() = task {
 let ``UpdateAsync Set Individual Fields``() = task {
     use ctx = openContext()
 
-    let! head = 
+    let! row = 
         selectAsync HydraReader.Read (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorMessage = "TEST INSERT ASYNC")
-            tryHead
+            head
         }
-
-    let row = head.Value
 
     let! result = 
         updateTask (Shared ctx) {
@@ -354,14 +348,11 @@ let ``UpdateAsync Set Individual Fields``() = task {
 let ``Update Entity``() = task {
     use ctx = openContext()
 
-    let! head = 
+    let! row = 
         selectAsync HydraReader.Read (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorMessage = "TEST INSERT ASYNC")
-            tryHead
+            head
         }
-
-    let row = head.Value
 
     let errorLog = 
         { row with
@@ -391,15 +382,12 @@ let ``Delete Test``() = task {
     use ctx = openContext()
     ctx.BeginTransaction()
 
-    let! idHead = 
+    let! rowId = 
         selectAsync HydraReader.Read (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorMessage = "TEST INSERT ASYNC")
             select e.ErrorLogID
-            tryHead
+            head
         }
-
-    let rowId = idHead.Value
 
     let! result = 
         deleteTask (Shared ctx) {
@@ -416,15 +404,12 @@ let ``DeleteAsync Test``() = task {
     use ctx = openContext()
     ctx.BeginTransaction()
 
-    let! idHead = 
+    let! rowId = 
         selectAsync HydraReader.Read (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorMessage = "TEST INSERT ASYNC")
             select e.ErrorLogID
-            tryHead
+            head
         }
-
-    let rowId = idHead.Value
 
     let! result = 
         deleteTask (Shared ctx) {

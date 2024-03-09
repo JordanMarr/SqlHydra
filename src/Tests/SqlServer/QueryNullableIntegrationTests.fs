@@ -193,14 +193,11 @@ let ``InsertGetIdAsync Test``() = task {
 let ``Update Set Individual Fields``() = task {
     use ctx = openContext()
         
-    let! head = 
-        selectAsync HydraReader.Read (Shared ctx) {
+    let! row = 
+        selectTask HydraReader.Read (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorMessage = "TEST INSERT ASYNC")
-            tryHead
+            head
         }
-
-    let row = head.Value
 
     let! result = 
         updateTask (Shared ctx) {
@@ -219,19 +216,16 @@ let ``Update Set Individual Fields``() = task {
 let ``UpdateAsync Set Individual Fields``() = task {
     use ctx = openContext()
 
-    let! head = 
-        selectAsync HydraReader.Read (Shared ctx) {
+    let! row = 
+        selectTask HydraReader.Read (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorMessage = "TEST INSERT ASYNC")
-            tryHead
+            head
         }
-
-    let row = head.Value
 
     let! result = 
         updateTask (Shared ctx) {
             for e in dbo.ErrorLog do
-            set e.ErrorNumber 500
+            set e.ErrorNumber (row.ErrorNumber + 1)
             set e.ErrorProcedure null
             where (e.ErrorLogID = row.ErrorLogID)
         }
@@ -243,14 +237,11 @@ let ``UpdateAsync Set Individual Fields``() = task {
 let ``Update Entity``() = task {
     use ctx = openContext()
         
-    let! head = 
-        selectAsync HydraReader.Read (Shared ctx) {
+    let! row = 
+        selectTask HydraReader.Read (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorMessage = "TEST INSERT ASYNC")
-            tryHead
+            head
         }
-
-    let row = head.Value
 
     row.ErrorTime <- System.DateTime.Now
     row.ErrorLine <- 888
