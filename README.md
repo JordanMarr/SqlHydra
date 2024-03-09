@@ -314,14 +314,12 @@ There are three select builders that you can use to create select queries:
 let getErrorNumbers () =
     task {
         use ctx = openQueryContext()
-        let! errorNumbers =
+        return!
             select {
                 for e in dbo.ErrorLog do
                 select e.ErrorNumber
             }
             |> ctx.ReadAsync HydraReader.Read
-
-        return errorNumbers
     }
 ```
 
