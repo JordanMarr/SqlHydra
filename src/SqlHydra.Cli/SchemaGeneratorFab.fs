@@ -1,8 +1,6 @@
 ﻿module SqlHydra.SchemaGeneratorFab
 
 open Domain
-open Fabulous.AST
-open type Ast
 
 open FSharp.Compiler.SyntaxTree
 open FSharp.Compiler.XmlDoc
@@ -12,6 +10,8 @@ open Domain
 open System.Data
 open SqlHydra.SchemaFilters
 
+open Fabulous.AST
+open type Ast
 
 
 /// Generates the outer module and table records.
@@ -25,7 +25,7 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
         let tableSchemas = filteredTables |> List.map (fun t -> t.Schema) 
         enumSchemas @ tableSchemas |> List.distinct
     
-    Namespace(app.Name) {
+    Namespace(cfg.Namespace) {
         for schema in schemas do
             let tables = 
                 filteredTables 
@@ -58,7 +58,7 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
 
                     Record(table) {
                         for column in tableType.Columns do 
-                            Ast.Field(column.Name, LongIdent("int"))
+                            Field(column.Name, column.TypeMapping.ClrType)
                     }
             }
     }
