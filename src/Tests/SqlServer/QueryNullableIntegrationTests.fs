@@ -126,7 +126,7 @@ let ``Select Columns with Option``() = task {
     let! values = 
         select {
             for p in Production.Product do
-            where (isNotNullValue p.ProductSubcategoryID.HasValue)
+            where (p.ProductSubcategoryID.HasValue)
             select (p.ProductSubcategoryID, p.ListPrice)
         }
         |> ctx.ReadAsync HydraReader.Read
