@@ -159,8 +159,8 @@ let run (args: Args) =
 
     let formattedCode = 
         args.GetSchema cfg
-        |> SchemaGenerator.generateModule cfg args.AppInfo
-        |> SchemaGenerator.toFormattedCode cfg args.AppInfo args.Version
+        |> SchemaGeneratorFab.generateModule cfg args.AppInfo
+        |> SchemaGeneratorFab.toFormattedCode cfg args.AppInfo args.Version
 
     File.WriteAllText(outputFile.FullName, formattedCode)
     Fsproj.addFileToProject args.Project cfg
