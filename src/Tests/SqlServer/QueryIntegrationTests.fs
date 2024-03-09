@@ -391,10 +391,20 @@ let ``Delete Test``() = task {
     use ctx = openContext()
     ctx.BeginTransaction()
 
+    let! idHead = 
+        selectAsync HydraReader.Read (Shared ctx) {
+            for e in dbo.ErrorLog do
+            where (e.ErrorMessage = "TEST INSERT ASYNC")
+            select e.ErrorLogID
+            tryHead
+        }
+
+    let rowId = idHead.Value
+
     let! result = 
         deleteTask (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorLogID = 1)
+            where (e.ErrorLogID = rowId)
         }
 
     result =! 1
@@ -406,10 +416,20 @@ let ``DeleteAsync Test``() = task {
     use ctx = openContext()
     ctx.BeginTransaction()
 
+    let! idHead = 
+        selectAsync HydraReader.Read (Shared ctx) {
+            for e in dbo.ErrorLog do
+            where (e.ErrorMessage = "TEST INSERT ASYNC")
+            select e.ErrorLogID
+            tryHead
+        }
+
+    let rowId = idHead.Value
+
     let! result = 
         deleteTask (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorLogID = 1)
+            where (e.ErrorLogID = rowId)
         }
 
     result =! 1
