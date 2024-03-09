@@ -302,6 +302,15 @@ let ``InsertGetIdAsync Test``() = task {
 let ``Update Set Individual Fields``() = task {
     use ctx = openContext()
 
+    let! head = 
+        selectAsync HydraReader.Read (Shared ctx) {
+            for e in dbo.ErrorLog do
+            where (e.ErrorMessage = "TEST INSERT ASYNC")
+            tryHead
+        }
+
+    let row = head.Value
+
     let! result = 
         updateTask (Shared ctx) {
             for e in dbo.ErrorLog do
@@ -309,7 +318,7 @@ let ``Update Set Individual Fields``() = task {
             set e.ErrorMessage "ERROR #123"
             set e.ErrorLine (Some 999)
             set e.ErrorProcedure None
-            where (e.ErrorLogID = 1)
+            where (e.ErrorLogID = row.ErrorLogID)
         }
 
     result >! 0
@@ -319,6 +328,15 @@ let ``Update Set Individual Fields``() = task {
 let ``UpdateAsync Set Individual Fields``() = task {
     use ctx = openContext()
 
+    let! head = 
+        selectAsync HydraReader.Read (Shared ctx) {
+            for e in dbo.ErrorLog do
+            where (e.ErrorMessage = "TEST INSERT ASYNC")
+            tryHead
+        }
+
+    let row = head.Value
+
     let! result = 
         updateTask (Shared ctx) {
             for e in dbo.ErrorLog do
@@ -326,7 +344,7 @@ let ``UpdateAsync Set Individual Fields``() = task {
             set e.ErrorMessage "ERROR #123"
             set e.ErrorLine (Some 999)
             set e.ErrorProcedure None
-            where (e.ErrorLogID = 1)
+            where (e.ErrorLogID = row.ErrorLogID)
         }
 
     result =! 1
@@ -336,9 +354,17 @@ let ``UpdateAsync Set Individual Fields``() = task {
 let ``Update Entity``() = task {
     use ctx = openContext()
 
+    let! head = 
+        selectAsync HydraReader.Read (Shared ctx) {
+            for e in dbo.ErrorLog do
+            where (e.ErrorMessage = "TEST INSERT ASYNC")
+            tryHead
+        }
+
+    let row = head.Value
+
     let errorLog = 
-        {
-            dbo.ErrorLog.ErrorLogID = 2
+        { row with
             dbo.ErrorLog.ErrorTime = System.DateTime.Now
             dbo.ErrorLog.ErrorLine = Some 888
             dbo.ErrorLog.ErrorMessage = "ERROR #2"
