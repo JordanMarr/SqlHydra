@@ -140,16 +140,16 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         this.BuildCommand(compiledQuery)
 
     /// Returns an ADO.NET data reader for a given query.
-    member this.GetReader<'T, 'Reader when 'Reader :> DbDataReader> (query: SelectQuery<'T>) = 
+    member this.GetReader<'T, 'Reader & #DbDataReader> (query: SelectQuery<'T>) = 
         let cmd = this.BuildCommand(query.ToKataQuery()) // do not dispose cmd
         cmd.ExecuteReader() :?> 'Reader
 
     /// Returns an ADO.NET data reader for a given query.
-    member this.GetReaderAsync<'T, 'Reader when 'Reader :> DbDataReader> (query: SelectQuery<'T>) = 
+    member this.GetReaderAsync<'T, 'Reader & #DbDataReader> (query: SelectQuery<'T>) = 
         this.GetReaderAsyncWithOptions<'T, 'Reader>(query)
 
     /// Returns an ADO.NET data reader for a given query.
-    member this.GetReaderAsyncWithOptions<'T, 'Reader when 'Reader :> DbDataReader> (query: SelectQuery<'T>, ?cancel: CancellationToken) = 
+    member this.GetReaderAsyncWithOptions<'T, 'Reader & #DbDataReader> (query: SelectQuery<'T>, ?cancel: CancellationToken) = 
         task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
             let cmd = this.BuildCommand(query.ToKataQuery()) // do not dispose cmd
             let! reader = cmd.ExecuteReaderAsync(cancel |> Option.defaultValue CancellationToken.None)
@@ -157,7 +157,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         }
 
     /// Executes a select query with a given readEntity builder function.
-    member this.Read<'Entity, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
+    member this.Read<'Entity, 'Reader & #DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
         use cmd = this.BuildCommand(query.ToKataQuery())
         use reader = cmd.ExecuteReader() :?> 'Reader
         let readEntity = readEntityBuilder reader
@@ -167,11 +167,11 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         |] 
 
     /// Executes a select query with a given readEntity builder function.
-    member this.ReadAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) = 
+    member this.ReadAsync<'Entity, 'Reader & #DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) = 
         this.ReadAsyncWithOptions (query, readEntityBuilder)
 
     /// Executes a select query with a given readEntity builder function and optional args.
-    member this.ReadAsyncWithOptions<'Entity, 'Reader when 'Reader :> DbDataReader> 
+    member this.ReadAsyncWithOptions<'Entity, 'Reader & #DbDataReader> 
         (query: SelectQuery<'Entity>, readEntityBuilder: 'Reader -> (unit -> 'Entity), ?cancel: CancellationToken) = 
         task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
             let cancel = defaultArg cancel CancellationToken.None
@@ -191,15 +191,15 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         }
 
     /// Executes a select query with a given readEntity builder function for a single (option) result.
-    member this.ReadOne<'Entity, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
+    member this.ReadOne<'Entity, 'Reader & #DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) =
         this.Read readEntityBuilder query |> Seq.tryHead
 
     /// Executes a select query with a given readEntity builder function for a single (option) result.
-    member this.ReadOneAsync<'Entity, 'Reader when 'Reader :> DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) = 
+    member this.ReadOneAsync<'Entity, 'Reader & #DbDataReader> (readEntityBuilder: 'Reader -> (unit -> 'Entity)) (query: SelectQuery<'Entity>) = 
         this.ReadOneAsyncWithOptions(query, readEntityBuilder)
 
     /// Executes a select query with a given readEntity builder function for a single (option) result with optional args.
-    member this.ReadOneAsyncWithOptions<'Entity, 'Reader when 'Reader :> DbDataReader>
+    member this.ReadOneAsyncWithOptions<'Entity, 'Reader & #DbDataReader>
         (query: SelectQuery<'Entity>, readEntityBuilder: 'Reader -> (unit -> 'Entity), ?cancel: CancellationToken) = 
         task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
             let! entities = this.ReadAsyncWithOptions (query, readEntityBuilder, cancel |> Option.defaultValue CancellationToken.None)

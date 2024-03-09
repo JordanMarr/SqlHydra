@@ -302,6 +302,12 @@ let ``InsertGetIdAsync Test``() = task {
 let ``Update Set Individual Fields``() = task {
     use ctx = openContext()
 
+    let! row = 
+        selectAsync HydraReader.Read (Shared ctx) {
+            for e in dbo.ErrorLog do
+            head
+        }
+
     let! result = 
         updateTask (Shared ctx) {
             for e in dbo.ErrorLog do
@@ -309,7 +315,7 @@ let ``Update Set Individual Fields``() = task {
             set e.ErrorMessage "ERROR #123"
             set e.ErrorLine (Some 999)
             set e.ErrorProcedure None
-            where (e.ErrorLogID = 1)
+            where (e.ErrorLogID = row.ErrorLogID)
         }
 
     result >! 0
@@ -319,6 +325,12 @@ let ``Update Set Individual Fields``() = task {
 let ``UpdateAsync Set Individual Fields``() = task {
     use ctx = openContext()
 
+    let! row = 
+        selectAsync HydraReader.Read (Shared ctx) {
+            for e in dbo.ErrorLog do
+            head
+        }
+
     let! result = 
         updateTask (Shared ctx) {
             for e in dbo.ErrorLog do
@@ -326,7 +338,7 @@ let ``UpdateAsync Set Individual Fields``() = task {
             set e.ErrorMessage "ERROR #123"
             set e.ErrorLine (Some 999)
             set e.ErrorProcedure None
-            where (e.ErrorLogID = 1)
+            where (e.ErrorLogID = row.ErrorLogID)
         }
 
     result =! 1
@@ -336,9 +348,14 @@ let ``UpdateAsync Set Individual Fields``() = task {
 let ``Update Entity``() = task {
     use ctx = openContext()
 
+    let! row = 
+        selectAsync HydraReader.Read (Shared ctx) {
+            for e in dbo.ErrorLog do
+            head
+        }
+
     let errorLog = 
-        {
-            dbo.ErrorLog.ErrorLogID = 2
+        { row with
             dbo.ErrorLog.ErrorTime = System.DateTime.Now
             dbo.ErrorLog.ErrorLine = Some 888
             dbo.ErrorLog.ErrorMessage = "ERROR #2"
@@ -365,10 +382,17 @@ let ``Delete Test``() = task {
     use ctx = openContext()
     ctx.BeginTransaction()
 
+    let! rowId = 
+        selectAsync HydraReader.Read (Shared ctx) {
+            for e in dbo.ErrorLog do
+            select e.ErrorLogID
+            head
+        }
+
     let! result = 
         deleteTask (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorLogID = 1)
+            where (e.ErrorLogID = rowId)
         }
 
     result =! 1
@@ -380,10 +404,17 @@ let ``DeleteAsync Test``() = task {
     use ctx = openContext()
     ctx.BeginTransaction()
 
+    let! rowId = 
+        selectAsync HydraReader.Read (Shared ctx) {
+            for e in dbo.ErrorLog do
+            select e.ErrorLogID
+            head
+        }
+
     let! result = 
         deleteTask (Shared ctx) {
             for e in dbo.ErrorLog do
-            where (e.ErrorLogID = 1)
+            where (e.ErrorLogID = rowId)
         }
 
     result =! 1

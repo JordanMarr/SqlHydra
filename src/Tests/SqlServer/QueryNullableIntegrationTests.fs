@@ -126,7 +126,7 @@ let ``Select Columns with Option``() = task {
     let! values = 
         select {
             for p in Production.Product do
-            where (isNotNullValue p.ProductSubcategoryID.HasValue)
+            where (p.ProductSubcategoryID.HasValue)
             select (p.ProductSubcategoryID, p.ListPrice)
         }
         |> ctx.ReadAsync HydraReader.Read
@@ -192,6 +192,12 @@ let ``InsertGetIdAsync Test``() = task {
 [<Test>]
 let ``Update Set Individual Fields``() = task {
     use ctx = openContext()
+        
+    let! row = 
+        selectTask HydraReader.Read (Shared ctx) {
+            for e in dbo.ErrorLog do
+            head
+        }
 
     let! result = 
         updateTask (Shared ctx) {
@@ -200,24 +206,28 @@ let ``Update Set Individual Fields``() = task {
             set e.ErrorMessage "ERROR #123"
             set e.ErrorLine 999
             set e.ErrorProcedure null
-            where (e.ErrorLogID = 1)
+            where (e.ErrorLogID = row.ErrorLogID)
         }
 
-    result >! 0
+    result =! 1
 }
 
 [<Test>]
 let ``UpdateAsync Set Individual Fields``() = task {
     use ctx = openContext()
 
+    let! row = 
+        selectTask HydraReader.Read (Shared ctx) {
+            for e in dbo.ErrorLog do
+            head
+        }
+
     let! result = 
         updateTask (Shared ctx) {
             for e in dbo.ErrorLog do
-            set e.ErrorNumber 123
-            set e.ErrorMessage "ERROR #123"
-            set e.ErrorLine 999
+            set e.ErrorNumber (row.ErrorNumber + 1)
             set e.ErrorProcedure null
-            where (e.ErrorLogID = 1)
+            where (e.ErrorLogID = row.ErrorLogID)
         }
 
     result =! 1
@@ -226,26 +236,28 @@ let ``UpdateAsync Set Individual Fields``() = task {
 [<Test>]
 let ``Update Entity``() = task {
     use ctx = openContext()
-
-    let errorLog = 
-        {
-            dbo.ErrorLog.ErrorLogID = 2
-            dbo.ErrorLog.ErrorTime = System.DateTime.Now
-            dbo.ErrorLog.ErrorLine = 888
-            dbo.ErrorLog.ErrorMessage = "ERROR #2"
-            dbo.ErrorLog.ErrorNumber = 500
-            dbo.ErrorLog.ErrorProcedure = null
-            dbo.ErrorLog.ErrorSeverity = Nullable()
-            dbo.ErrorLog.ErrorState = Nullable()
-            dbo.ErrorLog.UserName = "jmarr"
+        
+    let! row = 
+        selectTask HydraReader.Read (Shared ctx) {
+            for e in dbo.ErrorLog do
+            head
         }
+
+    row.ErrorTime <- System.DateTime.Now
+    row.ErrorLine <- 888
+    row.ErrorMessage <- "ERROR #2"
+    row.ErrorNumber <- 500
+    row.ErrorProcedure <- null
+    row.ErrorSeverity <- Nullable()
+    row.ErrorState <- Nullable()
+    row.UserName <- "jmarr"
 
     let! result = 
         updateTask (Shared ctx) {
             for e in dbo.ErrorLog do
-            entity errorLog
+            entity row
             excludeColumn e.ErrorLogID
-            where (e.ErrorLogID = errorLog.ErrorLogID)
+            where (e.ErrorLogID = row.ErrorLogID)
         }
 
     result =! 1
