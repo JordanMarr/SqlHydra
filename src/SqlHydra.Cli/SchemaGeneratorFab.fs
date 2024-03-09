@@ -10,8 +10,14 @@ open Domain
 open System.Data
 open SqlHydra.SchemaFilters
 
+open Fantomas.Core
+open Fantomas.Core.SyntaxOak
+open Fantomas.FCS.Text
+
 open Fabulous.AST
 open type Ast
+
+let range0 = range.Zero
 
 
 /// Generates the outer module and table records.
@@ -58,7 +64,16 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
 
                     Record(table) {
                         for column in tableType.Columns do 
+                            //Field(LongIdent($"``{column.Name}``: {column.TypeMapping.ClrType}"))
+                            
+                            //let fieldType = typeof<string>
+                            //let t = LongIdent(column.TypeMapping.ClrType)
+                            //let field = FieldNode(None, None,  None, false, None, Some (SingleTextNode(column.Name, range0)), t, range.Zero)                                    
+                            
+                            // TODO: column.Name needs to handle spaces.
                             Field(column.Name, column.TypeMapping.ClrType)
+
+
                     }
             }
     }
