@@ -63,28 +63,35 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                         db.Tables 
                         |> List.find (fun t -> t.Schema = schema && t.Name = table)
 
-                    Record(table) {
-                        for col in tableType.Columns do 
-                            let baseType = 
-                                // Handles array types: "byte[]", "string[]", "int[]", "int []", "int array"
-                                if col.TypeMapping.ClrType.EndsWith "[]" || col.TypeMapping.ClrType.EndsWith "array" then
-                                    let baseTypeNm = col.TypeMapping.ClrType.Split([| "[]"; " []"; " array" |], System.StringSplitOptions.RemoveEmptyEntries) |> Array.head
-                                    $"{baseTypeNm} []"
-                                else
-                                    col.TypeMapping.ClrType
+                    
+                    let tableRecord = 
+                        Record(table) {
+                        
+                            for col in tableType.Columns do 
+                                let baseType = 
+                                    // Handles array types: "byte[]", "string[]", "int[]", "int []", "int array"
+                                    if col.TypeMapping.ClrType.EndsWith "[]" || col.TypeMapping.ClrType.EndsWith "array" then
+                                        let baseTypeNm = col.TypeMapping.ClrType.Split([| "[]"; " []"; " array" |], System.StringSplitOptions.RemoveEmptyEntries) |> Array.head
+                                        $"{baseTypeNm} []"
+                                    else
+                                        col.TypeMapping.ClrType
 
-                            let columnPropertyType =
-                                if col.IsNullable then
-                                    match cfg.NullablePropertyType with
-                                    | NullablePropertyType.Option ->
-                                        $"Option<{baseType}>"
-                                    | NullablePropertyType.Nullable ->
-                                        $"System.Nullable<{baseType}>"
-                                else 
-                                    baseType
+                                let columnPropertyType =
+                                    if col.IsNullable then
+                                        match cfg.NullablePropertyType with
+                                        | NullablePropertyType.Option ->
+                                            $"Option<{baseType}>"
+                                        | NullablePropertyType.Nullable ->
+                                            $"System.Nullable<{baseType}>"
+                                    else 
+                                        baseType
 
-                            Field(col.Name, columnPropertyType)
-                    }
+                                Field(col.Name, columnPropertyType)
+                        }
+
+                    if cfg.IsCLIMutable 
+                    then tableRecord.attribute(Attribute("CLIMutable"))
+                    else tableRecord
             }
     }
 
