@@ -65,13 +65,13 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                     Record(table) {
                         for column in tableType.Columns do 
                             //Field(LongIdent($"``{column.Name}``: {column.TypeMapping.ClrType}"))
-                            
-                            //let fieldType = typeof<string>
-                            //let t = LongIdent(column.TypeMapping.ClrType)
-                            //let field = FieldNode(None, None,  None, false, None, Some (SingleTextNode(column.Name, range0)), t, range.Zero)                                    
-                            
+                            let fieldType = Type.LongIdent(IdentListNode([IdentifierOrDot.Ident(SingleTextNode(column.TypeMapping.ClrType, range0))], range0))
+                            //let name = MultipleTextsNode([SingleTextNode(column.Name, range0); SingleTextNode(": ", range0)], range0)
+                            //let field = FieldNode(None, None, Some name, false, None, None, fieldType, range.Zero)
+                            let field = FieldNode(None, None,  None, false, None, Some (SingleTextNode(column.Name, range0)), fieldType, range.Zero)
+                            field
                             // TODO: column.Name needs to handle spaces.
-                            Field(column.Name, column.TypeMapping.ClrType)
+                            //Field(column.Name, column.TypeMapping.ClrType)
 
 
                     }
