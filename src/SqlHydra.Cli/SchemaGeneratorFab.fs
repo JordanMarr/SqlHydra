@@ -19,6 +19,7 @@ open type Ast
 
 let range0 = range.Zero
 
+let backticks = Fantomas.FCS.Syntax.PrettyNaming.NormalizeIdentifierBackticks
 
 /// Generates the outer module and table records.
 let generateModule (cfg: Config) (app: AppInfo) (db: Schema) = 
@@ -53,9 +54,9 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                         enumType.Labels 
                         |> List.sortBy _.SortOrder
                                             
-                    Enum(enum) {
+                    Enum(backticks enum) {
                         for label in labels do
-                            EnumCase(label.Name, string label.SortOrder)
+                            EnumCase(backticks label.Name, string label.SortOrder)
                     }
 
                 for table in tables do
@@ -92,6 +93,9 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                     if cfg.IsCLIMutable 
                     then tableRecord.attribute(Attribute("CLIMutable"))
                     else tableRecord
+
+                    if cfg.TableDeclarations then
+                        Value(table, $"SqlHydra.Query.Table.table<{backticks table}>", false)
             }
     }
 
