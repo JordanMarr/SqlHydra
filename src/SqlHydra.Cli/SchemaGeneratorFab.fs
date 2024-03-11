@@ -87,7 +87,13 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                                     else 
                                         baseType
 
-                                Field(col.Name, columnPropertyType)
+                                let field = Field(col.Name, columnPropertyType)
+                                match col.TypeMapping.ProviderDbType with
+                                | Some providerDbType -> 
+                                    field.attribute(Attribute($"SqlHydra.ProviderDbType(\"{providerDbType}\")"))
+                                | _ -> 
+                                    field
+
                         }
 
                     if cfg.IsCLIMutable 
