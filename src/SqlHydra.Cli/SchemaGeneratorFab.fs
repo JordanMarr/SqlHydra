@@ -21,6 +21,18 @@ let range0 = range.Zero
 
 let backticks = Fantomas.FCS.Syntax.PrettyNaming.NormalizeIdentifierBackticks
 
+/// Creates a "HydraReader" class with properties for each table in a given schema.
+let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (tbls: Table seq) = 
+    Class(
+        "HydraReader", 
+        Constructor() {
+            SimplePat("reader", rdrCfg.ReaderType, false)
+        }        
+    ) {
+        Property("this.Reader", ConstantExpr("reader", false))
+    }
+    
+
 /// Generates the outer module and table records.
 let generateModule (cfg: Config) (app: AppInfo) (db: Schema) = 
     let filteredTables = 
@@ -107,6 +119,11 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                     if cfg.TableDeclarations then
                         Value(table, $"SqlHydra.Query.Table.table<{backticks table}>", false)
             }
+    
+        // Create "HydraReader" below all generated tables/readers...
+        if cfg.Readers.IsSome then
+            let allTables = schemas |> List.collect (fun schema -> filteredTables |> List.filter (fun t -> t.Schema = schema))
+            createHydraReaderClass db cfg.Readers.Value app allTables
     }
 
 let columnReadersModule = $"""
