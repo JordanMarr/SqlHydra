@@ -1,19 +1,11 @@
 ﻿module SqlHydra.SchemaGeneratorFab
 
 open Domain
-
-open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.XmlDoc
-open FsAst
-open Fantomas
-open Domain
 open System.Data
 open SqlHydra.SchemaFilters
-
 open Fantomas.Core
 open Fantomas.Core.SyntaxOak
 open Fantomas.FCS.Text
-
 open Fabulous.AST
 open type Ast
 
@@ -30,8 +22,7 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
         }        
     ) {
         Property("this.Reader", ConstantExpr("reader", false))
-    }
-    
+    }    
 
 /// Generates the outer module and table records.
 let generateModule (cfg: Config) (app: AppInfo) (db: Schema) = 
@@ -261,7 +252,6 @@ let toFormattedCode (cfg: Config) (app: AppInfo) (version: string) (ast: WidgetB
     let formattedCode = 
         ast
         |> Gen.mkOak
-        //|> CodeFormatter.FormatOakAsync
         |> fun oak -> CodeFormatter.FormatOakAsync(oak, cfg)
         |> Async.RunSynchronously
 
