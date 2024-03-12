@@ -14,14 +14,22 @@ let range0 = range.Zero
 let backticks = Fantomas.FCS.Syntax.PrettyNaming.NormalizeIdentifierBackticks
 
 /// Creates a "HydraReader" class with properties for each table in a given schema.
-let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (tbls: Table seq) = 
+let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (allTables: Table seq) = 
     Class(
         "HydraReader", 
         Constructor() {
             SimplePat("reader", rdrCfg.ReaderType, false)
         }        
     ) {
+        // Backing fields
+        Value("buildGetOrdinal", ConstantExpr(""))
+
+        for tbl in allTables do             
+            // let lazyPersonEmailAddress = lazy (Person.Readers.EmailAddressReader(reader, buildGetOrdinal 5))
+            Value($"lazy{backticks tbl.Schema}{backticks tbl.Name}", ConstantExpr("lazy (Person.Readers.EmailAddressReader(reader, buildGetOrdinal 5))", false)) 
+
         Property("this.Reader", ConstantExpr("reader", false))
+
     }    
 
 /// Generates the outer module and table records.
@@ -235,7 +243,23 @@ module private DataReaderExtensions =
 /// A list of static code text substitutions to the generated file.
 let substitutions (app: AppInfo) : (string * string) list = 
     [
+        // Reader classes at top of namespace
         "open Substitue.ColumnReadersModule", columnReadersModule
+
+        // HydraReader utility functions
+        "let buildGetOrdinal = \"\"", 
+        """let mutable accFieldCount = 0
+    let buildGetOrdinal fieldCount =
+        let dictionary = 
+            [0..reader.FieldCount-1] 
+            |> List.map (fun i -> reader.GetName(i), i)
+            |> List.sortBy snd
+            |> List.skip accFieldCount
+            |> List.take fieldCount
+            |> dict
+        accFieldCount <- accFieldCount + fieldCount
+        fun col -> dictionary.Item col
+        """
     ]
 
 /// Formats the generated code using Fantomas.
