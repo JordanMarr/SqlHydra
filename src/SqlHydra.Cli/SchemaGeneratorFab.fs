@@ -157,6 +157,35 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
 
                                     TypedExpr(recordExpr, ":", LongIdent(backticks table.Name))                                    
                                 )
+
+                                Method("__.ReadIfNotNull",
+                                    UnitPat(),
+
+                                    // Try to get the first PK, or else the first required field, or else the first optional field (as a last resort)
+                                    let firstPkOrFirstRequiredField = 
+                                        let firstRequiredField = table.Columns |> Seq.tryFind (fun c -> c.IsNullable = false)
+                                        let firstOptionalField = table.Columns |> Seq.tryFind (fun c -> c.IsNullable = true)
+                                        table.Columns 
+                                        |> List.tryFind (fun c -> c.IsPK)
+                                        |> Option.orElse firstRequiredField
+                                        |> Option.orElse firstOptionalField
+                                        |> Option.map (fun c -> c.Name)
+                                    
+                                    // If at least one PK column exists, check first PK for null; else check user supplied column arg for null.
+                                    match firstPkOrFirstRequiredField with
+                                    | Some col -> 
+                                        //LongIdentWithDots.Create([ "__"; col; "IsNull" ])
+                                        ConstantExpr("None", false)
+
+                                        // ERROR: "The type WidgetBuilder<ExprIfThenElseNode> is not compatible with type WidgetBuilder<Expr>."
+                                        //IfThenElse(
+                                        //    ConstantExpr("1=1", false), 
+                                        //    ConstantExpr("None", false), 
+                                        //    ConstantExpr("None", false)
+                                        //)
+                                    | None -> 
+                                        ConstantExpr("None", false)
+                                )
                             }
                     }
                 | _ -> 
@@ -218,9 +247,6 @@ let substitutions (app: AppInfo) : (string * string) list =
     [
         "open Substitue.ColumnReadersModule", columnReadersModule
     ]
-
-open Fantomas
-open Fantomas.Core
 
 /// Formats the generated code using Fantomas.
 let toFormattedCode (cfg: Config) (app: AppInfo) (version: string) (ast: WidgetBuilder<SyntaxOak.Oak>) = 
