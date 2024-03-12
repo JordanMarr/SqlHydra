@@ -148,11 +148,14 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                                     Property($"__.{backticks col.Name}", ConstantExpr($"{columnReaderType}(reader, getOrdinal, reader.{col.TypeMapping.ReaderMethod}, \"{col.Name}\")", false))
 
                                 Method("__.Read", 
-                                    UnitPat(), 
-                                    RecordExpr() { 
-                                        for col in table.Columns do
-                                            RecordFieldExpr(backticks col.Name, ConstantExpr($"__.{backticks col.Name}.Read()", false)) 
-                                    }
+                                    UnitPat(),                                     
+                                    let recordExpr = 
+                                        RecordExpr() { 
+                                            for col in table.Columns do
+                                                RecordFieldExpr(backticks col.Name, ConstantExpr($"__.{backticks col.Name}.Read()", false))
+                                        }
+
+                                    TypedExpr(recordExpr, ":", LongIdent(backticks table.Name))                                    
                                 )
                             }
                     }
