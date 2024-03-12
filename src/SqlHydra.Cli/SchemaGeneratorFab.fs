@@ -173,16 +173,15 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                                     
                                     // If at least one PK column exists, check first PK for null; else check user supplied column arg for null.
                                     match firstPkOrFirstRequiredField with
-                                    | Some col -> 
+                                    | Some pkCol -> 
                                         //LongIdentWithDots.Create([ "__"; col; "IsNull" ])
-                                        ConstantExpr("None", false)
 
-                                        // ERROR: "The type WidgetBuilder<ExprIfThenElseNode> is not compatible with type WidgetBuilder<Expr>."
-                                        //IfThenElse(
-                                        //    ConstantExpr("1=1", false), 
-                                        //    ConstantExpr("None", false), 
-                                        //    ConstantExpr("None", false)
-                                        //)
+                                        // if __.BusinessEntityID.IsNull() then None else Some(__.Read())
+                                        IfThenElseExpr(
+                                            ConstantExpr($"__.{backticks pkCol}.IsNull()", false), 
+                                            ConstantExpr("None", false), 
+                                            ConstantExpr("Some(__.Read())", false)
+                                        )
                                     | None -> 
                                         ConstantExpr("None", false)
                                 )
