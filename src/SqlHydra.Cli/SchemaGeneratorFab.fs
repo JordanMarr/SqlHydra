@@ -49,18 +49,20 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
         if cfg.Readers.IsSome then 
             Open("Substitue.ColumnReadersModule")
 
+        // Schema modules with enums, tables and readers
         for schema in schemas do
             let tables = 
                 filteredTables 
                 |> List.filter (fun t -> t.Schema = schema)
-                |> List.map (fun t -> t.Name)
 
             let enums = 
                 db.Enums 
                 |> List.filter (fun e -> e.Schema = schema)
                 |> List.map (fun e -> e.Name)
 
+            // Add a module for each schema
             NestedModule(schema) {
+                // Add enums in schema
                 for enum in enums do
                     let enumType = 
                         db.Enums 
@@ -75,14 +77,15 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                             EnumCase(backticks label.Name, string label.SortOrder)
                     }
 
+                // Add tables in schema
                 for table in tables do
                     let tableType = 
                         db.Tables 
-                        |> List.find (fun t -> t.Schema = schema && t.Name = table)
+                        |> List.find (fun t -> t.Schema = schema && t.Name = table.Name)
 
                     
                     let tableRecord = 
-                        Record(table) {
+                        Record(table.Name) {
                         
                             for col in tableType.Columns do 
                                 let baseType = 
@@ -117,7 +120,44 @@ let generateModule (cfg: Config) (app: AppInfo) (db: Schema) =
                     else tableRecord
 
                     if cfg.TableDeclarations then
-                        Value(table, $"SqlHydra.Query.Table.table<{backticks table}>", false)
+                        Value(table.Name, $"SqlHydra.Query.Table.table<{backticks table.Name}>", false)
+
+                // Add "Readers" module if readers are enabled
+                match cfg.Readers with
+                | Some readers -> 
+                    NestedModule("Readers") {
+                        for table in tables do 
+                            Class($"{backticks table.Name}Reader", Constructor() {
+                                SimplePat("reader", readers.ReaderType, false)
+                                SimplePat("getOrdinal", false)
+                            }) {
+                                for col in table.Columns do
+
+                                    let columnReaderType =
+                                        if col.IsNullable then 
+                                            match cfg.NullablePropertyType with
+                                            | NullablePropertyType.Option ->
+                                                "OptionColumn"                  // Returns None for DBNull.Value
+                                            | NullablePropertyType.Nullable ->
+                                                if col.TypeMapping.IsValueType() 
+                                                then "NullableValueColumn"      // Returns System.Nullable<> for DBNull.Value
+                                                else "NullableObjectColumn"     // Returns null for DBNull.Value
+                                        else 
+                                            "RequiredColumn"
+
+                                    Property($"__.{backticks col.Name}", ConstantExpr($"{columnReaderType}(reader, getOrdinal, reader.{col.TypeMapping.ReaderMethod}, \"{col.Name}\")", false))
+
+                                Method("__.Read", 
+                                    UnitPat(), 
+                                    RecordExpr() { 
+                                        for col in table.Columns do
+                                            RecordFieldExpr(backticks col.Name, ConstantExpr($"__.{backticks col.Name}.Read()", false)) 
+                                    }
+                                )
+                            }
+                    }
+                | _ -> 
+                    ()
             }
     
         // Create "HydraReader" below all generated tables/readers...
