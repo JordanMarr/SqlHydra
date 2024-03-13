@@ -39,6 +39,43 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
         // member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value
         // (Use a placeholder property until get/set properties are added to Fabulous.AST)
         Property("__.AccFieldCount", ConstantExpr(""))
+
+        // Method: member private __.GetReaderByName(entity: string, isOption: bool) =
+        Method("__.GetReaderByName", 
+            ParametersPat(true) {
+                ParameterPat("entity", String())
+                ParameterPat("isOption", Boolean())
+            },
+
+            // match entity, isOption with
+            MatchExpr(
+                TupleExpr() {
+                    ConstantExpr("entity", false)
+                    ConstantExpr("isOption", false)
+                }
+            ) {
+                for table in allTables do
+                    // | "OT.CONTACTS", false -> __.``OT.CONTACTS``.Read >> box
+                    
+                    // match case: isOption = false
+                    MatchClauseExpr(
+                        TuplePat() {
+                            ConstantPat($"\"{table.Schema}.{table.Name}\"")
+                            ConstantPat("false")
+                        }, ConstantExpr(Constant($"__.``{table.Schema}.{table.Name}``.Read >> box", false))
+                    )
+
+                    // match case: isOption = true
+                    MatchClauseExpr(
+                        TuplePat() {
+                            ConstantPat($"\"{table.Schema}.{table.Name}\"")
+                            ConstantPat("true")
+                        }, ConstantExpr(Constant($"__.``{table.Schema}.{table.Name}``.ReadIfNotNull >> box", false))
+                    )
+
+                    //| _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
+            }            
+        )
     }    
 
 /// Generates the outer module and table records.
