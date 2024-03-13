@@ -24,9 +24,17 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
         // Backing fields
         Value("buildGetOrdinal", ConstantExpr(""))
 
-        for tbl in allTables do             
+        for table in allTables do             
             // let lazyPersonEmailAddress = lazy (Person.Readers.EmailAddressReader(reader, buildGetOrdinal 5))
-            Value($"lazy{backticks tbl.Schema}{backticks tbl.Name}", ConstantExpr("lazy (Person.Readers.EmailAddressReader(reader, buildGetOrdinal 5))", false)) 
+            Value(
+                $"lazy{backticks table.Schema}{backticks table.Name}", 
+                ConstantExpr($"lazy ({backticks table.Schema}.Readers.{backticks table.Name}Reader(reader, buildGetOrdinal {table.TotalColumns}))", 
+                false)
+            )
+
+        for table in allTables do 
+            // member __.``HumanResources.Department`` = lazyHumanResourcesDepartment.Value
+            Property($"__.``{table.Schema}.{table.Name}``", ConstantExpr($"lazy{table.Schema}{table.Name}.Value", false))
 
         Property("this.Reader", ConstantExpr("reader", false))
 
