@@ -36,8 +36,9 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
             // member __.``HumanResources.Department`` = lazyHumanResourcesDepartment.Value
             Property($"__.``{table.Schema}.{table.Name}``", ConstantExpr($"lazy{table.Schema}{table.Name}.Value", false))
 
-        Property("this.Reader", ConstantExpr("reader", false))
-
+        // member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value
+        // (Use a placeholder property until get/set properties are added to Fabulous.AST)
+        Property("__.AccFieldCount", ConstantExpr(""))
     }    
 
 /// Generates the outer module and table records.
@@ -268,6 +269,10 @@ let substitutions (app: AppInfo) : (string * string) list =
         accFieldCount <- accFieldCount + fieldCount
         fun col -> dictionary.Item col
         """
+
+        // HydraReader class AccFieldCount property
+        "member __.AccFieldCount = \"\"",
+        "member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value"
     ]
 
 /// Formats the generated code using Fantomas.
