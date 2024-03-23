@@ -343,6 +343,19 @@ let substitutions (app: AppInfo) : (string * string) list =
         fun col -> dictionary.Item col
         """
 
+        // GetPrimitiveReader method - let bindings
+        "isOpt: bool, isNullable: bool) =",
+        """isOpt: bool, isNullable: bool) =
+        let wrapValue get (ord: int) = 
+            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            elif isNullable then (if reader.IsDBNull ord then System.Nullable() else get ord |> System.Nullable) |> box
+            else get ord |> box
+
+        let wrapRef get (ord: int) = 
+            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            else get ord |> box
+        """
+
         // HydraReader class AccFieldCount property
         "member __.AccFieldCount = \"\"",
         "member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value"
