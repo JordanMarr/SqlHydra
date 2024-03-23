@@ -80,8 +80,37 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                 )
             }            
         )
+            .toPrivate()
 
-        // Method: static static member private GetPrimitiveReader(t: System.Type, reader: Microsoft.Data.SqlClient.SqlDataReader, isOpt: bool, isNullable: bool) =
+        // Method: static member private GetPrimitiveReader(t: System.Type, reader: Microsoft.Data.SqlClient.SqlDataReader, isOpt: bool, isNullable: bool) =
+        Method("GetPrimitiveReader", 
+            ParametersPat(true) {
+                ParameterPat("t", "System.Type")
+                ParameterPat("reader", rdrCfg.ReaderType)
+                ParameterPat("isOpt", Boolean())
+                ParameterPat("isNullable", Boolean())
+            },
+            
+            /// if t = typedefof<System.Guid> then Some(wrapValue reader.GetGuid)
+            let mkIfThenElse elseExpr primitiveTypeReader =
+                let wrapFnName = 
+                    if primitiveTypeReader.ClrType |> isValueType
+                    then "wrapValue"
+                    else "wrapRef"
+
+                IfThenElseExpr(
+                    ConstantExpr($"t = typedefof<{primitiveTypeReader.ClrType}>", false),
+                    ConstantExpr($"Some({wrapFnName} reader.{primitiveTypeReader.ReaderMethod})", false),
+                    elseExpr
+                )
+
+            // if .. else if .. else None
+            db.PrimitiveTypeReaders 
+            |> Seq.rev
+            |> Seq.fold mkIfThenElse (ConstantExpr("None"))
+        )
+            .toPrivate()
+            .toStatic()
     }    
 
 /// Generates the outer module and table records.
