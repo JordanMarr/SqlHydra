@@ -73,9 +73,15 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                         }, ConstantExpr(Constant($"__.``{table.Schema}.{table.Name}``.ReadIfNotNull >> box", false))
                     )
 
-                    //| _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
+                //| _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
+                MatchClauseExpr(
+                    WildPat(), 
+                    ConstantExpr("failwith $\"Could not read type '{entity}' because no generated reader exists.\"", false)
+                )
             }            
         )
+
+        // Method: static static member private GetPrimitiveReader(t: System.Type, reader: Microsoft.Data.SqlClient.SqlDataReader, isOpt: bool, isNullable: bool) =
     }    
 
 /// Generates the outer module and table records.
