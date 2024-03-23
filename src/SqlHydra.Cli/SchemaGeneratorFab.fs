@@ -4,7 +4,6 @@ open Domain
 open System.Data
 open SqlHydra.SchemaFilters
 open Fantomas.Core
-open Fantomas.Core.SyntaxOak
 open Fantomas.FCS.Text
 open Fabulous.AST
 open type Ast
@@ -104,10 +103,12 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                     elseExpr
                 )
 
-            // if .. else if .. else None
-            db.PrimitiveTypeReaders 
-            |> Seq.rev
-            |> Seq.fold mkIfThenElse (ConstantExpr("None"))
+            let ifThenElse = 
+                db.PrimitiveTypeReaders 
+                |> Seq.rev
+                |> Seq.fold mkIfThenElse (ConstantExpr("None"))
+            
+            ifThenElse
         )
             .toPrivate()
             .toStatic()
