@@ -415,7 +415,7 @@ let toFormattedCode (cfg: Config) (app: AppInfo) (version: string) (ast: WidgetB
 
     let cfg = 
         { FormatConfig.Default with 
-            FormatConfig.MaxIfThenElseShortWidth = 100           // Forces ReadIfNotNull if/then to be on a single line
+            FormatConfig.MaxIfThenElseShortWidth = 400           // Forces ReadIfNotNull if/then to be on a single line
             FormatConfig.MaxValueBindingWidth = 400              // Ensure reader property/column bindings stay on one line
             FormatConfig.MaxLineLength = 400                     // Ensure reader property/column bindings stay on one line
         }

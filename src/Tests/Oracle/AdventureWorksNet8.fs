@@ -13,12 +13,26 @@ module ColumnReaders =
             inherit Column(reader, getOrdinal, column)
             member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getter
 
-    type OptionalColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+    type OptionColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
             inherit Column(reader, getOrdinal, column)
             member __.Read(?alias) = 
                 match alias |> Option.defaultValue __.Name |> getOrdinal with
                 | o when reader.IsDBNull o -> None
                 | o -> Some (getter o)
+
+    type NullableObjectColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = 
+                match alias |> Option.defaultValue __.Name |> getOrdinal with
+                | o when reader.IsDBNull o -> null
+                | o -> (getter o) |> unbox
+
+    type NullableValueColumn<'T, 'Reader when 'T : struct and 'T : (new : unit -> 'T) and 'T :> System.ValueType and 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+            inherit Column(reader, getOrdinal, column)
+            member __.Read(?alias) = 
+                match alias |> Option.defaultValue __.Name |> getOrdinal with
+                | o when reader.IsDBNull o -> System.Nullable<'T>()
+                | o -> System.Nullable<'T> (getter o)
 
 [<AutoOpen>]
 module private DataReaderExtensions =
@@ -147,67 +161,70 @@ module OT =
     let WAREHOUSES = SqlHydra.Query.Table.table<WAREHOUSES>
 
     module Readers =
-        type CONTACTSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        type CONTACTSReader (reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
             member __.CONTACT_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "CONTACT_ID")
-            member __.CUSTOMER_ID = OptionalColumn(reader, getOrdinal, reader.GetInt64, "CUSTOMER_ID")
+            member __.CUSTOMER_ID = OptionColumn(reader, getOrdinal, reader.GetInt64, "CUSTOMER_ID")
             member __.EMAIL = RequiredColumn(reader, getOrdinal, reader.GetString, "EMAIL")
             member __.FIRST_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "FIRST_NAME")
             member __.LAST_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "LAST_NAME")
-            member __.PHONE = OptionalColumn(reader, getOrdinal, reader.GetString, "PHONE")
+            member __.PHONE = OptionColumn(reader, getOrdinal, reader.GetString, "PHONE")
 
             member __.Read() =
-                { CONTACTS.CONTACT_ID = __.CONTACT_ID.Read()
+                { CONTACT_ID = __.CONTACT_ID.Read()
                   CUSTOMER_ID = __.CUSTOMER_ID.Read()
                   EMAIL = __.EMAIL.Read()
                   FIRST_NAME = __.FIRST_NAME.Read()
                   LAST_NAME = __.LAST_NAME.Read()
                   PHONE = __.PHONE.Read() }
+                : CONTACTS
 
             member __.ReadIfNotNull() =
                 if __.CONTACT_ID.IsNull() then None else Some(__.Read())
 
-        type COUNTRIESReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        type COUNTRIESReader (reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
             member __.COUNTRY_ID = RequiredColumn(reader, getOrdinal, reader.GetString, "COUNTRY_ID")
             member __.COUNTRY_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "COUNTRY_NAME")
-            member __.REGION_ID = OptionalColumn(reader, getOrdinal, reader.GetInt64, "REGION_ID")
+            member __.REGION_ID = OptionColumn(reader, getOrdinal, reader.GetInt64, "REGION_ID")
 
             member __.Read() =
-                { COUNTRIES.COUNTRY_ID = __.COUNTRY_ID.Read()
+                { COUNTRY_ID = __.COUNTRY_ID.Read()
                   COUNTRY_NAME = __.COUNTRY_NAME.Read()
                   REGION_ID = __.REGION_ID.Read() }
+                : COUNTRIES
 
             member __.ReadIfNotNull() =
                 if __.COUNTRY_ID.IsNull() then None else Some(__.Read())
 
-        type CUSTOMERSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
-            member __.ADDRESS = OptionalColumn(reader, getOrdinal, reader.GetString, "ADDRESS")
-            member __.CREDIT_LIMIT = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "CREDIT_LIMIT")
+        type CUSTOMERSReader (reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+            member __.ADDRESS = OptionColumn(reader, getOrdinal, reader.GetString, "ADDRESS")
+            member __.CREDIT_LIMIT = OptionColumn(reader, getOrdinal, reader.GetDecimal, "CREDIT_LIMIT")
             member __.CUSTOMER_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "CUSTOMER_ID")
             member __.NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "NAME")
-            member __.WEBSITE = OptionalColumn(reader, getOrdinal, reader.GetString, "WEBSITE")
+            member __.WEBSITE = OptionColumn(reader, getOrdinal, reader.GetString, "WEBSITE")
 
             member __.Read() =
-                { CUSTOMERS.ADDRESS = __.ADDRESS.Read()
+                { ADDRESS = __.ADDRESS.Read()
                   CREDIT_LIMIT = __.CREDIT_LIMIT.Read()
                   CUSTOMER_ID = __.CUSTOMER_ID.Read()
                   NAME = __.NAME.Read()
                   WEBSITE = __.WEBSITE.Read() }
+                : CUSTOMERS
 
             member __.ReadIfNotNull() =
                 if __.CUSTOMER_ID.IsNull() then None else Some(__.Read())
 
-        type EMPLOYEESReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        type EMPLOYEESReader (reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
             member __.EMAIL = RequiredColumn(reader, getOrdinal, reader.GetString, "EMAIL")
             member __.EMPLOYEE_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "EMPLOYEE_ID")
             member __.FIRST_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "FIRST_NAME")
             member __.HIRE_DATE = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "HIRE_DATE")
             member __.JOB_TITLE = RequiredColumn(reader, getOrdinal, reader.GetString, "JOB_TITLE")
             member __.LAST_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "LAST_NAME")
-            member __.MANAGER_ID = OptionalColumn(reader, getOrdinal, reader.GetInt64, "MANAGER_ID")
+            member __.MANAGER_ID = OptionColumn(reader, getOrdinal, reader.GetInt64, "MANAGER_ID")
             member __.PHONE = RequiredColumn(reader, getOrdinal, reader.GetString, "PHONE")
 
             member __.Read() =
-                { EMPLOYEES.EMAIL = __.EMAIL.Read()
+                { EMAIL = __.EMAIL.Read()
                   EMPLOYEE_ID = __.EMPLOYEE_ID.Read()
                   FIRST_NAME = __.FIRST_NAME.Read()
                   HIRE_DATE = __.HIRE_DATE.Read()
@@ -215,60 +232,64 @@ module OT =
                   LAST_NAME = __.LAST_NAME.Read()
                   MANAGER_ID = __.MANAGER_ID.Read()
                   PHONE = __.PHONE.Read() }
+                : EMPLOYEES
 
             member __.ReadIfNotNull() =
                 if __.EMPLOYEE_ID.IsNull() then None else Some(__.Read())
 
-        type INVENTORIESReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        type INVENTORIESReader (reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
             member __.PRODUCT_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "PRODUCT_ID")
             member __.QUANTITY = RequiredColumn(reader, getOrdinal, reader.GetInt32, "QUANTITY")
             member __.WAREHOUSE_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "WAREHOUSE_ID")
 
             member __.Read() =
-                { INVENTORIES.PRODUCT_ID = __.PRODUCT_ID.Read()
+                { PRODUCT_ID = __.PRODUCT_ID.Read()
                   QUANTITY = __.QUANTITY.Read()
                   WAREHOUSE_ID = __.WAREHOUSE_ID.Read() }
+                : INVENTORIES
 
             member __.ReadIfNotNull() =
                 if __.PRODUCT_ID.IsNull() then None else Some(__.Read())
 
-        type LOCATIONSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        type LOCATIONSReader (reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
             member __.ADDRESS = RequiredColumn(reader, getOrdinal, reader.GetString, "ADDRESS")
-            member __.CITY = OptionalColumn(reader, getOrdinal, reader.GetString, "CITY")
-            member __.COUNTRY_ID = OptionalColumn(reader, getOrdinal, reader.GetString, "COUNTRY_ID")
+            member __.CITY = OptionColumn(reader, getOrdinal, reader.GetString, "CITY")
+            member __.COUNTRY_ID = OptionColumn(reader, getOrdinal, reader.GetString, "COUNTRY_ID")
             member __.LOCATION_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "LOCATION_ID")
-            member __.POSTAL_CODE = OptionalColumn(reader, getOrdinal, reader.GetString, "POSTAL_CODE")
-            member __.STATE = OptionalColumn(reader, getOrdinal, reader.GetString, "STATE")
+            member __.POSTAL_CODE = OptionColumn(reader, getOrdinal, reader.GetString, "POSTAL_CODE")
+            member __.STATE = OptionColumn(reader, getOrdinal, reader.GetString, "STATE")
 
             member __.Read() =
-                { LOCATIONS.ADDRESS = __.ADDRESS.Read()
+                { ADDRESS = __.ADDRESS.Read()
                   CITY = __.CITY.Read()
                   COUNTRY_ID = __.COUNTRY_ID.Read()
                   LOCATION_ID = __.LOCATION_ID.Read()
                   POSTAL_CODE = __.POSTAL_CODE.Read()
                   STATE = __.STATE.Read() }
+                : LOCATIONS
 
             member __.ReadIfNotNull() =
                 if __.LOCATION_ID.IsNull() then None else Some(__.Read())
 
-        type ORDERSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        type ORDERSReader (reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
             member __.CUSTOMER_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "CUSTOMER_ID")
             member __.ORDER_DATE = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ORDER_DATE")
             member __.ORDER_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "ORDER_ID")
-            member __.SALESMAN_ID = OptionalColumn(reader, getOrdinal, reader.GetInt64, "SALESMAN_ID")
+            member __.SALESMAN_ID = OptionColumn(reader, getOrdinal, reader.GetInt64, "SALESMAN_ID")
             member __.STATUS = RequiredColumn(reader, getOrdinal, reader.GetString, "STATUS")
 
             member __.Read() =
-                { ORDERS.CUSTOMER_ID = __.CUSTOMER_ID.Read()
+                { CUSTOMER_ID = __.CUSTOMER_ID.Read()
                   ORDER_DATE = __.ORDER_DATE.Read()
                   ORDER_ID = __.ORDER_ID.Read()
                   SALESMAN_ID = __.SALESMAN_ID.Read()
                   STATUS = __.STATUS.Read() }
+                : ORDERS
 
             member __.ReadIfNotNull() =
                 if __.ORDER_ID.IsNull() then None else Some(__.Read())
 
-        type ORDER_ITEMSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        type ORDER_ITEMSReader (reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
             member __.ITEM_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "ITEM_ID")
             member __.ORDER_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "ORDER_ID")
             member __.PRODUCT_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "PRODUCT_ID")
@@ -276,70 +297,75 @@ module OT =
             member __.UNIT_PRICE = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "UNIT_PRICE")
 
             member __.Read() =
-                { ORDER_ITEMS.ITEM_ID = __.ITEM_ID.Read()
+                { ITEM_ID = __.ITEM_ID.Read()
                   ORDER_ID = __.ORDER_ID.Read()
                   PRODUCT_ID = __.PRODUCT_ID.Read()
                   QUANTITY = __.QUANTITY.Read()
                   UNIT_PRICE = __.UNIT_PRICE.Read() }
+                : ORDER_ITEMS
 
             member __.ReadIfNotNull() =
                 if __.ITEM_ID.IsNull() then None else Some(__.Read())
 
-        type PRODUCTSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        type PRODUCTSReader (reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
             member __.CATEGORY_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "CATEGORY_ID")
-            member __.DESCRIPTION = OptionalColumn(reader, getOrdinal, reader.GetString, "DESCRIPTION")
-            member __.LIST_PRICE = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "LIST_PRICE")
+            member __.DESCRIPTION = OptionColumn(reader, getOrdinal, reader.GetString, "DESCRIPTION")
+            member __.LIST_PRICE = OptionColumn(reader, getOrdinal, reader.GetDecimal, "LIST_PRICE")
             member __.PRODUCT_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "PRODUCT_ID")
             member __.PRODUCT_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "PRODUCT_NAME")
-            member __.STANDARD_COST = OptionalColumn(reader, getOrdinal, reader.GetDecimal, "STANDARD_COST")
+            member __.STANDARD_COST = OptionColumn(reader, getOrdinal, reader.GetDecimal, "STANDARD_COST")
 
             member __.Read() =
-                { PRODUCTS.CATEGORY_ID = __.CATEGORY_ID.Read()
+                { CATEGORY_ID = __.CATEGORY_ID.Read()
                   DESCRIPTION = __.DESCRIPTION.Read()
                   LIST_PRICE = __.LIST_PRICE.Read()
                   PRODUCT_ID = __.PRODUCT_ID.Read()
                   PRODUCT_NAME = __.PRODUCT_NAME.Read()
                   STANDARD_COST = __.STANDARD_COST.Read() }
+                : PRODUCTS
 
             member __.ReadIfNotNull() =
                 if __.PRODUCT_ID.IsNull() then None else Some(__.Read())
 
-        type PRODUCT_CATEGORIESReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        type PRODUCT_CATEGORIESReader (reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
             member __.CATEGORY_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "CATEGORY_ID")
             member __.CATEGORY_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "CATEGORY_NAME")
 
             member __.Read() =
-                { PRODUCT_CATEGORIES.CATEGORY_ID = __.CATEGORY_ID.Read()
+                { CATEGORY_ID = __.CATEGORY_ID.Read()
                   CATEGORY_NAME = __.CATEGORY_NAME.Read() }
+                : PRODUCT_CATEGORIES
 
             member __.ReadIfNotNull() =
                 if __.CATEGORY_ID.IsNull() then None else Some(__.Read())
 
-        type REGIONSReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+        type REGIONSReader (reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
             member __.REGION_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "REGION_ID")
             member __.REGION_NAME = RequiredColumn(reader, getOrdinal, reader.GetString, "REGION_NAME")
 
             member __.Read() =
-                { REGIONS.REGION_ID = __.REGION_ID.Read()
+                { REGION_ID = __.REGION_ID.Read()
                   REGION_NAME = __.REGION_NAME.Read() }
+                : REGIONS
 
             member __.ReadIfNotNull() =
                 if __.REGION_ID.IsNull() then None else Some(__.Read())
 
-        type WAREHOUSESReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
-            member __.LOCATION_ID = OptionalColumn(reader, getOrdinal, reader.GetInt64, "LOCATION_ID")
+        type WAREHOUSESReader (reader: Oracle.ManagedDataAccess.Client.OracleDataReader, getOrdinal) =
+            member __.LOCATION_ID = OptionColumn(reader, getOrdinal, reader.GetInt64, "LOCATION_ID")
             member __.WAREHOUSE_ID = RequiredColumn(reader, getOrdinal, reader.GetInt64, "WAREHOUSE_ID")
-            member __.WAREHOUSE_NAME = OptionalColumn(reader, getOrdinal, reader.GetString, "WAREHOUSE_NAME")
+            member __.WAREHOUSE_NAME = OptionColumn(reader, getOrdinal, reader.GetString, "WAREHOUSE_NAME")
 
             member __.Read() =
-                { WAREHOUSES.LOCATION_ID = __.LOCATION_ID.Read()
+                { LOCATION_ID = __.LOCATION_ID.Read()
                   WAREHOUSE_ID = __.WAREHOUSE_ID.Read()
                   WAREHOUSE_NAME = __.WAREHOUSE_NAME.Read() }
+                : WAREHOUSES
 
             member __.ReadIfNotNull() =
                 if __.WAREHOUSE_ID.IsNull() then None else Some(__.Read())
 
-type HydraReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader) =
+type HydraReader (reader: Oracle.ManagedDataAccess.Client.OracleDataReader) =
     let mutable accFieldCount = 0
     let buildGetOrdinal fieldCount =
         let dictionary = 
@@ -406,22 +432,25 @@ type HydraReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader) =
         | "OT.WAREHOUSES", true -> __.``OT.WAREHOUSES``.ReadIfNotNull >> box
         | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
-    static member private GetPrimitiveReader(t: System.Type, reader: Oracle.ManagedDataAccess.Client.OracleDataReader, isOpt: bool) =
-        let wrap get (ord: int) = 
-            if isOpt 
-            then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
-            else get ord |> box 
-        
+    static member private GetPrimitiveReader(t: System.Type, reader: Oracle.ManagedDataAccess.Client.OracleDataReader, isOpt: bool, isNullable: bool) =
+        let wrapValue get (ord: int) = 
+            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            elif isNullable then (if reader.IsDBNull ord then System.Nullable() else get ord |> System.Nullable) |> box
+            else get ord |> box
 
-        if t = typedefof<int> then Some(wrap reader.GetInt32)
-        else if t = typedefof<int64> then Some(wrap reader.GetInt64)
-        else if t = typedefof<decimal> then Some(wrap reader.GetDecimal)
-        else if t = typedefof<double> then Some(wrap reader.GetDouble)
-        else if t = typedefof<System.Single> then Some(wrap reader.GetFieldValue)
-        else if t = typedefof<string> then Some(wrap reader.GetString)
-        else if t = typedefof<System.DateTime> then Some(wrap reader.GetDateTime)
-        else if t = typedefof<System.TimeSpan> then Some(wrap reader.GetTimeSpan)
-        else if t = typedefof<byte []> then Some(wrap reader.GetFieldValue<byte []>)
+        let wrapRef get (ord: int) = 
+            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            else get ord |> box
+        
+        if t = typedefof<int> then Some(wrapValue reader.GetInt32)
+        elif t = typedefof<int64> then Some(wrapValue reader.GetInt64)
+        elif t = typedefof<decimal> then Some(wrapValue reader.GetDecimal)
+        elif t = typedefof<double> then Some(wrapValue reader.GetDouble)
+        elif t = typedefof<System.Single> then Some(wrapValue reader.GetFieldValue)
+        elif t = typedefof<string> then Some(wrapRef reader.GetString)
+        elif t = typedefof<System.DateTime> then Some(wrapValue reader.GetDateTime)
+        elif t = typedefof<System.TimeSpan> then Some(wrapRef reader.GetTimeSpan)
+        elif t = typedefof<byte[]> then Some(wrapRef reader.GetFieldValue<byte[]>)
         else None
 
     static member Read(reader: Oracle.ManagedDataAccess.Client.OracleDataReader) = 
@@ -433,12 +462,12 @@ type HydraReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader) =
             ordinal
             
         let buildEntityReadFn (t: System.Type) = 
-            let t, isOpt = 
-                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> 
-                then t.GenericTypeArguments.[0], true
-                else t, false
+            let t, isOpt, isNullable = 
+                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> then t.GenericTypeArguments.[0], true, false
+                elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>> then t.GenericTypeArguments.[0], false, true
+                else t, false, false
             
-            match HydraReader.GetPrimitiveReader(t, reader, isOpt) with
+            match HydraReader.GetPrimitiveReader(t, reader, isOpt, isNullable) with
             | Some primitiveReader -> 
                 let ord = getOrdinalAndIncrement()
                 fun () -> primitiveReader ord

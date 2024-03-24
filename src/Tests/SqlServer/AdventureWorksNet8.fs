@@ -153,22 +153,23 @@ module HumanResources =
     let Shift = SqlHydra.Query.Table.table<Shift>
 
     module Readers =
-        type DepartmentReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type DepartmentReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.DepartmentID = RequiredColumn(reader, getOrdinal, reader.GetInt16, "DepartmentID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.GroupName = RequiredColumn(reader, getOrdinal, reader.GetString, "GroupName")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Department.DepartmentID = __.DepartmentID.Read()
+                { DepartmentID = __.DepartmentID.Read()
                   Name = __.Name.Read()
                   GroupName = __.GroupName.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Department
 
             member __.ReadIfNotNull() =
                 if __.DepartmentID.IsNull() then None else Some(__.Read())
 
-        type EmployeeReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type EmployeeReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.NationalIDNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "NationalIDNumber")
             member __.LoginID = RequiredColumn(reader, getOrdinal, reader.GetString, "LoginID")
@@ -186,7 +187,7 @@ module HumanResources =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Employee.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   NationalIDNumber = __.NationalIDNumber.Read()
                   LoginID = __.LoginID.Read()
                   OrganizationLevel = __.OrganizationLevel.Read()
@@ -201,11 +202,12 @@ module HumanResources =
                   CurrentFlag = __.CurrentFlag.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Employee
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type EmployeeDepartmentHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type EmployeeDepartmentHistoryReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.DepartmentID = RequiredColumn(reader, getOrdinal, reader.GetInt16, "DepartmentID")
             member __.ShiftID = RequiredColumn(reader, getOrdinal, reader.GetByte, "ShiftID")
@@ -214,17 +216,18 @@ module HumanResources =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { EmployeeDepartmentHistory.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   DepartmentID = __.DepartmentID.Read()
                   ShiftID = __.ShiftID.Read()
                   StartDate = __.StartDate.Read()
                   EndDate = __.EndDate.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : EmployeeDepartmentHistory
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type EmployeePayHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type EmployeePayHistoryReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.RateChangeDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "RateChangeDate")
             member __.Rate = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "Rate")
@@ -232,29 +235,31 @@ module HumanResources =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { EmployeePayHistory.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   RateChangeDate = __.RateChangeDate.Read()
                   Rate = __.Rate.Read()
                   PayFrequency = __.PayFrequency.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : EmployeePayHistory
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type JobCandidateReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type JobCandidateReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.JobCandidateID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "JobCandidateID")
             member __.BusinessEntityID = OptionColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { JobCandidate.JobCandidateID = __.JobCandidateID.Read()
+                { JobCandidateID = __.JobCandidateID.Read()
                   BusinessEntityID = __.BusinessEntityID.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : JobCandidate
 
             member __.ReadIfNotNull() =
                 if __.JobCandidateID.IsNull() then None else Some(__.Read())
 
-        type ShiftReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ShiftReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ShiftID = RequiredColumn(reader, getOrdinal, reader.GetByte, "ShiftID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.StartTime = RequiredColumn(reader, getOrdinal, reader.GetTimeOnly, "StartTime")
@@ -262,11 +267,12 @@ module HumanResources =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Shift.ShiftID = __.ShiftID.Read()
+                { ShiftID = __.ShiftID.Read()
                   Name = __.Name.Read()
                   StartTime = __.StartTime.Read()
                   EndTime = __.EndTime.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Shift
 
             member __.ReadIfNotNull() =
                 if __.ShiftID.IsNull() then None else Some(__.Read())
@@ -472,7 +478,7 @@ module Person =
     let StateProvince = SqlHydra.Query.Table.table<StateProvince>
 
     module Readers =
-        type AddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type AddressReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.AddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "AddressID")
             member __.AddressLine1 = RequiredColumn(reader, getOrdinal, reader.GetString, "AddressLine1")
             member __.AddressLine2 = OptionColumn(reader, getOrdinal, reader.GetString, "AddressLine2")
@@ -483,7 +489,7 @@ module Person =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Address.AddressID = __.AddressID.Read()
+                { AddressID = __.AddressID.Read()
                   AddressLine1 = __.AddressLine1.Read()
                   AddressLine2 = __.AddressLine2.Read()
                   City = __.City.Read()
@@ -491,39 +497,42 @@ module Person =
                   PostalCode = __.PostalCode.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Address
 
             member __.ReadIfNotNull() =
                 if __.AddressID.IsNull() then None else Some(__.Read())
 
-        type AddressTypeReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type AddressTypeReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.AddressTypeID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "AddressTypeID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { AddressType.AddressTypeID = __.AddressTypeID.Read()
+                { AddressTypeID = __.AddressTypeID.Read()
                   Name = __.Name.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : AddressType
 
             member __.ReadIfNotNull() =
                 if __.AddressTypeID.IsNull() then None else Some(__.Read())
 
-        type BusinessEntityReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type BusinessEntityReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { BusinessEntity.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : BusinessEntity
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type BusinessEntityAddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type BusinessEntityAddressReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.AddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "AddressID")
             member __.AddressTypeID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "AddressTypeID")
@@ -531,16 +540,17 @@ module Person =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { BusinessEntityAddress.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   AddressID = __.AddressID.Read()
                   AddressTypeID = __.AddressTypeID.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : BusinessEntityAddress
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type BusinessEntityContactReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type BusinessEntityContactReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.PersonID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "PersonID")
             member __.ContactTypeID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ContactTypeID")
@@ -548,42 +558,45 @@ module Person =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { BusinessEntityContact.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   PersonID = __.PersonID.Read()
                   ContactTypeID = __.ContactTypeID.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : BusinessEntityContact
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type ContactTypeReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ContactTypeReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ContactTypeID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ContactTypeID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ContactType.ContactTypeID = __.ContactTypeID.Read()
+                { ContactTypeID = __.ContactTypeID.Read()
                   Name = __.Name.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ContactType
 
             member __.ReadIfNotNull() =
                 if __.ContactTypeID.IsNull() then None else Some(__.Read())
 
-        type CountryRegionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type CountryRegionReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.CountryRegionCode = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionCode")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { CountryRegion.CountryRegionCode = __.CountryRegionCode.Read()
+                { CountryRegionCode = __.CountryRegionCode.Read()
                   Name = __.Name.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : CountryRegion
 
             member __.ReadIfNotNull() =
                 if __.CountryRegionCode.IsNull() then None else Some(__.Read())
 
-        type EmailAddressReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type EmailAddressReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.EmailAddressID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "EmailAddressID")
             member __.EmailAddress = OptionColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
@@ -591,16 +604,17 @@ module Person =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { EmailAddress.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   EmailAddressID = __.EmailAddressID.Read()
                   EmailAddress = __.EmailAddress.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : EmailAddress
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type PasswordReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type PasswordReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.PasswordHash = RequiredColumn(reader, getOrdinal, reader.GetString, "PasswordHash")
             member __.PasswordSalt = RequiredColumn(reader, getOrdinal, reader.GetString, "PasswordSalt")
@@ -608,16 +622,17 @@ module Person =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Password.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   PasswordHash = __.PasswordHash.Read()
                   PasswordSalt = __.PasswordSalt.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Password
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type PersonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type PersonReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.PersonType = RequiredColumn(reader, getOrdinal, reader.GetString, "PersonType")
             member __.NameStyle = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "NameStyle")
@@ -631,7 +646,7 @@ module Person =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Person.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   PersonType = __.PersonType.Read()
                   NameStyle = __.NameStyle.Read()
                   Title = __.Title.Read()
@@ -642,39 +657,42 @@ module Person =
                   EmailPromotion = __.EmailPromotion.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Person
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type PersonPhoneReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type PersonPhoneReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.PhoneNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "PhoneNumber")
             member __.PhoneNumberTypeID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "PhoneNumberTypeID")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { PersonPhone.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   PhoneNumber = __.PhoneNumber.Read()
                   PhoneNumberTypeID = __.PhoneNumberTypeID.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : PersonPhone
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type PhoneNumberTypeReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type PhoneNumberTypeReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.PhoneNumberTypeID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "PhoneNumberTypeID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { PhoneNumberType.PhoneNumberTypeID = __.PhoneNumberTypeID.Read()
+                { PhoneNumberTypeID = __.PhoneNumberTypeID.Read()
                   Name = __.Name.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : PhoneNumberType
 
             member __.ReadIfNotNull() =
                 if __.PhoneNumberTypeID.IsNull() then None else Some(__.Read())
 
-        type StateProvinceReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type StateProvinceReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.StateProvinceID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "StateProvinceID")
             member __.StateProvinceCode = RequiredColumn(reader, getOrdinal, reader.GetString, "StateProvinceCode")
             member __.CountryRegionCode = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionCode")
@@ -685,7 +703,7 @@ module Person =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { StateProvince.StateProvinceID = __.StateProvinceID.Read()
+                { StateProvinceID = __.StateProvinceID.Read()
                   StateProvinceCode = __.StateProvinceCode.Read()
                   CountryRegionCode = __.CountryRegionCode.Read()
                   IsOnlyStateProvinceFlag = __.IsOnlyStateProvinceFlag.Read()
@@ -693,6 +711,7 @@ module Person =
                   TerritoryID = __.TerritoryID.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : StateProvince
 
             member __.ReadIfNotNull() =
                 if __.StateProvinceID.IsNull() then None else Some(__.Read())
@@ -1152,7 +1171,7 @@ module Production =
     let WorkOrderRouting = SqlHydra.Query.Table.table<WorkOrderRouting>
 
     module Readers =
-        type BillOfMaterialsReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type BillOfMaterialsReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BillOfMaterialsID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BillOfMaterialsID")
             member __.ProductAssemblyID = OptionColumn(reader, getOrdinal, reader.GetInt32, "ProductAssemblyID")
             member __.ComponentID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ComponentID")
@@ -1164,7 +1183,7 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { BillOfMaterials.BillOfMaterialsID = __.BillOfMaterialsID.Read()
+                { BillOfMaterialsID = __.BillOfMaterialsID.Read()
                   ProductAssemblyID = __.ProductAssemblyID.Read()
                   ComponentID = __.ComponentID.Read()
                   StartDate = __.StartDate.Read()
@@ -1173,24 +1192,26 @@ module Production =
                   BOMLevel = __.BOMLevel.Read()
                   PerAssemblyQty = __.PerAssemblyQty.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : BillOfMaterials
 
             member __.ReadIfNotNull() =
                 if __.BillOfMaterialsID.IsNull() then None else Some(__.Read())
 
-        type CultureReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type CultureReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.CultureID = RequiredColumn(reader, getOrdinal, reader.GetString, "CultureID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Culture.CultureID = __.CultureID.Read()
+                { CultureID = __.CultureID.Read()
                   Name = __.Name.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Culture
 
             member __.ReadIfNotNull() =
                 if __.CultureID.IsNull() then None else Some(__.Read())
 
-        type DocumentReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type DocumentReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.DocumentLevel = OptionColumn(reader, getOrdinal, reader.GetInt16, "DocumentLevel")
             member __.Title = RequiredColumn(reader, getOrdinal, reader.GetString, "Title")
             member __.Owner = RequiredColumn(reader, getOrdinal, reader.GetInt32, "Owner")
@@ -1206,7 +1227,7 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Document.DocumentLevel = __.DocumentLevel.Read()
+                { DocumentLevel = __.DocumentLevel.Read()
                   Title = __.Title.Read()
                   Owner = __.Owner.Read()
                   FolderFlag = __.FolderFlag.Read()
@@ -1219,22 +1240,24 @@ module Production =
                   Document = __.Document.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Document
 
             member __.ReadIfNotNull() =
                 if __.Title.IsNull() then None else Some(__.Read())
 
-        type IllustrationReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type IllustrationReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.IllustrationID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "IllustrationID")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Illustration.IllustrationID = __.IllustrationID.Read()
+                { IllustrationID = __.IllustrationID.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Illustration
 
             member __.ReadIfNotNull() =
                 if __.IllustrationID.IsNull() then None else Some(__.Read())
 
-        type LocationReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type LocationReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.LocationID = RequiredColumn(reader, getOrdinal, reader.GetInt16, "LocationID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.CostRate = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "CostRate")
@@ -1242,16 +1265,17 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Location.LocationID = __.LocationID.Read()
+                { LocationID = __.LocationID.Read()
                   Name = __.Name.Read()
                   CostRate = __.CostRate.Read()
                   Availability = __.Availability.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Location
 
             member __.ReadIfNotNull() =
                 if __.LocationID.IsNull() then None else Some(__.Read())
 
-        type ProductReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.ProductNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "ProductNumber")
@@ -1279,7 +1303,7 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Product.ProductID = __.ProductID.Read()
+                { ProductID = __.ProductID.Read()
                   Name = __.Name.Read()
                   ProductNumber = __.ProductNumber.Read()
                   MakeFlag = __.MakeFlag.Read()
@@ -1304,26 +1328,28 @@ module Production =
                   DiscontinuedDate = __.DiscontinuedDate.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Product
 
             member __.ReadIfNotNull() =
                 if __.ProductID.IsNull() then None else Some(__.Read())
 
-        type ProductCategoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductCategoryReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductCategoryID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductCategoryID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductCategory.ProductCategoryID = __.ProductCategoryID.Read()
+                { ProductCategoryID = __.ProductCategoryID.Read()
                   Name = __.Name.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductCategory
 
             member __.ReadIfNotNull() =
                 if __.ProductCategoryID.IsNull() then None else Some(__.Read())
 
-        type ProductCostHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductCostHistoryReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
             member __.EndDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
@@ -1331,42 +1357,45 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductCostHistory.ProductID = __.ProductID.Read()
+                { ProductID = __.ProductID.Read()
                   StartDate = __.StartDate.Read()
                   EndDate = __.EndDate.Read()
                   StandardCost = __.StandardCost.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductCostHistory
 
             member __.ReadIfNotNull() =
                 if __.ProductID.IsNull() then None else Some(__.Read())
 
-        type ProductDescriptionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductDescriptionReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductDescriptionID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductDescriptionID")
             member __.Description = RequiredColumn(reader, getOrdinal, reader.GetString, "Description")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductDescription.ProductDescriptionID = __.ProductDescriptionID.Read()
+                { ProductDescriptionID = __.ProductDescriptionID.Read()
                   Description = __.Description.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductDescription
 
             member __.ReadIfNotNull() =
                 if __.ProductDescriptionID.IsNull() then None else Some(__.Read())
 
-        type ProductDocumentReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductDocumentReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductDocument.ProductID = __.ProductID.Read()
+                { ProductID = __.ProductID.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductDocument
 
             member __.ReadIfNotNull() =
                 if __.ProductID.IsNull() then None else Some(__.Read())
 
-        type ProductInventoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductInventoryReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.LocationID = RequiredColumn(reader, getOrdinal, reader.GetInt16, "LocationID")
             member __.Shelf = RequiredColumn(reader, getOrdinal, reader.GetString, "Shelf")
@@ -1376,18 +1405,19 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductInventory.ProductID = __.ProductID.Read()
+                { ProductID = __.ProductID.Read()
                   LocationID = __.LocationID.Read()
                   Shelf = __.Shelf.Read()
                   Bin = __.Bin.Read()
                   Quantity = __.Quantity.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductInventory
 
             member __.ReadIfNotNull() =
                 if __.ProductID.IsNull() then None else Some(__.Read())
 
-        type ProductListPriceHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductListPriceHistoryReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
             member __.EndDate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "EndDate")
@@ -1395,59 +1425,63 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductListPriceHistory.ProductID = __.ProductID.Read()
+                { ProductID = __.ProductID.Read()
                   StartDate = __.StartDate.Read()
                   EndDate = __.EndDate.Read()
                   ListPrice = __.ListPrice.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductListPriceHistory
 
             member __.ReadIfNotNull() =
                 if __.ProductID.IsNull() then None else Some(__.Read())
 
-        type ProductModelReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductModelReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductModel.ProductModelID = __.ProductModelID.Read()
+                { ProductModelID = __.ProductModelID.Read()
                   Name = __.Name.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductModel
 
             member __.ReadIfNotNull() =
                 if __.ProductModelID.IsNull() then None else Some(__.Read())
 
-        type ProductModelIllustrationReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductModelIllustrationReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
             member __.IllustrationID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "IllustrationID")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductModelIllustration.ProductModelID = __.ProductModelID.Read()
+                { ProductModelID = __.ProductModelID.Read()
                   IllustrationID = __.IllustrationID.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductModelIllustration
 
             member __.ReadIfNotNull() =
                 if __.ProductModelID.IsNull() then None else Some(__.Read())
 
-        type ProductModelProductDescriptionCultureReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductModelProductDescriptionCultureReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductModelID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductModelID")
             member __.ProductDescriptionID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductDescriptionID")
             member __.CultureID = RequiredColumn(reader, getOrdinal, reader.GetString, "CultureID")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductModelProductDescriptionCulture.ProductModelID = __.ProductModelID.Read()
+                { ProductModelID = __.ProductModelID.Read()
                   ProductDescriptionID = __.ProductDescriptionID.Read()
                   CultureID = __.CultureID.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductModelProductDescriptionCulture
 
             member __.ReadIfNotNull() =
                 if __.ProductModelID.IsNull() then None else Some(__.Read())
 
-        type ProductPhotoReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductPhotoReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductPhotoID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductPhotoID")
             member __.ThumbNailPhoto = OptionColumn(reader, getOrdinal, reader.GetFieldValue, "ThumbNailPhoto")
             member __.ThumbnailPhotoFileName = OptionColumn(reader, getOrdinal, reader.GetString, "ThumbnailPhotoFileName")
@@ -1456,32 +1490,34 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductPhoto.ProductPhotoID = __.ProductPhotoID.Read()
+                { ProductPhotoID = __.ProductPhotoID.Read()
                   ThumbNailPhoto = __.ThumbNailPhoto.Read()
                   ThumbnailPhotoFileName = __.ThumbnailPhotoFileName.Read()
                   LargePhoto = __.LargePhoto.Read()
                   LargePhotoFileName = __.LargePhotoFileName.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductPhoto
 
             member __.ReadIfNotNull() =
                 if __.ProductPhotoID.IsNull() then None else Some(__.Read())
 
-        type ProductProductPhotoReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductProductPhotoReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.ProductPhotoID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductPhotoID")
             member __.Primary = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "Primary")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductProductPhoto.ProductID = __.ProductID.Read()
+                { ProductID = __.ProductID.Read()
                   ProductPhotoID = __.ProductPhotoID.Read()
                   Primary = __.Primary.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductProductPhoto
 
             member __.ReadIfNotNull() =
                 if __.ProductID.IsNull() then None else Some(__.Read())
 
-        type ProductReviewReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductReviewReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductReviewID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductReviewID")
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.ReviewerName = RequiredColumn(reader, getOrdinal, reader.GetString, "ReviewerName")
@@ -1492,7 +1528,7 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductReview.ProductReviewID = __.ProductReviewID.Read()
+                { ProductReviewID = __.ProductReviewID.Read()
                   ProductID = __.ProductID.Read()
                   ReviewerName = __.ReviewerName.Read()
                   ReviewDate = __.ReviewDate.Read()
@@ -1500,11 +1536,12 @@ module Production =
                   Rating = __.Rating.Read()
                   Comments = __.Comments.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductReview
 
             member __.ReadIfNotNull() =
                 if __.ProductReviewID.IsNull() then None else Some(__.Read())
 
-        type ProductSubcategoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductSubcategoryReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductSubcategoryID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductSubcategoryID")
             member __.ProductCategoryID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductCategoryID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
@@ -1512,29 +1549,31 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductSubcategory.ProductSubcategoryID = __.ProductSubcategoryID.Read()
+                { ProductSubcategoryID = __.ProductSubcategoryID.Read()
                   ProductCategoryID = __.ProductCategoryID.Read()
                   Name = __.Name.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductSubcategory
 
             member __.ReadIfNotNull() =
                 if __.ProductSubcategoryID.IsNull() then None else Some(__.Read())
 
-        type ScrapReasonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ScrapReasonReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ScrapReasonID = RequiredColumn(reader, getOrdinal, reader.GetInt16, "ScrapReasonID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ScrapReason.ScrapReasonID = __.ScrapReasonID.Read()
+                { ScrapReasonID = __.ScrapReasonID.Read()
                   Name = __.Name.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ScrapReason
 
             member __.ReadIfNotNull() =
                 if __.ScrapReasonID.IsNull() then None else Some(__.Read())
 
-        type TransactionHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type TransactionHistoryReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.TransactionID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "TransactionID")
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.ReferenceOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ReferenceOrderID")
@@ -1546,7 +1585,7 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { TransactionHistory.TransactionID = __.TransactionID.Read()
+                { TransactionID = __.TransactionID.Read()
                   ProductID = __.ProductID.Read()
                   ReferenceOrderID = __.ReferenceOrderID.Read()
                   ReferenceOrderLineID = __.ReferenceOrderLineID.Read()
@@ -1555,11 +1594,12 @@ module Production =
                   Quantity = __.Quantity.Read()
                   ActualCost = __.ActualCost.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : TransactionHistory
 
             member __.ReadIfNotNull() =
                 if __.TransactionID.IsNull() then None else Some(__.Read())
 
-        type TransactionHistoryArchiveReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type TransactionHistoryArchiveReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.TransactionID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "TransactionID")
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.ReferenceOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ReferenceOrderID")
@@ -1571,7 +1611,7 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { TransactionHistoryArchive.TransactionID = __.TransactionID.Read()
+                { TransactionID = __.TransactionID.Read()
                   ProductID = __.ProductID.Read()
                   ReferenceOrderID = __.ReferenceOrderID.Read()
                   ReferenceOrderLineID = __.ReferenceOrderLineID.Read()
@@ -1580,24 +1620,26 @@ module Production =
                   Quantity = __.Quantity.Read()
                   ActualCost = __.ActualCost.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : TransactionHistoryArchive
 
             member __.ReadIfNotNull() =
                 if __.TransactionID.IsNull() then None else Some(__.Read())
 
-        type UnitMeasureReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type UnitMeasureReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.UnitMeasureCode = RequiredColumn(reader, getOrdinal, reader.GetString, "UnitMeasureCode")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { UnitMeasure.UnitMeasureCode = __.UnitMeasureCode.Read()
+                { UnitMeasureCode = __.UnitMeasureCode.Read()
                   Name = __.Name.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : UnitMeasure
 
             member __.ReadIfNotNull() =
                 if __.UnitMeasureCode.IsNull() then None else Some(__.Read())
 
-        type WorkOrderReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type WorkOrderReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.WorkOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "WorkOrderID")
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.OrderQty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "OrderQty")
@@ -1610,7 +1652,7 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { WorkOrder.WorkOrderID = __.WorkOrderID.Read()
+                { WorkOrderID = __.WorkOrderID.Read()
                   ProductID = __.ProductID.Read()
                   OrderQty = __.OrderQty.Read()
                   StockedQty = __.StockedQty.Read()
@@ -1620,11 +1662,12 @@ module Production =
                   DueDate = __.DueDate.Read()
                   ScrapReasonID = __.ScrapReasonID.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : WorkOrder
 
             member __.ReadIfNotNull() =
                 if __.WorkOrderID.IsNull() then None else Some(__.Read())
 
-        type WorkOrderRoutingReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type WorkOrderRoutingReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.WorkOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "WorkOrderID")
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.OperationSequence = RequiredColumn(reader, getOrdinal, reader.GetInt16, "OperationSequence")
@@ -1639,7 +1682,7 @@ module Production =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { WorkOrderRouting.WorkOrderID = __.WorkOrderID.Read()
+                { WorkOrderID = __.WorkOrderID.Read()
                   ProductID = __.ProductID.Read()
                   OperationSequence = __.OperationSequence.Read()
                   LocationID = __.LocationID.Read()
@@ -1651,6 +1694,7 @@ module Production =
                   PlannedCost = __.PlannedCost.Read()
                   ActualCost = __.ActualCost.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : WorkOrderRouting
 
             member __.ReadIfNotNull() =
                 if __.WorkOrderID.IsNull() then None else Some(__.Read())
@@ -1780,7 +1824,7 @@ module Purchasing =
     let Vendor = SqlHydra.Query.Table.table<Vendor>
 
     module Readers =
-        type ProductVendorReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ProductVendorReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.AverageLeadTime = RequiredColumn(reader, getOrdinal, reader.GetInt32, "AverageLeadTime")
@@ -1794,7 +1838,7 @@ module Purchasing =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ProductVendor.ProductID = __.ProductID.Read()
+                { ProductID = __.ProductID.Read()
                   BusinessEntityID = __.BusinessEntityID.Read()
                   AverageLeadTime = __.AverageLeadTime.Read()
                   StandardPrice = __.StandardPrice.Read()
@@ -1805,11 +1849,12 @@ module Purchasing =
                   OnOrderQty = __.OnOrderQty.Read()
                   UnitMeasureCode = __.UnitMeasureCode.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ProductVendor
 
             member __.ReadIfNotNull() =
                 if __.ProductID.IsNull() then None else Some(__.Read())
 
-        type PurchaseOrderDetailReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type PurchaseOrderDetailReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.PurchaseOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "PurchaseOrderID")
             member __.PurchaseOrderDetailID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "PurchaseOrderDetailID")
             member __.DueDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "DueDate")
@@ -1823,7 +1868,7 @@ module Purchasing =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { PurchaseOrderDetail.PurchaseOrderID = __.PurchaseOrderID.Read()
+                { PurchaseOrderID = __.PurchaseOrderID.Read()
                   PurchaseOrderDetailID = __.PurchaseOrderDetailID.Read()
                   DueDate = __.DueDate.Read()
                   OrderQty = __.OrderQty.Read()
@@ -1834,11 +1879,12 @@ module Purchasing =
                   RejectedQty = __.RejectedQty.Read()
                   StockedQty = __.StockedQty.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : PurchaseOrderDetail
 
             member __.ReadIfNotNull() =
                 if __.PurchaseOrderID.IsNull() then None else Some(__.Read())
 
-        type PurchaseOrderHeaderReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type PurchaseOrderHeaderReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.PurchaseOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "PurchaseOrderID")
             member __.RevisionNumber = RequiredColumn(reader, getOrdinal, reader.GetByte, "RevisionNumber")
             member __.Status = RequiredColumn(reader, getOrdinal, reader.GetByte, "Status")
@@ -1854,7 +1900,7 @@ module Purchasing =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { PurchaseOrderHeader.PurchaseOrderID = __.PurchaseOrderID.Read()
+                { PurchaseOrderID = __.PurchaseOrderID.Read()
                   RevisionNumber = __.RevisionNumber.Read()
                   Status = __.Status.Read()
                   EmployeeID = __.EmployeeID.Read()
@@ -1867,11 +1913,12 @@ module Purchasing =
                   Freight = __.Freight.Read()
                   TotalDue = __.TotalDue.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : PurchaseOrderHeader
 
             member __.ReadIfNotNull() =
                 if __.PurchaseOrderID.IsNull() then None else Some(__.Read())
 
-        type ShipMethodReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ShipMethodReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ShipMethodID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ShipMethodID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.ShipBase = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "ShipBase")
@@ -1880,17 +1927,18 @@ module Purchasing =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ShipMethod.ShipMethodID = __.ShipMethodID.Read()
+                { ShipMethodID = __.ShipMethodID.Read()
                   Name = __.Name.Read()
                   ShipBase = __.ShipBase.Read()
                   ShipRate = __.ShipRate.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ShipMethod
 
             member __.ReadIfNotNull() =
                 if __.ShipMethodID.IsNull() then None else Some(__.Read())
 
-        type VendorReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type VendorReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.AccountNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "AccountNumber")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
@@ -1901,7 +1949,7 @@ module Purchasing =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Vendor.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   AccountNumber = __.AccountNumber.Read()
                   Name = __.Name.Read()
                   CreditRating = __.CreditRating.Read()
@@ -1909,6 +1957,7 @@ module Purchasing =
                   ActiveFlag = __.ActiveFlag.Read()
                   PurchasingWebServiceURL = __.PurchasingWebServiceURL.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Vendor
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -2282,20 +2331,21 @@ module Sales =
     let Store = SqlHydra.Query.Table.table<Store>
 
     module Readers =
-        type CountryRegionCurrencyReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type CountryRegionCurrencyReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.CountryRegionCode = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionCode")
             member __.CurrencyCode = RequiredColumn(reader, getOrdinal, reader.GetString, "CurrencyCode")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { CountryRegionCurrency.CountryRegionCode = __.CountryRegionCode.Read()
+                { CountryRegionCode = __.CountryRegionCode.Read()
                   CurrencyCode = __.CurrencyCode.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : CountryRegionCurrency
 
             member __.ReadIfNotNull() =
                 if __.CountryRegionCode.IsNull() then None else Some(__.Read())
 
-        type CreditCardReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type CreditCardReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.CreditCardID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "CreditCardID")
             member __.CardType = RequiredColumn(reader, getOrdinal, reader.GetString, "CardType")
             member __.CardNumber = RequiredColumn(reader, getOrdinal, reader.GetString, "CardNumber")
@@ -2304,30 +2354,32 @@ module Sales =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { CreditCard.CreditCardID = __.CreditCardID.Read()
+                { CreditCardID = __.CreditCardID.Read()
                   CardType = __.CardType.Read()
                   CardNumber = __.CardNumber.Read()
                   ExpMonth = __.ExpMonth.Read()
                   ExpYear = __.ExpYear.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : CreditCard
 
             member __.ReadIfNotNull() =
                 if __.CreditCardID.IsNull() then None else Some(__.Read())
 
-        type CurrencyReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type CurrencyReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.CurrencyCode = RequiredColumn(reader, getOrdinal, reader.GetString, "CurrencyCode")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Currency.CurrencyCode = __.CurrencyCode.Read()
+                { CurrencyCode = __.CurrencyCode.Read()
                   Name = __.Name.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Currency
 
             member __.ReadIfNotNull() =
                 if __.CurrencyCode.IsNull() then None else Some(__.Read())
 
-        type CurrencyRateReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type CurrencyRateReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.CurrencyRateID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "CurrencyRateID")
             member __.CurrencyRateDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "CurrencyRateDate")
             member __.FromCurrencyCode = RequiredColumn(reader, getOrdinal, reader.GetString, "FromCurrencyCode")
@@ -2337,18 +2389,19 @@ module Sales =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { CurrencyRate.CurrencyRateID = __.CurrencyRateID.Read()
+                { CurrencyRateID = __.CurrencyRateID.Read()
                   CurrencyRateDate = __.CurrencyRateDate.Read()
                   FromCurrencyCode = __.FromCurrencyCode.Read()
                   ToCurrencyCode = __.ToCurrencyCode.Read()
                   AverageRate = __.AverageRate.Read()
                   EndOfDayRate = __.EndOfDayRate.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : CurrencyRate
 
             member __.ReadIfNotNull() =
                 if __.CurrencyRateID.IsNull() then None else Some(__.Read())
 
-        type CustomerReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type CustomerReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.CustomerID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "CustomerID")
             member __.PersonID = OptionColumn(reader, getOrdinal, reader.GetInt32, "PersonID")
             member __.StoreID = OptionColumn(reader, getOrdinal, reader.GetInt32, "StoreID")
@@ -2358,31 +2411,33 @@ module Sales =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Customer.CustomerID = __.CustomerID.Read()
+                { CustomerID = __.CustomerID.Read()
                   PersonID = __.PersonID.Read()
                   StoreID = __.StoreID.Read()
                   TerritoryID = __.TerritoryID.Read()
                   AccountNumber = __.AccountNumber.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Customer
 
             member __.ReadIfNotNull() =
                 if __.CustomerID.IsNull() then None else Some(__.Read())
 
-        type PersonCreditCardReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type PersonCreditCardReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.CreditCardID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "CreditCardID")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { PersonCreditCard.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   CreditCardID = __.CreditCardID.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : PersonCreditCard
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type SalesOrderDetailReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type SalesOrderDetailReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.SalesOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderID")
             member __.SalesOrderDetailID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderDetailID")
             member __.CarrierTrackingNumber = OptionColumn(reader, getOrdinal, reader.GetString, "CarrierTrackingNumber")
@@ -2396,7 +2451,7 @@ module Sales =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SalesOrderDetail.SalesOrderID = __.SalesOrderID.Read()
+                { SalesOrderID = __.SalesOrderID.Read()
                   SalesOrderDetailID = __.SalesOrderDetailID.Read()
                   CarrierTrackingNumber = __.CarrierTrackingNumber.Read()
                   OrderQty = __.OrderQty.Read()
@@ -2407,11 +2462,12 @@ module Sales =
                   LineTotal = __.LineTotal.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : SalesOrderDetail
 
             member __.ReadIfNotNull() =
                 if __.SalesOrderID.IsNull() then None else Some(__.Read())
 
-        type SalesOrderHeaderReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type SalesOrderHeaderReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.SalesOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderID")
             member __.RevisionNumber = RequiredColumn(reader, getOrdinal, reader.GetByte, "RevisionNumber")
             member __.OrderDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "OrderDate")
@@ -2440,7 +2496,7 @@ module Sales =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SalesOrderHeader.SalesOrderID = __.SalesOrderID.Read()
+                { SalesOrderID = __.SalesOrderID.Read()
                   RevisionNumber = __.RevisionNumber.Read()
                   OrderDate = __.OrderDate.Read()
                   DueDate = __.DueDate.Read()
@@ -2466,24 +2522,26 @@ module Sales =
                   Comment = __.Comment.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : SalesOrderHeader
 
             member __.ReadIfNotNull() =
                 if __.SalesOrderID.IsNull() then None else Some(__.Read())
 
-        type SalesOrderHeaderSalesReasonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type SalesOrderHeaderSalesReasonReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.SalesOrderID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesOrderID")
             member __.SalesReasonID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesReasonID")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SalesOrderHeaderSalesReason.SalesOrderID = __.SalesOrderID.Read()
+                { SalesOrderID = __.SalesOrderID.Read()
                   SalesReasonID = __.SalesReasonID.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : SalesOrderHeaderSalesReason
 
             member __.ReadIfNotNull() =
                 if __.SalesOrderID.IsNull() then None else Some(__.Read())
 
-        type SalesPersonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type SalesPersonReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.TerritoryID = OptionColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
             member __.SalesQuota = OptionColumn(reader, getOrdinal, reader.GetDecimal, "SalesQuota")
@@ -2495,7 +2553,7 @@ module Sales =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SalesPerson.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   TerritoryID = __.TerritoryID.Read()
                   SalesQuota = __.SalesQuota.Read()
                   Bonus = __.Bonus.Read()
@@ -2504,11 +2562,12 @@ module Sales =
                   SalesLastYear = __.SalesLastYear.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : SalesPerson
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type SalesPersonQuotaHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type SalesPersonQuotaHistoryReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.QuotaDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "QuotaDate")
             member __.SalesQuota = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "SalesQuota")
@@ -2516,31 +2575,33 @@ module Sales =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SalesPersonQuotaHistory.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   QuotaDate = __.QuotaDate.Read()
                   SalesQuota = __.SalesQuota.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : SalesPersonQuotaHistory
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type SalesReasonReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type SalesReasonReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.SalesReasonID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesReasonID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.ReasonType = RequiredColumn(reader, getOrdinal, reader.GetString, "ReasonType")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SalesReason.SalesReasonID = __.SalesReasonID.Read()
+                { SalesReasonID = __.SalesReasonID.Read()
                   Name = __.Name.Read()
                   ReasonType = __.ReasonType.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : SalesReason
 
             member __.ReadIfNotNull() =
                 if __.SalesReasonID.IsNull() then None else Some(__.Read())
 
-        type SalesTaxRateReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type SalesTaxRateReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.SalesTaxRateID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SalesTaxRateID")
             member __.StateProvinceID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "StateProvinceID")
             member __.TaxType = RequiredColumn(reader, getOrdinal, reader.GetByte, "TaxType")
@@ -2550,18 +2611,19 @@ module Sales =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SalesTaxRate.SalesTaxRateID = __.SalesTaxRateID.Read()
+                { SalesTaxRateID = __.SalesTaxRateID.Read()
                   StateProvinceID = __.StateProvinceID.Read()
                   TaxType = __.TaxType.Read()
                   TaxRate = __.TaxRate.Read()
                   Name = __.Name.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : SalesTaxRate
 
             member __.ReadIfNotNull() =
                 if __.SalesTaxRateID.IsNull() then None else Some(__.Read())
 
-        type SalesTerritoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type SalesTerritoryReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.TerritoryID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.CountryRegionCode = RequiredColumn(reader, getOrdinal, reader.GetString, "CountryRegionCode")
@@ -2574,7 +2636,7 @@ module Sales =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SalesTerritory.TerritoryID = __.TerritoryID.Read()
+                { TerritoryID = __.TerritoryID.Read()
                   Name = __.Name.Read()
                   CountryRegionCode = __.CountryRegionCode.Read()
                   Group = __.Group.Read()
@@ -2584,11 +2646,12 @@ module Sales =
                   CostLastYear = __.CostLastYear.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : SalesTerritory
 
             member __.ReadIfNotNull() =
                 if __.TerritoryID.IsNull() then None else Some(__.Read())
 
-        type SalesTerritoryHistoryReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type SalesTerritoryHistoryReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.TerritoryID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "TerritoryID")
             member __.StartDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "StartDate")
@@ -2597,17 +2660,18 @@ module Sales =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SalesTerritoryHistory.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   TerritoryID = __.TerritoryID.Read()
                   StartDate = __.StartDate.Read()
                   EndDate = __.EndDate.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : SalesTerritoryHistory
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
 
-        type ShoppingCartItemReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ShoppingCartItemReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ShoppingCartItemID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ShoppingCartItemID")
             member __.ShoppingCartID = RequiredColumn(reader, getOrdinal, reader.GetString, "ShoppingCartID")
             member __.Quantity = RequiredColumn(reader, getOrdinal, reader.GetInt32, "Quantity")
@@ -2616,17 +2680,18 @@ module Sales =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { ShoppingCartItem.ShoppingCartItemID = __.ShoppingCartItemID.Read()
+                { ShoppingCartItemID = __.ShoppingCartItemID.Read()
                   ShoppingCartID = __.ShoppingCartID.Read()
                   Quantity = __.Quantity.Read()
                   ProductID = __.ProductID.Read()
                   DateCreated = __.DateCreated.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : ShoppingCartItem
 
             member __.ReadIfNotNull() =
                 if __.ShoppingCartItemID.IsNull() then None else Some(__.Read())
 
-        type SpecialOfferReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type SpecialOfferReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.SpecialOfferID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SpecialOfferID")
             member __.Description = RequiredColumn(reader, getOrdinal, reader.GetString, "Description")
             member __.DiscountPct = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "DiscountPct")
@@ -2640,7 +2705,7 @@ module Sales =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SpecialOffer.SpecialOfferID = __.SpecialOfferID.Read()
+                { SpecialOfferID = __.SpecialOfferID.Read()
                   Description = __.Description.Read()
                   DiscountPct = __.DiscountPct.Read()
                   Type = __.Type.Read()
@@ -2651,26 +2716,28 @@ module Sales =
                   MaxQty = __.MaxQty.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : SpecialOffer
 
             member __.ReadIfNotNull() =
                 if __.SpecialOfferID.IsNull() then None else Some(__.Read())
 
-        type SpecialOfferProductReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type SpecialOfferProductReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.SpecialOfferID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "SpecialOfferID")
             member __.ProductID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ProductID")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { SpecialOfferProduct.SpecialOfferID = __.SpecialOfferID.Read()
+                { SpecialOfferID = __.SpecialOfferID.Read()
                   ProductID = __.ProductID.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : SpecialOfferProduct
 
             member __.ReadIfNotNull() =
                 if __.SpecialOfferID.IsNull() then None else Some(__.Read())
 
-        type StoreReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type StoreReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.BusinessEntityID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "BusinessEntityID")
             member __.Name = RequiredColumn(reader, getOrdinal, reader.GetString, "Name")
             member __.SalesPersonID = OptionColumn(reader, getOrdinal, reader.GetInt32, "SalesPersonID")
@@ -2678,11 +2745,12 @@ module Sales =
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { Store.BusinessEntityID = __.BusinessEntityID.Read()
+                { BusinessEntityID = __.BusinessEntityID.Read()
                   Name = __.Name.Read()
                   SalesPersonID = __.SalesPersonID.Read()
                   rowguid = __.rowguid.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : Store
 
             member __.ReadIfNotNull() =
                 if __.BusinessEntityID.IsNull() then None else Some(__.Read())
@@ -2744,22 +2812,23 @@ module dbo =
     let ErrorLog = SqlHydra.Query.Table.table<ErrorLog>
 
     module Readers =
-        type AWBuildVersionReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type AWBuildVersionReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.SystemInformationID = RequiredColumn(reader, getOrdinal, reader.GetByte, "SystemInformationID")
             member __.``Database Version`` = RequiredColumn(reader, getOrdinal, reader.GetString, "Database Version")
             member __.VersionDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "VersionDate")
             member __.ModifiedDate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ModifiedDate")
 
             member __.Read() =
-                { AWBuildVersion.SystemInformationID = __.SystemInformationID.Read()
+                { SystemInformationID = __.SystemInformationID.Read()
                   ``Database Version`` = __.``Database Version``.Read()
                   VersionDate = __.VersionDate.Read()
                   ModifiedDate = __.ModifiedDate.Read() }
+                : AWBuildVersion
 
             member __.ReadIfNotNull() =
                 if __.SystemInformationID.IsNull() then None else Some(__.Read())
 
-        type DatabaseLogReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type DatabaseLogReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.DatabaseLogID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "DatabaseLogID")
             member __.PostTime = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "PostTime")
             member __.DatabaseUser = RequiredColumn(reader, getOrdinal, reader.GetString, "DatabaseUser")
@@ -2769,18 +2838,19 @@ module dbo =
             member __.TSQL = RequiredColumn(reader, getOrdinal, reader.GetString, "TSQL")
 
             member __.Read() =
-                { DatabaseLog.DatabaseLogID = __.DatabaseLogID.Read()
+                { DatabaseLogID = __.DatabaseLogID.Read()
                   PostTime = __.PostTime.Read()
                   DatabaseUser = __.DatabaseUser.Read()
                   Event = __.Event.Read()
                   Schema = __.Schema.Read()
                   Object = __.Object.Read()
                   TSQL = __.TSQL.Read() }
+                : DatabaseLog
 
             member __.ReadIfNotNull() =
                 if __.DatabaseLogID.IsNull() then None else Some(__.Read())
 
-        type ErrorLogReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type ErrorLogReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ErrorLogID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ErrorLogID")
             member __.ErrorTime = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ErrorTime")
             member __.UserName = RequiredColumn(reader, getOrdinal, reader.GetString, "UserName")
@@ -2792,7 +2862,7 @@ module dbo =
             member __.ErrorMessage = RequiredColumn(reader, getOrdinal, reader.GetString, "ErrorMessage")
 
             member __.Read() =
-                { ErrorLog.ErrorLogID = __.ErrorLogID.Read()
+                { ErrorLogID = __.ErrorLogID.Read()
                   ErrorTime = __.ErrorTime.Read()
                   UserName = __.UserName.Read()
                   ErrorNumber = __.ErrorNumber.Read()
@@ -2801,6 +2871,7 @@ module dbo =
                   ErrorProcedure = __.ErrorProcedure.Read()
                   ErrorLine = __.ErrorLine.Read()
                   ErrorMessage = __.ErrorMessage.Read() }
+                : ErrorLog
 
             member __.ReadIfNotNull() =
                 if __.ErrorLogID.IsNull() then None else Some(__.Read())
@@ -2827,31 +2898,33 @@ module ext =
     let GetIdGuidRepro = SqlHydra.Query.Table.table<GetIdGuidRepro>
 
     module Readers =
-        type DateTime2SupportReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type DateTime2SupportReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.ID = RequiredColumn(reader, getOrdinal, reader.GetInt32, "ID")
             member __.LessPrecision = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "LessPrecision")
             member __.MorePrecision = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "MorePrecision")
 
             member __.Read() =
-                { DateTime2Support.ID = __.ID.Read()
+                { ID = __.ID.Read()
                   LessPrecision = __.LessPrecision.Read()
                   MorePrecision = __.MorePrecision.Read() }
+                : DateTime2Support
 
             member __.ReadIfNotNull() =
                 if __.ID.IsNull() then None else Some(__.Read())
 
-        type GetIdGuidReproReader(reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
+        type GetIdGuidReproReader (reader: Microsoft.Data.SqlClient.SqlDataReader, getOrdinal) =
             member __.Id = RequiredColumn(reader, getOrdinal, reader.GetGuid, "Id")
             member __.EmailAddress = RequiredColumn(reader, getOrdinal, reader.GetString, "EmailAddress")
 
             member __.Read() =
-                { GetIdGuidRepro.Id = __.Id.Read()
+                { Id = __.Id.Read()
                   EmailAddress = __.EmailAddress.Read() }
+                : GetIdGuidRepro
 
             member __.ReadIfNotNull() =
                 if __.Id.IsNull() then None else Some(__.Read())
 
-type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
+type HydraReader (reader: Microsoft.Data.SqlClient.SqlDataReader) =
     let mutable accFieldCount = 0
     let buildGetOrdinal fieldCount =
         let dictionary = 
@@ -3166,29 +3239,28 @@ type HydraReader(reader: Microsoft.Data.SqlClient.SqlDataReader) =
         let wrapValue get (ord: int) = 
             if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
             elif isNullable then (if reader.IsDBNull ord then System.Nullable() else get ord |> System.Nullable) |> box
-            else get ord |> box 
+            else get ord |> box
 
         let wrapRef get (ord: int) = 
             if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
             else get ord |> box
         
-
         if t = typedefof<System.Guid> then Some(wrapValue reader.GetGuid)
-        else if t = typedefof<bool> then Some(wrapValue reader.GetBoolean)
-        else if t = typedefof<int> then Some(wrapValue reader.GetInt32)
-        else if t = typedefof<int64> then Some(wrapValue reader.GetInt64)
-        else if t = typedefof<int16> then Some(wrapValue reader.GetInt16)
-        else if t = typedefof<byte> then Some(wrapValue reader.GetByte)
-        else if t = typedefof<double> then Some(wrapValue reader.GetDouble)
-        else if t = typedefof<System.Single> then Some(wrapValue reader.GetFloat)
-        else if t = typedefof<decimal> then Some(wrapValue reader.GetDecimal)
-        else if t = typedefof<string> then Some(wrapRef reader.GetString)
-        else if t = typedefof<System.DateTimeOffset> then Some(wrapValue reader.GetDateTimeOffset)
-        else if t = typedefof<System.DateOnly> then Some(wrapValue reader.GetDateOnly)
-        else if t = typedefof<System.TimeOnly> then Some(wrapValue reader.GetTimeOnly)
-        else if t = typedefof<System.DateTime> then Some(wrapValue reader.GetDateTime)
-        else if t = typedefof<byte []> then Some(wrapRef reader.GetFieldValue<byte []>)
-        else if t = typedefof<obj> then Some(wrapRef reader.GetFieldValue)
+        elif t = typedefof<bool> then Some(wrapValue reader.GetBoolean)
+        elif t = typedefof<int> then Some(wrapValue reader.GetInt32)
+        elif t = typedefof<int64> then Some(wrapValue reader.GetInt64)
+        elif t = typedefof<int16> then Some(wrapValue reader.GetInt16)
+        elif t = typedefof<byte> then Some(wrapValue reader.GetByte)
+        elif t = typedefof<double> then Some(wrapValue reader.GetDouble)
+        elif t = typedefof<System.Single> then Some(wrapValue reader.GetFloat)
+        elif t = typedefof<decimal> then Some(wrapValue reader.GetDecimal)
+        elif t = typedefof<string> then Some(wrapRef reader.GetString)
+        elif t = typedefof<System.DateTimeOffset> then Some(wrapValue reader.GetDateTimeOffset)
+        elif t = typedefof<System.DateOnly> then Some(wrapValue reader.GetDateOnly)
+        elif t = typedefof<System.TimeOnly> then Some(wrapValue reader.GetTimeOnly)
+        elif t = typedefof<System.DateTime> then Some(wrapValue reader.GetDateTime)
+        elif t = typedefof<byte[]> then Some(wrapRef reader.GetFieldValue<byte[]>)
+        elif t = typedefof<obj> then Some(wrapRef reader.GetFieldValue)
         else None
 
     static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 

@@ -25,7 +25,7 @@ let lazySchema = lazy OracleSchemaProvider.getSchema cfg
 
 let getCode cfg = 
     lazySchema.Value
-    |> SchemaGenerator.generateModule cfg AppInfo.info
+    |> SchemaGenerator.generate cfg AppInfo.info
     |> SchemaGenerator.toFormattedCode cfg AppInfo.info "---"
 
 let inCode (str: string) cfg = 
