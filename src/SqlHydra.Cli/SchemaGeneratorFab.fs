@@ -97,16 +97,18 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
 
             IfThenElifExpr(ConstantExpr("None", false)) {
                 for i, ptr in db.PrimitiveTypeReaders |> Seq.indexed do
-                    if i = 0 then 
-                        IfThenExpr( 
-                            ConstantExpr($"t = typedefof<{ptr.ClrType}>", false),
-                            ConstantExpr($"Some({wrapFnName ptr} reader.{ptr.ReaderMethod})", false)
-                        )                
-                    else                 
-                        ElIfThenExpr(
-                            ConstantExpr($"t = typedefof<{ptr.ClrType}>", false),
-                            ConstantExpr($"Some({wrapFnName ptr} reader.{ptr.ReaderMethod})", false)
-                        )
+                    
+                    let readerGetFieldValueMethod =
+                        if ptr.ClrType.EndsWith "[]"
+                        then $"GetFieldValue<{ptr.ClrType}>" // handles array types
+                        else $"{ptr.ReaderMethod}"
+                    
+                    let ifExpr = ConstantExpr($"t = typedefof<{ptr.ClrType}>", false)
+                    let elExpr = ConstantExpr($"Some({wrapFnName ptr} reader.{readerGetFieldValueMethod})", false)
+
+                    if i = 0 
+                    then IfThenExpr(ifExpr, elExpr)
+                    else ElIfThenExpr(ifExpr, elExpr)
             }
         )
             .toPrivate()
