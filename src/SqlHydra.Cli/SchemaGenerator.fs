@@ -1,4 +1,4 @@
-﻿module SqlHydra.SchemaGeneratorFab
+﻿module SqlHydra.SchemaGenerator
 
 open Domain
 open Fantomas.Core

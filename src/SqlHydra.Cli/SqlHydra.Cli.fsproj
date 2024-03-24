@@ -37,7 +37,7 @@
 		<Compile Include="Npgsql\NpgsqlDataTypes.fs" />
 		<Compile Include="Npgsql\NpgsqlSchemaProvider.fs" />
 		<Compile Include="Npgsql\AppInfo.fs" />
-		<Compile Include="SchemaGeneratorFab.fs" />
+		<Compile Include="SchemaGenerator.fs" />
 		<Compile Include="TomlConfigParser.fs" />
 		<Compile Include="Fsproj.fs" />
 		<Compile Include="Console.fs" />
