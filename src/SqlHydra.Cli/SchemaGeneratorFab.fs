@@ -89,26 +89,27 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                 ParameterPat("isOpt", Boolean())
                 ParameterPat("isNullable", Boolean())
             },
-            
-            /// if t = typedefof<System.Guid> then Some(wrapValue reader.GetGuid)
-            let mkIfThenElse elseExpr primitiveTypeReader =
-                let wrapFnName = 
-                    if primitiveTypeReader.ClrType |> isValueType
-                    then "wrapValue"
-                    else "wrapRef"
 
-                IfThenElseExpr(
-                    ConstantExpr($"t = typedefof<{primitiveTypeReader.ClrType}>", false),
-                    ConstantExpr($"Some({wrapFnName} reader.{primitiveTypeReader.ReaderMethod})", false),
-                    elseExpr
+            let wrapFnName (ptr: PrimitiveTypeReader) = 
+                if ptr.ClrType |> isValueType
+                then "wrapValue"
+                else "wrapRef"
+            
+            let lst = db.PrimitiveTypeReaders |> Seq.toList
+            let ptr = lst.Head
+                        
+            IfThenElifExpr(ConstantExpr("None", false)) {
+                IfThenExpr( 
+                    ConstantExpr($"t = typedefof<{ptr.ClrType}>", false),
+                    ConstantExpr($"Some({wrapFnName ptr} reader.{ptr.ReaderMethod})", false)
                 )
-
-            let ifThenElse = 
-                db.PrimitiveTypeReaders 
-                |> Seq.rev
-                |> Seq.fold mkIfThenElse (ConstantExpr("None", false))
-            
-            ifThenElse
+                
+                for ptr in lst.Tail do
+                    ElIfThenExpr(
+                        ConstantExpr($"t = typedefof<{ptr.ClrType}>", false),
+                        ConstantExpr($"Some({wrapFnName ptr} reader.{ptr.ReaderMethod})", false)
+                    )
+            }
         )
             .toPrivate()
             .toStatic()
@@ -367,8 +368,8 @@ let toFormattedCode (cfg: Config) (app: AppInfo) (version: string) (ast: WidgetB
 
     let cfg = 
         { FormatConfig.Default with 
-            //FormatConfig.MaxIfThenShortWidth = 100
-            //FormatConfig.MaxIfThenElseShortWidth = 100           // Forces ReadIfNotNull if/then to be on a single line
+            //FormatConfig.MaxIfThenShortWidth = 1000
+            FormatConfig.MaxIfThenElseShortWidth = 100           // Forces ReadIfNotNull if/then to be on a single line
             FormatConfig.MaxValueBindingWidth = 400              // Ensure reader property/column bindings stay on one line
             FormatConfig.MaxLineLength = 400                     // Ensure reader property/column bindings stay on one line
         }
