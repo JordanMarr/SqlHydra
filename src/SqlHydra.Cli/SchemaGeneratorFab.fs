@@ -113,6 +113,16 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
         )
             .toPrivate()
             .toStatic()
+
+        // static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
+        // (use a placeholder method)
+        Method("Read", 
+            ParametersPat(true) {
+                ParameterPat("reader", rdrCfg.ReaderType)
+            },
+            ConstantExpr("// ReadMethodBodyPlaceholder", false)
+        )
+            .toStatic()
     }    
 
 /// Generates the outer module and table records.
@@ -360,6 +370,45 @@ let substitutions (app: AppInfo) : (string * string) list =
         // HydraReader class AccFieldCount property
         "member __.AccFieldCount = \"\"",
         "member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value"
+
+        // HydraReader Read Method Body
+        "// ReadMethodBodyPlaceholder",
+        $"""
+        let hydra = HydraReader(reader)
+        {if app.Name = "SqlHydra.Oracle" then "reader.SuppressGetDecimalInvalidCastException <- true" else ""}            
+        let getOrdinalAndIncrement() = 
+            let ordinal = hydra.AccFieldCount
+            hydra.AccFieldCount <- hydra.AccFieldCount + 1
+            ordinal
+            
+        let buildEntityReadFn (t: System.Type) = 
+            let t, isOpt, isNullable = 
+                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> then t.GenericTypeArguments.[0], true, false
+                elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>> then t.GenericTypeArguments.[0], false, true
+                else t, false, false
+            
+            match HydraReader.GetPrimitiveReader(t, reader, isOpt, isNullable) with
+            | Some primitiveReader -> 
+                let ord = getOrdinalAndIncrement()
+                fun () -> primitiveReader ord
+            | None ->
+                let nameParts = t.FullName.Split([| '.'; '+' |])
+                let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join(".", parts)
+                hydra.GetReaderByName(schemaAndType, isOpt)
+            
+        // Return a fn that will hydrate 'T (which may be a tuple)
+        // This fn will be called once per each record returned by the data reader.
+        let t = typeof<'T>
+        if FSharp.Reflection.FSharpType.IsTuple(t) then
+            let readEntityFns = FSharp.Reflection.FSharpType.GetTupleElements(t) |> Array.map buildEntityReadFn
+            fun () ->
+                let entities = readEntityFns |> Array.map (fun read -> read())
+                Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(entities, t) :?> 'T
+        else
+            let readEntityFn = t |> buildEntityReadFn
+            fun () -> 
+                readEntityFn() :?> 'T
+        """
     ]
 
 /// Formats the generated code using Fantomas.
