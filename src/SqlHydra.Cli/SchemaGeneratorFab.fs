@@ -94,21 +94,19 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                 if ptr.ClrType |> isValueType
                 then "wrapValue"
                 else "wrapRef"
-            
-            let lst = db.PrimitiveTypeReaders |> Seq.toList
-            let ptr = lst.Head
-                        
+
             IfThenElifExpr(ConstantExpr("None", false)) {
-                IfThenExpr( 
-                    ConstantExpr($"t = typedefof<{ptr.ClrType}>", false),
-                    ConstantExpr($"Some({wrapFnName ptr} reader.{ptr.ReaderMethod})", false)
-                )
-                
-                for ptr in lst.Tail do
-                    ElIfThenExpr(
-                        ConstantExpr($"t = typedefof<{ptr.ClrType}>", false),
-                        ConstantExpr($"Some({wrapFnName ptr} reader.{ptr.ReaderMethod})", false)
-                    )
+                for i, ptr in db.PrimitiveTypeReaders |> Seq.indexed do
+                    if i = 0 then 
+                        IfThenExpr( 
+                            ConstantExpr($"t = typedefof<{ptr.ClrType}>", false),
+                            ConstantExpr($"Some({wrapFnName ptr} reader.{ptr.ReaderMethod})", false)
+                        )                
+                    else                 
+                        ElIfThenExpr(
+                            ConstantExpr($"t = typedefof<{ptr.ClrType}>", false),
+                            ConstantExpr($"Some({wrapFnName ptr} reader.{ptr.ReaderMethod})", false)
+                        )
             }
         )
             .toPrivate()
