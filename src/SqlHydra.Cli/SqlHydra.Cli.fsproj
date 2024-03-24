@@ -37,7 +37,6 @@
 		<Compile Include="Npgsql\NpgsqlDataTypes.fs" />
 		<Compile Include="Npgsql\NpgsqlSchemaProvider.fs" />
 		<Compile Include="Npgsql\AppInfo.fs" />
-		<Compile Include="SchemaGenerator.fs" />
 		<Compile Include="SchemaGeneratorFab.fs" />
 		<Compile Include="TomlConfigParser.fs" />
 		<Compile Include="Fsproj.fs" />
@@ -59,8 +58,6 @@
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Include="FSharp.SystemCommandLine" Version="0.15.0-beta4" />
-		<PackageReference Include="Fantomas" Version="4.5.10" />
-		<PackageReference Include="FsAst" Version="0.10.0" />
 		<PackageReference Include="Glob" Version="1.1.9" />
 		<PackageReference Include="Microsoft.Build" Version="16.11.0" />
 		<PackageReference Include="Spectre.Console" Version="0.48.0" />

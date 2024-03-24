@@ -1,8 +1,6 @@
 ﻿module SqlHydra.SchemaGeneratorFab
 
 open Domain
-open System.Data
-open SqlHydra.SchemaFilters
 open Fantomas.Core
 open Fantomas.FCS.Text
 open Fabulous.AST

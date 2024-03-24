@@ -6,7 +6,7 @@ open FsAst
 open Fantomas
 open Domain
 open System.Data
-open SqlHydra.SchemaFilters
+
 
 let range0 = FSharp.Compiler.Text.range.Zero
 
