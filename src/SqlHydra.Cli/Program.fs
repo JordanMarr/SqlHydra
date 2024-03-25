@@ -26,7 +26,7 @@ let handler (provider: string, tomlFile: IO.FileInfo option, project: IO.FileInf
             GetSchema = getSchema
             TomlFile = tomlFile |> Option.defaultWith (fun () -> IO.FileInfo($"sqlhydra-{provider}.toml"))
             Project = projectOrFirstFound
-            Version = Reflection.Assembly.GetAssembly(typeof<Console.Args>).GetName().Version |> string
+            Version = Version.get()
             ConnectionString = connString
         }
 

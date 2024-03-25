@@ -41,6 +41,7 @@
 		<Compile Include="TomlConfigParser.fs" />
 		<Compile Include="Fsproj.fs" />
 		<Compile Include="Console.fs" />
+		<Compile Include="Version.fs" />
 		<Compile Include="Program.fs" />
 	</ItemGroup>
 
