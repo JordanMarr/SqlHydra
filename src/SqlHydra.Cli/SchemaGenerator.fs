@@ -142,8 +142,11 @@ let generateNamespace (cfg: Config) (app: AppInfo) (db: Schema) =
     
     Namespace(cfg.Namespace) {
 
+        Open "SqlHydra"
+        Open "SqlHydra.Query.Table"
+
         if cfg.Readers.IsSome then 
-            Open("Substitue.ColumnReadersModule")
+            Open "Substitue.ColumnReadersModule"
 
         // Schema modules with enums, tables and readers
         for schema in schemas do
@@ -205,7 +208,7 @@ let generateNamespace (cfg: Config) (app: AppInfo) (db: Schema) =
                                 let field = Field(col.Name, columnPropertyType)
                                 match col.TypeMapping.ProviderDbType with
                                 | Some providerDbType -> 
-                                    field.attribute(Attribute($"SqlHydra.ProviderDbType(\"{providerDbType}\")"))
+                                    field.attribute(Attribute($"ProviderDbType(\"{providerDbType}\")"))
                                 | _ -> 
                                     field
                         }
@@ -215,7 +218,7 @@ let generateNamespace (cfg: Config) (app: AppInfo) (db: Schema) =
                     else tableRecord
 
                     if cfg.TableDeclarations then
-                        Value(table.Name, Unquoted $"SqlHydra.Query.Table.table<{backticks table.Name}>")
+                        Value(table.Name, Unquoted $"table<{backticks table.Name}>")
 
                 // Add "Readers" module if readers are enabled
                 match cfg.Readers with
