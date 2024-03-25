@@ -11,69 +11,73 @@ let range0 = range.Zero
 let backticks = Fantomas.FCS.Syntax.PrettyNaming.NormalizeIdentifierBackticks
 
 /// Creates a "HydraReader" class with properties for each table in a given schema.
-let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (allTables: Table seq) = 
+let generateHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (allTables: Table seq) = 
     Class(
         "HydraReader", 
-        Constructor() {
-            SimplePat("reader", rdrCfg.ReaderType, false)
-        }        
+        Constructor(            
+            ParenPat(ParameterPat("reader", LongIdent(rdrCfg.ReaderType)))
+        )        
     ) {
         // Backing fields
-        Value("buildGetOrdinal", ConstantExpr(""))
+        Value("accFieldCount", Unquoted "0").toMutable()
 
         for table in allTables do             
             // let lazyPersonEmailAddress = lazy (Person.Readers.EmailAddressReader(reader, buildGetOrdinal 5))
             Value(
                 $"lazy{backticks table.Schema}{backticks table.Name}", 
-                ConstantExpr($"lazy ({backticks table.Schema}.Readers.{backticks table.Name}Reader(reader, buildGetOrdinal {table.TotalColumns}))", 
-                false)
+                ConstantExpr(Unquoted $"lazy ({backticks table.Schema}.Readers.{backticks table.Name}Reader(reader, buildGetOrdinal {table.TotalColumns}))")
             )
 
         for table in allTables do 
             // member __.``HumanResources.Department`` = lazyHumanResourcesDepartment.Value
-            Property($"__.``{table.Schema}.{table.Name}``", ConstantExpr($"lazy{table.Schema}{table.Name}.Value", false))
+            Property($"__.``{table.Schema}.{table.Name}``", Unquoted $"lazy{table.Schema}{table.Name}.Value")
 
         // member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value
         // (Use a placeholder property until get/set properties are added to Fabulous.AST)
-        Property("__.AccFieldCount", ConstantExpr(""))
+        Property("__.AccFieldCount", Unquoted "0")
 
         // Method: member private __.GetReaderByName(entity: string, isOption: bool) =
-        Method("__.GetReaderByName", 
-            ParametersPat(true) {
-                ParameterPat("entity", String())
-                ParameterPat("isOption", Boolean())
-            },
+        Method(
+            "__.GetReaderByName",
+            ParenPat (
+                TuplePat [
+                    ParameterPat("entity", String())
+                    ParameterPat("isOption", Boolean())
+                ]
+            ),
 
             // match entity, isOption with
             MatchExpr(
-                TupleExpr() {
-                    ConstantExpr("entity", false)
-                    ConstantExpr("isOption", false)
-                }
+                TupleExpr [
+                    ConstantExpr(Unquoted "entity")
+                    ConstantExpr(Unquoted "isOption")
+                ]
             ) {
                 for table in allTables do
                     // | "OT.CONTACTS", false -> __.``OT.CONTACTS``.Read >> box
                     
                     // match case: isOption = false
                     MatchClauseExpr(
-                        TuplePat() {
+                        TuplePat [
                             ConstantPat($"\"{table.Schema}.{table.Name}\"")
                             ConstantPat("false")
-                        }, ConstantExpr(Constant($"__.``{table.Schema}.{table.Name}``.Read >> box", false))
+                        ], 
+                        ConstantExpr(Unquoted $"__.``{table.Schema}.{table.Name}``.Read >> box")
                     )
 
                     // match case: isOption = true
                     MatchClauseExpr(
-                        TuplePat() {
+                        TuplePat [
                             ConstantPat($"\"{table.Schema}.{table.Name}\"")
                             ConstantPat("true")
-                        }, ConstantExpr(Constant($"__.``{table.Schema}.{table.Name}``.ReadIfNotNull >> box", false))
+                        ], 
+                        ConstantExpr(Unquoted $"__.``{table.Schema}.{table.Name}``.ReadIfNotNull >> box")
                     )
 
                 //| _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
                 MatchClauseExpr(
                     WildPat(), 
-                    ConstantExpr("failwith $\"Could not read type '{entity}' because no generated reader exists.\"", false)
+                    ConstantExpr(Unquoted "failwith $\"Could not read type '{entity}' because no generated reader exists.\"")
                 )
             }            
         )
@@ -81,19 +85,21 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
 
         // Method: static member private GetPrimitiveReader(t: System.Type, reader: Microsoft.Data.SqlClient.SqlDataReader, isOpt: bool, isNullable: bool) =
         Method("GetPrimitiveReader", 
-            ParametersPat(true) {
-                ParameterPat("t", "System.Type")
-                ParameterPat("reader", rdrCfg.ReaderType)
-                ParameterPat("isOpt", Boolean())
-                ParameterPat("isNullable", Boolean())
-            },
+            ParenPat(
+                TuplePat [
+                    ParameterPat("t", LongIdent "System.Type")
+                    ParameterPat("reader", LongIdent rdrCfg.ReaderType)
+                    ParameterPat("isOpt", Boolean())
+                    ParameterPat("isNullable", Boolean())
+                ]
+            ),
 
             let wrapFnName (ptr: PrimitiveTypeReader) = 
                 if ptr.ClrType |> isValueType
                 then "wrapValue"
                 else "wrapRef"
 
-            IfThenElifExpr(ConstantExpr("None", false)) {
+            IfThenElifExpr(ConstantExpr(Unquoted "None")) {
                 for i, ptr in db.PrimitiveTypeReaders |> Seq.indexed do
                     
                     let readerGetFieldValueMethod =
@@ -101,8 +107,8 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
                         then $"GetFieldValue<{ptr.ClrType}>" // handles array types
                         else $"{ptr.ReaderMethod}"
                     
-                    let ifExpr = ConstantExpr($"t = typedefof<{ptr.ClrType}>", false)
-                    let elExpr = ConstantExpr($"Some({wrapFnName ptr} reader.{readerGetFieldValueMethod})", false)
+                    let ifExpr = ConstantExpr(Unquoted $"t = typedefof<{ptr.ClrType}>")
+                    let elExpr = ConstantExpr(Unquoted $"Some({wrapFnName ptr} reader.{readerGetFieldValueMethod})")
 
                     if i = 0 
                     then IfThenExpr(ifExpr, elExpr)
@@ -115,16 +121,16 @@ let createHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo) (
         // static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
         // (use a placeholder method)
         Method("Read", 
-            ParametersPat(true) {
-                ParameterPat("reader", rdrCfg.ReaderType)
-            },
-            ConstantExpr("// ReadMethodBodyPlaceholder", false)
+            ParenPat(
+                ParameterPat("reader", LongIdent rdrCfg.ReaderType)
+            ),
+            ConstantExpr(Unquoted "// ReadMethodBodyPlaceholder")
         )
             .toStatic()
     }    
 
 /// Generates the outer module and table records.
-let generate (cfg: Config) (app: AppInfo) (db: Schema) = 
+let generateNamespace (cfg: Config) (app: AppInfo) (db: Schema) = 
     let filteredTables = 
         db.Tables 
         |> List.sortBy (fun tbl -> tbl.Schema, tbl.Name)
@@ -202,7 +208,6 @@ let generate (cfg: Config) (app: AppInfo) (db: Schema) =
                                     field.attribute(Attribute($"SqlHydra.ProviderDbType(\"{providerDbType}\")"))
                                 | _ -> 
                                     field
-
                         }
 
                     if cfg.IsCLIMutable 
@@ -210,17 +215,24 @@ let generate (cfg: Config) (app: AppInfo) (db: Schema) =
                     else tableRecord
 
                     if cfg.TableDeclarations then
-                        Value(table.Name, $"SqlHydra.Query.Table.table<{backticks table.Name}>", false)
+                        Value(table.Name, Unquoted $"SqlHydra.Query.Table.table<{backticks table.Name}>")
 
                 // Add "Readers" module if readers are enabled
                 match cfg.Readers with
                 | Some readers -> 
                     NestedModule("Readers") {
                         for table in tables do 
-                            Class($"{backticks table.Name}Reader", Constructor() {
-                                SimplePat("reader", readers.ReaderType, false)
-                                SimplePat("getOrdinal", false)
-                            }) {
+                            Class(
+                                $"{backticks table.Name}Reader", 
+                                Constructor(
+                                    ParenPat(
+                                        TuplePat [
+                                            ParameterPat("reader", LongIdent readers.ReaderType)
+                                            ParameterPat("getOrdinal")
+                                        ]
+                                    )
+                                )
+                            ) {
                                 for col in table.Columns do
 
                                     let columnReaderType =
@@ -235,20 +247,22 @@ let generate (cfg: Config) (app: AppInfo) (db: Schema) =
                                         else 
                                             "RequiredColumn"
 
-                                    Property($"__.{backticks col.Name}", ConstantExpr($"{columnReaderType}(reader, getOrdinal, reader.{col.TypeMapping.ReaderMethod}, \"{col.Name}\")", false))
+                                    Property($"__.{backticks col.Name}", Unquoted $"{columnReaderType}(reader, getOrdinal, reader.{col.TypeMapping.ReaderMethod}, \"{col.Name}\")")
 
-                                Method("__.Read", 
+                                Method(
+                                    "__.Read", 
                                     UnitPat(),                                     
                                     let recordExpr = 
                                         RecordExpr() { 
                                             for col in table.Columns do
-                                                RecordFieldExpr(backticks col.Name, ConstantExpr($"__.{backticks col.Name}.Read()", false))
+                                                RecordFieldExpr(backticks col.Name, ConstantExpr(Unquoted $"__.{backticks col.Name}.Read()"))
                                         }
 
                                     TypedExpr(recordExpr, ":", LongIdent(backticks table.Name))                                    
                                 )
 
-                                Method("__.ReadIfNotNull",
+                                Method(
+                                    "__.ReadIfNotNull",
                                     UnitPat(),
 
                                     // Try to get the first PK, or else the first required field, or else the first optional field (as a last resort)
@@ -268,12 +282,12 @@ let generate (cfg: Config) (app: AppInfo) (db: Schema) =
 
                                         // if __.BusinessEntityID.IsNull() then None else Some(__.Read())
                                         IfThenElseExpr(
-                                            ConstantExpr($"__.{backticks pkCol}.IsNull()", false), 
-                                            ConstantExpr("None", false), 
-                                            ConstantExpr("Some(__.Read())", false)
+                                            ConstantExpr(Unquoted $"__.{backticks pkCol}.IsNull()"), 
+                                            ConstantExpr(Unquoted "None"), 
+                                            ConstantExpr(Unquoted "Some(__.Read())")
                                         )
                                     | None -> 
-                                        ConstantExpr("None", false)
+                                        ConstantExpr(Unquoted "None")
                                 )
                             }
                     }
@@ -284,8 +298,15 @@ let generate (cfg: Config) (app: AppInfo) (db: Schema) =
         // Create "HydraReader" below all generated tables/readers...
         if cfg.Readers.IsSome then
             let allTables = schemas |> List.collect (fun schema -> filteredTables |> List.filter (fun t -> t.Schema = schema))
-            createHydraReaderClass db cfg.Readers.Value app allTables
+            generateHydraReaderClass db cfg.Readers.Value app allTables
     }
+
+/// Generates the entire schema.
+let generate (cfg: Config) (app: AppInfo) (db: Schema) = 
+    Oak() {
+        generateNamespace cfg app db
+    }
+    
 
 let columnReadersModule = $"""
 [<AutoOpen>]
@@ -338,7 +359,7 @@ let substitutions (app: AppInfo) : (string * string) list =
         "open Substitue.ColumnReadersModule", columnReadersModule
 
         // HydraReader utility functions
-        "let buildGetOrdinal = \"\"", 
+        "let mutable accFieldCount = 0", 
         """let mutable accFieldCount = 0
     let buildGetOrdinal fieldCount =
         let dictionary = 
@@ -366,7 +387,7 @@ let substitutions (app: AppInfo) : (string * string) list =
         """
 
         // HydraReader class AccFieldCount property
-        "member __.AccFieldCount = \"\"",
+        "member __.AccFieldCount = 0",
         "member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value"
 
         // HydraReader Read Method Body
