@@ -2,6 +2,7 @@ module SqlHydra.SchemaFilters
 
 open GlobExpressions
 open SqlHydra.Domain
+open Spectre.Console
 
 /// Applies glob include and exclude patterns to filter schemas and tables.
 let inline filterTables (filters: Filters) (tables: 'Table seq when 'Table : (member Schema: string) and 'Table : (member Name: string)) = 
@@ -28,6 +29,12 @@ let inline filterTables (filters: Filters) (tables: 'Table seq when 'Table : (me
         
         let filteredPaths = includedPaths - excludedPaths
         let filteredTables = filteredPaths |> Seq.map (fun path -> tablesByPath.[path]) |> Seq.toList
+        
+        AnsiConsole.MarkupLineInterpolated($"[blue]-[/] Filters:")
+        AnsiConsole.MarkupLineInterpolated($"  [green]Include: [{filters.Includes}][/]")
+        AnsiConsole.MarkupLineInterpolated($"  [red]Exclude: [{filters.Excludes}][/]")
+        AnsiConsole.MarkupLineInterpolated($"[blue]-[/] Tables: {Seq.length filteredTables} of {Seq.length tables}")
+
         filteredTables
 
 /// Applies glob include and exclude patterns to filter columns.

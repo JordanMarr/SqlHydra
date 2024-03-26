@@ -126,6 +126,7 @@ let tryLoadConfig(tomlFile: FileInfo) =
 
 /// Creates a sqlhydra-*.toml file if necessary.
 let getOrCreateConfig (args: Args) = 
+    AnsiConsole.WriteLine()
     AnsiConsole.MarkupLine($"[blue]-[/] {args.AppInfo.Name}")
     AnsiConsole.MarkupLine($"[blue]-[/] v[yellow]{args.Version}[/]")
 
