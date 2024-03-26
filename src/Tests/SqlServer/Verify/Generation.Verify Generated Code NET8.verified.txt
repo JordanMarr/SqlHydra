@@ -1,5 +1,7 @@
 ﻿namespace TestNS
 
+open SqlHydra
+open SqlHydra.Query.Table
 
 [<AutoOpen>]
 module ColumnReaders =
@@ -47,270 +49,270 @@ module private DataReaderExtensions =
 module HumanResources =
     [<CLIMutable>]
     type Department =
-        { [<SqlHydra.ProviderDbType("SmallInt")>]
+        { [<ProviderDbType("SmallInt")>]
           DepartmentID: int16
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           GroupName: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type Employee =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           NationalIDNumber: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           LoginID: string
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           OrganizationLevel: Option<int16>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           JobTitle: string
-          [<SqlHydra.ProviderDbType("Date")>]
+          [<ProviderDbType("Date")>]
           BirthDate: System.DateOnly
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           MaritalStatus: string
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           Gender: string
-          [<SqlHydra.ProviderDbType("Date")>]
+          [<ProviderDbType("Date")>]
           HireDate: System.DateOnly
-          [<SqlHydra.ProviderDbType("Bit")>]
+          [<ProviderDbType("Bit")>]
           SalariedFlag: bool
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           VacationHours: int16
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           SickLeaveHours: int16
-          [<SqlHydra.ProviderDbType("Bit")>]
+          [<ProviderDbType("Bit")>]
           CurrentFlag: bool
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type EmployeeDepartmentHistory =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           DepartmentID: int16
-          [<SqlHydra.ProviderDbType("TinyInt")>]
+          [<ProviderDbType("TinyInt")>]
           ShiftID: byte
-          [<SqlHydra.ProviderDbType("Date")>]
+          [<ProviderDbType("Date")>]
           StartDate: System.DateOnly
-          [<SqlHydra.ProviderDbType("Date")>]
+          [<ProviderDbType("Date")>]
           EndDate: Option<System.DateOnly>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type EmployeePayHistory =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           RateChangeDate: System.DateTime
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           Rate: decimal
-          [<SqlHydra.ProviderDbType("TinyInt")>]
+          [<ProviderDbType("TinyInt")>]
           PayFrequency: byte
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type JobCandidate =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           JobCandidateID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           BusinessEntityID: Option<int>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type Shift =
-        { [<SqlHydra.ProviderDbType("TinyInt")>]
+        { [<ProviderDbType("TinyInt")>]
           ShiftID: byte
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("Time")>]
+          [<ProviderDbType("Time")>]
           StartTime: System.TimeOnly
-          [<SqlHydra.ProviderDbType("Time")>]
+          [<ProviderDbType("Time")>]
           EndTime: System.TimeOnly
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type vEmployee =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Title: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           FirstName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           MiddleName: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           LastName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Suffix: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           JobTitle: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PhoneNumber: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PhoneNumberType: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           EmailAddress: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           EmailPromotion: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressLine1: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressLine2: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           City: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           StateProvinceName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PostalCode: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           CountryRegionName: string }
 
     [<CLIMutable>]
     type vEmployeeDepartment =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Title: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           FirstName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           MiddleName: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           LastName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Suffix: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           JobTitle: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Department: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           GroupName: string
-          [<SqlHydra.ProviderDbType("Date")>]
+          [<ProviderDbType("Date")>]
           StartDate: System.DateOnly }
 
     [<CLIMutable>]
     type vEmployeeDepartmentHistory =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Title: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           FirstName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           MiddleName: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           LastName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Suffix: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Shift: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Department: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           GroupName: string
-          [<SqlHydra.ProviderDbType("Date")>]
+          [<ProviderDbType("Date")>]
           StartDate: System.DateOnly
-          [<SqlHydra.ProviderDbType("Date")>]
+          [<ProviderDbType("Date")>]
           EndDate: Option<System.DateOnly> }
 
     [<CLIMutable>]
     type vJobCandidate =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           JobCandidateID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           BusinessEntityID: Option<int>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Name.Prefix``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Name.First``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Name.Middle``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Name.Last``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Name.Suffix``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Skills: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Addr.Type``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Addr.Loc.CountryRegion``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Addr.Loc.State``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Addr.Loc.City``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Addr.PostalCode``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           EMail: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           WebSite: Option<string>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type vJobCandidateEducation =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           JobCandidateID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Edu.Level``: Option<string>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ``Edu.StartDate``: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ``Edu.EndDate``: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Edu.Degree``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Edu.Major``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Edu.Minor``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Edu.GPA``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Edu.GPAScale``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Edu.School``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Edu.Loc.CountryRegion``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Edu.Loc.State``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Edu.Loc.City``: Option<string> }
 
     [<CLIMutable>]
     type vJobCandidateEmployment =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           JobCandidateID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ``Emp.StartDate``: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ``Emp.EndDate``: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Emp.OrgName``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Emp.JobTitle``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Emp.Responsibility``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Emp.FunctionCategory``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Emp.IndustryCategory``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Emp.Loc.CountryRegion``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Emp.Loc.State``: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Emp.Loc.City``: Option<string> }
 
     module Readers =
@@ -645,229 +647,229 @@ module HumanResources =
 module Person =
     [<CLIMutable>]
     type Address =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           AddressID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressLine1: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressLine2: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           City: string
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           StateProvinceID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PostalCode: string
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type AddressType =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           AddressTypeID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type BusinessEntity =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type BusinessEntityAddress =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           AddressID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           AddressTypeID: int
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type BusinessEntityContact =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           PersonID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ContactTypeID: int
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ContactType =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ContactTypeID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type CountryRegion =
-        { [<SqlHydra.ProviderDbType("NVarChar")>]
+        { [<ProviderDbType("NVarChar")>]
           CountryRegionCode: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type EmailAddress =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           EmailAddressID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           EmailAddress: Option<string>
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type Password =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("VarChar")>]
+          [<ProviderDbType("VarChar")>]
           PasswordHash: string
-          [<SqlHydra.ProviderDbType("VarChar")>]
+          [<ProviderDbType("VarChar")>]
           PasswordSalt: string
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type Person =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           PersonType: string
-          [<SqlHydra.ProviderDbType("Bit")>]
+          [<ProviderDbType("Bit")>]
           NameStyle: bool
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Title: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           FirstName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           MiddleName: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           LastName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Suffix: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           EmailPromotion: int
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type PersonPhone =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PhoneNumber: string
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           PhoneNumberTypeID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type PhoneNumberType =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           PhoneNumberTypeID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type StateProvince =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           StateProvinceID: int
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           StateProvinceCode: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           CountryRegionCode: string
-          [<SqlHydra.ProviderDbType("Bit")>]
+          [<ProviderDbType("Bit")>]
           IsOnlyStateProvinceFlag: bool
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           TerritoryID: int
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type vAdditionalContactInfo =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           FirstName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           MiddleName: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           LastName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           TelephoneNumber: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           TelephoneSpecialInstructions: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Street: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           City: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           StateProvince: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PostalCode: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           CountryRegion: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           HomeAddressSpecialInstructions: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           EMailAddress: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           EMailSpecialInstructions: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           EMailTelephoneNumber: Option<string>
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type vStateProvinceCountryRegion =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           StateProvinceID: int
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           StateProvinceCode: string
-          [<SqlHydra.ProviderDbType("Bit")>]
+          [<ProviderDbType("Bit")>]
           IsOnlyStateProvinceFlag: bool
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           StateProvinceName: string
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           TerritoryID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           CountryRegionCode: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           CountryRegionName: string }
 
     module Readers =
@@ -1176,496 +1178,496 @@ module Person =
 module Production =
     [<CLIMutable>]
     type BillOfMaterials =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BillOfMaterialsID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductAssemblyID: Option<int>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ComponentID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           StartDate: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           EndDate: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           UnitMeasureCode: string
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           BOMLevel: int16
-          [<SqlHydra.ProviderDbType("Decimal")>]
+          [<ProviderDbType("Decimal")>]
           PerAssemblyQty: decimal
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type Culture =
-        { [<SqlHydra.ProviderDbType("NChar")>]
+        { [<ProviderDbType("NChar")>]
           CultureID: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type Document =
-        { [<SqlHydra.ProviderDbType("SmallInt")>]
+        { [<ProviderDbType("SmallInt")>]
           DocumentLevel: Option<int16>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Title: string
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           Owner: int
-          [<SqlHydra.ProviderDbType("Bit")>]
+          [<ProviderDbType("Bit")>]
           FolderFlag: bool
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           FileName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           FileExtension: string
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           Revision: string
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ChangeNumber: int
-          [<SqlHydra.ProviderDbType("TinyInt")>]
+          [<ProviderDbType("TinyInt")>]
           Status: byte
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           DocumentSummary: Option<string>
-          [<SqlHydra.ProviderDbType("VarBinary")>]
+          [<ProviderDbType("VarBinary")>]
           Document: Option<byte []>
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type Illustration =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           IllustrationID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type Location =
-        { [<SqlHydra.ProviderDbType("SmallInt")>]
+        { [<ProviderDbType("SmallInt")>]
           LocationID: int16
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("SmallMoney")>]
+          [<ProviderDbType("SmallMoney")>]
           CostRate: decimal
-          [<SqlHydra.ProviderDbType("Decimal")>]
+          [<ProviderDbType("Decimal")>]
           Availability: decimal
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type Product =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ProductNumber: string
-          [<SqlHydra.ProviderDbType("Bit")>]
+          [<ProviderDbType("Bit")>]
           MakeFlag: bool
-          [<SqlHydra.ProviderDbType("Bit")>]
+          [<ProviderDbType("Bit")>]
           FinishedGoodsFlag: bool
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Color: Option<string>
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           SafetyStockLevel: int16
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           ReorderPoint: int16
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           StandardCost: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           ListPrice: decimal
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Size: Option<string>
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           SizeUnitMeasureCode: Option<string>
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           WeightUnitMeasureCode: Option<string>
-          [<SqlHydra.ProviderDbType("Decimal")>]
+          [<ProviderDbType("Decimal")>]
           Weight: Option<decimal>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           DaysToManufacture: int
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           ProductLine: Option<string>
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           Class: Option<string>
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           Style: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductSubcategoryID: Option<int>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductModelID: Option<int>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           SellStartDate: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           SellEndDate: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           DiscontinuedDate: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ProductCategory =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductCategoryID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ProductCostHistory =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           StartDate: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           EndDate: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           StandardCost: decimal
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ProductDescription =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductDescriptionID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Description: string
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ProductDocument =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ProductInventory =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           LocationID: int16
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Shelf: string
-          [<SqlHydra.ProviderDbType("TinyInt")>]
+          [<ProviderDbType("TinyInt")>]
           Bin: byte
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           Quantity: int16
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ProductListPriceHistory =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           StartDate: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           EndDate: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           ListPrice: decimal
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ProductModel =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductModelID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ProductModelIllustration =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductModelID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           IllustrationID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ProductModelProductDescriptionCulture =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductModelID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductDescriptionID: int
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           CultureID: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ProductPhoto =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductPhotoID: int
-          [<SqlHydra.ProviderDbType("VarBinary")>]
+          [<ProviderDbType("VarBinary")>]
           ThumbNailPhoto: Option<byte []>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ThumbnailPhotoFileName: Option<string>
-          [<SqlHydra.ProviderDbType("VarBinary")>]
+          [<ProviderDbType("VarBinary")>]
           LargePhoto: Option<byte []>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           LargePhotoFileName: Option<string>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ProductProductPhoto =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductPhotoID: int
-          [<SqlHydra.ProviderDbType("Bit")>]
+          [<ProviderDbType("Bit")>]
           Primary: bool
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ProductReview =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductReviewID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ReviewerName: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ReviewDate: System.DateTime
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           EmailAddress: string
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           Rating: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Comments: Option<string>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ProductSubcategory =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductSubcategoryID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductCategoryID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ScrapReason =
-        { [<SqlHydra.ProviderDbType("SmallInt")>]
+        { [<ProviderDbType("SmallInt")>]
           ScrapReasonID: int16
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type TransactionHistory =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           TransactionID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ReferenceOrderID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ReferenceOrderLineID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           TransactionDate: System.DateTime
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           TransactionType: string
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           Quantity: int
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           ActualCost: decimal
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type TransactionHistoryArchive =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           TransactionID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ReferenceOrderID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ReferenceOrderLineID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           TransactionDate: System.DateTime
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           TransactionType: string
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           Quantity: int
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           ActualCost: decimal
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type UnitMeasure =
-        { [<SqlHydra.ProviderDbType("NChar")>]
+        { [<ProviderDbType("NChar")>]
           UnitMeasureCode: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type WorkOrder =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           WorkOrderID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           OrderQty: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           StockedQty: int
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           ScrappedQty: int16
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           StartDate: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           EndDate: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           DueDate: System.DateTime
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           ScrapReasonID: Option<int16>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type WorkOrderRouting =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           WorkOrderID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           OperationSequence: int16
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           LocationID: int16
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ScheduledStartDate: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ScheduledEndDate: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ActualStartDate: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ActualEndDate: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("Decimal")>]
+          [<ProviderDbType("Decimal")>]
           ActualResourceHrs: Option<decimal>
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           PlannedCost: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           ActualCost: Option<decimal>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type vProductAndDescription =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ProductModel: string
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           CultureID: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Description: string }
 
     [<CLIMutable>]
     type vProductModelCatalogDescription =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductModelID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Summary: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Manufacturer: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Copyright: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ProductURL: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           WarrantyPeriod: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           WarrantyDescription: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           NoOfYears: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           MaintenanceDescription: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Wheel: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Saddle: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Pedal: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           BikeFrame: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Crankset: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PictureAngle: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PictureSize: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ProductPhotoID: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Material: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Color: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ProductLine: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Style: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           RiderExperience: Option<string>
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type vProductModelInstructions =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductModelID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Instructions: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           LocationID: Option<int>
-          [<SqlHydra.ProviderDbType("Decimal")>]
+          [<ProviderDbType("Decimal")>]
           SetupHours: Option<decimal>
-          [<SqlHydra.ProviderDbType("Decimal")>]
+          [<ProviderDbType("Decimal")>]
           MachineHours: Option<decimal>
-          [<SqlHydra.ProviderDbType("Decimal")>]
+          [<ProviderDbType("Decimal")>]
           LaborHours: Option<decimal>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           LotSize: Option<int>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Step: Option<string>
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     module Readers =
@@ -2306,163 +2308,163 @@ module Production =
 module Purchasing =
     [<CLIMutable>]
     type ProductVendor =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           AverageLeadTime: int
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           StandardPrice: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           LastReceiptCost: Option<decimal>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           LastReceiptDate: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           MinOrderQty: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           MaxOrderQty: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           OnOrderQty: Option<int>
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           UnitMeasureCode: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type PurchaseOrderDetail =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           PurchaseOrderID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           PurchaseOrderDetailID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           DueDate: System.DateTime
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           OrderQty: int16
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           UnitPrice: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           LineTotal: decimal
-          [<SqlHydra.ProviderDbType("Decimal")>]
+          [<ProviderDbType("Decimal")>]
           ReceivedQty: decimal
-          [<SqlHydra.ProviderDbType("Decimal")>]
+          [<ProviderDbType("Decimal")>]
           RejectedQty: decimal
-          [<SqlHydra.ProviderDbType("Decimal")>]
+          [<ProviderDbType("Decimal")>]
           StockedQty: decimal
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type PurchaseOrderHeader =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           PurchaseOrderID: int
-          [<SqlHydra.ProviderDbType("TinyInt")>]
+          [<ProviderDbType("TinyInt")>]
           RevisionNumber: byte
-          [<SqlHydra.ProviderDbType("TinyInt")>]
+          [<ProviderDbType("TinyInt")>]
           Status: byte
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           EmployeeID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           VendorID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ShipMethodID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           OrderDate: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ShipDate: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           SubTotal: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           TaxAmt: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           Freight: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           TotalDue: decimal
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ShipMethod =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ShipMethodID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           ShipBase: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           ShipRate: decimal
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type Vendor =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AccountNumber: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("TinyInt")>]
+          [<ProviderDbType("TinyInt")>]
           CreditRating: byte
-          [<SqlHydra.ProviderDbType("Bit")>]
+          [<ProviderDbType("Bit")>]
           PreferredVendorStatus: bool
-          [<SqlHydra.ProviderDbType("Bit")>]
+          [<ProviderDbType("Bit")>]
           ActiveFlag: bool
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PurchasingWebServiceURL: Option<string>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type vVendorWithAddresses =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressType: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressLine1: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressLine2: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           City: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           StateProvinceName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PostalCode: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           CountryRegionName: string }
 
     [<CLIMutable>]
     type vVendorWithContacts =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ContactType: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Title: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           FirstName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           MiddleName: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           LastName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Suffix: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PhoneNumber: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PhoneNumberType: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           EmailAddress: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           EmailPromotion: int }
 
     module Readers =
@@ -2665,536 +2667,536 @@ module Purchasing =
 module Sales =
     [<CLIMutable>]
     type CountryRegionCurrency =
-        { [<SqlHydra.ProviderDbType("NVarChar")>]
+        { [<ProviderDbType("NVarChar")>]
           CountryRegionCode: string
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           CurrencyCode: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type CreditCard =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           CreditCardID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           CardType: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           CardNumber: string
-          [<SqlHydra.ProviderDbType("TinyInt")>]
+          [<ProviderDbType("TinyInt")>]
           ExpMonth: byte
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           ExpYear: int16
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type Currency =
-        { [<SqlHydra.ProviderDbType("NChar")>]
+        { [<ProviderDbType("NChar")>]
           CurrencyCode: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type CurrencyRate =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           CurrencyRateID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           CurrencyRateDate: System.DateTime
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           FromCurrencyCode: string
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           ToCurrencyCode: string
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           AverageRate: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           EndOfDayRate: decimal
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type Customer =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           CustomerID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           PersonID: Option<int>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           StoreID: Option<int>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           TerritoryID: Option<int>
-          [<SqlHydra.ProviderDbType("VarChar")>]
+          [<ProviderDbType("VarChar")>]
           AccountNumber: string
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type PersonCreditCard =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           CreditCardID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type SalesOrderDetail =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           SalesOrderID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           SalesOrderDetailID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           CarrierTrackingNumber: Option<string>
-          [<SqlHydra.ProviderDbType("SmallInt")>]
+          [<ProviderDbType("SmallInt")>]
           OrderQty: int16
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           SpecialOfferID: int
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           UnitPrice: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           UnitPriceDiscount: decimal
-          [<SqlHydra.ProviderDbType("Decimal")>]
+          [<ProviderDbType("Decimal")>]
           LineTotal: decimal
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type SalesOrderHeader =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           SalesOrderID: int
-          [<SqlHydra.ProviderDbType("TinyInt")>]
+          [<ProviderDbType("TinyInt")>]
           RevisionNumber: byte
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           OrderDate: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           DueDate: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ShipDate: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("TinyInt")>]
+          [<ProviderDbType("TinyInt")>]
           Status: byte
-          [<SqlHydra.ProviderDbType("Bit")>]
+          [<ProviderDbType("Bit")>]
           OnlineOrderFlag: bool
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           SalesOrderNumber: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PurchaseOrderNumber: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AccountNumber: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           CustomerID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           SalesPersonID: Option<int>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           TerritoryID: Option<int>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           BillToAddressID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ShipToAddressID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ShipMethodID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           CreditCardID: Option<int>
-          [<SqlHydra.ProviderDbType("VarChar")>]
+          [<ProviderDbType("VarChar")>]
           CreditCardApprovalCode: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           CurrencyRateID: Option<int>
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           SubTotal: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           TaxAmt: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           Freight: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           TotalDue: decimal
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Comment: Option<string>
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type SalesOrderHeaderSalesReason =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           SalesOrderID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           SalesReasonID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type SalesPerson =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           TerritoryID: Option<int>
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           SalesQuota: Option<decimal>
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           Bonus: decimal
-          [<SqlHydra.ProviderDbType("SmallMoney")>]
+          [<ProviderDbType("SmallMoney")>]
           CommissionPct: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           SalesYTD: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           SalesLastYear: decimal
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type SalesPersonQuotaHistory =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           QuotaDate: System.DateTime
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           SalesQuota: decimal
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type SalesReason =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           SalesReasonID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ReasonType: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type SalesTaxRate =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           SalesTaxRateID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           StateProvinceID: int
-          [<SqlHydra.ProviderDbType("TinyInt")>]
+          [<ProviderDbType("TinyInt")>]
           TaxType: byte
-          [<SqlHydra.ProviderDbType("SmallMoney")>]
+          [<ProviderDbType("SmallMoney")>]
           TaxRate: decimal
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type SalesTerritory =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           TerritoryID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           CountryRegionCode: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Group: string
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           SalesYTD: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           SalesLastYear: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           CostYTD: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           CostLastYear: decimal
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type SalesTerritoryHistory =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           TerritoryID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           StartDate: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           EndDate: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type ShoppingCartItem =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ShoppingCartItemID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ShoppingCartID: string
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           Quantity: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           DateCreated: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type SpecialOffer =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           SpecialOfferID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Description: string
-          [<SqlHydra.ProviderDbType("SmallMoney")>]
+          [<ProviderDbType("SmallMoney")>]
           DiscountPct: decimal
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Type: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Category: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           StartDate: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           EndDate: System.DateTime
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           MinQty: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           MaxQty: Option<int>
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type SpecialOfferProduct =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           SpecialOfferID: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ProductID: int
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type Store =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           SalesPersonID: Option<int>
-          [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+          [<ProviderDbType("UniqueIdentifier")>]
           rowguid: System.Guid
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type vIndividualCustomer =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Title: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           FirstName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           MiddleName: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           LastName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Suffix: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PhoneNumber: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PhoneNumberType: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           EmailAddress: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           EmailPromotion: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressType: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressLine1: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressLine2: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           City: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           StateProvinceName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PostalCode: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           CountryRegionName: string }
 
     [<CLIMutable>]
     type vPersonDemographics =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           TotalPurchaseYTD: Option<decimal>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           DateFirstPurchase: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           BirthDate: Option<System.DateTime>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           MaritalStatus: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           YearlyIncome: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Gender: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           TotalChildren: Option<int>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           NumberChildrenAtHome: Option<int>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Education: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Occupation: Option<string>
-          [<SqlHydra.ProviderDbType("Bit")>]
+          [<ProviderDbType("Bit")>]
           HomeOwnerFlag: Option<bool>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           NumberCarsOwned: Option<int> }
 
     [<CLIMutable>]
     type vSalesPerson =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Title: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           FirstName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           MiddleName: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           LastName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Suffix: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           JobTitle: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PhoneNumber: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PhoneNumberType: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           EmailAddress: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           EmailPromotion: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressLine1: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressLine2: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           City: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           StateProvinceName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PostalCode: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           CountryRegionName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           TerritoryName: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           TerritoryGroup: Option<string>
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           SalesQuota: Option<decimal>
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           SalesYTD: decimal
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           SalesLastYear: decimal }
 
     [<CLIMutable>]
     type vSalesPersonSalesByFiscalYears =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           SalesPersonID: Option<int>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           FullName: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           JobTitle: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           SalesTerritory: string
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           ``2002``: Option<decimal>
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           ``2003``: Option<decimal>
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           ``2004``: Option<decimal> }
 
     [<CLIMutable>]
     type vStoreWithAddresses =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressType: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressLine1: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           AddressLine2: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           City: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           StateProvinceName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PostalCode: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           CountryRegionName: string }
 
     [<CLIMutable>]
     type vStoreWithContacts =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ContactType: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Title: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           FirstName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           MiddleName: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           LastName: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Suffix: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PhoneNumber: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           PhoneNumberType: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           EmailAddress: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           EmailPromotion: int }
 
     [<CLIMutable>]
     type vStoreWithDemographics =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           BusinessEntityID: int
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Name: string
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           AnnualSales: Option<decimal>
-          [<SqlHydra.ProviderDbType("Money")>]
+          [<ProviderDbType("Money")>]
           AnnualRevenue: Option<decimal>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           BankName: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           BusinessType: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           YearOpened: Option<int>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Specialty: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           SquareFeet: Option<int>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Brands: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Internet: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           NumberEmployees: Option<int> }
 
     module Readers =
@@ -3865,51 +3867,51 @@ module Sales =
 module dbo =
     [<CLIMutable>]
     type AWBuildVersion =
-        { [<SqlHydra.ProviderDbType("TinyInt")>]
+        { [<ProviderDbType("TinyInt")>]
           SystemInformationID: byte
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ``Database Version``: string
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           VersionDate: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ModifiedDate: System.DateTime }
 
     [<CLIMutable>]
     type DatabaseLog =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           DatabaseLogID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           PostTime: System.DateTime
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           DatabaseUser: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Event: string
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Schema: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           Object: Option<string>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           TSQL: string }
 
     [<CLIMutable>]
     type ErrorLog =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ErrorLogID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           ErrorTime: System.DateTime
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           UserName: string
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ErrorNumber: int
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ErrorSeverity: Option<int>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ErrorState: Option<int>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ErrorProcedure: Option<string>
-          [<SqlHydra.ProviderDbType("Int")>]
+          [<ProviderDbType("Int")>]
           ErrorLine: Option<int>
-          [<SqlHydra.ProviderDbType("NVarChar")>]
+          [<ProviderDbType("NVarChar")>]
           ErrorMessage: string }
 
     module Readers =
@@ -3980,18 +3982,18 @@ module dbo =
 module ext =
     [<CLIMutable>]
     type DateTime2Support =
-        { [<SqlHydra.ProviderDbType("Int")>]
+        { [<ProviderDbType("Int")>]
           ID: int
-          [<SqlHydra.ProviderDbType("DateTime")>]
+          [<ProviderDbType("DateTime")>]
           LessPrecision: System.DateTime
-          [<SqlHydra.ProviderDbType("DateTime2")>]
+          [<ProviderDbType("DateTime2")>]
           MorePrecision: System.DateTime }
 
     [<CLIMutable>]
     type GetIdGuidRepro =
-        { [<SqlHydra.ProviderDbType("UniqueIdentifier")>]
+        { [<ProviderDbType("UniqueIdentifier")>]
           Id: System.Guid
-          [<SqlHydra.ProviderDbType("NChar")>]
+          [<ProviderDbType("NChar")>]
           EmailAddress: string }
 
     module Readers =
@@ -4450,8 +4452,8 @@ type HydraReader (reader: Microsoft.Data.SqlClient.SqlDataReader) =
             
         let buildEntityReadFn (t: System.Type) = 
             let t, isOpt, isNullable = 
-                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> then t.GenericTypeArguments.[0], true, false
-                elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>> then t.GenericTypeArguments.[0], false, true
+                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> then t.GenericTypeArguments[0], true, false
+                elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>> then t.GenericTypeArguments[0], false, true
                 else t, false, false
             
             match HydraReader.GetPrimitiveReader(t, reader, isOpt, isNullable) with

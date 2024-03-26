@@ -106,9 +106,9 @@ let ``Should have Tables and PKs``() =
 
 [<Test>]
 let ``Code Should Have ProviderDbTypeAttribute With Json``() =
-    cfg |> inCode "[<SqlHydra.ProviderDbType(\"Json\")>]"
+    cfg |> inCode "[<ProviderDbType(\"Json\")>]"
 
 [<Test>]
 let ``Code Should Have ProviderDbTypeAttribute With Jsonb``() =
-    cfg |> inCode "[<SqlHydra.ProviderDbType(\"Jsonb\")>]"
+    cfg |> inCode "[<ProviderDbType(\"Jsonb\")>]"
 

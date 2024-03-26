@@ -405,9 +405,8 @@ let substitutions (app: AppInfo) : (string * string) list =
             
         let buildEntityReadFn (t: System.Type) = 
             let t, isOpt, isNullable = 
-                let genericTypeDef = t.GetGenericTypeDefinition()
-                if t.IsGenericType && genericTypeDef = typedefof<Option<_>> then t.GenericTypeArguments[0], true, false
-                elif t.IsGenericType && genericTypeDef = typedefof<System.Nullable<_>> then t.GenericTypeArguments[0], false, true
+                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> then t.GenericTypeArguments[0], true, false
+                elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>> then t.GenericTypeArguments[0], false, true
                 else t, false, false
             
             match HydraReader.GetPrimitiveReader(t, reader, isOpt, isNullable) with
