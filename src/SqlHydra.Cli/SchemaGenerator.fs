@@ -51,35 +51,36 @@ let generateHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo)
                 TupleExpr [
                     ConstantExpr(Unquoted "entity")
                     ConstantExpr(Unquoted "isOption")
-                ]
-            ) {
-                for table in allTables do
-                    // | "OT.CONTACTS", false -> __.``OT.CONTACTS``.Read >> box
+                ],
+                [ 
+                    for table in allTables do
+                        // | "OT.CONTACTS", false -> __.``OT.CONTACTS``.Read >> box
                     
-                    // match case: isOption = false
-                    MatchClauseExpr(
-                        TuplePat [
-                            ConstantPat($"\"{table.Schema}.{table.Name}\"")
-                            ConstantPat("false")
-                        ], 
-                        ConstantExpr(Unquoted $"__.``{table.Schema}.{table.Name}``.Read >> box")
-                    )
+                        // match case: isOption = false
+                        MatchClauseExpr(
+                            TuplePat [
+                                ConstantPat($"\"{table.Schema}.{table.Name}\"")
+                                ConstantPat("false")
+                            ], 
+                            ConstantExpr(Unquoted $"__.``{table.Schema}.{table.Name}``.Read >> box")
+                        )
 
-                    // match case: isOption = true
-                    MatchClauseExpr(
-                        TuplePat [
-                            ConstantPat($"\"{table.Schema}.{table.Name}\"")
-                            ConstantPat("true")
-                        ], 
-                        ConstantExpr(Unquoted $"__.``{table.Schema}.{table.Name}``.ReadIfNotNull >> box")
-                    )
+                        // match case: isOption = true
+                        MatchClauseExpr(
+                            TuplePat [
+                                ConstantPat($"\"{table.Schema}.{table.Name}\"")
+                                ConstantPat("true")
+                            ], 
+                            ConstantExpr(Unquoted $"__.``{table.Schema}.{table.Name}``.ReadIfNotNull >> box")
+                        )
 
-                //| _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
-                MatchClauseExpr(
-                    WildPat(), 
-                    ConstantExpr(Unquoted "failwith $\"Could not read type '{entity}' because no generated reader exists.\"")
-                )
-            }            
+                    //| _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
+                    MatchClauseExpr(
+                        WildPat(), 
+                        ConstantExpr(Unquoted "failwith $\"Could not read type '{entity}' because no generated reader exists.\"")
+                    )
+                ]
+            )
         )
             .toPrivate()
 
@@ -99,8 +100,8 @@ let generateHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo)
                 then "wrapValue"
                 else "wrapRef"
 
-            IfThenElifExpr(ConstantExpr(Unquoted "None")) {
-                for i, ptr in db.PrimitiveTypeReaders |> Seq.indexed do
+            IfThenElifExpr( 
+                [ for i, ptr in db.PrimitiveTypeReaders |> Seq.indexed do
                     
                     let readerGetFieldValueMethod =
                         if ptr.ClrType.EndsWith "[]"
@@ -112,8 +113,10 @@ let generateHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo)
 
                     if i = 0 
                     then IfThenExpr(ifExpr, elExpr)
-                    else ElIfThenExpr(ifExpr, elExpr)
-            }
+                    else ElIfThenExpr(ifExpr, elExpr) 
+                ],
+                ConstantExpr(Unquoted "None")
+            )
         )
             .toPrivate()
             .toStatic()
@@ -256,10 +259,10 @@ let generateNamespace (cfg: Config) (app: AppInfo) (db: Schema) =
                                     "__.Read", 
                                     UnitPat(),                                     
                                     let recordExpr = 
-                                        RecordExpr() { 
+                                        RecordExpr [
                                             for col in table.Columns do
                                                 RecordFieldExpr(backticks col.Name, ConstantExpr(Unquoted $"__.{backticks col.Name}.Read()"))
-                                        }
+                                        ]
 
                                     TypedExpr(recordExpr, ":", LongIdent(backticks table.Name))                                    
                                 )
