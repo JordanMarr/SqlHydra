@@ -77,7 +77,7 @@ module ext =
           currentmood: mood }
 
     module Readers =
-        type arraysReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type arraysReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = RequiredColumn(reader, getOrdinal, reader.GetString, "id")
             member __.text_array = RequiredColumn(reader, getOrdinal, reader.GetFieldValue, "text_array")
             member __.integer_array = RequiredColumn(reader, getOrdinal, reader.GetFieldValue, "integer_array")
@@ -91,7 +91,7 @@ module ext =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type jsonsupportReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type jsonsupportReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = RequiredColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.json_field = RequiredColumn(reader, getOrdinal, reader.GetString, "json_field")
             member __.jsonb_field = RequiredColumn(reader, getOrdinal, reader.GetString, "jsonb_field")
@@ -105,7 +105,7 @@ module ext =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type personReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type personReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.currentmood = RequiredColumn(reader, getOrdinal, reader.GetFieldValue, "currentmood")
 
@@ -227,7 +227,7 @@ module hr =
           modifieddate: Option<System.DateTime> }
 
     module Readers =
-        type dReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type dReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.departmentid = OptionColumn(reader, getOrdinal, reader.GetInt32, "departmentid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -245,7 +245,7 @@ module hr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type eReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type eReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.nationalidnumber = OptionColumn(reader, getOrdinal, reader.GetString, "nationalidnumber")
@@ -285,7 +285,7 @@ module hr =
             member __.ReadIfNotNull() =
                 if __.salariedflag.IsNull() then None else Some(__.Read())
 
-        type edhReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type edhReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.departmentid = OptionColumn(reader, getOrdinal, reader.GetInt16, "departmentid")
@@ -307,7 +307,7 @@ module hr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type ephReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type ephReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.ratechangedate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "ratechangedate")
@@ -327,7 +327,7 @@ module hr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type jcReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type jcReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.jobcandidateid = OptionColumn(reader, getOrdinal, reader.GetInt32, "jobcandidateid")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
@@ -345,7 +345,7 @@ module hr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type sReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type sReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.shiftid = OptionColumn(reader, getOrdinal, reader.GetInt32, "shiftid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -639,7 +639,7 @@ module humanresources =
           ``Emp.Loc.City``: Option<string> }
 
     module Readers =
-        type departmentReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type departmentReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.departmentid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "departmentid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.groupname = RequiredColumn(reader, getOrdinal, reader.GetString, "groupname")
@@ -655,7 +655,7 @@ module humanresources =
             member __.ReadIfNotNull() =
                 if __.departmentid.IsNull() then None else Some(__.Read())
 
-        type employeeReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type employeeReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.nationalidnumber = RequiredColumn(reader, getOrdinal, reader.GetString, "nationalidnumber")
             member __.loginid = RequiredColumn(reader, getOrdinal, reader.GetString, "loginid")
@@ -693,7 +693,7 @@ module humanresources =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type employeedepartmenthistoryReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type employeedepartmenthistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.departmentid = RequiredColumn(reader, getOrdinal, reader.GetInt16, "departmentid")
             member __.shiftid = RequiredColumn(reader, getOrdinal, reader.GetInt16, "shiftid")
@@ -713,7 +713,7 @@ module humanresources =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type employeepayhistoryReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type employeepayhistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.ratechangedate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "ratechangedate")
             member __.rate = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "rate")
@@ -731,7 +731,7 @@ module humanresources =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type jobcandidateReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type jobcandidateReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.jobcandidateid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "jobcandidateid")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.resume = OptionColumn(reader, getOrdinal, reader.GetString, "resume")
@@ -747,7 +747,7 @@ module humanresources =
             member __.ReadIfNotNull() =
                 if __.jobcandidateid.IsNull() then None else Some(__.Read())
 
-        type shiftReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type shiftReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.shiftid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "shiftid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.starttime = RequiredColumn(reader, getOrdinal, reader.GetTimeOnly, "starttime")
@@ -765,7 +765,7 @@ module humanresources =
             member __.ReadIfNotNull() =
                 if __.shiftid.IsNull() then None else Some(__.Read())
 
-        type vemployeeReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vemployeeReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.title = OptionColumn(reader, getOrdinal, reader.GetString, "title")
             member __.firstname = OptionColumn(reader, getOrdinal, reader.GetString, "firstname")
@@ -809,7 +809,7 @@ module humanresources =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type vemployeedepartmentReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vemployeedepartmentReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.title = OptionColumn(reader, getOrdinal, reader.GetString, "title")
             member __.firstname = OptionColumn(reader, getOrdinal, reader.GetString, "firstname")
@@ -837,7 +837,7 @@ module humanresources =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type vemployeedepartmenthistoryReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vemployeedepartmenthistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.title = OptionColumn(reader, getOrdinal, reader.GetString, "title")
             member __.firstname = OptionColumn(reader, getOrdinal, reader.GetString, "firstname")
@@ -867,7 +867,7 @@ module humanresources =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type vjobcandidateReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vjobcandidateReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.jobcandidateid = OptionColumn(reader, getOrdinal, reader.GetInt32, "jobcandidateid")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.``Name.Prefix`` = OptionColumn(reader, getOrdinal, reader.GetString, "Name.Prefix")
@@ -907,7 +907,7 @@ module humanresources =
             member __.ReadIfNotNull() =
                 if __.jobcandidateid.IsNull() then None else Some(__.Read())
 
-        type vjobcandidateeducationReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vjobcandidateeducationReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.jobcandidateid = OptionColumn(reader, getOrdinal, reader.GetInt32, "jobcandidateid")
             member __.``Edu.Level`` = OptionColumn(reader, getOrdinal, reader.GetString, "Edu.Level")
             member __.``Edu.StartDate`` = OptionColumn(reader, getOrdinal, reader.GetDateOnly, "Edu.StartDate")
@@ -941,7 +941,7 @@ module humanresources =
             member __.ReadIfNotNull() =
                 if __.jobcandidateid.IsNull() then None else Some(__.Read())
 
-        type vjobcandidateemploymentReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vjobcandidateemploymentReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.jobcandidateid = OptionColumn(reader, getOrdinal, reader.GetInt32, "jobcandidateid")
             member __.``Emp.StartDate`` = OptionColumn(reader, getOrdinal, reader.GetDateOnly, "Emp.StartDate")
             member __.``Emp.EndDate`` = OptionColumn(reader, getOrdinal, reader.GetDateOnly, "Emp.EndDate")
@@ -1176,7 +1176,7 @@ module pe =
           modifieddate: Option<System.DateTime> }
 
     module Readers =
-        type aReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type aReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.addressid = OptionColumn(reader, getOrdinal, reader.GetInt32, "addressid")
             member __.addressline1 = OptionColumn(reader, getOrdinal, reader.GetString, "addressline1")
@@ -1204,7 +1204,7 @@ module pe =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type atReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type atReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.addresstypeid = OptionColumn(reader, getOrdinal, reader.GetInt32, "addresstypeid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -1222,7 +1222,7 @@ module pe =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type beReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type beReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.rowguid = OptionColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
@@ -1238,7 +1238,7 @@ module pe =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type beaReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type beaReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.addressid = OptionColumn(reader, getOrdinal, reader.GetInt32, "addressid")
@@ -1258,7 +1258,7 @@ module pe =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type becReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type becReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.personid = OptionColumn(reader, getOrdinal, reader.GetInt32, "personid")
@@ -1278,7 +1278,7 @@ module pe =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type crReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type crReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.countryregioncode = OptionColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
             member __.modifieddate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -1292,7 +1292,7 @@ module pe =
             member __.ReadIfNotNull() =
                 if __.countryregioncode.IsNull() then None else Some(__.Read())
 
-        type ctReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type ctReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.contacttypeid = OptionColumn(reader, getOrdinal, reader.GetInt32, "contacttypeid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -1308,7 +1308,7 @@ module pe =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type eReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type eReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.emailaddressid = OptionColumn(reader, getOrdinal, reader.GetInt32, "emailaddressid")
@@ -1328,7 +1328,7 @@ module pe =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type pReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.persontype = OptionColumn(reader, getOrdinal, reader.GetString, "persontype")
@@ -1364,7 +1364,7 @@ module pe =
             member __.ReadIfNotNull() =
                 if __.namestyle.IsNull() then None else Some(__.Read())
 
-        type paReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type paReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.passwordhash = OptionColumn(reader, getOrdinal, reader.GetString, "passwordhash")
@@ -1384,7 +1384,7 @@ module pe =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type pntReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pntReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.phonenumbertypeid = OptionColumn(reader, getOrdinal, reader.GetInt32, "phonenumbertypeid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -1400,7 +1400,7 @@ module pe =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type ppReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type ppReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.phonenumber = OptionColumn(reader, getOrdinal, reader.GetString, "phonenumber")
@@ -1418,7 +1418,7 @@ module pe =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type spReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type spReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.stateprovinceid = OptionColumn(reader, getOrdinal, reader.GetInt32, "stateprovinceid")
             member __.stateprovincecode = OptionColumn(reader, getOrdinal, reader.GetString, "stateprovincecode")
@@ -1662,7 +1662,7 @@ module person =
           modifieddate: Option<System.DateTime> }
 
     module Readers =
-        type addressReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type addressReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.addressid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "addressid")
             member __.addressline1 = RequiredColumn(reader, getOrdinal, reader.GetString, "addressline1")
             member __.addressline2 = OptionColumn(reader, getOrdinal, reader.GetString, "addressline2")
@@ -1688,7 +1688,7 @@ module person =
             member __.ReadIfNotNull() =
                 if __.addressid.IsNull() then None else Some(__.Read())
 
-        type addresstypeReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type addresstypeReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.addresstypeid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "addresstypeid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
@@ -1704,7 +1704,7 @@ module person =
             member __.ReadIfNotNull() =
                 if __.addresstypeid.IsNull() then None else Some(__.Read())
 
-        type businessentityReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type businessentityReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -1718,7 +1718,7 @@ module person =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type businessentityaddressReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type businessentityaddressReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.addressid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "addressid")
             member __.addresstypeid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "addresstypeid")
@@ -1736,7 +1736,7 @@ module person =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type businessentitycontactReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type businessentitycontactReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.personid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "personid")
             member __.contacttypeid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "contacttypeid")
@@ -1754,7 +1754,7 @@ module person =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type contacttypeReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type contacttypeReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.contacttypeid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "contacttypeid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -1768,7 +1768,7 @@ module person =
             member __.ReadIfNotNull() =
                 if __.contacttypeid.IsNull() then None else Some(__.Read())
 
-        type countryregionReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type countryregionReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.countryregioncode = RequiredColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -1782,7 +1782,7 @@ module person =
             member __.ReadIfNotNull() =
                 if __.countryregioncode.IsNull() then None else Some(__.Read())
 
-        type emailaddressReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type emailaddressReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.emailaddressid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "emailaddressid")
             member __.emailaddress = OptionColumn(reader, getOrdinal, reader.GetString, "emailaddress")
@@ -1800,7 +1800,7 @@ module person =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type passwordReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type passwordReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.passwordhash = RequiredColumn(reader, getOrdinal, reader.GetString, "passwordhash")
             member __.passwordsalt = RequiredColumn(reader, getOrdinal, reader.GetString, "passwordsalt")
@@ -1818,7 +1818,7 @@ module person =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type personReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type personReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.persontype = RequiredColumn(reader, getOrdinal, reader.GetString, "persontype")
             member __.namestyle = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "namestyle")
@@ -1852,7 +1852,7 @@ module person =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type personphoneReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type personphoneReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.phonenumber = RequiredColumn(reader, getOrdinal, reader.GetString, "phonenumber")
             member __.phonenumbertypeid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "phonenumbertypeid")
@@ -1868,7 +1868,7 @@ module person =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type phonenumbertypeReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type phonenumbertypeReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.phonenumbertypeid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "phonenumbertypeid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -1882,7 +1882,7 @@ module person =
             member __.ReadIfNotNull() =
                 if __.phonenumbertypeid.IsNull() then None else Some(__.Read())
 
-        type stateprovinceReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type stateprovinceReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.stateprovinceid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "stateprovinceid")
             member __.stateprovincecode = RequiredColumn(reader, getOrdinal, reader.GetString, "stateprovincecode")
             member __.countryregioncode = RequiredColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
@@ -1906,7 +1906,7 @@ module person =
             member __.ReadIfNotNull() =
                 if __.stateprovinceid.IsNull() then None else Some(__.Read())
 
-        type vadditionalcontactinfoReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vadditionalcontactinfoReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.firstname = OptionColumn(reader, getOrdinal, reader.GetString, "firstname")
             member __.middlename = OptionColumn(reader, getOrdinal, reader.GetString, "middlename")
@@ -2401,7 +2401,7 @@ module pr =
           modifieddate: Option<System.DateTime> }
 
     module Readers =
-        type bomReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type bomReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.billofmaterialsid = OptionColumn(reader, getOrdinal, reader.GetInt32, "billofmaterialsid")
             member __.productassemblyid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productassemblyid")
@@ -2429,7 +2429,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type cReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type cReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetString, "id")
             member __.cultureid = OptionColumn(reader, getOrdinal, reader.GetString, "cultureid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -2445,7 +2445,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type dReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type dReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.title = OptionColumn(reader, getOrdinal, reader.GetString, "title")
             member __.owner = OptionColumn(reader, getOrdinal, reader.GetInt32, "owner")
             member __.folderflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "folderflag")
@@ -2479,7 +2479,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.folderflag.IsNull() then None else Some(__.Read())
 
-        type iReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type iReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.illustrationid = OptionColumn(reader, getOrdinal, reader.GetInt32, "illustrationid")
             member __.diagram = OptionColumn(reader, getOrdinal, reader.GetString, "diagram")
@@ -2495,7 +2495,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type lReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type lReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.locationid = OptionColumn(reader, getOrdinal, reader.GetInt32, "locationid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -2515,7 +2515,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type pReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.productid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -2575,7 +2575,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.makeflag.IsNull() then None else Some(__.Read())
 
-        type pcReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pcReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.productcategoryid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productcategoryid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -2593,7 +2593,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type pchReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pchReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.productid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.startdate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
@@ -2613,7 +2613,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type pdReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pdReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.productdescriptionid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productdescriptionid")
             member __.description = OptionColumn(reader, getOrdinal, reader.GetString, "description")
@@ -2631,7 +2631,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type pdocReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pdocReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.productid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.modifieddate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -2647,7 +2647,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type piReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type piReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.productid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.locationid = OptionColumn(reader, getOrdinal, reader.GetInt16, "locationid")
@@ -2671,7 +2671,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type plphReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type plphReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.productid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.startdate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
@@ -2691,7 +2691,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type pmReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pmReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.productmodelid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -2713,7 +2713,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type pmiReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pmiReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productmodelid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
             member __.illustrationid = OptionColumn(reader, getOrdinal, reader.GetInt32, "illustrationid")
             member __.modifieddate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -2727,7 +2727,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.productmodelid.IsNull() then None else Some(__.Read())
 
-        type pmpdcReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pmpdcReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productmodelid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
             member __.productdescriptionid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productdescriptionid")
             member __.cultureid = OptionColumn(reader, getOrdinal, reader.GetString, "cultureid")
@@ -2743,7 +2743,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.productmodelid.IsNull() then None else Some(__.Read())
 
-        type ppReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type ppReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.productphotoid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productphotoid")
             member __.thumbnailphoto = OptionColumn(reader, getOrdinal, reader.GetFieldValue, "thumbnailphoto")
@@ -2765,7 +2765,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type pppReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pppReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.productphotoid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productphotoid")
             member __.primary = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "primary")
@@ -2781,7 +2781,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.primary.IsNull() then None else Some(__.Read())
 
-        type prReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type prReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.productreviewid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productreviewid")
             member __.productid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productid")
@@ -2807,7 +2807,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type pscReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pscReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.productsubcategoryid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productsubcategoryid")
             member __.productcategoryid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productcategoryid")
@@ -2827,7 +2827,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type srReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type srReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.scrapreasonid = OptionColumn(reader, getOrdinal, reader.GetInt32, "scrapreasonid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -2843,7 +2843,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type thReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type thReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.transactionid = OptionColumn(reader, getOrdinal, reader.GetInt32, "transactionid")
             member __.productid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productid")
@@ -2871,7 +2871,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type thaReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type thaReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.transactionid = OptionColumn(reader, getOrdinal, reader.GetInt32, "transactionid")
             member __.productid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productid")
@@ -2899,7 +2899,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type umReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type umReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetString, "id")
             member __.unitmeasurecode = OptionColumn(reader, getOrdinal, reader.GetString, "unitmeasurecode")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -2915,7 +2915,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type wReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type wReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.workorderid = OptionColumn(reader, getOrdinal, reader.GetInt32, "workorderid")
             member __.productid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productid")
@@ -2943,7 +2943,7 @@ module pr =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type wrReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type wrReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.workorderid = OptionColumn(reader, getOrdinal, reader.GetInt32, "workorderid")
             member __.productid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productid")
@@ -3466,7 +3466,7 @@ module production =
           modifieddate: System.DateTime }
 
     module Readers =
-        type billofmaterialsReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type billofmaterialsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.billofmaterialsid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "billofmaterialsid")
             member __.productassemblyid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productassemblyid")
             member __.componentid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "componentid")
@@ -3492,7 +3492,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.billofmaterialsid.IsNull() then None else Some(__.Read())
 
-        type cultureReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type cultureReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.cultureid = RequiredColumn(reader, getOrdinal, reader.GetString, "cultureid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -3506,7 +3506,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.cultureid.IsNull() then None else Some(__.Read())
 
-        type documentReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type documentReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.title = RequiredColumn(reader, getOrdinal, reader.GetString, "title")
             member __.owner = RequiredColumn(reader, getOrdinal, reader.GetInt32, "owner")
             member __.folderflag = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "folderflag")
@@ -3540,7 +3540,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.documentnode.IsNull() then None else Some(__.Read())
 
-        type illustrationReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type illustrationReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.illustrationid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "illustrationid")
             member __.diagram = OptionColumn(reader, getOrdinal, reader.GetString, "diagram")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -3554,7 +3554,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.illustrationid.IsNull() then None else Some(__.Read())
 
-        type locationReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type locationReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.locationid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "locationid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.costrate = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "costrate")
@@ -3572,7 +3572,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.locationid.IsNull() then None else Some(__.Read())
 
-        type productReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.productnumber = RequiredColumn(reader, getOrdinal, reader.GetString, "productnumber")
@@ -3630,7 +3630,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productid.IsNull() then None else Some(__.Read())
 
-        type productcategoryReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productcategoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productcategoryid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productcategoryid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
@@ -3646,7 +3646,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productcategoryid.IsNull() then None else Some(__.Read())
 
-        type productcosthistoryReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productcosthistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
             member __.enddate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
@@ -3664,7 +3664,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productid.IsNull() then None else Some(__.Read())
 
-        type productdescriptionReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productdescriptionReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productdescriptionid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productdescriptionid")
             member __.description = RequiredColumn(reader, getOrdinal, reader.GetString, "description")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
@@ -3680,7 +3680,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productdescriptionid.IsNull() then None else Some(__.Read())
 
-        type productdocumentReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productdocumentReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
             member __.documentnode = RequiredColumn(reader, getOrdinal, reader.GetString, "documentnode")
@@ -3694,7 +3694,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productid.IsNull() then None else Some(__.Read())
 
-        type productinventoryReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productinventoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.locationid = RequiredColumn(reader, getOrdinal, reader.GetInt16, "locationid")
             member __.shelf = RequiredColumn(reader, getOrdinal, reader.GetString, "shelf")
@@ -3716,7 +3716,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productid.IsNull() then None else Some(__.Read())
 
-        type productlistpricehistoryReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productlistpricehistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
             member __.enddate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "enddate")
@@ -3734,7 +3734,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productid.IsNull() then None else Some(__.Read())
 
-        type productmodelReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productmodelReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productmodelid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.catalogdescription = OptionColumn(reader, getOrdinal, reader.GetString, "catalogdescription")
@@ -3754,7 +3754,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productmodelid.IsNull() then None else Some(__.Read())
 
-        type productmodelillustrationReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productmodelillustrationReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productmodelid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
             member __.illustrationid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "illustrationid")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -3768,7 +3768,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productmodelid.IsNull() then None else Some(__.Read())
 
-        type productmodelproductdescriptioncultureReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productmodelproductdescriptioncultureReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productmodelid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
             member __.productdescriptionid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productdescriptionid")
             member __.cultureid = RequiredColumn(reader, getOrdinal, reader.GetString, "cultureid")
@@ -3784,7 +3784,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productmodelid.IsNull() then None else Some(__.Read())
 
-        type productphotoReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productphotoReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productphotoid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productphotoid")
             member __.thumbnailphoto = OptionColumn(reader, getOrdinal, reader.GetFieldValue, "thumbnailphoto")
             member __.thumbnailphotofilename = OptionColumn(reader, getOrdinal, reader.GetString, "thumbnailphotofilename")
@@ -3804,7 +3804,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productphotoid.IsNull() then None else Some(__.Read())
 
-        type productproductphotoReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productproductphotoReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.productphotoid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productphotoid")
             member __.primary = RequiredColumn(reader, getOrdinal, reader.GetBoolean, "primary")
@@ -3820,7 +3820,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productid.IsNull() then None else Some(__.Read())
 
-        type productreviewReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productreviewReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productreviewid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productreviewid")
             member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.reviewername = RequiredColumn(reader, getOrdinal, reader.GetString, "reviewername")
@@ -3844,7 +3844,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productreviewid.IsNull() then None else Some(__.Read())
 
-        type productsubcategoryReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productsubcategoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productsubcategoryid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productsubcategoryid")
             member __.productcategoryid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productcategoryid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
@@ -3862,7 +3862,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productsubcategoryid.IsNull() then None else Some(__.Read())
 
-        type scrapreasonReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type scrapreasonReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.scrapreasonid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "scrapreasonid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -3876,7 +3876,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.scrapreasonid.IsNull() then None else Some(__.Read())
 
-        type transactionhistoryReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type transactionhistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.transactionid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "transactionid")
             member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.referenceorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "referenceorderid")
@@ -3902,7 +3902,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.transactionid.IsNull() then None else Some(__.Read())
 
-        type transactionhistoryarchiveReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type transactionhistoryarchiveReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.transactionid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "transactionid")
             member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.referenceorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "referenceorderid")
@@ -3928,7 +3928,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.transactionid.IsNull() then None else Some(__.Read())
 
-        type unitmeasureReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type unitmeasureReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.unitmeasurecode = RequiredColumn(reader, getOrdinal, reader.GetString, "unitmeasurecode")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -3942,7 +3942,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.unitmeasurecode.IsNull() then None else Some(__.Read())
 
-        type vproductmodelcatalogdescriptionReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vproductmodelcatalogdescriptionReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productmodelid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
             member __.Summary = OptionColumn(reader, getOrdinal, reader.GetString, "Summary")
@@ -4000,7 +4000,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productmodelid.IsNull() then None else Some(__.Read())
 
-        type vproductmodelinstructionsReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vproductmodelinstructionsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productmodelid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productmodelid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
             member __.instructions = OptionColumn(reader, getOrdinal, reader.GetString, "instructions")
@@ -4030,7 +4030,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.productmodelid.IsNull() then None else Some(__.Read())
 
-        type workorderReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type workorderReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.workorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "workorderid")
             member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.orderqty = RequiredColumn(reader, getOrdinal, reader.GetInt32, "orderqty")
@@ -4056,7 +4056,7 @@ module production =
             member __.ReadIfNotNull() =
                 if __.workorderid.IsNull() then None else Some(__.Read())
 
-        type workorderroutingReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type workorderroutingReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.workorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "workorderid")
             member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.operationsequence = RequiredColumn(reader, getOrdinal, reader.GetInt16, "operationsequence")
@@ -4207,7 +4207,7 @@ module pu =
           modifieddate: Option<System.DateTime> }
 
     module Readers =
-        type podReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type podReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.purchaseorderid = OptionColumn(reader, getOrdinal, reader.GetInt32, "purchaseorderid")
             member __.purchaseorderdetailid = OptionColumn(reader, getOrdinal, reader.GetInt32, "purchaseorderdetailid")
@@ -4235,7 +4235,7 @@ module pu =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type pohReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pohReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.purchaseorderid = OptionColumn(reader, getOrdinal, reader.GetInt32, "purchaseorderid")
             member __.revisionnumber = OptionColumn(reader, getOrdinal, reader.GetInt16, "revisionnumber")
@@ -4269,7 +4269,7 @@ module pu =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type pvReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pvReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.productid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
@@ -4301,7 +4301,7 @@ module pu =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type smReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type smReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.shipmethodid = OptionColumn(reader, getOrdinal, reader.GetInt32, "shipmethodid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -4323,7 +4323,7 @@ module pu =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type vReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.accountnumber = OptionColumn(reader, getOrdinal, reader.GetString, "accountnumber")
@@ -4506,7 +4506,7 @@ module purchasing =
           emailpromotion: Option<int> }
 
     module Readers =
-        type productvendorReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type productvendorReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.averageleadtime = RequiredColumn(reader, getOrdinal, reader.GetInt32, "averageleadtime")
@@ -4536,7 +4536,7 @@ module purchasing =
             member __.ReadIfNotNull() =
                 if __.productid.IsNull() then None else Some(__.Read())
 
-        type purchaseorderdetailReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type purchaseorderdetailReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.purchaseorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "purchaseorderid")
             member __.purchaseorderdetailid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "purchaseorderdetailid")
             member __.duedate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "duedate")
@@ -4562,7 +4562,7 @@ module purchasing =
             member __.ReadIfNotNull() =
                 if __.purchaseorderid.IsNull() then None else Some(__.Read())
 
-        type purchaseorderheaderReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type purchaseorderheaderReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.purchaseorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "purchaseorderid")
             member __.revisionnumber = RequiredColumn(reader, getOrdinal, reader.GetInt16, "revisionnumber")
             member __.status = RequiredColumn(reader, getOrdinal, reader.GetInt16, "status")
@@ -4594,7 +4594,7 @@ module purchasing =
             member __.ReadIfNotNull() =
                 if __.purchaseorderid.IsNull() then None else Some(__.Read())
 
-        type shipmethodReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type shipmethodReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.shipmethodid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "shipmethodid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.shipbase = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "shipbase")
@@ -4614,7 +4614,7 @@ module purchasing =
             member __.ReadIfNotNull() =
                 if __.shipmethodid.IsNull() then None else Some(__.Read())
 
-        type vendorReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vendorReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.accountnumber = RequiredColumn(reader, getOrdinal, reader.GetString, "accountnumber")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
@@ -4638,7 +4638,7 @@ module purchasing =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type vvendorwithaddressesReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vvendorwithaddressesReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
             member __.addresstype = OptionColumn(reader, getOrdinal, reader.GetString, "addresstype")
@@ -4664,7 +4664,7 @@ module purchasing =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type vvendorwithcontactsReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vvendorwithcontactsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
             member __.contacttype = OptionColumn(reader, getOrdinal, reader.GetString, "contacttype")
@@ -5055,7 +5055,7 @@ module sa =
           modifieddate: Option<System.DateTime> }
 
     module Readers =
-        type cReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type cReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.customerid = OptionColumn(reader, getOrdinal, reader.GetInt32, "customerid")
             member __.personid = OptionColumn(reader, getOrdinal, reader.GetInt32, "personid")
@@ -5077,7 +5077,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type ccReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type ccReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.creditcardid = OptionColumn(reader, getOrdinal, reader.GetInt32, "creditcardid")
             member __.cardtype = OptionColumn(reader, getOrdinal, reader.GetString, "cardtype")
@@ -5099,7 +5099,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type crReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type crReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.currencyrateid = OptionColumn(reader, getOrdinal, reader.GetInt32, "currencyrateid")
             member __.currencyratedate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "currencyratedate")
             member __.fromcurrencycode = OptionColumn(reader, getOrdinal, reader.GetString, "fromcurrencycode")
@@ -5121,7 +5121,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.currencyrateid.IsNull() then None else Some(__.Read())
 
-        type crcReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type crcReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.countryregioncode = OptionColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
             member __.currencycode = OptionColumn(reader, getOrdinal, reader.GetString, "currencycode")
             member __.modifieddate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -5135,7 +5135,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.countryregioncode.IsNull() then None else Some(__.Read())
 
-        type cuReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type cuReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetString, "id")
             member __.currencycode = OptionColumn(reader, getOrdinal, reader.GetString, "currencycode")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -5151,7 +5151,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type pccReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type pccReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.creditcardid = OptionColumn(reader, getOrdinal, reader.GetInt32, "creditcardid")
@@ -5167,7 +5167,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type sReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type sReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -5189,7 +5189,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type sciReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type sciReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.shoppingcartitemid = OptionColumn(reader, getOrdinal, reader.GetInt32, "shoppingcartitemid")
             member __.shoppingcartid = OptionColumn(reader, getOrdinal, reader.GetString, "shoppingcartid")
@@ -5211,7 +5211,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type soReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type soReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.specialofferid = OptionColumn(reader, getOrdinal, reader.GetInt32, "specialofferid")
             member __.description = OptionColumn(reader, getOrdinal, reader.GetString, "description")
@@ -5243,7 +5243,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type sodReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type sodReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.salesorderid = OptionColumn(reader, getOrdinal, reader.GetInt32, "salesorderid")
             member __.salesorderdetailid = OptionColumn(reader, getOrdinal, reader.GetInt32, "salesorderdetailid")
@@ -5273,7 +5273,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type sohReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type sohReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.salesorderid = OptionColumn(reader, getOrdinal, reader.GetInt32, "salesorderid")
             member __.revisionnumber = OptionColumn(reader, getOrdinal, reader.GetInt16, "revisionnumber")
@@ -5333,7 +5333,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.onlineorderflag.IsNull() then None else Some(__.Read())
 
-        type sohsrReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type sohsrReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.salesorderid = OptionColumn(reader, getOrdinal, reader.GetInt32, "salesorderid")
             member __.salesreasonid = OptionColumn(reader, getOrdinal, reader.GetInt32, "salesreasonid")
             member __.modifieddate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -5347,7 +5347,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.salesorderid.IsNull() then None else Some(__.Read())
 
-        type sopReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type sopReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.specialofferid = OptionColumn(reader, getOrdinal, reader.GetInt32, "specialofferid")
             member __.productid = OptionColumn(reader, getOrdinal, reader.GetInt32, "productid")
@@ -5365,7 +5365,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type spReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type spReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.territoryid = OptionColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
@@ -5393,7 +5393,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type spqhReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type spqhReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.quotadate = OptionColumn(reader, getOrdinal, reader.GetDateTime, "quotadate")
@@ -5413,7 +5413,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type srReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type srReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.salesreasonid = OptionColumn(reader, getOrdinal, reader.GetInt32, "salesreasonid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -5431,7 +5431,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type stReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type stReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.territoryid = OptionColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
@@ -5461,7 +5461,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type sthReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type sthReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.territoryid = OptionColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
@@ -5483,7 +5483,7 @@ module sa =
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
 
-        type trReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type trReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = OptionColumn(reader, getOrdinal, reader.GetInt32, "id")
             member __.salestaxrateid = OptionColumn(reader, getOrdinal, reader.GetInt32, "salestaxrateid")
             member __.stateprovinceid = OptionColumn(reader, getOrdinal, reader.GetInt32, "stateprovinceid")
@@ -6056,7 +6056,7 @@ module sales =
           NumberEmployees: Option<int> }
 
     module Readers =
-        type countryregioncurrencyReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type countryregioncurrencyReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.countryregioncode = RequiredColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
             member __.currencycode = RequiredColumn(reader, getOrdinal, reader.GetString, "currencycode")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -6070,7 +6070,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.countryregioncode.IsNull() then None else Some(__.Read())
 
-        type creditcardReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type creditcardReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.creditcardid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "creditcardid")
             member __.cardtype = RequiredColumn(reader, getOrdinal, reader.GetString, "cardtype")
             member __.cardnumber = RequiredColumn(reader, getOrdinal, reader.GetString, "cardnumber")
@@ -6090,7 +6090,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.creditcardid.IsNull() then None else Some(__.Read())
 
-        type currencyReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type currencyReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.currencycode = RequiredColumn(reader, getOrdinal, reader.GetString, "currencycode")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -6104,7 +6104,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.currencycode.IsNull() then None else Some(__.Read())
 
-        type currencyrateReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type currencyrateReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.currencyrateid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "currencyrateid")
             member __.currencyratedate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "currencyratedate")
             member __.fromcurrencycode = RequiredColumn(reader, getOrdinal, reader.GetString, "fromcurrencycode")
@@ -6126,7 +6126,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.currencyrateid.IsNull() then None else Some(__.Read())
 
-        type customerReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type customerReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.customerid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "customerid")
             member __.personid = OptionColumn(reader, getOrdinal, reader.GetInt32, "personid")
             member __.storeid = OptionColumn(reader, getOrdinal, reader.GetInt32, "storeid")
@@ -6146,7 +6146,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.customerid.IsNull() then None else Some(__.Read())
 
-        type personcreditcardReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type personcreditcardReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.creditcardid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "creditcardid")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -6160,7 +6160,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type salesorderdetailReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type salesorderdetailReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.salesorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salesorderid")
             member __.salesorderdetailid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salesorderdetailid")
             member __.carriertrackingnumber = OptionColumn(reader, getOrdinal, reader.GetString, "carriertrackingnumber")
@@ -6188,7 +6188,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.salesorderid.IsNull() then None else Some(__.Read())
 
-        type salesorderheaderReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type salesorderheaderReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.salesorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salesorderid")
             member __.revisionnumber = RequiredColumn(reader, getOrdinal, reader.GetInt16, "revisionnumber")
             member __.orderdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "orderdate")
@@ -6246,7 +6246,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.salesorderid.IsNull() then None else Some(__.Read())
 
-        type salesorderheadersalesreasonReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type salesorderheadersalesreasonReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.salesorderid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salesorderid")
             member __.salesreasonid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salesreasonid")
             member __.modifieddate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "modifieddate")
@@ -6260,7 +6260,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.salesorderid.IsNull() then None else Some(__.Read())
 
-        type salespersonReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type salespersonReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.territoryid = OptionColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
             member __.salesquota = OptionColumn(reader, getOrdinal, reader.GetDecimal, "salesquota")
@@ -6286,7 +6286,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type salespersonquotahistoryReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type salespersonquotahistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.quotadate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "quotadate")
             member __.salesquota = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "salesquota")
@@ -6304,7 +6304,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type salesreasonReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type salesreasonReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.salesreasonid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salesreasonid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.reasontype = RequiredColumn(reader, getOrdinal, reader.GetString, "reasontype")
@@ -6320,7 +6320,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.salesreasonid.IsNull() then None else Some(__.Read())
 
-        type salestaxrateReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type salestaxrateReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.salestaxrateid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "salestaxrateid")
             member __.stateprovinceid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "stateprovinceid")
             member __.taxtype = RequiredColumn(reader, getOrdinal, reader.GetInt16, "taxtype")
@@ -6342,7 +6342,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.salestaxrateid.IsNull() then None else Some(__.Read())
 
-        type salesterritoryReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type salesterritoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.territoryid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.countryregioncode = RequiredColumn(reader, getOrdinal, reader.GetString, "countryregioncode")
@@ -6370,7 +6370,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.territoryid.IsNull() then None else Some(__.Read())
 
-        type salesterritoryhistoryReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type salesterritoryhistoryReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.territoryid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "territoryid")
             member __.startdate = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "startdate")
@@ -6390,7 +6390,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type shoppingcartitemReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type shoppingcartitemReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.shoppingcartitemid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "shoppingcartitemid")
             member __.shoppingcartid = RequiredColumn(reader, getOrdinal, reader.GetString, "shoppingcartid")
             member __.quantity = RequiredColumn(reader, getOrdinal, reader.GetInt32, "quantity")
@@ -6410,7 +6410,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.shoppingcartitemid.IsNull() then None else Some(__.Read())
 
-        type specialofferReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type specialofferReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.specialofferid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "specialofferid")
             member __.description = RequiredColumn(reader, getOrdinal, reader.GetString, "description")
             member __.discountpct = RequiredColumn(reader, getOrdinal, reader.GetDecimal, "discountpct")
@@ -6440,7 +6440,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.specialofferid.IsNull() then None else Some(__.Read())
 
-        type specialofferproductReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type specialofferproductReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.specialofferid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "specialofferid")
             member __.productid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "productid")
             member __.rowguid = RequiredColumn(reader, getOrdinal, reader.GetGuid, "rowguid")
@@ -6456,7 +6456,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.specialofferid.IsNull() then None else Some(__.Read())
 
-        type storeReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type storeReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
             member __.salespersonid = OptionColumn(reader, getOrdinal, reader.GetInt32, "salespersonid")
@@ -6476,7 +6476,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type vindividualcustomerReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vindividualcustomerReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.title = OptionColumn(reader, getOrdinal, reader.GetString, "title")
             member __.firstname = OptionColumn(reader, getOrdinal, reader.GetString, "firstname")
@@ -6520,7 +6520,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type vpersondemographicsReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vpersondemographicsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.totalpurchaseytd = OptionColumn(reader, getOrdinal, reader.GetDecimal, "totalpurchaseytd")
             member __.datefirstpurchase = OptionColumn(reader, getOrdinal, reader.GetDateOnly, "datefirstpurchase")
@@ -6554,7 +6554,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type vsalespersonReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vsalespersonReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.title = OptionColumn(reader, getOrdinal, reader.GetString, "title")
             member __.firstname = OptionColumn(reader, getOrdinal, reader.GetString, "firstname")
@@ -6606,7 +6606,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type vsalespersonsalesbyfiscalyearsReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vsalespersonsalesbyfiscalyearsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.SalesPersonID = OptionColumn(reader, getOrdinal, reader.GetInt32, "SalesPersonID")
             member __.FullName = OptionColumn(reader, getOrdinal, reader.GetString, "FullName")
             member __.JobTitle = OptionColumn(reader, getOrdinal, reader.GetString, "JobTitle")
@@ -6628,7 +6628,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.SalesPersonID.IsNull() then None else Some(__.Read())
 
-        type vsalespersonsalesbyfiscalyearsdataReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vsalespersonsalesbyfiscalyearsdataReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.salespersonid = OptionColumn(reader, getOrdinal, reader.GetInt32, "salespersonid")
             member __.fullname = OptionColumn(reader, getOrdinal, reader.GetString, "fullname")
             member __.jobtitle = OptionColumn(reader, getOrdinal, reader.GetString, "jobtitle")
@@ -6648,7 +6648,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.salespersonid.IsNull() then None else Some(__.Read())
 
-        type vstorewithaddressesReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vstorewithaddressesReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
             member __.addresstype = OptionColumn(reader, getOrdinal, reader.GetString, "addresstype")
@@ -6674,7 +6674,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type vstorewithcontactsReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vstorewithcontactsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
             member __.contacttype = OptionColumn(reader, getOrdinal, reader.GetString, "contacttype")
@@ -6706,7 +6706,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-        type vstorewithdemographicsReader (reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type vstorewithdemographicsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.businessentityid = OptionColumn(reader, getOrdinal, reader.GetInt32, "businessentityid")
             member __.name = OptionColumn(reader, getOrdinal, reader.GetString, "name")
             member __.AnnualSales = OptionColumn(reader, getOrdinal, reader.GetDecimal, "AnnualSales")
@@ -6738,7 +6738,7 @@ module sales =
             member __.ReadIfNotNull() =
                 if __.businessentityid.IsNull() then None else Some(__.Read())
 
-type HydraReader (reader: Npgsql.NpgsqlDataReader) =
+type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     let mutable accFieldCount = 0
     let buildGetOrdinal fieldCount =
         let dictionary = 
