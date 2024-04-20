@@ -103,7 +103,7 @@ type UpdateAsyncBuilder<'Updated>(ct: ContextType) =
     member this.Run (state: QuerySource<'Updated, UpdateQuerySpec<'Updated>>) = 
         async {
             let updateQuery = state.Query |> prepareUpdateQuery
-            let ctx = ContextUtils.getContext ct
+            let! ctx = ContextUtils.getContext ct |> Async.AwaitTask
             try
                 let! cancel = Async.CancellationToken
                 let! result = ctx.UpdateAsyncWithOptions (updateQuery, cancel) |> Async.AwaitTask
@@ -122,7 +122,7 @@ type UpdateTaskBuilder<'Updated>(ct: ContextType, cancellationToken: Cancellatio
     member this.Run (state: QuerySource<'Updated, UpdateQuerySpec<'Updated>>) = 
         task {
             let updateQuery = state.Query |> prepareUpdateQuery
-            let ctx = ContextUtils.getContext ct
+            let! ctx = ContextUtils.getContext ct
             try
                 let! result = ctx.UpdateAsyncWithOptions (updateQuery, cancellationToken) |> Async.AwaitTask
                 return result

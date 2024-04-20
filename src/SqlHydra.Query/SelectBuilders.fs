@@ -6,10 +6,12 @@ open System
 open System.Linq.Expressions
 open System.Data.Common
 open System.Threading
+open System.Threading.Tasks
 open SqlKata
 
 type ContextType = 
     | Create of create: (unit -> QueryContext)
+    | CreateTask of create: (unit -> Task<QueryContext>)
     | Shared of QueryContext
 
 module ContextUtils = 
@@ -18,14 +20,16 @@ module ContextUtils =
         then ctx.Connection.Open()
         ctx
 
-    let getContext ct =
+    let getContext ct : Task<QueryContext> =
         match ct with 
-        | Create create -> create() |> tryOpen
-        | Shared ctx -> ctx
+        | Create create -> create() |> tryOpen |> Task.FromResult
+        | CreateTask create -> create()
+        | Shared ctx -> Task.FromResult ctx
 
     let disposeIfNotShared ct (ctx: QueryContext) =
         match ct with
         | Create _ -> (ctx :> IDisposable).Dispose()
+        | CreateTask _ -> (ctx :> IDisposable).Dispose()
         | Shared _ -> () // Do not dispose if shared
 
 
@@ -375,10 +379,10 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader & #DbDataReader> (
     
     member this.RunSelected(query: Query, resultModifier) =
         task {
-            let ctx = ContextUtils.getContext ct
+            let! ctx = ContextUtils.getContext ct
             try 
                 let selectQuery = SelectQuery<'Selected>(query)
-                let! results = ctx.ReadAsyncWithOptions (selectQuery, readEntityBuilder, cancellationToken) |> Async.AwaitTask
+                let! results = ctx.ReadAsyncWithOptions (selectQuery, readEntityBuilder, cancellationToken)
                 return results |> resultModifier
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
@@ -386,10 +390,10 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader & #DbDataReader> (
 
     member this.RunMapped(query: Query, resultModifier) =
         task {
-            let ctx = ContextUtils.getContext ct
+            let! ctx = ContextUtils.getContext ct
             try 
                 let selectQuery = SelectQuery<'Selected>(query)
-                let! results = ctx.ReadAsyncWithOptions (selectQuery, readEntityBuilder, cancellationToken) |> Async.AwaitTask
+                let! results = ctx.ReadAsyncWithOptions (selectQuery, readEntityBuilder, cancellationToken)
                 return results |> Seq.map this.MapFn.Value.Invoke |> resultModifier
             finally 
                 ContextUtils.disposeIfNotShared ct ctx
@@ -440,7 +444,7 @@ type SelectTaskBuilder<'Selected, 'Mapped, 'Reader & #DbDataReader> (
     // Run: count
     member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =
         task {
-            let ctx = ContextUtils.getContext ct
+            let! ctx = ContextUtils.getContext ct
             try return! ctx.CountAsyncWithOptions (SelectQuery<int>(state.Query), cancellationToken) |> Async.AwaitTask
             finally ContextUtils.disposeIfNotShared ct ctx
         }
@@ -453,7 +457,7 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader & #DbDataReader> (
     
     member this.RunSelected(query: Query, resultModifier) =
         async {
-            let ctx = ContextUtils.getContext ct
+            let! ctx = ContextUtils.getContext ct |> Async.AwaitTask
             try 
                 let selectQuery = SelectQuery<'Selected>(query)
                 let! cancel = Async.CancellationToken
@@ -465,7 +469,7 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader & #DbDataReader> (
 
     member this.RunMapped(query: Query, resultModifier) =
         async {
-            let ctx = ContextUtils.getContext ct
+            let! ctx = ContextUtils.getContext ct |> Async.AwaitTask
             try 
                 let selectQuery = SelectQuery<'Selected>(query)
                 let! cancel = Async.CancellationToken
@@ -520,7 +524,7 @@ type SelectAsyncBuilder<'Selected, 'Mapped, 'Reader & #DbDataReader> (
     // Run: count
     member this.Run(state: QuerySource<ResultModifier.Count<int>, Query>) =
         async {
-            let ctx = ContextUtils.getContext ct
+            let! ctx = ContextUtils.getContext ct |> Async.AwaitTask
             let! cancel = Async.CancellationToken
             try return! ctx.CountAsyncWithOptions (SelectQuery<int>(state.Query), cancel) |> Async.AwaitTask
             finally ContextUtils.disposeIfNotShared ct ctx

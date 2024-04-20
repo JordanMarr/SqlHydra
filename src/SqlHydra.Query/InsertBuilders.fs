@@ -100,7 +100,7 @@ type InsertAsyncBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct
 
     member this.Run (state: QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>) = 
         async {
-            let ctx = ContextUtils.getContext ct            
+            let! ctx = ContextUtils.getContext ct |> Async.AwaitTask 
             try 
                 let insertQuery = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
                 let! cancel = Async.CancellationToken
@@ -122,7 +122,7 @@ type InsertTaskBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct>(ct:
 
     member this.Run (state: QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>) = 
         task {
-            let ctx = ContextUtils.getContext ct
+            let! ctx = ContextUtils.getContext ct
             try 
                 let insertQuery = InsertQuery<'Inserted, 'InsertReturn>(state.Query)
                 if state.Query.Entities |> Seq.isEmpty then
