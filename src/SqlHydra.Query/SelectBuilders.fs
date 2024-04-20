@@ -12,24 +12,37 @@ open SqlKata
 type ContextType = 
     | Create of create: (unit -> QueryContext)
     | CreateTask of create: (unit -> Task<QueryContext>)
+    | CreateAsync of create: (unit -> Async<QueryContext>)
     | Shared of QueryContext
 
 module ContextUtils = 
-    let tryOpen (ctx: QueryContext) = 
+    let private tryOpen (ctx: QueryContext) = 
         if ctx.Connection.State <> Data.ConnectionState.Open 
         then ctx.Connection.Open()
         ctx
 
-    let getContext ct : Task<QueryContext> =
+    let getContext ct : Task<QueryContext> =        
         match ct with 
-        | Create create -> create() |> tryOpen |> Task.FromResult
-        | CreateTask create -> create()
-        | Shared ctx -> Task.FromResult ctx
+        | Create create ->             
+            create() |> tryOpen |> Task.FromResult
+        | CreateTask create -> 
+            task {
+                let! ctx = create() 
+                return ctx |> tryOpen
+            }
+        | CreateAsync create -> 
+            task {
+                let! ctx = create() 
+                return ctx |> tryOpen
+            }
+        | Shared ctx ->             
+            ctx |> tryOpen |> Task.FromResult
 
     let disposeIfNotShared ct (ctx: QueryContext) =
         match ct with
         | Create _ -> (ctx :> IDisposable).Dispose()
         | CreateTask _ -> (ctx :> IDisposable).Dispose()
+        | CreateAsync _ -> (ctx :> IDisposable).Dispose()
         | Shared _ -> () // Do not dispose if shared
 
 
