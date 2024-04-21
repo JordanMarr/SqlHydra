@@ -363,7 +363,7 @@ let! distinctCustomerNames =
 Selecting city and state columns only:
 ```F#
 let getCities (cityFilter: string) = 
-    selectTask HydraReader.Read (Create openContext) {
+    selectTask HydraReader.Read openContext {
         for a in SalesLT.Address do                             // Specifies a FROM table in the query
         where (a.City = cityFilter)                             // Specifies a WHERE clause in the query
         select (a.City, a.StateProvince) into selected          // Specifies which entities and/or columns to SELECT in the query
@@ -388,7 +388,7 @@ _Special `where` filter operators:_
 Select `Address` entities where City starts with `S`:
 ```F#
 let getAddressesInCitiesStartingWithS () = 
-        selectAsync HydraReader.Read (Create openContext) {
+        selectAsync HydraReader.Read openContext {
             for a in SalesLT.Address do
             where (a.City =% "S%")
         }
@@ -397,7 +397,7 @@ let getAddressesInCitiesStartingWithS () =
 Try to select a single row (this example returns a `decimal option`):
 ```F#
 let tryGetOrderTotal (orderId: int) = 
-        selectAsync HydraReader.Read (Create openContext) {
+        selectAsync HydraReader.Read openContext {
             for o in SalesLT.Order do
             where (o.Id = orderId)
             select o.Total
@@ -410,7 +410,7 @@ let tryGetOrderTotal (orderId: int) =
 Select top 10 `Product` entities with inner joined category name:
 ```F#
 let getProductsWithCategory () = 
-    selectTask HydraReader.Read (Create openContext) {
+    selectTask HydraReader.Read openContext {
         for p in SalesLT.Product do
         join c in categoryTable on (p.ProductCategoryID.Value = c.ProductCategoryID)
         select (p, c.Name)
@@ -423,7 +423,7 @@ Select `Customer` with left joined `Address` where `CustomerID` is in a list of 
 
 ```F#
 let getCustomerAddressesInIds (customerIds: int list) =
-    selectAsync HydraReader.Read (Create openContext) {
+    selectAsync HydraReader.Read openContext) {
         for c in SalesLT.Customer do
         leftJoin ca in SalesLT.CustomerAddress on (c.CustomerID = ca.Value.CustomerID)
         leftJoin a  in SalesLT.Address on (ca.Value.AddressID = a.Value.AddressID)
@@ -437,7 +437,7 @@ When selecting individual columns from a left joined table, you can force non-op
 
 ```F#
 let getCustomerZipCodes (customerId: int) =
-    selectAsync HydraReader.Read (Create openContext) {
+    selectAsync HydraReader.Read openContext {
         for c in SalesLT.Customer do
         leftJoin ca in SalesLT.CustomerAddress on (c.CustomerID = ca.Value.CustomerID)
         leftJoin a  in SalesLT.Address on (ca.Value.AddressID = a.Value.AddressID)
@@ -467,7 +467,7 @@ To transform the query results use the `mapSeq`, `mapArray` or `mapList` operati
 
 ```F#
     let! lineTotals =
-        selectTask HydraReader.Read (Create openContext) {
+        selectTask HydraReader.Read openContext {
             for o in SalesLT.OrderHeaders do
             join d in SalesLT.OrderDetails on (o.SalesOrderID = d.SalesOrderID)
             where (o.OnlineOrderFlag = true)
@@ -487,7 +487,7 @@ If a custom subset of entities and/or columns has been selected in the query, yo
 
 ```F#
     let! lineTotals =
-        selectTask HydraReader.Read (Create openContext) {
+        selectTask HydraReader.Read openContext {
             for o in SalesLT.OrderHeaders do
             join d in SalesLT.OrderDetails on (o.SalesOrderID = d.SalesOrderID)
             where (o.OnlineOrderFlag = true)
@@ -508,7 +508,7 @@ If a custom subset of entities and/or columns has been selected in the query, yo
 You can also use `mapSeq` in conjunction with `tryHead` to map a single result:
 
 ```F#
-        selectAsync HydraReader.Read (Create openContext) {
+        selectAsync HydraReader.Read openContext {
             for o in SalesLT.Order do
             where (o.Id = orderId)
             select o.Total
@@ -530,7 +530,7 @@ _Aggregate functions (can be used in `select`, `having` and `orderBy` clauses):_
 ```F#
 /// Select categories with an avg product price > 500 and < 1000
 let getCategoriesWithHighAvgPrice () = 
-    selectTask HydraReader.Read (Create openContext) {
+    selectTask HydraReader.Read openContext {
         for p in SalesLT.Product do
         where (p.ProductCategoryID <> None)
         groupBy p.ProductCategoryID
@@ -546,7 +546,7 @@ let getCategoriesWithHighAvgPrice () =
 Alternative Row Count Query:
 ```F#
 let! customersWithNoSalesPersonCount =
-    selectTask HydraReader.Read (Create openContext) {
+    selectTask HydraReader.Read openContext {
         for c in SalesLT.Customer do
         where (c.SalesPerson = None)
         count
@@ -559,7 +559,7 @@ let! customersWithNoSalesPersonCount =
 ```F#
 /// Select the minimum item price above a threshold
 let getNextLowestPrice threshold = 
-    selectTask HydraReader.Read (Create openContext) {
+    selectTask HydraReader.Read openContext {
         for p in SalesLT.Product do
         where (p.ListPrice > threshold)
         select (minBy p.ListPrice)
@@ -570,7 +570,7 @@ let getNextLowestPrice threshold =
 ```F#
 /// Select the minimum item price above a threshold
 let getNextLowestPrice threshold = 
-    selectTask HydraReader.Read (Create openContext) {
+    selectTask HydraReader.Read openContext {
         for p in SalesLT.Product do
         where (p.ListPrice > threshold)
         select (minBy (Some p.ListPrice))
@@ -596,7 +596,7 @@ let top5CategoryIdsWithHighestAvgPrices =
 
 // Get category names where the category ID is "IN" the subquery:
 let! top5Categories =
-    selectTask HydraReader.Read (Create openContext) {
+    selectTask HydraReader.Read openContext {
         for c in SalesLT.ProductCategory do
         where (Some c.ProductCategoryID |=| subqueryMany top5CategoryIdsWithHighestAvgPrices)
         select c.Name
@@ -615,7 +615,7 @@ let avgListPrice =
 
 // Get products with a price > the average price
 let! productsWithAboveAveragePrice =
-    selectTask HydraReader.Read (Create openContext) {
+    selectTask HydraReader.Read openContext {
         for p in SalesLT.Product do
         where (p.ListPrice > subqueryOne avgListPrice)
         select (p.Name, p.ListPrice)
@@ -640,7 +640,7 @@ let lowestPriceByProductLine =
 // Get the products whose price is the lowest of all prices in its product line.
 // The name "outer" needs to match the subquery.
 let! cheapestByProductLine = 
-    selectTask HydraReader.Read (Create openContext) {
+    selectTask HydraReader.Read openContext {
         for outer in Production.Product do
         where (outer.ListPrice = subqueryOne lowestPriceByProductLine)
         select (outer.Name, outer.ListPrice)
@@ -651,7 +651,7 @@ let! cheapestByProductLine =
 Distinct Query:
 ```F#
 let! distinctCustomerNames = 
-    selectTask HydraReader.Read (Create openContext) {
+    selectTask HydraReader.Read openContext {
         for c in SalesLT.Customer do
         select (c.FirstName, c.LastName)
         distinct
@@ -669,7 +669,7 @@ Transformations (i.e. `.ToString()` or calling any functions is _not supported_ 
 ```F#
 let getCities () =
     let city = getCity() // DO prepare where parameters above and then pass into the where clause
-    selectTask HydraReader.Read (Create openContext) {
+    selectTask HydraReader.Read openContext {
         for a in SalesLT.Address do
         where (a.City = city)
         select (a.City, a.StateProvince) into (city, state)
@@ -680,7 +680,7 @@ let getCities () =
 ❌ INCORRECT:
 ```F#
 let getCities () =
-    selectTask HydraReader.Read (Create openContext) {
+    selectTask HydraReader.Read openContext {
         for a in SalesLT.Address do
         where (a.City = getCity()) // DO NOT perform calculations or translations within the builder
         select ($"City: %s{city}, State: %s{state}")   // DO NOT transform results within the builder 
@@ -694,7 +694,7 @@ For simple inserts with no identity column and no included/excluded columns, use
 
 ```F#
 let! rowsInserted = 
-    insertTask (Create openContext) {
+    insertTask openContext {
         into Person.Person
         entity 
             {
@@ -717,7 +717,7 @@ By default, all record fields will be included as insert values, so when using a
 ```F#
 
 let! errorLogID =
-    insertTask (Create openContext) {
+    insertTask openContext {
         for e in dbo.ErrorLog do
         entity 
             {
@@ -756,7 +756,7 @@ let currenciesMaybe =
 
 match currenciesMaybe with
 | Some currencies ->
-    do! insertTask (Create openContext) {
+    do! insertTask openContext {
             into Sales.Currency
             entities currencies
         } :> Task // upcast to Task if you want to ignore the resulting value
@@ -779,7 +779,7 @@ Upsert support has been added for Postgres and Sqlite only because they support 
 ```F#
     /// Inserts an address or updates it if it already exists.
     let upsertAddress address = 
-        insertTask (Create openContext) {
+        insertTask openContext {
             for a in Person.Address do
             entity address
             onConflictDoUpdate a.AddressID (
@@ -801,7 +801,7 @@ Or, if you have multiple addresses to upsert:
     let upsertAddress addresses =
         match addresses |> AtLeastOne.tryCreate with
         | Some addresses -> 
-            insertTask (Create openContext) {
+            insertTask openContext {
                 for a in Person.Address do
                 entities addresses
                 onConflictDoUpdate a.AddressID (
@@ -822,7 +822,7 @@ Or, if you have multiple addresses to upsert:
 ```F#
     /// Tries to insert an address if it doesn't already exist.
     let tryInsertAddress address = 
-        insertTask (Create openContext) {
+        insertTask openContext {
             for a in Person.Address do
             entity address
             onConflictDoNothing a.AddressID
@@ -836,7 +836,7 @@ Or, if you have multiple addresses to upsert:
 To update individual columns, use the `set` operation.
 
 ```F#
-do! updateAsync (Create openContext) {
+do! updateAsync openContext {
         for e in dbo.ErrorLog do
         set e.ErrorNumber 123
         set e.ErrorMessage "ERROR #123"
@@ -854,7 +854,7 @@ NOTE: You may use `includeColumn` or `excludeColumn` multiple times - once for e
 
 ```F#
 let! rowsUpdated = 
-    updateTask (Create openContext) {
+    updateTask openContext {
         for e in dbo.ErrorLog do
         entity 
             {
@@ -885,7 +885,7 @@ update {
 ### Delete Builder
 
 ```F#
-do! deleteTask (Create openContext) {
+do! deleteTask openContext {
         for e in dbo.ErrorLog do
         where (e.ErrorLogID = 5)
     } :> Task // upcast to Task if you want to ignore the resulting value
@@ -894,7 +894,7 @@ do! deleteTask (Create openContext) {
 If you want to delete all records in a table, you must use the `deleteAll` keyword in lieu of a `where` statement or else it will not compile:
 ```F#
 let! rowsDeleted = 
-    deleteTask (Create openContext) {
+    deleteTask openContext {
         for c in Sales.Customer do
         deleteAll
     }
