@@ -18,7 +18,7 @@ type Args =
 
 type LoadConfigResult = 
     | Valid of Config
-    | Invalid of error: string
+    | Invalid of Exception
     | NotFound
 
 /// Creates a yes/no prmompt.
@@ -113,14 +113,14 @@ let saveConfig (tomlFile: FileInfo, cfg: Config) =
     File.WriteAllText(tomlFile.FullName, toml)
 
 /// Reads a config from toml.
-let tryLoadConfig(tomlFile: FileInfo) = 
+let tryLoadConfig(tomlFile: FileInfo) =     
     if tomlFile.Exists then
-        try            
+        try
             let toml = File.ReadAllText(tomlFile.FullName)
             let config = TomlConfigParser.read(toml)
             Valid config
         with ex -> 
-            Invalid ex.Message
+            Invalid ex
     else 
         NotFound
 
@@ -133,8 +133,8 @@ let getOrCreateConfig (args: Args) =
     match tryLoadConfig(args.TomlFile) with
     | Valid cfg -> 
         cfg
-    | Invalid exMsg -> 
-        Console.WriteLine($"> Unable to deserialize '{args.TomlFile.FullName}'. \n{exMsg}")
+    | Invalid ex -> 
+        AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything)
         failwith "Invalid toml config."
     | NotFound ->
         AnsiConsole.MarkupLine($"[blue]-[/] `{args.TomlFile.Name}` does not exist. Starting configuration wizard...")
