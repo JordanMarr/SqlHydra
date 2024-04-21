@@ -153,7 +153,7 @@ let ``InsertGetId Test``() = task {
         }
 
     let! errorLogId = 
-        insertTask (Shared ctx) {
+        insertTask ctx {
             for e in dbo.ErrorLog do
             entity errorLog
             getId e.ErrorLogID
@@ -180,7 +180,7 @@ let ``InsertGetIdAsync Test``() = task {
         }
 
     let! result = 
-        insertTask (Shared ctx) {
+        insertTask ctx {
             for e in dbo.ErrorLog do
             entity errorLog
             getId e.ErrorLogID
@@ -194,13 +194,13 @@ let ``Update Set Individual Fields``() = task {
     use ctx = openContext()
         
     let! row = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for e in dbo.ErrorLog do
             head
         }
 
     let! result = 
-        updateTask (Shared ctx) {
+        updateTask ctx {
             for e in dbo.ErrorLog do
             set e.ErrorNumber 123
             set e.ErrorMessage "ERROR #123"
@@ -217,13 +217,13 @@ let ``UpdateAsync Set Individual Fields``() = task {
     use ctx = openContext()
 
     let! row = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for e in dbo.ErrorLog do
             head
         }
 
     let! result = 
-        updateTask (Shared ctx) {
+        updateTask ctx {
             for e in dbo.ErrorLog do
             set e.ErrorNumber (row.ErrorNumber + 1)
             set e.ErrorProcedure null
@@ -238,7 +238,7 @@ let ``Update Entity``() = task {
     use ctx = openContext()
         
     let! row = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for e in dbo.ErrorLog do
             head
         }
@@ -253,7 +253,7 @@ let ``Update Entity``() = task {
     row.UserName <- "jmarr"
 
     let! result = 
-        updateTask (Shared ctx) {
+        updateTask ctx {
             for e in dbo.ErrorLog do
             entity row
             excludeColumn e.ErrorLogID

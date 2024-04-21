@@ -14,6 +14,10 @@ type ContextType =
     | CreateTask of create: (unit -> Task<QueryContext>)
     | CreateAsync of create: (unit -> Async<QueryContext>)
     | Shared of QueryContext
+    static member op_Implicit(ctx: QueryContext) = Shared ctx
+    static member op_Implicit(createFn: unit -> QueryContext) = Create createFn
+    static member op_Implicit(createFn: unit -> Task<QueryContext>) = CreateTask createFn
+    static member op_Implicit(createFn: unit -> Async<QueryContext>) = CreateAsync createFn
 
 module ContextUtils = 
     let private tryOpen (ctx: QueryContext) = 

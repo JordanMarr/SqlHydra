@@ -328,7 +328,7 @@ let ``Insert and Get Id``() = task {
     ctx.BeginTransaction()
 
     let! prodReviewId = 
-        insertTask (Shared ctx) {
+        insertTask ctx {
             for r in production.productreview do
             entity 
                 {
@@ -442,7 +442,7 @@ let ``Distinct Test``() = task {
     match currencies with
     | Some currencies ->
         let! rowsInserted = 
-            insertTask (Shared ctx) {
+            insertTask ctx {
                 for e in sales.currency do
                 entities currencies
             }
@@ -450,14 +450,14 @@ let ``Distinct Test``() = task {
         Assert.AreEqual(rowsInserted, 3, "Expected 3 rows to be inserted")
 
         let! results =
-            selectTask HydraReader.Read (Shared ctx) {
+            selectTask HydraReader.Read ctx {
                 for c in sales.currency do
                 where (c.currencycode =% "BC%")
                 select c.name
             }
 
         let! distinctResults =
-            selectTask HydraReader.Read (Shared ctx) {
+            selectTask HydraReader.Read ctx {
                 for c in sales.currency do
                 where (c.currencycode =% "BC%")
                 select c.name
@@ -567,13 +567,13 @@ let ``Enum Tests``() = task {
 #endif
 
     let! deleteResults =
-        deleteTask (Shared ctx) {
+        deleteTask ctx {
             for p in ext.person do
             deleteAll
         }
 
     let! insertResults = 
-        insertTask (Shared ctx) {
+        insertTask ctx {
             into ext.person
             entity (
                 { 
@@ -586,14 +586,14 @@ let ``Enum Tests``() = task {
     Assert.IsTrue(insertResults > 0, "Expected insert results > 0")
 
     let! query1Results = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for p in ext.person do
             select p
             toList
         } 
 
     let! updateResults = 
-        updateTask (Shared ctx) {
+        updateTask ctx {
             for p in ext.person do
             set p.currentmood ext.mood.happy
             where (p.currentmood = ext.mood.ok)
@@ -602,7 +602,7 @@ let ``Enum Tests``() = task {
     Assert.IsTrue(updateResults > 0, "Expected update results > 0")
 
     let! query2Results = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for p in ext.person do
             select p
             toList
@@ -617,7 +617,7 @@ let ``OnConflictDoUpdate``() = task {
     ctx.BeginTransaction()
 
     let upsertCurrency currency = 
-        insertTask (Shared ctx) {
+        insertTask ctx {
             for c in sales.currency do
             entity currency
             onConflictDoUpdate c.currencycode (c.name, c.modifieddate)
@@ -693,7 +693,7 @@ let ``Query Employee Record with DateOnly``() = task {
     use ctx = openContext()
             
     let! employees =
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for e in humanresources.employee do
             select e
         }
@@ -706,7 +706,7 @@ let ``Query Employee Column with DateOnly``() = task {
     use ctx = openContext()
             
     let! employeeBirthDates =
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for e in humanresources.employee do
             select e.birthdate
         }
@@ -727,7 +727,7 @@ let ``Test Array Columns``() = task {
         }
 
     let! insertResults = 
-        insertTask (Shared ctx) {
+        insertTask ctx {
             into ext.arrays
             entity row
         }
@@ -736,7 +736,7 @@ let ``Test Array Columns``() = task {
 
             
     let! query1Result = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for r in ext.arrays do
             select r
             tryHead
@@ -745,7 +745,7 @@ let ``Test Array Columns``() = task {
     Assert.AreEqual(query1Result, Some row, "Expected query result to match inserted row.")
 
     let! query2Result = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for r in ext.arrays do
             select (r.integer_array, r.text_array)
             tryHead
@@ -762,7 +762,7 @@ let ``Update Employee DateOnly``() = task {
     ctx.BeginTransaction()
             
     let! employees =
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for e in humanresources.employee do
             select e
         }
@@ -773,7 +773,7 @@ let ``Update Employee DateOnly``() = task {
     let birthDate = System.DateOnly(1980, 1, 1)
 
     let! result = 
-        updateTask (Shared ctx) {
+        updateTask ctx {
             for e in humanresources.employee do
             set e.birthdate birthDate
             where (e.businessentityid = emp.businessentityid)
@@ -782,7 +782,7 @@ let ``Update Employee DateOnly``() = task {
     result =! 1
 
     let! refreshedEmp = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for e in humanresources.employee do
             where (e.businessentityid = emp.businessentityid)                    
             tryHead

@@ -20,7 +20,7 @@ let openContext() =
 [<Test>]
 let ``selectTask - no select``() = task {
     let! results = 
-        selectTask HydraReader.Read (Create openContext) {
+        selectTask HydraReader.Read openContext {
             for p in Person.Person do
             take 10
         }
@@ -31,7 +31,7 @@ let ``selectTask - no select``() = task {
 [<Test>]
 let ``selectTask - select p``() = task {
     let! results = 
-        selectTask HydraReader.Read (Create openContext) {
+        selectTask HydraReader.Read openContext {
             for p in Person.Person do
             take 10
             select p
@@ -43,7 +43,7 @@ let ``selectTask - select p``() = task {
 [<Test>]
 let ``selectTask - toArray``() = task {
     let! results = 
-        selectTask HydraReader.Read (Create openContext) {
+        selectTask HydraReader.Read openContext {
             for p in Person.Person do
             take 10
             toArray
@@ -55,7 +55,7 @@ let ``selectTask - toArray``() = task {
 [<Test>]
 let ``selectTask - mapList column``() = task {
     let! results = 
-        selectTask HydraReader.Read (Create openContext) {
+        selectTask HydraReader.Read openContext {
             for p in Person.Person do
             take 10
             mapList p.FirstName
@@ -67,7 +67,7 @@ let ``selectTask - mapList column``() = task {
 [<Test>]
 let ``selectTask - select entity - mapSeq column``() = task {
     let! results = 
-        selectTask HydraReader.Read (Create openContext) {
+        selectTask HydraReader.Read openContext {
             for p in Person.Person do
             take 10
             select p
@@ -80,7 +80,7 @@ let ``selectTask - select entity - mapSeq column``() = task {
 [<Test>]
 let ``selectTask - select columns into - mapList column``() = task {
     let! results = 
-        selectTask HydraReader.Read (Create openContext) {
+        selectTask HydraReader.Read openContext {
             for p in Person.Person do
             take 10
             select (p.FirstName, p.LastName) into (fname, lname)
@@ -93,7 +93,7 @@ let ``selectTask - select columns into - mapList column``() = task {
 [<Test>]
 let ``selectTask - count``() = task {
     let! results = 
-        selectTask HydraReader.Read (Create openContext) {
+        selectTask HydraReader.Read openContext {
             for p in Person.Person do
             count
         }
@@ -104,7 +104,7 @@ let ``selectTask - count``() = task {
 [<Test>]
 let ``selectTask - tryHead - Selected``() = task {
     let! result = 
-        selectTask HydraReader.Read (Create openContext) {
+        selectTask HydraReader.Read openContext {
             for p in Person.Person do
             take 1
             tryHead
@@ -116,7 +116,7 @@ let ``selectTask - tryHead - Selected``() = task {
 [<Test>]
 let ``selectTask - tryHead - Mapped``() = task {
     let! result = 
-        selectTask HydraReader.Read (Create openContext) {
+        selectTask HydraReader.Read openContext {
             for p in Person.Person do
             take 1
             mapSeq $"{p.FirstName} {p.LastName}"
