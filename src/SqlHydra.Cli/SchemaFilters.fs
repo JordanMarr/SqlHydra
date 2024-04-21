@@ -31,9 +31,9 @@ let inline filterTables (filters: Filters) (tables: 'Table seq when 'Table : (me
         let filteredTables = filteredPaths |> Seq.map (fun path -> tablesByPath.[path]) |> Seq.toList
         
         AnsiConsole.MarkupLineInterpolated($"[blue]-[/] Filters:")
-        AnsiConsole.MarkupLineInterpolated($"  [green]Include: [{filters.Includes}][/]")
-        AnsiConsole.MarkupLineInterpolated($"  [red]Exclude: [{filters.Excludes}][/]")
-        AnsiConsole.MarkupLineInterpolated($"[blue]-[/] Tables: {Seq.length filteredTables} of {Seq.length tables}")
+        AnsiConsole.MarkupLineInterpolated($"  [blue]-[/] Include: [green][{filters.Includes}][/]")
+        AnsiConsole.MarkupLineInterpolated($"  [blue]-[/] Exclude: [red][{filters.Excludes}][/]")
+        AnsiConsole.MarkupLineInterpolated($"  [blue]-[/] Tables & Views: [deepskyblue1]{Seq.length filteredTables} of {Seq.length tables}[/]")
 
         filteredTables
 

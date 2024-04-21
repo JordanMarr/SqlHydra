@@ -124,14 +124,30 @@ let tryLoadConfig(tomlFile: FileInfo) =
     else 
         NotFound
 
+let printConfig (cfg: Config) = 
+    // Create connection string object 
+    let connString = new System.Data.Common.DbConnectionStringBuilder(ConnectionString = cfg.ConnectionString)
+    connString.Remove("password") |> ignore
+    AnsiConsole.MarkupLine($"[blue]-[/] Connection String: [deepskyblue1]\"{connString}\"[/]")
+    AnsiConsole.MarkupLine($"[blue]-[/] Output File: [deepskyblue1]\"{cfg.OutputFile}\"[/]")
+    AnsiConsole.MarkupLine($"[blue]-[/] Namespace: [deepskyblue1]\"{cfg.Namespace}\"[/]")
+    AnsiConsole.MarkupLine($"[blue]-[/] CLI Mutable: [deepskyblue1]{cfg.IsCLIMutable}[/]")
+    AnsiConsole.MarkupLine($"[blue]-[/] Mutable Properties: [deepskyblue1]{cfg.IsMutableProperties}[/]")
+    AnsiConsole.MarkupLine($"[blue]-[/] Nullable Property Type: [deepskyblue1]\"{cfg.NullablePropertyType}\"[/]")
+    AnsiConsole.MarkupLine($"[blue]-[/] Provider DB Type Attributes: [deepskyblue1]{cfg.ProviderDbTypeAttributes}[/]")
+    AnsiConsole.MarkupLine($"[blue]-[/] Table Declarations: [deepskyblue1]{cfg.TableDeclarations}[/]")
+    let readers = cfg.Readers |> Option.map (fun r -> r.ReaderType) |> Option.defaultValue "HydraReader Feature Disabled"
+    AnsiConsole.MarkupLine($"[blue]-[/] Readers: [deepskyblue1]\"{readers}\"[/]")
+    // Filters are printed in SchemaFilters.fs
+
 /// Creates a sqlhydra-*.toml file if necessary.
 let getOrCreateConfig (args: Args) = 
     AnsiConsole.WriteLine()
-    AnsiConsole.MarkupLine($"[blue]-[/] {args.AppInfo.Name}")
-    AnsiConsole.MarkupLine($"[blue]-[/] v[yellow]{args.Version}[/]")
+    AnsiConsole.MarkupLine($"{args.AppInfo.Name} [gold1]v{args.Version}[/]")
 
     match tryLoadConfig(args.TomlFile) with
     | Valid cfg -> 
+        printConfig cfg
         cfg
     | Invalid ex -> 
         AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything)
@@ -165,4 +181,6 @@ let run (args: Args) =
 
     File.WriteAllText(outputFile.FullName, formattedCode)
     Fsproj.addFileToProject args.Project cfg
-    AnsiConsole.MarkupLine($"[green]-[/] '{outputFile.FullName}' has been generated!")
+    AnsiConsole.WriteLine()
+    AnsiConsole.MarkupLine($"[gray]https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration[/]")
+    AnsiConsole.MarkupLine($"[green1]Generated: \"{outputFile.FullName}\"![/]")
