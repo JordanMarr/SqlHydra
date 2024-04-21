@@ -201,11 +201,15 @@ module dbo =
           ErrorProcedure: Option<string>
           ErrorLine: Option<int> }
 
+    let ErrorLog = table<ErrorLog>
+
     type BuildVersion =
         { SystemInformationID: byte
           ``Database Version``: string
           VersionDate: System.DateTime
           ModifiedDate: System.DateTime }
+
+    let BuildVersion = table<BuildVersion>
 
 module SalesLT =
     type Address =
@@ -218,6 +222,8 @@ module SalesLT =
           AddressID: int
           AddressLine1: string
           AddressLine2: Option<string> }
+
+    let Address = table<Address>
 
     type Customer =
         { LastName: string
@@ -235,6 +241,8 @@ module SalesLT =
           SalesPerson: Option<string>
           EmailAddress: Option<string>
           Phone: Option<string> }
+
+    let Customer = table<Customer>
     
     // etc...
 ```
