@@ -413,7 +413,7 @@ let ``Distinct Test``() = task {
     match countriesAL1 with
     | Some countries ->
         let! rowsInserted = 
-            insertTask (Shared ctx) {
+            insertTask ctx {
                 for e in OT.COUNTRIES do
                 entities countries
             }
@@ -421,14 +421,14 @@ let ``Distinct Test``() = task {
         Assert.AreEqual(rowsInserted, 3, "Expected 3 rows to be inserted")
 
         let! results =
-            selectTask HydraReader.Read (Shared ctx) {
+            selectTask HydraReader.Read ctx {
                 for c in OT.COUNTRIES do
                 where (c.COUNTRY_ID =% "X%")
                 select c.COUNTRY_NAME
             }
 
         let! distinctResults =
-            selectTask HydraReader.Read (Shared ctx) {
+            selectTask HydraReader.Read ctx {
                 for c in OT.COUNTRIES do
                 where (c.COUNTRY_ID =% "X%")
                 select c.REGION_ID

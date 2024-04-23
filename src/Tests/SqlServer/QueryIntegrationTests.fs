@@ -262,7 +262,7 @@ let ``InsertGetId Test``() = task {
         }
 
     let! errorLogId = 
-        insertTask (Shared ctx) {
+        insertTask ctx {
             for e in dbo.ErrorLog do
             entity errorLog
             getId e.ErrorLogID
@@ -289,7 +289,7 @@ let ``InsertGetIdAsync Test``() = task {
         }
 
     let! result = 
-        insertTask (Shared ctx) {
+        insertTask ctx {
             for e in dbo.ErrorLog do
             entity errorLog
             getId e.ErrorLogID
@@ -303,13 +303,13 @@ let ``Update Set Individual Fields``() = task {
     use ctx = openContext()
 
     let! row = 
-        selectAsync HydraReader.Read (Shared ctx) {
+        selectAsync HydraReader.Read ctx {
             for e in dbo.ErrorLog do
             head
         }
 
     let! result = 
-        updateTask (Shared ctx) {
+        updateTask ctx {
             for e in dbo.ErrorLog do
             set e.ErrorNumber 123
             set e.ErrorMessage "ERROR #123"
@@ -326,13 +326,13 @@ let ``UpdateAsync Set Individual Fields``() = task {
     use ctx = openContext()
 
     let! row = 
-        selectAsync HydraReader.Read (Shared ctx) {
+        selectAsync HydraReader.Read ctx {
             for e in dbo.ErrorLog do
             head
         }
 
     let! result = 
-        updateTask (Shared ctx) {
+        updateTask ctx {
             for e in dbo.ErrorLog do
             set e.ErrorNumber 123
             set e.ErrorMessage "ERROR #123"
@@ -349,7 +349,7 @@ let ``Update Entity``() = task {
     use ctx = openContext()
 
     let! row = 
-        selectAsync HydraReader.Read (Shared ctx) {
+        selectAsync HydraReader.Read ctx {
             for e in dbo.ErrorLog do
             head
         }
@@ -367,7 +367,7 @@ let ``Update Entity``() = task {
         }
 
     let! result = 
-        updateTask (Shared ctx) {
+        updateTask ctx {
             for e in dbo.ErrorLog do
             entity errorLog
             excludeColumn e.ErrorLogID
@@ -383,14 +383,14 @@ let ``Delete Test``() = task {
     ctx.BeginTransaction()
 
     let! rowId = 
-        selectAsync HydraReader.Read (Shared ctx) {
+        selectAsync HydraReader.Read ctx {
             for e in dbo.ErrorLog do
             select e.ErrorLogID
             head
         }
 
     let! result = 
-        deleteTask (Shared ctx) {
+        deleteTask ctx {
             for e in dbo.ErrorLog do
             where (e.ErrorLogID = rowId)
         }
@@ -405,14 +405,14 @@ let ``DeleteAsync Test``() = task {
     ctx.BeginTransaction()
 
     let! rowId = 
-        selectAsync HydraReader.Read (Shared ctx) {
+        selectAsync HydraReader.Read ctx {
             for e in dbo.ErrorLog do
             select e.ErrorLogID
             head
         }
 
     let! result = 
-        deleteTask (Shared ctx) {
+        deleteTask ctx {
             for e in dbo.ErrorLog do
             where (e.ErrorLogID = rowId)
         }
@@ -428,7 +428,7 @@ let ``Multiple Inserts``() = task {
     ctx.BeginTransaction()
 
     let! _ = 
-        deleteTask (Shared ctx) {
+        deleteTask ctx {
             for e in dbo.ErrorLog do
             deleteAll
         }
@@ -443,7 +443,7 @@ let ``Multiple Inserts``() = task {
     match errorLogs with
     | Some errorLogs ->
         let! rowsInserted =  
-            insertTask (Shared ctx) {
+            insertTask ctx {
                 for e in dbo.ErrorLog do
                 entities errorLogs
                 excludeColumn e.ErrorLogID
@@ -473,7 +473,7 @@ let ``Distinct Test``() = task {
     ctx.BeginTransaction()
 
     let! deletedCount = 
-        deleteAsync (Shared ctx) {
+        deleteAsync ctx {
             for e in dbo.ErrorLog do
             deleteAll
         } 
@@ -486,7 +486,7 @@ let ``Distinct Test``() = task {
     match errorLogs with
     | Some errorLogs ->            
         let! rowsInserted = 
-            insertAsync (Shared ctx) {
+            insertAsync ctx {
                 for e in dbo.ErrorLog do
                 entities errorLogs
                 excludeColumn e.ErrorLogID
@@ -496,13 +496,13 @@ let ``Distinct Test``() = task {
     | None -> ()
 
     let! results =
-        selectAsync HydraReader.Read (Shared ctx)  {
+        selectAsync HydraReader.Read ctx  {
             for e in dbo.ErrorLog do
             select e.ErrorNumber
         }
 
     let! distinctResults =
-        selectAsync HydraReader.Read (Shared ctx) {
+        selectAsync HydraReader.Read ctx {
             for e in dbo.ErrorLog do
             select e.ErrorNumber
             distinct
@@ -521,7 +521,7 @@ let ``Count Test``() = task {
 
     for i in [0..2] do
         let! result = 
-            insertTask (Shared ctx) {
+            insertTask ctx {
                 for e in dbo.ErrorLog do
                 entity stubbedErrorLog
                 getId e.ErrorLogID
@@ -546,7 +546,7 @@ let ``Count Test Task``() = task {
 
     for i in [0..2] do
         let! result = 
-            insertTask (Shared ctx) {
+            insertTask ctx {
                 for e in dbo.ErrorLog do
                 entity stubbedErrorLog
                 getId e.ErrorLogID
@@ -554,7 +554,7 @@ let ``Count Test Task``() = task {
         ()
 
     let! count = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for e in dbo.ErrorLog do
             count
         }
@@ -570,7 +570,7 @@ let ``Count Test Async``() = task {
         
     for i in [0..2] do
         let! result = 
-            insertAsync (Shared ctx) {
+            insertAsync ctx {
                 for e in dbo.ErrorLog do
                 entity stubbedErrorLog
                 getId e.ErrorLogID
@@ -578,7 +578,7 @@ let ``Count Test Async``() = task {
         ()
         
     let! count = 
-        selectAsync HydraReader.Read (Shared ctx) {
+        selectAsync HydraReader.Read ctx {
             for e in dbo.ErrorLog do
             count
         }
@@ -627,7 +627,7 @@ let ``Update Employee DateOnly``() = task {
     ctx.BeginTransaction()
             
     let! employees =
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for e in HumanResources.Employee do
             select e
         }
@@ -638,7 +638,7 @@ let ``Update Employee DateOnly``() = task {
     let birthDate = System.DateOnly(1980, 1, 1)
 
     let! result = 
-        updateTask (Shared ctx) {
+        updateTask ctx {
             for e in HumanResources.Employee do
             set e.BirthDate birthDate
             where (e.BusinessEntityID = emp.BusinessEntityID)
@@ -647,7 +647,7 @@ let ``Update Employee DateOnly``() = task {
     result =! 1
 
     let! refreshedEmp = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for e in HumanResources.Employee do
             where (e.BusinessEntityID = emp.BusinessEntityID)                    
             tryHead
@@ -706,14 +706,14 @@ let ``Update Shift with TimeOnly``() = task {
     let minStartTime = System.TimeOnly(9, 30)
     let updatedStartTime = System.TimeOnly(10, 30)
 
-    do! updateTask (Shared ctx) {
+    do! updateTask ctx {
             for s in HumanResources.Shift do
             set s.StartTime updatedStartTime
             where (s.StartTime >= minStartTime)
         } :> Task
 
     let! shiftsat1030AM =
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for s in HumanResources.Shift do
             where (s.StartTime = updatedStartTime)
         } 
@@ -748,7 +748,7 @@ let ``Insert, update, and select with both datetime and datetime2 precision``() 
         |> ctx.InsertAsync
 
     let! retrievedBack = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for row in ext.DateTime2Support do
             select row
         }
@@ -757,14 +757,14 @@ let ``Insert, update, and select with both datetime and datetime2 precision``() 
     Assert.AreNotEqual([timestamp], [for (row: ext.DateTime2Support) in retrievedBack -> row.LessPrecision], "INSERT: Expected a loss of precision when storing a DATETIME")
 
     let! fullPrecisionQuery = 
-        selectTask HydraReader.Read (Shared ctx) { 
+        selectTask HydraReader.Read ctx { 
             for row in ext.DateTime2Support do
             where (row.MorePrecision = timestamp)
             count
         }
 
     let! lessPrecisionQuery = 
-        selectTask HydraReader.Read (Shared ctx) { 
+        selectTask HydraReader.Read ctx { 
             for row in ext.DateTime2Support do
             where (row.LessPrecision = timestamp)
             count
@@ -776,21 +776,21 @@ let ``Insert, update, and select with both datetime and datetime2 precision``() 
     let newTimestamp = System.DateTime(baseTimestamp.Ticks + 2345678L)
 
     let! _ = 
-        updateTask (Shared ctx) {
+        updateTask ctx {
             for row in ext.DateTime2Support do
             set row.MorePrecision newTimestamp
             where (row.MorePrecision = timestamp)
         }
 
     let! _ = 
-        updateTask (Shared ctx) {
+        updateTask ctx {
             for row in ext.DateTime2Support do
             set row.LessPrecision newTimestamp
             where (row.LessPrecision = timestamp)
         }
 
     let! retrievedBack = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for row in ext.DateTime2Support do
             select row
         }
@@ -804,7 +804,7 @@ let ``Insert, update, and select with both datetime and datetime2 precision``() 
 let ``Guid getId Bug Repro Issue 38``() = task {
     use ctx = openContext()
     let! guid = 
-        insertAsync (Shared ctx) {
+        insertAsync ctx {
             for row in ext.GetIdGuidRepro do
             entity
                 {
@@ -821,7 +821,7 @@ let ``Guid getId Bug Repro Issue 38``() = task {
 [<Test>]
 let ``Individual column from a leftJoin table should be optional if Some``() = task {
     let! results = 
-        selectTask HydraReader.Read (Create openContext)  {
+        selectTask HydraReader.Read openContext  {
             for o in Sales.SalesOrderHeader do
             leftJoin sr in Sales.SalesOrderHeaderSalesReason on (o.SalesOrderID = sr.Value.SalesOrderID)
             leftJoin r in Sales.SalesReason on (sr.Value.SalesReasonID = r.Value.SalesReasonID)
@@ -873,7 +873,7 @@ let ``DiffService Save`` () = task {
     let today = System.DateTime.Today
 
     let! existingDepartments = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for d in HumanResources.Department do
             toList
         }
@@ -915,7 +915,7 @@ let ``DiffService Save`` () = task {
 
     // Pull departments again, verify, then try delete.
     let! existingDepartments = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for d in HumanResources.Department do
             toList
         }

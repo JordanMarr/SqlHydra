@@ -255,7 +255,7 @@ let ``Multiple Inserts``() = task {
     ctx.BeginTransaction()
 
     let! _ = 
-        deleteTask (Shared ctx) {
+        deleteTask ctx {
             for e in main.ErrorLog do
             deleteAll
         }
@@ -303,7 +303,7 @@ let ``Distinct Test``() = task {
     ctx.BeginTransaction()
 
     let! _ = 
-        deleteTask (Shared ctx) {
+        deleteTask ctx {
             for e in main.ErrorLog do
             deleteAll
         }
@@ -329,13 +329,13 @@ let ``Distinct Test``() = task {
         ()
 
     let! results =
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for e in main.ErrorLog do
             select e.ErrorNumber
         }
 
     let! distinctResults =
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for e in main.ErrorLog do
             select e.ErrorNumber
             distinct
@@ -379,7 +379,7 @@ let ``OnConflictDoUpdate``() = task {
     ctx.BeginTransaction()
 
     let upsertAddress address = 
-        insertTask (Shared ctx) {
+        insertTask ctx {
             for a in main.Address do
             entity address
             onConflictDoUpdate a.AddressID (
@@ -394,7 +394,7 @@ let ``OnConflictDoUpdate``() = task {
         } :> Task
 
     let queryAddress id = 
-        selectTask HydraReader.Read (Shared ctx) {
+        selectTask HydraReader.Read ctx {
             for a in main.Address do
             where (a.AddressID = id)
             toList

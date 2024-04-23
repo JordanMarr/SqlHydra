@@ -9,11 +9,21 @@ open System.Threading
 open System.Threading.Tasks
 open SqlKata
 
+/// The context type that determines how the query context is created and disposed.
+/// Can be implicitly converted from a QueryContext, a function that creates a QueryContext, a Task that creates a QueryContext, or an Async that creates a QueryContext.
 type ContextType = 
+    /// A new QueryContext will be created and disposed within the select builder.
     | Create of create: (unit -> QueryContext)
+    /// A new QueryContext will be created and disposed within the select builder.
     | CreateTask of create: (unit -> Task<QueryContext>)
+    /// A new QueryContext will be created and disposed within the select builder.
     | CreateAsync of create: (unit -> Async<QueryContext>)
+    /// A shared QueryContext will be used and not disposed within the select builder.
     | Shared of QueryContext
+    static member op_Implicit(ctx: QueryContext) = Shared ctx
+    static member op_Implicit(createFn: unit -> QueryContext) = Create createFn
+    static member op_Implicit(createFn: unit -> Task<QueryContext>) = CreateTask createFn
+    static member op_Implicit(createFn: unit -> Async<QueryContext>) = CreateAsync createFn
 
 module ContextUtils = 
     let private tryOpen (ctx: QueryContext) = 
