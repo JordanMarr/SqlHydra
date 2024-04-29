@@ -41,6 +41,7 @@ let supportedTypeMappings =
         "nvarchar",         "string",           DbType.String,      nameof r.GetString
         "memo",             "string",           DbType.String,      nameof r.GetString
         "longtext",         "string",           DbType.String,      nameof r.GetString
+        "longvarchar",      "string",           DbType.String,      nameof r.GetString
         "note",             "string",           DbType.String,      nameof r.GetString
         "text",             "string",           DbType.String,      nameof r.GetString
         "ntext",            "string",           DbType.String,      nameof r.GetString
