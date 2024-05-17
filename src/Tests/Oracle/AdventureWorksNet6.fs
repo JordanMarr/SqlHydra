@@ -369,29 +369,34 @@ module OT =
 
 type HydraReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader) =
     let mutable accFieldCount = 0
-    let buildGetOrdinal fieldCount =
+    let buildGetOrdinal tableType =
+        let fieldNames = 
+            FSharp.Reflection.FSharpType.GetRecordFields(tableType)
+            |> Array.map _.Name
+
         let dictionary = 
-            [0..reader.FieldCount-1] 
-            |> List.map (fun i -> reader.GetName(i), i)
-            |> List.sortBy snd
-            |> List.skip accFieldCount
-            |> List.take fieldCount
+            [| 0 .. reader.FieldCount - 1 |] 
+            |> Array.map (fun i -> reader.GetName(i), i)
+            |> Array.sortBy snd
+            |> Array.skip accFieldCount
+            |> Array.filter (fun (name, _) -> Array.contains name fieldNames)
+            |> Array.take fieldNames.Length
             |> dict
-        accFieldCount <- accFieldCount + fieldCount
+        accFieldCount <- accFieldCount + fieldNames.Length
         fun col -> dictionary.Item col
         
-    let lazyOTCONTACTS = lazy (OT.Readers.CONTACTSReader(reader, buildGetOrdinal 6))
-    let lazyOTCOUNTRIES = lazy (OT.Readers.COUNTRIESReader(reader, buildGetOrdinal 3))
-    let lazyOTCUSTOMERS = lazy (OT.Readers.CUSTOMERSReader(reader, buildGetOrdinal 5))
-    let lazyOTEMPLOYEES = lazy (OT.Readers.EMPLOYEESReader(reader, buildGetOrdinal 8))
-    let lazyOTINVENTORIES = lazy (OT.Readers.INVENTORIESReader(reader, buildGetOrdinal 3))
-    let lazyOTLOCATIONS = lazy (OT.Readers.LOCATIONSReader(reader, buildGetOrdinal 6))
-    let lazyOTORDERS = lazy (OT.Readers.ORDERSReader(reader, buildGetOrdinal 5))
-    let lazyOTORDER_ITEMS = lazy (OT.Readers.ORDER_ITEMSReader(reader, buildGetOrdinal 5))
-    let lazyOTPRODUCTS = lazy (OT.Readers.PRODUCTSReader(reader, buildGetOrdinal 6))
-    let lazyOTPRODUCT_CATEGORIES = lazy (OT.Readers.PRODUCT_CATEGORIESReader(reader, buildGetOrdinal 2))
-    let lazyOTREGIONS = lazy (OT.Readers.REGIONSReader(reader, buildGetOrdinal 2))
-    let lazyOTWAREHOUSES = lazy (OT.Readers.WAREHOUSESReader(reader, buildGetOrdinal 3))
+    let lazyOTCONTACTS = lazy (OT.Readers.CONTACTSReader(reader, buildGetOrdinal typeof<OT.CONTACTS>))
+    let lazyOTCOUNTRIES = lazy (OT.Readers.COUNTRIESReader(reader, buildGetOrdinal typeof<OT.COUNTRIES>))
+    let lazyOTCUSTOMERS = lazy (OT.Readers.CUSTOMERSReader(reader, buildGetOrdinal typeof<OT.CUSTOMERS>))
+    let lazyOTEMPLOYEES = lazy (OT.Readers.EMPLOYEESReader(reader, buildGetOrdinal typeof<OT.EMPLOYEES>))
+    let lazyOTINVENTORIES = lazy (OT.Readers.INVENTORIESReader(reader, buildGetOrdinal typeof<OT.INVENTORIES>))
+    let lazyOTLOCATIONS = lazy (OT.Readers.LOCATIONSReader(reader, buildGetOrdinal typeof<OT.LOCATIONS>))
+    let lazyOTORDERS = lazy (OT.Readers.ORDERSReader(reader, buildGetOrdinal typeof<OT.ORDERS>))
+    let lazyOTORDER_ITEMS = lazy (OT.Readers.ORDER_ITEMSReader(reader, buildGetOrdinal typeof<OT.ORDER_ITEMS>))
+    let lazyOTPRODUCTS = lazy (OT.Readers.PRODUCTSReader(reader, buildGetOrdinal typeof<OT.PRODUCTS>))
+    let lazyOTPRODUCT_CATEGORIES = lazy (OT.Readers.PRODUCT_CATEGORIESReader(reader, buildGetOrdinal typeof<OT.PRODUCT_CATEGORIES>))
+    let lazyOTREGIONS = lazy (OT.Readers.REGIONSReader(reader, buildGetOrdinal typeof<OT.REGIONS>))
+    let lazyOTWAREHOUSES = lazy (OT.Readers.WAREHOUSESReader(reader, buildGetOrdinal typeof<OT.WAREHOUSES>))
     member __.``OT.CONTACTS`` = lazyOTCONTACTS.Value
     member __.``OT.COUNTRIES`` = lazyOTCOUNTRIES.Value
     member __.``OT.CUSTOMERS`` = lazyOTCUSTOMERS.Value
