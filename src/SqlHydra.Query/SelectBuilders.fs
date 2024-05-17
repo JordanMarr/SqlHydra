@@ -121,9 +121,14 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let queryWithSelectedColumns =
             selections
             |> List.fold (fun (q: Query) -> function
-                | LinqExpressionVisitors.SelectedTable tableAlias -> 
-                    // Select all columns in table
-                    q.Select($"%s{tableAlias}.*")
+                | LinqExpressionVisitors.SelectedTable (tableAlias, tableType) -> 
+                    // Explicitly select all columns in generated table record type.
+                    // This avoids table scans due to 'SELECT *', and avoids potential errors when a table has more columns than expected.
+                    let props = 
+                        FSharp.Reflection.FSharpType.GetRecordFields(tableType)
+                        |> Array.map (fun p -> $"%s{tableAlias}.%s{p.Name}")
+
+                    q.Select(props)
                 | LinqExpressionVisitors.SelectedColumn (tableAlias, column) -> 
                     // Select a single column
                     q.Select($"%s{tableAlias}.%s{column}")

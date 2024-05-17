@@ -752,7 +752,7 @@ let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Pro
     visit (propertySelector :> Expression)
 
 type Selection =
-    | SelectedTable of tableAlias: string
+    | SelectedTable of tableAlias: string * tableType: Type
     | SelectedColumn of tableAlias: string * column: string
     | SelectedAggregateColumn of aggregateType: string * tableAlias: string * column: string
 
@@ -775,7 +775,7 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
             n.Arguments 
             |> Seq.map visit |> Seq.toList |> List.concat
         | Parameter p -> 
-            [ SelectedTable p.Name ]
+            [ SelectedTable (p.Name, p.Type) ]
         | Member m -> 
             if m.Member.DeclaringType |> isOptionOrNullableType then 
                 visit m.Expression

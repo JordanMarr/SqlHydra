@@ -22,10 +22,10 @@ let generateHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo)
         Value("accFieldCount", Unquoted "0").toMutable()
 
         for table in allTables do             
-            // let lazyPersonEmailAddress = lazy (Person.Readers.EmailAddressReader(reader, buildGetOrdinal 5))
+            // let lazyPersonEmailAddress = lazy (Person.Readers.EmailAddressReader(reader, buildGetOrdinal 5 typeof<Person.EmailAddress))
             Value(
                 $"lazy{backticks table.Schema}{backticks table.Name}", 
-                ConstantExpr(Unquoted $"lazy ({backticks table.Schema}.Readers.{backticks table.Name}Reader(reader, buildGetOrdinal {table.TotalColumns}))")
+                ConstantExpr(Unquoted $"lazy ({backticks table.Schema}.Readers.{backticks table.Name}Reader(reader, buildGetOrdinal typeof<{table.Schema}.{table.Name}>))")
             )
 
         for table in allTables do 
@@ -367,15 +367,20 @@ let substitutions (app: AppInfo) : (string * string) list =
         // HydraReader utility functions
         "let mutable accFieldCount = 0", 
         """let mutable accFieldCount = 0
-    let buildGetOrdinal fieldCount =
+    let buildGetOrdinal tableType =
+        let fieldNames = 
+            FSharp.Reflection.FSharpType.GetRecordFields(tableType)
+            |> Array.map _.Name
+
         let dictionary = 
-            [0..reader.FieldCount-1] 
-            |> List.map (fun i -> reader.GetName(i), i)
-            |> List.sortBy snd
-            |> List.skip accFieldCount
-            |> List.take fieldCount
+            [| 0 .. reader.FieldCount - 1 |] 
+            |> Array.map (fun i -> reader.GetName(i), i)
+            |> Array.sortBy snd
+            |> Array.skip accFieldCount
+            |> Array.filter (fun (name, _) -> Array.contains name fieldNames)
+            |> Array.take fieldNames.Length
             |> dict
-        accFieldCount <- accFieldCount + fieldCount
+        accFieldCount <- accFieldCount + fieldNames.Length
         fun col -> dictionary.Item col
         """
 

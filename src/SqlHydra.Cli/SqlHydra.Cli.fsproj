@@ -4,7 +4,7 @@
 		<OutputType>Exe</OutputType>
 		<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<Version>2.4.1</Version>
+		<Version>2.5.0</Version>
 		<WarningsAsErrors>
 			<!-- Incomplete pattern matches on this expression. -->
 			FS0025
@@ -50,9 +50,9 @@
 		<PackageReference Update="FSharp.Core" Version="7.0.200" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Update="FSharp.Core" Version="8.0.100" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Include="Fabulous.AST" Version="1.0.0-pre5" />
-		<PackageReference Include="Npgsql" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
-		<PackageReference Include="Npgsql" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
-		<PackageReference Include="Npgsql" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
+		<PackageReference Include="Npgsql" Version="6.0.11" Condition="'$(TargetFramework)' == 'net6.0'" />
+		<PackageReference Include="Npgsql" Version="7.0.7" Condition="'$(TargetFramework)' == 'net7.0'" />
+		<PackageReference Include="Npgsql" Version="8.0.3" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.120" />
 		<PackageReference Include="System.Data.SQLite" Version="1.0.118" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
