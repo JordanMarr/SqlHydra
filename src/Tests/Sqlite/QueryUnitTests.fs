@@ -57,7 +57,7 @@ let ``Select 1 Table and 1 Column``() =
         }
         |> toSql
 
-    sql.Contains("SELECT \"o\".*, \"d\".\"LineTotal\" FROM") =! true
+    sql.Contains("""SELECT "o"."SalesOrderID", "o"."RevisionNumber", "o"."OrderDate", "o"."DueDate", "o"."ShipDate", "o"."Status", "o"."OnlineOrderFlag", "o"."SalesOrderNumber", "o"."PurchaseOrderNumber", "o"."AccountNumber", "o"."CustomerID", "o"."ShipToAddressID", "o"."BillToAddressID", "o"."ShipMethod", "o"."CreditCardApprovalCode", "o"."SubTotal", "o"."TaxAmt", "o"."Freight", "o"."TotalDue", "o"."Comment", "o"."rowguid", "o"."ModifiedDate", "d"."LineTotal" FROM""") =! true
 
 [<Test>]
 let ``Where with Option Type``() = 

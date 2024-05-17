@@ -25,7 +25,7 @@ let generateHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo)
             // let lazyPersonEmailAddress = lazy (Person.Readers.EmailAddressReader(reader, buildGetOrdinal 5))
             Value(
                 $"lazy{backticks table.Schema}{backticks table.Name}", 
-                ConstantExpr(Unquoted $"lazy ({backticks table.Schema}.Readers.{backticks table.Name}Reader(reader, buildGetOrdinal {table.TotalColumns}))")
+                ConstantExpr(Unquoted $"lazy ({backticks table.Schema}.Readers.{backticks table.Name}Reader(reader, buildGetOrdinal {table.Columns.Length}))")
             )
 
         for table in allTables do 

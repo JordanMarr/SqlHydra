@@ -74,7 +74,7 @@ let ``Select 1 Table and 1 Column``() =
         }
         |> toSql
 
-    sql.Contains("SELECT [o].*, [d].[LineTotal] FROM") =! true
+    sql.Contains("SELECT [o].[SalesOrderID], [o].[RevisionNumber], [o].[OrderDate], [o].[DueDate], [o].[ShipDate], [o].[Status], [o].[OnlineOrderFlag], [o].[SalesOrderNumber], [o].[PurchaseOrderNumber], [o].[AccountNumber], [o].[CustomerID], [o].[SalesPersonID], [o].[TerritoryID], [o].[BillToAddressID], [o].[ShipToAddressID], [o].[ShipMethodID], [o].[CreditCardID], [o].[CreditCardApprovalCode], [o].[CurrencyRateID], [o].[SubTotal], [o].[TaxAmt], [o].[Freight], [o].[TotalDue], [o].[Comment], [o].[rowguid], [o].[ModifiedDate], [d].[LineTotal] FROM [Sales].[SalesOrderHeader] AS [o]") =! true
 
 [<Test>]
 let ``Where bool is true``() = 
@@ -288,7 +288,7 @@ let ``Left Join``() =
         }
         |> toSql
 
-    let expected = """SELECT [o].* FROM [Sales].[SalesOrderHeader] AS [o] 
+    let expected = """SELECT [o].[SalesOrderID], [o].[RevisionNumber], [o].[OrderDate], [o].[DueDate], [o].[ShipDate], [o].[Status], [o].[OnlineOrderFlag], [o].[SalesOrderNumber], [o].[PurchaseOrderNumber], [o].[AccountNumber], [o].[CustomerID], [o].[SalesPersonID], [o].[TerritoryID], [o].[BillToAddressID], [o].[ShipToAddressID], [o].[ShipMethodID], [o].[CreditCardID], [o].[CreditCardApprovalCode], [o].[CurrencyRateID], [o].[SubTotal], [o].[TaxAmt], [o].[Freight], [o].[TotalDue], [o].[Comment], [o].[rowguid], [o].[ModifiedDate] FROM [Sales].[SalesOrderHeader] AS [o] 
 LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID]) WHERE ([o].[SalesOrderID] = [d].[SalesOrderID])"""
     sql =! expected
 
@@ -365,7 +365,7 @@ let ``Join On Value Bug Fix Test``() =
         |> toSql
 
     Assert.AreEqual(sql,
-        """SELECT [o].* FROM [Sales].[SalesOrderHeader] AS [o] 
+        """SELECT [o].[SalesOrderID], [o].[RevisionNumber], [o].[OrderDate], [o].[DueDate], [o].[ShipDate], [o].[Status], [o].[OnlineOrderFlag], [o].[SalesOrderNumber], [o].[PurchaseOrderNumber], [o].[AccountNumber], [o].[CustomerID], [o].[SalesPersonID], [o].[TerritoryID], [o].[BillToAddressID], [o].[ShipToAddressID], [o].[ShipMethodID], [o].[CreditCardID], [o].[CreditCardApprovalCode], [o].[CurrencyRateID], [o].[SubTotal], [o].[TaxAmt], [o].[Freight], [o].[TotalDue], [o].[Comment], [o].[rowguid], [o].[ModifiedDate] FROM [Sales].[SalesOrderHeader] AS [o] 
 LEFT JOIN [Sales].[SalesOrderHeader] AS [d] ON ([o].[AccountNumber] = [d].[AccountNumber])""",
         "Bugged version was replacing TableMapping for original table with joined table.")
         
@@ -591,7 +591,7 @@ let ``Self Join``() =
         |> toSql
 
     sql =!
-        """SELECT [p1].* FROM [Production].[Product] AS [p1] 
+        """SELECT [p1].[ProductID], [p1].[Name], [p1].[ProductNumber], [p1].[MakeFlag], [p1].[FinishedGoodsFlag], [p1].[Color], [p1].[SafetyStockLevel], [p1].[ReorderPoint], [p1].[StandardCost], [p1].[ListPrice], [p1].[Size], [p1].[SizeUnitMeasureCode], [p1].[WeightUnitMeasureCode], [p1].[Weight], [p1].[DaysToManufacture], [p1].[ProductLine], [p1].[Class], [p1].[Style], [p1].[ProductSubcategoryID], [p1].[ProductModelID], [p1].[SellStartDate], [p1].[SellEndDate], [p1].[DiscontinuedDate], [p1].[rowguid], [p1].[ModifiedDate] FROM [Production].[Product] AS [p1] 
 INNER JOIN [Production].[Product] AS [p2] ON ([p1].[ProductID] = [p2].[ProductID]) WHERE ([p2].[ListPrice] > @p0)"""
 
 [<Test>]
