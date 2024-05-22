@@ -418,11 +418,14 @@ _Special `where` filter operators:_
 Select `Address` entities where City starts with `S`:
 ```F#
 let getAddressesInCitiesStartingWithS () = 
-        selectAsync HydraReader.Read openContext {
-            for a in SalesLT.Address do
-            where (a.City =% "S%")
-        }
+    selectAsync HydraReader.Read openContext {
+        for a in SalesLT.Address do
+        where (a.City =% "S%")
+        select a
+    }
 ```
+
+NOTE: You should always explicitly `select` the table or tables. As of v2.5.0, selecting the table(s) will explicitly select all columns in the table. Otherwise, it will issue a `SELECT *` query which is slightly less performant as it will require a table scan.
 
 Try to select a single row (this example returns a `decimal option`):
 ```F#
@@ -501,7 +504,9 @@ To transform the query results use the `mapSeq`, `mapArray` or `mapList` operati
             for o in SalesLT.OrderHeaders do
             join d in SalesLT.OrderDetails on (o.SalesOrderID = d.SalesOrderID)
             where (o.OnlineOrderFlag = true)
+            select (o, d) into selected
             mapList (
+                let o,d = selected
                 {| 
                     ShipDate = 
                         match o.ShipDate with
