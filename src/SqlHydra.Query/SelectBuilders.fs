@@ -124,11 +124,14 @@ type SelectBuilder<'Selected, 'Mapped> () =
                 | LinqExpressionVisitors.SelectedTable (tableAlias, tableType) -> 
                     // Explicitly select all columns in generated table record type.
                     // This avoids table scans due to 'SELECT *', and avoids potential errors when a table has more columns than expected.
-                    let props = 
-                        FSharp.Reflection.FSharpType.GetRecordFields(tableType)
-                        |> Array.map (fun p -> $"%s{tableAlias}.%s{p.Name}")
+                    //let props = 
+                    //    FSharp.Reflection.FSharpType.GetRecordFields(tableType)
+                    //    |> Array.map (fun p -> $"%s{tableAlias}.%s{p.Name}")
+                    //q.Select(props)
 
-                    q.Select(props)
+                    // Bug fix: temporarily revert to * until option types are property implemented.
+                    q.Select($"%s{tableAlias}.*")
+
                 | LinqExpressionVisitors.SelectedColumn (tableAlias, column) -> 
                     // Select a single column
                     q.Select($"%s{tableAlias}.%s{column}")

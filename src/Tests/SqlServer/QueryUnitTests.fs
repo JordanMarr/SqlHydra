@@ -649,3 +649,15 @@ let ``Individual column from a leftJoin table should be optional if Some``() =
     sql =! """SELECT [d].[OrderQty] FROM [Sales].[SalesOrderHeader] AS [o] 
 LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID])"""
 
+[<Test>]
+let ``select option bug fix`` () = 
+    let sql = 
+        select {
+            for o in Sales.SalesOrderHeader do
+            leftJoin d in Sales.SalesOrderDetail on (o.SalesOrderID = d.Value.SalesOrderID)
+            where (o.SalesOrderID = 1)
+            select (o,d)
+        }
+        |> toSql
+
+    sql.Contains("WHERE ([o].[SalesOrderID] = @p0)") =! true
