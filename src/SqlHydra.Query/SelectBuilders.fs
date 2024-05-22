@@ -129,7 +129,9 @@ type SelectBuilder<'Selected, 'Mapped> () =
                     //    |> Array.map (fun p -> $"%s{tableAlias}.%s{p.Name}")
                     //q.Select(props)
 
-                    // Bug fix: temporarily revert to * until option types are property implemented.
+                    // Bug fix: temporarily revert to * until option types are properly implemented.
+                    // `tableType` was not properly unwrapping option types, causing a runtime error.
+                    // For example, left joining a table creates an option type, which should be unwrapped.
                     q.Select($"%s{tableAlias}.*")
 
                 | LinqExpressionVisitors.SelectedColumn (tableAlias, column) -> 
