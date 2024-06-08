@@ -23,9 +23,10 @@ let generateHydraReaderClass (db: Schema) (rdrCfg: ReadersConfig) (app: AppInfo)
 
         for table in allTables do             
             // let lazyPersonEmailAddress = lazy (Person.Readers.EmailAddressReader(reader, buildGetOrdinal 5 typeof<Person.EmailAddress))
+            // let lazypublicmigration = lazy (``public``.Readers.migrationReader(reader, buildGetOrdinal typeof<``public``.migration>))
             Value(
-                $"lazy{backticks table.Schema}{backticks table.Name}", 
-                ConstantExpr(Unquoted $"lazy ({backticks table.Schema}.Readers.{backticks table.Name}Reader(reader, buildGetOrdinal typeof<{table.Schema}.{table.Name}>))")
+                $"lazy{table.Schema}{table.Name}", 
+                ConstantExpr(Unquoted $"lazy ({backticks table.Schema}.Readers.{backticks table.Name}Reader(reader, buildGetOrdinal typeof<{backticks table.Schema}.{table.Name}>))")
             )
 
         for table in allTables do 
