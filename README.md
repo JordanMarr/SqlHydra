@@ -451,6 +451,11 @@ let getProductsWithCategory () =
     }
 ```
 
+> [!WARNING]
+> You need to write the join condition using the known variable before the new one
+> 
+> Otherwise, F# will complains about `p` and `c` not being defined
+
 Select `Customer` with left joined `Address` where `CustomerID` is in a list of values:
 (Note that left joined tables will be of type `'T option`, so you will need to use the `.Value` property to access join columns.)
 
