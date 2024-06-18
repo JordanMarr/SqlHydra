@@ -968,6 +968,8 @@ let getCustomers filters =
 Sometimes it is easier to just write a custom SQL query. This can be helpful when you have a very custom query, or are using SQL constructs that do not yet exist in `SqlHydra.Query`. 
 You can do this while still maintaining the benefits of the strongly typed generated `HydraReader`.
 
+This example uses the generated `HydraReader` to hydrate the generated `dbo.Product` table record.
+
 ```F#
 let getTop10Products(conn: SqlConnection) = task {
     let sql = $"SELECT TOP 10 * FROM {nameof dbo.Product} p"
@@ -979,6 +981,35 @@ let getTop10Products(conn: SqlConnection) = task {
         while reader.Read() do
             hydra.``dbo.Product``.Read()
     ]
+}
+```
+
+The next example uses a query expression that modifies the underlying `SqlKata` query (using the the `kata` custom operation) to override the `SELECT` clause, and then manually reads the results into a custom record type.
+This technique can be useful if you want to select custom columns that use functions with a custom result type, but you still want to use a strongly typed query expression. 
+
+```F#
+/// A custom result type to be used for this query.
+type CityRow = { City3: string; Number: int }
+
+let getCities() = task {
+    use ctx = openContext()
+            
+    let! reader =
+        select {
+            for a in Person.Address do
+            where (a.City |=| [ "Seattle"; "Denver" ])
+            kata (fun q -> q.SelectRaw("SUBSTRING(City, 1, 3) AS City3, 123 AS Number"))
+        }
+        |> ctx.GetReaderAsync
+        
+    return
+        [
+            while reader.Read() do
+                {
+                    City3 = reader.Get "City3"
+                    Number = reader.Get "Number"
+                }
+        ]
 }
 ```
 
