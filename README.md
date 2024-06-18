@@ -452,9 +452,7 @@ let getProductsWithCategory () =
 ```
 
 > [!WARNING]
-> You need to write the join condition using the known variable before the new one
-> 
-> Otherwise, F# will complains about `p` and `c` not being defined
+> You need to write the join `on` equality condition using the known (left) table variable on the left and the new (right) one on the right; otherwise, the F# compiler will complain that `p` and `c` are not defined. (This order condition is due to the way F# [Query Expressions](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/query-expressions) are defined.)
 
 Select `Customer` with left joined `Address` where `CustomerID` is in a list of values:
 (Note that left joined tables will be of type `'T option`, so you will need to use the `.Value` property to access join columns.)
