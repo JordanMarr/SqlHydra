@@ -591,8 +591,8 @@ let! customersWithNoSalesPersonCount =
         count
     }
 ```
-
-💥 In some cases when selecting an aggregate of a non-NULL column, the database will still return NULL if the query result set is empty, for example if selecting the MAX of an INT column in an empty table. This is not supported and will throw an exception. If your query might return NULL for the aggregate of a non-NULL column, you may include `Some` in the aggregate to support parsing the NULL as an `Option` value:
+> [!WARNING]
+> In some cases when selecting an aggregate of a non-NULL column, the database will still return NULL if the query result set is empty, for example if selecting the MAX of an INT column in an empty table. This is not supported and will throw an exception. If your query might return NULL for the aggregate of a non-NULL column, you may include `Some` in the aggregate to support parsing the NULL as an `Option` value:
 
 ❌ INCORRECT:
 ```F#
