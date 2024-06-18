@@ -998,7 +998,7 @@ let getCities() = task {
         select {
             for a in Person.Address do
             where (a.City |=| [ "Seattle"; "Denver" ])
-            kata (fun q -> q.SelectRaw("SUBSTRING(City, 1, 3) AS City3, 123 AS Number"))
+            kata (fun query -> query.SelectRaw("SUBSTRING(City, 1, 3) AS City3, 123 AS Number"))
         }
         |> ctx.GetReaderAsync
         
