@@ -34,6 +34,9 @@
 		<Compile Include="Oracle\OracleDataTypes.fs" />
 		<Compile Include="Oracle\OracleSchemaProvider.fs" />
 		<Compile Include="Oracle\AppInfo.fs" />
+		<Compile Include="MySql\MySqlDataTypes.fs" />
+		<Compile Include="MySql\MySqlSchemaProvider.fs" />
+		<Compile Include="MySql\AppInfo.fs" />
 		<Compile Include="Npgsql\NpgsqlDataTypes.fs" />
 		<Compile Include="Npgsql\NpgsqlSchemaProvider.fs" />
 		<Compile Include="Npgsql\AppInfo.fs" />
@@ -46,21 +49,22 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Update="FSharp.Core" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
+		<PackageReference Update="FSharp.Core" Version="8.0.300" Condition="'$(TargetFramework)' == 'net6.0'" />
 		<PackageReference Update="FSharp.Core" Version="7.0.200" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Update="FSharp.Core" Version="8.0.100" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Include="Fabulous.AST" Version="1.0.0-pre5" />
+		<PackageReference Include="MySql.Data" Version="9.0.0" />
 		<PackageReference Include="Npgsql" Version="6.0.11" Condition="'$(TargetFramework)' == 'net6.0'" />
 		<PackageReference Include="Npgsql" Version="7.0.7" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Include="Npgsql" Version="8.0.3" Condition="'$(TargetFramework)' == 'net8.0'" />
-		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.120" />
+		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.140" />
 		<PackageReference Include="System.Data.SQLite" Version="1.0.118" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
 		<PackageReference Include="FSharp.SystemCommandLine" Version="0.15.0-beta4" />
 		<PackageReference Include="Glob" Version="1.1.9" />
-		<PackageReference Include="Microsoft.Build" Version="16.11.0" />
-		<PackageReference Include="Spectre.Console" Version="0.48.0" />
-		<PackageReference Include="Tomlyn" Version="0.16.2" />
+		<PackageReference Include="Microsoft.Build" Version="17.10.4" />
+		<PackageReference Include="Spectre.Console" Version="0.49.1" />
+		<PackageReference Include="Tomlyn" Version="0.17.0" />
 	</ItemGroup>
 
 	<ItemGroup>
