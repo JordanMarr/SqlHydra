@@ -451,6 +451,9 @@ let getProductsWithCategory () =
     }
 ```
 
+> [!WARNING]
+> You need to write the join `on` equality condition using the known (left) table variable on the left and the new (right) one on the right; otherwise, the F# compiler will complain that `p` and `c` are not defined. (This order condition is due to the way F# [Query Expressions](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/query-expressions) are defined.)
+
 Select `Customer` with left joined `Address` where `CustomerID` is in a list of values:
 (Note that left joined tables will be of type `'T option`, so you will need to use the `.Value` property to access join columns.)
 
@@ -490,7 +493,8 @@ select {
 }
 ```
 
-💥 The `join` `on` clause only supports simple column = column comparisons. Constant value parameters are not supported.
+> [!WARNING] 
+> The `join` `on` clause only supports simple column = column comparisons. Constant value parameters are not supported.
 Any custom filters that you might normally put in the `on` clause, especially those involving input parameters, will need to be moved to the `where` clause.
 This is because the F# `join` `on` syntax does not support complex filter clauses.
 
@@ -587,8 +591,8 @@ let! customersWithNoSalesPersonCount =
         count
     }
 ```
-
-💥 In some cases when selecting an aggregate of a non-NULL column, the database will still return NULL if the query result set is empty, for example if selecting the MAX of an INT column in an empty table. This is not supported and will throw an exception. If your query might return NULL for the aggregate of a non-NULL column, you may include `Some` in the aggregate to support parsing the NULL as an `Option` value:
+> [!WARNING]
+> In some cases when selecting an aggregate of a non-NULL column, the database will still return NULL if the query result set is empty, for example if selecting the MAX of an INT column in an empty table. This is not supported and will throw an exception. If your query might return NULL for the aggregate of a non-NULL column, you may include `Some` in the aggregate to support parsing the NULL as an `Option` value:
 
 ❌ INCORRECT:
 ```F#
@@ -964,6 +968,8 @@ let getCustomers filters =
 Sometimes it is easier to just write a custom SQL query. This can be helpful when you have a very custom query, or are using SQL constructs that do not yet exist in `SqlHydra.Query`. 
 You can do this while still maintaining the benefits of the strongly typed generated `HydraReader`.
 
+This example uses the generated `HydraReader` to hydrate the generated `dbo.Product` table record.
+
 ```F#
 let getTop10Products(conn: SqlConnection) = task {
     let sql = $"SELECT TOP 10 * FROM {nameof dbo.Product} p"
@@ -975,6 +981,35 @@ let getTop10Products(conn: SqlConnection) = task {
         while reader.Read() do
             hydra.``dbo.Product``.Read()
     ]
+}
+```
+
+The next example uses a query expression that modifies the underlying `SqlKata` query (using the the `kata` custom operation) to override the `SELECT` clause, and then manually reads the results into a custom record type.
+This technique can be useful if you want to select custom columns that use functions with a custom result type, but you still want to use a strongly typed query expression. 
+
+```F#
+/// A custom result type to be used for this query.
+type CityRow = { City3: string; Number: int }
+
+let getCities() = task {
+    use ctx = openContext()
+            
+    let! reader =
+        select {
+            for a in Person.Address do
+            where (a.City |=| [ "Seattle"; "Denver" ])
+            kata (fun query -> query.SelectRaw("SUBSTRING(City, 1, 3) AS City3, 123 AS Number"))
+        }
+        |> ctx.GetReaderAsync
+        
+    return
+        [
+            while reader.Read() do
+                {
+                    City3 = reader.Get "City3"
+                    Number = reader.Get "Number"
+                }
+        ]
 }
 ```
 
