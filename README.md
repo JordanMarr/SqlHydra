@@ -3,7 +3,12 @@ SqlHydra is a set of NuGet packages for working with databases in F# with an emp
 
 
 ### SqlHydra.Cli
-[SqlHydra.Cli](#sqlhydracli-) is a dotnet tool that generates F# types and readers for SQL Server, PostgreSQL, Oracle and SQLite databases.
+[SqlHydra.Cli](#sqlhydracli-) is a dotnet tool that generates F# types and readers for  the following databases:
+* SQL Server
+* PostgreSQL
+* Oracle
+* SQLite
+* MySQL (recently contributed -- currently exists as a beta release only)
 
 ### SqlHydra.Query
 [SqlHydra.Query](#sqlhydraquery-) provides strongly typed Linq queries against generated types. 
@@ -16,7 +21,7 @@ SqlHydra is a set of NuGet packages for working with databases in F# with an emp
 
 ## Contributors ✨
 
-Thanks goes to these wonderful people:
+Thanks to these awesome F# community contributors:
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -54,6 +59,10 @@ Thanks goes to these wonderful people:
     <td align="center">
         <a href="https://github.com/EverybodyKurts"><img src="https://avatars.githubusercontent.com/u/879734?v=4&s=100" style="width: 100px" alt=""/>
         <br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=EverybodyKurts" title="Code">💻</a>
+    </td>
+   <td align="center">
+        <a href="https://github.com/RJSonnenberg"><img src="https://avatars.githubusercontent.com/u/24612120?v=4" style="width: 100px" alt=""/>
+        <br /><a href="https://github.com/JordanMarr/SqlHydra/commits?author=RJSonnenberg" title="Code">💻</a>
     </td>
   </tr>
 </table>
