@@ -211,7 +211,7 @@ let generateNamespace (cfg: Config) (app: AppInfo) (db: Schema) =
 
                                 let field = Field(col.Name, columnPropertyType)
                                 match col.TypeMapping.ProviderDbType with
-                                | Some providerDbType -> 
+                                | Some providerDbType when cfg.ProviderDbTypeAttributes -> 
                                     field.attribute(Attribute($"ProviderDbType(\"{providerDbType}\")"))
                                 | _ -> 
                                     field
