@@ -37,6 +37,7 @@ let supportedTypeMappings =
         "BINARY",               "byte[]",                                   DbType.Binary,              Some (nameof SqlDbType.Binary),                 nameof r.GetFieldValue
         "IMAGE",                "byte[]",                                   DbType.Binary,              Some (nameof SqlDbType.Image),                  nameof r.GetFieldValue
         "ROWVERSION",           "byte[]",                                   DbType.Binary,              Some (nameof SqlDbType.Binary),                 nameof r.GetFieldValue
+        "TIMESTAMP",            "byte[]",                                   DbType.Binary,              Some (nameof SqlDbType.Binary),                 nameof r.GetFieldValue
         "SQL_VARIANT",          "obj",                                      DbType.Object,              Some (nameof SqlDbType.Variant),                nameof r.GetFieldValue
         
         // UNSUPPORTED COLUMN TYPES
