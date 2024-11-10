@@ -89,7 +89,7 @@ let mkTable cfg db (table: Table) schema = stringBuffer {
     }
 }
 
-let generate (cfg: Config) (app: AppInfo) (db: Schema) (version: string) = 
+let generate (cfg: Config) (app: AppInfo) (db: Schema) (version: string) = stringBuffer {
     let filteredTables = 
         db.Tables 
         |> List.sortBy (fun tbl -> tbl.Schema, tbl.Name)
@@ -105,13 +105,11 @@ namespace SqlServer.AdventureWorksNet6
 
 open SqlHydra
 open SqlHydra.Query.Table
+"""
 
-{{
     if cfg.Readers.IsSome then columnReadersModule else ""
-}}
 
-{{
-    [ for schema in schemas do
+    for schema in schemas do
         let tables = 
             filteredTables 
             |> List.filter (fun t -> t.Schema = schema)
@@ -128,8 +126,4 @@ open SqlHydra.Query.Table
 
         for table in tables do
             mkTable cfg db table schema |> mkIndent 1
-
-    ]
-    |> String.concat "\n"
-}}
-"""
+}
