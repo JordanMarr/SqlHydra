@@ -55,6 +55,7 @@
     <Compile Include="UnitTests\TomlConfigParser.fs" />
     <Compile Include="UnitTests\ColumnFilters.fs" />
     <Compile Include="UnitTests\TableFilters.fs" />
+    <Compile Include="UnitTests\SchemaTemplateTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
