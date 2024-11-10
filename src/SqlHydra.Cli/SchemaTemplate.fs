@@ -4,7 +4,7 @@ open Domain
 
 let backticks = Fantomas.FCS.Syntax.PrettyNaming.NormalizeIdentifierBackticks
 
-let indent (tabs: int) (text: string) = 
+let mkIndent (tabs: int) (text: string) = 
     let spaces = tabs * 4
     let indent = String.replicate spaces " "
     text.Split('\n') |> Array.map (fun line -> indent + line) |> String.concat "\n"
@@ -53,6 +53,42 @@ module private DataReaderExtensions =
             reader.GetFieldValue(ordinal) |> System.TimeOnly.FromTimeSpan
         """
 
+let mkTable cfg db (table: Table) schema = stringBuffer {
+    let tableType = 
+        db.Tables 
+        |> List.find (fun t -> t.Schema = schema && t.Name = table.Name)
+
+    if cfg.IsCLIMutable then "[<CLIMutable>]"
+
+    $"type {backticks table.Name} ="
+    indent {
+        "{"
+        indent {
+            for col in tableType.Columns do
+                let baseType = 
+                    // Handles array types: "byte[]", "string[]", "int[]", "int []", "int array"
+                    if col.TypeMapping.ClrType.EndsWith "[]" || col.TypeMapping.ClrType.EndsWith "array" then
+                        let baseTypeNm = col.TypeMapping.ClrType.Split([| "[]"; " []"; " array" |], System.StringSplitOptions.RemoveEmptyEntries) |> Array.head
+                        $"{baseTypeNm} []"
+                    else
+                        col.TypeMapping.ClrType
+
+                let columnPropertyType =
+                    if col.IsNullable then
+                        match cfg.NullablePropertyType with
+                        | NullablePropertyType.Option ->
+                            $"Option<{baseType}>"
+                        | NullablePropertyType.Nullable ->
+                            $"System.Nullable<{baseType}>"
+                    else 
+                        baseType
+
+                $"{backticks col.Name}: {columnPropertyType}"
+        }
+        "}"
+    }
+}
+
 let generate (cfg: Config) (app: AppInfo) (db: Schema) (version: string) = 
     let filteredTables = 
         db.Tables 
@@ -88,10 +124,10 @@ open SqlHydra.Query.Table
         $"module {backticks schema} ="
 
         for enum in enums do 
-            backticks enum |> indent 1
+            backticks enum |> mkIndent 1
 
         for table in tables do
-            backticks table.Name |> indent 1
+            mkTable cfg db table schema |> mkIndent 1
 
     ]
     |> String.concat "\n"
