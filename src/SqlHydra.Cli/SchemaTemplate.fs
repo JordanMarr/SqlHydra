@@ -53,6 +53,22 @@ module private DataReaderExtensions =
             reader.GetFieldValue(ordinal) |> System.TimeOnly.FromTimeSpan
         """
 
+let mkEnum db schema enum = stringBuffer {
+    let enumType = 
+        db.Enums 
+        |> List.find (fun e -> e.Schema = schema && e.Name = enum)
+
+    let labels = 
+        enumType.Labels 
+        |> List.sortBy _.SortOrder
+
+    $"type {backticks enumType.Name} ="
+    indent {
+        for label in labels do
+            $"| {backticks label.Name} = {label.SortOrder}"
+    }
+}
+
 let mkTable cfg db (table: Table) schema = stringBuffer {
     let tableType = 
         db.Tables 
@@ -107,23 +123,28 @@ open SqlHydra
 open SqlHydra.Query.Table
 """
 
-    if cfg.Readers.IsSome then columnReadersModule else ""
+    if cfg.Readers.IsSome then 
+        columnReadersModule
 
     for schema in schemas do
-        let tables = 
-            filteredTables 
-            |> List.filter (fun t -> t.Schema = schema)
+        $"module {backticks schema} ="
 
         let enums = 
             db.Enums 
             |> List.filter (fun e -> e.Schema = schema)
-            |> List.map (fun e -> e.Name)
+            |> List.map _.Name
 
-        $"module {backticks schema} ="
+        indent {
+            for enum in enums do 
+                mkEnum db schema enum
+        }
 
-        for enum in enums do 
-            backticks enum |> mkIndent 1
+        let tables = 
+            filteredTables 
+            |> List.filter (fun t -> t.Schema = schema)
 
-        for table in tables do
-            mkTable cfg db table schema |> mkIndent 1
+        indent {
+            for table in tables do
+                mkTable cfg db table schema
+        }
 }
