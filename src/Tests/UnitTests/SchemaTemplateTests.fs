@@ -32,4 +32,4 @@ let ``Schema Template Test - SqlServer`` () =
     let output = SchemaTemplate.generate cfg info schema "1.0.0"
     printfn $"Output:\n{output}"
     // Write output to sqlserver.fs
-    System.IO.File.WriteAllText("_sqlserver.fs", output)
+    //System.IO.File.WriteAllText("_sqlserver.fs", output)
