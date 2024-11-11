@@ -163,4 +163,47 @@ open SqlHydra.Query.Table
                     $"let {backticks table.Name} = table<{backticks table.Name}>"
                     newLine
         }
+
+        if cfg.Readers.IsSome then 
+            indent {
+                let reader = cfg.Readers.Value
+                $"module Readers ="
+                indent {
+                    for table in tables do 
+                        let readerClassName = $"{table.Name}Reader"
+                        $"type {backticks readerClassName}(reader: {reader.ReaderType}, getOrdinal) ="
+                        indent {
+                            for col in table.Columns do 
+                                let columnReaderType =
+                                    if col.IsNullable then 
+                                        match cfg.NullablePropertyType with
+                                        | NullablePropertyType.Option ->
+                                            "OptionColumn"                  // Returns None for DBNull.Value
+                                        | NullablePropertyType.Nullable ->
+                                            if col.TypeMapping.IsValueType() 
+                                            then "NullableValueColumn"      // Returns System.Nullable<> for DBNull.Value
+                                            else "NullableObjectColumn"     // Returns null for DBNull.Value
+                                    else 
+                                        "RequiredColumn"
+
+                                $"member __.{backticks col.Name} = {columnReaderType}(reader, getOrdinal, reader.{col.TypeMapping.ReaderMethod}, \"{col.Name}\")"
+
+                            "member __.Read() ="
+                            indent {
+                                "{"
+                                indent {
+                                    for col in table.Columns do 
+                                        $"let {backticks col.Name} = __.{backticks col.Name}.Read()"
+                                }
+                                $$"""} : {{backticks table.Name}}"""
+                            }
+
+                            "member __.ReadIfNotNull() ="
+                            indent {
+                                $"if __.{backticks table.Columns.Head.Name}.IsNull() then None else Some(__.Read())"
+                            }
+                        }
+                        newLine
+                }
+            }
 }
