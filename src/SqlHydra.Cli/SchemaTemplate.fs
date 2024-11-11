@@ -165,8 +165,8 @@ open SqlHydra.Query.Table
         }
 
         if cfg.Readers.IsSome then 
+            let reader = cfg.Readers.Value
             indent {
-                let reader = cfg.Readers.Value
                 $"module Readers ="
                 indent {
                     for table in tables do 
@@ -206,4 +206,131 @@ open SqlHydra.Query.Table
                         newLine
                 }
             }
+
+    // Create "HydraReader" below all generated tables/readers...
+    if cfg.Readers.IsSome then
+        let reader = cfg.Readers.Value
+        let allTables = schemas |> List.collect (fun schema -> filteredTables |> List.filter (fun t -> t.Schema = schema))
+        $"type HydraReader(reader: {cfg.Readers.Value.ReaderType}) ="
+        indent {
+            """
+    let mutable accFieldCount = 0
+    let buildGetOrdinal tableType =
+        let fieldNames = 
+            FSharp.Reflection.FSharpType.GetRecordFields(tableType)
+            |> Array.map _.Name
+
+        let dictionary = 
+            [| 0 .. reader.FieldCount - 1 |] 
+            |> Array.map (fun i -> reader.GetName(i), i)
+            |> Array.sortBy snd
+            |> Array.skip accFieldCount
+            |> Array.filter (fun (name, _) -> Array.contains name fieldNames)
+            |> Array.take fieldNames.Length
+            |> dict
+        accFieldCount <- accFieldCount + fieldNames.Length
+        fun col -> dictionary.Item col
+            """
+
+            // Create lazy backing fields.
+            // Ex: let lazyPersonEmailAddress = lazy (Person.Readers.EmailAddressReader(reader, buildGetOrdinal 5 typeof<Person.EmailAddress))
+            // Ex: let lazypublicmigration = lazy (``public``.Readers.migrationReader(reader, buildGetOrdinal typeof<``public``.migration>))
+            for table in allTables do
+                let readerClassName = $"{table.Name}Reader"
+                $"let lazy{table.Name} = lazy ({backticks table.Name}.Readers.{backticks readerClassName}(reader, buildGetOrdinal typeof<{backticks table.Schema}.{table.Name}>))"
+
+            // Create public properties against the lazy backing fields.
+            // Ex: member __.``HumanResources.Department`` = lazyHumanResourcesDepartment.Value
+            for table in allTables do
+                $"member __.{backticks table.Schema}.{backticks table.Name} = lazy{table.Name}.Value"
+
+            // AccFieldCount property
+            "member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value"
+
+            // Method: member private __.GetReaderByName(entity: string, isOption: bool) =
+            "member private __.GetReaderByName(entity: string, isOption: bool) ="
+            indent { 
+                "match entity, isOption with"
+                for table in allTables do
+                    // | "OT.CONTACTS", false -> __.``OT.CONTACTS``.Read >> box
+                    $"| \"{table.Schema}.{table.Name}\", false -> __.{backticks table.Schema}.{backticks table.Name} >> box"
+                    $"| \"{table.Schema}.{table.Name}\", true -> __.{backticks table.Schema}.{backticks table.Name}.ReadIfNotNull() >> box"
+
+                $$"""| _ -> failwith $"Could not read type '{entity}' because no generated reader exists." """
+                
+            }
+
+            // Method: static member private GetPrimitiveReader(t: System.Type, reader: Microsoft.Data.SqlClient.SqlDataReader, isOpt: bool, isNullable: bool) =// Method: member __.Read(entity: string, isOption: bool) = 
+            $"static member private GetPrimitiveReader(t: System.Type, reader: {reader.ReaderType}, isOpt: bool, isNullable: bool) ="
+            indent {
+                """
+        let wrapValue get (ord: int) = 
+            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            elif isNullable then (if reader.IsDBNull ord then System.Nullable() else get ord |> System.Nullable) |> box
+            else get ord |> box
+
+        let wrapRef get (ord: int) = 
+            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+            else get ord |> box
+
+                """
+
+                let wrapFnName (ptr: PrimitiveTypeReader) = 
+                    if ptr.ClrType |> isValueType
+                    then "wrapValue"
+                    else "wrapRef"
+                
+                for i, ptr in db.PrimitiveTypeReaders |> Seq.indexed do
+                    let if_elif = if i = 0 then "if" else "elif"
+                    let readerGetFieldValueMethod =
+                        if ptr.ClrType.EndsWith "[]"
+                        then $"GetFieldValue<{ptr.ClrType}>" // handles array types
+                        else $"{ptr.ReaderMethod}"
+
+                    $"{if_elif} t = typedefof<{ptr.ClrType}> then Some({wrapFnName ptr} reader.{readerGetFieldValueMethod})"
+
+                "else None"
+            }
+
+            // Method: member __.Read(entity: string, isOption: bool) =
+            $"""
+    static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
+        let hydra = HydraReader(reader)
+        {if app.Name = "SqlHydra.Oracle" then "reader.SuppressGetDecimalInvalidCastException <- true" else ""}
+                    
+        let getOrdinalAndIncrement() = 
+            let ordinal = hydra.AccFieldCount
+            hydra.AccFieldCount <- hydra.AccFieldCount + 1
+            ordinal
+            
+        let buildEntityReadFn (t: System.Type) = 
+            let t, isOpt, isNullable = 
+                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> then t.GenericTypeArguments[0], true, false
+                elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>> then t.GenericTypeArguments[0], false, true
+                else t, false, false
+            
+            match HydraReader.GetPrimitiveReader(t, reader, isOpt, isNullable) with
+            | Some primitiveReader -> 
+                let ord = getOrdinalAndIncrement()
+                fun () -> primitiveReader ord
+            | None ->
+                let nameParts = t.FullName.Split([| '.'; '+' |])
+                let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join(".", parts)
+                hydra.GetReaderByName(schemaAndType, isOpt)
+            
+        // Return a fn that will hydrate 'T (which may be a tuple)
+        // This fn will be called once per each record returned by the data reader.
+        let t = typeof<'T>
+        if FSharp.Reflection.FSharpType.IsTuple(t) then
+            let readEntityFns = FSharp.Reflection.FSharpType.GetTupleElements(t) |> Array.map buildEntityReadFn
+            fun () ->
+                let entities = readEntityFns |> Array.map (fun read -> read())
+                Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(entities, t) :?> 'T
+        else
+            let readEntityFn = t |> buildEntityReadFn
+            fun () -> 
+                readEntityFn() :?> 'T
+            """
+        }
+
 }
