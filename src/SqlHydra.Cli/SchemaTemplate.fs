@@ -4,6 +4,8 @@ open Domain
 
 let backticks = Fantomas.FCS.Syntax.PrettyNaming.NormalizeIdentifierBackticks
 
+let newLine = "\n"
+
 let mkIndent (tabs: int) (text: string) = 
     let spaces = tabs * 4
     let indent = String.replicate spaces " "
@@ -137,6 +139,7 @@ open SqlHydra.Query.Table
         indent {
             for enum in enums do 
                 mkEnum db schema enum
+                newLine
         }
 
         let tables = 
@@ -146,5 +149,10 @@ open SqlHydra.Query.Table
         indent {
             for table in tables do
                 mkTable cfg db table schema
+                newLine
+
+                if cfg.TableDeclarations then 
+                    $"let {backticks table.Name} = table<{backticks table.Name}>"
+                    newLine
         }
 }

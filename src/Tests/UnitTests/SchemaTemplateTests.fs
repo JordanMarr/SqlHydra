@@ -6,7 +6,7 @@ open SqlHydra
 
 [<Test>]
 let ``Schema Template Test`` () = 
-    let cfg = Npgsql.Generation.cfg
+    let cfg = { Npgsql.Generation.cfg with TableDeclarations = true }
     let info = SqlHydra.Npgsql.AppInfo.info
     let schema = Npgsql.NpgsqlSchemaProvider.getSchema cfg
     let output = SchemaTemplate.generate cfg info schema "1.0.0"
