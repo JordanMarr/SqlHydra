@@ -23,3 +23,5 @@ let ``Schema Template Test - SqlServer`` () =
     let schema = SqlServer.SqlServerSchemaProvider.getSchema cfg
     let output = SchemaTemplate.generate cfg info schema "1.0.0"
     printfn $"Output:\n{output}"
+    // Write output to sqlserver.fs
+    System.IO.File.WriteAllText("_sqlserver.fs", output)

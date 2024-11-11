@@ -3,46 +3,40 @@
 open Domain
 
 let backticks = Fantomas.FCS.Syntax.PrettyNaming.NormalizeIdentifierBackticks
-
 let newLine = "\n"
-
-let mkIndent (tabs: int) (text: string) = 
-    let spaces = tabs * 4
-    let indent = String.replicate spaces " "
-    text.Split('\n') |> Array.map (fun line -> indent + line) |> String.concat "\n"
 
 let columnReadersModule = $"""
 [<AutoOpen>]
 module ColumnReaders =
     type Column(reader: System.Data.IDataReader, getOrdinal: string -> int, column) =
-            member __.Name = column
-            member __.IsNull() = getOrdinal column |> reader.IsDBNull
-            override __.ToString() = __.Name
+        member __.Name = column
+        member __.IsNull() = getOrdinal column |> reader.IsDBNull
+        override __.ToString() = __.Name
 
     type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
-            inherit Column(reader, getOrdinal, column)
-            member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getter
+        inherit Column(reader, getOrdinal, column)
+        member __.Read(?alias) = alias |> Option.defaultValue __.Name |> getOrdinal |> getter
 
     type OptionColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
-            inherit Column(reader, getOrdinal, column)
-            member __.Read(?alias) = 
-                match alias |> Option.defaultValue __.Name |> getOrdinal with
-                | o when reader.IsDBNull o -> None
-                | o -> Some (getter o)
+        inherit Column(reader, getOrdinal, column)
+        member __.Read(?alias) = 
+            match alias |> Option.defaultValue __.Name |> getOrdinal with
+            | o when reader.IsDBNull o -> None
+            | o -> Some (getter o)
 
     type NullableObjectColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
-            inherit Column(reader, getOrdinal, column)
-            member __.Read(?alias) = 
-                match alias |> Option.defaultValue __.Name |> getOrdinal with
-                | o when reader.IsDBNull o -> null
-                | o -> (getter o) |> unbox
+        inherit Column(reader, getOrdinal, column)
+        member __.Read(?alias) = 
+            match alias |> Option.defaultValue __.Name |> getOrdinal with
+            | o when reader.IsDBNull o -> null
+            | o -> (getter o) |> unbox
 
     type NullableValueColumn<'T, 'Reader when 'T : struct and 'T : (new : unit -> 'T) and 'T :> System.ValueType and 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
-            inherit Column(reader, getOrdinal, column)
-            member __.Read(?alias) = 
-                match alias |> Option.defaultValue __.Name |> getOrdinal with
-                | o when reader.IsDBNull o -> System.Nullable<'T>()
-                | o -> System.Nullable<'T> (getter o)
+        inherit Column(reader, getOrdinal, column)
+        member __.Read(?alias) = 
+            match alias |> Option.defaultValue __.Name |> getOrdinal with
+            | o when reader.IsDBNull o -> System.Nullable<'T>()
+            | o -> System.Nullable<'T> (getter o)
 
 [<AutoOpen>]
 module private DataReaderExtensions =
@@ -193,7 +187,7 @@ open SqlHydra.Query.Table
                                 "{"
                                 indent {
                                     for col in table.Columns do 
-                                        $"let {backticks col.Name} = __.{backticks col.Name}.Read()"
+                                        $"{backticks col.Name} = __.{backticks col.Name}.Read()"
                                 }
                                 $$"""} : {{backticks table.Name}}"""
                             }
@@ -214,22 +208,22 @@ open SqlHydra.Query.Table
         $"type HydraReader(reader: {cfg.Readers.Value.ReaderType}) ="
         indent {
             """
-    let mutable accFieldCount = 0
-    let buildGetOrdinal tableType =
-        let fieldNames = 
-            FSharp.Reflection.FSharpType.GetRecordFields(tableType)
-            |> Array.map _.Name
+let mutable accFieldCount = 0
+let buildGetOrdinal tableType =
+    let fieldNames = 
+        FSharp.Reflection.FSharpType.GetRecordFields(tableType)
+        |> Array.map _.Name
 
-        let dictionary = 
-            [| 0 .. reader.FieldCount - 1 |] 
-            |> Array.map (fun i -> reader.GetName(i), i)
-            |> Array.sortBy snd
-            |> Array.skip accFieldCount
-            |> Array.filter (fun (name, _) -> Array.contains name fieldNames)
-            |> Array.take fieldNames.Length
-            |> dict
-        accFieldCount <- accFieldCount + fieldNames.Length
-        fun col -> dictionary.Item col
+    let dictionary = 
+        [| 0 .. reader.FieldCount - 1 |] 
+        |> Array.map (fun i -> reader.GetName(i), i)
+        |> Array.sortBy snd
+        |> Array.skip accFieldCount
+        |> Array.filter (fun (name, _) -> Array.contains name fieldNames)
+        |> Array.take fieldNames.Length
+        |> dict
+    accFieldCount <- accFieldCount + fieldNames.Length
+    fun col -> dictionary.Item col
             """
 
             // Create lazy backing fields.
@@ -244,8 +238,11 @@ open SqlHydra.Query.Table
             for table in allTables do
                 $"member __.{backticks table.Schema}.{backticks table.Name} = lazy{table.Name}.Value"
 
+            newLine
+
             // AccFieldCount property
             "member private __.AccFieldCount with get () = accFieldCount and set (value) = accFieldCount <- value"
+            newLine
 
             // Method: member private __.GetReaderByName(entity: string, isOption: bool) =
             "member private __.GetReaderByName(entity: string, isOption: bool) ="
@@ -259,20 +256,20 @@ open SqlHydra.Query.Table
                 $$"""| _ -> failwith $"Could not read type '{entity}' because no generated reader exists." """
                 
             }
+            newLine 
 
             // Method: static member private GetPrimitiveReader(t: System.Type, reader: Microsoft.Data.SqlClient.SqlDataReader, isOpt: bool, isNullable: bool) =// Method: member __.Read(entity: string, isOption: bool) = 
             $"static member private GetPrimitiveReader(t: System.Type, reader: {reader.ReaderType}, isOpt: bool, isNullable: bool) ="
             indent {
                 """
-        let wrapValue get (ord: int) = 
-            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
-            elif isNullable then (if reader.IsDBNull ord then System.Nullable() else get ord |> System.Nullable) |> box
-            else get ord |> box
+let wrapValue get (ord: int) = 
+    if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+    elif isNullable then (if reader.IsDBNull ord then System.Nullable() else get ord |> System.Nullable) |> box
+    else get ord |> box
 
-        let wrapRef get (ord: int) = 
-            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
-            else get ord |> box
-
+let wrapRef get (ord: int) = 
+    if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box 
+    else get ord |> box
                 """
 
                 let wrapFnName (ptr: PrimitiveTypeReader) = 
@@ -294,43 +291,43 @@ open SqlHydra.Query.Table
 
             // Method: member __.Read(entity: string, isOption: bool) =
             $"""
-    static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
-        let hydra = HydraReader(reader)
-        {if app.Name = "SqlHydra.Oracle" then "reader.SuppressGetDecimalInvalidCastException <- true" else ""}
+static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
+    let hydra = HydraReader(reader)
+    {if app.Name = "SqlHydra.Oracle" then "reader.SuppressGetDecimalInvalidCastException <- true" else ""}
                     
-        let getOrdinalAndIncrement() = 
-            let ordinal = hydra.AccFieldCount
-            hydra.AccFieldCount <- hydra.AccFieldCount + 1
-            ordinal
+    let getOrdinalAndIncrement() = 
+        let ordinal = hydra.AccFieldCount
+        hydra.AccFieldCount <- hydra.AccFieldCount + 1
+        ordinal
             
-        let buildEntityReadFn (t: System.Type) = 
-            let t, isOpt, isNullable = 
-                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> then t.GenericTypeArguments[0], true, false
-                elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>> then t.GenericTypeArguments[0], false, true
-                else t, false, false
+    let buildEntityReadFn (t: System.Type) = 
+        let t, isOpt, isNullable = 
+            if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> then t.GenericTypeArguments[0], true, false
+            elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>> then t.GenericTypeArguments[0], false, true
+            else t, false, false
             
-            match HydraReader.GetPrimitiveReader(t, reader, isOpt, isNullable) with
-            | Some primitiveReader -> 
-                let ord = getOrdinalAndIncrement()
-                fun () -> primitiveReader ord
-            | None ->
-                let nameParts = t.FullName.Split([| '.'; '+' |])
-                let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join(".", parts)
-                hydra.GetReaderByName(schemaAndType, isOpt)
+        match HydraReader.GetPrimitiveReader(t, reader, isOpt, isNullable) with
+        | Some primitiveReader -> 
+            let ord = getOrdinalAndIncrement()
+            fun () -> primitiveReader ord
+        | None ->
+            let nameParts = t.FullName.Split([| '.'; '+' |])
+            let schemaAndType = nameParts |> Array.skip (nameParts.Length - 2) |> fun parts -> System.String.Join(".", parts)
+            hydra.GetReaderByName(schemaAndType, isOpt)
             
-        // Return a fn that will hydrate 'T (which may be a tuple)
-        // This fn will be called once per each record returned by the data reader.
-        let t = typeof<'T>
-        if FSharp.Reflection.FSharpType.IsTuple(t) then
-            let readEntityFns = FSharp.Reflection.FSharpType.GetTupleElements(t) |> Array.map buildEntityReadFn
-            fun () ->
-                let entities = readEntityFns |> Array.map (fun read -> read())
-                Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(entities, t) :?> 'T
-        else
-            let readEntityFn = t |> buildEntityReadFn
-            fun () -> 
-                readEntityFn() :?> 'T
-            """
+    // Return a fn that will hydrate 'T (which may be a tuple)
+    // This fn will be called once per each record returned by the data reader.
+    let t = typeof<'T>
+    if FSharp.Reflection.FSharpType.IsTuple(t) then
+        let readEntityFns = FSharp.Reflection.FSharpType.GetTupleElements(t) |> Array.map buildEntityReadFn
+        fun () ->
+            let entities = readEntityFns |> Array.map (fun read -> read())
+            Microsoft.FSharp.Reflection.FSharpValue.MakeTuple(entities, t) :?> 'T
+    else
+        let readEntityFn = t |> buildEntityReadFn
+        fun () -> 
+            readEntityFn() :?> 'T
+        """
         }
 
 }
