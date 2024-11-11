@@ -40,7 +40,6 @@
 		<Compile Include="Npgsql\NpgsqlDataTypes.fs" />
 		<Compile Include="Npgsql\NpgsqlSchemaProvider.fs" />
 		<Compile Include="Npgsql\AppInfo.fs" />
-		<Compile Include="SchemaGenerator.fs" />
 		<Compile Include="SchemaTemplate.fs" />
 		<Compile Include="TomlConfigParser.fs" />
 		<Compile Include="Fsproj.fs" />
@@ -53,8 +52,8 @@
 		<PackageReference Update="FSharp.Core" Version="6.0.7" Condition="'$(TargetFramework)' == 'net6.0'" />
 		<PackageReference Update="FSharp.Core" Version="7.0.200" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Update="FSharp.Core" Version="8.0.100" Condition="'$(TargetFramework)' == 'net8.0'" />
-		<PackageReference Include="Fabulous.AST" Version="1.0.0-pre5" />
 		<PackageReference Include="MySql.Data" Version="9.0.0" />
+		<PackageReference Include="Fantomas.FCS" Version="6.3.16" />
 		<PackageReference Include="Npgsql" Version="6.0.11" Condition="'$(TargetFramework)' == 'net6.0'" />
 		<PackageReference Include="Npgsql" Version="7.0.7" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Include="Npgsql" Version="8.0.3" Condition="'$(TargetFramework)' == 'net8.0'" />

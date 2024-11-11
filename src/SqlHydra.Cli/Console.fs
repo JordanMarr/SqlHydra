@@ -174,12 +174,11 @@ let run (args: Args) =
     // Ensure the output directory exists (`cfg.OutputFile` may contain subdirectories).
     outputFile.Directory.Create()
 
-    let formattedCode = 
-        args.GetSchema cfg
-        |> SchemaGenerator.generate cfg args.AppInfo
-        |> SchemaGenerator.toFormattedCode cfg args.AppInfo args.Version
+    let generatedCode = 
+        let schema = args.GetSchema cfg
+        SchemaTemplate.generate cfg args.AppInfo schema args.Version
 
-    File.WriteAllText(outputFile.FullName, formattedCode)
+    File.WriteAllText(outputFile.FullName, generatedCode)
     Fsproj.addFileToProject args.Project cfg
     AnsiConsole.WriteLine()
     AnsiConsole.MarkupLine($"[gray]https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration[/]")
