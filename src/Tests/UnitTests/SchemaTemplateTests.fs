@@ -5,13 +5,21 @@ open SqlHydra.Domain
 open SqlHydra
 
 [<Test>]
-let ``Schema Template Test`` () = 
+let ``Schema Template Test - Npgsql`` () = 
     let cfg = 
         { Npgsql.Generation.cfg with 
             TableDeclarations = true
             //IsMutableProperties = true 
         }
-    let info = SqlHydra.Npgsql.AppInfo.info
+    let info = Npgsql.AppInfo.info
     let schema = Npgsql.NpgsqlSchemaProvider.getSchema cfg
+    let output = SchemaTemplate.generate cfg info schema "1.0.0"
+    printfn $"Output:\n{output}"
+
+[<Test>]
+let ``Schema Template Test - SqlServer`` () = 
+    let cfg = SqlServer.Generation.cfg 
+    let info = SqlServer.AppInfo.info
+    let schema = SqlServer.SqlServerSchemaProvider.getSchema cfg
     let output = SchemaTemplate.generate cfg info schema "1.0.0"
     printfn $"Output:\n{output}"

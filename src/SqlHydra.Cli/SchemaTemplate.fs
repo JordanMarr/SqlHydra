@@ -109,7 +109,7 @@ let mkTable cfg db (table: Table) schema = stringBuffer {
                         None
 
                 if providerDbTypeAttribute.IsSome then providerDbTypeAttribute.Value
-                $"""{if cfg.IsMutableProperties then "mutable" else ""} {backticks col.Name}: {columnPropertyType}"""
+                $"""{if cfg.IsMutableProperties then "mutable " else ""}{backticks col.Name}: {columnPropertyType}"""
         }
         "}"
     }
