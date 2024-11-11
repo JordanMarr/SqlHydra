@@ -9,7 +9,6 @@ let ``Schema Template Test - Npgsql`` () =
     let cfg = 
         { Npgsql.Generation.cfg with 
             TableDeclarations = true
-            //IsMutableProperties = true 
         }
     let info = Npgsql.AppInfo.info
     let schema = Npgsql.NpgsqlSchemaProvider.getSchema cfg
@@ -18,7 +17,16 @@ let ``Schema Template Test - Npgsql`` () =
 
 [<Test>]
 let ``Schema Template Test - SqlServer`` () = 
-    let cfg = SqlServer.Generation.cfg 
+    let cfg = 
+        { SqlServer.Generation.cfg with
+            TableDeclarations = true
+            Filters = 
+                { 
+                    Includes = [ "*" ]
+                    Excludes = [ "*/v*" ]
+                    Restrictions = Map.empty                
+                }
+        }
     let info = SqlServer.AppInfo.info
     let schema = SqlServer.SqlServerSchemaProvider.getSchema cfg
     let output = SchemaTemplate.generate cfg info schema "1.0.0"

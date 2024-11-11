@@ -231,12 +231,15 @@ let buildGetOrdinal tableType =
             // Ex: let lazypublicmigration = lazy (``public``.Readers.migrationReader(reader, buildGetOrdinal typeof<``public``.migration>))
             for table in allTables do
                 let readerClassName = $"{table.Name}Reader"
-                $"let lazy{table.Name} = lazy ({backticks table.Name}.Readers.{backticks readerClassName}(reader, buildGetOrdinal typeof<{backticks table.Schema}.{table.Name}>))"
+                let lazySchemaTable = $"lazy{table.Schema}{table.Name}"
+                $"let {backticks lazySchemaTable} = lazy ({backticks table.Schema}.Readers.{backticks readerClassName}(reader, buildGetOrdinal typeof<{backticks table.Schema}.{table.Name}>))"
 
             // Create public properties against the lazy backing fields.
             // Ex: member __.``HumanResources.Department`` = lazyHumanResourcesDepartment.Value
             for table in allTables do
-                $"member __.{backticks table.Schema}.{backticks table.Name} = lazy{table.Name}.Value"
+                let lazySchemaTable = $"lazy{table.Schema}{table.Name}"
+                let schemaTable = $"{table.Schema}.{table.Name}"
+                $"member __.{backticks schemaTable} = {backticks lazySchemaTable}.Value"
 
             newLine
 
@@ -250,8 +253,9 @@ let buildGetOrdinal tableType =
                 "match entity, isOption with"
                 for table in allTables do
                     // | "OT.CONTACTS", false -> __.``OT.CONTACTS``.Read >> box
-                    $"| \"{table.Schema}.{table.Name}\", false -> __.{backticks table.Schema}.{backticks table.Name} >> box"
-                    $"| \"{table.Schema}.{table.Name}\", true -> __.{backticks table.Schema}.{backticks table.Name}.ReadIfNotNull() >> box"
+                    let schemaTable = $"{table.Schema}.{table.Name}"
+                    $"| \"{table.Schema}.{table.Name}\", false -> __.{backticks schemaTable}.Read >> box"
+                    $"| \"{table.Schema}.{table.Name}\", true -> __.{backticks schemaTable}.ReadIfNotNull >> box"
 
                 $$"""| _ -> failwith $"Could not read type '{entity}' because no generated reader exists." """
                 
