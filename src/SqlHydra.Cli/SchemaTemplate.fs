@@ -295,7 +295,7 @@ let wrapRef get (ord: int) =
 
             // Method: member __.Read(entity: string, isOption: bool) =
             $"""
-static member Read(reader: Microsoft.Data.SqlClient.SqlDataReader) = 
+static member Read(reader: {reader.ReaderType}) = 
     let hydra = HydraReader(reader)
     {if app.Name = "SqlHydra.Oracle" then "reader.SuppressGetDecimalInvalidCastException <- true" else ""}
                     
