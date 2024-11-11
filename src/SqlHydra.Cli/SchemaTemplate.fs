@@ -101,7 +101,15 @@ let mkTable cfg db (table: Table) schema = stringBuffer {
                     else 
                         baseType
 
-                $"{backticks col.Name}: {columnPropertyType}"
+                let providerDbTypeAttribute =
+                    match col.TypeMapping.ProviderDbType with
+                    | Some providerDbType when cfg.ProviderDbTypeAttributes -> 
+                        Some $"[<ProviderDbType(\"{providerDbType}\")>]"
+                    | _ -> 
+                        None
+
+                if providerDbTypeAttribute.IsSome then providerDbTypeAttribute.Value
+                $"""{if cfg.IsMutableProperties then "mutable" else ""} {backticks col.Name}: {columnPropertyType}"""
         }
         "}"
     }
