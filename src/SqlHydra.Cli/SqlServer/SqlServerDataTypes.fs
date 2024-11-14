@@ -7,7 +7,7 @@ let private r : Microsoft.Data.SqlClient.SqlDataReader = null
 
 // https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql-server-data-type-mappings
 /// A list of supported column type mappings
-let supportedTypeMappings =
+let supportedTypeMappings isLegacy =
     [// ColumnTypeAlias         ClrType                                     DbType                      ProviderDbType                                  ReaderMethod
         "UNIQUEIDENTIFIER",     "System.Guid",                              DbType.Guid,                Some (nameof SqlDbType.UniqueIdentifier),       nameof r.GetGuid
         "BIT",                  "bool",                                     DbType.Boolean,             Some (nameof SqlDbType.Bit),                    nameof r.GetBoolean
@@ -28,8 +28,14 @@ let supportedTypeMappings =
         "TEXT",                 "string",                                   DbType.String,              Some (nameof SqlDbType.Text),                   nameof r.GetString
         "NTEXT",                "string",                                   DbType.String,              Some (nameof SqlDbType.NText),                  nameof r.GetString
         "DATETIMEOFFSET",       "System.DateTimeOffset",                    DbType.DateTimeOffset,      Some (nameof SqlDbType.DateTimeOffset),         nameof r.GetDateTimeOffset
-        "DATE",                 "System.DateOnly",                          DbType.Date,                Some (nameof SqlDbType.Date),                   "GetDateOnly"
-        "TIME",                 "System.TimeOnly",                          DbType.Time,                Some (nameof SqlDbType.Time),                   "GetTimeOnly"
+        
+        if isLegacy then
+         "DATE",                "System.DateTime",                          DbType.Date,                Some (nameof SqlDbType.Date),                   nameof r.GetDateTime
+         "TIME",                "System.TimeSpan",                          DbType.Time,                Some (nameof SqlDbType.Time),                   nameof r.GetTimeSpan
+        else
+         "DATE",                "System.DateOnly",                          DbType.Date,                Some (nameof SqlDbType.Date),                   "GetDateOnly"
+         "TIME",                "System.TimeOnly",                          DbType.Time,                Some (nameof SqlDbType.Time),                   "GetTimeOnly"
+
         "DATETIME",             "System.DateTime",                          DbType.DateTime,            Some (nameof SqlDbType.DateTime),               nameof r.GetDateTime
         "DATETIME2",            "System.DateTime",                          DbType.DateTime2,           Some (nameof SqlDbType.DateTime2),              nameof r.GetDateTime
         "SMALLDATETIME",        "System.DateTime",                          DbType.DateTime,            Some (nameof SqlDbType.SmallDateTime),          nameof r.GetDateTime        
@@ -47,8 +53,8 @@ let supportedTypeMappings =
         //"HIERARCHYID",        "Microsoft.SqlServer.Types.SqlHierarchyId", DbType.Object,              None
     ]
 
-let typeMappingsByName =
-    supportedTypeMappings
+let typeMappingsByName isLegacy =
+    supportedTypeMappings isLegacy
     |> List.map (fun (columnTypeAlias, clrType, dbType, providerDbType, readerMethod) ->
         columnTypeAlias,
         { 
@@ -61,12 +67,14 @@ let typeMappingsByName =
     )
     |> Map.ofList
         
-let tryFindTypeMapping (providerTypeName: string) =
-    typeMappingsByName.TryFind (providerTypeName.ToUpper())
+let tryFindTypeMapping isLegacy =
+    let map = typeMappingsByName isLegacy
+    let toUpper (str: string) = str.ToUpper()
+    toUpper >> map.TryFind
         
-let primitiveTypeReaders = 
-    supportedTypeMappings
+let primitiveTypeReaders isLegacy = 
+    supportedTypeMappings isLegacy
     |> List.map (fun (_, clrType, _, _, readerMethod) ->
         { PrimitiveTypeReader.ClrType = clrType; PrimitiveTypeReader.ReaderMethod = readerMethod }
     )
-    |> List.distinctBy (fun ptr -> ptr.ClrType)
+    |> List.distinctBy _.ClrType

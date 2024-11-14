@@ -5,7 +5,7 @@ open Microsoft.Data.SqlClient
 open SqlHydra.Domain
 open SqlHydra
 
-let getSchema (cfg: Config) : Schema = 
+let getSchema (cfg: Config) (isLegacy: bool) : Schema = 
     use conn = new SqlConnection(cfg.ConnectionString)
     conn.Open()
     
@@ -76,9 +76,10 @@ let getSchema (cfg: Config) : Schema =
                 )
 
             let supportedColumns = 
+                let tryFindTypeMapping = SqlServerDataTypes.tryFindTypeMapping isLegacy
                 tableColumns
                 |> Seq.choose (fun col -> 
-                    SqlServerDataTypes.tryFindTypeMapping(col.ProviderTypeName)
+                    tryFindTypeMapping col.ProviderTypeName
                     |> Option.map (fun typeMapping -> 
                         {
                             Column.Name = col.ColumnName
@@ -112,5 +113,5 @@ let getSchema (cfg: Config) : Schema =
     { 
         Tables = tables 
         Enums = []
-        PrimitiveTypeReaders = SqlServerDataTypes.primitiveTypeReaders
+        PrimitiveTypeReaders = SqlServerDataTypes.primitiveTypeReaders isLegacy
     }

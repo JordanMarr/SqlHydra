@@ -10,7 +10,7 @@ let dbNullOpt<'T> (o: obj) : 'T option =
     | :? System.DBNull -> None
     | _ -> o :?> 'T |> Some
 
-let getSchema (cfg: Config) : Schema = 
+let getSchema (cfg: Config) isLegacy : Schema = 
     use conn = new SQLiteConnection(cfg.ConnectionString)
     conn.Open()
     let sTables = conn.GetSchema("Tables", cfg.Filters.TryGetRestrictionsByKey("Tables"))
@@ -60,9 +60,10 @@ let getSchema (cfg: Config) : Schema =
                 )
 
             let supportedColumns = 
+                let tryFindTypeMapping = SqliteDataTypes.tryFindTypeMapping isLegacy
                 tableColumns
                 |> Seq.choose (fun col -> 
-                    SqliteDataTypes.tryFindTypeMapping(col.ProviderTypeName)
+                    tryFindTypeMapping col.ProviderTypeName
                     |> Option.map (fun typeMapping -> 
                         { 
                             Column.Name = col.ColumnName
@@ -96,5 +97,5 @@ let getSchema (cfg: Config) : Schema =
     { 
         Tables = tables
         Enums = []
-        PrimitiveTypeReaders = SqliteDataTypes.primitiveTypeReaders
+        PrimitiveTypeReaders = SqliteDataTypes.primitiveTypeReaders isLegacy
     }

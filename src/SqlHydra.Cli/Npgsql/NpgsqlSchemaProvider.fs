@@ -4,7 +4,7 @@ open System.Data
 open SqlHydra.Domain
 open SqlHydra
 
-let getSchema (cfg: Config) : Schema =
+let getSchema (cfg: Config) (isLegacy: bool) : Schema =
     use conn = new Npgsql.NpgsqlConnection(cfg.ConnectionString)
     conn.Open()
     // NOTE: GetSchema will fail if a Postgres enum doesn't exists in a custom schema but not in public schema.
@@ -177,6 +177,8 @@ let getSchema (cfg: Config) : Schema =
         |> Seq.groupBy (fun col -> col.TableSchema, col.TableName)
         |> Map.ofSeq
 
+    let tryFindTypeMapping = NpgsqlDataTypes.tryFindTypeMapping isLegacy
+
     let matViews = 
         materializedViews
         |> Seq.choose (fun tbl -> 
@@ -185,7 +187,7 @@ let getSchema (cfg: Config) : Schema =
                 | Some cols -> 
                     cols
                     |> Seq.choose (fun col -> 
-                        NpgsqlDataTypes.tryFindTypeMapping(col.ProviderTypeName)
+                        tryFindTypeMapping col.ProviderTypeName
                         |> Option.map (fun typeMapping ->
                             { 
                                 Column.Name = col.ColumnName
@@ -237,7 +239,7 @@ let getSchema (cfg: Config) : Schema =
             let mappedColumns = 
                 tableColumns
                 |> Seq.choose (fun col -> 
-                    NpgsqlDataTypes.tryFindTypeMapping(col.ProviderTypeName)
+                    tryFindTypeMapping col.ProviderTypeName
                     |> Option.map (fun typeMapping ->
                         { 
                             Column.Name = col.ColumnName
@@ -306,5 +308,5 @@ let getSchema (cfg: Config) : Schema =
     { 
         Tables = tables @ matViews
         Enums = enums
-        PrimitiveTypeReaders = NpgsqlDataTypes.primitiveTypeReaders
+        PrimitiveTypeReaders = NpgsqlDataTypes.primitiveTypeReaders isLegacy
     }

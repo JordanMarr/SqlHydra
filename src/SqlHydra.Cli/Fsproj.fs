@@ -26,3 +26,22 @@ let addFileToProject (fsproj: FileInfo) (cfg: Config) =
             fstCompileGrp.AddItem("Compile", cfg.OutputFile, [ KeyValuePair("Visible", "False") ]) |> ignore
             root.Save()
     )
+
+let getTargetFrameworks (fsProj: FileInfo) =
+    let root = ProjectRootElement.Open(fsProj.FullName)
+    let targetFrameworksValue = 
+        root.PropertyGroups
+        |> Seq.collect (fun pg -> pg.Properties)
+        |> Seq.tryFind (fun p -> p.Name = "TargetFrameworks")
+        |> Option.map (fun p -> p.Value)
+        |> Option.defaultValue ""
+
+    targetFrameworksValue.Split(';')
+    |> Array.map _.Trim()
+    
+let targetsLegacyFramework (fsProj: FileInfo) = 
+    getTargetFrameworks fsProj
+    |> Array.exists (fun t -> 
+        t.StartsWith("net4") || 
+        t.StartsWith("netstandard")
+    )

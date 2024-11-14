@@ -6,7 +6,7 @@ open SqlHydra.Domain
 let private r : System.Data.Common.DbDataReader = null
 
 /// A list of supported column type mappings
-let supportedTypeMappings =
+let supportedTypeMappings isLegacy =
     [ 
         "smallint",         "int16",            DbType.Int16,       nameof r.GetInt16
         "int",              "int",              DbType.Int32,       nameof r.GetInt32
@@ -52,14 +52,20 @@ let supportedTypeMappings =
         "datetime",         "System.DateTime",  DbType.DateTime,    nameof r.GetDateTime
         "smalldate",        "System.DateTime",  DbType.DateTime,    nameof r.GetDateTime 
         "timestamp",        "System.DateTime",  DbType.DateTime,    nameof r.GetDateTime 
-        "date",             "System.DateOnly",  DbType.DateTime,    "GetDateOnly"
-        "time",             "System.TimeOnly",  DbType.DateTime,    "GetTimeOnly"
+        
+        if isLegacy then
+         "date",            "System.DateTime",  DbType.DateTime,    nameof r.GetDateTime 
+         "time",            "System.DateTime",  DbType.DateTime,    nameof r.GetDateTime 
+        else
+         "date",            "System.DateOnly",  DbType.DateTime,    "GetDateOnly"
+         "time",            "System.TimeOnly",  DbType.DateTime,    "GetTimeOnly"
+
         "uniqueidentifier", "System.Guid",      DbType.Guid,        nameof r.GetGuid
         "guid",             "System.Guid",      DbType.Guid,        nameof r.GetGuid 
     ]
 
-let typeMappingsByName =
-    supportedTypeMappings
+let typeMappingsByName isLegacy =
+    supportedTypeMappings isLegacy
     |> List.map (fun (columnTypeAlias, clrType, dbType, readerMethod) ->
         columnTypeAlias,
         { 
@@ -72,11 +78,13 @@ let typeMappingsByName =
     )
     |> Map.ofList
 
-let tryFindTypeMapping (providerTypeName: string) = 
-    typeMappingsByName.TryFind(providerTypeName.ToLower().Trim())
+let tryFindTypeMapping isLegacy = 
+    let map = typeMappingsByName isLegacy
+    let toLower (str: string) = str.ToLower().Trim()
+    toLower >> map.TryFind
 
-let primitiveTypeReaders = 
-    supportedTypeMappings
+let primitiveTypeReaders isLegacy = 
+    supportedTypeMappings isLegacy
     |> List.map(fun (_, clrType, _, readerMethod) ->
         { PrimitiveTypeReader.ClrType = clrType; PrimitiveTypeReader.ReaderMethod = readerMethod }
     )

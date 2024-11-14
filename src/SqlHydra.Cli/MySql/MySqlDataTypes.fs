@@ -7,7 +7,7 @@ open SqlHydra.Domain
 let private r : System.Data.Common.DbDataReader = null
 
 /// A list of supported column type mappings
-let supportedTypeMappings = // https://dev.mysql.com/doc/refman/9.0/en/data-types.html
+let supportedTypeMappings isLegacy = // https://dev.mysql.com/doc/refman/9.0/en/data-types.html
     [// ColumnTypeAlias                 ClrType                 DbType                  ProviderDbType
         "bit",                          "int16",                DbType.Int16,           Some (nameof MySqlDbType.Bit),         nameof r.GetInt16
         "tinyint",                      "int16",                DbType.Int16,           Some (nameof MySqlDbType.Int16),       nameof r.GetInt16
@@ -40,8 +40,14 @@ let supportedTypeMappings = // https://dev.mysql.com/doc/refman/9.0/en/data-type
         "enum",                         "string",               DbType.String,          Some (nameof MySqlDbType.Enum),        nameof r.GetString
         "set",                          "string",               DbType.String,          Some (nameof MySqlDbType.Set),         nameof r.GetString
         "json",                         "string",               DbType.String,          Some (nameof MySqlDbType.JSON),        nameof r.GetString
-        "date",                         "System.DateOnly",      DbType.DateTime,        Some (nameof MySqlDbType.Date),        "GetDateOnly"
-        "time",                         "System.TimeOnly",      DbType.Time,            Some (nameof MySqlDbType.Time),        "GetTimeOnly"
+        
+        if isLegacy then
+         "date",                        "System.DateTime",      DbType.DateTime,        Some (nameof MySqlDbType.Date),        nameof r.GetDateTime
+         "time",                        "System.DateTime",      DbType.DateTime,        Some (nameof MySqlDbType.Time),        nameof r.GetDateTime
+        else
+         "date",                        "System.DateOnly",      DbType.DateTime,        Some (nameof MySqlDbType.Date),        "GetDateOnly"
+         "time",                        "System.TimeOnly",      DbType.Time,            Some (nameof MySqlDbType.Time),        "GetTimeOnly"
+        
         "datetime",                     "System.DateTime",      DbType.DateTime,        Some (nameof MySqlDbType.DateTime),    nameof r.GetDateTime
         "timestamp",                    "System.DateTime",      DbType.DateTime,        Some (nameof MySqlDbType.Timestamp),   nameof r.GetDateTime
         "year",                         "int16",                DbType.Int16,           Some (nameof MySqlDbType.Year),        nameof r.GetInt16
@@ -54,9 +60,8 @@ let supportedTypeMappings = // https://dev.mysql.com/doc/refman/9.0/en/data-type
         "long",                         "string",               DbType.String,          Some (nameof MySqlDbType.MediumText),  nameof r.GetString
     ]
 
-let typeMappingsByName =
-    supportedTypeMappings
-
+let typeMappingsByName isLegacy =
+    supportedTypeMappings isLegacy
     |> List.map (fun (columnTypeAlias, clrType, dbType, providerDbType, readerMethod) ->
         columnTypeAlias,
         {
@@ -69,11 +74,13 @@ let typeMappingsByName =
     )
     |> Map.ofList
 
-let tryFindTypeMapping (providerTypeName: string) =
-    typeMappingsByName.TryFind (providerTypeName.ToLower().Trim())
+let tryFindTypeMapping isLegacy = 
+    let map = typeMappingsByName isLegacy
+    let toLower (str: string) = str.ToLower().Trim()
+    toLower >> map.TryFind
 
-let primitiveTypeReaders =
-    supportedTypeMappings
+let primitiveTypeReaders isLegacy =
+    supportedTypeMappings isLegacy
     |> List.map(fun (_, clrType, _, _, readerMethod) ->
         { PrimitiveTypeReader.ClrType = clrType; PrimitiveTypeReader.ReaderMethod = readerMethod }
     )

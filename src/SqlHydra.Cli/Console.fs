@@ -11,10 +11,12 @@ type Args =
         AppInfo: AppInfo
         TomlFile: FileInfo
         Project: FileInfo
-        GetSchema: Config -> Schema
+        GetSchema: Config -> IsLegacy -> Schema
         Version: string
         ConnectionString: string option
     }
+
+and IsLegacy = bool
 
 type LoadConfigResult = 
     | Valid of Config
@@ -175,8 +177,9 @@ let run (args: Args) =
     outputFile.Directory.Create()
 
     let generatedCode = 
-        let schema = args.GetSchema cfg
-        SchemaTemplate.generate cfg args.AppInfo schema args.Version
+        let isLegacy = Fsproj.targetsLegacyFramework args.Project
+        let schema = args.GetSchema cfg isLegacy
+        SchemaTemplate.generate cfg args.AppInfo schema args.Version isLegacy
 
     File.WriteAllText(outputFile.FullName, generatedCode)
     Fsproj.addFileToProject args.Project cfg

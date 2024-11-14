@@ -5,7 +5,7 @@ open Oracle.ManagedDataAccess.Client
 open SqlHydra.Domain
 open SqlHydra
 
-let getSchema (cfg: Config) : Schema =
+let getSchema (cfg: Config) (isLegacy: bool) : Schema =
     use conn = new OracleConnection(cfg.ConnectionString)
     conn.Open()
     let sTables = conn.GetSchema("Tables", cfg.Filters.TryGetRestrictionsByKey("Tables"))

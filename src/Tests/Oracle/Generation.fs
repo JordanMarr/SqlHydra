@@ -21,10 +21,10 @@ let cfg =
         Filters = { Includes = [ "OT/*" ]; Excludes = [ ]; Restrictions = Map.empty }
     }
 
-let lazySchema = lazy OracleSchemaProvider.getSchema cfg
+let lazySchema = lazy OracleSchemaProvider.getSchema cfg false
 
 let getCode cfg = 
-    SchemaTemplate.generate cfg AppInfo.info lazySchema.Value "---"
+    SchemaTemplate.generate cfg AppInfo.info lazySchema.Value "---" false
 
 let inCode (str: string) cfg = 
     let code = getCode cfg
@@ -36,7 +36,7 @@ let notInCode (str: string) cfg =
 
 [<Test; Ignore "Ignore">]
 let ```Print Schema``() = 
-    let schema = OracleSchemaProvider.getSchema cfg
+    let schema = OracleSchemaProvider.getSchema cfg false
     printfn "Schema: %A" schema
 
 [<Test>]

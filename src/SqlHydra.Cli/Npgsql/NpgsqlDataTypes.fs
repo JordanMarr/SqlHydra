@@ -7,7 +7,7 @@ open SqlHydra.Domain
 let private r : Npgsql.NpgsqlDataReader = null
 
 /// A list of supported column type mappings
-let supportedTypeMappings = // https://www.npgsql.org/doc/types/basic.html
+let supportedTypeMappings isLegacy = // https://www.npgsql.org/doc/types/basic.html
     [//  ColumnTypeAlias                ClrType                 DbType                  ProviderDbType                          ReaderMethod            ArrayBaseType
         "boolean",                      "bool",                 DbType.Boolean,         Some (nameof NpgsqlDbType.Boolean),     nameof r.GetBoolean,    Some NpgsqlDbType.Boolean
         "smallint",                     "int16",                DbType.Int16,           Some (nameof NpgsqlDbType.Smallint),    nameof r.GetInt16,      Some NpgsqlDbType.Smallint
@@ -30,8 +30,14 @@ let supportedTypeMappings = // https://www.npgsql.org/doc/types/basic.html
         "uuid",                         "System.Guid",          DbType.Guid,            Some (nameof NpgsqlDbType.Uuid),        nameof r.GetGuid,       Some NpgsqlDbType.Uuid
         // skipped unsupported types
         "interval",                     "System.TimeSpan",      DbType.Time,            Some (nameof NpgsqlDbType.Interval),    nameof r.GetTimeSpan,   Some NpgsqlDbType.Interval
-        "date",                         "System.DateOnly",      DbType.DateTime,        Some (nameof NpgsqlDbType.Date),        "GetDateOnly",          Some NpgsqlDbType.Date
-        "time without time zone",       "System.TimeOnly",      DbType.Time,            Some (nameof NpgsqlDbType.Time),        "GetTimeOnly",          Some NpgsqlDbType.Time
+        
+        if isLegacy then
+         "date",                        "System.DateTime",      DbType.DateTime,        Some (nameof NpgsqlDbType.Date),        nameof r.GetDateTime,   Some NpgsqlDbType.Date
+         "time without time zone",      "System.TimeSpan",      DbType.Time,            Some (nameof NpgsqlDbType.Time),        nameof r.GetTimeSpan,   Some NpgsqlDbType.Time        
+        else
+         "date",                        "System.DateOnly",      DbType.DateTime,        Some (nameof NpgsqlDbType.Date),        "GetDateOnly",          Some NpgsqlDbType.Date
+         "time without time zone",      "System.TimeOnly",      DbType.Time,            Some (nameof NpgsqlDbType.Time),        "GetTimeOnly",          Some NpgsqlDbType.Time
+        
         "timestamp with time zone",     "System.DateTime",      DbType.DateTime,        Some (nameof NpgsqlDbType.TimestampTz), nameof r.GetDateTime,   Some NpgsqlDbType.TimestampTz 
         "timestamp without time zone",  "System.DateTime",      DbType.DateTime,        Some (nameof NpgsqlDbType.Timestamp),   nameof r.GetDateTime,   Some NpgsqlDbType.Timestamp
         "time with time zone",          "System.DateTimeOffset",DbType.DateTimeOffset,  Some (nameof NpgsqlDbType.TimeTz),      nameof r.GetDateTime,   Some NpgsqlDbType.TimeTz
@@ -72,9 +78,8 @@ let supportedTypeMappings = // https://www.npgsql.org/doc/types/basic.html
         ]
     )
 
-let typeMappingsByName =
-    supportedTypeMappings
-    
+let typeMappingsByName isLegacy =
+    supportedTypeMappings isLegacy    
     |> List.map (fun (columnTypeAlias, clrType, dbType, providerDbType, readerMethod) ->
         columnTypeAlias,
         { 
@@ -87,11 +92,13 @@ let typeMappingsByName =
     )
     |> Map.ofList
 
-let tryFindTypeMapping (providerTypeName: string) = 
-    typeMappingsByName.TryFind (providerTypeName.ToLower().Trim())
+let tryFindTypeMapping isLegacy = 
+    let map = typeMappingsByName isLegacy
+    let toLower (str: string) = str.ToLower().Trim()
+    toLower >> map.TryFind
 
-let primitiveTypeReaders = 
-    supportedTypeMappings
+let primitiveTypeReaders isLegacy = 
+    supportedTypeMappings isLegacy
     |> List.map(fun (_, clrType, _, _, readerMethod) ->
         { PrimitiveTypeReader.ClrType = clrType; PrimitiveTypeReader.ReaderMethod = readerMethod }
     )

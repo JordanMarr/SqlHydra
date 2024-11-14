@@ -37,7 +37,9 @@ module ColumnReaders =
             match alias |> Option.defaultValue __.Name |> getOrdinal with
             | o when reader.IsDBNull o -> System.Nullable<'T>()
             | o -> System.Nullable<'T> (getter o)
+"""
 
+let modernDateExtensionsModule = $"""
 [<AutoOpen>]
 module private DataReaderExtensions =
     type System.Data.IDataReader with
@@ -47,7 +49,7 @@ module private DataReaderExtensions =
     type System.Data.Common.DbDataReader with
         member reader.GetTimeOnly(ordinal: int) = 
             reader.GetFieldValue(ordinal) |> System.TimeOnly.FromTimeSpan
-        """
+"""
 
 let mkEnum db schema enum = stringBuffer {
     let enumType = 
@@ -109,7 +111,7 @@ let mkTable cfg db (table: Table) schema = stringBuffer {
     }
 }
 
-let generate (cfg: Config) (app: AppInfo) (db: Schema) (version: string) = stringBuffer {
+let generate (cfg: Config) (app: AppInfo) (db: Schema) (version: string) isLegacy = stringBuffer {
     let filteredTables = 
         db.Tables 
         |> List.sortBy (fun tbl -> tbl.Schema, tbl.Name)
@@ -129,6 +131,10 @@ open SqlHydra.Query.Table
 
     if cfg.Readers.IsSome then 
         columnReadersModule
+
+    if not isLegacy then
+        modernDateExtensionsModule
+        newLine
 
     for schema in schemas do
         $"module {backticks schema} ="
