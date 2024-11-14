@@ -29,15 +29,17 @@ let addFileToProject (fsproj: FileInfo) (cfg: Config) =
 
 let getTargetFrameworks (fsProj: FileInfo) =
     let root = ProjectRootElement.Open(fsProj.FullName)
-    let targetFrameworksValue = 
+    let targetFrameworks = 
         root.PropertyGroups
-        |> Seq.collect (fun pg -> pg.Properties)
-        |> Seq.tryFind (fun p -> p.Name = "TargetFrameworks")
-        |> Option.map (fun p -> p.Value)
-        |> Option.defaultValue ""
+        |> Seq.collect _.Properties
+        |> Seq.filter (fun p -> p.Name = "TargetFramework" || p.Name = "TargetFrameworks")
+        |> Seq.map _.Value
 
-    targetFrameworksValue.Split(';')
-    |> Array.map _.Trim()
+    targetFrameworks
+    |> Seq.collect _.Split(';')
+    |> Seq.map _.Trim()
+    |> Seq.toArray
+
     
 let targetsLegacyFramework (fsProj: FileInfo) = 
     getTargetFrameworks fsProj

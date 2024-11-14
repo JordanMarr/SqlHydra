@@ -142,6 +142,11 @@ let printConfig (cfg: Config) =
     AnsiConsole.MarkupLine($"[blue]-[/] Readers: [deepskyblue1]\"{readers}\"[/]")
     // Filters are printed in SchemaFilters.fs
 
+let printLegacyStatus (isLegacy: bool) = 
+    if isLegacy 
+    then AnsiConsole.MarkupLine($"[blue]-[/] DateOnly/TimeOnly Support: [deepskyblue1]False[/]")
+    else AnsiConsole.MarkupLine($"[blue]-[/] DateOnly/TimeOnly Support: [deepskyblue1]True[/]")        
+
 /// Creates a sqlhydra-*.toml file if necessary.
 let getOrCreateConfig (args: Args) = 
     AnsiConsole.WriteLine()
@@ -178,6 +183,7 @@ let run (args: Args) =
 
     let generatedCode = 
         let isLegacy = Fsproj.targetsLegacyFramework args.Project
+        printLegacyStatus isLegacy
         let schema = args.GetSchema cfg isLegacy
         SchemaTemplate.generate cfg args.AppInfo schema args.Version isLegacy
 

@@ -49,6 +49,7 @@ module private DataReaderExtensions =
     type System.Data.Common.DbDataReader with
         member reader.GetTimeOnly(ordinal: int) = 
             reader.GetFieldValue(ordinal) |> System.TimeOnly.FromTimeSpan
+
 """
 
 let mkEnum db schema enum = stringBuffer {
@@ -132,9 +133,8 @@ open SqlHydra.Query.Table
     if cfg.Readers.IsSome then 
         columnReadersModule
 
-    if not isLegacy then
-        modernDateExtensionsModule
-        newLine
+        if not isLegacy then 
+            modernDateExtensionsModule
 
     for schema in schemas do
         $"module {backticks schema} ="
