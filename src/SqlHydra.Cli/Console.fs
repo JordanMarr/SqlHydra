@@ -165,6 +165,20 @@ let getOrCreateConfig (args: Args) =
         saveConfig(args.TomlFile, cfg)
         cfg
 
+open Fantomas.Core
+
+let formatCodeWithFantomas (code: string) =
+    let cfg = 
+        { FormatConfig.Default with 
+            FormatConfig.MaxIfThenElseShortWidth = 400           // Forces ReadIfNotNull if/then to be on a single line
+            FormatConfig.MaxValueBindingWidth = 400              // Ensure reader property/column bindings stay on one line
+            FormatConfig.MaxLineLength = 400                     // Ensure reader property/column bindings stay on one line
+        }
+
+    CodeFormatter.FormatDocumentAsync(false, code, cfg) 
+    |> Async.RunSynchronously
+    |> _.Code
+
 /// Runs code generation for a given database provider.
 let run (args: Args) = 
     let cfg = 
@@ -186,6 +200,8 @@ let run (args: Args) =
         printLegacyStatus isLegacy
         let schema = args.GetSchema cfg isLegacy
         SchemaTemplate.generate cfg args.AppInfo schema args.Version isLegacy
+        |> formatCodeWithFantomas
+        
 
     File.WriteAllText(outputFile.FullName, generatedCode)
     Fsproj.addFileToProject args.Project cfg
