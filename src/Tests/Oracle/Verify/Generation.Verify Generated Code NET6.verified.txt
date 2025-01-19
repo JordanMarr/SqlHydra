@@ -1,8 +1,7 @@
 ﻿
 namespace TestNS
-
+    
 open SqlHydra
-open SqlHydra.Query.Table
 
 [<AutoOpen>]
 module ColumnReaders =
@@ -487,4 +486,15 @@ type HydraReader(reader: Oracle.ManagedDataAccess.Client.OracleDataReader) =
             let readEntityFn = t |> buildEntityReadFn
             fun () -> 
                 readEntityFn() :?> 'T
-            
+                
+    
+    /// Provides select builders that use the generated HydraReader.Read.
+    module HydraBuilders =
+        open SqlHydra.Query
+    
+        /// Builds a select query with a QueryContext - returns a Task query result
+        let selectTask ct = selectTask<'Selected, 'Mapped, Oracle.ManagedDataAccess.Client.OracleDataReader> HydraReader.Read ct
+    
+        /// Builds a select query with a QueryContext - returns an Async query result
+        let selectAsync ct = selectAsync<'Selected, 'Mapped, Oracle.ManagedDataAccess.Client.OracleDataReader> HydraReader.Read ct
+                    

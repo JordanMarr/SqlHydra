@@ -344,16 +344,16 @@ static member Read(reader: {reader.ReaderType}) =
 
             // If the user configures ProviderDbTypeAttributes, we know they are using SqlHydra.Query.
             if cfg.ProviderDbTypeAttributes then
-                """
+                $"""
 /// Provides select builders that use the generated HydraReader.Read.
 module HydraBuilders =
     open SqlHydra.Query
 
     /// Builds a select query with a QueryContext - returns a Task query result
-    let selectTask ct = selectTask<'Selected, 'Mapped, 'Reader> HydraReader.Read ct
+    let selectTask ct = selectTask<'Selected, 'Mapped, {reader.ReaderType}> HydraReader.Read ct
 
     /// Builds a select query with a QueryContext - returns an Async query result
-    let selectAsync ct = selectAsync<'Selected, 'Mapped, 'Reader> HydraReader.Read ct
+    let selectAsync ct = selectAsync<'Selected, 'Mapped, {reader.ReaderType}> HydraReader.Read ct
                 """
 
         }
