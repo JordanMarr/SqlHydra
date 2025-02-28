@@ -30,13 +30,8 @@ Target.create "BuildQuery" <| fun _ ->
     |> (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release", pkg), pkg)
     |> (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
-Target.create "BuildCliNet6" <| fun _ ->
-    [ cli; tests ]
-    |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net6.0", pkg), pkg)
-    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
-
 Target.create "BuildCliNet7" <| fun _ ->
-    [ cli; ] // tests ] Skip tests for net7.0 (only testing two at a time: net6.0 and net8.0)
+    [ cli; ] 
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net7.0", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
@@ -45,16 +40,21 @@ Target.create "BuildCliNet8" <| fun _ ->
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net8.0", pkg), pkg)
     |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
+Target.create "BuildCliNet9" <| fun _ ->
+    [ cli; tests ]
+    |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net9.0", pkg), pkg)
+    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
+
 Target.create "Build" <| fun _ ->
     printfn "Building all supported frameworks."
-
-Target.create "TestNet6" <| fun _ ->
-    let exitCode = Shell.Exec(Tools.dotnet, "test --configuration Release --framework net6.0", tests)
-    if exitCode <> 0 then failwith "Failed while running net6.0 tests"
 
 Target.create "TestNet8" <| fun _ ->
     let exitCode = Shell.Exec(Tools.dotnet, "test --configuration Release --framework net8.0", tests)
     if exitCode <> 0 then failwith "Failed while running net8.0 tests"
+
+Target.create "TestNet9" <| fun _ ->
+    let exitCode = Shell.Exec(Tools.dotnet, "test --configuration Release --framework net9.0", tests)
+    if exitCode <> 0 then failwith "Failed while running net9.0 tests"
 
 Target.create "Test" <| fun _ ->
     printfn "Testing on all supported frameworks."
@@ -88,9 +88,9 @@ Target.create "Publish" <| fun _ ->
     |> List.iter (fun (code, pkg) -> if code <> 0 then printfn $"ERROR: Could not publish '{pkg}' package. Error: {code}") // Display error and continue
 
 let dependencies = [
-    "Restore" ==> "BuildQuery" ==> "BuildCliNet6" ==> "BuildCliNet7" ==> "BuildCliNet8" ==> "Build"
-    "Build" ==> "TestNet6" ==> "TestNet8" ==> "Test"
-    //"BuildCliNet8" ==> "TestNet8" ==> "Test"
+    "Restore" ==> "BuildQuery" ==> "BuildCliNet7" ==> "BuildCliNet8" ==> "BuildCliNet9" ==> "Build"
+    "Build" ==> "TestNet8" ==> "TestNet9" ==> "Test"
+    //"BuildCliNet9" ==> "TestNet9" ==> "Test"
     "Test" ==> "Pack" ==> "Publish"
 ]
 
