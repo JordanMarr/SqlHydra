@@ -292,9 +292,12 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
 
             KataUtils.failIfIdentityOnConflict iq.Spec
 
+            //match iq.Spec with
+            //| { IdentityField = Some identityField } ->
+
             // Did the user select an identity field?
-            match iq.Spec.IdentityField with
-            | Some identityField -> 
+            match iq.Spec with
+            | { IdentityField = Some identityField } ->
                 // Try apply on conflict
                 cmd.CommandText <- cmd.CommandText |> applyOnConflict
 
@@ -327,7 +330,38 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                     // 'InsertReturn type set via `getId` in the builder
                     return Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
-            | None ->
+            | { OutputFields = outputFields } when outputFields.Length > 0 -> 
+                // Try apply on conflict
+                cmd.CommandText <- cmd.CommandText |> applyOnConflict
+
+                cmd.CommandText <- 
+                    let valuesIndex = cmd.CommandText.IndexOf("VALUES", StringComparison.OrdinalIgnoreCase)
+                    let outputCsv = 
+                        outputFields
+                        |> List.map (fun f -> $"INSERTED.{f}")
+                        |> String.concat ", "
+                    let outputClause = $"OUTPUT {outputCsv} "
+                    cmd.CommandText.Insert(valuesIndex, outputClause)
+
+                let! reader = cmd.ExecuteReaderAsync(cancel |> Option.defaultValue CancellationToken.None)
+                let! _ = reader.ReadAsync(cancel |> Option.defaultValue CancellationToken.None)
+                
+                let outputValues = 
+                    outputFields
+                    |> List.map (fun f -> reader.[f.Column])
+                    |> List.toArray
+
+                let outputTypes = 
+                    outputFields
+                    |> List.map _.Type
+                    |> List.toArray
+
+                // Convert array to a tuple of outputFields
+                let outputTupleType = FSharp.Reflection.FSharpType.MakeTupleType(outputTypes)
+                let outputTuple = FSharp.Reflection.FSharpValue.MakeTuple(outputValues, outputTupleType)
+                return outputTuple :?> 'InsertReturn
+
+            | _ ->
                 // Try apply on conflict
                 cmd.CommandText <- cmd.CommandText |> applyOnConflict
 

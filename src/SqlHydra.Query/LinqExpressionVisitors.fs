@@ -779,7 +779,7 @@ let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Pro
 
 type Selection =
     | SelectedTable of tableAlias: string * tableType: Type
-    | SelectedColumn of tableAlias: string * column: string
+    | SelectedColumn of tableAlias: string * column: string * columnType: Type
     | SelectedAggregateColumn of aggregateType: string * tableAlias: string * column: string
 
 /// Returns a list of one or more fully qualified table names: ["{schema}.{table}"]
@@ -807,7 +807,7 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
                 visit m.Expression
             else 
                 let alias = visitAlias m.Expression
-                [ SelectedColumn (alias, m.Member.Name) ]
+                [ SelectedColumn (alias, m.Member.Name, m.Member.DeclaringType) ]
         | _ -> 
             notImpl()
 

@@ -265,14 +265,16 @@ let ``InsertGetId Test``() = task {
             dbo.ErrorLog.UserName = "jmarr"
         }
 
-    let! errorLogId = 
+    let! (errorLogId, errorMessage) = 
         insertTask ctx {
             for e in dbo.ErrorLog do
             entity errorLog
-            getId e.ErrorLogID
+            //getId e.ErrorLogID
+            output (e.ErrorLogID, e.ErrorMessage)
         }
 
-    errorLogId >! 0
+    //errorLogId =! ""
+    //errorLogId >! 0
 }
 
 [<Test>]

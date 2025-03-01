@@ -98,13 +98,14 @@ type InsertBuilder<'Inserted, 'InsertReturn>() =
         let newSpec =
             selections
             |> List.choose (function 
-                | LinqExpressionVisitors.SelectedColumn (tableAlias, column) -> 
-                    Some (tableAlias, column)
+                | LinqExpressionVisitors.SelectedColumn (tableAlias, column, columnType) -> 
+                    Some (tableAlias, column, columnType)
                 | _ ->
                     None
             )
-            |> List.fold (fun spec (tableAlias, column) -> 
-                { spec with OutputFields = spec.OutputFields @ [ $"{tableAlias}.{column}" ] }
+            |> List.fold (fun spec (tableAlias, column, columnType) -> 
+                let outputField = { Column = $"{tableAlias}.{column}"; Type = columnType }
+                { spec with OutputFields = spec.OutputFields @ [outputField ] }
             ) spec
               
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)

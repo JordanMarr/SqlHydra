@@ -134,7 +134,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
                     // For example, left joining a table creates an option type, which should be unwrapped.
                     q.Select($"%s{tableAlias}.*")
 
-                | LinqExpressionVisitors.SelectedColumn (tableAlias, column) -> 
+                | LinqExpressionVisitors.SelectedColumn (tableAlias, column, _) -> 
                     // Select a single column
                     q.Select($"%s{tableAlias}.%s{column}")
                 | LinqExpressionVisitors.SelectedAggregateColumn (aggFn, tableAlias, column) -> 
