@@ -211,7 +211,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             return entities |> Seq.tryHead
         }
 
-    member this.Insert<'T, 'InsertReturn when 'InsertReturn : struct> (iq: InsertQuery<'T, 'InsertReturn>) = 
+    member this.Insert<'T, 'InsertReturn> (iq: InsertQuery<'T, 'InsertReturn>) = 
         let compiledQuery = iq.ToKataQuery() |> compiler.Compile
         use cmd = this.BuildCommand(compiledQuery, log = false) // We will log manually below to capture query changes
 
@@ -274,10 +274,10 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
             // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
             Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
 
-    member this.InsertAsync<'T, 'InsertReturn when 'InsertReturn : struct> (query: InsertQuery<'T, 'InsertReturn>) = 
+    member this.InsertAsync<'T, 'InsertReturn> (query: InsertQuery<'T, 'InsertReturn>) = 
         this.InsertAsyncWithOptions(query)
     
-    member this.InsertAsyncWithOptions<'T, 'InsertReturn when 'InsertReturn : struct> (iq: InsertQuery<'T, 'InsertReturn>, ?cancel: CancellationToken) = 
+    member this.InsertAsyncWithOptions<'T, 'InsertReturn> (iq: InsertQuery<'T, 'InsertReturn>, ?cancel: CancellationToken) = 
         task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
             let compiledQuery = iq.ToKataQuery() |> compiler.Compile
             use cmd = this.BuildCommand(compiledQuery, log = false) // We will log manually below to capture query changes

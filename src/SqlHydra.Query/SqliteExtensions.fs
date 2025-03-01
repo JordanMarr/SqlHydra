@@ -1,6 +1,6 @@
 ﻿module SqlHydra.Query.SqliteExtensions
 
-type InsertBuilder<'Inserted, 'InsertReturn when 'InsertReturn : struct> with
+type InsertBuilder<'Inserted, 'InsertReturn> with
 
     /// Performs an update on one or more update fields if a conflict occurs.
     [<CustomOperation("onConflictDoUpdate", MaintainsVariableSpace = true)>]

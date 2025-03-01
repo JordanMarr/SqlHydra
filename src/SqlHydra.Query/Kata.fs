@@ -88,10 +88,11 @@ type InsertQuerySpec<'T, 'Identity> =
         Entities: 'T list
         Fields: string list
         IdentityField: string option
+        OutputFields: string list
         InsertType: InsertType
     }
     static member Default : InsertQuerySpec<'T, 'Identity> = 
-        { Table = ""; Entities = []; Fields = []; IdentityField = None; InsertType = Insert }
+        { Table = ""; Entities = []; Fields = []; IdentityField = None; OutputFields = []; InsertType = Insert }
 
 type UpdateQuerySpec<'T> = 
     {
