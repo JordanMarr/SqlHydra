@@ -14,6 +14,17 @@ let inserted (outputFields: OutputField list) (cmdText: string) =
     let outputClause = $"\nOUTPUT {outputCsv}\n"
     cmdText.Insert(valuesIndex, outputClause)
 
+let updated (outputFields: OutputField list) (cmdText: string) = 
+    let whereIndex = cmdText.IndexOf("WHERE", StringComparison.OrdinalIgnoreCase)
+    let outputCsv = 
+        outputFields
+        |> List.map (fun f -> $"INSERTED.{f.ColumnName}")
+        |> String.concat ", "
+    let outputClause = $"\nOUTPUT {outputCsv}\n"
+    if whereIndex > -1 
+    then cmdText.Insert(whereIndex, outputClause)
+    else cmdText + outputClause
+
 let readValues<'InsertReturn> (cmd: DbCommand) (cancel: CancellationToken) (outputFields: OutputField list) =
     task {
         use! reader = cmd.ExecuteReaderAsync(cancel)

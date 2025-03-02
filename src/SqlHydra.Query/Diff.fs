@@ -49,7 +49,7 @@ and DiffResult<'T>(added: 'T seq, changed: 'T seq, removed: 'T seq) =
         this
 
     /// Allows the caller to insert all Added entities into the database.
-    member this.AddAll<'TRow, 'Identity when 'Identity : struct>(insertQuery: 'T seq -> InsertQuery<'TRow, 'Identity>) = 
+    member this.AddAll<'TRow, 'InsertReturn>(insertQuery: 'T seq -> InsertQuery<'TRow, 'InsertReturn>) = 
         let doInsertFn(ctx: QueryContext) =
             task {
                 if not (Seq.isEmpty this.Added) then
@@ -66,12 +66,15 @@ and DiffResult<'T>(added: 'T seq, changed: 'T seq, removed: 'T seq) =
         this
 
     /// Allows the caller to update each Changed entity in the database.
-    member this.Change<'TRow>(updateQuery: 'T -> UpdateQuery<'TRow>) =
+    member this.Change<'TRow, 'UpdateReturn>(updateQuery: 'T -> UpdateQuery<'TRow, 'UpdateReturn>) =
         let doUpdateFn(ctx: QueryContext) =
             task {
                 for row in this.Changed do
-                    let! rowsUpdated = ctx.UpdateAsync(updateQuery row)
-                    totalUpdated <- totalUpdated + rowsUpdated
+                    let! result = ctx.UpdateAsync(updateQuery row)
+                    if result.GetType() = typeof<int> then
+                        totalUpdated <- totalUpdated + (result |> unbox<int>)
+                    else
+                        totalUpdated <- totalUpdated + 1
             }
         updateEachRow <- Some doUpdateFn
         this

@@ -254,10 +254,12 @@ let ``Insert with Output``() = task {
     use ctx = openContext()
     ctx.BeginTransaction()
 
-    let errorLog = 
+    let now = DateTime.Now
+
+    let row = 
         {
             dbo.ErrorLog.ErrorLogID = 0 // Exclude
-            dbo.ErrorLog.ErrorTime = System.DateTime.Now
+            dbo.ErrorLog.ErrorTime = now
             dbo.ErrorLog.ErrorLine = Some 5
             dbo.ErrorLog.ErrorMessage = "TEST INSERT ASYNC"
             dbo.ErrorLog.ErrorNumber = 400
@@ -269,14 +271,55 @@ let ``Insert with Output``() = task {
     let! (errorLogId, errorTime, errorLine) =
         insertTask ctx {
             for e in dbo.ErrorLog do
-            entity errorLog
+            entity row
             excludeColumn e.ErrorLogID
             output (e.ErrorLogID, e.ErrorTime, e.ErrorLine)
         }
 
     errorLogId >! 0
-    (errorTime.Month, errorTime.Day, errorTime.Year) =! (errorLog.ErrorTime.Month, errorLog.ErrorTime.Day, errorLog.ErrorTime.Year)
-    errorLine =! errorLog.ErrorLine
+    (errorTime.Month, errorTime.Day, errorTime.Year) =! (now.Month, now.Day, now.Year)
+    errorLine =! row.ErrorLine
+
+    ctx.RollbackTransaction()
+}
+
+[<Test>]
+let ``Update with Output``() = task {
+    use ctx = openContext()
+    ctx.BeginTransaction()
+
+    let! row = 
+        selectAsync ctx {
+            for e in dbo.ErrorLog do
+            head
+        }
+
+    let now = DateTime.Now
+
+    let row = 
+        { row with
+            dbo.ErrorLog.ErrorTime = now
+            dbo.ErrorLog.ErrorLine = Some 888
+            dbo.ErrorLog.ErrorMessage = "ERROR #2"
+            dbo.ErrorLog.ErrorNumber = 500
+            dbo.ErrorLog.ErrorProcedure = None
+            dbo.ErrorLog.ErrorSeverity = None
+            dbo.ErrorLog.ErrorState = None
+            dbo.ErrorLog.UserName = "jmarr"
+        }
+
+    let! (errorLogId, errorTime, errorLine) = 
+        updateTask ctx {
+            for e in dbo.ErrorLog do
+            entity row
+            excludeColumn e.ErrorLogID
+            where (e.ErrorLogID = row.ErrorLogID)
+            output (e.ErrorLogID, e.ErrorTime, e.ErrorLine)
+        }
+
+    errorLogId >! 0
+    (errorTime.Month, errorTime.Day, errorTime.Year) =! (now.Month, now.Day, now.Year)
+    errorLine =! row.ErrorLine
 
     ctx.RollbackTransaction()
 }

@@ -6,17 +6,17 @@ open System
 open System.Linq.Expressions
 open System.Threading
 
-let private prepareUpdateQuery<'Updated> spec = 
+let private prepareUpdateQuery<'Updated, 'UpdateReturn> (spec: UpdateQuerySpec<'Updated, 'UpdateReturn>) = 
     if spec.Where = None && spec.UpdateAll = false
     then invalidOp "An `update` expression must either contain a `where` clause or `updateAll`."
-    UpdateQuery<'Updated>(spec)
+    UpdateQuery<'Updated, 'UpdateReturn>(spec)
 
 /// The base update builder that contains all common operations
-type UpdateBuilder<'Updated>() =
+type UpdateBuilder<'Updated, 'UpdateReturn>() =
     
     let getQueryOrDefault (state: QuerySource<'T>) =
         match state with
-        | :? QuerySource<'T, UpdateQuerySpec<'T>> as qs -> qs.Query
+        | :? QuerySource<'T, UpdateQuerySpec<'T, 'UpdateReturn>> as qs -> qs.Query
         | _ -> UpdateQuerySpec.Default
 
     member this.For (state: QuerySource<'T>, [<ReflectedDefinition>] forExpr: FSharp.Quotations.Expr<'T -> QuerySource<'T>>) =
@@ -25,7 +25,7 @@ type UpdateBuilder<'Updated>() =
         let tblMaybe, tableMappings = TableMappings.tryGetByRootOrAlias tableAlias state.TableMappings
         let tbl = tblMaybe |> Option.get
 
-        QuerySource<'T, UpdateQuerySpec<'T>>({ query with Table = $"{tbl.Schema}.{tbl.Name}" }, tableMappings)
+        QuerySource<'T, UpdateQuerySpec<'T, 'UpdateReturn>>({ query with Table = $"{tbl.Schema}.{tbl.Name}" }, tableMappings)
 
     member this.Yield _ =
         QuerySource<'T>(Map.empty)
@@ -34,7 +34,7 @@ type UpdateBuilder<'Updated>() =
     [<CustomOperation("entity", MaintainsVariableSpace = true)>]
     member this.Entity (state: QuerySource<'T>, value: 'T) = 
         let query = state |> getQueryOrDefault
-        QuerySource<'T, UpdateQuerySpec<'T>>(
+        QuerySource<'T, UpdateQuerySpec<'T, 'UpdateReturn>>(
             { query with Entity = value |> Some}
             , state.TableMappings)
 
@@ -45,7 +45,7 @@ type UpdateBuilder<'Updated>() =
         let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector :?> Reflection.PropertyInfo
         
         let value = KataUtils.getQueryParameterForValue prop value
-        QuerySource<'T, UpdateQuerySpec<'T>>(
+        QuerySource<'T, UpdateQuerySpec<'T, 'UpdateReturn>>(
             { query with SetValues = query.SetValues @ [ prop.Name, value ] }
             , state.TableMappings)
 
@@ -54,7 +54,7 @@ type UpdateBuilder<'Updated>() =
     member this.IncludeColumn (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector) = 
         let query = state |> getQueryOrDefault
         let prop = (propertySelector |> LinqExpressionVisitors.visitPropertySelector<'T, 'Prop>).Name
-        QuerySource<'T, UpdateQuerySpec<'T>>({ query with Fields = query.Fields @ [ prop ] }, state.TableMappings)
+        QuerySource<'T, UpdateQuerySpec<'T, 'UpdateReturn>>({ query with Fields = query.Fields @ [ prop ] }, state.TableMappings)
 
     /// Excludes a column from the update query.
     [<CustomOperation("excludeColumn", MaintainsVariableSpace = true)>]
@@ -68,7 +68,7 @@ type UpdateBuilder<'Updated>() =
                 | fields -> fields
             |> List.filter (fun f -> f <> prop.Name)
             |> (fun x -> { query with Fields = x })
-        QuerySource<'T, UpdateQuerySpec<'T>>(newQuery, state.TableMappings)
+        QuerySource<'T, UpdateQuerySpec<'T, 'UpdateReturn>>(newQuery, state.TableMappings)
 
     /// Sets the WHERE condition
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
@@ -81,15 +81,15 @@ type UpdateBuilder<'Updated>() =
             match query.Where with
             | None -> Some where
             | Some w -> w.Where(fun w -> where) |> Some
-        QuerySource<'T, UpdateQuerySpec<'T>>({ query with Where = where'; UpdateAll = false }, state.TableMappings)
+        QuerySource<'T, UpdateQuerySpec<'T, 'UpdateReturn>>({ query with Where = where'; UpdateAll = false }, state.TableMappings)
 
     /// A safeguard that verifies that all records in the table should be updated.
     [<CustomOperation("updateAll", MaintainsVariableSpace = true)>]
-    member this.UpdateAll (state:QuerySource<'T>) = 
+    member this.UpdateAll (state: QuerySource<'T>) = 
         let query = state |> getQueryOrDefault
         if query.Where |> Option.isSome then 
             invalidOp "Cannot have `updateAll` clause in a query where `where` has been used."
-        QuerySource<'T, UpdateQuerySpec<'T>>({ query with UpdateAll = true; Where = None }, state.TableMappings)
+        QuerySource<'T, UpdateQuerySpec<'T, 'UpdateReturn>>({ query with UpdateAll = true; Where = None }, state.TableMappings)
 
     /// Unwraps the query
     member this.Run (state: QuerySource<'Updated>) =
@@ -97,10 +97,10 @@ type UpdateBuilder<'Updated>() =
 
 
 /// An update builder that returns an Async result.
-type UpdateAsyncBuilder<'Updated>(ct: ContextType) =
-    inherit UpdateBuilder<'Updated>()
+type UpdateAsyncBuilder<'Updated, 'UpdateReturn>(ct: ContextType) =
+    inherit UpdateBuilder<'Updated, 'UpdateReturn>()
 
-    member this.Run (state: QuerySource<'Updated, UpdateQuerySpec<'Updated>>) = 
+    member this.Run (state: QuerySource<'Updated, UpdateQuerySpec<'Updated, 'UpdateReturn>>) = 
         async {
             let updateQuery = state.Query |> prepareUpdateQuery
             let! ctx = ContextUtils.getContext ct |> Async.AwaitTask
@@ -114,12 +114,12 @@ type UpdateAsyncBuilder<'Updated>(ct: ContextType) =
 
 
 /// An update builder that returns a Task result.
-type UpdateTaskBuilder<'Updated>(ct: ContextType, cancellationToken: CancellationToken) =
-    inherit UpdateBuilder<'Updated>()
+type UpdateTaskBuilder<'Updated, 'UpdateReturn>(ct: ContextType, cancellationToken: CancellationToken) =
+    inherit UpdateBuilder<'Updated, 'UpdateReturn>()
     
     new(ct) = UpdateTaskBuilder(ct, CancellationToken.None)
 
-    member this.Run (state: QuerySource<'Updated, UpdateQuerySpec<'Updated>>) = 
+    member this.Run (state: QuerySource<'Updated, UpdateQuerySpec<'Updated, 'UpdateReturn>>) = 
         task {
             let updateQuery = state.Query |> prepareUpdateQuery
             let! ctx = ContextUtils.getContext ct
@@ -132,18 +132,18 @@ type UpdateTaskBuilder<'Updated>(ct: ContextType, cancellationToken: Cancellatio
 
 
 /// Builds and returns an update query that can be manually run by piping into QueryContext update methods
-let update<'Updated> = 
-    UpdateBuilder<'Updated>()
+let update<'Updated, 'UpdateReturn> = 
+    UpdateBuilder<'Updated, 'UpdateReturn>()
 
 /// Builds an update query that returns an Async result
-let updateAsync<'Updated> ct = 
-    UpdateAsyncBuilder<'Updated>(ct)
+let updateAsync<'Updated, 'UpdateReturn> ct = 
+    UpdateAsyncBuilder<'Updated, 'UpdateReturn>(ct)
 
 /// Builds an update query that returns a Task result
-let updateTask<'Updated> ct = 
-    UpdateTaskBuilder<'Updated>(ct)
+let updateTask<'Updated, 'UpdateReturn> ct = 
+    UpdateTaskBuilder<'Updated, 'UpdateReturn>(ct)
     
 /// Builds an update query with a QueryContext and CancellationToken - returns a Task result
-let updateTaskCancellable<'Updated> ct cancellationToken = 
-    UpdateTaskBuilder<'Updated>(ct, cancellationToken)
+let updateTaskCancellable<'Updated, 'UpdateReturn> ct cancellationToken = 
+    UpdateTaskBuilder<'Updated, 'UpdateReturn>(ct, cancellationToken)
     

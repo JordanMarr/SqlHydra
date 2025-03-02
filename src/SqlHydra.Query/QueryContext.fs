@@ -332,7 +332,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 // Try apply on conflict
                 cmd.CommandText <- cmd.CommandText |> applyOnConflict
 
-                // Add output clause
+                // Append SQL Server output clause
                 cmd.CommandText <- OutputClause.inserted outputFields cmd.CommandText
 
                 // Fix Oracle multi-insert query
@@ -358,17 +358,27 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 return Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
         }
     
-    member this.Update (query: UpdateQuery<'T>) = 
+    member this.Update (query: UpdateQuery<'T, 'UpdateReturn>) = 
         use cmd = this.BuildCommand(query.ToKataQuery())
         cmd.ExecuteNonQuery()
 
-    member this.UpdateAsync (query: UpdateQuery<'T>) = 
+    member this.UpdateAsync (query: UpdateQuery<'T, 'UpdateReturn>) = 
         this.UpdateAsyncWithOptions(query)
     
-    member this.UpdateAsyncWithOptions (query: UpdateQuery<'T>, ?cancel: CancellationToken) = 
+    member this.UpdateAsyncWithOptions (query: UpdateQuery<'T, 'UpdateReturn>, ?cancel: CancellationToken) = 
         task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
+            let cancel = defaultArg cancel CancellationToken.None
+
             use cmd = this.BuildCommand(query.ToKataQuery())
-            return! cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None)
+            
+            if query.Spec.OutputFields.Length > 0 then 
+                // Append SQL Server output clause
+                cmd.CommandText <- OutputClause.updated query.Spec.OutputFields cmd.CommandText
+                let! outputValues = OutputClause.readValues<'UpdateReturn> cmd cancel query.Spec.OutputFields
+                return outputValues 
+            else
+                let! rowsInserted = cmd.ExecuteNonQueryAsync(cancel)
+                return Convert.ChangeType(rowsInserted, typeof<'UpdateReturn>) :?> 'UpdateReturn
         }
 
     member this.Delete (query: DeleteQuery<'T>) = 
