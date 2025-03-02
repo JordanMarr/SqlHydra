@@ -96,7 +96,7 @@ type InsertQuerySpec<'T, 'Identity> =
 
 and OutputField = 
     {
-        Column: string
+        ColumnName: string
         Type: Type
     }
 

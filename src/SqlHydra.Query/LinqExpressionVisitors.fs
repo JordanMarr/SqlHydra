@@ -807,7 +807,7 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
                 visit m.Expression
             else 
                 let alias = visitAlias m.Expression
-                [ SelectedColumn (alias, m.Member.Name, m.Member.DeclaringType) ]
+                [ SelectedColumn (alias, m.Member.Name, m.Type) ]
         | _ -> 
             notImpl()
 

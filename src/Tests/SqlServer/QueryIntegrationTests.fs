@@ -249,6 +249,37 @@ let ``Select Columns with Option``() = task {
 }
 
 [<Test>]
+let ``Insert with Output``() = task {
+    use ctx = openContext()
+    ctx.BeginTransaction()
+
+    let errorLog = 
+        {
+            dbo.ErrorLog.ErrorLogID = 0 // Exclude
+            dbo.ErrorLog.ErrorTime = System.DateTime.Now
+            dbo.ErrorLog.ErrorLine = None
+            dbo.ErrorLog.ErrorMessage = "TEST INSERT ASYNC"
+            dbo.ErrorLog.ErrorNumber = 400
+            dbo.ErrorLog.ErrorProcedure = (Some "Procedure 400")
+            dbo.ErrorLog.ErrorSeverity = None
+            dbo.ErrorLog.ErrorState = None
+            dbo.ErrorLog.UserName = "jmarr"
+        }
+    let! (errorLogId, errorTime) =
+        insertTask ctx {
+            for e in dbo.ErrorLog do
+            entity errorLog
+            excludeColumn e.ErrorLogID
+            output (e.ErrorLogID, e.ErrorTime)
+        }
+
+    errorLogId >! 0
+    (errorTime.Month, errorTime.Day, errorTime.Year) =! (errorLog.ErrorTime.Month, errorLog.ErrorTime.Day, errorLog.ErrorTime.Year)
+
+    ctx.RollbackTransaction()
+}
+
+[<Test>]
 let ``InsertGetId Test``() = task {
     use ctx = openContext()
 
@@ -265,16 +296,14 @@ let ``InsertGetId Test``() = task {
             dbo.ErrorLog.UserName = "jmarr"
         }
 
-    let! (errorLogId, errorMessage) = 
+    let! errorLogId = 
         insertTask ctx {
             for e in dbo.ErrorLog do
             entity errorLog
-            //getId e.ErrorLogID
-            output (e.ErrorLogID, e.ErrorMessage)
+            getId e.ErrorLogID
         }
 
-    //errorLogId =! ""
-    //errorLogId >! 0
+    errorLogId >! 0
 }
 
 [<Test>]

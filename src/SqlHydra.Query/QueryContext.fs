@@ -338,17 +338,17 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                     let valuesIndex = cmd.CommandText.IndexOf("VALUES", StringComparison.OrdinalIgnoreCase)
                     let outputCsv = 
                         outputFields
-                        |> List.map (fun f -> $"INSERTED.{f}")
+                        |> List.map (fun f -> $"INSERTED.{f.ColumnName}")
                         |> String.concat ", "
-                    let outputClause = $"OUTPUT {outputCsv} "
+                    let outputClause = $"OUTPUT {outputCsv} \n"
                     cmd.CommandText.Insert(valuesIndex, outputClause)
 
-                let! reader = cmd.ExecuteReaderAsync(cancel |> Option.defaultValue CancellationToken.None)
+                use! reader = cmd.ExecuteReaderAsync(cancel |> Option.defaultValue CancellationToken.None)
                 let! _ = reader.ReadAsync(cancel |> Option.defaultValue CancellationToken.None)
                 
                 let outputValues = 
                     outputFields
-                    |> List.map (fun f -> reader.[f.Column])
+                    |> List.map (fun f -> reader.[f.ColumnName])
                     |> List.toArray
 
                 let outputTypes = 
@@ -356,11 +356,14 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                     |> List.map _.Type
                     |> List.toArray
 
-                // Convert array to a tuple of outputFields
-                let outputTupleType = FSharp.Reflection.FSharpType.MakeTupleType(outputTypes)
-                let outputTuple = FSharp.Reflection.FSharpValue.MakeTuple(outputValues, outputTupleType)
-                return outputTuple :?> 'InsertReturn
-
+                match outputValues with 
+                | [| outputValue |] -> 
+                    return outputValue :?> 'InsertReturn
+                | outputValues -> 
+                    // Convert array to a tuple
+                    let outputTupleType = FSharp.Reflection.FSharpType.MakeTupleType(outputTypes)
+                    let outputTuple = FSharp.Reflection.FSharpValue.MakeTuple(outputValues, outputTupleType)
+                    return outputTuple :?> 'InsertReturn
             | _ ->
                 // Try apply on conflict
                 cmd.CommandText <- cmd.CommandText |> applyOnConflict

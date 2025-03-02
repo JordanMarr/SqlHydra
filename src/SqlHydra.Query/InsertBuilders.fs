@@ -103,8 +103,8 @@ type InsertBuilder<'Inserted, 'InsertReturn>() =
                 | _ ->
                     None
             )
-            |> List.fold (fun spec (tableAlias, column, columnType) -> 
-                let outputField = { Column = $"{tableAlias}.{column}"; Type = columnType }
+            |> List.fold (fun spec (_, column, columnType) -> 
+                let outputField = { ColumnName = column; Type = columnType }
                 { spec with OutputFields = spec.OutputFields @ [outputField ] }
             ) spec
               
