@@ -779,7 +779,7 @@ let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Pro
 
 type Selection =
     | SelectedTable of tableAlias: string * tableType: Type
-    | SelectedColumn of tableAlias: string * column: string * columnType: Type
+    | SelectedColumn of tableAlias: string * column: string * columnType: Type * isOpt: bool * isNullable: bool
     | SelectedAggregateColumn of aggregateType: string * tableAlias: string * column: string
 
 /// Returns a list of one or more fully qualified table names: ["{schema}.{table}"]
@@ -806,8 +806,13 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
             if m.Member.DeclaringType |> isOptionOrNullableType then 
                 visit m.Expression
             else 
+                let isOptional, isNullable =
+                    if m.Type.IsGenericType && m.Type.GetGenericTypeDefinition() = typedefof<Option<_>> then true, false
+                    elif m.Type.IsGenericType && m.Type.GetGenericTypeDefinition() = typedefof<Nullable<_>> then false, true
+                    else false, false
+
                 let alias = visitAlias m.Expression
-                [ SelectedColumn (alias, m.Member.Name, m.Type) ]
+                [ SelectedColumn (alias, m.Member.Name, m.Type, isOptional, isNullable) ]
         | _ -> 
             notImpl()
 

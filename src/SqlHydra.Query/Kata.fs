@@ -97,8 +97,14 @@ type InsertQuerySpec<'T, 'Identity> =
 and OutputField = 
     {
         ColumnName: string
-        Type: Type
+        PropertyType: Type
+        Nullability: Nullability
     }
+
+and Nullability = 
+    | IsOptional
+    | IsNullable
+    | NotNullable
 
 type UpdateQuerySpec<'T> = 
     {

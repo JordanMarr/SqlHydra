@@ -257,7 +257,7 @@ let ``Insert with Output``() = task {
         {
             dbo.ErrorLog.ErrorLogID = 0 // Exclude
             dbo.ErrorLog.ErrorTime = System.DateTime.Now
-            dbo.ErrorLog.ErrorLine = None
+            dbo.ErrorLog.ErrorLine = Some 5
             dbo.ErrorLog.ErrorMessage = "TEST INSERT ASYNC"
             dbo.ErrorLog.ErrorNumber = 400
             dbo.ErrorLog.ErrorProcedure = (Some "Procedure 400")
@@ -265,16 +265,17 @@ let ``Insert with Output``() = task {
             dbo.ErrorLog.ErrorState = None
             dbo.ErrorLog.UserName = "jmarr"
         }
-    let! (errorLogId, errorTime) =
+    let! (errorLogId, errorTime, errorLine) =
         insertTask ctx {
             for e in dbo.ErrorLog do
             entity errorLog
             excludeColumn e.ErrorLogID
-            output (e.ErrorLogID, e.ErrorTime)
+            output (e.ErrorLogID, e.ErrorTime, e.ErrorLine)
         }
 
     errorLogId >! 0
     (errorTime.Month, errorTime.Day, errorTime.Year) =! (errorLog.ErrorTime.Month, errorLog.ErrorTime.Day, errorLog.ErrorTime.Year)
+    errorLine =! errorLog.ErrorLine
 
     ctx.RollbackTransaction()
 }

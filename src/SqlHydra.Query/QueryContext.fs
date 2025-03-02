@@ -348,12 +348,25 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 
                 let outputValues = 
                     outputFields
-                    |> List.map (fun f -> reader.[f.ColumnName])
+                    |> List.map (fun f -> 
+                        let ord = reader.GetOrdinal(f.ColumnName)
+                        match f.Nullability with
+                        | NotNullable -> 
+                            reader[ord]
+                        | IsOptional -> 
+                            if reader.IsDBNull(ord) 
+                            then None
+                            else Activator.CreateInstance(f.PropertyType, [| reader[ord] |])
+                        | IsNullable ->
+                            if reader.IsDBNull(ord) 
+                            then Nullable() |> box
+                            else Activator.CreateInstance(f.PropertyType, [| reader[ord] |])
+                    )
                     |> List.toArray
 
                 let outputTypes = 
                     outputFields
-                    |> List.map _.Type
+                    |> List.map _.PropertyType
                     |> List.toArray
 
                 match outputValues with 
