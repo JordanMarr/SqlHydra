@@ -281,6 +281,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
         task { // Must wrap in task to prevent `EndExecuteNonQuery` ex in NET6_0_OR_GREATER
             let compiledQuery = iq.ToKataQuery() |> compiler.Compile
             use cmd = this.BuildCommand(compiledQuery, log = false) // We will log manually below to capture query changes
+            let cancel = defaultArg cancel CancellationToken.None
 
             // Applies on conflict modifier if in spec
             let applyOnConflict =
@@ -291,9 +292,6 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 | Insert -> id
 
             KataUtils.failIfIdentityOnConflict iq.Spec
-
-            //match iq.Spec with
-            //| { IdentityField = Some identityField } ->
 
             // Did the user select an identity field?
             match iq.Spec with
@@ -322,11 +320,11 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                     outputParam.DbType <- Data.DbType.Decimal
                     outputParam.Direction <- Data.ParameterDirection.Output
                     cmd.Parameters.Add(outputParam) |> ignore
-                    let! _ = cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None)
+                    let! _ = cmd.ExecuteNonQueryAsync(cancel)
                     // 'InsertReturn type set via `getId` in the builder
                     return Convert.ChangeType(outputParam.Value, typeof<'InsertReturn>) :?> 'InsertReturn
                 else
-                    let! identity = cmd.ExecuteScalarAsync(cancel |> Option.defaultValue CancellationToken.None)
+                    let! identity = cmd.ExecuteScalarAsync(cancel)
                     // 'InsertReturn type set via `getId` in the builder
                     return Convert.ChangeType(identity, typeof<'InsertReturn>) :?> 'InsertReturn
         
@@ -334,49 +332,17 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 // Try apply on conflict
                 cmd.CommandText <- cmd.CommandText |> applyOnConflict
 
-                cmd.CommandText <- 
-                    let valuesIndex = cmd.CommandText.IndexOf("VALUES", StringComparison.OrdinalIgnoreCase)
-                    let outputCsv = 
-                        outputFields
-                        |> List.map (fun f -> $"INSERTED.{f.ColumnName}")
-                        |> String.concat ", "
-                    let outputClause = $"OUTPUT {outputCsv} \n"
-                    cmd.CommandText.Insert(valuesIndex, outputClause)
+                // Add output clause
+                cmd.CommandText <- OutputClause.inserted outputFields cmd.CommandText
 
-                use! reader = cmd.ExecuteReaderAsync(cancel |> Option.defaultValue CancellationToken.None)
-                let! _ = reader.ReadAsync(cancel |> Option.defaultValue CancellationToken.None)
+                // Fix Oracle multi-insert query
+                if compiler :? SqlKata.Compilers.OracleCompiler && iq.Spec.Entities.Length > 1 
+                then cmd.CommandText <- cmd.CommandText |> Fixes.Oracle.fixMultiInsertQuery 
                 
-                let outputValues = 
-                    outputFields
-                    |> List.map (fun f -> 
-                        let ord = reader.GetOrdinal(f.ColumnName)
-                        match f.Nullability with
-                        | NotNullable -> 
-                            reader[ord]
-                        | IsOptional -> 
-                            if reader.IsDBNull(ord) 
-                            then None
-                            else Activator.CreateInstance(f.PropertyType, [| reader[ord] |])
-                        | IsNullable ->
-                            if reader.IsDBNull(ord) 
-                            then Nullable() |> box
-                            else Activator.CreateInstance(f.PropertyType, [| reader[ord] |])
-                    )
-                    |> List.toArray
+                this.LogCommand(compiledQuery, cmd)
 
-                let outputTypes = 
-                    outputFields
-                    |> List.map _.PropertyType
-                    |> List.toArray
-
-                match outputValues with 
-                | [| outputValue |] -> 
-                    return outputValue :?> 'InsertReturn
-                | outputValues -> 
-                    // Convert array to a tuple
-                    let outputTupleType = FSharp.Reflection.FSharpType.MakeTupleType(outputTypes)
-                    let outputTuple = FSharp.Reflection.FSharpValue.MakeTuple(outputValues, outputTupleType)
-                    return outputTuple :?> 'InsertReturn
+                let! outputValues = OutputClause.readValues<'InsertReturn> cmd cancel outputFields
+                return outputValues
             | _ ->
                 // Try apply on conflict
                 cmd.CommandText <- cmd.CommandText |> applyOnConflict
@@ -387,7 +353,7 @@ type QueryContext(conn: DbConnection, compiler: SqlKata.Compilers.Compiler) =
                 
                 this.LogCommand(compiledQuery, cmd)
 
-                let! results = cmd.ExecuteNonQueryAsync(cancel |> Option.defaultValue CancellationToken.None)
+                let! results = cmd.ExecuteNonQueryAsync(cancel)
                 // 'InsertReturn is `int` here -- NOTE: must include `'InsertReturn : struct` constraint
                 return Convert.ChangeType(results, typeof<'InsertReturn>) :?> 'InsertReturn
         }

@@ -32,6 +32,7 @@
 		<Compile Include="LinqExpressionVisitors.fs" />
 		<Compile Include="Fixes.fs" />
 		<Compile Include="OnConflict.fs" />
+		<Compile Include="OutputClause.fs" />
 		<Compile Include="QueryContext.fs" />
 		<Compile Include="SelectBuilders.fs" />
 		<Compile Include="InsertBuilders.fs" />
