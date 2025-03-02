@@ -3,6 +3,7 @@
 open System
 open System.IO
 open SqlHydra.Query
+open SqlHydra.Query.SqlServerExtensions
 open DB
 open NUnit.Framework
 open System.Threading.Tasks

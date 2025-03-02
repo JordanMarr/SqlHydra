@@ -39,6 +39,7 @@
 		<Compile Include="UpdateBuilders.fs" />
 		<Compile Include="DeleteBuilders.fs" />
 		<Compile Include="Diff.fs" />
+		<Compile Include="SqlServerExtensions.fs" />
 		<Compile Include="NpgsqlExtensions.fs" />
 		<Compile Include="SqliteExtensions.fs" />
 		<Compile Include="DataReaderExtensions.fs" />

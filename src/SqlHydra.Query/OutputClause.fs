@@ -1,4 +1,5 @@
-﻿module internal SqlHydra.Query.OutputClause
+﻿/// Provides support for the SQL Server OUTPUT clause , which allows you to return values from inserted or deleted rows in an INSERT, UPDATE, or DELETE statement.
+module internal SqlHydra.Query.OutputClause
 
 open System
 open System.Data.Common
