@@ -16,10 +16,11 @@ type InsertBuilder<'Inserted, 'InsertReturn> with
                 | _ ->
                     None
             )
-            |> List.fold (fun spec (_, column, propertyType, isOptional, isNullable) -> 
+            |> List.fold (fun (spec: InsertQuerySpec<'T, 'InsertReturn>) (_, column, propertyType, isOptional, isNullable) -> 
                 let nullability = if isOptional then IsOptional elif isNullable then IsNullable else NotNullable
                 let outputField = { ColumnName = column; PropertyType = propertyType; Nullability = nullability }
                 { spec with OutputFields = spec.OutputFields @ [outputField ] }
             ) spec
               
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
+
