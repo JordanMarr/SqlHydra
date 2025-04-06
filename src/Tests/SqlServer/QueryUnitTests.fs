@@ -67,6 +67,24 @@ let ``Conditional Where And Clauses, One True``() =
     sql =! "SELECT * FROM [Person].[Address] AS [a] WHERE (([a].[City] = @p0)) ORDER BY [a].[City]"
 
 [<Test>]
+let ``Conditional Where And Clauses, Neither True``() = 
+    let cityFilter = false
+    let zipFilter = false
+
+    let sql = 
+        select {
+            for a in Person.Address do
+            where (
+                (cityFilter && a.City = "Dallas") &&
+                (zipFilter && a.PostalCode = "75001")
+            )
+            orderBy a.City
+        }
+        |> toSql
+
+    sql =! "SELECT * FROM [Person].[Address] AS [a] ORDER BY [a].[City]"
+
+[<Test>]
 let ``Conditional Where Or Clauses, Both True``() = 
     let cityFilter = true
     let zipFilter = true
