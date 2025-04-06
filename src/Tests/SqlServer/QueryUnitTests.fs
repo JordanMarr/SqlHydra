@@ -19,10 +19,11 @@ type OptionalBoolEntity =
 
 [<Test>]
 let ``Simple Where``() = 
+    let applyCityFilter = true
     let sql = 
         select {
             for a in Person.Address do
-            where (a.City = "Dallas")
+            where (applyCityFilter && a.City = "Dallas")
             orderBy a.City
         }
         |> toSql

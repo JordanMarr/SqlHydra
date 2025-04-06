@@ -121,6 +121,11 @@ module VisitorPatterns =
         | Member m when m.Type = typeof<bool> -> Some m
         | _ -> None
 
+    let (|BoolConstant|_|) (exp: Expression) = 
+        match exp with
+        | Constant c when c.Type = typeof<bool> -> Some (c.Value :?> bool)
+        | _ -> None
+
     let (|Parameter|_|) (exp: Expression) =
         match exp.NodeType with
         | ExpressionType.Parameter -> Some (exp :?> ParameterExpression)
@@ -446,6 +451,12 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
         | BinaryCompare x ->
             match x.Left, x.Right with
             
+            // Handle conditional filters
+            | BoolConstant b, _ -> 
+                match b with
+                | true -> visit x.Right (Query())
+                | false -> query
+
             // Handle property to subquery comparisons
             | Property p1, MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryOne ->
                 let comparison = getComparison exp.NodeType
