@@ -31,6 +31,79 @@ let ``Simple Where``() =
     sql =! "SELECT * FROM [Person].[Address] AS [a] WHERE ([a].[City] = @p0) ORDER BY [a].[City]"
 
 [<Test>]
+let ``Conditional Where And Clauses, Both True``() = 
+    let cityFilter = true
+    let zipFilter = true
+
+    let sql = 
+        select {
+            for a in Person.Address do
+            where (
+                (cityFilter && a.City = "Dallas") &&
+                (zipFilter && a.PostalCode = "75001")
+            )
+            orderBy a.City
+        }
+        |> toSql
+
+    sql =! "SELECT * FROM [Person].[Address] AS [a] WHERE (([a].[City] = @p0) AND ([a].[PostalCode] = @p1)) ORDER BY [a].[City]"
+
+[<Test>]
+let ``Conditional Where And Clauses, One True``() = 
+    let cityFilter = true
+    let zipFilter = false
+
+    let sql = 
+        select {
+            for a in Person.Address do
+            where (
+                (cityFilter && a.City = "Dallas") &&
+                (zipFilter && a.PostalCode = "75001")
+            )
+            orderBy a.City
+        }
+        |> toSql
+
+    sql =! "SELECT * FROM [Person].[Address] AS [a] WHERE (([a].[City] = @p0)) ORDER BY [a].[City]"
+
+[<Test>]
+let ``Conditional Where Or Clauses, Both True``() = 
+    let cityFilter = true
+    let zipFilter = true
+
+    let sql = 
+        select {
+            for a in Person.Address do
+            where (
+                (cityFilter && a.City = "Dallas") || 
+                (zipFilter && a.PostalCode = "75001")
+            )
+            orderBy a.City
+        }
+        |> toSql
+
+    sql =! "SELECT * FROM [Person].[Address] AS [a] WHERE (([a].[City] = @p0) OR ([a].[PostalCode] = @p1)) ORDER BY [a].[City]"
+
+[<Test>]
+let ``Conditional Where Or Clauses, One True``() = 
+    let cityFilter = false
+    let zipFilter = true
+
+    let sql = 
+        select {
+            for a in Person.Address do
+            where (
+                (cityFilter && a.City = "Dallas") ||
+                (zipFilter && a.PostalCode = "75001")
+            )
+            orderBy a.City
+        }
+        |> toSql
+
+    sql =! "SELECT * FROM [Person].[Address] AS [a] WHERE (([a].[PostalCode] = @p0)) ORDER BY [a].[City]"
+
+
+[<Test>]
 let ``Simple Where - kata``() = 
     let sql = 
         select {

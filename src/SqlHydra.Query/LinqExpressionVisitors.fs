@@ -441,13 +441,27 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
             let operand = visit operand (Query())
             query.WhereNot(fun q -> operand)
         | BinaryAnd x ->
-            let lt = visit x.Left (Query())
-            let rt = visit x.Right (Query())
-            query.Where(fun q -> lt).Where(fun q -> rt)
+            match x.Left with
+            // Allow user to enable or disable right side where clause
+            | BoolConstant enableFilter ->
+                if enableFilter
+                then visit x.Right (Query())
+                else query // short-circuit: if left is false, right is not evaluated
+            | _ -> 
+                let lt = visit x.Left (Query())
+                let rt = visit x.Right (Query())
+                query.Where(fun q -> lt).Where(fun q -> rt)
         | BinaryOr x -> 
-            let lt = visit x.Left (Query())
-            let rt = visit x.Right (Query())
-            query.OrWhere(fun q -> lt).OrWhere(fun q -> rt)
+            match x.Left with
+            // Allow user to enable or disable right side where clause
+            | BoolConstant enableFilter ->
+                if enableFilter
+                then visit x.Right (Query())
+                else query // short-circuit: if left is false, right is not evaluated
+            | _ -> 
+                let lt = visit x.Left (Query())
+                let rt = visit x.Right (Query())
+                query.OrWhere(fun q -> lt).OrWhere(fun q -> rt)
         | BinaryCompare x ->
             match x.Left, x.Right with
             
