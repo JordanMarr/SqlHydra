@@ -442,9 +442,8 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
             query.WhereNot(fun q -> operand)
         | BinaryAnd x ->
             match x.Left with
-            // Allow user to enable or disable right side where clause
-            | BoolConstant enableFilter ->
-                if enableFilter
+            | Value b  -> 
+                if b :?> bool
                 then visit x.Right (Query())
                 else query // short-circuit: if left is false, right is not evaluated
             | _ -> 
@@ -454,8 +453,8 @@ let visitWhere<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -
         | BinaryOr x -> 
             match x.Left with
             // Allow user to enable or disable right side where clause
-            | BoolConstant enableFilter ->
-                if enableFilter
+            | Value b  -> 
+                if b :?> bool
                 then visit x.Right (Query())
                 else query // short-circuit: if left is false, right is not evaluated
             | _ -> 
