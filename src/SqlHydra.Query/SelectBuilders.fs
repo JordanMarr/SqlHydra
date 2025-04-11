@@ -166,6 +166,8 @@ type SelectBuilder<'Selected, 'Mapped> () =
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, tableAlias, p) -> 
                     let fqCol = $"%s{tableAlias}.%s{p.Name}"
                     state.Query.OrderByRaw($"%s{aggType}(%s{fqCol})")
+                | LinqExpressionVisitors.OrderByIgnored -> 
+                    state.Query
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the ORDER BY for single column
@@ -185,6 +187,8 @@ type SelectBuilder<'Selected, 'Mapped> () =
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, tableAlias, p) -> 
                     let fqCol = $"%s{tableAlias}.%s{p.Name}"
                     state.Query.OrderByRaw($"%s{aggType}(%s{fqCol}) DESC")
+                | LinqExpressionVisitors.OrderByIgnored -> 
+                    state.Query
         QuerySource<'T, Query>(orderedQuery, state.TableMappings)
 
     /// Sets the ORDER BY DESC for single column

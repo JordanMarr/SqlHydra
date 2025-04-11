@@ -54,6 +54,12 @@ module Where =
     /// Compares two values for inequality.
     let notEqual (prop: 'P) (value: 'P) = true
 
+[<AutoOpen>]
+module OrderBy = 
+
+    // infix operator ^^ that takes a boolean that determines whether .
+    let inline (^^) (_: bool) (prop: 'P) =
+        prop
 
 (*
 Select Aggregates:

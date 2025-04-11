@@ -196,13 +196,37 @@ module SqlPatterns =
             Some (u.Operand :?> MemberExpression)
         | _ -> 
             None
+                
+    // Extract constant value from nested object/properties
+    let rec unwrapMember (m: MemberExpression) =
+        match m.Expression with
+        | Constant c -> Some c.Value
+        | Member m -> unwrapMember m
+        | _ -> None
+
+    // Extract constant value from nested object/properties
+    let rec unwrap (exp: Expression) =
+        match exp with
+        | Member m -> unwrap m.Expression
+        | Constant c -> c.Value
+        | _ -> notImpl()
+
+    /// Reads a property from a method call expression.
+    let (|EvaluateCall|_|) (exp: Expression) =
+        match exp.NodeType with
+        | ExpressionType.Call -> 
+            let mce = exp :?> MethodCallExpression
+            // Evaluate the method call
+            let value = mce.Method.Invoke(null, mce.Arguments |> Seq.map unwrap |> Seq.toArray)
+            Some value
+        | _ -> None
 
     /// A property member, a property wrapped in 'Some', or an option 'Value'.
     let (|Property|_|) (exp: Expression) =
         match exp with
-        | Member m when m.Member.DeclaringType <> null && m.Member.DeclaringType |> isOptionOrNullableType && m.Member.Name = "Value" -> 
+        | Member m when  m.Member.DeclaringType <> null && m.Member.DeclaringType |> isOptionOrNullableType && m.Member.Name = "Value" -> 
             // Handles option '.Value'
-            tryGetMember m.Expression
+            tryGetMember m.Expression         
         | _ -> 
             tryGetMember exp            
 
@@ -223,11 +247,6 @@ module SqlPatterns =
             | _ -> notImplMsg(sprintf "Unable to unwrap where value for '%s'" m.Member.Name)
         | Member m when m.Expression.NodeType = ExpressionType.MemberAccess -> 
             // Extract constant value from nested object/properties
-            let rec unwrapMember (m: MemberExpression) =
-                match m.Expression with
-                | Constant c -> Some c.Value
-                | Member m -> unwrapMember m
-                | _ -> None
             unwrapMember m
         | Constant c -> Some c.Value
         | ImplConvertConstant c -> Some c.Value
@@ -248,11 +267,6 @@ module SqlPatterns =
         | Member m when m.Type.Name.StartsWith("Nullable") -> 
             // Handles nullable types
             // Extract constant value from nested object/properties
-            let rec unwrapMember (m: MemberExpression) =
-                match m.Expression with
-                | Constant c -> Some c.Value
-                | Member m -> unwrapMember m
-                | _ -> None
             unwrapMember m
         | _ -> None
 
@@ -730,6 +744,7 @@ let visitPropertiesSelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'P
 type OrderBy =
     | OrderByColumn of tableAlias: string * MemberInfo
     | OrderByAggregateColumn of aggregateType: string * tableAlias: string * MemberInfo
+    | OrderByIgnored
 
 /// Returns a column MemberInfo.
 let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
@@ -739,6 +754,19 @@ let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'
         | MethodCall m when m.Method.Name = "Invoke" ->
             // Handle tuples
             visit m.Object
+        | MethodCall m when m.Method.Name = nameof op_HatHat ->
+            // Enable the order by column
+            match m.Arguments[0], m.Arguments[1] with
+            // Handles option '.Value' or 'IsSome`
+            | EvaluateCall enabled , Property p 
+            | Value enabled, Property p -> 
+                if enabled :?> bool then 
+                    let alias = visitAlias p.Expression
+                    OrderByColumn (alias, p.Member)
+                else
+                    OrderByIgnored
+            | _ -> 
+                notImpl()            
         | AggregateColumn (aggType, p) -> 
             let alias = visitAlias p.Expression
             OrderByAggregateColumn (aggType, alias, p.Member)
