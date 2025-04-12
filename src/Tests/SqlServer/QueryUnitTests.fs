@@ -50,15 +50,15 @@ let ``Conditional Where And Clauses, Both True``() =
 
 [<Test>]
 let ``Conditional Where And Clauses, One True``() = 
-    let cityFilter = true
-    let zipFilter = false
+    let cityFilter = Some "Dallas"
+    let zipFilter : Option<string> = None
 
     let sql = 
         select {
             for a in Person.Address do
             where (
-                (cityFilter && a.City = "Dallas") &&
-                (zipFilter && a.PostalCode = "75001")
+                (cityFilter.IsSome && a.City = cityFilter.Value) &&
+                (zipFilter.IsSome && a.PostalCode = zipFilter.Value)
             )
             orderBy a.City
         }
@@ -68,15 +68,15 @@ let ``Conditional Where And Clauses, One True``() =
 
 [<Test>]
 let ``Conditional Where And Clauses, Neither True``() = 
-    let cityFilter = false
-    let zipFilter = false
+    let cityFilter : Option<string> = None
+    let zipFilter : Option<string> = None
 
     let sql = 
         select {
             for a in Person.Address do
             where (
-                (cityFilter && a.City = "Dallas") &&
-                (zipFilter && a.PostalCode = "75001")
+                (cityFilter.IsSome && a.City = cityFilter.Value) &&
+                (zipFilter.IsSome && a.PostalCode = zipFilter.Value)
             )
             orderBy a.City
         }
