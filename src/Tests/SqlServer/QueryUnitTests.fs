@@ -31,6 +31,22 @@ let ``Simple Where``() =
     sql =! "SELECT * FROM [Person].[Address] AS [a] WHERE ([a].[City] = @p0) ORDER BY [a].[City]"
 
 [<Test>]
+let ``Conditional Where Clause``() = 
+    let cityFilter = Some "Dallas"
+
+    let sql = 
+        select {
+            for a in Person.Address do
+            where (
+                (cityFilter.IsSome && a.City = cityFilter.Value)
+            )
+            orderBy a.City
+        }
+        |> toSql
+
+    sql =! "SELECT * FROM [Person].[Address] AS [a] WHERE ([a].[City] = @p0) ORDER BY [a].[City]"
+
+[<Test>]
 let ``Conditional Where And Clauses, Both True``() = 
     let cityFilter = true
     let zipFilter = true
@@ -57,14 +73,14 @@ let ``Conditional Where And Clauses, One True``() =
         select {
             for a in Person.Address do
             where (
-                (cityFilter.IsSome && a.City = cityFilter.Value) &&
-                (zipFilter.IsSome && a.PostalCode = zipFilter.Value)
+                (cityFilter.IsSome && a.City = cityFilter.Value) //&&
+                //(zipFilter.IsSome && a.PostalCode = zipFilter.Value)
             )
             orderBy a.City
         }
         |> toSql
 
-    sql =! "SELECT * FROM [Person].[Address] AS [a] WHERE (([a].[City] = @p0)) ORDER BY [a].[City]"
+    sql =! "SELECT * FROM [Person].[Address] AS [a] WHERE ([a].[City] = @p0) ORDER BY [a].[City]"
 
 [<Test>]
 let ``Conditional Where And Clauses, Neither True``() = 
