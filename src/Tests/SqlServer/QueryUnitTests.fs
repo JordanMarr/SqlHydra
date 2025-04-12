@@ -86,15 +86,15 @@ let ``Conditional Where And Clauses, Neither True``() =
 
 [<Test>]
 let ``Conditional Where Or Clauses, Both True``() = 
-    let cityFilter = true
-    let zipFilter = true
+    let cityFilter = Some "Dallas"
+    let zipFilter = Some "75001"
 
     let sql = 
         select {
             for a in Person.Address do
             where (
-                (cityFilter && a.City = "Dallas") || 
-                (zipFilter && a.PostalCode = "75001")
+                (cityFilter.IsSome && a.City = cityFilter.Value) || 
+                (zipFilter.IsSome && a.PostalCode = zipFilter.Value)
             )
             orderBy a.City
         }
@@ -102,20 +102,14 @@ let ``Conditional Where Or Clauses, Both True``() =
 
     sql =! "SELECT * FROM [Person].[Address] AS [a] WHERE (([a].[City] = @p0) OR ([a].[PostalCode] = @p1)) ORDER BY [a].[City]"
 
-type Temp = 
-    {
-        Enabled: bool option
-    }
-
-
 [<Test>]
 let ``Conditional OrderBy``() = 
-    let citySort = Some true
+    let isCitySortEnabled() = true
 
     let sql = 
         select {
             for a in Person.Address do
-            orderBy (citySort.IsSome ^^ a.City)
+            orderBy (isCitySortEnabled() ^^ a.City)
         }
         |> toSql
 

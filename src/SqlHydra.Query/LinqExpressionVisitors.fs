@@ -204,22 +204,16 @@ module SqlPatterns =
         | Member m -> unwrapMember m
         | _ -> None
 
-    // Extract constant value from nested object/properties
-    let rec unwrap (exp: Expression) =
-        match exp with
-        | Member m -> unwrap m.Expression
-        | Constant c -> c.Value
-        | _ -> notImpl()
+    let compileAndEvaluateExpression (exp: Expression) = 
+        let lambda = Expression.Lambda(exp)
+        let compiled = lambda.Compile()
+        compiled.DynamicInvoke()
 
-    /// Reads a property from a method call expression.
-    let (|EvaluateCall|_|) (exp: Expression) =
-        match exp.NodeType with
-        | ExpressionType.Call -> 
-            let mce = exp :?> MethodCallExpression
-            // Evaluate the method call
-            let value = mce.Method.Invoke(null, mce.Arguments |> Seq.map unwrap |> Seq.toArray)
-            Some value
-        | _ -> None
+    let (|Evaluate|_|) (exp: Expression) =
+        try
+            compileAndEvaluateExpression exp |> Some
+        with _ ->
+            None
 
     /// A property member, a property wrapped in 'Some', or an option 'Value'.
     let (|Property|_|) (exp: Expression) =
@@ -755,11 +749,9 @@ let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'
             // Handle tuples
             visit m.Object
         | MethodCall m when m.Method.Name = nameof op_HatHat ->
-            // Enable the order by column
+            // ^^ operator conditionally adds property to order by clause
             match m.Arguments[0], m.Arguments[1] with
-            // Handles option '.Value' or 'IsSome`
-            | EvaluateCall enabled , Property p 
-            | Value enabled, Property p -> 
+            | Evaluate enabled, Property p ->
                 if enabled :?> bool then 
                     let alias = visitAlias p.Expression
                     OrderByColumn (alias, p.Member)
