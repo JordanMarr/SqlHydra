@@ -442,7 +442,7 @@ let tryGetOrderTotal (orderId: int) =
         }
 ```
 
-### Evaluation of Where Parameter Expressions
+#### Evaluation of Where Parameter Expressions
 
 As of v3, SqlHydra.Query `where` parameters can now be expressions that are evaluated inline within the query. (In previous versions, `where` parameters had to be constant value bindings that were evaluated outside of the query builder.) 
 
