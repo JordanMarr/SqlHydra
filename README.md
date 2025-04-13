@@ -441,9 +441,34 @@ let tryGetOrderTotal (orderId: int) =
             tryHead
         }
 ```
+
+### Evaluation of Where Parameter Expressions
+
+As of v3, SqlHydra.Query `where` parameters can now be expressions that are evaluated inline within the query. (In previous versions, `where` parameters had to be constant value bindings that were evaluated outside of the query builder.) 
+
+For example, these are all valid ways to set a `where` parameter as of v3:
+
+```F#
+let getAddresses() =
+    let chicago = "Chicago"
+    let getCity() = "Chicago"
+
+    selectTask openContext {
+        for a in Person.Address do
+        where (
+            a.City = "Chicago" ||
+            a.City = chicago ||
+            a.City = getCity() ||
+            a.City = getCity().ToUpper() ||
+            a.City = $"City: {getCity()}"
+        )
+        orderBy a.City
+    }
+```
+
 #### Conditional Where
 
-As of v3, you can conditionally include or exclude where conditions.
+As of v3, you can conditionally include or exclude `where` conditions using the `&&` operator to short-circuit the condition.
 In the example below, if `cityFilter.IsSome` evaluates to `false`, the `cityFilter` clause will not be added to the query.
 
 ```F#
@@ -455,6 +480,21 @@ let getAddresses(cityFilter: string option; zipFilter: string option) =
             (zipFilter.IsSome && a.PostalCode = zipFilter.Value)
         )
         orderBy a.City
+    }
+```
+
+#### Conditional Order By
+
+As of v3, you can conditionally include or exclude `orderBy` columns using the custom `^^` operator to short-circuit the sort condition.
+
+```F#
+let getAddresses(sortByCity: bool, sortByZip: bool) = 
+    selectTask openContext {
+        for a in Person.Address do
+        orderBy (
+            (sortByCity ^^ a.City) &&
+            (sortByZip ^^ a.PostalCode)
+        )
     }
 ```
 
