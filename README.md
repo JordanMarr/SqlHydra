@@ -463,7 +463,7 @@ Select `Customer` with left joined `Address` where `CustomerID` is in a list of 
 
 ```F#
 let getCustomerAddressesInIds (customerIds: int list) =
-    selectAsync openContext) {
+    selectAsync openContext {
         for c in SalesLT.Customer do
         leftJoin ca in SalesLT.CustomerAddress on (c.CustomerID = ca.Value.CustomerID)
         leftJoin a  in SalesLT.Address on (ca.Value.AddressID = a.Value.AddressID)
@@ -701,32 +701,29 @@ let! distinctCustomerNames =
     }
 ```
 
-### Dos and Don'ts
+### Transforming Select Results
 
-:boom: The `select` clause only supports tables and fields for the sake of modifying the generated SQL query and the returned query type `'T`.
-Transformations (i.e. `.ToString()` or calling any functions is _not supported_ and will throw an exception.
-
-:boom: The `where` clause will automatically parameterize your input values. _However_, similar to the `select` clause, the `where` clause does not support calling an transformations (i.e. `.ToString()`). So you must prepare any parameter transformations before the builder. 
+:boom: The `select` clause allows you to limit the tables and columns that will be included in the generated SQL query and the returned query type `'T`.
+Transformations (i.e. `.ToString()` or calling any functions is _not supported_ in the `select` and will throw an exception. 
 
 ✅ CORRECT:
 ```F#
-let getCities () =
-    let city = getCity() // DO prepare where parameters above and then pass into the where clause
+let getCity (city: string) =
     selectTask openContext {
         for a in SalesLT.Address do
         where (a.City = city)
         select (a.City, a.StateProvince) into (city, state)
-        mapList $"City: %s{city}, State: %s{state}"   // DO transforms using the `mapSeq`, `mapArray` or `mapList` operations
+        mapList $"City: %s{city}, State: %s{state}"   // DO transforms within `mapSeq`, `mapArray` or `mapList` operations
     }
 ```
 
 ❌ INCORRECT:
 ```F#
-let getCities () =
+let getCity (city: string) =
     selectTask openContext {
         for a in SalesLT.Address do
-        where (a.City = getCity()) // DO NOT perform calculations or translations within the builder
-        select ($"City: %s{city}, State: %s{state}")   // DO NOT transform results within the builder 
+        where (a.City = city) 
+        select ($"City: %s{city}, State: %s{state}")   // DO NOT transform results within the `select` operation.
     }
 ```
 
