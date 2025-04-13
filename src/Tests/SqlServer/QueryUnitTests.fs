@@ -12,18 +12,13 @@ open SqlServer.AdventureWorksNet8
 open SqlServer.AdventureWorksNet9
 #endif
 
-type OptionalBoolEntity = 
-    {
-        QuestionAnswered: bool option
-    }
-
 [<Test>]
 let ``Simple Where``() = 
-    let applyCityFilter = true
+    let getCity() = "Dallas"
     let sql = 
         select {
             for a in Person.Address do
-            where (applyCityFilter && a.City = "Dallas")
+            where (a.City = getCity())
             orderBy a.City
         }
         |> toSql
@@ -149,7 +144,7 @@ let ``Select 1 Column``() =
     let sql =
         select {
             for a in Person.Address do
-            select (a.City)
+            select a.City
         }
         |> toSql
 
@@ -200,6 +195,9 @@ let ``Where bool is false``() =
         |> toSql
 
     sql.Contains("WHERE ([o].[OnlineOrderFlag] = cast(0 as bit))") =! true
+
+
+type OptionalBoolEntity = { QuestionAnswered: bool option }
 
 [<Test>]
 let ``Where bool option is true``() = 
@@ -277,6 +275,17 @@ let ``And Where``() =
         |> toSql
 
     sql.Contains("WHERE (([a].[City] = @p0) AND ([a].[City] = @p1))") =! true
+
+[<Test>]
+let ``Where Guid Empty``() = 
+    let sql =  
+        select {
+            for a in Person.Address do
+            where (a.rowguid = System.Guid.Empty)
+        }
+        |> toSql
+
+    sql.Contains("WHERE ([a].[rowguid] = @p0)") =! true
 
 [<Test>]
 let ``Where with AND and OR in Parenthesis``() = 

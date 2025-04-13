@@ -74,7 +74,8 @@ type UpdateBuilder<'Updated, 'UpdateReturn>() =
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
     member this.Where (state: QuerySource<'T>, [<ProjectionParameter>] whereExpression) = 
         let query = state |> getQueryOrDefault
-        let where = LinqExpressionVisitors.visitWhere<'T> whereExpression (FQ.fullyQualifyColumn state.TableMappings)
+        let tableMappings = state.TableMappings |> Map.values
+        let where = LinqExpressionVisitors.visitWhere<'T> tableMappings whereExpression (FQ.fullyQualifyColumn state.TableMappings)
         if query.UpdateAll then
             invalidOp "Cannot have `where` clause in a query where `updateAll` has been used."
         let where' = 

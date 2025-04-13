@@ -1065,26 +1065,20 @@ let ``DiffService Save`` () = task {
 
 [<Test>]
 let ``Multiple Joins Same Table`` () = task {
-        let! order, sp, cp = 
-            selectTask openContext {
-                for order in Sales.SalesOrderHeader do
-                join s in Sales.SalesPerson on (order.SalesPersonID.Value = s.BusinessEntityID)
-                join sp in Person.Person on (s.BusinessEntityID = sp.BusinessEntityID)
-                join c in Sales.Customer on (order.CustomerID = c.CustomerID)
-                join cp in Person.Person on (c.PersonID.Value = cp.BusinessEntityID)
-                where (order.SalesPersonID <> None && order.SalesPersonID <> None)
-                take 1
-                select (order, sp, cp)
-                head
-            }
+    let! order, sp, cp = 
+        selectTask openContext {
+            for order in Sales.SalesOrderHeader do
+            join s in Sales.SalesPerson on (order.SalesPersonID.Value = s.BusinessEntityID)
+            join sp in Person.Person on (s.BusinessEntityID = sp.BusinessEntityID)
+            join c in Sales.Customer on (order.CustomerID = c.CustomerID)
+            join cp in Person.Person on (c.PersonID.Value = cp.BusinessEntityID)
+            where (order.SalesOrderID = 43659)
+            select (order, sp, cp)
+            head
+        }
 
-        // Print results
-        printfn $"Order: {order.SalesOrderID}"
-        printfn $"Sales Person: {sp.FirstName} {sp.LastName}"
-        printfn $"Customer: {cp.FirstName} {cp.LastName}"
-
-        // Verify that same-table properties are read properly.
-        sp.FirstName =! "Tsvi"
-        cp.FirstName =! "James"
+    // Verify that same-table properties are read properly.
+    sp.FirstName =! "Tsvi"
+    cp.FirstName =! "James"
 }
     
