@@ -1,10 +1,10 @@
 ﻿module internal SqlHydra.Query.LinqExpressionVisitors
 
 open System
-open System.Data.SqlTypes
 open System.Linq.Expressions
 open System.Reflection
 open SqlKata
+open FastExpressionCompiler
 
 let notImpl() = raise (NotImplementedException())
 let notImplMsg msg = raise (NotImplementedException msg)
@@ -212,9 +212,12 @@ module SqlPatterns =
         | _ -> None
 
     let compileAndEvaluateExpression (exp: Expression) = 
-        let lambda = Expression.Lambda(exp)
-        let compiled = lambda.Compile()
-        compiled.DynamicInvoke()
+        try
+            let lambda = Expression.Lambda(exp)
+            let compiled = lambda.CompileFast()
+            compiled.DynamicInvoke()
+        with ex ->  
+            notImplMsg $"Unable to evaluate query parameter expression:\n{exp}"
 
     /// Handles extended properties on Nullable and Option types.
     [<RequireQualifiedAccess>]
