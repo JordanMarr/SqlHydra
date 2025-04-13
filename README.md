@@ -462,7 +462,6 @@ let getAddresses() =
             a.City = getCity().ToUpper() ||
             a.City = $"City: {getCity()}"
         )
-        orderBy a.City
     }
 ```
 
@@ -479,7 +478,6 @@ let getAddresses(cityFilter: string option; zipFilter: string option) =
             (cityFilter.IsSome && a.City = cityFilter.Value) &&
             (zipFilter.IsSome && a.PostalCode = zipFilter.Value)
         )
-        orderBy a.City
     }
 ```
 
