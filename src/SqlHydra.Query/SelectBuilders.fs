@@ -316,7 +316,8 @@ type SelectBuilder<'Selected, 'Mapped> () =
     /// Sets the HAVING condition.
     [<CustomOperation("having", MaintainsVariableSpace = true)>]
     member this.Having (state: QuerySource<'T, Query>, [<ProjectionParameter>] havingExpression) = 
-        let having = LinqExpressionVisitors.visitHaving<'T> havingExpression qualifyColumnWithAlias
+        let tableMappings = state.TableMappings |> Map.values
+        let having = LinqExpressionVisitors.visitHaving<'T> tableMappings havingExpression qualifyColumnWithAlias
         QuerySource<'T, Query>(state.Query.Having(fun w -> having), state.TableMappings)
 
     /// Sets query to return DISTINCT values

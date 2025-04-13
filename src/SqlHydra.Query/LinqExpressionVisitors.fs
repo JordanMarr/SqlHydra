@@ -247,6 +247,14 @@ module SqlPatterns =
             tryGetMember exp
             |> Option.map (fun pm -> pm, ExtProperty.NA)
 
+    /// A property/column in a record/table mapped to this query via a `for` or `join` clause.
+    let (|MappedColumn|_|) (tables: TableMapping seq) (exp: Expression) = 
+        match exp with
+        | Property (p, ext) when tables |> Seq.exists (fun tbl -> tbl.IsInTable p) ->
+            Some (p, ext)
+        | _ -> 
+            None
+
     /// A constant value or an expression that can be evaluated to a constant value.
     let (|Value|_|) (exp: Expression) =
         match exp with
@@ -294,19 +302,12 @@ let visitAlias (exp: Expression) =
     visit exp
 
 
-let visitWhere<'T> (tableMappings: TableMapping seq) (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -> MemberInfo -> string) =
-    /// A property on a mapped table record.
+let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -> MemberInfo -> string) =
+    /// A column/property on a mapped table/record.
     let (|Column|_|) (exp: Expression) = 
         match exp with
-        | Property (p, ext) when 
-            tableMappings 
-            |> Seq.exists (fun tbl -> 
-                p.Member.ReflectedType.DeclaringType.Name = tbl.Schema && 
-                p.Member.ReflectedType.Name = tbl.Name
-            ) ->
-            Some (p, ext)
-        | _ -> 
-            None
+        | MappedColumn tables (p, ext) -> Some (p, ext)
+        | _ -> None
 
     let rec visit (exp: Expression) (query: Query) : Query =
         match exp with
@@ -593,7 +594,13 @@ let visitWhere<'T> (tableMappings: TableMapping seq) (filter: Expression<Func<'T
 
     visit (filter :> Expression) (Query())
 
-let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -> MemberInfo -> string) =
+let visitHaving<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -> MemberInfo -> string) =
+    /// A column/property on a mapped table/record.
+    let (|Column|_|) (exp: Expression) = 
+        match exp with
+        | MappedColumn tables (p, ext) -> Some (p, ext)
+        | _ -> None
+
     let rec visit (exp: Expression) (query: Query) : Query =
         match exp with
         | Lambda x -> visit x.Body query
@@ -611,7 +618,7 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string 
 
             match m.Arguments.[0], m.Arguments.[1] with
             // Column is IN / NOT IN a subquery of values
-            | Property (p, _), MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryMany ->
+            | Column (p, _), MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryMany ->
                 let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
                 let alias = visitAlias p.Expression
                 let fqCol = qualifyColumn alias p.Member
@@ -620,7 +627,7 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string 
                 | nameof isIn | nameof op_BarEqualsBar -> query.HavingIn(fqCol, selectSubquery.ToKataQuery())
                 | _ -> query.HavingNotIn(fqCol, selectSubquery.ToKataQuery())
             // Column is IN / NOT IN a list of values
-            | Property (p, _), ListInit values ->
+            | Column (p, _), ListInit values ->
                 let queryParameters = 
                     values 
                     |> Seq.map (KataUtils.getQueryParameterForValue p.Member)
@@ -630,7 +637,7 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string 
                 let fqCol = qualifyColumn alias p.Member
                 filter(fqCol, queryParameters)
             // Column is IN / NOT IN an array of values
-            | Property (p, _), ArrayInit values -> 
+            | Column (p, _), ArrayInit values -> 
                 let queryParameters = 
                     values 
                     |> Seq.map (KataUtils.getQueryParameterForValue p.Member)
@@ -640,7 +647,7 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string 
                 let fqCol = qualifyColumn alias p.Member
                 filter(fqCol, queryParameters)
             // Column is IN / NOT IN an IEnumerable of values
-            | Property (p, _), Value value -> 
+            | Column (p, _), Value value -> 
                 let queryParameters = 
                     (value :?> System.Collections.IEnumerable) 
                     |> Seq.cast<obj> 
@@ -651,12 +658,12 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string 
                 let fqCol = qualifyColumn alias p.Member
                 filter(fqCol, queryParameters)
             // Column is IN / NOT IN a sequence expression of values
-            | Property (p, _), MethodCall c when c.Method.Name = "CreateSequence" ->
+            | Column (p, _), MethodCall c when c.Method.Name = "CreateSequence" ->
                 notImplMsg "Unable to unwrap sequence expression. Please use a list or array instead."
             | _ -> notImpl()
         | MethodCall m when List.contains m.Method.Name [ nameof like; nameof notLike; nameof op_EqualsPercent; nameof op_LessGreaterPercent ] ->
             match m.Arguments.[0], m.Arguments.[1] with
-            | Property (p, _), Value value -> 
+            | Column (p, _), Value value -> 
                 let pattern = string value
                 match m.Method.Name with
                 | nameof like | nameof op_EqualsPercent -> 
@@ -670,7 +677,7 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string 
             | _ -> notImpl()
         | MethodCall m when m.Method.Name = nameof isNullValue || m.Method.Name = nameof isNotNullValue ->
             match m.Arguments.[0] with
-            | Property (p, _) -> 
+            | Column (p, _) -> 
                 let alias = visitAlias p.Expression
                 let fqCol = qualifyColumn alias p.Member
                 if m.Method.Name = nameof isNullValue
@@ -690,7 +697,7 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string 
             query.OrHaving(fun q -> lt).OrHaving(fun q -> rt)
         | BinaryCompare x ->
             match x.Left, x.Right with            
-            | Property (p1, _), MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryOne ->
+            | Column (p1, _), MethodCall subqueryExpr when subqueryExpr.Method.Name = nameof subqueryOne ->
                 // Handle property to subquery comparisons
                 let comparison = getComparison exp.NodeType
                 let subqueryConst = match subqueryExpr.Arguments.[0] with | Constant c -> c | _ -> notImpl()
@@ -698,7 +705,7 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string 
                 let alias = visitAlias p1.Expression
                 let fqCol = qualifyColumn alias p1.Member
                 query.Having(fqCol, comparison, selectSubquery.ToKataQuery())
-            | AggregateColumn (aggType, (p1, _)), Property (p2, _) ->
+            | AggregateColumn (aggType, (p1, _)), Column (p2, _) ->
                 // Handle aggregate col to col comparisons
                 let lt = 
                     let alias = visitAlias p1.Expression
@@ -714,7 +721,7 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string 
                 let lt = qualifyColumn alias p.Member
                 let comparison = getComparison(exp.NodeType)
                 query.HavingRaw($"{aggType}({lt}) {comparison} ?", [value])
-            | Property (p1, _), Property (p2, _) ->
+            | Column (p1, _), Column (p2, _) ->
                 // Handle col to col comparisons
                 let lt = 
                     let alias = visitAlias p1.Expression
@@ -724,7 +731,7 @@ let visitHaving<'T> (filter: Expression<Func<'T, bool>>) (qualifyColumn: string 
                     let alias = visitAlias p2.Expression
                     qualifyColumn alias p2.Member
                 query.HavingColumns(lt, comparison, rt)
-            | Property (p, _), Value value ->
+            | Column (p, _), Value value ->
                 // Handle column to value comparisons
                 match exp.NodeType, value with
                 | ExpressionType.Equal, null -> 

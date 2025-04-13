@@ -10,6 +10,10 @@ type TableMapping =
         Name: string
         Schema: string 
     }
+    member this.IsInTable (m: Linq.Expressions.MemberExpression) =
+        m.Member.ReflectedType.DeclaringType <> null &&
+        m.Member.ReflectedType.DeclaringType.Name = this.Schema && 
+        m.Member.ReflectedType.Name = this.Name
 
 type TableMappingKey = 
     | Root
