@@ -441,6 +441,22 @@ let tryGetOrderTotal (orderId: int) =
             tryHead
         }
 ```
+#### Conditional Where
+
+As of v3, you can conditionally include or exclude where conditions.
+In the example below, if `cityFilter.IsSome` evaluates to `false`, the `cityFilter` clause will not be added to the query.
+
+```F#
+let getAddresses(cityFilter: string option; zipFilter: string option) = 
+    selectTask openContext {
+        for a in Person.Address do
+        where (
+            (cityFilter.IsSome && a.City = cityFilter.Value) &&
+            (zipFilter.IsSome && a.PostalCode = zipFilter.Value)
+        )
+        orderBy a.City
+    }
+```
 
 #### Joins
 
