@@ -30,11 +30,6 @@ Target.create "BuildQuery" <| fun _ ->
     |> (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release", pkg), pkg)
     |> (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
 
-Target.create "BuildCliNet7" <| fun _ ->
-    [ cli; ] 
-    |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net7.0", pkg), pkg)
-    |> List.iter (fun (code, pkg) -> if code <> 0 then failwith $"Could not build '{pkg}'package.'")
-
 Target.create "BuildCliNet8" <| fun _ ->
     [ cli; tests ]
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "build --configuration Release --framework net8.0", pkg), pkg)
@@ -88,7 +83,7 @@ Target.create "Publish" <| fun _ ->
     |> List.iter (fun (code, pkg) -> if code <> 0 then printfn $"ERROR: Could not publish '{pkg}' package. Error: {code}") // Display error and continue
 
 let dependencies = [
-    "Restore" ==> "BuildQuery" ==> "BuildCliNet7" ==> "BuildCliNet8" ==> "BuildCliNet9" ==> "Build"
+    "Restore" ==> "BuildQuery" ==> "BuildCliNet8" ==> "BuildCliNet9" ==> "Build"
     "Build" ==> "TestNet8" ==> "TestNet9" ==> "Test"
     //"BuildCliNet9" ==> "TestNet9" ==> "Test"
     "Test" ==> "Pack" ==> "Publish"

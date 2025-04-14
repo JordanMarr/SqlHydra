@@ -2,9 +2,9 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFrameworks>net7.0;net8.0;net9.0</TargetFrameworks>
+		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<Version>3.0.0-beta.1</Version>
+		<Version>3.0.0</Version>
 		<WarningsAsErrors>
 			<!-- Incomplete pattern matches on this expression. -->
 			FS0025
@@ -14,7 +14,7 @@
 			NU1504
 		</NoWarn>
 		<Authors>Jordan Marr</Authors>
-		<Description>SqlHydra.Cli is a dotnet tool that generates F# types for SQL Server, PostgreSQL, Sqlite and Oracle databases.</Description>
+		<Description>SqlHydra.Cli is a dotnet tool that generates F# types for SQL Server, PostgreSQL, Sqlite, MySQL and Oracle.</Description>
 		<PackageTags>F# fsharp data database orm sql codegen typeprovider</PackageTags>
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>sqlhydra</ToolCommandName>
@@ -49,14 +49,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Update="FSharp.Core" Version="7.0.200" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Update="FSharp.Core" Version="8.0.100" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Update="FSharp.Core" Version="9.0.201" Condition="'$(TargetFramework)' == 'net9.0'" />
 		<PackageReference Include="Fantomas.Core" Version="6.3.16" />
 		<PackageReference Include="Microsoft.SqlServer.Types" Version="160.1000.6" />
 		<PackageReference Include="MySql.Data" Version="9.0.0" />
 		<PackageReference Include="Fantomas.FCS" Version="6.3.16" />
-		<PackageReference Include="Npgsql" Version="7.0.7" Condition="'$(TargetFramework)' == 'net7.0'" />
 		<PackageReference Include="Npgsql" Version="8.0.3" Condition="'$(TargetFramework)' == 'net8.0'" />
 		<PackageReference Include="Npgsql" Version="9.0.3" Condition="'$(TargetFramework)' == 'net9.0'" />
 		<PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.140" />
