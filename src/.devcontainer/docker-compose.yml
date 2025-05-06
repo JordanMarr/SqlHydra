@@ -55,16 +55,37 @@ services:
     ports:
       - "54320:5432"
 
+  # oracle:
+  #   hostname: oracle
+  #   container_name: oracle
+  #   build: 
+  #     context: ./oracle
+  #     dockerfile: Dockerfile.xe
+  #   environment:
+  #     - ORACLE_PWD=oracle
+  #     - ORACLE_ALLOW_REMOTE=true
+  #   ports:
+  #     - 1521:1521
+
   oracle:
+    image: gvenzl/oracle-xe
     hostname: oracle
     container_name: oracle
     build: 
       context: ./oracle
       dockerfile: Dockerfile.xe
     environment:
-      - ORACLE_PWD=oracle
-      - ORACLE_ALLOW_REMOTE=true
+      ORACLE_PASSWORD: "oracle"
     ports:
       - 1521:1521
-    
-    
+    volumes:
+      - ./oracle/oracle-sample-database:/docker-entrypoint-initdb.d
+    command: |
+      /bin/bash -c "
+      echo "Running ot_create_user.sql";
+      sqlplus / as sysdba @/docker-entrypoint-initdb.d/ot_create_user.sql
+      echo "Running ot_schema.sql";
+      sqlplus / as sysdba @/docker-entrypoint-initdb.d/ot_schema.sql
+      echo "Running ot_data.sql";
+      sqlplus / as sysdba @/docker-entrypoint-initdb.d/ot_data.sql
+      "
