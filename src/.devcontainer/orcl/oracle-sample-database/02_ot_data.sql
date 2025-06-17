@@ -3,14 +3,13 @@
 -- Link	       : http://www.oracletutorial.com/oracle-sample-database/
 -- Version     : 1.0
 -- Last Updated: July-28-2017
--- Copyright   : Copyright © 2017 by www.oracletutorial.com. All Rights Reserved.
+-- Copyright   : Copyright ï¿½ 2017 by www.oracletutorial.com. All Rights Reserved.
 -- Notice      : Use this sample database for the educational purpose only.
 --               Credit the site oracletutorial.com explitly in your materials that
 --               use this sample database.
 --------------------------------------------------------------------------------------
 
-ALTER SESSION SET CONTAINER = XEPDB1;
-ALTER SESSION SET current_schema = OT;
+-- Removed ALTER SESSION commands for compatibility with gvenzl/oracle-xe image
 
 -- disable FK constraints 
 ALTER TABLE countries DISABLE CONSTRAINT fk_countries_regions;

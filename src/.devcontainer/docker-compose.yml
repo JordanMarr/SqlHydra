@@ -78,7 +78,6 @@ services:
     ports:
       - 1522:1521
     volumes:
-      - ./orcl/oracle-sample-database/01_ot_schema.sql:/docker-entrypoint-initdb.d/01_ot_schema.sql
-      - ./orcl/oracle-sample-database/02_ot_data.sql:/docker-entrypoint-initdb.d/02_ot_data.sql
+      - ./orcl/init-ot-schema.sql:/docker-entrypoint-initdb.d/01_init_schema.sql
     
     
