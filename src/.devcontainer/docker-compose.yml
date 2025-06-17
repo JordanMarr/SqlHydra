@@ -66,5 +66,19 @@ services:
       - ORACLE_ALLOW_REMOTE=true
     ports:
       - 1521:1521
+
+  orcl:
+    hostname: orcl
+    container_name: orcl
+    image: gvenzl/oracle-xe:21-slim
+    environment:
+      - ORACLE_PASSWORD=oracle
+      - APP_USER=OT
+      - APP_USER_PASSWORD=Oracle1
+    ports:
+      - 1522:1521
+    volumes:
+      - ./orcl/oracle-sample-database/01_ot_schema.sql:/docker-entrypoint-initdb.d/01_ot_schema.sql
+      - ./orcl/oracle-sample-database/02_ot_data.sql:/docker-entrypoint-initdb.d/02_ot_data.sql
     
     
