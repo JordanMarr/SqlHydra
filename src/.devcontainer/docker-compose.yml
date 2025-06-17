@@ -79,5 +79,6 @@ services:
       - 1522:1521
     volumes:
       - ./orcl/init-ot-schema.sql:/docker-entrypoint-initdb.d/01_init_schema.sql
+      - ./orcl/init-ot-data.sql:/docker-entrypoint-initdb.d/02_init_data.sql
     
     
