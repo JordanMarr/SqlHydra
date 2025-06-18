@@ -55,17 +55,17 @@ services:
     ports:
       - "54320:5432"
 
-  oracle:
-    hostname: oracle
-    container_name: oracle
-    build: 
-      context: ./oracle
-      dockerfile: Dockerfile.xe
-    environment:
-      - ORACLE_PWD=oracle
-      - ORACLE_ALLOW_REMOTE=true
-    ports:
-      - 1521:1521
+  # oracle:
+  #   hostname: oracle
+  #   container_name: oracle
+  #   build: 
+  #     context: ./oracle
+  #     dockerfile: Dockerfile.xe
+  #   environment:
+  #     - ORACLE_PWD=oracle
+  #     - ORACLE_ALLOW_REMOTE=true
+  #   ports:
+  #     - 1521:1521
 
   orcl:
     hostname: orcl
@@ -76,7 +76,7 @@ services:
       - APP_USER=OT
       - APP_USER_PASSWORD=Oracle1
     ports:
-      - 1522:1521
+      - 1521:1521
     volumes:
       - ./orcl/init-ot-schema.sql:/docker-entrypoint-initdb.d/01_init_schema.sql
       - ./orcl/init-ot-data.sql:/docker-entrypoint-initdb.d/02_init_data.sql
