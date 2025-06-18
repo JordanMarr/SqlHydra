@@ -26,12 +26,12 @@ let ``Where Name Contains``() = task {
     let addresses =
         select {
             for c in OT.CUSTOMERS do
-            where (c.NAME |=| [ "ABC"; "XYZ" ])
+            where (c.NAME |=| [ "ABC Corp"; "XYZ Ltd" ])
         }
         |> ctx.Read HydraReader.Read
 
     gt0 addresses
-    Assert.IsTrue(addresses |> Seq.forall (fun a -> a.NAME = "ABC" || a.NAME = "XYZ"), "Expected only 'ABC' or 'XYZ'.")
+    Assert.IsTrue(addresses |> Seq.forall (fun a -> a.NAME = "ABC Corp" || a.NAME = "XYZ Ltd"), "Expected only 'ABC Corp' or 'XYZ Ltd'.")
 }
 
 [<Test>]
@@ -112,7 +112,7 @@ let ``Select Column Aggregates From Product IDs 1-3``() = task {
     
     verifyAggregateValuesFor 1 (150.0M, 350.0M, 250.0M, 2, 500.0M)
     verifyAggregateValuesFor 2 (250.0M, 750.0M, 500.0M, 2, 1000.0M)
-    verifyAggregateValuesFor 5 (200.0M, 200.0M, 200.0M, 1, 200.0M)
+    verifyAggregateValuesFor 3 (200.0M, 200.0M, 200.0M, 1, 200.0M)
 }
 
 [<Test>]
