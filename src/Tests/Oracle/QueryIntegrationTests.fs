@@ -26,28 +26,28 @@ let ``Where Name Contains``() = task {
     let addresses =
         select {
             for c in OT.CUSTOMERS do
-            where (c.NAME |=| [ "Staples"; "Aflac" ])
+            where (c.NAME |=| [ "ABC"; "XYZ" ])
         }
         |> ctx.Read HydraReader.Read
 
     gt0 addresses
-    Assert.IsTrue(addresses |> Seq.forall (fun a -> a.NAME = "Staples" || a.NAME = "Aflac"), "Expected only 'Staples' or 'Aflac'.")
+    Assert.IsTrue(addresses |> Seq.forall (fun a -> a.NAME = "ABC" || a.NAME = "XYZ"), "Expected only 'ABC' or 'XYZ'.")
 }
 
 [<Test>]
-let ``Select Address Column Where Address Contains Detroit``() = task {
+let ``Select Address Column Where Address Contains USA``() = task {
     use ctx = openContext()
 
     let cities =
         select {
             for c in OT.CUSTOMERS do
-            where (c.ADDRESS =% "%Detroit%")
+            where (c.ADDRESS =% "%USA")
             select c.ADDRESS
         }
         |> ctx.Read HydraReader.Read
 
     gt0 cities
-    Assert.IsTrue(cities |> Seq.choose id |> Seq.forall (fun city -> city.Contains "Detroit"), "Expected all cities to contain 'Detroit'.")
+    Assert.IsTrue(cities |> Seq.choose id |> Seq.forall (fun city -> city.Contains "USA"), "Expected all cities to contain 'USA'.")
 }
 
 [<Test>]
