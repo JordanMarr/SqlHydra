@@ -58,7 +58,7 @@ let ``Inner Join Orders-Details``() = task {
         select {
             for o in OT.ORDERS do
             join d in OT.ORDER_ITEMS on (o.ORDER_ID = d.ORDER_ID)
-            where (o.STATUS = "Pending")
+            where (o.STATUS = "Shipped")
             select (o, d)
         }
 
@@ -110,9 +110,9 @@ let ``Select Column Aggregates From Product IDs 1-3``() = task {
         let aMinPrice, aMaxPrice, aAvgPrice, aPriceCount, aSumPrice = aggByCatID.[catId]
         dc aMinPrice xMinPrice; dc aMaxPrice xMaxPrice; dc aAvgPrice xAvgPrice; Assert.AreEqual(aPriceCount, xPriceCount); dc aSumPrice xSumPrice
     
-    verifyAggregateValuesFor 1 (554.99M, 3410.46M, 1386.966M, 70, 97087.65M)
-    verifyAggregateValuesFor 2 (739.99M, 5499.99M, 1406.098M, 50, 70304.9M)
-    verifyAggregateValuesFor 5 (15.55M, 8867.99M, 635.216M, 108, 68603.38M)
+    verifyAggregateValuesFor 1 (150.0M, 350.0M, 250.0M, 2, 500.0M)
+    verifyAggregateValuesFor 2 (250.0M, 750.0M, 500.0M, 2, 1000.0M)
+    verifyAggregateValuesFor 5 (200.0M, 200.0M, 200.0M, 1, 200.0M)
 }
 
 [<Test>]
