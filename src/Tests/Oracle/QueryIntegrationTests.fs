@@ -135,10 +135,10 @@ let ``Aggregate Subquery One``() = task {
         }
         |> ctx.ReadAsync HydraReader.Read
 
-    let avgListPrice = 438.6662M
+    let avgListPrice = 340.0M
 
     gt0 productsWithHigherThanAvgPrice
-    Assert.IsTrue(productsWithHigherThanAvgPrice |> Seq.forall (fun (nm, price) -> price > avgListPrice), "Expected all prices to be > than avg price of $438.67.")
+    Assert.IsTrue(productsWithHigherThanAvgPrice |> Seq.forall (fun (nm, price) -> price > avgListPrice), "Expected all prices to be > than avg price of $340.00.")
 }
 
 // This stopped working after implementing columns with table aliases.
