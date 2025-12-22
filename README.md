@@ -49,6 +49,8 @@ let getProducts minPrice =
     }
 ```
 
+> **Note:** All query builders have both `Task` and `Async` variants: `selectTask`/`selectAsync`, `insertTask`/`insertAsync`, `updateTask`/`updateAsync`, `deleteTask`/`deleteAsync`.
+
 That's it! Your queries are now type-checked at compile time.
 
 ---
