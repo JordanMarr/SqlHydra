@@ -337,6 +337,28 @@ selectTask openContext {
 }
 ```
 
+### Transforming Results (Important!)
+
+The `select` clause only supports selecting columns/tables - **not** transformations like `.ToString()` or string interpolation.
+
+**Correct:** Transform in `mapList`/`mapArray`/`mapSeq`:
+```fsharp
+selectTask openContext {
+    for a in SalesLT.Address do
+    select (a.City, a.StateProvince) into (city, state)
+    mapList $"City: {city}, State: {state}"
+}
+```
+
+**Incorrect:** Transforming in `select` throws at runtime:
+```fsharp
+// DON'T DO THIS - will throw!
+selectTask openContext {
+    for a in SalesLT.Address do
+    select ($"City: {a.City}")
+}
+```
+
 </details>
 
 <details>
@@ -526,35 +548,9 @@ If you get SSL certificate errors, append `;TrustServerCertificate=True` to your
 </details>
 
 <details>
-<summary><h2>Transforming Results (Important!)</h2></summary>
-
-The `select` clause only supports selecting columns/tables - **not** transformations.
-
-**Correct:** Transform in `mapList`/`mapArray`/`mapSeq`:
-```fsharp
-selectTask openContext {
-    for a in SalesLT.Address do
-    select (a.City, a.StateProvince) into (city, state)
-    mapList $"City: {city}, State: {state}"
-}
-```
-
-**Incorrect:** Transforming in `select` throws at runtime:
-```fsharp
-// DON'T DO THIS - will throw!
-selectTask openContext {
-    for a in SalesLT.Address do
-    select ($"City: {a.City}")
-}
-```
-
-</details>
-
-<details>
 <summary><h2>Supported Frameworks</h2></summary>
 
 - .NET 8 and .NET 9 are supported
-- `System.DateOnly` and `System.TimeOnly` are supported on .NET 6+
 - For .NET 5 support, use the older provider-specific tools (`SqlHydra.SqlServer`, etc.)
 
 </details>
