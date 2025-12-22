@@ -305,13 +305,24 @@ let getAboveAverageProducts () =
 ### Other Operations
 
 ```fsharp
-// Ordering (conditional with ^^)
+// Ordering
 selectTask openContext {
     for p in SalesLT.Product do
     orderBy p.Name
     thenByDescending p.ListPrice
     select p
 }
+
+// Conditional ordering with ^^
+let getAddresses (sortByCity: bool) (sortByZip: bool) =
+    selectTask openContext {
+        for a in Person.Address do
+        orderBy (
+            (sortByCity ^^ a.City) &&
+            (sortByZip ^^ a.PostalCode)
+        )
+        select a
+    }
 
 // Pagination
 selectTask openContext {
