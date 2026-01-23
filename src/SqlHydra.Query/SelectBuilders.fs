@@ -334,12 +334,12 @@ type SelectBuilder<'Selected, 'Mapped> () =
     
     /// Returns the query results as an array.
     [<CustomOperation("toArray", MaintainsVariableSpace = true)>]
-    member this.ToArray (state: QuerySource<'Selected, Query>) =
+    member this.ToArray (state: QuerySource<'Selected seq, Query>) =
         QuerySource<'Selected array, Query>(state.Query, state.TableMappings)
 
     /// Returns the query results as a list.
     [<CustomOperation("toList", MaintainsVariableSpace = true)>]
-    member this.ToList (state: QuerySource<'Selected, Query>) =
+    member this.ToList (state: QuerySource<'Selected seq, Query>) =
         QuerySource<'Selected list, Query>(state.Query, state.TableMappings)
 
     /// COUNT aggregate function
