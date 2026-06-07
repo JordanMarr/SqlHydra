@@ -664,8 +664,14 @@ let rec visitSqlFn (qualifyColumn: string -> MemberInfo -> string) (exp: Express
             // Nested expression inside aggregate (e.g. SUM(CAST(...)) or MAX(SUM(...)))
             renderAggregate aggType (renderExpr inner)
     | MethodCall m ->
-        let args = m.Arguments |> Seq.map renderExpr |> String.concat ", "
-        $"{m.Method.Name.ToUpperInvariant()}({args})"
+        // Infix-operator seam: a 2-arg function registered via SqlHydraInfixOperatorAttribute
+        // (e.g. cosine_distance → <=>) is emitted infix: (lhs <=> rhs).
+        match (if m.Arguments.Count = 2 then InfixOperators.tryGetOperator m.Method.Name else None) with
+        | Some op ->
+            $"({renderExpr m.Arguments.[0]} {op} {renderExpr m.Arguments.[1]})"
+        | None ->
+            let args = m.Arguments |> Seq.map renderExpr |> String.concat ", "
+            $"{m.Method.Name.ToUpperInvariant()}({args})"
     | _ ->
         notImplMsg $"Expected a method call expression but got: {exp.NodeType}"
 
@@ -1271,6 +1277,9 @@ let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'
                     let alias = visitAlias mem.Expression
                     qualifyColumn alias mem.Member
                 | :? ConstantExpression as c -> renderConstant false c
+                | :? MethodCallExpression as mc when mc.Arguments.Count = 2 && (InfixOperators.tryGetOperator mc.Method.Name).IsSome ->
+                    let op = (InfixOperators.tryGetOperator mc.Method.Name).Value
+                    $"({render mc.Arguments.[0]} {op} {render mc.Arguments.[1]})"
                 | :? MethodCallExpression as mc when aggregateMethodNames.Contains mc.Method.Name ->
                     let aggType = aggTypeOf mc.Method.Name
                     renderAggregate aggType (render mc.Arguments.[0])
@@ -1555,6 +1564,9 @@ let private renderSelectExpression (exp: Expression) : string * obj[] =
                 | Some s -> s
                 | None -> notImplMsg $"Unsupported binary operator in select expression: {b.NodeType}"
             $"{left} {op} {right}"
+        | :? MethodCallExpression as mc when mc.Arguments.Count = 2 && (InfixOperators.tryGetOperator mc.Method.Name).IsSome ->
+            let op = (InfixOperators.tryGetOperator mc.Method.Name).Value
+            $"({render mc.Arguments.[0]} {op} {render mc.Arguments.[1]})"
         // Aggregates: countBy/sumBy/etc. → SUM(col), COUNT(DISTINCT col) for countDistinct.
         | :? MethodCallExpression as mc when aggregateMethodNames.Contains mc.Method.Name ->
             let aggType = aggTypeOf mc.Method.Name

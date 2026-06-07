@@ -142,6 +142,53 @@ module RawExpressions =
     /// Example: caseWhen (col > 0) (inlineValue "yes") (inlineValue "no")
     let inlineValue<'T> (_value: 'T) : 'T = Unchecked.defaultof<'T>
 
+/// Assembly-level attribute that registers a SQL function name as an infix operator.
+/// Extension packages (e.g. SqlHydra.Query.Pgvector) apply this attribute on themselves and
+/// SqlHydra discovers it the first time a query is compiled. No explicit registration call required.
+///
+/// Example (in extension package):
+///   [<assembly: SqlHydra.Query.SqlHydraInfixOperator("cosine_distance", "<=>")>]
+[<System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = true)>]
+type SqlHydraInfixOperatorAttribute(fnName: string, op: string) =
+    inherit System.Attribute()
+    member _.FnName = fnName
+    member _.Operator = op
+
+/// Registry for SQL functions that should be emitted as infix operators.
+/// Discovers `SqlHydraInfixOperatorAttribute` declarations from all loaded assemblies, and
+/// subscribes to `AssemblyLoad` so plugin assemblies that load lazily are picked up automatically.
+/// Manual registration is also supported for tests / dynamic scenarios.
+module InfixOperators =
+    let private registry = System.Collections.Concurrent.ConcurrentDictionary<string, string>()
+
+    let private scanAssembly (asm: System.Reflection.Assembly) =
+        try
+            for attr in asm.GetCustomAttributes(typeof<SqlHydraInfixOperatorAttribute>, false) do
+                let a = attr :?> SqlHydraInfixOperatorAttribute
+                registry.[a.FnName] <- a.Operator
+        with _ -> () // tolerate dynamic / reflection-only / partially-loaded assemblies
+
+    let private initOnce =
+        lazy (
+            // Pick up assemblies already loaded at startup.
+            for asm in System.AppDomain.CurrentDomain.GetAssemblies() do
+                scanAssembly asm
+            // Pick up plugin assemblies that load lazily after first use.
+            System.AppDomain.CurrentDomain.AssemblyLoad.Add(fun e -> scanAssembly e.LoadedAssembly)
+        )
+
+    /// Manually register a function name. Extension packages should prefer
+    /// `SqlHydraInfixOperatorAttribute` so registration is automatic.
+    let register (fnName: string) (operator: string) =
+        registry.[fnName] <- operator
+
+    /// Look up whether a function should be emitted as an infix operator.
+    let tryGetOperator (fnName: string) =
+        initOnce.Value
+        match registry.TryGetValue(fnName) with
+        | true, op -> Some op
+        | _ -> None
+
 [<AutoOpen>]
 module SqlFunctions =
 

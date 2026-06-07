@@ -8,6 +8,18 @@ open System.Data.Common
 open System.Threading
 open System.Threading.Tasks
 
+/// Helpers for extension packages that add custom CE operations.
+[<AutoOpen>]
+module ExtensionHelpers =
+    /// Resolves an orderBy-style [<ProjectionParameter>] property selector to its
+    /// (tableAlias, columnName) when it is a simple column reference.
+    /// Returns None for expressions or aggregates. For extension packages adding
+    /// custom ORDER BY operations (e.g. vector distance ordering).
+    let tryGetOrderByColumn<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) : (string * string) option =
+        match LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector with
+        | LinqExpressionVisitors.OrderByColumn(tableAlias, m) -> Some(tableAlias, m.Name)
+        | _ -> None
+
 /// The context type that determines how the query context is created and disposed.
 /// Can be implicitly converted from a QueryContext, a function that creates a QueryContext, a Task that creates a QueryContext, or an Async that creates a QueryContext.
 [<NoComparison; NoEquality>]
