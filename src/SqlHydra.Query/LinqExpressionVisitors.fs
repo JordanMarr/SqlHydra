@@ -8,6 +8,40 @@ open FastExpressionCompiler
 let notImpl() = raise (NotImplementedException())
 let notImplMsg msg = raise (NotImplementedException msg)
 
+/// Aggregate method names recognized by the visitor. Used by visitSqlFn / pattern matchers.
+/// Keep in sync with QueryFunctions.Aggregates.
+let aggregateMethodNames =
+    System.Collections.Generic.HashSet<string>([
+        nameof minBy; nameof maxBy; nameof sumBy; nameof avgBy
+        nameof countBy; nameof avgByAs; nameof countDistinct
+    ])
+
+/// Renders an aggregate function call. Special-cases COUNTDISTINCT → COUNT(DISTINCT col).
+let renderAggregate (aggType: string) (col: string) =
+    if aggType = "COUNTDISTINCT" then $"COUNT(DISTINCT {col})"
+    else $"{aggType}({col})"
+
+/// Derives the SQL aggregate type name from an aggregate method name (e.g. `countBy` → `COUNT`, `avgByAs` → `AVG`).
+let aggTypeOf (name: string) = name.Replace("By", "").Replace("As", "").ToUpper()
+
+/// Maps an F# CLR type to its SQL CAST target type name.
+let sqlTypeForClrType (t: System.Type) =
+    let t =
+        if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<option<_>>
+        then t.GetGenericArguments().[0]
+        elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>>
+        then System.Nullable.GetUnderlyingType(t)
+        else t
+    if t = typeof<float> || t = typeof<double> then "FLOAT"
+    elif t = typeof<float32> || t = typeof<single> then "REAL"
+    elif t = typeof<int> || t = typeof<int32> then "INTEGER"
+    elif t = typeof<int64> then "BIGINT"
+    elif t = typeof<int16> then "SMALLINT"
+    elif t = typeof<decimal> then "NUMERIC"
+    elif t = typeof<string> then "TEXT"
+    elif t = typeof<bool> then "BOOLEAN"
+    else t.Name
+
 
 [<AutoOpen>]
 module VisitorPatterns =
@@ -269,8 +303,8 @@ module SqlPatterns =
 
     let (|AggregateColumn|_|) (exp: Expression) =
         match exp with
-        | MethodCall m when List.contains m.Method.Name [ nameof minBy; nameof maxBy; nameof sumBy; nameof avgBy; nameof countBy; nameof avgByAs ] ->
-            let aggType = m.Method.Name.Replace("By", "").Replace("As", "").ToUpper()
+        | MethodCall m when aggregateMethodNames.Contains m.Method.Name ->
+            let aggType = aggTypeOf m.Method.Name
             match m.Arguments.[0] with
             | Property p -> Some (aggType, p)
             | _ -> notImplMsg "Invalid argument to aggregate function."
@@ -372,10 +406,14 @@ module NormalizedPatterns =
         | _ -> None
 
     /// Aggregate column pattern (minBy, maxBy, sumBy, avgBy, countBy, avgByAs).
+    /// Matches only when the aggregate's argument resolves to a column (direct Property or
+    /// Option/Nullable Value chain). Aggregates over arbitrary expressions (e.g.
+    /// `countBy(caseWhen ...)`) fall through to the NMethodCall arm, which delegates to
+    /// `visitSqlFn`/`renderExpr` for full expression rendering.
     let (|NAggregateColumn|_|) (nexp: NormalizedExpression) =
         match nexp with
-        | NMethodCall(m, _) when List.contains m.Method.Name [ nameof minBy; nameof maxBy; nameof sumBy; nameof avgBy; nameof countBy; nameof avgByAs ] ->
-            let aggType = m.Method.Name.Replace("By", "").Replace("As", "").ToUpper()
+        | NMethodCall(m, _) when aggregateMethodNames.Contains m.Method.Name ->
+            let aggType = aggTypeOf m.Method.Name
             match m.Arguments.[0] with
             | Property p -> Some (aggType, p)
             | _ -> notImplMsg "Invalid argument to aggregate function."
@@ -399,15 +437,36 @@ module NormalizedPatterns =
             | _ -> None
         | _ -> None
 
-let getComparison (expType: ExpressionType) =
+let tryGetComparison (expType: ExpressionType) =
     match expType with
-    | ExpressionType.Equal -> "="
-    | ExpressionType.NotEqual -> "<>"
-    | ExpressionType.GreaterThan -> ">"
-    | ExpressionType.GreaterThanOrEqual -> ">="
-    | ExpressionType.LessThan -> "<"
-    | ExpressionType.LessThanOrEqual -> "<="
-    | _ -> notImplMsg "Unsupported comparison type"
+    | ExpressionType.Equal -> Some "="
+    | ExpressionType.NotEqual -> Some "<>"
+    | ExpressionType.GreaterThan -> Some ">"
+    | ExpressionType.GreaterThanOrEqual -> Some ">="
+    | ExpressionType.LessThan -> Some "<"
+    | ExpressionType.LessThanOrEqual -> Some "<="
+    | _ -> None
+
+/// Maps a binary expression node to its SQL operator: comparisons (`=`,`<>`,…) plus
+/// logical/arithmetic operators (`AND`/`OR`/`+`/`-`/`*`/`/`/`%`). `None` if unsupported.
+let tryGetBinaryOp (expType: ExpressionType) =
+    match tryGetComparison expType with
+    | Some s -> Some s
+    | None ->
+        match expType with
+        | ExpressionType.AndAlso -> Some "AND"
+        | ExpressionType.OrElse -> Some "OR"
+        | ExpressionType.Add -> Some "+"
+        | ExpressionType.Subtract -> Some "-"
+        | ExpressionType.Multiply -> Some "*"
+        | ExpressionType.Divide -> Some "/"
+        | ExpressionType.Modulo -> Some "%"
+        | _ -> None
+
+let getComparison (expType: ExpressionType) =
+    match tryGetComparison expType with
+    | Some s -> s
+    | None -> notImplMsg "Unsupported comparison type"
 
 let reverseComparison (expType: ExpressionType) =
     match expType with
@@ -446,33 +505,167 @@ let visitAlias (exp: Expression) =
         | _ -> notImpl()
     visit exp
 
+let private compileAndEval (e: Expression) =
+    System.Linq.Expressions.Expression.Lambda(e).Compile().DynamicInvoke()
+
+let private inv = System.Globalization.CultureInfo.InvariantCulture
+
+let private isNullaryDU (t: System.Type) =
+    FSharp.Reflection.FSharpType.IsUnion(t)
+    && FSharp.Reflection.FSharpType.GetUnionCases(t) |> Array.forall (fun c -> c.GetFields().Length = 0)
+
+let private formatFloat (s: string) =
+    if s.Contains(".") || s.Contains("e") || s.Contains("E") then s else s + ".0"
+
+/// Formats a numeric constant as SQL literal, preserving the type's decimal form for floats.
+/// `1.0` (double) → "1.0", not "1" (which Postgres types as integer and breaks `1.0 - <vector>` queries).
+/// Enums and nullary DUs are quoted as their string name — Postgres treats bare identifiers as columns.
+let private formatNumericLiteral (value: obj) (clrType: System.Type) =
+    match clrType with
+    | t when t = typeof<float> || t = typeof<double> -> (value :?> double).ToString("R", inv) |> formatFloat
+    | t when t = typeof<single> || t = typeof<float32> -> (value :?> single).ToString("R", inv) |> formatFloat
+    | t when t = typeof<decimal> -> (value :?> decimal).ToString(inv)
+    | t when t.IsEnum || isNullaryDU t -> $"'{value}'"
+    // Integer primitives (int, int64, byte, ...) — ToString is safe SQL for these.
+    // char/bool are excluded: bool is handled in renderObjAsLiteral; char would emit unquoted.
+    | t when t.IsPrimitive && t <> typeof<char> && t <> typeof<bool> -> sprintf "%O" value
+    | t -> failwithf "Cannot format SQL literal of type %s — wrap with inlineValue or parameterize." t.FullName
+
+/// Renders a `ConstantExpression` to a SQL literal. When `handleBool` is true, bool constants
+/// emit `TRUE`/`FALSE`; otherwise they fall through to numeric formatting (matching the
+/// orderBy walker, which never receives bool constants). Shared by the expression walkers.
+let private renderConstant (handleBool: bool) (c: ConstantExpression) =
+    if c.Value = null then "NULL"
+    elif c.Type = typeof<string> then $"'{c.Value}'"
+    elif handleBool && c.Type = typeof<bool> then (if c.Value :?> bool then "TRUE" else "FALSE")
+    else formatNumericLiteral c.Value c.Type
+
+/// Renders an evaluated runtime value as a SQL literal fragment.
+/// Used for `inlineValue` and static-field references (Guid.Empty, DateTime.MinValue, etc.).
+let private renderObjAsLiteral (v: obj) =
+    match v with
+    | null -> "NULL"
+    | :? string as s -> $"'{s}'"
+    | :? bool as b -> if b then "TRUE" else "FALSE"
+    | :? System.Guid as g -> $"'{g}'"
+    | :? System.DateTime as dt ->
+        let s = dt.ToString("yyyy-MM-dd HH:mm:ss", inv)
+        $"'{s}'"
+    | :? System.DateTimeOffset as dto ->
+        let s = dto.ToString("yyyy-MM-dd HH:mm:sszzz", inv)
+        $"'{s}'"
+    | _ -> formatNumericLiteral v (v.GetType())
+
 /// Converts a SQL function MethodCall expression to a SQL fragment string.
+/// Also renders argument expressions when called recursively as the entry point for
+/// general select-fragment compilation (caseWhen, castAs, etc.).
 /// Example: LEN(p.FirstName) -> "LEN({p}.{FirstName})"
 let rec visitSqlFn (qualifyColumn: string -> MemberInfo -> string) (exp: Expression) : string =
+    /// Render an arbitrary expression as a SQL fragment (literals inline, columns qualified, nested fns recursed).
+    /// Supports: Member columns, static-field Members, Constants, Unary Convert, Binary arithmetic/compare, MethodCall.
+    /// `inlineValue x` is rendered as the value's literal form (numeric/string).
+    let rec renderExpr (arg: Expression) : string =
+        match arg with
+        // Unwrap implicit numeric conversions (e.g., int → float when a column type widens).
+        | :? UnaryExpression as u when u.NodeType = ExpressionType.Convert ->
+            renderExpr u.Operand
+        // inlineValue marker: compile-and-eval the inner expression and emit as a literal.
+        | MethodCall m when m.Method.Name = nameof inlineValue && m.Arguments.Count = 1 ->
+            renderObjAsLiteral (compileAndEval m.Arguments.[0])
+        | Member mem when mem.Expression <> null ->
+            let alias = visitAlias mem.Expression
+            qualifyColumn alias mem.Member
+        // Static fields (Guid.Empty, DateTime.MinValue, String.Empty) — null .Expression.
+        | Member mem -> renderObjAsLiteral (compileAndEval mem)
+        | :? ConstantExpression as c -> renderConstant true c
+        | :? BinaryExpression as b ->
+            let left = renderExpr b.Left
+            let right = renderExpr b.Right
+            let op =
+                match tryGetBinaryOp b.NodeType with
+                | Some s -> s
+                | None -> notImplMsg $"Unsupported binary operator in expression: {b.NodeType}"
+            $"{left} {op} {right}"
+        | MethodCall _ as nested -> visitSqlFn qualifyColumn nested
+        | _ -> notImplMsg $"Unsupported expression in select/caseWhen fragment: {arg.NodeType}"
+
+    /// Extract (cond, value) pairs from an F# list literal like `[ a > 1, "x"; b > 2, "y" ]`.
+    let rec extractListItems (exp: Expression) : (string * string) list =
+        match exp with
+        | :? MethodCallExpression as m when m.Method.Name = "Cons" || m.Method.Name = "op_ColonColon" ->
+            let (cond, value) = extractTuple m.Arguments.[0]
+            (cond, value) :: extractListItems m.Arguments.[1]
+        | :? NewExpression as n when n.Arguments.Count = 2 ->
+            let (cond, value) = extractTuple n.Arguments.[0]
+            (cond, value) :: extractListItems n.Arguments.[1]
+        | :? MemberExpression as m when m.Member.Name = "Empty" -> []
+        | :? DefaultExpression -> []
+        | _ ->
+            // Fallback: compile-and-eval to runtime list.
+            try
+                match compileAndEval exp with
+                | :? System.Collections.IEnumerable as items ->
+                    [ for item in items do
+                        let t = item.GetType()
+                        let cond = t.GetProperty("Item1").GetValue(item) :?> bool
+                        let v = t.GetProperty("Item2").GetValue(item)
+                        let condStr = if cond then "TRUE" else "FALSE"
+                        let valStr =
+                            match v with
+                            | null -> "NULL"
+                            | :? string as s -> $"'{s}'"
+                            | x -> sprintf "%O" x
+                        yield (condStr, valStr) ]
+                | _ -> notImplMsg $"Cannot extract caseWhenMulti list: {exp.NodeType}"
+            with ex -> notImplMsg $"Cannot extract caseWhenMulti list: {exp.NodeType} ({ex.Message})"
+    and extractTuple (exp: Expression) : string * string =
+        match exp with
+        | :? NewExpression as n when n.Arguments.Count = 2 ->
+            (renderExpr n.Arguments.[0], renderExpr n.Arguments.[1])
+        | :? MethodCallExpression as m when m.Method.Name = "NewTuple" ->
+            (renderExpr m.Arguments.[0], renderExpr m.Arguments.[1])
+        | _ -> notImplMsg $"Cannot extract caseWhenMulti tuple: {exp.NodeType}"
+
     match exp with
+    // CAST(expr AS sqlType) — target SQL type inferred from the F# return type.
+    | MethodCall m when m.Method.Name = nameof castAs && m.Arguments.Count = 1 ->
+        $"CAST({renderExpr m.Arguments.[0]} AS {sqlTypeForClrType m.Method.ReturnType})"
+    // CASE WHEN cond THEN then ELSE else END
+    | MethodCall m when m.Method.Name = nameof caseWhen && m.Arguments.Count = 3 ->
+        $"CASE WHEN {renderExpr m.Arguments.[0]} THEN {renderExpr m.Arguments.[1]} ELSE {renderExpr m.Arguments.[2]} END"
+    // Multi-branch CASE WHEN
+    | MethodCall m when m.Method.Name = nameof caseWhenMulti && m.Arguments.Count = 2 ->
+        let whens =
+            extractListItems m.Arguments.[0]
+            |> List.map (fun (c, v) -> $"WHEN {c} THEN {v}")
+            |> String.concat " "
+        $"CASE {whens} ELSE {renderExpr m.Arguments.[1]} END"
+    // Lateral subquery column reference: lateralCol "alias" "col" → "alias"."col"
+    | MethodCall m when m.Method.Name = nameof lateralCol && m.Arguments.Count = 2 ->
+        let alias = compileAndEval m.Arguments.[0] :?> string
+        let column = compileAndEval m.Arguments.[1] :?> string
+        $"\"{alias}\".\"{column}\""
+    // Raw SQL escape hatch
+    | MethodCall m when m.Method.Name = nameof rawExpr && m.Arguments.Count = 1 ->
+        compileAndEval m.Arguments.[0] :?> string
+    // PostgreSQL INTERVAL literal: interval "7 days" → INTERVAL '7 days'
+    // (Method name string-matched because `interval` lives in NpgsqlExtensions and isn't in scope here.)
+    | MethodCall m when m.Method.Name = "interval" && m.Arguments.Count = 1 ->
+        let value = compileAndEval m.Arguments.[0] :?> string
+        $"INTERVAL '{value}'"
+    // Aggregates → render via renderAggregate (handles COUNT(DISTINCT col)).
+    | MethodCall m when aggregateMethodNames.Contains m.Method.Name ->
+        let aggType = aggTypeOf m.Method.Name
+        match m.Arguments.[0] with
+        | Member mem when mem.Expression <> null ->
+            let alias = visitAlias mem.Expression
+            renderAggregate aggType (qualifyColumn alias mem.Member)
+        | inner ->
+            // Nested expression inside aggregate (e.g. SUM(CAST(...)) or MAX(SUM(...)))
+            renderAggregate aggType (renderExpr inner)
     | MethodCall m ->
-        let fnName = m.Method.Name
-        let args =
-            m.Arguments
-            |> Seq.map (fun arg ->
-                match arg with
-                | Member mem ->
-                    let alias = visitAlias mem.Expression
-                    qualifyColumn alias mem.Member
-                | Constant c when c.Value = null ->
-                    "NULL"
-                | Constant c when c.Type = typeof<string> ->
-                    $"'{c.Value}'"
-                | Constant c ->
-                    sprintf "%O" c.Value
-                | MethodCall _ as nested ->
-                    // Handle nested function calls
-                    visitSqlFn qualifyColumn nested
-                | _ ->
-                    notImplMsg $"Unsupported argument type in SQL function: {arg.NodeType}"
-            )
-            |> String.concat ", "
-        $"{fnName}({args})"
+        let args = m.Arguments |> Seq.map renderExpr |> String.concat ", "
+        $"{m.Method.Name.ToUpperInvariant()}({args})"
     | _ ->
         notImplMsg $"Expected a method call expression but got: {exp.NodeType}"
 
@@ -499,6 +692,31 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
 
     let rec visit (nexp: NormalizedExpression) : WhereClause =
         match nexp with
+        // Idiomatic F#: `set.Contains col`, `list.Contains col`, `array.Contains col`,
+        // and `Seq.contains col xs` / `List.contains col xs`. Compile to `col IN (values)`.
+        // The collection is compile-and-eval'd (it must be a closed-over value, not a column).
+        | NMethodCall(m, args) when m.Method.Name = "Contains" ->
+            let receiverExp, columnNExp =
+                if m.Object <> null && args.Length = 1 then
+                    // Instance method: receiver.Contains(col)
+                    m.Object, args.[0]
+                elif args.Length = 2 then
+                    // Static: Module.contains col xs OR xs.Contains col-via-extension
+                    m.Arguments.[0], args.[1]
+                else
+                    notImplMsg $"Unsupported Contains shape: {nexp}"
+            match columnNExp with
+            | NColumn (p, _) ->
+                let receiver = compileAndEvaluateExpression receiverExp
+                let queryParameters =
+                    (receiver :?> System.Collections.IEnumerable)
+                    |> Seq.cast<obj>
+                    |> Seq.map (QueryUtils.getQueryParameterForValue p.Member)
+                    |> Seq.toArray
+                let alias = visitAlias p.Expression
+                let fqCol = qualifyColumn alias p.Member
+                InValues(fqCol, queryParameters)
+            | _ -> notImplMsg $"Unsupported Contains column argument: {columnNExp}"
         | NMethodCall(m, args) when List.contains m.Method.Name [ nameof isIn; nameof isNotIn; nameof op_BarEqualsBar; nameof op_BarLessGreaterBar ] ->
             let isIn = List.contains m.Method.Name [ nameof isIn; nameof op_BarEqualsBar ]
 
@@ -727,21 +945,44 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
                 Compare(fqCol, compOp, Parameter queryParameter)
 
             | NColumn (p, _), _ ->
-                let value = nEvaluate right
                 let alias = visitAlias p.Expression
                 let fqCol = qualifyColumn alias p.Member
-                match value with
-                | null when op = ExpressionType.Equal -> IsNull(fqCol)
-                | null when op = ExpressionType.NotEqual -> IsNotNull(fqCol)
-                | _ ->
-                    let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
-                    Compare(fqCol, compOp, Parameter queryParameter)
+                // RHS may be a captured value (compile-and-eval) OR an outer-scope column
+                // reference in a lateral subquery (where the column's parameter isn't in
+                // the local `tables` map). Try eval; on failure, fall back to column ref.
+                let valueResult =
+                    try Some (nEvaluate right) with _ -> None
+                match valueResult with
+                | Some value ->
+                    match value with
+                    | null when op = ExpressionType.Equal -> IsNull(fqCol)
+                    | null when op = ExpressionType.NotEqual -> IsNotNull(fqCol)
+                    | _ ->
+                        let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
+                        Compare(fqCol, compOp, Parameter queryParameter)
+                | None ->
+                    match right with
+                    | NMemberAccess(_, m) when m.Expression <> null ->
+                        let rhsAlias = visitAlias m.Expression
+                        let rhsCol = qualifyColumn rhsAlias m.Member
+                        CompareColumns(fqCol, compOp, rhsCol)
+                    | _ -> notImplMsg $"Unable to evaluate where RHS: {right}"
 
             | _, NColumn (p, _) ->
-                let value = nEvaluate left
+                let valueResult =
+                    try Some (nEvaluate left) with _ -> None
                 let reversedOp = reverseComparisonOp compOp
                 let alias = visitAlias p.Expression
                 let fqCol = qualifyColumn alias p.Member
+                match valueResult with
+                | None ->
+                    match left with
+                    | NMemberAccess(_, m) when m.Expression <> null ->
+                        let lhsAlias = visitAlias m.Expression
+                        let lhsCol = qualifyColumn lhsAlias m.Member
+                        CompareColumns(lhsCol, compOp, fqCol)
+                    | _ -> notImplMsg $"Unable to evaluate where LHS: {left}"
+                | Some value ->
                 match value with
                 | null when reversedOp = Eq -> IsNull(fqCol)
                 | null when reversedOp = NotEq -> IsNotNull(fqCol)
@@ -792,8 +1033,45 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
 
             | NValue _, NValue _ ->
                 notImplMsg("Value to value comparisons are not currently supported. Ex: where (1 = 1)")
+
             | _ ->
-                notImpl()
+                // Fallback: outer-scope column refs (lateral subquery referencing
+                // a correlate-d parent table). The parameter isn't in the local
+                // `tables` map so NColumn doesn't match, but visitAlias still
+                // returns the parameter name as alias.
+                let rec asOuterCol (n: NormalizedExpression) =
+                    match n with
+                    | NMemberAccess(_, m) when (m.Expression :? ParameterExpression) -> Some m
+                    | NUnary(ExpressionType.Convert, inner) -> asOuterCol inner
+                    | _ -> None
+                let tryEval (n: NormalizedExpression) =
+                    try Some (nEvaluate n) with _ -> None
+                match asOuterCol left, asOuterCol right with
+                | Some ml, Some mr ->
+                    let lt = qualifyColumn (visitAlias ml.Expression) ml.Member
+                    let rt = qualifyColumn (visitAlias mr.Expression) mr.Member
+                    CompareColumns(lt, compOp, rt)
+                | Some ml, None ->
+                    let fq = qualifyColumn (visitAlias ml.Expression) ml.Member
+                    match tryEval right with
+                    | Some null when op = ExpressionType.Equal -> IsNull(fq)
+                    | Some null when op = ExpressionType.NotEqual -> IsNotNull(fq)
+                    | Some v ->
+                        let qp = QueryUtils.getQueryParameterForValue ml.Member v
+                        Compare(fq, compOp, Parameter qp)
+                    | None -> notImplMsg $"[where-cmp] cannot eval RHS: {right}"
+                | None, Some mr ->
+                    let fq = qualifyColumn (visitAlias mr.Expression) mr.Member
+                    let rev = reverseComparisonOp compOp
+                    match tryEval left with
+                    | Some null when op = ExpressionType.Equal -> IsNull(fq)
+                    | Some null when op = ExpressionType.NotEqual -> IsNotNull(fq)
+                    | Some v ->
+                        let qp = QueryUtils.getQueryParameterForValue mr.Member v
+                        Compare(fq, rev, Parameter qp)
+                    | None -> notImplMsg $"[where-cmp] cannot eval LHS: {left}"
+                | None, None ->
+                    notImplMsg $"[where-cmp-fallthrough] op={compOp}\nleft={left}\nright={right}"
 
         | _ ->
             notImplMsg $"Unsupported expression type in where clause: {nexp}"
@@ -872,7 +1150,7 @@ let visitHaving<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool
                 then IsNull(fqCol)
                 else IsNotNull(fqCol)
             | _ -> notImpl()
-        | NMethodCall(m, args) when List.contains m.Method.Name [ nameof minBy; nameof maxBy; nameof sumBy; nameof avgBy; nameof countBy; nameof avgByAs ] ->
+        | NMethodCall(m, args) when aggregateMethodNames.Contains m.Method.Name ->
             visit args.[0]
         | NBinaryAnd(left, right) ->
             let lt = visit left
@@ -899,11 +1177,11 @@ let visitHaving<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool
                 let rt =
                     let alias = visitAlias p2.Expression
                     qualifyColumn alias p2.Member
-                RawWhere($"{aggType}({lt}) {comparison} {rt}", [||])
+                RawWhere($"{renderAggregate aggType lt} {comparison} {rt}", [||])
             | NAggregateColumn (aggType, (p, _)), NValue value ->
                 let alias = visitAlias p.Expression
                 let lt = qualifyColumn alias p.Member
-                RawWhere($"{aggType}({lt}) {comparison} ?", [|value|])
+                RawWhere($"{renderAggregate aggType lt} {comparison} ?", [|value|])
             | NColumn (p1, _), NColumn (p2, _) ->
                 let lt =
                     let alias = visitAlias p1.Expression
@@ -948,9 +1226,13 @@ let visitPropertiesSelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'P
 
     visit (ExpressionNormalizer.toNormalizedExpression (propertySelector :> Expression))
 
+[<NoComparison>]
 type OrderBy =
     | OrderByColumn of tableAlias: string * MemberInfo
     | OrderByAggregateColumn of aggregateType: string * tableAlias: string * MemberInfo
+    /// `orderBy (cosine_distance(col, vec))` and similar method-call expressions.
+    /// Carries the rendered SQL fragment with `?` placeholders bound to `parameters`.
+    | OrderByExpression of fragment: string * parameters: obj[]
     | OrderByIgnored
 
 /// Returns a column MemberInfo.
@@ -971,6 +1253,34 @@ let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'
         | NAggregateColumn (aggType, (p, _)) ->
             let alias = visitAlias p.Expression
             OrderByAggregateColumn (aggType, alias, p.Member)
+        // Method-call orderBy (e.g. orderBy (cosine_distance(col, inlineValue vec))) — render directly.
+        // Walk the expression building SQL fragment + parameter list. inlineValue args become bound
+        // parameters; columns are qualified; InfixOperators registrations rewrite to infix.
+        | NMethodCall(m, _) ->
+            let parms = ResizeArray<obj>()
+            let qualifyColumn alias (mem: MemberInfo) = $"\"{alias}\".\"{mem.Name}\""
+            let rec render (e: Expression) : string =
+                match e with
+                | :? UnaryExpression as u when u.NodeType = ExpressionType.Convert ->
+                    render u.Operand
+                | :? MethodCallExpression as mc when mc.Method.Name = nameof inlineValue && mc.Arguments.Count = 1 ->
+                    let value = compileAndEval mc.Arguments.[0]
+                    parms.Add(if isNull value then box System.DBNull.Value else value)
+                    "?"
+                | :? MemberExpression as mem when mem.Expression <> null ->
+                    let alias = visitAlias mem.Expression
+                    qualifyColumn alias mem.Member
+                | :? ConstantExpression as c -> renderConstant false c
+                | :? MethodCallExpression as mc when aggregateMethodNames.Contains mc.Method.Name ->
+                    let aggType = aggTypeOf mc.Method.Name
+                    renderAggregate aggType (render mc.Arguments.[0])
+                | :? MethodCallExpression as mc ->
+                    let args = mc.Arguments |> Seq.map render |> String.concat ", "
+                    $"{mc.Method.Name.ToUpperInvariant()}({args})"
+                | _ ->
+                    notImplMsg $"Unsupported expression in orderBy method-call: {e.NodeType}"
+            let frag = render (m :> Expression)
+            OrderByExpression (frag, parms.ToArray())
         | NMemberAccess(inner, m) ->
             if m.Member.DeclaringType |> isOptionOrNullableType then
                 visit inner
@@ -984,7 +1294,8 @@ let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'
 
     visit (ExpressionNormalizer.toNormalizedExpression (propertySelector :> Expression))
 
-type JoinedPropertyInfo = 
+[<NoComparison>]
+type JoinedPropertyInfo =
     {
         Alias: string
         Member: MemberInfo
@@ -1025,10 +1336,17 @@ let visitPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Pro
 
     visit (ExpressionNormalizer.toNormalizedExpression (propertySelector :> Expression))
 
+[<NoComparison>]
 type Selection =
     | SelectedTable of tableAlias: string * tableType: Type
     | SelectedColumn of tableAlias: string * column: string * columnType: Type * isOpt: bool * isNullable: bool
     | SelectedExpression of sqlFragment: string
+    /// Select projection with bound parameters (e.g. `1.0 - cosine_distance(col, inlineValue v)`).
+    /// Fragment uses `?` placeholders that the emitter binds in order.
+    | SelectedExpressionWithParams of sqlFragment: string * parameters: obj[]
+    /// Selection with an explicit `AS "alias"` (anonymous-record field name).
+    /// Wraps any of the above; the inner Selection is rendered, then the alias appended.
+    | SelectedAs of inner: Selection * alias: string
 
 
 /// Visits a join predicate expression and builds a WhereClause for the JOIN ON condition.
@@ -1086,7 +1404,31 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
                     let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
                     Compare(fqCol, reversedOp, Parameter queryParameter)
 
-            // Nullable.Value / Option.Value comparisons
+            // Option.Value / Nullable.Value column compared to another column → CompareColumns.
+            | NColumn (p, ext), NColumn (p2, _) when ext = ExtProperty.Value ->
+                let alias1 = visitAlias p.Expression
+                let m1 = tryGetMember p
+                let lt = qualifyColumn alias1 m1.Value.Member
+                let alias2 = visitAlias p2.Expression
+                let rt = qualifyColumn alias2 p2.Member
+                CompareColumns(lt, compOp, rt)
+            | NColumn (p1, _), NColumn (p2, ext2) when ext2 = ExtProperty.Value ->
+                let alias1 = visitAlias p1.Expression
+                let lt = qualifyColumn alias1 p1.Member
+                let alias2 = visitAlias p2.Expression
+                let m2 = tryGetMember p2
+                let rt = qualifyColumn alias2 m2.Value.Member
+                CompareColumns(lt, compOp, rt)
+            // Both sides Value-wrapped (e.g. left.Value.x = right.Value.y)
+            | NColumn (p1, ext1), NColumn (p2, ext2) when ext1 = ExtProperty.Value && ext2 = ExtProperty.Value ->
+                let alias1 = visitAlias p1.Expression
+                let m1 = tryGetMember p1
+                let lt = qualifyColumn alias1 m1.Value.Member
+                let alias2 = visitAlias p2.Expression
+                let m2 = tryGetMember p2
+                let rt = qualifyColumn alias2 m2.Value.Member
+                CompareColumns(lt, compOp, rt)
+            // Nullable.Value / Option.Value column compared to a value (compile-eval'd if needed).
             | NColumn (p, ext), _ when ext = ExtProperty.Value ->
                 let value =
                     match right with
@@ -1104,12 +1446,130 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
                     let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
                     Compare(fqCol, compOp, Parameter queryParameter)
 
+            // Column compared to a non-NValue expression. Could be either:
+            //   (a) a captured local / static member — compile-and-eval to a parameter, or
+            //   (b) a column reference whose receiver isn't in the local `tables` map (e.g. a
+            //       correlated outer-scope parameter from a lateral subquery).
+            // Try compile-and-eval first; if it fails (because the expression references a
+            // free query parameter), fall back to treating it as a column ref via the
+            // underlying member chain.
+            | NColumn (p, _), (NMemberAccess _ | NMethodCall _ | NUnknown _) ->
+                let evalRhs () =
+                    match right with
+                    | NMemberAccess(_, m) -> Some (compileAndEvaluateExpression (m :> Expression))
+                    | NMethodCall(m, _) -> Some (compileAndEvaluateExpression (m :> Expression))
+                    | NUnknown e -> Some (compileAndEvaluateExpression e)
+                    | _ -> None
+                let alias = visitAlias p.Expression
+                let fqCol = qualifyColumn alias p.Member
+                let tryColumnRef () =
+                    match right with
+                    | NMemberAccess(_, m) when m.Expression <> null ->
+                        try
+                            let rhsAlias = visitAlias m.Expression
+                            Some (qualifyColumn rhsAlias m.Member)
+                        with _ -> None
+                    | _ -> None
+                let result =
+                    try evalRhs () |> Option.map Choice1Of2
+                    with _ -> tryColumnRef () |> Option.map Choice2Of2
+                match result with
+                | Some (Choice1Of2 value) ->
+                    match value with
+                    | null when op = ExpressionType.Equal -> IsNull(fqCol)
+                    | null when op = ExpressionType.NotEqual -> IsNotNull(fqCol)
+                    | _ ->
+                        let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
+                        Compare(fqCol, compOp, Parameter queryParameter)
+                | Some (Choice2Of2 rhsCol) ->
+                    CompareColumns(fqCol, compOp, rhsCol)
+                | None ->
+                    notImplMsg $"Unable to render join predicate RHS: {right}"
+
+            // Reverse: captured value or outer-scope column compared to local column.
+            | (NMemberAccess _ | NMethodCall _ | NUnknown _), NColumn (p, _) ->
+                let evalLhs () =
+                    match left with
+                    | NMemberAccess(_, m) -> Some (compileAndEvaluateExpression (m :> Expression))
+                    | NMethodCall(m, _) -> Some (compileAndEvaluateExpression (m :> Expression))
+                    | NUnknown e -> Some (compileAndEvaluateExpression e)
+                    | _ -> None
+                let alias = visitAlias p.Expression
+                let fqCol = qualifyColumn alias p.Member
+                let tryColumnRef () =
+                    match left with
+                    | NMemberAccess(_, m) when m.Expression <> null ->
+                        try
+                            let lhsAlias = visitAlias m.Expression
+                            Some (qualifyColumn lhsAlias m.Member)
+                        with _ -> None
+                    | _ -> None
+                let result =
+                    try evalLhs () |> Option.map Choice1Of2
+                    with _ -> tryColumnRef () |> Option.map Choice2Of2
+                let reversedOp = reverseComparisonOp compOp
+                match result with
+                | Some (Choice1Of2 value) ->
+                    match value with
+                    | null when reversedOp = Eq -> IsNull(fqCol)
+                    | null when reversedOp = NotEq -> IsNotNull(fqCol)
+                    | _ ->
+                        let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
+                        Compare(fqCol, reversedOp, Parameter queryParameter)
+                | Some (Choice2Of2 lhsCol) ->
+                    CompareColumns(lhsCol, compOp, fqCol)
+                | None ->
+                    notImplMsg $"Unable to render join predicate LHS: {left}"
+
             | _ ->
                 notImplMsg $"Unsupported join predicate comparison: {op}"
         | _ ->
             notImplMsg $"Unsupported join predicate expression: {nexp}"
 
     visit (ExpressionNormalizer.toNormalizedExpression (predicate :> Expression))
+
+/// Renders a select-projection expression to a SQL fragment with bound parameters.
+/// Used for arithmetic/inlineValue/method-call combinations like `1.0 - cosine_distance(col, inlineValue v)`.
+/// inlineValue args are compile-and-eval'd as bound parameters (`?`); columns are qualified;
+/// InfixOperators rewrites apply.
+let private renderSelectExpression (exp: Expression) : string * obj[] =
+    let parms = ResizeArray<obj>()
+    let qualifyColumn alias (mem: MemberInfo) = $"{{{alias}}}.{{{mem.Name}}}"
+    let rec render (e: Expression) : string =
+        match e with
+        | :? UnaryExpression as u when u.NodeType = ExpressionType.Convert ->
+            render u.Operand
+        | :? MethodCallExpression as mc when mc.Method.Name = nameof inlineValue && mc.Arguments.Count = 1 ->
+            let value = compileAndEval mc.Arguments.[0]
+            parms.Add(if isNull value then box System.DBNull.Value else value)
+            "?"
+        | :? MemberExpression as mem when mem.Expression <> null ->
+            let alias = visitAlias mem.Expression
+            qualifyColumn alias mem.Member
+        | :? ConstantExpression as c -> renderConstant true c
+        | :? BinaryExpression as b ->
+            let left = render b.Left
+            let right = render b.Right
+            let op =
+                match tryGetBinaryOp b.NodeType with
+                | Some s -> s
+                | None -> notImplMsg $"Unsupported binary operator in select expression: {b.NodeType}"
+            $"{left} {op} {right}"
+        // Aggregates: countBy/sumBy/etc. → SUM(col), COUNT(DISTINCT col) for countDistinct.
+        | :? MethodCallExpression as mc when aggregateMethodNames.Contains mc.Method.Name ->
+            let aggType = aggTypeOf mc.Method.Name
+            renderAggregate aggType (render mc.Arguments.[0])
+        | :? MethodCallExpression as mc ->
+            // Delegate to visitSqlFn for caseWhen/castAs/coalesce/etc. Fall back to a
+            // generic "name(args)" form only if visitSqlFn explicitly rejects the shape.
+            try visitSqlFn qualifyColumn (mc :> Expression)
+            with :? System.NotImplementedException ->
+                let args = mc.Arguments |> Seq.map render |> String.concat ", "
+                $"{mc.Method.Name.ToUpperInvariant()}({args})"
+        | _ ->
+            notImplMsg $"Unsupported expression in select projection: {e.NodeType}"
+    let frag = render exp
+    frag, parms.ToArray()
 
 /// Returns a list of one or more fully qualified table names: ["{schema}.{table}"]
 let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
@@ -1191,13 +1651,52 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
         | NAggregateColumn (aggType, (p, _)) ->
             let alias = visitAlias p.Expression
             let fqCol = $"{{%s{alias}}}.{{%s{p.Member.Name}}}"
-            [ SelectedExpression $"{aggType}({fqCol})" ]
+            [ SelectedExpression (renderAggregate aggType fqCol) ]
         | NMethodCall(m, _) ->
             let qualifyCol alias (mem: MemberInfo) = $"{{%s{alias}}}.{{%s{mem.Name}}}"
             let sqlFragment = visitSqlFn qualifyCol (m :> Expression)
             [ SelectedExpression sqlFragment ]
-        | NNew(_, args) ->
-            args |> List.collect visit
+        | NNew(newExpr, args) ->
+            // Each anonymous-record / tuple / DU field initializer is one Selection.
+            // newExpr.Members carries the member info for each constructor arg, which gives us
+            // the F# field name to use as a SQL `AS "alias"` so the consumer reader can read by
+            // field name rather than the underlying column name.
+            // Binary, Unary, and inlineValue-bearing initializers fall through to the
+            // expression-walker that emits SelectedExpressionWithParams.
+            let memberNames =
+                if newExpr.Members <> null && newExpr.Members.Count = args.Length then
+                    newExpr.Members |> Seq.map (fun m -> Some m.Name) |> Seq.toList
+                else
+                    // Fallback: read fields/properties from the anonymous record type itself.
+                    let t = newExpr.Type
+                    let props = t.GetProperties()
+                    if props.Length = args.Length then
+                        props |> Array.map (fun p -> Some p.Name) |> Array.toList
+                    else
+                        args |> List.map (fun _ -> None)
+            args
+            |> List.mapi (fun i nargs -> i, nargs, memberNames.[i])
+            |> List.collect (fun (i, narg, fieldName) ->
+                let inner =
+                    match narg with
+                    | NMethodCall _ | NAggregateColumn _ | NMemberAccess _ | NParameter _ | NNew _ ->
+                        visit narg
+                    | _ ->
+                        let frag, parms = renderSelectExpression newExpr.Arguments.[i]
+                        [ SelectedExpressionWithParams (frag, parms) ]
+                // Wrap with SelectedAs only when the field name is meaningful (not Item1/Item2/...
+                // tuple-positional names) and differs from the underlying column.
+                let isTuplePositional (n: string) =
+                    n.StartsWith("Item")
+                    && n.Length > 4
+                    && System.Char.IsDigit(n.[4])
+                let isMeaningfulAlias n = not (isTuplePositional n)
+                match fieldName, inner with
+                | Some fname, [ SelectedColumn (_, col, _, _, _) as sel ] when isMeaningfulAlias fname && fname <> col ->
+                    [ SelectedAs (sel, fname) ]
+                | Some fname, [ (SelectedExpression _ | SelectedExpressionWithParams _) as sel ] when isMeaningfulAlias fname ->
+                    [ SelectedAs (sel, fname) ]
+                | _ -> inner)
         | NParameter p ->
             [ SelectedTable (p.Name, p.Type) ]
         | NMemberAccess(inner, m) ->

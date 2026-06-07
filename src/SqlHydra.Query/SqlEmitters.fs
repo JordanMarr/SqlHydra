@@ -99,38 +99,35 @@ type PostgresEmitter() =
     override _.EmitLike(quotedCol, paramName) = $"{quotedCol} ilike {paramName}"
     override _.EmitNotLike(quotedCol, paramName) = $"NOT ({quotedCol} ilike {paramName})"
 
-    override this.EmitInsertConflict(insertType, insertSql, columns, _rows, _collector) =
+    override this.EmitReturning(returning, sql) = this.AppendReturning(returning, sql)
+
+    override this.EmitInsertConflict(insertType, table, insertSql, columns, _rows, collector) =
         match insertType with
         | OnConflictDoUpdate (conflictFields, updateFields) ->
-            let insertQuery, identityQuery =
-                match insertSql.Split([| ";" |], StringSplitOptions.RemoveEmptyEntries) with
-                | [| iq; idq |] -> iq, idq
-                | _ -> insertSql, ""
+            this.BuildOnConflictUpdate(insertSql, conflictFields, updateFields)
 
-            let setLines =
-                updateFields
-                |> List.map (fun col -> $"{col}=EXCLUDED.\"{col}\"\n")
-                |> fun lines -> String.Join(",", lines)
+        | OnConflictDoUpdateCoalesce (conflictFields, updateFields, coalesceFields) ->
+            this.BuildOnConflictUpdateCoalesce(insertSql, table, conflictFields, updateFields, coalesceFields)
+
+        | OnConflictDoNothing conflictFields ->
+            this.BuildOnConflictDoNothing(insertSql, conflictFields)
+
+        | OnConflictDoNothingWhereRaw (conflictFields, whereFragment, parms) ->
+            let insertQuery, identityQuery = this.SplitInsertAndIdentity(insertSql)
             let conflictCsv = String.Join(",", conflictFields)
-
+            let rendered = this.SubstituteParams(whereFragment, parms, collector)
             StringBuilder()
                 .AppendLine(insertQuery)
-                .AppendLine($"ON CONFLICT({conflictCsv}) DO UPDATE SET")
-                .AppendLine(setLines).Append(";")
+                .AppendLine($"ON CONFLICT({conflictCsv}) WHERE {rendered}")
+                .AppendLine("DO NOTHING;")
                 .AppendLine(identityQuery)
                 .ToString()
 
-        | OnConflictDoNothing conflictFields ->
-            let insertQuery, identityQuery =
-                match insertSql.Split([| ";" |], StringSplitOptions.RemoveEmptyEntries) with
-                | [| iq; idq |] -> iq, idq
-                | _ -> insertSql, ""
-
-            let conflictCsv = String.Join(",", conflictFields)
-
+        | OnConflictDoNothingRawTarget rawTarget ->
+            let insertQuery, identityQuery = this.SplitInsertAndIdentity(insertSql)
             StringBuilder()
                 .AppendLine(insertQuery)
-                .AppendLine($"ON CONFLICT({conflictCsv})")
+                .AppendLine($"ON CONFLICT({rawTarget})")
                 .AppendLine("DO NOTHING;")
                 .AppendLine(identityQuery)
                 .ToString()
@@ -155,44 +152,21 @@ type SqliteEmitter() =
     override _.EmitInsertIdentity(_field) =
         ";select last_insert_rowid() as id"
 
-    override this.EmitInsertConflict(insertType, insertSql, _columns, _rows, _collector) =
+    override this.EmitReturning(returning, sql) = this.AppendReturning(returning, sql)
+
+    override this.EmitInsertConflict(insertType, table, insertSql, _columns, _rows, _collector) =
         match insertType with
         | InsertOrReplace ->
             insertSql.Replace("INSERT", "INSERT OR REPLACE")
 
         | OnConflictDoUpdate (conflictFields, updateFields) ->
-            let insertQuery, identityQuery =
-                match insertSql.Split([| ";" |], StringSplitOptions.RemoveEmptyEntries) with
-                | [| iq; idq |] -> iq, idq
-                | _ -> insertSql, ""
+            this.BuildOnConflictUpdate(insertSql, conflictFields, updateFields)
 
-            let setLines =
-                updateFields
-                |> List.map (fun col -> $"{col}=EXCLUDED.\"{col}\"\n")
-                |> fun lines -> String.Join(",", lines)
-            let conflictCsv = String.Join(",", conflictFields)
-
-            StringBuilder()
-                .AppendLine(insertQuery)
-                .AppendLine($"ON CONFLICT({conflictCsv}) DO UPDATE SET")
-                .AppendLine(setLines).Append(";")
-                .AppendLine(identityQuery)
-                .ToString()
+        | OnConflictDoUpdateCoalesce (conflictFields, updateFields, coalesceFields) ->
+            this.BuildOnConflictUpdateCoalesce(insertSql, table, conflictFields, updateFields, coalesceFields)
 
         | OnConflictDoNothing conflictFields ->
-            let insertQuery, identityQuery =
-                match insertSql.Split([| ";" |], StringSplitOptions.RemoveEmptyEntries) with
-                | [| iq; idq |] -> iq, idq
-                | _ -> insertSql, ""
-
-            let conflictCsv = String.Join(",", conflictFields)
-
-            StringBuilder()
-                .AppendLine(insertQuery)
-                .AppendLine($"ON CONFLICT({conflictCsv})")
-                .AppendLine("DO NOTHING;")
-                .AppendLine(identityQuery)
-                .ToString()
+            this.BuildOnConflictDoNothing(insertSql, conflictFields)
 
         | _ -> insertSql
 
