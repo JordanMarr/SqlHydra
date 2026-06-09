@@ -8,8 +8,21 @@ open System.Data.Common
 open System.Threading
 open System.Threading.Tasks
 
+/// Helpers for extension packages that add custom CE operations.
+[<AutoOpen>]
+module ExtensionHelpers =
+    /// Resolves an orderBy-style [<ProjectionParameter>] property selector to its
+    /// (tableAlias, columnName) when it is a simple column reference.
+    /// Returns None for expressions or aggregates. For extension packages adding
+    /// custom ORDER BY operations (e.g. vector distance ordering).
+    let tryGetOrderByColumn<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) : (string * string) option =
+        match LinqExpressionVisitors.visitOrderByPropertySelector<'T, 'Prop> propertySelector with
+        | LinqExpressionVisitors.OrderByColumn(tableAlias, m) -> Some(tableAlias, m.Name)
+        | _ -> None
+
 /// The context type that determines how the query context is created and disposed.
 /// Can be implicitly converted from a QueryContext, a function that creates a QueryContext, a Task that creates a QueryContext, or an Async that creates a QueryContext.
+[<NoComparison; NoEquality>]
 type ContextType =
     /// A new QueryContext will be created and disposed within the select builder.
     | Create of create: (unit -> QueryContext)
@@ -109,6 +122,19 @@ type SelectBuilder<'Selected, 'Mapped> () =
     let qualifyColumnWithAlias (alias: string) (col: Reflection.MemberInfo) =
         $"%s{alias}.%s{col.Name}"
 
+    /// Combines outer + inner CTEs, deduplicating by alias (last write wins). Used when
+    /// a `cteFrom` source is the inner side of a `leftJoin'`/`join'` — the inner's
+    /// WithCtes must propagate, but the same source could be used in multiple joins.
+    let mergeCtes (outerIr: SelectQueryIR) (inner: QuerySource<'T>) =
+        let innerIr = inner |> getQueryOrDefault
+        if innerIr.WithCtes.IsEmpty then outerIr
+        else
+            let seen = System.Collections.Generic.HashSet<string>()
+            let merged =
+                outerIr.WithCtes @ innerIr.WithCtes
+                |> List.filter (fun (alias, _) -> seen.Add alias)
+            { outerIr with WithCtes = merged }
+
     member val MapFn = Option<Func<'Selected, 'Mapped>>.None with get, set
     member val CancellationToken = CancellationToken.None with get, set
     member val private PendingJoinInfo = Option<PendingJoin>.None with get, set
@@ -120,7 +146,8 @@ type SelectBuilder<'Selected, 'Mapped> () =
 
         match tblMaybe with
         | Some tbl ->
-            QuerySource<'T, SelectQueryIR>({ ir with From = Some $"{tbl.Schema}.{tbl.Name} as {tableAlias}" }, tableMappings)
+            let fromSpec = $"{FQ.qualifiedTable tbl} as {tableAlias}"
+            QuerySource<'T, SelectQueryIR>({ ir with From = Some fromSpec }, tableMappings)
         | None ->
             // Handles this scenario: `select (p.FirstName, p.LastName) into (fname, lname)`
             state :?> QuerySource<'T, SelectQueryIR>
@@ -140,6 +167,32 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let newClause = LinqExpressionVisitors.visitWhere<'T> tableMappings whereExpression qualifyColumnWithAlias
         QuerySource<'T, SelectQueryIR>({ ir with Where = WhereClause.combineAnd ir.Where newClause }, state.TableMappings)
 
+    /// WHERE EXISTS (subquery)
+    [<CustomOperation("whereExists", MaintainsVariableSpace = true)>]
+    member this.WhereExists (state: QuerySource<'T, SelectQueryIR>, subquery: SelectQuery) =
+        let ir = state.Query
+        let newClause = WhereClause.Exists subquery.SelectIR
+        QuerySource<'T, SelectQueryIR>({ ir with Where = WhereClause.combineAnd ir.Where newClause }, state.TableMappings)
+
+    /// WHERE NOT EXISTS (subquery)
+    [<CustomOperation("whereNotExists", MaintainsVariableSpace = true)>]
+    member this.WhereNotExists (state: QuerySource<'T, SelectQueryIR>, subquery: SelectQuery) =
+        let ir = state.Query
+        let newClause = WhereClause.NotExists subquery.SelectIR
+        QuerySource<'T, SelectQueryIR>({ ir with Where = WhereClause.combineAnd ir.Where newClause }, state.TableMappings)
+
+    /// HAVING with raw SQL fragment. Use ? for parameter placeholders.
+    [<CustomOperation("havingRaw", MaintainsVariableSpace = true)>]
+    member this.HavingRaw (state: QuerySource<'T, SelectQueryIR>, fragment: string) =
+        let ir = state.Query
+        QuerySource<'T, SelectQueryIR>({ ir with Having = WhereClause.combineAnd ir.Having (RawWhere(fragment, [||])) }, state.TableMappings)
+
+    /// HAVING with raw SQL fragment + parameters. Use ? as placeholders.
+    [<CustomOperation("havingRaw", MaintainsVariableSpace = true)>]
+    member this.HavingRaw (state: QuerySource<'T, SelectQueryIR>, fragment: string, parameters: obj[]) =
+        let ir = state.Query
+        QuerySource<'T, SelectQueryIR>({ ir with Having = WhereClause.combineAnd ir.Having (RawWhere(fragment, parameters)) }, state.TableMappings)
+
     /// Sets the SELECT statement and filters the query to include only the selected tables
     [<CustomOperation("select", MaintainsVariableSpace = true, AllowIntoPattern = true)>]
     member this.Select (state: QuerySource<'T, SelectQueryIR>, [<ProjectionParameter>] selectExpression: Expression<Func<'T, 'Selected>>) =
@@ -158,7 +211,17 @@ type SelectBuilder<'Selected, 'Mapped> () =
                     // Select a single column
                     { ir with Select = ir.Select @ [SpecificColumn $"%s{tableAlias}.%s{column}"] }
                 | LinqExpressionVisitors.SelectedExpression sqlFragment ->
-                    { ir with Select = ir.Select @ [RawColumn sqlFragment] }
+                    { ir with Select = ir.Select @ [RawColumn (sqlFragment, [||])] }
+                | LinqExpressionVisitors.SelectedExpressionWithParams (sqlFragment, parms) ->
+                    { ir with Select = ir.Select @ [RawColumn (sqlFragment, parms)] }
+                | LinqExpressionVisitors.SelectedAs (LinqExpressionVisitors.SelectedColumn (tableAlias, column, _, _, _), alias) ->
+                    { ir with Select = ir.Select @ [RawColumn ($"\"%s{tableAlias}\".\"%s{column}\" AS \"%s{alias}\"", [||])] }
+                | LinqExpressionVisitors.SelectedAs (LinqExpressionVisitors.SelectedExpression frag, alias) ->
+                    { ir with Select = ir.Select @ [RawColumn ($"%s{frag} AS \"%s{alias}\"", [||])] }
+                | LinqExpressionVisitors.SelectedAs (LinqExpressionVisitors.SelectedExpressionWithParams (frag, parms), alias) ->
+                    { ir with Select = ir.Select @ [RawColumn ($"%s{frag} AS \"%s{alias}\"", parms)] }
+                | LinqExpressionVisitors.SelectedAs _ ->
+                    failwith "SelectedAs may only wrap SelectedColumn / SelectedExpression / SelectedExpressionWithParams"
             ) state.Query
 
         QuerySource<'Selected, SelectQueryIR>(irWithSelectedColumns, state.TableMappings)
@@ -175,7 +238,9 @@ type SelectBuilder<'Selected, 'Mapped> () =
                     [OrderByColumn (fqCol, Asc)]
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, tableAlias, p) ->
                     let fqCol = $"{{%s{tableAlias}}}.{{%s{p.Name}}}"
-                    [OrderByRaw $"%s{aggType}(%s{fqCol})"]
+                    [OrderByRaw (LinqExpressionVisitors.renderAggregate aggType fqCol, [||])]
+                | LinqExpressionVisitors.OrderByExpression (frag, parms) ->
+                    [OrderByRaw (frag, parms)]
                 | LinqExpressionVisitors.OrderByIgnored ->
                     []
         QuerySource<'T, SelectQueryIR>({ ir with OrderBy = ir.OrderBy @ newOrderBy }, state.TableMappings)
@@ -197,7 +262,9 @@ type SelectBuilder<'Selected, 'Mapped> () =
                     [OrderByColumn (fqCol, Desc)]
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, tableAlias, p) ->
                     let fqCol = $"{{%s{tableAlias}}}.{{%s{p.Name}}}"
-                    [OrderByRaw $"%s{aggType}(%s{fqCol}) DESC"]
+                    [OrderByRaw ($"{LinqExpressionVisitors.renderAggregate aggType fqCol} DESC", [||])]
+                | LinqExpressionVisitors.OrderByExpression (frag, parms) ->
+                    [OrderByRaw ($"{frag} DESC", parms)]
                 | LinqExpressionVisitors.OrderByIgnored ->
                     []
         QuerySource<'T, SelectQueryIR>({ ir with OrderBy = ir.OrderBy @ newOrderBy }, state.TableMappings)
@@ -206,6 +273,50 @@ type SelectBuilder<'Selected, 'Mapped> () =
     [<CustomOperation("thenByDescending", MaintainsVariableSpace = true)>]
     member this.ThenByDescending (state: QuerySource<'T, SelectQueryIR>, [<ProjectionParameter>] propertySelector) =
         this.OrderByDescending(state, propertySelector)
+
+    /// ORDER BY a raw SQL fragment (e.g. an aggregate or computed expression).
+    [<CustomOperation("orderByRaw", MaintainsVariableSpace = true)>]
+    member this.OrderByRaw (state: QuerySource<'T, SelectQueryIR>, fragment: string) =
+        let ir = state.Query
+        QuerySource<'T, SelectQueryIR>({ ir with OrderBy = ir.OrderBy @ [OrderByRaw (fragment, [||])] }, state.TableMappings)
+
+    /// ORDER BY a column alias (raw, quoted). Use for computed/aliased columns produced in select.
+    [<CustomOperation("orderByAlias", MaintainsVariableSpace = true)>]
+    member this.OrderByAlias (state: QuerySource<'T, SelectQueryIR>, alias: string) =
+        let ir = state.Query
+        QuerySource<'T, SelectQueryIR>({ ir with OrderBy = ir.OrderBy @ [OrderByRaw ($"\"{alias}\"", [||])] }, state.TableMappings)
+
+    /// ORDER BY a column alias DESC (raw, quoted).
+    [<CustomOperation("orderByAliasDesc", MaintainsVariableSpace = true)>]
+    member this.OrderByAliasDesc (state: QuerySource<'T, SelectQueryIR>, alias: string) =
+        let ir = state.Query
+        QuerySource<'T, SelectQueryIR>({ ir with OrderBy = ir.OrderBy @ [OrderByRaw ($"\"{alias}\" DESC", [||])] }, state.TableMappings)
+
+    /// Applies a NULLS ordering to the most recent ORDER BY clause.
+    member private this.ApplyNulls (state: QuerySource<'T, SelectQueryIR>, nulls: NullsOrdering, rawLiteral: string) =
+        let ir = state.Query
+        let newOrderBy =
+            match List.tryLast ir.OrderBy with
+            | Some last ->
+                let init = ir.OrderBy.[0..ir.OrderBy.Length - 2]
+                let updated =
+                    match last with
+                    | OrderByColumn (col, dir) -> OrderByColumnNulls (col, dir, nulls)
+                    | OrderByColumnNulls (col, dir, _) -> OrderByColumnNulls (col, dir, nulls)
+                    | OrderByRaw (frag, parms) -> OrderByRaw ($"{frag} {rawLiteral}", parms)
+                init @ [updated]
+            | None -> ir.OrderBy
+        QuerySource<'T, SelectQueryIR>({ ir with OrderBy = newOrderBy }, state.TableMappings)
+
+    /// Adds NULLS LAST to the most recent ORDER BY clause.
+    [<CustomOperation("nullsLast", MaintainsVariableSpace = true)>]
+    member this.NullsLast (state: QuerySource<'T, SelectQueryIR>) =
+        this.ApplyNulls(state, NullsLast, "NULLS LAST")
+
+    /// Adds NULLS FIRST to the most recent ORDER BY clause.
+    [<CustomOperation("nullsFirst", MaintainsVariableSpace = true)>]
+    member this.NullsFirst (state: QuerySource<'T, SelectQueryIR>) =
+        this.ApplyNulls(state, NullsFirst, "NULLS FIRST")
 
     /// Sets the SKIP value for query
     [<CustomOperation("skip", MaintainsVariableSpace = true)>]
@@ -251,7 +362,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let innerTableNameAsAlias =
             innerProperties
             |> Seq.map (fun p -> p, mergedTables[TableAliasKey p.Alias])
-            |> Seq.map (fun (p, tbl) -> $"%s{tbl.Schema}.%s{tbl.Name} AS %s{p.Alias}")
+            |> Seq.map (fun (p, tbl) -> $"%s{FQ.qualifiedTable tbl} AS %s{p.Alias}")
             |> Seq.head
 
         let joinCondition =
@@ -261,7 +372,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
                 WhereClause.combineAndFlat acc cond
             ) WhereClause.Empty
 
-        let joinClause = { Kind = InnerJoin; Table = innerTableNameAsAlias; Condition = joinCondition }
+        let joinClause = { Kind = InnerJoin; Table = innerTableNameAsAlias; Subquery = None; Condition = joinCondition }
         QuerySource<'JoinResult, SelectQueryIR>({ ir with Joins = ir.Joins @ [joinClause] }, mergedTables)
 
     /// LEFT JOIN table on one or more columns
@@ -298,7 +409,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let innerTableNameAsAlias =
             innerProperties
             |> Seq.map (fun p -> p, mergedTables[TableAliasKey p.Alias])
-            |> Seq.map (fun (p, tbl) -> $"%s{tbl.Schema}.%s{tbl.Name} AS %s{p.Alias}")
+            |> Seq.map (fun (p, tbl) -> $"%s{FQ.qualifiedTable tbl} AS %s{p.Alias}")
             |> Seq.head
 
         let joinCondition =
@@ -308,7 +419,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
                 WhereClause.combineAndFlat acc cond
             ) WhereClause.Empty
 
-        let joinClause = { Kind = LeftJoin; Table = innerTableNameAsAlias; Condition = joinCondition }
+        let joinClause = { Kind = LeftJoin; Table = innerTableNameAsAlias; Subquery = None; Condition = joinCondition }
         QuerySource<'JoinResult, SelectQueryIR>({ ir with Joins = ir.Joins @ [joinClause] }, mergedTables)
 
     /// References a table variable from a correlated parent query from within a subquery.
@@ -351,7 +462,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
 
         // Get inner table info
         let innerTable = mergedTables[TableAliasKey innerAlias]
-        let tableName = $"{innerTable.Schema}.{innerTable.Name}"
+        let tableName = FQ.qualifiedTable innerTable
 
         let pendingJoin = {
             JoinType = JoinType.Inner
@@ -359,7 +470,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
             TableAlias = innerAlias
         }
 
-        let ir = outerSource |> getQueryOrDefault
+        let ir = mergeCtes (outerSource |> getQueryOrDefault) innerSource
         this.PendingJoinInfo <- Some pendingJoin
         QuerySource<'JoinResult, SelectQueryIR>(ir, mergedTables)
 
@@ -382,7 +493,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
 
         // Get inner table info
         let innerTable = mergedTables[TableAliasKey innerAlias]
-        let tableName = $"{innerTable.Schema}.{innerTable.Name}"
+        let tableName = FQ.qualifiedTable innerTable
 
         let pendingJoin = {
             JoinType = JoinType.Left
@@ -390,7 +501,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
             TableAlias = innerAlias
         }
 
-        let ir = outerSource |> getQueryOrDefault
+        let ir = mergeCtes (outerSource |> getQueryOrDefault) innerSource
         this.PendingJoinInfo <- Some pendingJoin
         QuerySource<'JoinResult, SelectQueryIR>(ir, mergedTables)
 
@@ -420,7 +531,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
             | JoinType.Inner -> InnerJoin
             | JoinType.Left -> LeftJoin
 
-        let joinClause = { Kind = joinKind; Table = tableNameAsAlias; Condition = joinCondition }
+        let joinClause = { Kind = joinKind; Table = tableNameAsAlias; Subquery = None; Condition = joinCondition }
 
         QuerySource<'T, SelectQueryIR>({ ir with Joins = ir.Joins @ [joinClause] }, state.TableMappings)
 
@@ -731,6 +842,11 @@ type SelectAsyncBuilder<'Selected, 'Mapped> (ct: ContextType) =
 
 /// Builds and returns a select query that can be manually run by piping into QueryContext read methods
 let select<'Selected, 'Mapped> =
+    SelectQueryBuilder<'Selected, 'Mapped>()
+
+/// Alias for `select` — use inside `whereExists`/`whereNotExists` (or other contexts that
+/// already use `select` as a custom op) to disambiguate.
+let subquery<'Selected, 'Mapped> =
     SelectQueryBuilder<'Selected, 'Mapped>()
 
 /// Builds a select query with a context source - returns an Async query result

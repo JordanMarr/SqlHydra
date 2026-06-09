@@ -12,7 +12,10 @@
 		</WarningsAsErrors>
 		<NoWarn>
 			<!-- Duplicate Package -->
-			NU1504
+			NU1504;
+			<!-- FS1182: Unused parameters in stub functions are intentional pattern markers
+			     for the visitor (e.g. let isIn (prop: 'P) (values: 'P seq) = true). -->
+			FS1182
 		</NoWarn>
 		<Authors>Jordan Marr</Authors>
 		<PackageTags>F# fsharp data database orm sql</PackageTags>
