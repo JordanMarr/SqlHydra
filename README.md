@@ -764,7 +764,8 @@ type MyCustomMapping() =
                         TypeMapping.ColumnTypeAlias = "vector"
                         TypeMapping.ClrType = "Pgvector.Vector"
                         TypeMapping.DbType = System.Data.DbType.Object
-                        TypeMapping.ProviderDbType = Some "Vector"
+                        // No NpgsqlDbType for vector -- Pgvector.Npgsql infers it from the value.
+                        TypeMapping.ProviderDbType = None
                     }
                 | _ -> baseTryFind ctx
 ```
@@ -804,10 +805,12 @@ Type mapping extensions can also be published as NuGet packages. Add it as a `Pa
 
 ```toml
 [extensions]
-type_mappings = ["SqlHydra.Query.PgVector"]
+type_mappings = ["SqlHydra.Query.Pgvector"]
 ```
 
 SqlHydra will resolve the assembly from your project's build output and load any `IExtendTypeMapping` implementations it finds.
+
+[**SqlHydra.Query.Pgvector**](https://github.com/michaelglass/SqlHydra.Query.Pgvector) is a worked example of such a package: it maps the PostgreSQL `vector` column type to `Pgvector.Vector` and adds pgvector distance operators (`<=>`, `<->`, `<#>`) for `SqlHydra.Query`.
 
 #### Multiple Extensions
 
