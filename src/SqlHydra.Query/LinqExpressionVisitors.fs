@@ -307,7 +307,9 @@ module SqlPatterns =
             let aggType = aggTypeOf m.Method.Name
             match m.Arguments.[0] with
             | Property p -> Some (aggType, p)
-            | _ -> notImplMsg "Invalid argument to aggregate function."
+            // Aggregate over an arbitrary expression (e.g. sumBy(caseWhen ...)): not a column,
+            // so don't match — the expression falls through to full expression rendering.
+            | _ -> None
         | _ -> None
 
 // ─── NormalizedExpression Patterns ───────────────────────────────────────────
@@ -416,7 +418,7 @@ module NormalizedPatterns =
             let aggType = aggTypeOf m.Method.Name
             match m.Arguments.[0] with
             | Property p -> Some (aggType, p)
-            | _ -> notImplMsg "Invalid argument to aggregate function."
+            | _ -> None
         | _ -> None
 
     /// List initializer — delegates to original ListInit pattern.
