@@ -130,5 +130,19 @@ let loadNamed (project: FileInfo) (extensionNames: string list) : ISqlHydraExten
         | None ->
             failwith $"Could not find '{dllName}' in the build output of '{project.Name}'. Ensure the project has been built."
         | Some path ->
-            loadFromAssembly path
+            // A registered extension that yields no ISqlHydraExtension is always a mistake worth
+            // stopping for: otherwise generation silently proceeds without the mapping and exits 0,
+            // leaving the affected columns missing from the output with no error. Fail loudly and
+            // point at the likely fixes.
+            match loadFromAssembly path with
+            | [] ->
+                failwith (
+                    $"Extension '{extName}' (loaded from '{path}') contains no ISqlHydraExtension implementations "
+                    + "(e.g. an IExtendTypeMapping). "
+                    + $"Check that '{extName}' in the TOML [extensions] section matches the package or assembly that "
+                    + "implements the extension, and that it is referenced by the project. If the name is correct, the "
+                    + "extension's types may have failed to load — ensure its dependencies are present and that it "
+                    + "targets a compatible SqlHydra version."
+                )
+            | extensions -> extensions
     )
