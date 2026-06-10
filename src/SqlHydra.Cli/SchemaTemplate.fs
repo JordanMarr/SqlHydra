@@ -141,15 +141,40 @@ namespace {{cfg.Namespace}}
         if provider.Type = ProviderType.Npgsql then
             $"""
 type QueryContextFactory =
-    {{
-        OpenContext: unit -> QueryContext
-        OpenContextAsync: unit -> System.Threading.Tasks.Task<QueryContext>
+    private {{
+        _OwnsDataSource: bool
+        _NpgsqlDataSource: Npgsql.NpgsqlDataSource
+        _OpenContext: unit -> QueryContext
+        _OpenContextAsync: System.Threading.CancellationToken -> System.Threading.Tasks.Task<QueryContext>
     }}
+    member this.OpenContext() = this._OpenContext()
+    member this.OpenContextAsync() = this._OpenContextAsync(System.Threading.CancellationToken.None)
+    member this.OpenContextAsync(ct: System.Threading.CancellationToken) = this._OpenContextAsync(ct)
+    member this.Dispose() =
+        if this._OwnsDataSource then
+            this._NpgsqlDataSource.Dispose()
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
+    member this.DisposeAsync() = 
+        task {{
+            if this._OwnsDataSource then 
+                do! this._NpgsqlDataSource.DisposeAsync()
+        }} |> System.Threading.Tasks.ValueTask
+#endif
+    interface System.IDisposable with
+        member this.Dispose() = this.Dispose()
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
+    interface System.IAsyncDisposable with
+        member this.DisposeAsync() = this.DisposeAsync()
+#endif
     interface IQueryContextFactory with
+        member this.OpenContext() = this._OpenContext()
         member this.OpenContextAsync() = this.OpenContextAsync()
+        member this.OpenContextAsync(ct: System.Threading.CancellationToken) = this.OpenContextAsync(ct)
     static member Create(connectionString: string, ?sqlLogger) =
-        QueryContextFactory.Create(Npgsql.NpgsqlDataSource.Create(connectionString), ?sqlLogger = sqlLogger)
+        QueryContextFactory.Create(Npgsql.NpgsqlDataSource.Create(connectionString), true, ?sqlLogger = sqlLogger)
     static member Create(dataSource: Npgsql.NpgsqlDataSource, ?sqlLogger) =
+        QueryContextFactory.Create(dataSource, false, ?sqlLogger = sqlLogger)
+    static member private Create(dataSource: Npgsql.NpgsqlDataSource, ownsDataSource: bool, ?sqlLogger) =
         let emitter = {emitter}
 
         let createConn () : System.Data.Common.DbConnection =
@@ -161,28 +186,45 @@ type QueryContextFactory =
             sqlLogger |> Option.iter (fun logger -> ctx.Logger <- logger)
             ctx
 
-        let openContextAsync () =
+        let openContextAsync (ct: System.Threading.CancellationToken) =
             task {{
-                let! conn = dataSource.OpenConnectionAsync()
+                let! conn = dataSource.OpenConnectionAsync(ct)
                 let ctx = new QueryContext(conn, emitter)
                 sqlLogger |> Option.iter (fun logger -> ctx.Logger <- logger)
                 return ctx
             }}
 
         {{
-            OpenContext = openContext
-            OpenContextAsync = openContextAsync
+            _OwnsDataSource = ownsDataSource
+            _NpgsqlDataSource = dataSource
+            _OpenContext = openContext
+            _OpenContextAsync = openContextAsync
         }}
     """
         else
             $"""
 type QueryContextFactory =
-    {{
-        OpenContext: unit -> QueryContext
-        OpenContextAsync: unit -> System.Threading.Tasks.Task<QueryContext>
+    private {{
+        _OpenContext: unit -> QueryContext
+        _OpenContextAsync: System.Threading.CancellationToken -> System.Threading.Tasks.Task<QueryContext>
     }}
+    member this.OpenContext() = this._OpenContext()
+    member this.OpenContextAsync() = this._OpenContextAsync(System.Threading.CancellationToken.None)
+    member this.OpenContextAsync(ct: System.Threading.CancellationToken) = this._OpenContextAsync(ct)
+    member this.Dispose() = ()
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
+    member this.DisposeAsync() = System.Threading.Tasks.ValueTask.CompletedTask
+#endif
+    interface System.IDisposable with
+        member this.Dispose() = this.Dispose()
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
+    interface System.IAsyncDisposable with
+        member this.DisposeAsync() = this.DisposeAsync()
+#endif
     interface IQueryContextFactory with
+        member this.OpenContext() = this._OpenContext()
         member this.OpenContextAsync() = this.OpenContextAsync()
+        member this.OpenContextAsync(ct: System.Threading.CancellationToken) = this.OpenContextAsync(ct)
     static member Create(connectionString: string, ?sqlLogger) =
         let emitter = {emitter}
 
@@ -196,18 +238,18 @@ type QueryContextFactory =
             sqlLogger |> Option.iter (fun logger -> ctx.Logger <- logger)
             ctx
 
-        let openContextAsync () =
+        let openContextAsync (ct: System.Threading.CancellationToken) =
             task {{
                 let conn = createConn ()
-                do! conn.OpenAsync()
+                do! conn.OpenAsync(ct)
                 let ctx = new QueryContext(conn, emitter)
                 sqlLogger |> Option.iter (fun logger -> ctx.Logger <- logger)
                 return ctx
             }}
 
         {{
-            OpenContext = openContext
-            OpenContextAsync = openContextAsync
+            _OpenContext = openContext
+            _OpenContextAsync = openContextAsync
         }}
     """
 
