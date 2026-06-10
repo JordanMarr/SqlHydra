@@ -64,6 +64,7 @@
     <Compile Include="UnitTests\TomlConfigParser.fs" />
     <Compile Include="UnitTests\ColumnFilters.fs" />
     <Compile Include="UnitTests\TableFilters.fs" />
+    <Compile Include="UnitTests\Extensions.fs" />
     <Compile Include="UnitTests\SchemaTemplateTests.fs" />
   </ItemGroup>
   <ItemGroup>
