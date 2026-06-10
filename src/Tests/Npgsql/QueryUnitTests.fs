@@ -297,7 +297,34 @@ let ``Correlated subquery with differing for and correlate tables uses the for s
     sql.Contains("FROM \"sales\".\"salesorderdetail\"") =! true
 
 [<Test>]
-let ``Delete Query with Where``() = 
+let ``Correlated subquery parameters do not collide with outer parameters``() =
+    // Regression for issue #134: the inner subquery used to be compiled with a fresh
+    // ParameterCollector, so its parameter was named @p0 just like the outer query's first
+    // parameter. After merging, the outer @p0 bound to BOTH spots. The subquery parameter
+    // must be named @p1 (and resolve to its own value), not reuse the outer @p0.
+    let latestOrder =
+        select {
+            for d in sales.salesorderheader do
+            correlate od in sales.salesorderheader
+            where (d.customerid = od.customerid && d.salesorderid < 10)
+            select (maxBy d.orderdate)
+        }
+
+    let sql =
+        select {
+            for od in sales.salesorderheader do
+            where (od.salesorderid > 1 && od.orderdate = subqueryOne latestOrder)
+        }
+        |> toSql
+
+    sql =!
+        "SELECT * FROM \"sales\".\"salesorderheader\" AS \"od\" WHERE ((\"od\".\"salesorderid\" > @p0) AND \
+        (\"od\".\"orderdate\" = (SELECT MAX(\"d\".\"orderdate\") AS __hydra_expr_0 \
+        FROM \"sales\".\"salesorderheader\" AS \"d\" \
+        WHERE ((\"d\".\"customerid\" = \"od\".\"customerid\") AND (\"d\".\"salesorderid\" < @p1)))))".RemoveHydraExpr()
+
+[<Test>]
+let ``Delete Query with Where``() =
     let sql =  
         delete {
             for c in sales.customer do
