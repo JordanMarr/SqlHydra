@@ -1037,6 +1037,32 @@ let ``nested aggregate-in-aggregate (MAX(SUM(x)))`` () =
     sql.Contains("AS FLOAT") =! true
 
 [<Test>]
+let ``aggregate over a caseWhen expression emits SUM(CASE WHEN ...)`` () =
+    // A conditional count: SUM(CASE WHEN cond THEN 1 ELSE 0 END). The aggregate's argument
+    // is an expression (caseWhen), not a bare column — must render, not throw.
+    let sql =
+        select {
+            for p in production.product do
+            groupBy p.color
+            select (sumBy (caseWhen (p.standardcost > 100m) 1 0))
+        }
+        |> toSql
+    sql.Contains("SUM(CASE WHEN") =! true
+    sql.Contains("THEN 1") =! true
+    sql.Contains("ELSE 0") =! true
+
+[<Test>]
+let ``avgBy over a caseWhen expression emits AVG(CASE WHEN ...)`` () =
+    let sql =
+        select {
+            for p in production.product do
+            groupBy p.color
+            select (avgBy (caseWhen (p.standardcost > 100m) 1.0 0.0))
+        }
+        |> toSql
+    sql.Contains("AVG(CASE WHEN") =! true
+
+[<Test>]
 let ``anonymous record renamed field emits AS alias`` () =
     let sql =
         select {
