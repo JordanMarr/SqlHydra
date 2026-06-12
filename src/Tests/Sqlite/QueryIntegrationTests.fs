@@ -96,6 +96,79 @@ let ``Where subqueryOne``() = task {
 }
 
 [<Test>]
+let ``Select with Timeout``() = task {
+    use! ctx = db.OpenContextAsync()
+    let q =
+        select {
+            for c in main.Customer do
+            where (c.CustomerID = 1L)
+            timeout (System.TimeSpan.FromSeconds 45.0)
+        }
+    use cmd = ctx.BuildCommand(q.IR)
+    cmd.CommandTimeout =! 45
+}
+
+[<Test>]
+let ``Select without Timeout Leaves DbCommand Default``() = task {
+    use! ctx = db.OpenContextAsync()
+    // Capture the provider default by building a no-options command.
+    let defaultTimeout =
+        use baseline = ctx.Connection.CreateCommand()
+        baseline.CommandTimeout
+
+    let q =
+        select {
+            for c in main.Customer do
+            where (c.CustomerID = 1L)
+        }
+    use cmd = ctx.BuildCommand(q.IR)
+    cmd.CommandTimeout =! defaultTimeout
+}
+
+[<Test>]
+let ``Select with Multiple Timeouts``() = task {
+    use! ctx = db.OpenContextAsync()
+    let q =
+        select {
+            for c in main.Customer do
+            where (c.CustomerID = 1L)
+            timeout (System.TimeSpan.FromSeconds 5.0)
+            timeout (System.TimeSpan.FromSeconds 60.0)
+        }
+    use cmd = ctx.BuildCommand(q.IR)
+    cmd.CommandTimeout =! 60
+}
+
+[<Test>]
+let ``Select with Sub-Second Timeout``() = task {
+    use! ctx = db.OpenContextAsync()
+    let q =
+        select {
+            for c in main.Customer do
+            where (c.CustomerID = 1L)
+            timeout (System.TimeSpan.FromMilliseconds 500.0)
+        }
+    use cmd = ctx.BuildCommand(q.IR)
+    // DbCommand.CommandTimeout is an int (seconds); ApplyCommandOptions
+    // calls Math.Ceiling, so 0.5s is rounded up to 1s rather than truncating to 0
+    // (which DbCommand would otherwise interpret as "no timeout").
+    cmd.CommandTimeout =! 1
+}
+
+[<Test>]
+let ``Select with Zero Timeout``() = task {
+    use! ctx = db.OpenContextAsync()
+    let q =
+        select {
+            for c in main.Customer do
+            where (c.CustomerID = 1L)
+            timeout System.TimeSpan.Zero
+        }
+    use cmd = ctx.BuildCommand(q.IR)
+    cmd.CommandTimeout =! 0
+}
+
+[<Test>]
 let ``InsertGetId Test``() = task {
     let errorLog = 
         {
@@ -143,6 +216,32 @@ let ``InsertGetIdAsync Test``() = task {
         }
 
     result >! 0L
+}
+
+[<Test>]
+let ``Insert with Timeout``() = task {
+    use! ctx = db.OpenContextAsync()
+    let sample =
+        { main.ErrorLog.ErrorLogID = 0L
+          main.ErrorLog.ErrorTime = System.DateTime.Now
+          main.ErrorLog.ErrorLine = None
+          main.ErrorLog.ErrorMessage = "TIMEOUT TEST"
+          main.ErrorLog.ErrorNumber = 400L
+          main.ErrorLog.ErrorProcedure = Some "Procedure 400"
+          main.ErrorLog.ErrorSeverity = None
+          main.ErrorLog.ErrorState = None
+          main.ErrorLog.UserName = "jmarr" }
+    let q =
+        insert {
+            for e in main.ErrorLog do
+            entity sample
+            excludeColumn e.ErrorLogID
+            timeout (System.TimeSpan.FromSeconds 45.0)
+        }
+    let ir = SqlHydra.Query.QueryUtils.fromInsert q.Spec
+    let compiled = ctx.Emitter.EmitInsert(ir)
+    use cmd = ctx.BuildCommandFromCompiled(compiled)
+    cmd.CommandTimeout =! 45
 }
 
 [<Test>]
@@ -202,6 +301,22 @@ let ``Update Entity``() = task {
 }
 
 [<Test>]
+let ``Update with Timeout``() = task {
+    use! ctx = db.OpenContextAsync()
+    let q =
+        update {
+            for c in main.Customer do
+            set c.FirstName "John"
+            where (c.CustomerID = -1L)
+            timeout (System.TimeSpan.FromSeconds 45.0)
+        }
+    let ir = SqlHydra.Query.QueryUtils.fromUpdate q.Spec
+    let compiled = ctx.Emitter.EmitUpdate(ir)
+    use cmd = ctx.BuildCommandFromCompiled(compiled)
+    cmd.CommandTimeout =! 45
+}
+
+[<Test>]
 let ``Delete Test``() = task {
     let! result = 
         deleteTask db {
@@ -221,6 +336,20 @@ let ``DeleteAsync Test``() = task {
         }
 
     printfn "result: %i" result
+}
+
+[<Test>]
+let ``Delete with Timeout``() = task {
+    use! ctx = db.OpenContextAsync()
+    let q =
+        delete {
+            for c in main.Customer do
+            where (c.CustomerID = -1L)
+            timeout (System.TimeSpan.FromSeconds 45.0)
+        }
+    let compiled = q.CompileWith(ctx.Emitter)
+    use cmd = ctx.BuildCommandFromCompiled(compiled)
+    cmd.CommandTimeout =! 45
 }
 
 [<Test>]
@@ -455,4 +584,3 @@ let ``DateOnly round-trip in SQLite``() = task {
     results.Length =! 1
     results.[0].date =! expected
 }
-

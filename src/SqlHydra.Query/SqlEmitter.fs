@@ -8,6 +8,8 @@ type CompiledQuery = {
     Sql: string
     /// Parameter name * value pairs (values may be QueryParameter wrappers)
     Parameters: (string * obj) list
+    /// Options for the command executing the query.
+    CommandOptions: CommandOptions
 }
 
 /// Interface for SQL generation. Implement for custom database providers.

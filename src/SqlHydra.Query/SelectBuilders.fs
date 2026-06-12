@@ -633,6 +633,14 @@ type SelectBuilder<'Selected, 'Mapped> () =
     member this.Head (state: QuerySource<'Mapped list, SelectQueryIR>) =
         QuerySource<ResultModifier.Head<'Mapped>, SelectQueryIR>(state.Query, state.TableMappings)
 
+    /// Sets the command execution timeout for this query.
+    /// Sub-second positive values are rounded up to one second. 
+    /// Passing `TimeSpan.Zero` is interpreted as "wait indefinitely".
+    /// Omitting `timeout` leaves the provider's default in place.
+    [<CustomOperation("timeout", MaintainsVariableSpace = true)>]
+    member this.Timeout (state: QuerySource<'T, SelectQueryIR>, timeout: TimeSpan) =
+        QuerySource<'T, SelectQueryIR>({ state.Query with CommandOptions = { state.Query.CommandOptions with CommandTimeout = Some timeout } }, state.TableMappings)
+
 /// A select builder that returns a select query.
 type SelectQueryBuilder<'Selected, 'Mapped> () =
     inherit SelectBuilder<'Selected, 'Mapped>()

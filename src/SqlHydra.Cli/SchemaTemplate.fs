@@ -144,12 +144,21 @@ type QueryContextFactory =
     {{
         OpenContext: unit -> QueryContext
         OpenContextAsync: unit -> System.Threading.Tasks.Task<QueryContext>
+        /// Disposes the NpgsqlDataSource when the factory created it from a connection string; a no-op when the caller supplied their own.
+        Dispose: unit -> unit
     }}
+    interface System.IDisposable with
+        member this.Dispose() = this.Dispose()
     interface IQueryContextFactory with
         member this.OpenContextAsync() = this.OpenContextAsync()
     static member Create(connectionString: string, ?sqlLogger) =
-        QueryContextFactory.Create(Npgsql.NpgsqlDataSource.Create(connectionString), ?sqlLogger = sqlLogger)
+        // The factory creates this data source, so it owns and disposes it.
+        let dataSource = Npgsql.NpgsqlDataSource.Create(connectionString)
+        QueryContextFactory.CreateInternal(dataSource, (fun () -> dataSource.Dispose()), ?sqlLogger = sqlLogger)
     static member Create(dataSource: Npgsql.NpgsqlDataSource, ?sqlLogger) =
+        // The caller supplied this data source, so the caller owns its lifetime.
+        QueryContextFactory.CreateInternal(dataSource, ignore, ?sqlLogger = sqlLogger)
+    static member private CreateInternal(dataSource: Npgsql.NpgsqlDataSource, dispose: unit -> unit, ?sqlLogger) =
         let emitter = {emitter}
 
         let createConn () : System.Data.Common.DbConnection =
@@ -172,6 +181,7 @@ type QueryContextFactory =
         {{
             OpenContext = openContext
             OpenContextAsync = openContextAsync
+            Dispose = dispose
         }}
     """
         else
@@ -181,6 +191,10 @@ type QueryContextFactory =
         OpenContext: unit -> QueryContext
         OpenContextAsync: unit -> System.Threading.Tasks.Task<QueryContext>
     }}
+    // This provider holds no factory-level resources; each connection is owned and disposed by its QueryContext.
+    member _.Dispose() = ()
+    interface System.IDisposable with
+        member this.Dispose() = this.Dispose()
     interface IQueryContextFactory with
         member this.OpenContextAsync() = this.OpenContextAsync()
     static member Create(connectionString: string, ?sqlLogger) =

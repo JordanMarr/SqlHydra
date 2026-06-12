@@ -45,6 +45,19 @@ let ``Where City Starts With S``() = task {
 }
 
 [<Test>]
+let ``Select with Timeout``() = task {
+    use! ctx = db.OpenContextAsync()
+    let q =
+        select {
+            for a in Person.Address do
+            where (a.AddressID = 1)
+            timeout (System.TimeSpan.FromSeconds 45.0)
+        }
+    use cmd = ctx.BuildCommand(q.IR)
+    cmd.CommandTimeout =! 45
+}
+
+[<Test>]
 let ``Select City Column Where City Starts with S``() = task {
     let! cities =
         selectTask db {

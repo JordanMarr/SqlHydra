@@ -9,7 +9,7 @@ open System.Threading
 let private prepareDeleteQuery<'Deleted> (spec: DeleteQuerySpec<'Deleted>) =
     if spec.Where = WhereClause.Empty && not spec.DeleteAll then
         invalidOp "A `delete` expression must either contain a `where` clause or `deleteAll`."
-    DeleteQuery<'Deleted>({ Table = spec.Table; Where = spec.Where; Returning = spec.Returning })
+    DeleteQuery<'Deleted>({ Table = spec.Table; Where = spec.Where; Returning = spec.Returning; CommandOptions = spec.CommandOptions })
 
 /// The base delete builder that contains all common operations
 type DeleteBuilder<'Deleted>() =
@@ -66,6 +66,15 @@ type DeleteBuilder<'Deleted>() =
     member this.Cancel (state: QuerySource<'T, DeleteQuerySpec<'T>>, cancellationToken: CancellationToken) =
         this.CancellationToken <- cancellationToken
         state
+
+    /// Sets the command execution timeout for this query.
+    /// Sub-second positive values are rounded up to one second. 
+    /// Passing `TimeSpan.Zero` is interpreted as "wait indefinitely".
+    /// Omitting `timeout` leaves the provider's default in place.
+    [<CustomOperation("timeout", MaintainsVariableSpace = true)>]
+    member this.Timeout (state: QuerySource<'T>, timeout: TimeSpan) =
+        let spec = state |> getQueryOrDefault
+        QuerySource<'T, DeleteQuerySpec<'T>>({ spec with CommandOptions = { spec.CommandOptions with CommandTimeout = Some timeout } }, state.TableMappings)
 
     /// Unwraps the query
     member this.Run (state: QuerySource<'Deleted>) =
