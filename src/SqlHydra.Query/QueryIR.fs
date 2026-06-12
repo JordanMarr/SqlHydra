@@ -2,6 +2,13 @@ namespace SqlHydra.Query
 
 open System
 
+type CommandOptions =
+    {
+        /// The wait time before terminating the attempt to execute a command and generating an error.
+        CommandTimeout: TimeSpan option
+    }
+    static member Default = { CommandTimeout = None }
+
 /// Comparison operators used in WHERE/HAVING/ON clauses.
 type ComparisonOp =
     | Eq
@@ -150,6 +157,8 @@ and [<NoComparison>] SelectQueryIR = {
     DistinctOn: string list
     /// SELECT COUNT(*) flag
     IsCount: bool
+    /// Options for the command executing the query.
+    CommandOptions: CommandOptions
 }
 
 /// Helpers for composing WhereClause values.
@@ -187,6 +196,7 @@ module SelectQueryIR =
         Distinct = false
         DistinctOn = []
         IsCount = false
+        CommandOptions = CommandOptions.Default
     }
 
 // ─── Insert-related types ───
@@ -235,6 +245,8 @@ type InsertQueryIR = {
     OutputFields: OutputField list
     /// PostgreSQL/SQLite RETURNING column list. Empty = no RETURNING.
     Returning: string list
+    /// Options for the command executing the query.
+    CommandOptions: CommandOptions
 }
 
 /// UPDATE query IR.
@@ -249,6 +261,8 @@ type UpdateQueryIR = {
     OutputFields: OutputField list
     /// PostgreSQL RETURNING column list. Empty = no RETURNING.
     Returning: string list
+    /// Options for the command executing the query.
+    CommandOptions: CommandOptions
 }
 
 /// DELETE query IR.
@@ -258,4 +272,6 @@ type DeleteQueryIR = {
     Where: WhereClause
     /// PostgreSQL RETURNING column list. Empty = no RETURNING.
     Returning: string list
+    /// Options for the command executing the query.
+    CommandOptions: CommandOptions
 }

@@ -31,6 +31,19 @@ let ``Where Name Contains``() = task {
 }
 
 [<Test>]
+let ``Select with Timeout``() = task {
+    use! ctx = db.OpenContextAsync()
+    let q =
+        select {
+            for c in OT.CUSTOMERS do
+            where (c.CUSTOMER_ID = 1L)
+            timeout (System.TimeSpan.FromSeconds 45.0)
+        }
+    use cmd = ctx.BuildCommand(q.IR)
+    cmd.CommandTimeout =! 45
+}
+
+[<Test>]
 let ``Select Address Column Where Address Contains USA``() = task {
     let! cities =
         selectTask db {

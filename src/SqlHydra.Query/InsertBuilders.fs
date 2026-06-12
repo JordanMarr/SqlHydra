@@ -115,6 +115,15 @@ type InsertBuilder<'Inserted, 'InsertReturn>() =
         this.CancellationToken <- cancellationToken
         state
 
+    /// Sets the command execution timeout for this query.
+    /// Sub-second positive values are rounded up to one second. 
+    /// Passing `TimeSpan.Zero` is interpreted as "wait indefinitely".
+    /// Omitting `timeout` leaves the provider's default in place.
+    [<CustomOperation("timeout", MaintainsVariableSpace = true)>]
+    member this.Timeout (state: QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>, timeout: TimeSpan) =
+        let query = state |> getQueryOrDefault
+        QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>({ query with CommandOptions = { query.CommandOptions with CommandTimeout = Some timeout } }, state.TableMappings)
+
     member this.Run (state: QuerySource<'Inserted>) =
         let spec = getQueryOrDefault state
         InsertQuery<'Inserted, 'InsertReturn>(spec)

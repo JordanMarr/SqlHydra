@@ -98,10 +98,12 @@ type InsertQuerySpec<'T, 'Identity> =
         /// Pending conflict target while building a composable `onConflict ... doNothing` chain.
         /// Cleared once a conflict action finalizes the spec into `InsertType`.
         PendingConflict: PendingConflictTarget option
+        CommandOptions: CommandOptions
     }
     static member Default : InsertQuerySpec<'T, 'Identity> =
         { Table = ""; Entities = []; Fields = []; IdentityField = None; OutputFields = []
-          InsertType = Insert; Returning = []; FromSelect = None; PendingConflict = None }
+          InsertType = Insert; Returning = []; FromSelect = None; PendingConflict = None
+          CommandOptions = CommandOptions.Default }
 
 [<NoComparison>]
 type UpdateQuerySpec<'T, 'UpdateReturn> =
@@ -115,10 +117,12 @@ type UpdateQuerySpec<'T, 'UpdateReturn> =
         OutputFields: OutputField list
         UpdateAll: bool
         Returning: string list
+        CommandOptions: CommandOptions
     }
     static member Default : UpdateQuerySpec<'T, 'UpdateReturn> =
         { Table = ""; Entity = Option<'T>.None; Fields = []; SetValues = []; RawSetValues = []
-          Where = WhereClause.Empty; OutputFields = []; UpdateAll = false; Returning = [] }
+          Where = WhereClause.Empty; OutputFields = []; UpdateAll = false; Returning = []
+          CommandOptions = CommandOptions.Default }
 
 [<NoComparison>]
 type DeleteQuerySpec<'T> =
@@ -127,9 +131,11 @@ type DeleteQuerySpec<'T> =
         Where: WhereClause
         DeleteAll: bool
         Returning: string list
+        CommandOptions: CommandOptions
     }
     static member Default : DeleteQuerySpec<'T> =
-        { Table = ""; Where = WhereClause.Empty; DeleteAll = false; Returning = [] }
+        { Table = ""; Where = WhereClause.Empty; DeleteAll = false; Returning = []
+          CommandOptions = CommandOptions.Default }
 
 type QuerySource<'T>(tableMappings) =
     interface IEnumerable<'T> with
@@ -242,6 +248,7 @@ module internal QueryUtils =
             Where = spec.Where
             OutputFields = spec.OutputFields
             Returning = spec.Returning
+            CommandOptions = spec.CommandOptions
         }
 
     let fromInsert (spec: InsertQuerySpec<'T, 'InsertReturn>) : InsertQueryIR =
@@ -268,6 +275,7 @@ module internal QueryUtils =
                 InsertType = spec.InsertType
                 OutputFields = spec.OutputFields
                 Returning = spec.Returning
+                CommandOptions = spec.CommandOptions
             }
         | None, [] ->
             failwith "At least one `entity` or `entities` must be set in the `insert` builder."
@@ -289,6 +297,7 @@ module internal QueryUtils =
                 InsertType = spec.InsertType
                 OutputFields = spec.OutputFields
                 Returning = spec.Returning
+                CommandOptions = spec.CommandOptions
             }
 
     /// Fails if `getId` identity field is used as an `onConflict` target.
