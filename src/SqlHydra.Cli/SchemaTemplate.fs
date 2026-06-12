@@ -160,16 +160,25 @@ namespace {{cfg.Namespace}}
                     newLine
         }
 
-    // Emit an additive enum-registration helper (Npgsql only, when enums exist).
-    // Placed after the per-schema modules so the generated enum types are in scope.
-    mkEnumRegistration cfg provider db
-
     // If the user configures ProviderDbTypeAttributes, we know they are using SqlHydra.Query.
     if cfg.ProviderDbTypeAttributes then
+        // Emit an additive enum-registration helper (Npgsql only, when enums exist).
+        // Placed after the per-schema modules so the generated enum types are in scope,
+        // and before the factory so it can register enums on the data source it builds.
+        mkEnumRegistration cfg provider db
+
         let emitter = provider.SqlEmitter
         let connectionType = provider.ProviderConnectionType
 
         if provider.Type = ProviderType.Npgsql then
+            // When enums were generated, the factory builds its data source through
+            // Enums.register so the generated enum types work without any manual MapEnum calls.
+            let createDataSource =
+                if db.Enums.IsEmpty then
+                    "Npgsql.NpgsqlDataSource.Create(connectionString)"
+                else
+                    "(Npgsql.NpgsqlDataSourceBuilder(connectionString) |> Enums.register).Build()"
+
             $"""
 type QueryContextFactory =
     {{
@@ -179,7 +188,7 @@ type QueryContextFactory =
     interface IQueryContextFactory with
         member this.OpenContextAsync() = this.OpenContextAsync()
     static member Create(connectionString: string, ?sqlLogger) =
-        QueryContextFactory.Create(Npgsql.NpgsqlDataSource.Create(connectionString), ?sqlLogger = sqlLogger)
+        QueryContextFactory.Create({createDataSource}, ?sqlLogger = sqlLogger)
     static member Create(dataSource: Npgsql.NpgsqlDataSource, ?sqlLogger) =
         let emitter = {emitter}
 

@@ -677,13 +677,22 @@ let! (created, updated) =
 
 ### PostgreSQL
 
-**Enum Types:** Postgres enums are generated as CLR enums. Register them with Npgsql:
+**Enum Types:** Postgres enums are generated as CLR enums and registered with Npgsql automatically.
+When enums exist (and `provider_db_type_attributes` is enabled), the generated code includes an `Enums.register` helper, and the generated `QueryContextFactory.Create(connectionString)` applies it for you — no manual `MapEnum` calls needed:
+
+```fsharp
+let factory = QueryContextFactory.Create("connection string")
+```
+
+If you build your own `NpgsqlDataSource`, pipe the builder through `Enums.register` before `Build()`:
 
 ```fsharp
 let dataSource =
-    let builder = NpgsqlDataSourceBuilder("connection string")
-    builder.MapEnum<ext.mood>("ext.mood") |> ignore
-    builder.Build()
+    NpgsqlDataSourceBuilder("connection string")
+    |> Enums.register
+    |> _.Build()
+
+let factory = QueryContextFactory.Create(dataSource)
 ```
 
 **Arrays:** `text[]` and `integer[]` column types are supported.
