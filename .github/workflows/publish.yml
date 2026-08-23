@@ -1,0 +1,50 @@
+# Publishes to nuget.org using Trusted Publishing (OIDC).
+# No stored API key: NuGet/login exchanges a GitHub-issued OIDC token for a
+# short-lived (1 hour) API key, validated against the trusted publishing policy
+# configured on nuget.org for this repository + workflow file.
+#
+# Trigger manually from the Actions tab (Run workflow) after bumping the version.
+#
+# Note: tests are NOT run here because they require docker compose databases
+# (mssql, postgresql, oracle); they already run on every push to main via
+# build-and-test.yml.
+
+name: Publish to NuGet
+
+on:
+  workflow_dispatch:
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write # required for GitHub OIDC token issuance (Trusted Publishing)
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Pack SqlHydra.Query
+        run: dotnet pack src/SqlHydra.Query/SqlHydra.Query.fsproj --configuration Release -o nupkg
+
+      - name: Pack SqlHydra.Cli
+        run: dotnet pack src/SqlHydra.Cli/SqlHydra.Cli.fsproj --configuration Release -o nupkg
+
+      - name: NuGet login (OIDC -> temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: "jordan marr" # nuget.org profile name (not email)
+
+      - name: Push
+        run: dotnet nuget push "nupkg/*.nupkg" --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
