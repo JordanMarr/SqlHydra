@@ -17,13 +17,9 @@ open Npgsql.AdventureWorksNet9
 open Npgsql.AdventureWorksNet10
 #endif
 
-let db = 
-    let dataSource = 
-        let builder = Npgsql.NpgsqlDataSourceBuilder(connectionString)
-        builder.MapEnum<ext.mood>("ext.mood") |> ignore    
-        builder.Build()
-    
-    QueryContextFactory.Create(dataSource, sqlLogger = printf "SQL: %O")
+// The connection-string overload auto-registers generated enums via Enums.register,
+// so the enum tests below exercise the zero-config path end-to-end.
+let db = QueryContextFactory.Create(connectionString, sqlLogger = printf "SQL: %O")
 
 [<Test>]
 let ``Where City Contains``() = task {

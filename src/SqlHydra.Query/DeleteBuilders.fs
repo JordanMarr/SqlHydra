@@ -3,29 +3,31 @@
 module SqlHydra.Query.DeleteBuilders
 
 open System
+open System.Linq.Expressions
 open System.Threading
 
-let private prepareDeleteQuery<'Deleted> (ir: SelectQueryIR) =
-    DeleteQuery<'Deleted>({ Table = ir.From |> Option.defaultValue ""; Where = ir.Where; CommandOptions = ir.CommandOptions; })
+let private prepareDeleteQuery<'Deleted> (spec: DeleteQuerySpec<'Deleted>) =
+    if spec.Where = WhereClause.Empty && not spec.DeleteAll then
+        invalidOp "A `delete` expression must either contain a `where` clause or `deleteAll`."
+    DeleteQuery<'Deleted>({ Table = spec.Table; Where = spec.Where; Returning = spec.Returning; CommandOptions = spec.CommandOptions })
 
 /// The base delete builder that contains all common operations
 type DeleteBuilder<'Deleted>() =
 
     let getQueryOrDefault (state: QuerySource<'T>) =
         match state with
-        | :? QuerySource<'T, SelectQueryIR> as qs -> qs.Query
-        | _ -> SelectQueryIR.empty
+        | :? QuerySource<'T, DeleteQuerySpec<'T>> as qs -> qs.Query
+        | _ -> DeleteQuerySpec.Default
 
     member val CancellationToken = CancellationToken.None with get, set
 
     member this.For (state: QuerySource<'T>, [<ReflectedDefinition>] forExpr: FSharp.Quotations.Expr<'T -> QuerySource<'T>>) =
-        let ir = state |> getQueryOrDefault
+        let spec = state |> getQueryOrDefault
         let tableAlias = QuotationVisitor.visitFor forExpr |> QuotationVisitor.allowUnderscore true
         let tblMaybe, tableMappings = TableMappings.tryGetByRootOrAlias tableAlias state.TableMappings
         let tbl = tblMaybe |> Option.get
-
-        QuerySource<'T, SelectQueryIR>(
-            { ir with From = Some $"{tbl.Schema}.{tbl.Name}" },
+        QuerySource<'T, DeleteQuerySpec<'T>>(
+            { spec with Table = $"{tbl.Schema}.{tbl.Name}" },
             tableMappings)
 
     member this.Yield _ =
@@ -33,20 +35,35 @@ type DeleteBuilder<'Deleted>() =
 
     /// Sets the WHERE condition
     [<CustomOperation("where", MaintainsVariableSpace = true)>]
-    member this.Where (state:QuerySource<'T>, [<ProjectionParameter>] whereExpression) =
-        let ir = state |> getQueryOrDefault
+    member this.Where (state: QuerySource<'T>, [<ProjectionParameter>] whereExpression) =
+        let spec = state |> getQueryOrDefault
         let tableMappings = state.TableMappings |> Map.values
         let newClause = LinqExpressionVisitors.visitWhere<'T> tableMappings whereExpression (FQ.fullyQualifyColumn state.TableMappings)
-        QuerySource<'T, SelectQueryIR>({ ir with Where = WhereClause.combineAnd ir.Where newClause }, state.TableMappings)
+        QuerySource<'T, DeleteQuerySpec<'T>>(
+            { spec with Where = WhereClause.combineAnd spec.Where newClause; DeleteAll = false },
+            state.TableMappings)
 
-    /// Deletes all records in the table (only when there are is no where clause)
+    /// Adds one or more columns to the DELETE ... RETURNING clause (PostgreSQL).
+    /// Pass a single property or a tuple of properties.
+    [<CustomOperation("returning", MaintainsVariableSpace = true)>]
+    member this.Returning (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector: Expression<Func<'T, 'Prop>>) =
+        let spec = state |> getQueryOrDefault
+        let cols = LinqExpressionVisitors.visitPropertiesSelector<'T, 'Prop> propertySelector (fun _ p -> p.Name)
+        QuerySource<'T, DeleteQuerySpec<'T>>(
+            { spec with Returning = spec.Returning @ cols },
+            state.TableMappings)
+
+    /// Safeguard verifying that all rows in the table should be deleted (no `where` clause).
     [<CustomOperation("deleteAll", MaintainsVariableSpace = true)>]
-    member this.DeleteAll (state:QuerySource<'T>) =
-        state :?> QuerySource<'T, SelectQueryIR>
+    member this.DeleteAll (state: QuerySource<'T>) =
+        let spec = state |> getQueryOrDefault
+        if spec.Where <> WhereClause.Empty then
+            invalidOp "Cannot have `deleteAll` clause in a query where `where` has been used."
+        QuerySource<'T, DeleteQuerySpec<'T>>({ spec with DeleteAll = true }, state.TableMappings)
 
     /// Sets a CancellationToken for the query execution.
     [<CustomOperation("cancel", MaintainsVariableSpace = true)>]
-    member this.Cancel (state: QuerySource<'T, SelectQueryIR>, cancellationToken: CancellationToken) =
+    member this.Cancel (state: QuerySource<'T, DeleteQuerySpec<'T>>, cancellationToken: CancellationToken) =
         this.CancellationToken <- cancellationToken
         state
 
@@ -55,22 +72,20 @@ type DeleteBuilder<'Deleted>() =
     /// Passing `TimeSpan.Zero` is interpreted as "wait indefinitely".
     /// Omitting `timeout` leaves the provider's default in place.
     [<CustomOperation("timeout", MaintainsVariableSpace = true)>]
-    member this.Timeout (state: QuerySource<'T, SelectQueryIR>, timeout: TimeSpan) =
-        let query = state |> getQueryOrDefault
-        QuerySource<'T, SelectQueryIR>({ query with CommandOptions = { query.CommandOptions with CommandTimeout = Some timeout } }, state.TableMappings)
+    member this.Timeout (state: QuerySource<'T>, timeout: TimeSpan) =
+        let spec = state |> getQueryOrDefault
+        QuerySource<'T, DeleteQuerySpec<'T>>({ spec with CommandOptions = { spec.CommandOptions with CommandTimeout = Some timeout } }, state.TableMappings)
 
     /// Unwraps the query
     member this.Run (state: QuerySource<'Deleted>) =
-        state
-        |> getQueryOrDefault
-        |> prepareDeleteQuery
+        state |> getQueryOrDefault |> prepareDeleteQuery
 
 
 /// A delete builder that returns an Async result.
 type DeleteAsyncBuilder<'Deleted>(ct: ContextType) =
     inherit DeleteBuilder<'Deleted>()
 
-    member this.Run (state: QuerySource<'Deleted, SelectQueryIR>) =
+    member this.Run (state: QuerySource<'Deleted, DeleteQuerySpec<'Deleted>>) =
         async {
             let deleteQuery = state.Query |> prepareDeleteQuery
             let! ctx = ContextUtils.getContext ct |> Async.AwaitTask
@@ -88,7 +103,7 @@ type DeleteAsyncBuilder<'Deleted>(ct: ContextType) =
 type DeleteTaskBuilder<'Deleted>(ct: ContextType) =
     inherit DeleteBuilder<'Deleted>()
 
-    member this.Run (state: QuerySource<'Deleted, SelectQueryIR>) =
+    member this.Run (state: QuerySource<'Deleted, DeleteQuerySpec<'Deleted>>) =
         task {
             let deleteQuery = state.Query |> prepareDeleteQuery
             let! ctx = ContextUtils.getContext ct
@@ -116,4 +131,3 @@ let inline deleteTask< ^Deleted, ^Context
     (ctSource: ^Context) =
     let ct = ContextTypeResolver.resolve ctSource
     DeleteTaskBuilder< ^Deleted>(ct)
-

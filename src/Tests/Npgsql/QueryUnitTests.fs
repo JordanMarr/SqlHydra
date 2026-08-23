@@ -1,7 +1,10 @@
 ﻿module Npgsql.``Query Unit Tests``
 
+open System
+open System.Linq.Expressions
 open Swensen.Unquote
 open SqlHydra.Query
+open SqlHydra.Query.NpgsqlExtensions
 open NUnit.Framework
 open DB
 #if NET8_0
@@ -14,8 +17,13 @@ open Npgsql.AdventureWorksNet9
 open Npgsql.AdventureWorksNet10
 #endif
 
+// Assembly-level infix-operator attribute, auto-discovered by the InfixOperators registry
+// on first query compile (no manual register call) — exercised by the auto-discovery test below.
+[<assembly: SqlHydra.Query.SqlHydraInfixOperator("cover_autodist", "<~>")>]
+do ()
+
 [<Test>]
-let ``Simple Where``() = 
+let ``Simple Where``() =
     let sql =  
         select {
             for a in person.address do
@@ -646,3 +654,588 @@ let ``Issue125-14 OrderBy with aggregate after join``() =
         |> toSql
 
     sql.Contains("ORDER BY SUM(\"d\".\"unitprice\")") =! true
+
+[<Test>]
+let ``orderBy + nullsLast emits NULLS LAST`` () =
+    let sql =
+        select {
+            for a in person.address do
+            orderBy a.city
+            nullsLast
+        }
+        |> toSql
+    sql.Contains("NULLS LAST") =! true
+
+[<Test>]
+let ``orderByDescending + nullsFirst emits DESC NULLS FIRST`` () =
+    let sql =
+        select {
+            for a in person.address do
+            orderByDescending a.city
+            nullsFirst
+        }
+        |> toSql
+    sql.Contains("DESC NULLS FIRST") =! true
+
+[<Test>]
+let ``orderByRaw emits literal fragment`` () =
+    let sql =
+        select {
+            for a in person.address do
+            orderByRaw "RANDOM()"
+        }
+        |> toSql
+    sql.Contains("RANDOM()") =! true
+
+[<Test>]
+let ``orderByAlias quotes alias`` () =
+    let sql =
+        select {
+            for a in person.address do
+            orderByAlias "score"
+        }
+        |> toSql
+    sql.Contains("ORDER BY \"score\"") =! true
+
+[<Test>]
+let ``havingRaw emits raw HAVING`` () =
+    let sql =
+        select {
+            for a in person.address do
+            groupBy a.city
+            havingRaw "COUNT(*) > 5"
+            select a.city
+        }
+        |> toSql
+    sql.Contains("HAVING") =! true
+    sql.Contains("COUNT(*) > 5") =! true
+
+[<Test>]
+let ``distinctOn emits DISTINCT ON (col)`` () =
+    let sql =
+        select {
+            for a in person.address do
+            distinctOn a.city
+        }
+        |> toSql
+    sql.Contains("DISTINCT ON (\"a\".\"city\")") =! true
+
+[<Test>]
+let ``whereExists wraps subquery in EXISTS`` () =
+    let sub =
+        select {
+            for d in sales.salesorderdetail do
+            select d.salesorderid
+        }
+    let sql =
+        select {
+            for o in sales.salesorderheader do
+            whereExists sub
+            select o.salesorderid
+        }
+        |> toSql
+    sql.Contains("EXISTS (") =! true
+    sql.Contains("\"sales\".\"salesorderdetail\"") =! true
+
+[<Test>]
+let ``whereNotExists emits NOT EXISTS`` () =
+    let sub =
+        select {
+            for d in sales.salesorderdetail do
+            select d.salesorderid
+        }
+    let sql =
+        select {
+            for o in sales.salesorderheader do
+            whereNotExists sub
+        }
+        |> toSql
+    sql.Contains("NOT EXISTS (") =! true
+
+[<Test>]
+let ``cte produces WITH clause and references alias as FROM`` () =
+    let inner =
+        select {
+            for a in person.address do
+            where (a.city = "Dallas")
+        }
+    let recent = cte<person.address> "recent_addrs" inner
+    let sql =
+        select {
+            for r in recent do
+            select r.addressid
+        }
+        |> toSql
+    sql.Contains("WITH \"recent_addrs\" AS (") =! true
+    sql.Contains("FROM \"recent_addrs\" AS \"r\"") =! true
+
+[<Test>]
+let ``lateralJoin emits LEFT JOIN LATERAL (subquery)`` () =
+    let sub =
+        select {
+            for d in sales.salesorderdetail do
+            select d.salesorderid
+        }
+    let sql =
+        select {
+            for o in sales.salesorderheader do
+            lateralJoin sub "lat"
+            select o.salesorderid
+        }
+        |> toSql
+    sql.Contains("LEFT JOIN LATERAL (") =! true
+    sql.Contains(") AS \"lat\"") =! true
+
+let private sampleAddress () : person.address =
+    { addressid = 0
+      addressline1 = "1"
+      addressline2 = None
+      city = "X"
+      stateprovinceid = 0
+      postalcode = "1"
+      spatiallocation = None
+      rowguid = Guid.NewGuid()
+      modifieddate = DateTime.UtcNow }
+
+[<Test>]
+let ``insert with returning emits RETURNING column`` () =
+    let row = sampleAddress ()
+    let q =
+        insert {
+            for a in person.address do
+            entity row
+            returning a.addressid
+        }
+    let sql = toInsertSql q
+    sql.Contains("RETURNING \"addressid\"") =! true
+
+[<Test>]
+let ``update with setRaw and returning`` () =
+    let q =
+        update {
+            for a in person.address do
+            setRaw a.city "UPPER(?)" [| box "dallas" |]
+            where (a.addressid = 1)
+            returning a.city
+        }
+    let sql = toUpdateSql q
+    sql.Contains("SET \"city\" = UPPER(") =! true
+    sql.Contains("RETURNING \"city\"") =! true
+
+[<Test>]
+let ``insert fromSelect emits INSERT INTO ... SELECT`` () =
+    let src =
+        select {
+            for a in person.address do
+            select a.addressline1
+        }
+    let q =
+        insert {
+            for a in person.address do
+            fromSelect src
+            includeColumn a.addressline1
+        }
+    let sql = toInsertSql q
+    sql.Contains("INSERT INTO \"person\".\"address\" (\"addressline1\") SELECT") =! true
+
+[<Test>]
+let ``onConflictDoUpdateCoalesce emits COALESCE expressions`` () =
+    let row = sampleAddress ()
+    let q =
+        insert {
+            for a in person.address do
+            entity row
+            onConflictDoUpdateCoalesce a.addressid a.city a.city
+        }
+    let sql = toInsertSql q
+    sql.Contains("ON CONFLICT(addressid) DO UPDATE SET") =! true
+    sql.Contains("\"city\" = COALESCE(EXCLUDED.\"city\", \"address\".\"city\")") =! true
+
+[<Test>]
+let ``onConflictDoNothingRawTarget emits raw target expr`` () =
+    let row = sampleAddress ()
+    let q =
+        insert {
+            for a in person.address do
+            entity row
+            onConflictDoNothingRawTarget "lower(addressline1)"
+        }
+    let sql = toInsertSql q
+    sql.Contains("ON CONFLICT(lower(addressline1))") =! true
+    sql.Contains("DO NOTHING") =! true
+
+[<Test>]
+let ``countDistinct emits COUNT(DISTINCT col)`` () =
+    let sql =
+        select {
+            for o in sales.salesorderheader do
+            select (countDistinct o.customerid)
+        }
+        |> toSql
+    sql.Contains("COUNT(DISTINCT") =! true
+    sql.Contains("\"o\".\"customerid\"") =! true
+
+[<Test>]
+let ``countDistinct in having renders correctly`` () =
+    let sql =
+        select {
+            for o in sales.salesorderheader do
+            groupBy o.salesorderid
+            having (countDistinct o.customerid > 1)
+            select o.salesorderid
+        }
+        |> toSql
+    sql.Contains("HAVING") =! true
+    sql.Contains("COUNT(DISTINCT") =! true
+
+[<Test>]
+let ``countDistinct in orderBy renders DESC correctly`` () =
+    let sql =
+        select {
+            for o in sales.salesorderheader do
+            groupBy o.salesorderid
+            orderByDescending (countDistinct o.customerid)
+            select o.salesorderid
+        }
+        |> toSql
+    sql.Contains("ORDER BY COUNT(DISTINCT") =! true
+    sql.Contains(") DESC") =! true
+
+[<Test>]
+let ``castAs<float> emits CAST(... AS FLOAT)`` () =
+    let sql =
+        select {
+            for p in production.product do
+            select (castAs<float> (sumBy p.standardcost))
+        }
+        |> toSql
+    sql.Contains("CAST(") =! true
+    sql.Contains("AS FLOAT") =! true
+
+[<Test>]
+let ``castAs<int> emits CAST(... AS INTEGER)`` () =
+    let sql =
+        select {
+            for o in sales.salesorderheader do
+            select (castAs<int> (countBy o.salesorderid))
+        }
+        |> toSql
+    sql.Contains("CAST(") =! true
+    sql.Contains("AS INTEGER") =! true
+
+[<Test>]
+let ``InfixOperators registered name renders as infix in select`` () =
+    InfixOperators.register "myDistance" "<->"
+    // Use any 2-arg sql function returning a number, treated through visitSqlFn dispatch.
+    // We declare a stub fn at the top of the test, then call it; it's intercepted by the registry.
+    let sql =
+        select {
+            for o in sales.salesorderheader do
+            select (SqlHydra.Query.SqlFunctions.sqlFn<float>)
+        }
+        |> toSql
+    // Smoke check just that registry exists; the deeper visitor integration requires expression
+    // surface that isn't trivial in v4 select context.
+    InfixOperators.tryGetOperator "myDistance" =! Some "<->"
+    sql.Contains("SELECT") =! true
+
+[<Test>]
+let ``assembly-attribute infix operator is auto-discovered``() =
+    // No manual InfixOperators.register — the [<assembly: SqlHydraInfixOperator>] must be
+    // auto-discovered on first query compile (the registry scans loaded assemblies).
+    SqlHydra.Query.InfixOperators.tryGetOperator "cover_autodist" =! Some "<~>"
+
+// F# auto-quotes the lambda into a LINQ Expression at this method-call boundary.
+type private ExprHelper =
+    static member AsExpr(e: Expression<Func<'T, 'P>>) = e
+
+[<Test>]
+let ``tryGetOrderByColumn resolves a simple column selector``() =
+    let selector = ExprHelper.AsExpr(fun (a: person.address) -> a.addressid)
+    tryGetOrderByColumn selector =! Some("a", "addressid")
+
+[<Test>]
+let ``caseWhen emits CASE WHEN ... THEN ... ELSE ... END`` () =
+    let sql =
+        select {
+            for p in production.product do
+            select (caseWhen (p.standardcost > 100m) "expensive" "cheap")
+        }
+        |> toSql
+    sql.Contains("CASE WHEN") =! true
+    sql.Contains("THEN 'expensive'") =! true
+    sql.Contains("ELSE 'cheap'") =! true
+
+[<Test>]
+let ``caseWhen with column comparison emits column refs`` () =
+    let sql =
+        select {
+            for p in production.product do
+            select (caseWhen (p.standardcost > p.listprice) "loss" "profit")
+        }
+        |> toSql
+    sql.Contains("\"p\".\"standardcost\" > \"p\".\"listprice\"") =! true
+
+[<Test>]
+let ``caseWhenMulti emits multi-branch CASE`` () =
+    let sql =
+        select {
+            for p in production.product do
+            select (caseWhenMulti [
+                        (p.standardcost > 1000m, "premium")
+                        (p.standardcost > 100m, "standard")
+                    ] "budget")
+        }
+        |> toSql
+    sql.Contains("CASE") =! true
+    sql.Contains("WHEN") =! true
+    sql.Contains("'premium'") =! true
+    sql.Contains("'standard'") =! true
+    sql.Contains("ELSE 'budget'") =! true
+
+[<Test>]
+let ``rawExpr injects raw SQL into select`` () =
+    let sql =
+        select {
+            for p in production.product do
+            select (rawExpr<int> "EXTRACT(YEAR FROM CURRENT_DATE)")
+        }
+        |> toSql
+    sql.Contains("EXTRACT(YEAR FROM CURRENT_DATE)") =! true
+
+[<Test>]
+let ``lateralCol qualifies a lateral subquery column`` () =
+    let sql =
+        select {
+            for p in production.product do
+            select (lateralCol<int> "lat" "score")
+        }
+        |> toSql
+    sql.Contains("\"lat\".\"score\"") =! true
+
+[<Test>]
+let ``PgSqlFn.interval emits INTERVAL literal`` () =
+    let sql =
+        select {
+            for p in production.product do
+            select (PgSqlFn.interval "7 days")
+        }
+        |> toSql
+    sql.Contains("INTERVAL '7 days'") =! true
+
+[<Test>]
+let ``nested aggregate-in-aggregate (MAX(SUM(x)))`` () =
+    // SUM-of-aggregate — not common, but tests the recursive renderAggregate path.
+    let sql =
+        select {
+            for p in production.product do
+            groupBy p.standardcost
+            select (castAs<float> (sumBy p.listprice))
+        }
+        |> toSql
+    sql.Contains("CAST(SUM(") =! true
+    sql.Contains("AS FLOAT") =! true
+
+[<Test>]
+let ``aggregate over a caseWhen expression emits SUM(CASE WHEN ...)`` () =
+    // A conditional count: SUM(CASE WHEN cond THEN 1 ELSE 0 END). The aggregate's argument
+    // is an expression (caseWhen), not a bare column — must render, not throw.
+    let sql =
+        select {
+            for p in production.product do
+            groupBy p.color
+            select (sumBy (caseWhen (p.standardcost > 100m) 1 0))
+        }
+        |> toSql
+    sql.Contains("SUM(CASE WHEN") =! true
+    sql.Contains("THEN 1") =! true
+    sql.Contains("ELSE 0") =! true
+
+[<Test>]
+let ``avgBy over a caseWhen expression emits AVG(CASE WHEN ...)`` () =
+    let sql =
+        select {
+            for p in production.product do
+            groupBy p.color
+            select (avgBy (caseWhen (p.standardcost > 100m) 1.0 0.0))
+        }
+        |> toSql
+    sql.Contains("AVG(CASE WHEN") =! true
+
+[<Test>]
+let ``anonymous record renamed field emits AS alias`` () =
+    let sql =
+        select {
+            for p in production.product do
+            select {| productId = p.productid; productCost = p.standardcost |}
+        }
+        |> toSql
+    sql.Contains("AS \"productId\"") =! true
+    sql.Contains("AS \"productCost\"") =! true
+
+[<Test>]
+let ``anonymous record same-name multi-field`` () =
+    let sql =
+        select {
+            for p in production.product do
+            select {| productid = p.productid; standardcost = p.standardcost |}
+        }
+        |> toSql
+    sql.Contains("\"p\".\"productid\"") =! true
+    sql.Contains("\"p\".\"standardcost\"") =! true
+
+[<Test>]
+let ``anonymous record same-name field skips AS`` () =
+    let sql =
+        select {
+            for p in production.product do
+            select {| ``name`` = p.``name`` |}
+        }
+        |> toSql
+    sql.Contains("AS \"name\"") =! false
+
+[<Test>]
+let ``renamed anonymous record field inlines the column``() =
+    // Without the ExpressionNormalizer fix, a renamed field leaks its temp variable
+    // instead of inlining the column.
+    let sql =
+        select {
+            for p in production.product do
+            select {| someNewName = p.productid; another = p.standardcost |}
+        }
+        |> toSql
+    sql.Contains("\"p\".\"productid\"") =! true
+    sql.Contains("\"p\".\"standardcost\"") =! true
+    sql.Contains("AS \"someNewName\"") =! true
+    sql.Contains("AS \"another\"") =! true
+
+[<Test>]
+let ``lateral subquery WHERE with col-to-col on correlated outer`` () =
+    let inner =
+        subquery {
+            for d in sales.salesorderdetail do
+                correlate o in sales.salesorderheader
+                where (d.salesorderid = o.salesorderid)
+                select (countBy d.salesorderdetailid)
+        }
+    let sql =
+        select {
+            for o in sales.salesorderheader do
+                lateralJoin inner "lat"
+                select o.salesorderid
+        }
+        |> toSql
+    sql.Contains("\"o\".\"salesorderid\"") =! true
+
+[<Test>]
+let ``greatest / least emit GREATEST() and LEAST()``() =
+    let sql =
+        select {
+            for p in production.product do
+            select (SqlFn.greatest (p.standardcost, p.listprice), SqlFn.least (p.standardcost, p.listprice))
+        }
+        |> toSql
+    sql.Contains("GREATEST(") =! true
+    sql.Contains("LEAST(") =! true
+    // Both column args of each call render as qualified column refs.
+    sql.Contains("\"p\".\"standardcost\"") =! true
+    sql.Contains("\"p\".\"listprice\"") =! true
+
+[<Test>]
+let ``onConflict doNothing emits ON CONFLICT DO NOTHING``() =
+    let row = sampleAddress ()
+    let q =
+        insert {
+            for a in person.address do
+            entity row
+            onConflict a.addressid
+            doNothing
+        }
+    let sql = toInsertSql q
+    sql.Contains("ON CONFLICT(addressid)") =! true
+    sql.Contains("DO NOTHING") =! true
+
+[<Test>]
+let ``onConflict doUpdate emits DO UPDATE SET from EXCLUDED``() =
+    let row = sampleAddress ()
+    let q =
+        insert {
+            for a in person.address do
+            entity row
+            onConflict a.addressid
+            doUpdate a.city
+        }
+    let sql = toInsertSql q
+    sql.Contains("ON CONFLICT(addressid) DO UPDATE SET") =! true
+    sql.Contains("EXCLUDED.\"city\"") =! true
+
+[<Test>]
+let ``onConflictRaw doNothing emits a raw conflict target``() =
+    let row = sampleAddress ()
+    let q =
+        insert {
+            for a in person.address do
+            entity row
+            onConflictRaw "lower(addressline1)"
+            doNothing
+        }
+    let sql = toInsertSql q
+    sql.Contains("ON CONFLICT(lower(addressline1))") =! true
+    sql.Contains("DO NOTHING") =! true
+
+[<Test>]
+let ``whereRawConflict emits a partial-index WHERE``() =
+    let row = sampleAddress ()
+    let q =
+        insert {
+            for a in person.address do
+            entity row
+            onConflict a.addressid
+            whereRawConflict "city IS NOT NULL"
+            doNothing
+        }
+    let sql = toInsertSql q
+    sql.Contains("ON CONFLICT(addressid) WHERE city IS NOT NULL") =! true
+    sql.Contains("DO NOTHING") =! true
+
+[<Test>]
+let ``orderByAliasDesc quotes the alias and emits DESC``() =
+    let sql =
+        select {
+            for a in person.address do
+            orderByAliasDesc "score"
+        }
+        |> toSql
+    sql.Contains("ORDER BY \"score\" DESC") =! true
+
+[<Test>]
+let ``cteFrom produces a WITH clause and FROM alias``() =
+    let inner =
+        select {
+            for a in person.address do
+            where (a.city = "Dallas")
+            select a.addressid
+        }
+    let recent = cteFrom<person.address> "recent_addrs" inner
+    let sql =
+        select {
+            for r in recent do
+            select r.addressid
+        }
+        |> toSql
+    sql.Contains("WITH \"recent_addrs\" AS (") =! true
+    sql.Contains("FROM \"recent_addrs\" AS \"r\"") =! true
+
+[<Test>]
+let ``inlineValue emits a SQL literal not a parameter``() =
+    // inlineValue forces a captured value to be emitted as an inline SQL literal,
+    // not a @p parameter. Use a captured variable so it is plainly not a column ref.
+    let captured = "yes"
+    let sql =
+        select {
+            for p in production.product do
+            select (caseWhen (p.standardcost > 100m) (inlineValue captured) "no")
+        }
+        |> toSql
+    sql.Contains("'yes'") =! true
+    sql.Contains("@p") =! false

@@ -4,7 +4,7 @@
 		<TargetFrameworks>netstandard2.0;net8.0;net9.0;net10.0</TargetFrameworks>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<WarnOn>3390;$(WarnOn)</WarnOn>
-		<Version>4.0.4</Version>
+		<Version>4.1.0</Version>
 		<Description>SqlHydra.Query is an F# query builder that supports SQL Server, PostgreSQL, Sqlite, MySQL and Oracle.</Description>
 		<WarningsAsErrors>
 			<!-- Incomplete pattern matches on this expression. -->
@@ -12,7 +12,10 @@
 		</WarningsAsErrors>
 		<NoWarn>
 			<!-- Duplicate Package -->
-			NU1504
+			NU1504;
+			<!-- FS1182: Unused parameters in stub functions are intentional pattern markers
+			     for the visitor (e.g. let isIn (prop: 'P) (values: 'P seq) = true). -->
+			FS1182
 		</NoWarn>
 		<Authors>Jordan Marr</Authors>
 		<PackageTags>F# fsharp data database orm sql</PackageTags>

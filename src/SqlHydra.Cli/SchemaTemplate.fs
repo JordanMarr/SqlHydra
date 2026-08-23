@@ -28,6 +28,33 @@ let mkEnum db schema enum = stringBuffer {
     }
 }
 
+/// Emits an additive helper that registers all generated PostgreSQL enum types with an
+/// Npgsql.NpgsqlDataSourceBuilder. Emits output only for the Npgsql provider when the schema
+/// contains at least one enum; otherwise emits nothing.
+let mkEnumRegistration (cfg: Config) (provider: ISqlHydraDbProvider) (db: Schema) = stringBuffer {
+    if provider.Type = ProviderType.Npgsql && not db.Enums.IsEmpty then
+        let enums =
+            db.Enums
+            |> List.sortBy (fun e -> e.Schema, e.Name)
+
+        let mapEnumLines =
+            enums
+            |> List.map (fun e ->
+                let typeArg = $"{backticks e.Schema}.{backticks e.Name}"
+                let pgName = if e.Schema = "public" then e.Name else $"{e.Schema}.{e.Name}"
+                $"        builder.MapEnum<{typeArg}>(\"{pgName}\") |> ignore")
+            |> String.concat newLine
+
+        $"""
+[<RequireQualifiedAccess>]
+module Enums =
+    /// Registers all generated PostgreSQL enum types with the data source builder.
+    let register (builder: Npgsql.NpgsqlDataSourceBuilder) : Npgsql.NpgsqlDataSourceBuilder =
+{mapEnumLines}
+        builder
+    """
+}
+
 let mkTable cfg db (table: Table) schema tableName columnName = stringBuffer {
     let tableType =
         db.Tables
@@ -135,10 +162,23 @@ namespace {{cfg.Namespace}}
 
     // If the user configures ProviderDbTypeAttributes, we know they are using SqlHydra.Query.
     if cfg.ProviderDbTypeAttributes then
+        // Emit an additive enum-registration helper (Npgsql only, when enums exist).
+        // Placed after the per-schema modules so the generated enum types are in scope,
+        // and before the factory so it can register enums on the data source it builds.
+        mkEnumRegistration cfg provider db
+
         let emitter = provider.SqlEmitter
         let connectionType = provider.ProviderConnectionType
 
         if provider.Type = ProviderType.Npgsql then
+            // When enums were generated, the factory builds its data source through
+            // Enums.register so the generated enum types work without any manual MapEnum calls.
+            let createDataSource =
+                if db.Enums.IsEmpty then
+                    "Npgsql.NpgsqlDataSource.Create(connectionString)"
+                else
+                    "(Npgsql.NpgsqlDataSourceBuilder(connectionString) |> Enums.register).Build()"
+
             $"""
 type QueryContextFactory =
     {{
@@ -153,7 +193,7 @@ type QueryContextFactory =
         member this.OpenContextAsync() = this.OpenContextAsync()
     static member Create(connectionString: string, ?sqlLogger) =
         // The factory creates this data source, so it owns and disposes it.
-        let dataSource = Npgsql.NpgsqlDataSource.Create(connectionString)
+        let dataSource = {createDataSource}
         QueryContextFactory.CreateInternal(dataSource, (fun () -> dataSource.Dispose()), ?sqlLogger = sqlLogger)
     static member Create(dataSource: Npgsql.NpgsqlDataSource, ?sqlLogger) =
         // The caller supplied this data source, so the caller owns its lifetime.

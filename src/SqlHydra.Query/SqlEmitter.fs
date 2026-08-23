@@ -3,6 +3,7 @@ namespace SqlHydra.Query
 open SqlHydra.Domain
 
 /// Result of compiling a query IR to SQL.
+[<NoComparison>]
 type CompiledQuery = {
     Sql: string
     /// Parameter name * value pairs (values may be QueryParameter wrappers)

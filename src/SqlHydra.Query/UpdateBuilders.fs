@@ -51,6 +51,31 @@ type UpdateBuilder<'Updated, 'UpdateReturn>() =
             { query with SetValues = query.SetValues @ [ prop.Name, value ] }
             , state.TableMappings)
 
+    /// Sets a column to a raw SQL fragment with parameters. Use ? as parameter placeholders.
+    /// Example: setRaw c.col "COALESCE(?, col)" [| box value |]
+    [<CustomOperation("setRaw", MaintainsVariableSpace = true)>]
+    member this.SetRaw (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector: Expression<Func<'T, 'Prop>>, fragment: string, parameters: obj[]) =
+        let query = state |> getQueryOrDefault
+        let prop = LinqExpressionVisitors.visitPropertySelector<'T, 'Prop> propertySelector :?> Reflection.PropertyInfo
+        QuerySource<'T, UpdateQuerySpec<'T, 'UpdateReturn>>(
+            { query with RawSetValues = query.RawSetValues @ [ prop.Name, fragment, parameters ] }
+            , state.TableMappings)
+
+    /// Convenience overload: setRaw with no parameters.
+    [<CustomOperation("setRaw", MaintainsVariableSpace = true)>]
+    member this.SetRaw (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector: Expression<Func<'T, 'Prop>>, fragment: string) =
+        this.SetRaw(state, propertySelector, fragment, [||])
+
+    /// Adds one or more columns to the RETURNING clause (PostgreSQL).
+    /// Pass a single property `e.id` or a tuple `(e.id, e.email, e.updated_at)`.
+    [<CustomOperation("returning", MaintainsVariableSpace = true)>]
+    member this.Returning (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector: Expression<Func<'T, 'Prop>>) =
+        let query = state |> getQueryOrDefault
+        let cols = LinqExpressionVisitors.visitPropertiesSelector<'T, 'Prop> propertySelector (fun _ p -> p.Name)
+        QuerySource<'T, UpdateQuerySpec<'T, 'UpdateReturn>>(
+            { query with Returning = query.Returning @ cols }
+            , state.TableMappings)
+
     /// Includes a column in the update query.
     [<CustomOperation("includeColumn", MaintainsVariableSpace = true)>]
     member this.IncludeColumn (state: QuerySource<'T>, [<ProjectionParameter>] propertySelector) =

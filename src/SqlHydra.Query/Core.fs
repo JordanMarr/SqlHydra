@@ -43,8 +43,14 @@ module FQ =
         let tbl = tables[TableAliasKey tableAlias]
         $"%s{tbl.Schema}.%s{tbl.Name}.%s{column.Name}"
 
+    /// Renders a table as `schema.name` or just `name` when schema is empty (CTE refs).
+    let qualifiedTable (tbl: TableMapping) =
+        if tbl.Schema = "" then tbl.Name
+        else $"%s{tbl.Schema}.%s{tbl.Name}"
+
 /// Represents a collection that must contain at least on item.
 module AtLeastOne =
+    [<NoComparison>]
     type AtLeastOne<'T> = private { Items : 'T seq }
 
     /// Returns Some if seq contains at least one item, else returns None.
@@ -57,6 +63,7 @@ module AtLeastOne =
         atLeastOne
 
 /// Wraps a query parameter to provide the generated ProviderDbType attribute value.
+[<NoComparison>]
 type QueryParameter =
     {
         Value: obj
@@ -68,6 +75,16 @@ type QueryParameter =
         | Some providerDbType -> $"%s{providerDbType}: {this.Value}"
         | None -> $"obj: {this.Value}"
 
+/// Pending conflict target accumulated by the composable `onConflict ...` CE op,
+/// awaiting a `doNothing` / `doUpdate` / `doUpdateCoalesce` action to finalize.
+[<NoComparison>]
+type PendingConflictTarget =
+    /// `onConflict col1 col2 ...` — typed columns
+    | TypedConflictColumns of fields: string list * whereRaw: string option
+    /// `onConflictRaw "lower(email)"` — expression-index target
+    | RawConflictTarget of rawTargetExpr: string * whereRaw: string option
+
+[<NoComparison>]
 type InsertQuerySpec<'T, 'Identity> =
     {
         Table: string
@@ -76,24 +93,49 @@ type InsertQuerySpec<'T, 'Identity> =
         IdentityField: string option
         OutputFields: OutputField list
         InsertType: InsertType
+        Returning: string list
+        FromSelect: SelectQueryIR option
+        /// Pending conflict target while building a composable `onConflict ... doNothing` chain.
+        /// Cleared once a conflict action finalizes the spec into `InsertType`.
+        PendingConflict: PendingConflictTarget option
         CommandOptions: CommandOptions
     }
     static member Default : InsertQuerySpec<'T, 'Identity> =
-        { Table = ""; Entities = []; Fields = []; IdentityField = None; OutputFields = []; InsertType = Insert; CommandOptions = CommandOptions.Default }
+        { Table = ""; Entities = []; Fields = []; IdentityField = None; OutputFields = []
+          InsertType = Insert; Returning = []; FromSelect = None; PendingConflict = None
+          CommandOptions = CommandOptions.Default }
 
+[<NoComparison>]
 type UpdateQuerySpec<'T, 'UpdateReturn> =
     {
         Table: string
         Entity: 'T option
         Fields: string list
         SetValues: (string * obj) list
+        RawSetValues: (string * string * obj[]) list
         Where: WhereClause
         OutputFields: OutputField list
         UpdateAll: bool
+        Returning: string list
         CommandOptions: CommandOptions
     }
     static member Default : UpdateQuerySpec<'T, 'UpdateReturn> =
-        { Table = ""; Entity = Option<'T>.None; Fields = []; SetValues = []; Where = WhereClause.Empty; OutputFields = []; UpdateAll = false; CommandOptions = CommandOptions.Default }
+        { Table = ""; Entity = Option<'T>.None; Fields = []; SetValues = []; RawSetValues = []
+          Where = WhereClause.Empty; OutputFields = []; UpdateAll = false; Returning = []
+          CommandOptions = CommandOptions.Default }
+
+[<NoComparison>]
+type DeleteQuerySpec<'T> =
+    {
+        Table: string
+        Where: WhereClause
+        DeleteAll: bool
+        Returning: string list
+        CommandOptions: CommandOptions
+    }
+    static member Default : DeleteQuerySpec<'T> =
+        { Table = ""; Where = WhereClause.Empty; DeleteAll = false; Returning = []
+          CommandOptions = CommandOptions.Default }
 
 type QuerySource<'T>(tableMappings) =
     interface IEnumerable<'T> with
@@ -195,14 +237,17 @@ module internal QueryUtils =
                     |> Array.toList
 
             | Some _, _ -> failwith "Cannot have both `entity` and `set` operations in an `update` expression."
-            | None, [] -> failwith "Either an `entity` or `set` operations must be present in an `update` expression."
+            | None, [] when spec.RawSetValues.IsEmpty ->
+                failwith "Either an `entity`, `set`, or `setRaw` operation must be present in an `update` expression."
             | None, setValues -> setValues
 
         {
             Table = spec.Table
             SetColumns = kvps
+            SetRaws = spec.RawSetValues
             Where = spec.Where
             OutputFields = spec.OutputFields
+            Returning = spec.Returning
             CommandOptions = spec.CommandOptions
         }
 
@@ -216,14 +261,27 @@ module internal QueryUtils =
                 FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>)
                 |> Array.filter (fun p -> included.Contains(p.Name))
 
-        match spec.Entities with
-        | [] ->
-            failwith "At least one `entity` or `entities` must be set in the `insert` builder."
+        let columns = includedProperties |> Array.map (fun p -> p.Name) |> Array.toList
 
-        | entities ->
+        match spec.FromSelect, spec.Entities with
+        | Some selectIR, _ ->
+            // INSERT INTO ... (cols) <select-subquery>
+            {
+                Table = spec.Table
+                Columns = columns
+                Rows = []
+                FromSelect = Some selectIR
+                IdentityField = spec.IdentityField
+                InsertType = spec.InsertType
+                OutputFields = spec.OutputFields
+                Returning = spec.Returning
+                CommandOptions = spec.CommandOptions
+            }
+        | None, [] ->
+            failwith "At least one `entity` or `entities` must be set in the `insert` builder."
+        | None, entities ->
             if spec.IdentityField.IsSome && entities.Length > 1
             then failwith "`getId` is not currently supported for multiple inserts via the `entities` operation."
-            let columns = includedProperties |> Array.map (fun p -> p.Name) |> Array.toList
             let rows =
                 entities
                 |> List.map (fun entity ->
@@ -234,9 +292,11 @@ module internal QueryUtils =
                 Table = spec.Table
                 Columns = columns
                 Rows = rows
+                FromSelect = None
                 IdentityField = spec.IdentityField
                 InsertType = spec.InsertType
                 OutputFields = spec.OutputFields
+                Returning = spec.Returning
                 CommandOptions = spec.CommandOptions
             }
 

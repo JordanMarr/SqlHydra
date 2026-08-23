@@ -4,7 +4,7 @@
 		<OutputType>Exe</OutputType>
 		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<Version>4.0.1</Version>
+		<Version>4.1.0</Version>
 		<WarningsAsErrors>
 			<!-- Incomplete pattern matches on this expression. -->
 			FS0025
