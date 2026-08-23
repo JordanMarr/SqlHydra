@@ -52,3 +52,5 @@ Desktop.ini
 *.jfm
 /src/Tests/TestData/AdventureWorksLT_Temp.db
 **/Verify/*.received.*
+# Claude Code personal settings
+.claude/settings.local.json
