@@ -958,6 +958,41 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
                 let fqCol = qualifyColumn alias m.Value.Member
                 Compare(fqCol, compOp, Parameter queryParameter)
 
+            // SQL function compared to value
+            | NMethodCall _, NValue value ->
+                let sqlFragment = nVisitSqlFn qualifyColumn left
+                RawWhere($"{sqlFragment} {comparison} ?", [| value |])
+
+            // Value compared to SQL function
+            | NValue value, NMethodCall _ ->
+                let sqlFragment = nVisitSqlFn qualifyColumn right
+                let reversedComparison = getReverseComparison op
+                RawWhere($"{sqlFragment} {reversedComparison} ?", [| value |])
+
+            // SQL function compared to column
+            | NMethodCall (m, _), NColumn (p, _) when isSqlHydraFunction m.Method ->
+                let sqlFragment = nVisitSqlFn qualifyColumn left
+                let alias = visitAlias p.Expression
+                let fqCol = qualifyColumn alias p.Member
+                RawWhere($"{sqlFragment} {comparison} {fqCol}", [||])
+
+            // Column compared to SQL function
+            | NColumn (p, _), NMethodCall (m, _) when isSqlHydraFunction m.Method ->
+                let alias = visitAlias p.Expression
+                let fqCol = qualifyColumn alias p.Member
+                let sqlFragment = nVisitSqlFn qualifyColumn right
+                RawWhere($"{fqCol} {comparison} {sqlFragment}", [||])
+
+            // SQL function compared to SQL function
+            | NMethodCall _, NMethodCall _ ->
+                let sqlFragment1 = nVisitSqlFn qualifyColumn left
+                let sqlFragment2 = nVisitSqlFn qualifyColumn right
+                RawWhere($"{sqlFragment1} {comparison} {sqlFragment2}", [||])
+
+            // Joined table parameter compared to None (e.g., where (d = None) after leftJoin')
+            // Fall-throughs: the other side is a captured value, so compile-and-eval it.
+            // These MUST stay below the SQL-function arms — evaluating a stub yields null,
+            // and the comparison would silently collapse to `col IS NULL`.
             | NColumn (p, _), _ ->
                 let alias = visitAlias p.Expression
                 let fqCol = qualifyColumn alias p.Member
@@ -1004,38 +1039,6 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
                     let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
                     Compare(fqCol, reversedOp, Parameter queryParameter)
 
-            // SQL function compared to value
-            | NMethodCall _, NValue value ->
-                let sqlFragment = nVisitSqlFn qualifyColumn left
-                RawWhere($"{sqlFragment} {comparison} ?", [| value |])
-
-            // Value compared to SQL function
-            | NValue value, NMethodCall _ ->
-                let sqlFragment = nVisitSqlFn qualifyColumn right
-                let reversedComparison = getReverseComparison op
-                RawWhere($"{sqlFragment} {reversedComparison} ?", [| value |])
-
-            // SQL function compared to column
-            | NMethodCall _, NColumn (p, _) ->
-                let sqlFragment = nVisitSqlFn qualifyColumn left
-                let alias = visitAlias p.Expression
-                let fqCol = qualifyColumn alias p.Member
-                RawWhere($"{sqlFragment} {comparison} {fqCol}", [||])
-
-            // Column compared to SQL function
-            | NColumn (p, _), NMethodCall _ ->
-                let alias = visitAlias p.Expression
-                let fqCol = qualifyColumn alias p.Member
-                let sqlFragment = nVisitSqlFn qualifyColumn right
-                RawWhere($"{fqCol} {comparison} {sqlFragment}", [||])
-
-            // SQL function compared to SQL function
-            | NMethodCall _, NMethodCall _ ->
-                let sqlFragment1 = nVisitSqlFn qualifyColumn left
-                let sqlFragment2 = nVisitSqlFn qualifyColumn right
-                RawWhere($"{sqlFragment1} {comparison} {sqlFragment2}", [||])
-
-            // Joined table parameter compared to None (e.g., where (d = None) after leftJoin')
             | NParameter p, _ | _, NParameter p when p.Type |> isOptionType ->
                 let innerType = p.Type.GetGenericArguments().[0]
                 let firstField = FSharp.Reflection.FSharpType.GetRecordFields(innerType).[0]

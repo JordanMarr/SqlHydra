@@ -1282,3 +1282,75 @@ let ``inlineValue beside another SQL function is a value, not a database call``(
         |> toSql
     test <@ sql.Contains("(LOWER(a.city) = 'smith')") @>
     test <@ not (sql.Contains("INLINEVALUE")) @>
+
+[<Test>]
+let ``a where on a value does not silently become a NULL check``() =
+    // The worst of the three, because nothing fails: this emitted `city IS NULL`, so the
+    // query ran happily and returned every row whose city is unset -- never the row asked
+    // for. The fall-through compile-and-evaluated the marker, whose body is a stub, so the
+    // comparison value came back null and `= null` was folded into `IS NULL`.
+    let captured = "Dallas"
+    let sql =
+        select {
+            for a in person.address do
+            where (a.city = inlineValue captured)
+        }
+        |> toSql
+    // The whole predicate, not just the literal: rendering the marker itself as a
+    // function (`INLINEVALUE('Dallas')`) would satisfy any looser assertion.
+    test <@ sql.Contains("(a.city = 'Dallas')") @>
+    test <@ not (sql.Contains("IS NULL")) @>
+    test <@ not (sql.Contains("@p")) @>
+
+[<Test>]
+let ``a where against a raw SQL expression does not silently become a NULL check``() =
+    // Same silent failure as above, reached through `rawExpr` instead of `inlineValue`.
+    let sql =
+        select {
+            for a in person.address do
+            where (a.city = rawExpr<string> "'Dallas'")
+        }
+        |> toSql
+    test <@ sql.Contains("(a.city = 'Dallas')") @>
+    test <@ not (sql.Contains("RAWEXPR")) @>
+    test <@ not (sql.Contains("IS NULL")) @>
+
+[<Test>]
+let ``a SQL function can be compared against a column``() =
+    // Not silently wrong, just impossible: this shape threw NotImplementedException
+    // "Unable to evaluate where LHS", because the fall-through tried to compute
+    // `LOWER(a.city)` as a .NET value and there is no row to compute it against.
+    let sql =
+        select {
+            for a in person.address do
+            where (SqlFn.lower a.city = a.addressline1)
+        }
+        |> toSql
+    test <@ sql.Contains("(LOWER(a.city) = a.addressline1)") @>
+
+[<Test>]
+let ``a captured .NET value is still bound as a parameter``() =
+    // Not a bug fix -- this guards the two arms above. `name.ToUpperInvariant()` is a real
+    // call with a real result, so it must be computed and bound, never rendered as SQL.
+    let name = "dallas"
+    let sql =
+        select {
+            for a in person.address do
+            where (a.city = name.ToUpperInvariant())
+        }
+        |> toSql
+    test <@ sql.Contains("(\"a\".\"city\" = @p0)") @>
+    test <@ not (sql.Contains("UPPER")) @>
+
+[<Test>]
+let ``a captured .NET value on the left is still bound as a parameter``() =
+    // Mirror of the above, covering the other guarded arm.
+    let name = "dallas"
+    let sql =
+        select {
+            for a in person.address do
+            where (name.ToUpperInvariant() = a.city)
+        }
+        |> toSql
+    test <@ sql.Contains("(\"a\".\"city\" = @p0)") @>
+    test <@ not (sql.Contains("UPPER")) @>
