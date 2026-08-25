@@ -1239,3 +1239,31 @@ let ``inlineValue emits a SQL literal not a parameter``() =
         |> toSql
     sql.Contains("'yes'") =! true
     sql.Contains("@p") =! false
+
+[<Test>]
+let ``a value containing an apostrophe produces a runnable statement``() =
+    // The bug: `inlineValue "O'Brien"` rendered as 'O'Brien'. The apostrophe closes the
+    // literal and Postgres parses what follows as SQL, so the query never runs --
+    //   ERROR:  syntax error at or near "Brien"
+    // A value is data; it must not be able to change the shape of the statement.
+    let captured = "O'Brien"
+    let sql =
+        select {
+            for p in production.product do
+            select (caseWhen (p.standardcost > 100m) (inlineValue captured) "no")
+        }
+        |> toSql
+    test <@ sql.Contains("'O''Brien'") @>
+
+[<Test>]
+let ``an interval built from a runtime string escapes quotes``() =
+    // `interval` takes an arbitrary string, so the value can carry an apostrophe and close
+    // the literal the same way -- it is the one literal site not fed by a constant.
+    let span = "7 days'"
+    let sql =
+        select {
+            for p in production.product do
+            select (PgSqlFn.interval span)
+        }
+        |> toSql
+    test <@ sql.Contains("INTERVAL '7 days'''") @>

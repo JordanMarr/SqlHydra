@@ -526,6 +526,12 @@ let private isNullaryDU (t: System.Type) =
 let private formatFloat (s: string) =
     if s.Contains(".") || s.Contains("e") || s.Contains("E") then s else s + ".0"
 
+/// Renders a string as a SQL literal, doubling embedded single quotes so the value
+/// cannot close the literal early.
+let private renderStringLiteral (s: string) =
+    let escaped = s.Replace("'", "''")
+    $"'{escaped}'"
+
 /// Formats a numeric constant as SQL literal, preserving the type's decimal form for floats.
 /// `1.0` (double) → "1.0", not "1" (which Postgres types as integer and breaks `1.0 - <vector>` queries).
 /// Enums and nullary DUs are quoted as their string name — Postgres treats bare identifiers as columns.
@@ -534,7 +540,7 @@ let private formatNumericLiteral (value: obj) (clrType: System.Type) =
     | t when t = typeof<float> || t = typeof<double> -> (value :?> double).ToString("R", inv) |> formatFloat
     | t when t = typeof<single> || t = typeof<float32> -> (value :?> single).ToString("R", inv) |> formatFloat
     | t when t = typeof<decimal> -> (value :?> decimal).ToString(inv)
-    | t when t.IsEnum || isNullaryDU t -> $"'{value}'"
+    | t when t.IsEnum || isNullaryDU t -> renderStringLiteral (string value)
     // Integer primitives (int, int64, byte, ...) — ToString is safe SQL for these.
     // char/bool are excluded: bool is handled in renderObjAsLiteral; char would emit unquoted.
     | t when t.IsPrimitive && t <> typeof<char> && t <> typeof<bool> -> sprintf "%O" value
@@ -545,7 +551,7 @@ let private formatNumericLiteral (value: obj) (clrType: System.Type) =
 /// orderBy walker, which never receives bool constants). Shared by the expression walkers.
 let private renderConstant (handleBool: bool) (c: ConstantExpression) =
     if c.Value = null then "NULL"
-    elif c.Type = typeof<string> then $"'{c.Value}'"
+    elif c.Type = typeof<string> then renderStringLiteral (c.Value :?> string)
     elif handleBool && c.Type = typeof<bool> then (if c.Value :?> bool then "TRUE" else "FALSE")
     else formatNumericLiteral c.Value c.Type
 
@@ -554,15 +560,13 @@ let private renderConstant (handleBool: bool) (c: ConstantExpression) =
 let private renderObjAsLiteral (v: obj) =
     match v with
     | null -> "NULL"
-    | :? string as s -> $"'{s}'"
+    | :? string as s -> renderStringLiteral s
     | :? bool as b -> if b then "TRUE" else "FALSE"
-    | :? System.Guid as g -> $"'{g}'"
+    | :? System.Guid as g -> renderStringLiteral (string g)
     | :? System.DateTime as dt ->
-        let s = dt.ToString("yyyy-MM-dd HH:mm:ss", inv)
-        $"'{s}'"
+        renderStringLiteral (dt.ToString("yyyy-MM-dd HH:mm:ss", inv))
     | :? System.DateTimeOffset as dto ->
-        let s = dto.ToString("yyyy-MM-dd HH:mm:sszzz", inv)
-        $"'{s}'"
+        renderStringLiteral (dto.ToString("yyyy-MM-dd HH:mm:sszzz", inv))
     | _ -> formatNumericLiteral v (v.GetType())
 
 /// Converts a SQL function MethodCall expression to a SQL fragment string.
@@ -619,12 +623,7 @@ let rec visitSqlFn (qualifyColumn: string -> MemberInfo -> string) (exp: Express
                         let cond = t.GetProperty("Item1").GetValue(item) :?> bool
                         let v = t.GetProperty("Item2").GetValue(item)
                         let condStr = if cond then "TRUE" else "FALSE"
-                        let valStr =
-                            match v with
-                            | null -> "NULL"
-                            | :? string as s -> $"'{s}'"
-                            | x -> sprintf "%O" x
-                        yield (condStr, valStr) ]
+                        yield (condStr, renderObjAsLiteral v) ]
                 | _ -> notImplMsg $"Cannot extract caseWhenMulti list: {exp.NodeType}"
             with ex -> notImplMsg $"Cannot extract caseWhenMulti list: {exp.NodeType} ({ex.Message})"
     and extractTuple (exp: Expression) : string * string =
@@ -661,7 +660,7 @@ let rec visitSqlFn (qualifyColumn: string -> MemberInfo -> string) (exp: Express
     // (Method name string-matched because `interval` lives in NpgsqlExtensions and isn't in scope here.)
     | MethodCall m when m.Method.Name = "interval" && m.Arguments.Count = 1 ->
         let value = compileAndEval m.Arguments.[0] :?> string
-        $"INTERVAL '{value}'"
+        $"INTERVAL {renderStringLiteral value}"
     // Aggregates → render via renderAggregate (handles COUNT(DISTINCT col)).
     | MethodCall m when aggregateMethodNames.Contains m.Method.Name ->
         let aggType = aggTypeOf m.Method.Name
