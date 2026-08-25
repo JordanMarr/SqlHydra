@@ -8,6 +8,13 @@ open FastExpressionCompiler
 let notImpl() = raise (NotImplementedException())
 let notImplMsg msg = raise (NotImplementedException msg)
 
+/// True when a method call is a SqlHydra query function (`isIn`, `like`, `inlineValue`,
+/// `rawExpr`, `sqlFn` wrappers, ...) rather than an ordinary .NET call.
+/// A SqlHydra function has a stub body (`Unchecked.defaultof<_>`), so evaluating one yields
+/// null/0 rather than anything meaningful: it must be rendered as SQL, never compiled and run.
+let isSqlHydraFunction (mi: MethodInfo) =
+    mi.Module.Name = "SqlHydra.Query.dll"
+
 /// Aggregate method names recognized by the visitor. Used by visitSqlFn / pattern matchers.
 /// Keep in sync with QueryFunctions.Aggregates.
 let aggregateMethodNames =
@@ -297,7 +304,7 @@ module SqlPatterns =
         match exp with
         | Constant c -> Some c.Value
         // Do not try to evaluate QueryFunctions like `isIn`, `isNotIn`, etc.
-        | Call c when c.Method.Module.Name <> "SqlHydra.Query.dll" -> 
+        | Call c when not (isSqlHydraFunction c.Method) ->
             compileAndEvaluateExpression exp |> Some
         | _ -> None
 
@@ -394,7 +401,7 @@ module NormalizedPatterns =
     let (|NValue|_|) (nexp: NormalizedExpression) =
         match nexp with
         | NConstant(v, _) -> Some v
-        | NMethodCall(call, _) when call.Method.Module.Name <> "SqlHydra.Query.dll" ->
+        | NMethodCall(call, _) when not (isSqlHydraFunction call.Method) ->
             compileAndEvaluateExpression (call :> Expression) |> Some
         | NMemberAccess(NConstant _, m) ->
             // Evaluable member access on a constant (e.g., captured variable from closure)
