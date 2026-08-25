@@ -1343,6 +1343,54 @@ let ``a captured .NET value is still bound as a parameter``() =
     test <@ not (sql.Contains("UPPER")) @>
 
 [<Test>]
+let ``a SQL function can be used in a join predicate``() =
+    // Same defect as the where clause, one function over: `visitJoinPredicate` also
+    // compile-and-evaluates the other side, so this threw NotImplementedException
+    // "Unable to render join predicate RHS".
+    let sql =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (a.city = SqlFn.lower a2.city)
+            select a
+        }
+        |> toSql
+    test <@ sql.Contains("ON (a.city = LOWER(a2.city))") @>
+
+[<Test>]
+let ``a SQL function on the left of a join predicate``() =
+    let sql =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (SqlFn.lower a.city = a2.city)
+            select a
+        }
+        |> toSql
+    test <@ sql.Contains("ON (LOWER(a.city) = a2.city)") @>
+
+[<Test>]
+let ``a SQL function compared to a value in a join predicate``() =
+    let sql =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (SqlFn.lower a2.city = "dallas")
+            select a
+        }
+        |> toSql
+    test <@ sql.Contains("ON (LOWER(a2.city) = @p0)") @>
+
+[<Test>]
+let ``two SQL functions compared in a join predicate``() =
+    // The natural case-insensitive join, and the shape most likely to be reached for.
+    let sql =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (SqlFn.lower a.city = SqlFn.lower a2.city)
+            select a
+        }
+        |> toSql
+    test <@ sql.Contains("ON (LOWER(a.city) = LOWER(a2.city))") @>
+
+[<Test>]
 let ``a captured .NET value on the left is still bound as a parameter``() =
     // Mirror of the above, covering the other guarded arm.
     let name = "dallas"

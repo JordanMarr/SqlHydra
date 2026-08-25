@@ -1390,7 +1390,30 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
             WhereClause.combineOr lt rt
         | NBinaryCompare(left, op, right) ->
             let compOp = toComparisonOp op
+            let comparison = getComparison op
             match left, right with
+            // A SQL function must be rendered, not evaluated. These MUST precede the arms
+            // below, which compile-and-eval whichever side is not a column.
+            | NColumn (p, _), NMethodCall (m, _) when isSqlHydraFunction m.Method ->
+                let alias = visitAlias p.Expression
+                let fqCol = qualifyColumn alias p.Member
+                RawWhere($"{fqCol} {comparison} {nVisitSqlFn qualifyColumn right}", [||])
+
+            | NMethodCall (m, _), NColumn (p, _) when isSqlHydraFunction m.Method ->
+                let alias = visitAlias p.Expression
+                let fqCol = qualifyColumn alias p.Member
+                RawWhere($"{nVisitSqlFn qualifyColumn left} {comparison} {fqCol}", [||])
+
+            | NMethodCall (m, _), NValue value when isSqlHydraFunction m.Method ->
+                RawWhere($"{nVisitSqlFn qualifyColumn left} {comparison} ?", [| value |])
+
+            | NValue value, NMethodCall (m, _) when isSqlHydraFunction m.Method ->
+                RawWhere($"{nVisitSqlFn qualifyColumn right} {getReverseComparison op} ?", [| value |])
+
+            | NMethodCall (m1, _), NMethodCall (m2, _) when
+                isSqlHydraFunction m1.Method && isSqlHydraFunction m2.Method ->
+                RawWhere($"{nVisitSqlFn qualifyColumn left} {comparison} {nVisitSqlFn qualifyColumn right}", [||])
+
             // Handle col to col comparisons (the primary join case)
             | NColumn (p1, _), NColumn (p2, _) ->
                 let lt =
