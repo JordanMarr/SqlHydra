@@ -582,9 +582,6 @@ let rec visitSqlFn (qualifyColumn: string -> MemberInfo -> string) (exp: Express
         // Unwrap implicit numeric conversions (e.g., int → float when a column type widens).
         | :? UnaryExpression as u when u.NodeType = ExpressionType.Convert ->
             renderExpr u.Operand
-        // inlineValue marker: compile-and-eval the inner expression and emit as a literal.
-        | MethodCall m when m.Method.Name = nameof inlineValue && m.Arguments.Count = 1 ->
-            renderObjAsLiteral (compileAndEval m.Arguments.[0])
         | Member mem when mem.Expression <> null ->
             let alias = visitAlias mem.Expression
             qualifyColumn alias mem.Member
@@ -653,6 +650,9 @@ let rec visitSqlFn (qualifyColumn: string -> MemberInfo -> string) (exp: Express
         let alias = compileAndEval m.Arguments.[0] :?> string
         let column = compileAndEval m.Arguments.[1] :?> string
         $"\"{alias}\".\"{column}\""
+    // inlineValue marker: emit the wrapped value as a SQL literal.
+    | MethodCall m when m.Method.Name = nameof inlineValue && m.Arguments.Count = 1 ->
+        renderObjAsLiteral (compileAndEval m.Arguments.[0])
     // Raw SQL escape hatch
     | MethodCall m when m.Method.Name = nameof rawExpr && m.Arguments.Count = 1 ->
         compileAndEval m.Arguments.[0] :?> string

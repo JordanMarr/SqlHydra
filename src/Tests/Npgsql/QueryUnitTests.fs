@@ -1267,3 +1267,18 @@ let ``an interval built from a runtime string escapes quotes``() =
         }
         |> toSql
     test <@ sql.Contains("INTERVAL '7 days'''") @>
+
+[<Test>]
+let ``inlineValue beside another SQL function is a value, not a database call``() =
+    // The bug: this emitted `LOWER(a.city) = INLINEVALUE('smith')`, so Postgres looked for
+    // a function that does not exist and the query never ran --
+    //   ERROR:  function inlinevalue(unknown) does not exist
+    // `inlineValue` is a compile-time marker; it must never survive into the SQL.
+    let sql =
+        select {
+            for a in person.address do
+            where (SqlFn.lower a.city = inlineValue "smith")
+        }
+        |> toSql
+    test <@ sql.Contains("(LOWER(a.city) = 'smith')") @>
+    test <@ not (sql.Contains("INLINEVALUE")) @>
