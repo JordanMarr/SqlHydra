@@ -52,6 +52,11 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "54320:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
       
   orcl:
     hostname: orcl
@@ -66,5 +71,11 @@ services:
     volumes:
       - ./orcl/init-ot-schema.sql:/docker-entrypoint-initdb.d/01_init_schema.sql
       - ./orcl/init-ot-data.sql:/docker-entrypoint-initdb.d/02_init_data.sql
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh"]
+      interval: 10s
+      timeout: 10s
+      retries: 60
+      start_period: 30s
     
     

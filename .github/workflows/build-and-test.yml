@@ -31,13 +31,14 @@ jobs:
           dotnet-version: |
             8.x
             9.x
+            10.x
       - name: Restore
         working-directory: src/
         run: dotnet restore
 
       - name: Start containers
         working-directory: src/.devcontainer
-        run: docker compose up -d mssql postgresql orcl
+        run: docker compose up -d --wait mssql postgresql orcl
       - name: Build
         working-directory: src/
         run: dotnet build --no-restore
@@ -47,10 +48,20 @@ jobs:
 
       - name: Stop and Start containers
         working-directory: src/.devcontainer
-        run: docker compose down && docker compose up -d mssql postgresql orcl
+        run: docker compose down && docker compose up -d --wait mssql postgresql orcl
       - name: Build
         working-directory: src/
         run: dotnet build --no-restore
       - name: Test net9.0
         working-directory: src/
         run: dotnet test --framework net9.0
+
+      - name: Stop and Start containers
+        working-directory: src/.devcontainer
+        run: docker compose down && docker compose up -d --wait mssql postgresql orcl
+      - name: Build
+        working-directory: src/
+        run: dotnet build --no-restore
+      - name: Test net10.0
+        working-directory: src/
+        run: dotnet test --framework net10.0
