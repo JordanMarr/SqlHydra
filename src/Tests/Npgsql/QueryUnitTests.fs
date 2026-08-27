@@ -30,6 +30,9 @@ let SOUNDEX (s: string) : string = sqlFn
 /// The same wrapper with the marker left off: what a user gets when they forget it.
 let UNMARKED_SOUNDEX (s: string) : string = sqlFn
 
+/// An ordinary .NET function: must be evaluated, never rendered.
+let plainDotNetHelper () = "Dallas"
+
 /// Generic, because the call the visitor sees is then a constructed method rather than the
 /// one the attribute was written on — and the marker has to survive that.
 [<SqlHydraFunction>]
@@ -1689,3 +1692,32 @@ let ``every sqlFn wrapper shipped in SqlHydra.Query carries the marker``() =
         |> Seq.map (fun mi -> $"{mi.DeclaringType.FullName}.{mi.Name}")
         |> Seq.distinct |> Seq.sort |> Seq.toList
     test <@ unmarked = [] @>
+
+// Three `visitWhere` arms commented "SQL function ..." never checked whether the call was one,
+// so `myHelper()` went to the database as `MYHELPER()`. `on'` guarded all five of its
+// equivalents all along.
+
+[<Test>]
+let ``an ordinary .NET call on the left of a where is evaluated, not rendered``() =
+    let build () =
+        select {
+            for a in person.address do
+            where (plainDotNetHelper () = "Dallas")
+        }
+        |> toSql
+        |> ignore
+    // "Value to value" is the proof that both sides were evaluated rather than rendered.
+    let ex = Assert.Throws<NotImplementedException>(fun () -> build ())
+    test <@ ex.Message.Contains("Value to value") @>
+
+[<Test>]
+let ``two ordinary .NET calls in a where are evaluated, not rendered``() =
+    let build () =
+        select {
+            for a in person.address do
+            where (plainDotNetHelper () = plainDotNetHelper ())
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<NotImplementedException>(fun () -> build ())
+    test <@ ex.Message.Contains("Value to value") @>

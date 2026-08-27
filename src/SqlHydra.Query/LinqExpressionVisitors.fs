@@ -427,7 +427,7 @@ module NormalizedPatterns =
             Some v
         | NUnknown exp when exp <> null ->
             try compileAndEvaluateExpression exp |> Some
-            with _ -> None
+            with :? NotImplementedException -> None
         | _ -> None
 
     /// Aggregate column pattern (minBy, maxBy, sumBy, avgBy, countBy, avgByAs).
@@ -975,12 +975,12 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
                 Compare(fqCol, compOp, Parameter queryParameter)
 
             // SQL function compared to value
-            | NMethodCall _, NValue value ->
+            | NMethodCall (m, _), NValue value when isSqlHydraFunction m.Method ->
                 let sqlFragment = nVisitSqlFn qualifyColumn left
                 RawWhere($"{sqlFragment} {comparison} ?", [| value |])
 
             // Value compared to SQL function
-            | NValue value, NMethodCall _ ->
+            | NValue value, NMethodCall (m, _) when isSqlHydraFunction m.Method ->
                 let sqlFragment = nVisitSqlFn qualifyColumn right
                 let reversedComparison = getReverseComparison op
                 RawWhere($"{sqlFragment} {reversedComparison} ?", [| value |])
@@ -1000,7 +1000,8 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
                 RawWhere($"{fqCol} {comparison} {sqlFragment}", [||])
 
             // SQL function compared to SQL function
-            | NMethodCall _, NMethodCall _ ->
+            | NMethodCall (m1, _), NMethodCall (m2, _) when
+                isSqlHydraFunction m1.Method && isSqlHydraFunction m2.Method ->
                 let sqlFragment1 = nVisitSqlFn qualifyColumn left
                 let sqlFragment2 = nVisitSqlFn qualifyColumn right
                 RawWhere($"{sqlFragment1} {comparison} {sqlFragment2}", [||])
@@ -1080,7 +1081,7 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
                     | NUnary(ExpressionType.Convert, inner) -> asOuterCol inner
                     | _ -> None
                 let tryEval (n: NormalizedExpression) =
-                    try Some (nEvaluate n) with _ -> None
+                    try Some (nEvaluate n) with :? NotImplementedException -> None
                 match asOuterCol left, asOuterCol right with
                 | Some ml, Some mr ->
                     let lt = qualifyColumn (visitAlias ml.Expression) ml.Member
@@ -1529,7 +1530,7 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
                         try
                             let rhsAlias = visitAlias m.Expression
                             Some (qualifyColumn rhsAlias m.Member)
-                        with _ -> None
+                        with :? NotImplementedException -> None
                     | _ -> None
                 let result =
                     try evalRhs () |> Option.map Choice1Of2
@@ -1563,7 +1564,7 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
                         try
                             let lhsAlias = visitAlias m.Expression
                             Some (qualifyColumn lhsAlias m.Member)
-                        with _ -> None
+                        with :? NotImplementedException -> None
                     | _ -> None
                 let result =
                     try evalLhs () |> Option.map Choice1Of2
