@@ -4,7 +4,7 @@
 		<TargetFrameworks>netstandard2.0;net8.0;net9.0;net10.0</TargetFrameworks>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<WarnOn>3390;$(WarnOn)</WarnOn>
-		<Version>4.1.0</Version>
+		<Version>4.1.1</Version>
 		<Description>SqlHydra.Query is an F# query builder that supports SQL Server, PostgreSQL, Sqlite, MySQL and Oracle.</Description>
 		<WarningsAsErrors>
 			<!-- Incomplete pattern matches on this expression. -->
