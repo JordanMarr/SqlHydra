@@ -1,9 +1,10 @@
-module SqlHydra.Query.OracleExtensions
+﻿module SqlHydra.Query.OracleExtensions
 
 open System
 
 /// Common Oracle functions for use in select expressions.
 /// Use `open type SqlFn` to access functions without qualification.
+[<SqlHydraFunction>]
 type SqlFn =
     // String functions
     static member LENGTH(s: string) : int = sqlFn

@@ -1,6 +1,32 @@
 ﻿namespace SqlHydra.Query
 
+/// Marks `sqlFn` wrappers as SQL functions, so that a `where` or `on'` predicate renders the
+/// call as SQL instead of computing it as a .NET value. SqlHydra's own query functions carry it
+/// too: it is the only thing that makes a call a SQL function.
+/// Apply it to one function, or to the module or type holding a group of them: everything
+/// declared inside a marked module or type qualifies, nesting included, so keep ordinary
+/// helpers out of one.
+/// Unmarked wrappers still work in `select` and `orderBy`, which render every call; in a
+/// predicate they raise `SqlFunctionNotRenderedException` rather than compare against a stub.
+///
+/// Example:
+///   [<SqlHydraFunction>]
+///   module SqlFn =
+///       let SOUNDEX (s: string) : string = sqlFn
+///       let DIFFERENCE (s1: string, s2: string) : int = sqlFn
+[<System.AttributeUsage(System.AttributeTargets.Method ||| System.AttributeTargets.Class)>]
+type SqlHydraFunctionAttribute() =
+    inherit System.Attribute()
+
+/// Raised when a `sqlFn` wrapper is executed as ordinary .NET code instead of being rendered
+/// as SQL: either it was called outside a query expression, or it is used in a `where`/`on'`
+/// predicate without `[<SqlHydraFunction>]`, so the visitor took it for a value to compute.
+type SqlFunctionNotRenderedException(message: string, inner: exn) =
+    inherit System.InvalidOperationException(message, inner)
+    new (message: string) = SqlFunctionNotRenderedException(message, null)
+
 [<AutoOpen>]
+[<SqlHydraFunction>]
 module Table =
 
     /// Maps the entity 'T to a table of the exact same name.
@@ -24,6 +50,7 @@ module Table =
         QuerySource<'T, SelectQueryIR>(ir, tables) :> QuerySource<'T>
 
 [<AutoOpen>]
+[<SqlHydraFunction>]
 module Where = 
 
     /// WHERE column is IN values
@@ -64,6 +91,7 @@ module Where =
     let notEqual (prop: 'P) (value: 'P) = true
 
 [<AutoOpen>]
+[<SqlHydraFunction>]
 module OrderBy = 
 
     // infix operator ^^ that takes a boolean that conditionally includes the sort property.
@@ -86,6 +114,7 @@ SELECT [SalesLT].[Product].[Department], MIN([SalesLT].[Product].[Price]) AS Min
 *)
 
 [<AutoOpen>]
+[<SqlHydraFunction>]
 module Aggregates =
 
     /// Gets the COUNT of the given column
@@ -110,6 +139,7 @@ module Aggregates =
     let countDistinct (prop: 'P) = Unchecked.defaultof<int>
 
 [<AutoOpen>]
+[<SqlHydraFunction>]
 module CastFunctions =
     /// CAST(expression AS targetType).
     /// The target SQL type is inferred from the F# return type:
@@ -117,6 +147,7 @@ module CastFunctions =
     let castAs<'Result> (_value: obj) : 'Result = Unchecked.defaultof<'Result>
 
 [<AutoOpen>]
+[<SqlHydraFunction>]
 module CaseWhenFunctions =
     /// CASE WHEN condition THEN thenValue ELSE elseValue END.
     /// Note: values are rendered as SQL literals, not parameters.
@@ -128,6 +159,7 @@ module CaseWhenFunctions =
     let caseWhenMulti<'T> (branches: (bool * 'T) list) (elseValue: 'T) : 'T = Unchecked.defaultof<'T>
 
 [<AutoOpen>]
+[<SqlHydraFunction>]
 module RawExpressions =
     /// Reference a column from a lateral subquery by alias and column name (raw quoted).
     /// Example: lateralCol "lat" "score" → "lat"."score"
@@ -190,11 +222,23 @@ module InfixOperators =
         | _ -> None
 
 [<AutoOpen>]
+[<SqlHydraFunction>]
 module SqlFunctions =
 
-    /// A stub value used to define SQL function wrappers.
-    /// The function name and arguments are translated directly to SQL.
+    /// A stub used to define SQL function wrappers: the wrapper's name and arguments are
+    /// translated directly to SQL, and its body never runs.
     /// Example:
+    ///   [<SqlHydraFunction>]
     ///   let LEN (s: string) : int = sqlFn
+    ///   [<SqlHydraFunction>]
     ///   let SUBSTRING (s: string, start: int, length: int) : string = sqlFn
-    let sqlFn<'Return> : 'Return = Unchecked.defaultof<'Return>
+    ///
+    /// Raises if it is ever actually executed, which means the call was not rendered. Handing
+    /// back `Unchecked.defaultof` instead is what let `where (col = SOUNDEX "Smith")` compile,
+    /// run, and quietly mean `col IS NULL`.
+    let sqlFn<'Return> : 'Return =
+        raise (SqlFunctionNotRenderedException(
+            "A SqlHydra `sqlFn` function was executed instead of being rendered as SQL. \
+             In a `where` or `on'` predicate, a wrapper must be marked `[<SqlHydraFunction>]`, \
+             on the function or on the module or type holding it. Outside a query expression a \
+             `sqlFn` wrapper has no runtime meaning and cannot be called."))

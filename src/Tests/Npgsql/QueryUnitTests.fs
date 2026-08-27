@@ -22,6 +22,42 @@ open Npgsql.AdventureWorksNet10
 [<assembly: SqlHydra.Query.SqlHydraInfixOperator("cover_autodist", "<~>")>]
 do ()
 
+// Declared HERE, in the test assembly — not inside SqlHydra.Query — so these exercise the
+// real external path: `where` knows them only by the marker they carry.
+[<SqlHydraFunction>]
+let SOUNDEX (s: string) : string = sqlFn
+
+/// The same wrapper with the marker left off: what a user gets when they forget it.
+let UNMARKED_SOUNDEX (s: string) : string = sqlFn
+
+/// An ordinary .NET function: must be evaluated, never rendered.
+let plainDotNetHelper () = "Dallas"
+
+/// Generic, because the call the visitor sees is then a constructed method rather than the
+/// one the attribute was written on — and the marker has to survive that.
+[<SqlHydraFunction>]
+let NULLIF<'T> (a: 'T, b: 'T) : 'T = sqlFn
+
+type ExtFn =
+    /// Case folding over a NULLABLE column — the overload SqlHydra itself does not ship.
+    [<SqlHydraFunction>]
+    static member lower(s: string option) : string = sqlFn
+
+/// One marker for a whole group, which is the shape wrappers actually get written in.
+/// Nothing inside repeats it.
+[<SqlHydraFunction>]
+module Grouped =
+    let DIFFERENCE (a: string, b: string) : int = sqlFn
+
+    /// Nested and unmarked itself: a marked module covers what is declared inside it.
+    module Text =
+        let INITCAP (s: string) : string = sqlFn
+
+/// The same, on a type of static members — how SqlHydra's own provider files are laid out.
+[<SqlHydraFunction>]
+type GroupedFn =
+    static member ASCII(s: string) : int = sqlFn
+
 [<Test>]
 let ``Simple Where``() =
     let sql =  
@@ -1239,3 +1275,449 @@ let ``inlineValue emits a SQL literal not a parameter``() =
         |> toSql
     sql.Contains("'yes'") =! true
     sql.Contains("@p") =! false
+
+[<Test>]
+let ``a value containing an apostrophe produces a runnable statement``() =
+    // The bug: `inlineValue "O'Brien"` rendered as 'O'Brien'. The apostrophe closes the
+    // literal and Postgres parses what follows as SQL, so the query never runs --
+    //   ERROR:  syntax error at or near "Brien"
+    // A value is data; it must not be able to change the shape of the statement.
+    let captured = "O'Brien"
+    let sql =
+        select {
+            for p in production.product do
+            select (caseWhen (p.standardcost > 100m) (inlineValue captured) "no")
+        }
+        |> toSql
+    test <@ sql.Contains("'O''Brien'") @>
+
+[<Test>]
+let ``an interval built from a runtime string escapes quotes``() =
+    // `interval` takes an arbitrary string, so the value can carry an apostrophe and close
+    // the literal the same way -- it is the one literal site not fed by a constant.
+    let span = "7 days'"
+    let sql =
+        select {
+            for p in production.product do
+            select (PgSqlFn.interval span)
+        }
+        |> toSql
+    test <@ sql.Contains("INTERVAL '7 days'''") @>
+
+[<Test>]
+let ``inlineValue beside another SQL function is a value, not a database call``() =
+    // The bug: this emitted `LOWER(a.city) = INLINEVALUE('smith')`, so Postgres looked for
+    // a function that does not exist and the query never ran --
+    //   ERROR:  function inlinevalue(unknown) does not exist
+    // `inlineValue` is a compile-time marker; it must never survive into the SQL.
+    let sql =
+        select {
+            for a in person.address do
+            where (SqlFn.lower a.city = inlineValue "smith")
+        }
+        |> toSql
+    test <@ sql.Contains("(LOWER(a.city) = 'smith')") @>
+    test <@ not (sql.Contains("INLINEVALUE")) @>
+
+[<Test>]
+let ``a where on a value does not silently become a NULL check``() =
+    // The worst of the three, because nothing fails: this emitted `city IS NULL`, so the
+    // query ran happily and returned every row whose city is unset -- never the row asked
+    // for. The fall-through compile-and-evaluated the marker, whose body is a stub, so the
+    // comparison value came back null and `= null` was folded into `IS NULL`.
+    let captured = "Dallas"
+    let sql =
+        select {
+            for a in person.address do
+            where (a.city = inlineValue captured)
+        }
+        |> toSql
+    // The whole predicate, not just the literal: rendering the marker itself as a
+    // function (`INLINEVALUE('Dallas')`) would satisfy any looser assertion.
+    test <@ sql.Contains("(a.city = 'Dallas')") @>
+    test <@ not (sql.Contains("IS NULL")) @>
+    test <@ not (sql.Contains("@p")) @>
+
+[<Test>]
+let ``a where against a raw SQL expression does not silently become a NULL check``() =
+    // Same silent failure as above, reached through `rawExpr` instead of `inlineValue`.
+    let sql =
+        select {
+            for a in person.address do
+            where (a.city = rawExpr<string> "'Dallas'")
+        }
+        |> toSql
+    test <@ sql.Contains("(a.city = 'Dallas')") @>
+    test <@ not (sql.Contains("RAWEXPR")) @>
+    test <@ not (sql.Contains("IS NULL")) @>
+
+[<Test>]
+let ``a SQL function can be compared against a column``() =
+    // Not silently wrong, just impossible: this shape threw NotImplementedException
+    // "Unable to evaluate where LHS", because the fall-through tried to compute
+    // `LOWER(a.city)` as a .NET value and there is no row to compute it against.
+    let sql =
+        select {
+            for a in person.address do
+            where (SqlFn.lower a.city = a.addressline1)
+        }
+        |> toSql
+    test <@ sql.Contains("(LOWER(a.city) = a.addressline1)") @>
+
+[<Test>]
+let ``a captured .NET value is still bound as a parameter``() =
+    // Not a bug fix -- this guards the two arms above. `name.ToUpperInvariant()` is a real
+    // call with a real result, so it must be computed and bound, never rendered as SQL.
+    let name = "dallas"
+    let sql =
+        select {
+            for a in person.address do
+            where (a.city = name.ToUpperInvariant())
+        }
+        |> toSql
+    test <@ sql.Contains("(\"a\".\"city\" = @p0)") @>
+    test <@ not (sql.Contains("UPPER")) @>
+
+[<Test>]
+let ``a SQL function can be used in a join predicate``() =
+    // Same defect as the where clause, one function over: `visitJoinPredicate` also
+    // compile-and-evaluates the other side, so this threw NotImplementedException
+    // "Unable to render join predicate RHS".
+    let sql =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (a.city = SqlFn.lower a2.city)
+            select a
+        }
+        |> toSql
+    test <@ sql.Contains("ON (a.city = LOWER(a2.city))") @>
+
+[<Test>]
+let ``a SQL function on the left of a join predicate``() =
+    let sql =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (SqlFn.lower a.city = a2.city)
+            select a
+        }
+        |> toSql
+    test <@ sql.Contains("ON (LOWER(a.city) = a2.city)") @>
+
+[<Test>]
+let ``a SQL function compared to a value in a join predicate``() =
+    let sql =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (SqlFn.lower a2.city = "dallas")
+            select a
+        }
+        |> toSql
+    test <@ sql.Contains("ON (LOWER(a2.city) = @p0)") @>
+
+[<Test>]
+let ``two SQL functions compared in a join predicate``() =
+    // The natural case-insensitive join, and the shape most likely to be reached for.
+    let sql =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (SqlFn.lower a.city = SqlFn.lower a2.city)
+            select a
+        }
+        |> toSql
+    test <@ sql.Contains("ON (LOWER(a.city) = LOWER(a2.city))") @>
+
+[<Test>]
+let ``a captured .NET value on the left is still bound as a parameter``() =
+    // Mirror of the above, covering the other guarded arm.
+    let name = "dallas"
+    let sql =
+        select {
+            for a in person.address do
+            where (name.ToUpperInvariant() = a.city)
+        }
+        |> toSql
+    test <@ sql.Contains("(\"a\".\"city\" = @p0)") @>
+    test <@ not (sql.Contains("UPPER")) @>
+
+[<Test>]
+let ``a user-defined SQL function can be used in a where``() =
+    // The bug: a `sqlFn` wrapper declared outside SqlHydra.Query threw
+    // NotImplementedException "Unable to evaluate query parameter expression", because
+    // `where` tried to compute it as a .NET value. It worked in `select` all along.
+    let sql =
+        select {
+            for a in person.address do
+            where (ExtFn.lower a.addressline2 = "dallas")
+        }
+        |> toSql
+    test <@ sql.Contains("(LOWER(a.addressline2) = @p0)") @>
+
+[<Test>]
+let ``the README's custom-function example runs``() =
+    // The example the README tells people to write, verbatim:
+    //   where (SOUNDEX(p.LastName) = SOUNDEX("Smith"))
+    // It threw "Unable to evaluate query parameter expression", so the documented feature
+    // did not work in the clause the documentation demonstrates it in.
+    let sql =
+        select {
+            for a in person.address do
+            where (SOUNDEX(a.city) = SOUNDEX("Smith"))
+        }
+        |> toSql
+    test <@ sql.Contains("(SOUNDEX(a.city) = SOUNDEX('Smith'))") @>
+
+[<Test>]
+let ``a user-defined SQL function over constants does not silently become a NULL check``() =
+    // The dangerous shape. With no column argument there is nothing to make evaluation fail,
+    // so the wrapper evaluated to the stub's null and the predicate became `city IS NULL`:
+    // the query ran and returned the wrong rows, with nothing to notice.
+    let sql =
+        select {
+            for a in person.address do
+            where (a.city = SOUNDEX "Smith")
+        }
+        |> toSql
+    test <@ sql.Contains("(a.city = SOUNDEX('Smith'))") @>
+    test <@ not (sql.Contains("IS NULL")) @>
+
+[<Test>]
+let ``a generic user-defined SQL function is recognized in a where``() =
+    let sql =
+        select {
+            for a in person.address do
+            where (NULLIF(a.city, "Dallas") = "Seattle")
+        }
+        |> toSql
+    test <@ sql.Contains("NULLIF(a.city, 'Dallas')") @>
+
+[<Test>]
+let ``an unmarked SQL function over constants raises instead of emitting IS NULL``() =
+    // The regression that matters: `UNMARKED_SOUNDEX "Smith"` is not recognized as SQL, so the
+    // visitor computes it — and the stub raises rather than handing back the null that used to
+    // turn this predicate into `city IS NULL`. Loud beats a query that runs and lies.
+    let build () =
+        select {
+            for a in person.address do
+            where (a.city = UNMARKED_SOUNDEX "Smith")
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
+    test <@ ex.Message.Contains("UNMARKED_SOUNDEX") @>
+
+[<Test>]
+let ``an unmarked SQL function over a column names the marker it is missing``() =
+    // With a column argument the expression cannot be compiled at all, so this shape fails
+    // before the stub runs and keeps the older NotImplementedException. It was always loud;
+    // what it lacked was any hint of what to do, which is the half worth fixing.
+    let build () =
+        select {
+            for a in person.address do
+            where (UNMARKED_SOUNDEX a.city = "Smith")
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<NotImplementedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
+    test <@ ex.Message.Contains("UNMARKED_SOUNDEX") @>
+
+[<Test>]
+let ``an unmarked SQL function in an on' predicate raises instead of emitting IS NULL``() =
+    // `on'` reads the same marker as `where`, so it has the same silent shape to protect
+    // against: a wrapper over constants used to join on `city IS NULL`.
+    let build () =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (a2.city = UNMARKED_SOUNDEX "Smith")
+            select a
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
+
+[<Test>]
+let ``calling a SQL function wrapper outside a query raises``() =
+    // `sqlFn` has no runtime meaning at all. It used to return null here.
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> SOUNDEX "Smith" |> ignore)
+    test <@ ex.Message.Contains("rendered as SQL") @>
+
+[<Test>]
+let ``an unmarked SQL function still renders in a select and an orderBy``() =
+    // The marker is only needed where a predicate has to choose between rendering and
+    // evaluating. `select` and `orderBy` render every call, and did so before this change:
+    // no one's existing projection starts throwing because they never applied an attribute.
+    let sql =
+        select {
+            for a in person.address do
+            where (a.city = "Dallas")
+            orderBy (UNMARKED_SOUNDEX a.city)
+            select (UNMARKED_SOUNDEX a.city)
+        }
+        |> toSql
+    test <@ sql.Contains("SELECT UNMARKED_SOUNDEX(\"a\".\"city\")") @>
+    test <@ sql.Contains("ORDER BY UNMARKED_SOUNDEX(\"a\".\"city\")") @>
+
+[<Test>]
+let ``a user-defined SQL function can be used in an on' join predicate``() =
+    // `on'` consults the same marker as `where`, so a user-defined wrapper reaches the
+    // rendering arms there too — the case-insensitive join, spelled with your own function.
+    let sql =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (SOUNDEX a.city = SOUNDEX a2.city)
+            select a
+        }
+        |> toSql
+    test <@ sql.Contains("ON (SOUNDEX(a.city) = SOUNDEX(a2.city))") @>
+
+[<Test>]
+let ``a marked module covers the wrappers declared in it``() =
+    // The reason the marker is worth having: wrappers come in groups, so it costs one
+    // attribute for the group rather than one per function.
+    let sql =
+        select {
+            for a in person.address do
+            where (Grouped.DIFFERENCE(a.city, "Dallas") = 4)
+        }
+        |> toSql
+    test <@ sql.Contains("DIFFERENCE(a.city, 'Dallas')") @>
+
+[<Test>]
+let ``a marked module covers nested modules``() =
+    let sql =
+        select {
+            for a in person.address do
+            where (Grouped.Text.INITCAP a.city = "Dallas")
+        }
+        |> toSql
+    test <@ sql.Contains("INITCAP(a.city)") @>
+
+[<Test>]
+let ``a marked type covers its static members``() =
+    let sql =
+        select {
+            for a in person.address do
+            where (GroupedFn.ASCII a.city = 68)
+        }
+        |> toSql
+    test <@ sql.Contains("ASCII(a.city)") @>
+
+// A member access over a wrapper is the one shape `NValue` doesn't match, so it reaches the
+// fall-through arms with the stub intact. Four: two clauses x two operand orders.
+
+[<Test>]
+let ``a swallowed wrapper failure still names the marker (where, function on the right)``() =
+    let build () =
+        select {
+            for a in person.address do
+            where (a.addressid = (UNMARKED_SOUNDEX "Smith").Length)
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
+
+[<Test>]
+let ``a swallowed wrapper failure still names the marker (where, function on the left)``() =
+    let build () =
+        select {
+            for a in person.address do
+            where ((UNMARKED_SOUNDEX "Smith").Length = a.addressid)
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
+
+[<Test>]
+let ``a swallowed wrapper failure still names the marker (on', function on the right)``() =
+    let build () =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (a2.addressid = (UNMARKED_SOUNDEX "Smith").Length)
+            select a
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
+
+[<Test>]
+let ``a swallowed wrapper failure still names the marker (on', function on the left)``() =
+    let build () =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' ((UNMARKED_SOUNDEX "Smith").Length = a2.addressid)
+            select a
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
+
+[<Test>]
+let ``every sqlFn wrapper shipped in SqlHydra.Query carries the marker``() =
+    // A provider module added without the marker would go unrecognized, and `isIn`-style
+    // functions would be evaluated rather than rendered. IL reading is fine as a test oracle:
+    // build time, our own assembly, decides nothing at query time.
+    let flags =
+        System.Reflection.BindingFlags.Public ||| System.Reflection.BindingFlags.NonPublic
+        ||| System.Reflection.BindingFlags.Static ||| System.Reflection.BindingFlags.Instance
+        ||| System.Reflection.BindingFlags.DeclaredOnly
+    let callsSqlFn (mi: System.Reflection.MethodInfo) =
+        try
+            match mi.GetMethodBody() with
+            | null -> false
+            | body ->
+                match body.GetILAsByteArray() with
+                | null -> false
+                | il ->
+                    [ 0 .. il.Length - 5 ]
+                    |> List.exists (fun i ->
+                        il.[i] = 0x28uy
+                        && (try
+                                let t = mi.Module.ResolveMethod(BitConverter.ToInt32(il, i + 1))
+                                t.Name = "sqlFn"
+                                && t.DeclaringType <> null
+                                && t.DeclaringType.FullName = "SqlHydra.Query.SqlFunctions"
+                            with _ -> false))
+        with _ -> false
+    let unmarked =
+        typeof<SqlHydraFunctionAttribute>.Assembly.GetTypes()
+        |> Seq.collect (fun t -> t.GetMethods(flags))
+        |> Seq.filter callsSqlFn
+        |> Seq.filter (fun mi -> not (SqlHydra.Query.LinqExpressionVisitors.isSqlHydraFunction mi))
+        |> Seq.map (fun mi -> $"{mi.DeclaringType.FullName}.{mi.Name}")
+        |> Seq.distinct |> Seq.sort |> Seq.toList
+    test <@ unmarked = [] @>
+
+// Three `visitWhere` arms commented "SQL function ..." never checked whether the call was one,
+// so `myHelper()` went to the database as `MYHELPER()`. `on'` guarded all five of its
+// equivalents all along.
+
+[<Test>]
+let ``an ordinary .NET call on the left of a where is evaluated, not rendered``() =
+    let build () =
+        select {
+            for a in person.address do
+            where (plainDotNetHelper () = "Dallas")
+        }
+        |> toSql
+        |> ignore
+    // "Value to value" is the proof that both sides were evaluated rather than rendered.
+    let ex = Assert.Throws<NotImplementedException>(fun () -> build ())
+    test <@ ex.Message.Contains("Value to value") @>
+
+[<Test>]
+let ``two ordinary .NET calls in a where are evaluated, not rendered``() =
+    let build () =
+        select {
+            for a in person.address do
+            where (plainDotNetHelper () = plainDotNetHelper ())
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<NotImplementedException>(fun () -> build ())
+    test <@ ex.Message.Contains("Value to value") @>

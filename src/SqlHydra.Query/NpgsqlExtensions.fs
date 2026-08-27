@@ -4,6 +4,7 @@ open System
 
 /// Common PostgreSQL functions for use in select expressions.
 /// Use `open type SqlFn` to access functions without qualification.
+[<SqlHydraFunction>]
 type SqlFn =
     // String functions (PostgreSQL uses lowercase)
     static member char_length(s: string) : int = sqlFn
@@ -74,6 +75,7 @@ type SqlFn =
     static member least(a: 'T, b: 'T, c: 'T, d: 'T) : 'T = sqlFn
 
 /// PostgreSQL-specific functions.
+[<SqlHydraFunction>]
 type PgSqlFn =
     /// Renders a PostgreSQL `INTERVAL '<value>'` literal.
     /// Example: `interval "7 days"` → `INTERVAL '7 days'`
