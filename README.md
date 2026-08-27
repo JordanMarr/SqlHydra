@@ -298,6 +298,8 @@ let getCustomerCount (db: QueryContextFactory)  =
 
 SqlHydra.Query includes built-in SQL functions for each supported database provider. These can be used in both `select` and `where` clauses.
 
+> If a query needs several functions just to take shape, consider whether plain SQL would be clearer — see [When to Reach for Plain SQL](#when-to-reach-for-plain-sql).
+
 **Setup:**
 ```fsharp
 // Import the extension module for your database provider:
@@ -640,6 +642,18 @@ let completeOrder (db: QueryContextFactory) orderId = task {
     shared.CommitTransaction()
 }
 ```
+
+### When to Reach for Plain SQL
+
+SqlHydra is designed to give you type safety for the 90–95% of queries that follow a common shape: select, filter, join, aggregate, insert, update. For the last 5–10% — the genuinely bespoke reporting query, the vendor-specific trick, the statement a DBA handed you — plain SQL is usually the clearer tool, and using it is the intended path, not a failure of the library.
+
+A few guidelines:
+
+- **Prefer the query builder** when the query reads naturally in it. You get compile-time checking against your schema and refactoring support for free.
+- **Consider using plain SQL** when expressing the query would require stacking several `sqlFn` wrappers, `rawExpr`, or `inlineValue` calls just to get the shape right. At that point the builder is no longer adding safety; it is adding a layer someone must learn before they can read the query.
+- **You don't have to use a feature because it exists.** The function machinery, CTEs, lateral joins, and plugin operators are there for domains that need them everywhere (vector search, for example, is *entirely* functions and operators). If you only need them once, a SQL string is often the more maintainable choice.
+
+The [`HydraReader`](#custom-sql-with-hydrareader) below lets you keep the generated types on the result side even when the query itself is hand-written, so dropping down to SQL only costs you the typing on the query text — never on the rows.
 
 ### Custom SQL with HydraReader
 
