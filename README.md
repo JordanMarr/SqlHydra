@@ -352,21 +352,39 @@ See the full list for each provider:
 
 **Define custom functions:**
 
-You can easily define your own SQL function wrappers using the `sqlFn` helper:
+You can easily define your own SQL function wrappers using the `sqlFn` helper. Mark them with `[<SqlHydraFunction>]` - one marker on the module covers every wrapper in it:
 ```fsharp
-// Define a wrapper - the function name becomes the SQL function name
-let SOUNDEX (s: string) : string = sqlFn
-let DIFFERENCE (s1: string, s2: string) : int = sqlFn
+// The function name becomes the SQL function name
+[<SqlHydraFunction>]
+module CustomFn =
+    let SOUNDEX (s: string) : string = sqlFn
+    let DIFFERENCE (s1: string, s2: string) : int = sqlFn
 
 // Use in queries
 selectTask db {
     for p in Person.Person do
-    where (SOUNDEX(p.LastName) = SOUNDEX("Smith"))
+    where (CustomFn.SOUNDEX(p.LastName) = CustomFn.SOUNDEX("Smith"))
     select p.LastName
 }
 ```
 
-> **Note:** The `sqlFn` helper returns `Unchecked.defaultof<'Return>` - the function is never executed at runtime. The expression visitor translates the function name and arguments to SQL. If you use an invalid function name, you'll get a database error at runtime.
+Add `[<AutoOpen>]` to the module to call them unqualified, as `open type SqlFn` does for the built-ins.
+
+The marker also goes on a single function, or on a type of static members:
+```fsharp
+[<SqlHydraFunction>]
+let LEVENSHTEIN (s1: string, s2: string) : int = sqlFn
+
+[<SqlHydraFunction>]
+type TextFn =
+    static member METAPHONE(s: string) : string = sqlFn
+```
+
+> **Note:** `[<SqlHydraFunction>]` is what tells `where` and `on'` to render a call as SQL rather than compute it as a .NET value. Everything declared inside a marked module or type qualifies, nesting included, so keep ordinary helpers out of one. `select` and `orderBy` render every call and work without the marker.
+>
+> Extension packages that ship their own `sqlFn` wrappers need the marker for the same reason — their assembly is not `SqlHydra.Query`, so a `where` would otherwise try to compute the call.
+>
+> A `sqlFn` body has no runtime meaning, so executing one raises `SqlFunctionNotRenderedException` - which is what a missing marker gets you, rather than a query that quietly compares your column to `NULL`. If you use a function name the database does not have, you get a database error at runtime.
 
 ### Subqueries
 

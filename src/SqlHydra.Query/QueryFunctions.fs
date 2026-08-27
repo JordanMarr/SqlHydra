@@ -142,6 +142,30 @@ module RawExpressions =
     /// Example: caseWhen (col > 0) (inlineValue "yes") (inlineValue "no")
     let inlineValue<'T> (_value: 'T) : 'T = Unchecked.defaultof<'T>
 
+/// Marks `sqlFn` wrappers declared outside SqlHydra.Query as SQL functions, so that a `where`
+/// or `on'` predicate renders the call as SQL instead of computing it as a .NET value.
+/// Apply it to one function, or to the module or type holding a group of them: everything
+/// declared inside a marked module or type qualifies, nesting included, so keep ordinary
+/// helpers out of one.
+/// Unmarked wrappers still work in `select` and `orderBy`, which render every call; in a
+/// predicate they raise `SqlFunctionNotRenderedException` rather than compare against a stub.
+///
+/// Example:
+///   [<SqlHydraFunction>]
+///   module SqlFn =
+///       let SOUNDEX (s: string) : string = sqlFn
+///       let DIFFERENCE (s1: string, s2: string) : int = sqlFn
+[<System.AttributeUsage(System.AttributeTargets.Method ||| System.AttributeTargets.Class)>]
+type SqlHydraFunctionAttribute() =
+    inherit System.Attribute()
+
+/// Raised when a `sqlFn` wrapper is executed as ordinary .NET code instead of being rendered
+/// as SQL: either it was called outside a query expression, or it is used in a `where`/`on'`
+/// predicate without `[<SqlHydraFunction>]`, so the visitor took it for a value to compute.
+type SqlFunctionNotRenderedException(message: string, inner: exn) =
+    inherit System.InvalidOperationException(message, inner)
+    new (message: string) = SqlFunctionNotRenderedException(message, null)
+
 /// Assembly-level attribute that registers a SQL function name as an infix operator.
 /// Extension packages (e.g. SqlHydra.Query.Pgvector) apply this attribute on themselves and
 /// SqlHydra discovers it the first time a query is compiled. No explicit registration call required.
@@ -192,9 +216,20 @@ module InfixOperators =
 [<AutoOpen>]
 module SqlFunctions =
 
-    /// A stub value used to define SQL function wrappers.
-    /// The function name and arguments are translated directly to SQL.
+    /// A stub used to define SQL function wrappers: the wrapper's name and arguments are
+    /// translated directly to SQL, and its body never runs.
     /// Example:
+    ///   [<SqlHydraFunction>]
     ///   let LEN (s: string) : int = sqlFn
+    ///   [<SqlHydraFunction>]
     ///   let SUBSTRING (s: string, start: int, length: int) : string = sqlFn
-    let sqlFn<'Return> : 'Return = Unchecked.defaultof<'Return>
+    ///
+    /// Raises if it is ever actually executed, which means the call was not rendered. Handing
+    /// back `Unchecked.defaultof` instead is what let `where (col = SOUNDEX "Smith")` compile,
+    /// run, and quietly mean `col IS NULL`.
+    let sqlFn<'Return> : 'Return =
+        raise (SqlFunctionNotRenderedException(
+            "A SqlHydra `sqlFn` function was executed instead of being rendered as SQL. \
+             In a `where` or `on'` predicate, a wrapper declared outside SqlHydra.Query must \
+             be marked `[<SqlHydraFunction>]`. Outside a query expression a `sqlFn` wrapper \
+             has no runtime meaning and cannot be called."))

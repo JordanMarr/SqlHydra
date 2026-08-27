@@ -22,6 +22,39 @@ open Npgsql.AdventureWorksNet10
 [<assembly: SqlHydra.Query.SqlHydraInfixOperator("cover_autodist", "<~>")>]
 do ()
 
+// Declared HERE, in the test assembly — not inside SqlHydra.Query — so these exercise the
+// real external path: `where` knows them only by the marker they carry.
+[<SqlHydraFunction>]
+let SOUNDEX (s: string) : string = sqlFn
+
+/// The same wrapper with the marker left off: what a user gets when they forget it.
+let UNMARKED_SOUNDEX (s: string) : string = sqlFn
+
+/// Generic, because the call the visitor sees is then a constructed method rather than the
+/// one the attribute was written on — and the marker has to survive that.
+[<SqlHydraFunction>]
+let NULLIF<'T> (a: 'T, b: 'T) : 'T = sqlFn
+
+type ExtFn =
+    /// Case folding over a NULLABLE column — the overload SqlHydra itself does not ship.
+    [<SqlHydraFunction>]
+    static member lower(s: string option) : string = sqlFn
+
+/// One marker for a whole group, which is the shape wrappers actually get written in.
+/// Nothing inside repeats it.
+[<SqlHydraFunction>]
+module Grouped =
+    let DIFFERENCE (a: string, b: string) : int = sqlFn
+
+    /// Nested and unmarked itself: a marked module covers what is declared inside it.
+    module Text =
+        let INITCAP (s: string) : string = sqlFn
+
+/// The same, on a type of static members — how SqlHydra's own provider files are laid out.
+[<SqlHydraFunction>]
+type GroupedFn =
+    static member ASCII(s: string) : int = sqlFn
+
 [<Test>]
 let ``Simple Where``() =
     let sql =  
@@ -1402,3 +1435,168 @@ let ``a captured .NET value on the left is still bound as a parameter``() =
         |> toSql
     test <@ sql.Contains("(\"a\".\"city\" = @p0)") @>
     test <@ not (sql.Contains("UPPER")) @>
+
+[<Test>]
+let ``a user-defined SQL function can be used in a where``() =
+    // The bug: a `sqlFn` wrapper declared outside SqlHydra.Query threw
+    // NotImplementedException "Unable to evaluate query parameter expression", because
+    // `where` tried to compute it as a .NET value. It worked in `select` all along.
+    let sql =
+        select {
+            for a in person.address do
+            where (ExtFn.lower a.addressline2 = "dallas")
+        }
+        |> toSql
+    test <@ sql.Contains("(LOWER(a.addressline2) = @p0)") @>
+
+[<Test>]
+let ``the README's custom-function example runs``() =
+    // The example the README tells people to write, verbatim:
+    //   where (SOUNDEX(p.LastName) = SOUNDEX("Smith"))
+    // It threw "Unable to evaluate query parameter expression", so the documented feature
+    // did not work in the clause the documentation demonstrates it in.
+    let sql =
+        select {
+            for a in person.address do
+            where (SOUNDEX(a.city) = SOUNDEX("Smith"))
+        }
+        |> toSql
+    test <@ sql.Contains("(SOUNDEX(a.city) = SOUNDEX('Smith'))") @>
+
+[<Test>]
+let ``a user-defined SQL function over constants does not silently become a NULL check``() =
+    // The dangerous shape. With no column argument there is nothing to make evaluation fail,
+    // so the wrapper evaluated to the stub's null and the predicate became `city IS NULL`:
+    // the query ran and returned the wrong rows, with nothing to notice.
+    let sql =
+        select {
+            for a in person.address do
+            where (a.city = SOUNDEX "Smith")
+        }
+        |> toSql
+    test <@ sql.Contains("(a.city = SOUNDEX('Smith'))") @>
+    test <@ not (sql.Contains("IS NULL")) @>
+
+[<Test>]
+let ``a generic user-defined SQL function is recognized in a where``() =
+    let sql =
+        select {
+            for a in person.address do
+            where (NULLIF(a.city, "Dallas") = "Seattle")
+        }
+        |> toSql
+    test <@ sql.Contains("NULLIF(a.city, 'Dallas')") @>
+
+[<Test>]
+let ``an unmarked SQL function over constants raises instead of emitting IS NULL``() =
+    // The regression that matters: `UNMARKED_SOUNDEX "Smith"` is not recognized as SQL, so the
+    // visitor computes it — and the stub raises rather than handing back the null that used to
+    // turn this predicate into `city IS NULL`. Loud beats a query that runs and lies.
+    let build () =
+        select {
+            for a in person.address do
+            where (a.city = UNMARKED_SOUNDEX "Smith")
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
+    test <@ ex.Message.Contains("UNMARKED_SOUNDEX") @>
+
+[<Test>]
+let ``an unmarked SQL function over a column names the marker it is missing``() =
+    // With a column argument the expression cannot be compiled at all, so this shape fails
+    // before the stub runs and keeps the older NotImplementedException. It was always loud;
+    // what it lacked was any hint of what to do, which is the half worth fixing.
+    let build () =
+        select {
+            for a in person.address do
+            where (UNMARKED_SOUNDEX a.city = "Smith")
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<NotImplementedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
+    test <@ ex.Message.Contains("UNMARKED_SOUNDEX") @>
+
+[<Test>]
+let ``an unmarked SQL function in an on' predicate raises instead of emitting IS NULL``() =
+    // `on'` reads the same marker as `where`, so it has the same silent shape to protect
+    // against: a wrapper over constants used to join on `city IS NULL`.
+    let build () =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (a2.city = UNMARKED_SOUNDEX "Smith")
+            select a
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
+
+[<Test>]
+let ``calling a SQL function wrapper outside a query raises``() =
+    // `sqlFn` has no runtime meaning at all. It used to return null here.
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> SOUNDEX "Smith" |> ignore)
+    test <@ ex.Message.Contains("rendered as SQL") @>
+
+[<Test>]
+let ``an unmarked SQL function still renders in a select and an orderBy``() =
+    // The marker is only needed where a predicate has to choose between rendering and
+    // evaluating. `select` and `orderBy` render every call, and did so before this change:
+    // no one's existing projection starts throwing because they never applied an attribute.
+    let sql =
+        select {
+            for a in person.address do
+            where (a.city = "Dallas")
+            orderBy (UNMARKED_SOUNDEX a.city)
+            select (UNMARKED_SOUNDEX a.city)
+        }
+        |> toSql
+    test <@ sql.Contains("SELECT UNMARKED_SOUNDEX(\"a\".\"city\")") @>
+    test <@ sql.Contains("ORDER BY UNMARKED_SOUNDEX(\"a\".\"city\")") @>
+
+[<Test>]
+let ``a user-defined SQL function can be used in an on' join predicate``() =
+    // `on'` consults the same marker as `where`, so a user-defined wrapper reaches the
+    // rendering arms there too — the case-insensitive join, spelled with your own function.
+    let sql =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (SOUNDEX a.city = SOUNDEX a2.city)
+            select a
+        }
+        |> toSql
+    test <@ sql.Contains("ON (SOUNDEX(a.city) = SOUNDEX(a2.city))") @>
+
+[<Test>]
+let ``a marked module covers the wrappers declared in it``() =
+    // The reason the marker is worth having: wrappers come in groups, so it costs one
+    // attribute for the group rather than one per function.
+    let sql =
+        select {
+            for a in person.address do
+            where (Grouped.DIFFERENCE(a.city, "Dallas") = 4)
+        }
+        |> toSql
+    test <@ sql.Contains("DIFFERENCE(a.city, 'Dallas')") @>
+
+[<Test>]
+let ``a marked module covers nested modules``() =
+    let sql =
+        select {
+            for a in person.address do
+            where (Grouped.Text.INITCAP a.city = "Dallas")
+        }
+        |> toSql
+    test <@ sql.Contains("INITCAP(a.city)") @>
+
+[<Test>]
+let ``a marked type covers its static members``() =
+    let sql =
+        select {
+            for a in person.address do
+            where (GroupedFn.ASCII a.city = 68)
+        }
+        |> toSql
+    test <@ sql.Contains("ASCII(a.city)") @>

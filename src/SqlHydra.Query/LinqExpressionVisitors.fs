@@ -9,11 +9,21 @@ let notImpl() = raise (NotImplementedException())
 let notImplMsg msg = raise (NotImplementedException msg)
 
 /// True when a method call is a SqlHydra query function (`isIn`, `like`, `inlineValue`,
-/// `rawExpr`, `sqlFn` wrappers, ...) rather than an ordinary .NET call.
-/// A SqlHydra function has a stub body (`Unchecked.defaultof<_>`), so evaluating one yields
-/// null/0 rather than anything meaningful: it must be rendered as SQL, never compiled and run.
+/// `rawExpr`, `sqlFn` wrappers, ...) rather than an ordinary .NET call: it has a stub body,
+/// so it must be rendered as SQL, never evaluated. Everything in SqlHydra.Query qualifies
+/// (not all of it is a wrapper — `isIn` returns a real `true`); a wrapper declared anywhere
+/// else says so with `[<SqlHydraFunction>]`, on the function or on the module or type holding
+/// it. Forgetting the marker is not silent: the call is evaluated instead, and evaluating a
+/// stub fails rather than yielding a value.
 let isSqlHydraFunction (mi: MethodInfo) =
+    // Walk up: one marker on a module or type covers the group declared inside it.
+    let rec isMarkedContainer (t: Type) =
+        not (isNull t)
+        && (t.IsDefined(typeof<SqlHydraFunctionAttribute>, false) || isMarkedContainer t.DeclaringType)
+
     mi.Module.Name = "SqlHydra.Query.dll"
+    || mi.IsDefined(typeof<SqlHydraFunctionAttribute>, false)
+    || isMarkedContainer mi.DeclaringType
 
 /// Aggregate method names recognized by the visitor. Used by visitSqlFn / pattern matchers.
 /// Keep in sync with QueryFunctions.Aggregates.
@@ -258,7 +268,18 @@ module SqlPatterns =
             let compiled = lambda.CompileFast()
             compiled.DynamicInvoke()
         with ex ->  
-            notImplMsg $"Unable to evaluate query parameter expression:\n{exp}"
+            // A `sqlFn` stub raises when executed, and that names the real mistake — a wrapper
+            // missing `[<SqlHydraFunction>]`. Report it instead of burying it under the generic
+            // message. `DynamicInvoke` wraps what was thrown, so ask for the base exception.
+            match ex.GetBaseException() with
+            | :? SqlFunctionNotRenderedException as stubEx ->
+                raise (SqlFunctionNotRenderedException($"{stubEx.Message}\nExpression: {exp}", stubEx))
+            | _ ->
+                // With a column argument the compile fails before the stub can run, so an
+                // unmarked wrapper lands here rather than above. Same mistake, so say so.
+                notImplMsg $"Unable to evaluate query parameter expression:\n{exp}\n\
+                             If this is a SqlHydra SQL function wrapper, mark it \
+                             `[<SqlHydraFunction>]` so it is rendered as SQL instead of evaluated."
 
     /// Handles extended properties on Nullable and Option types.
     [<RequireQualifiedAccess>]
