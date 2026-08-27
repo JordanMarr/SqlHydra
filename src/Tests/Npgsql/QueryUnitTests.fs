@@ -1653,3 +1653,39 @@ let ``a swallowed wrapper failure still names the marker (on', function on the l
         |> ignore
     let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> build ())
     test <@ ex.Message.Contains("SqlHydraFunction") @>
+
+[<Test>]
+let ``every sqlFn wrapper shipped in SqlHydra.Query carries the marker``() =
+    // A provider module added without the marker would go unrecognized, and `isIn`-style
+    // functions would be evaluated rather than rendered. IL reading is fine as a test oracle:
+    // build time, our own assembly, decides nothing at query time.
+    let flags =
+        System.Reflection.BindingFlags.Public ||| System.Reflection.BindingFlags.NonPublic
+        ||| System.Reflection.BindingFlags.Static ||| System.Reflection.BindingFlags.Instance
+        ||| System.Reflection.BindingFlags.DeclaredOnly
+    let callsSqlFn (mi: System.Reflection.MethodInfo) =
+        try
+            match mi.GetMethodBody() with
+            | null -> false
+            | body ->
+                match body.GetILAsByteArray() with
+                | null -> false
+                | il ->
+                    [ 0 .. il.Length - 5 ]
+                    |> List.exists (fun i ->
+                        il.[i] = 0x28uy
+                        && (try
+                                let t = mi.Module.ResolveMethod(BitConverter.ToInt32(il, i + 1))
+                                t.Name = "sqlFn"
+                                && t.DeclaringType <> null
+                                && t.DeclaringType.FullName = "SqlHydra.Query.SqlFunctions"
+                            with _ -> false))
+        with _ -> false
+    let unmarked =
+        typeof<SqlHydraFunctionAttribute>.Assembly.GetTypes()
+        |> Seq.collect (fun t -> t.GetMethods(flags))
+        |> Seq.filter callsSqlFn
+        |> Seq.filter (fun mi -> not (SqlHydra.Query.LinqExpressionVisitors.isSqlHydraFunction mi))
+        |> Seq.map (fun mi -> $"{mi.DeclaringType.FullName}.{mi.Name}")
+        |> Seq.distinct |> Seq.sort |> Seq.toList
+    test <@ unmarked = [] @>

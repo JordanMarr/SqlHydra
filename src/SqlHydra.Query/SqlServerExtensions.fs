@@ -4,6 +4,7 @@ open System
 
 /// Common SQL Server functions for use in select expressions.
 /// Use `open type SqlFn` to access functions without qualification.
+[<SqlHydraFunction>]
 type SqlFn =
     // String functions
     static member LEN(s: string) : int = sqlFn

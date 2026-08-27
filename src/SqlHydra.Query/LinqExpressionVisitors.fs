@@ -8,21 +8,16 @@ open FastExpressionCompiler
 let notImpl() = raise (NotImplementedException())
 let notImplMsg msg = raise (NotImplementedException msg)
 
-/// True when a method call is a SqlHydra query function (`isIn`, `like`, `inlineValue`,
-/// `rawExpr`, `sqlFn` wrappers, ...) rather than an ordinary .NET call: it has a stub body,
-/// so it must be rendered as SQL, never evaluated. Everything in SqlHydra.Query qualifies
-/// (not all of it is a wrapper — `isIn` returns a real `true`); a wrapper declared anywhere
-/// else says so with `[<SqlHydraFunction>]`, on the function or on the module or type holding
-/// it. Forgetting the marker is not silent: the call is evaluated instead, and evaluating a
-/// stub fails rather than yielding a value.
+/// True when a call must be rendered as SQL rather than evaluated. `[<SqlHydraFunction>]` is
+/// the only answer, on the function or on the module or type holding it; SqlHydra's own
+/// functions carry it like anyone else's, and a test asserts none of them lose it.
 let isSqlHydraFunction (mi: MethodInfo) =
     // Walk up: one marker on a module or type covers the group declared inside it.
     let rec isMarkedContainer (t: Type) =
         not (isNull t)
         && (t.IsDefined(typeof<SqlHydraFunctionAttribute>, false) || isMarkedContainer t.DeclaringType)
 
-    mi.Module.Name = "SqlHydra.Query.dll"
-    || mi.IsDefined(typeof<SqlHydraFunctionAttribute>, false)
+    mi.IsDefined(typeof<SqlHydraFunctionAttribute>, false)
     || isMarkedContainer mi.DeclaringType
 
 /// Aggregate method names recognized by the visitor. Used by visitSqlFn / pattern matchers.

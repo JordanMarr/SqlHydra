@@ -1,9 +1,10 @@
-module SqlHydra.Query.MySqlExtensions
+﻿module SqlHydra.Query.MySqlExtensions
 
 open System
 
 /// Common MySQL functions for use in select expressions.
 /// Use `open type SqlFn` to access functions without qualification.
+[<SqlHydraFunction>]
 type SqlFn =
     // String functions
     static member CHAR_LENGTH(s: string) : int = sqlFn

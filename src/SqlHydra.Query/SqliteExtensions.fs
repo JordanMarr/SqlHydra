@@ -4,6 +4,7 @@ open System
 
 /// Common SQLite functions for use in select expressions.
 /// Use `open type SqlFn` to access functions without qualification.
+[<SqlHydraFunction>]
 type SqlFn =
     // String functions
     static member length(s: string) : int = sqlFn
