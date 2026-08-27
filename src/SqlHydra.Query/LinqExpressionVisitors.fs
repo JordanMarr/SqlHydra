@@ -1021,7 +1021,9 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
                 // reference in a lateral subquery (where the column's parameter isn't in
                 // the local `tables` map). Try eval; on failure, fall back to column ref.
                 let valueResult =
-                    try Some (nEvaluate right) with _ -> None
+                    // `None` means "not evaluable", which is what notImplMsg raises. Catching
+                    // everything also swallowed the sqlFn stub, losing the message it carries.
+                    try Some (nEvaluate right) with :? NotImplementedException -> None
                 match valueResult with
                 | Some value ->
                     match value with
@@ -1040,7 +1042,7 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
 
             | _, NColumn (p, _) ->
                 let valueResult =
-                    try Some (nEvaluate left) with _ -> None
+                    try Some (nEvaluate left) with :? NotImplementedException -> None
                 let reversedOp = reverseComparisonOp compOp
                 let alias = visitAlias p.Expression
                 let fqCol = qualifyColumn alias p.Member
@@ -1536,7 +1538,7 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
                     | _ -> None
                 let result =
                     try evalRhs () |> Option.map Choice1Of2
-                    with _ -> tryColumnRef () |> Option.map Choice2Of2
+                    with :? NotImplementedException -> tryColumnRef () |> Option.map Choice2Of2
                 match result with
                 | Some (Choice1Of2 value) ->
                     match value with
@@ -1570,7 +1572,7 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
                     | _ -> None
                 let result =
                     try evalLhs () |> Option.map Choice1Of2
-                    with _ -> tryColumnRef () |> Option.map Choice2Of2
+                    with :? NotImplementedException -> tryColumnRef () |> Option.map Choice2Of2
                 let reversedOp = reverseComparisonOp compOp
                 match result with
                 | Some (Choice1Of2 value) ->

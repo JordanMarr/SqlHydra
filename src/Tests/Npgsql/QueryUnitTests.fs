@@ -1600,3 +1600,56 @@ let ``a marked type covers its static members``() =
         }
         |> toSql
     test <@ sql.Contains("ASCII(a.city)") @>
+
+// A member access over a wrapper is the one shape `NValue` doesn't match, so it reaches the
+// fall-through arms with the stub intact. Four: two clauses x two operand orders.
+
+[<Test>]
+let ``a swallowed wrapper failure still names the marker (where, function on the right)``() =
+    let build () =
+        select {
+            for a in person.address do
+            where (a.addressid = (UNMARKED_SOUNDEX "Smith").Length)
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
+
+[<Test>]
+let ``a swallowed wrapper failure still names the marker (where, function on the left)``() =
+    let build () =
+        select {
+            for a in person.address do
+            where ((UNMARKED_SOUNDEX "Smith").Length = a.addressid)
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
+
+[<Test>]
+let ``a swallowed wrapper failure still names the marker (on', function on the right)``() =
+    let build () =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' (a2.addressid = (UNMARKED_SOUNDEX "Smith").Length)
+            select a
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
+
+[<Test>]
+let ``a swallowed wrapper failure still names the marker (on', function on the left)``() =
+    let build () =
+        select {
+            for a in person.address do
+            join' a2 in person.address; on' ((UNMARKED_SOUNDEX "Smith").Length = a2.addressid)
+            select a
+        }
+        |> toSql
+        |> ignore
+    let ex = Assert.Throws<SqlFunctionNotRenderedException>(fun () -> build ())
+    test <@ ex.Message.Contains("SqlHydraFunction") @>
