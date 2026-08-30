@@ -421,7 +421,49 @@ let getAboveAverageProducts (db: QueryContextFactory)  =
         where (p.ListPrice > subqueryOne avgPrice)
         select p
     }
+
+// WHERE EXISTS / WHERE NOT EXISTS
+// Use `correlate` in the subquery to reference a table from the outer query
+// (name the correlated variable the same as the outer query's variable).
+let orderDetails =
+    select {
+        for d in SalesLT.SalesOrderDetail do
+        correlate o in SalesLT.SalesOrderHeader
+        where (d.SalesOrderID = o.SalesOrderID)
+        select d.SalesOrderID
+    }
+
+let getOrdersWithDetails (db: QueryContextFactory)  =
+    selectTask db {
+        for o in SalesLT.SalesOrderHeader do
+        whereExists orderDetails
+        select o
+    }
 ```
+
+### Common Table Expressions (CTEs)
+
+`cte<'T>` creates a named `WITH` source from a select query. The resulting source can be queried like a table (and can be used as the inner side of `join'` / `leftJoin'`):
+
+```fsharp
+let dallasAddresses =
+    select {
+        for a in SalesLT.Address do
+        where (a.City = "Dallas")
+    }
+
+let dallas = cte<SalesLT.Address> "dallas_addresses" dallasAddresses
+
+let getDallasAddressIds (db: QueryContextFactory)  =
+    selectTask db {
+        for a in dallas do
+        select a.AddressID
+    }
+// WITH "dallas_addresses" AS (SELECT ... WHERE ...)
+// SELECT "a"."AddressID" FROM "dallas_addresses" AS "a"
+```
+
+Use `cteFrom<'T>` instead when the CTE's row shape differs from the inner select's row type (e.g. when the inner query builds computed columns with raw SELECT fragments); `'T` is the type the rows will be read back as.
 
 ### Other Operations
 
@@ -520,6 +562,26 @@ match items |> AtLeastOne.tryCreate with
     }
 | None ->
     printfn "Nothing to insert"
+```
+
+### Insert From Select (`fromSelect`)
+
+Inserts the results of a select query in a single SQL command (`INSERT INTO ... SELECT ...`) — the rows never round-trip through your application:
+
+```fsharp
+let dallasAddressLines =
+    select {
+        for a in SalesLT.Address do
+        where (a.City = "Dallas")
+        select a.AddressLine1
+    }
+
+let! rowsCopied =
+    insertTask db {
+        for arch in dbo.AddressArchive do
+        fromSelect dallasAddressLines
+        includeColumn arch.AddressLine1  // Target column list, in select-column order
+    }
 ```
 
 ### Update
@@ -632,6 +694,31 @@ deleteTask db {
 }
 ```
 
+### Returning Values - PostgreSQL and SQLite (`returning`)
+
+The `insert`, `update`, and `delete` builders support a `returning` operation that emits a `RETURNING` clause. When present, the task returns the requested column value (or tuple of values) instead of the affected row count — a single round trip:
+
+```fsharp
+// Insert and get generated values back
+let! (addressId, modifiedDate) =
+    insertTask db {
+        for a in SalesLT.Address do
+        entity newAddress
+        returning (a.AddressID, a.ModifiedDate)
+    }
+
+// Update ... returning
+let! updatedCity =
+    updateTask db {
+        for a in SalesLT.Address do
+        set a.City "Dallas"
+        where (a.AddressID = 5)
+        returning a.City
+    }
+```
+
+> **Note:** When combined with `onConflictDoNothing` and no row is actually inserted, the returned value is the type's default.
+
 </details>
 
 <details>
@@ -728,6 +815,28 @@ let factory = QueryContextFactory.Create(dataSource)
 ```
 
 **Arrays:** `text[]` and `integer[]` column types are supported.
+
+**Lateral Joins:** `lateralJoin` (in `SqlHydra.Query.NpgsqlExtensions`) emits `LEFT JOIN LATERAL (subquery) AS "alias" ON true`. Use `correlate` inside the subquery to reference outer tables, and `lateralCol<'T> "alias" "column"` to read the subquery's columns in the outer select:
+
+```fsharp
+open SqlHydra.Query.NpgsqlExtensions
+
+let latestDetail =
+    select {
+        for d in sales.salesorderdetail do
+        correlate o in sales.salesorderheader
+        where (d.salesorderid = o.salesorderid)
+        orderByDescending d.modifieddate
+        select d.orderqty
+        take 1
+    }
+
+selectTask db {
+    for o in sales.salesorderheader do
+    lateralJoin latestDetail "latest"
+    select (o.salesorderid, lateralCol<int16> "latest" "orderqty")
+}
+```
 
 ### SQLite
 
