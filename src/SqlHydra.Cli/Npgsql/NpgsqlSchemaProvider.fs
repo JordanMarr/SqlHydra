@@ -207,6 +207,29 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
             |}
         )
 
+    let baseTables =
+        sTables.Rows
+        |> Seq.cast<DataRow>
+        |> Seq.map (fun tbl ->
+            {|
+                Catalog = tbl["TABLE_CATALOG"] :?> string
+                Schema = tbl["TABLE_SCHEMA"] :?> string
+                Name  = tbl["TABLE_NAME"] :?> string
+                Type = tbl["TABLE_TYPE"] :?> string
+            |}
+        )
+        |> Seq.filter (fun tbl -> tbl.Type <> "SYSTEM_TABLE")
+
+    /// Every relation the filters keep. Materialized views go through here too — they used
+    /// to bypass filtering entirely, so an excluded one was still generated — and one pass
+    /// means the filter summary is reported once.
+    let includedRelations =
+        baseTables
+        |> Seq.append views
+        |> Seq.append materializedViews
+        |> SchemaFilters.filterTables cfg.Filters
+        |> Seq.toList
+
     let materializedViewColumns =
         let sql =
             """
@@ -272,7 +295,8 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
         extensions |> List.fold (fun acc (ext: IExtendTypeMapping) -> ext.Extend(acc)) baseTryFind
 
     let matViews =
-        materializedViews
+        includedRelations
+        |> Seq.filter (fun tbl -> tbl.Type = "materialized view")
         |> Seq.choose (fun tbl ->
             let matViewCols =
                 match materializedViewColumns.TryFind(tbl.Schema, tbl.Name) with
@@ -318,19 +342,8 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
         |> Seq.toList
 
     let tables =
-        sTables.Rows
-        |> Seq.cast<DataRow>
-        |> Seq.map (fun tbl ->
-            {|
-                Catalog = tbl["TABLE_CATALOG"] :?> string
-                Schema = tbl["TABLE_SCHEMA"] :?> string
-                Name  = tbl["TABLE_NAME"] :?> string
-                Type = tbl["TABLE_TYPE"] :?> string
-            |}
-        )
-        |> Seq.filter (fun tbl -> tbl.Type <> "SYSTEM_TABLE")
-        |> Seq.append views
-        |> SchemaFilters.filterTables cfg.Filters
+        includedRelations
+        |> Seq.filter (fun tbl -> tbl.Type <> "materialized view")
         |> Seq.choose (fun tbl ->
             let tableCols =
                 columnsByTable
