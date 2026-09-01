@@ -12,6 +12,26 @@ type SqlFn =
     static member length(s: string) : int = sqlFn
     static member upper(s: string) : string = sqlFn
     static member lower(s: string) : string = sqlFn
+
+    // Case folding over a NULLABLE column. Without these, `lower col` does not
+    // typecheck for a `string option` column and callers are forced to write
+    // `lower (coalesce (col, ""))` — which emits `LOWER(COALESCE(col, ''))` and
+    // therefore CANNOT match a functional index on `LOWER(col)`. Postgres falls
+    // back to a seq scan.
+    //
+    // `LOWER(NULL)` is NULL, so `LOWER(col) = 'x'` is NULL (not true) for a NULL
+    // row: a NULL column never matches a real value. That is exactly the semantics
+    // the `coalesce` workaround was hand-rolling, but stated in a form the planner
+    // can match against the index.
+    //
+    // The return type is the unwrapped `string` (not `string option`), following the
+    // established `coalesce(a: Option<'T>, b: 'T) : 'T` convention below: these are
+    // phantom expression-shaping signatures, and `string` is what lets the result be
+    // compared to a plain `string` in a `where`. Projecting one into a select over
+    // NULL rows is the caller's responsibility (wrap in `coalesce` for that).
+    static member upper(s: string option) : string = sqlFn
+    static member lower(s: string option) : string = sqlFn
+
     static member ltrim(s: string) : string = sqlFn
     static member rtrim(s: string) : string = sqlFn
     static member btrim(s: string) : string = sqlFn
