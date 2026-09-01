@@ -1156,6 +1156,9 @@ type XminColumn() =
                                 }
                             Column.IsNullable = false
                             Column.IsPK = false
+                            Column.Doc =
+                                [ "PostgreSQL's row version: the id of the transaction that"
+                                  "inserted this row version." ]
                         }
                     ]
                 else
@@ -1167,6 +1170,12 @@ Register it exactly like a type-mapping extension, in the TOML `[extensions]` se
 A contributed column is an ordinary one from there on: its `ProviderDbType` becomes a
 `[<ProviderDbType(...)>]` attribute and `IExtendNaming` renames it like any other. Contributing a
 name the table already has raises, rather than shadowing the discovered column.
+
+#### Documenting a Contributed Column
+
+`Column.Doc` is emitted as `///` lines above the generated field. A caution that lives only in an
+extension's README reaches whoever configured the extension and nobody else; on the field it
+reaches whoever reaches for the column.
 
 </details>
 

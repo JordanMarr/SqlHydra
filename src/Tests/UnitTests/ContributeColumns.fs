@@ -25,6 +25,7 @@ let private discovered name =
         Column.IsNullable = false
         Column.IsPK = name = "id"
         Column.IsReadOnly = false
+        Column.Doc = []
     }
 
 let private mkTable schema name tableType columns =
@@ -56,6 +57,9 @@ let private xminColumn =
         Column.IsNullable = false
         Column.IsPK = false
         Column.IsReadOnly = false
+        Column.Doc =
+            [ "The id of the transaction that inserted this row version — PostgreSQL's row version."
+              "It changes on every write to the row." ]
     }
 
 /// Contributes `xmin` to PostgreSQL base tables only — a view has no system columns.
@@ -182,6 +186,26 @@ let ``Generated field carries the provider db type the extension asked for`` () 
     // without it throws client-side.
     test <@ code.Contains "[<ProviderDbType(\"Xid\")>]" @>
     test <@ code.Contains "xmin: uint" @>
+
+/// The body of a generated record, so an assertion about a field is not answered by a doc
+/// comment somewhere else in the file.
+let private recordBody (typeName: string) (code: string) =
+    let fromType = code.Substring(code.IndexOf $"type {typeName} =")
+    fromType.Substring(0, fromType.IndexOf "}")
+
+[<Test>]
+let ``A column with an empty Doc emits no comment`` () =
+    let body = generate [] schema |> recordBody "users"
+
+    test <@ not (body.Contains "///") @>
+
+[<Test>]
+let ``A contributed column carries the doc comment the extension gave it`` () =
+    let body = apply [ XminContribution() ] |> generate [] |> recordBody "users"
+
+    // The caution belongs on the field, not only in the extension's README: whoever reaches
+    // for the column is reading the generated type, not the extension's docs.
+    test <@ body.Contains "/// It changes on every write to the row." @>
 
 [<Test>]
 let ``A naming extension renames a contributed column like any other`` () =
