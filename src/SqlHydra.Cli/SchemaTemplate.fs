@@ -132,6 +132,9 @@ let mkTable cfg db (table: Table) schema tableName columnName = stringBuffer {
             "{"
             indent {
                 for col in columns do
+                    // Before the attributes, so the doc comment binds to the field.
+                    for line in col.Doc do
+                        $"/// {line}"
                     match providerDbTypeAttribute col with
                     | Some attribute -> attribute
                     | None -> ()

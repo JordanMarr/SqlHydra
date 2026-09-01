@@ -161,6 +161,7 @@ let private currencycode =
         Column.IsNullable = false
         Column.IsPK = true
         Column.IsReadOnly = false
+        Column.Doc = []
         Column.TypeMapping =
             {
                 TypeMapping.ColumnTypeAlias = "character"
