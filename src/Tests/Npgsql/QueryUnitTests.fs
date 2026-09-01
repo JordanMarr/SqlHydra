@@ -1722,17 +1722,10 @@ let ``two ordinary .NET calls in a where are evaluated, not rendered``() =
     let ex = Assert.Throws<NotImplementedException>(fun () -> build ())
     test <@ ex.Message.Contains("Value to value") @>
 
-// ---------------------------------------------------------------------------
-// Case folding over a NULLABLE column — what a functional index on such a
-// column needs in order to actually be used.
-// ---------------------------------------------------------------------------
 
 [<Test>]
 let ``lower over a nullable column emits LOWER(col), not LOWER(COALESCE(col, ''))``() =
-    // A functional index `CREATE INDEX ... ON address (LOWER(addressline2))` can only be
-    // matched by `LOWER(addressline2)`. Without the `string option` overload a nullable
-    // column forces `lower (coalesce (col, ""))` — which emits `LOWER(COALESCE(col, ''))`
-    // and defeats the index (seq scan).
+    // A functional index on `LOWER(addressline2)` is only matched by `LOWER(addressline2)`.
     let sql =
         select {
             for a in person.address do
@@ -1757,8 +1750,7 @@ let ``upper over a nullable column emits UPPER(col)``() =
 
 [<Test>]
 let ``inlineValue and lower over a nullable column compose``() =
-    // The exact shape a partial functional index needs:
-    //   CREATE UNIQUE INDEX ... ON t (LOWER(addressline2)) WHERE city = 'Dallas'
+    // The shape a partial functional index needs.
     let sql =
         select {
             for a in person.address do

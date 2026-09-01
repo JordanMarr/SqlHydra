@@ -795,19 +795,11 @@ let ``SqlFn - PostgreSQL functions smoke test``() = task {
     Assert.That(middleName, Is.Not.Null)
 }
 
-// ---------------------------------------------------------------------------
-// The two claims the `string option` case-folding overloads rest on, measured
-// against the server rather than asserted about the emitted SQL. The unit tests
-// pin that `LOWER(col)` is emitted and `COALESCE` is not; these pin that the
-// difference is the one that matters.
-// ---------------------------------------------------------------------------
 
 [<Test>]
 let ``a functional index on a nullable column is usable through lower and unusable through coalesce``() = task {
-    // `enable_seqscan = off` is what makes this a test of USABILITY rather than of the
-    // planner's cost preference: on a small table a sequential scan is cheaper and would
-    // be chosen even with a perfectly good index. With it off, the planner takes the
-    // index if it can — so a remaining Seq Scan means the expression cannot match it.
+    // `enable_seqscan = off` so the planner takes the index if it can: a remaining
+    // Seq Scan then means the expression cannot match it.
     use! ctx = db.OpenContextAsync()
 
     let run (sql: string) =
@@ -836,8 +828,7 @@ let ``a functional index on a nullable column is usable through lower and unusab
             plan "SELECT * FROM person.address WHERE LOWER(COALESCE(addressline2, '')) = 'suite 100'"
 
         viaLower.Contains "test_address_lower_line2" =! true
-        // The control. Without it this test would pass just as well if the index were
-        // used by everything, which would prove nothing about the overload.
+        // The control: without it, an index used by everything would pass too.
         viaCoalesce.Contains "test_address_lower_line2" =! false
     finally
         run "RESET enable_seqscan"
@@ -846,10 +837,8 @@ let ``a functional index on a nullable column is usable through lower and unusab
 
 [<Test>]
 let ``lower over a nullable column leaves NULL rows out, where the coalesce workaround pulls them in``() = task {
-    // Not merely a different plan — a different answer. `LOWER(NULL)` is NULL, so a NULL
-    // row matches nothing; `LOWER(COALESCE(col, ''))` maps NULL to the empty string, so
-    // every NULL row matches a search for "". The overload exists so callers get the
-    // former without hand-writing SQL.
+    // A different answer, not just a different plan: COALESCE maps NULL to '', so every
+    // NULL row matches a search for "".
     use! ctx = db.OpenContextAsync()
 
     let count (sql: string) =
@@ -858,8 +847,7 @@ let ``lower over a nullable column leaves NULL rows out, where the coalesce work
         cmd.ExecuteScalar() :?> int64
 
     let nulls = count "SELECT count(*) FROM person.address WHERE addressline2 IS NULL"
-    // Guards the assertions below against a fixture with no NULLs, where both would
-    // trivially return zero and the test would pass while proving nothing.
+    // Without NULL rows both counts would be zero and this would prove nothing.
     Assert.That(nulls, Is.GreaterThan 0L, "fixture has no NULL addressline2 rows to distinguish")
 
     count "SELECT count(*) FROM person.address WHERE LOWER(addressline2) = ''" =! 0L
