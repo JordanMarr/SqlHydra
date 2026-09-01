@@ -1,4 +1,4 @@
-module SqlHydra.Npgsql.NpgsqlSchemaProvider
+﻿module SqlHydra.Npgsql.NpgsqlSchemaProvider
 
 open System.Data
 open SqlHydra.Domain

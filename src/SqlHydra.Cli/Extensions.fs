@@ -146,3 +146,61 @@ let loadNamed (project: FileInfo) (extensionNames: string list) : ISqlHydraExten
                 )
             | extensions -> extensions
     )
+
+/// Applies the column-contribution extensions to a discovered schema.
+///
+/// Runs between discovery and emission, once, over the finished schema — not inside a schema
+/// provider. A column a catalog does not list is not a provider concern: the same seam serves
+/// all five providers, and an extension decides which one it is contributing to by reading
+/// `Provider` off the context.
+///
+/// Extensions compose in registration order, each wrapping the last, which is the shape
+/// `IExtendTypeMapping` and `IExtendNaming` already use: an extension can see what the ones
+/// before it contributed, and drop from or add to that list.
+///
+/// A contributed name that a table already has raises. An override would be the more
+/// permissive choice and the wrong one — the generated file still compiles, so a shadowed
+/// column surfaces as a type error at some unrelated call site, or as nothing at all.
+let contributeColumns
+    (extensions: IContributeColumns list)
+    (provider: ProviderType)
+    (schema: Schema)
+    : Schema =
+
+    let contribute =
+        let baseFn (_: ColumnContributionContext) : Column list = []
+        extensions |> List.fold (fun acc (ext: IContributeColumns) -> ext.Contribute(acc)) baseFn
+
+    let contributeTo (table: Table) =
+        let contributed = contribute { Table = table; Provider = provider }
+        let tableName = $"{table.Schema}.{table.Name}"
+
+        contributed
+        |> List.countBy _.Name
+        |> List.tryFind (fun (_, count) -> count > 1)
+        |> Option.iter (fun (name, count) ->
+            failwith (
+                $"Column-contribution extensions contributed '{name}' {count} times to '{tableName}'. "
+                + "Each contributed column must be named once; an extension meaning to replace an "
+                + "earlier contribution should filter it out of the list it is given."
+            ))
+
+        let discovered = table.Columns |> List.map _.Name |> Set.ofList
+
+        contributed
+        |> List.tryFind (fun col -> discovered.Contains col.Name)
+        |> Option.iter (fun col ->
+            failwith (
+                $"A column-contribution extension contributed '{col.Name}' to '{tableName}', which already "
+                + "has a column of that name. Contribution adds columns the provider could not discover; it "
+                + "does not override discovered ones. Use an `IExtendTypeMapping` to retype a discovered "
+                + "column, or an `IExtendNaming` to rename one."
+            ))
+
+        if contributed.IsEmpty
+        then table
+        else { table with Columns = table.Columns @ contributed }
+
+    if extensions.IsEmpty
+    then schema
+    else { schema with Tables = schema.Tables |> List.map contributeTo }

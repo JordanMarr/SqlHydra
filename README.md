@@ -1122,6 +1122,52 @@ SqlHydra will resolve the assembly from your project's build output and load any
 
 Multiple extensions compose in order -- each wraps the previous one. An extension should call `baseTryFind ctx` for any types it doesn't handle, allowing the next extension (or the built-in mappings) to take over.
 
+### Contributing Columns the Catalog Does Not List
+
+`IExtendTypeMapping` retypes a column that was *discovered*. Some columns are never discovered:
+a PostgreSQL system column such as `xmin` is not in `information_schema`, so no type mapping is
+ever consulted for it and it cannot appear in the generated record at all.
+
+`IContributeColumns` fills that gap. It runs once over the finished schema -- after discovery and
+type mapping, before emission -- and returns the columns to append to a table:
+
+```fsharp
+open SqlHydra.Domain
+
+type XminColumn() =
+    interface IContributeColumns with
+        member _.Contribute(baseFn) =
+            fun (ctx: ColumnContributionContext) ->
+                let contributed = baseFn ctx
+
+                // A system column exists on base tables, on PostgreSQL only.
+                if ctx.Provider = ProviderType.Npgsql && ctx.Table.Type = TableType.Table then
+                    contributed @ [
+                        {
+                            Column.Name = "xmin"
+                            Column.TypeMapping =
+                                {
+                                    ClrType = "uint"
+                                    DbType = System.Data.DbType.UInt32
+                                    // Npgsql has no default mapping for uint32; without this,
+                                    // binding the column as a parameter throws client-side.
+                                    ProviderDbType = Some "Xid"
+                                    ColumnTypeAlias = "xid"
+                                }
+                            Column.IsNullable = false
+                            Column.IsPK = false
+                        }
+                    ]
+                else
+                    contributed
+```
+
+Register it exactly like a type-mapping extension, in the TOML `[extensions]` section.
+
+A contributed column is an ordinary one from there on: its `ProviderDbType` becomes a
+`[<ProviderDbType(...)>]` attribute and `IExtendNaming` renames it like any other. Contributing a
+name the table already has raises, rather than shadowing the discovered column.
+
 </details>
 
 <details>

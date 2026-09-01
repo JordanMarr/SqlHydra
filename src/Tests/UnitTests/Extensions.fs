@@ -1,4 +1,4 @@
-module UnitTests.Extensions
+﻿module UnitTests.Extensions
 
 open System
 open System.IO
