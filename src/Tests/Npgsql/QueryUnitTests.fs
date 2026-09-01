@@ -1721,3 +1721,68 @@ let ``two ordinary .NET calls in a where are evaluated, not rendered``() =
         |> ignore
     let ex = Assert.Throws<NotImplementedException>(fun () -> build ())
     test <@ ex.Message.Contains("Value to value") @>
+
+// `select` leaves a `SelectedQuerySource<'T>` behind, which is what lets an extension whose
+// operation only means something after a projection say so in its own signature. Declared HERE,
+// in the test assembly, so this is the path an extension package actually takes.
+
+[<AutoOpen>]
+module SelectStateExtension =
+
+    type SqlHydra.Query.SelectBuilders.SelectBuilder<'Selected, 'Mapped> with
+
+        /// Expands the `SELECT alias.*` that a whole-entity select emits with one more column
+        /// of the same table -- the shape a system-column or computed-column package needs.
+        /// Taking `SelectedQuerySource<'T>` rather than `QuerySource<'T, SelectQueryIR>` is the
+        /// whole point: there is no projection to expand before `select`, and now saying so is
+        /// the compiler's job rather than a `failwith` at query-construction time.
+        [<CustomOperation("withExtraColumn", MaintainsVariableSpace = true)>]
+        member _.WithExtraColumn
+            (
+                state: SelectedQuerySource<'T>,
+                [<ProjectionParameter>] columnSelector: Expression<Func<'T, 'Prop>>
+            ) : SelectedQuerySource<'T> =
+            match SelectBuilders.ExtensionHelpers.tryGetOrderByColumn columnSelector with
+            | Some (tableAlias, column) ->
+                let expanded =
+                    state.Query.Select
+                    |> List.collect (function
+                        | SelectColumn.AllColumns alias when alias = tableAlias ->
+                            [ SelectColumn.AllColumns alias
+                              SelectColumn.SpecificColumn $"%s{alias}.%s{column}" ]
+                        | c -> [ c ])
+                SelectedQuerySource<'T>({ state.Query with Select = expanded }, state.TableMappings)
+            | None -> failwith "withExtraColumn expects a single column, as in `withExtraColumn a.rowguid`."
+
+[<Test>]
+let ``an extension operation constrained to the select state expands the whole-entity projection``() =
+    let sql =
+        select {
+            for a in person.address do
+            where (a.city = "Dallas")
+            select a
+            withExtraColumn a.rowguid
+        }
+        |> toSql
+    test <@ sql.Contains("\"a\".*, \"a\".\"rowguid\"") @>
+
+[<Test>]
+let ``select returns the state type an extension can require``() =
+    // The seam itself. `withExtraColumn` above compiles only because `Select` returns this;
+    // placed before `select` it does not compile at all, which is the point of the change.
+    let selectOp = typeof<SelectBuilder<obj, obj>>.GetMethod("Select")
+    test <@ selectOp.ReturnType.GetGenericTypeDefinition() = typedefof<SelectedQuerySource<_>> @>
+
+[<Test>]
+let ``a bare select of a nullable column still resolves to the seq Run overload``() =
+    // Regression guard for the mirrored `Run` overloads, and the reason they exist. The `Run`
+    // set discriminates on the shape of the type argument, which only resolves while the
+    // argument is exactly `QuerySource<_, SelectQueryIR>`; handed a subtype, this ordinary
+    // query goes ambiguous between `'Selected` and `'Mapped option` (FS0041).
+    // Never executed -- there is no database here. Type-checking is the assertion.
+    let build (db: ContextType) : System.Threading.Tasks.Task<seq<string option>> =
+        selectTask db {
+            for a in person.address do
+            select a.addressline2
+        }
+    test <@ box build <> null @>

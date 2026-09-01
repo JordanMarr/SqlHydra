@@ -224,7 +224,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
                     failwith "SelectedAs may only wrap SelectedColumn / SelectedExpression / SelectedExpressionWithParams"
             ) state.Query
 
-        QuerySource<'Selected, SelectQueryIR>(irWithSelectedColumns, state.TableMappings)
+        SelectedQuerySource<'Selected>(irWithSelectedColumns, state.TableMappings)
 
     /// Sets the ORDER BY for single column
     [<CustomOperation("orderBy", MaintainsVariableSpace = true)>]
@@ -746,6 +746,16 @@ type SelectTaskBuilder<'Selected, 'Mapped> (ct: ContextType) =
             finally ContextUtils.disposeIfNotShared ct ctx
         }
 
+    /// Run: default, for the `SelectedQuerySource` a bare `select` now returns.
+    /// Load-bearing, not a convenience. The overloads above discriminate purely on the shape
+    /// of the type argument (`'Selected` vs `'Selected option` vs `'Mapped list` ...), which
+    /// only resolves while the argument type is exactly `QuerySource<_, SelectQueryIR>`. Handed
+    /// a subtype, `select c.someNullableColumn` becomes ambiguous between `'Selected` and
+    /// `'Mapped option` (FS0041) in ordinary user code. Matching the derived type exactly
+    /// restores the resolution, and every result modifier (`toList`, `tryHead`, `count`, ...)
+    /// returns a plain `QuerySource`, so a bare `select` is the only ending that lands here.
+    member this.Run(state: SelectedQuerySource<'Selected>) = this.RunSelected(state.Query, id)
+
 
 /// A select builder that returns an Async result.
 type SelectAsyncBuilder<'Selected, 'Mapped> (ct: ContextType) =
@@ -836,6 +846,16 @@ type SelectAsyncBuilder<'Selected, 'Mapped> (ct: ContextType) =
     // Run: head - 'Mapped
     member this.Run(state: QuerySource<ResultModifier.Head<'Mapped>, SelectQueryIR>) =
         this.RunMapped(state.Query, Seq.head)
+
+    /// Run: default, for the `SelectedQuerySource` a bare `select` now returns.
+    /// Load-bearing, not a convenience. The overloads above discriminate purely on the shape
+    /// of the type argument (`'Selected` vs `'Selected option` vs `'Mapped list` ...), which
+    /// only resolves while the argument type is exactly `QuerySource<_, SelectQueryIR>`. Handed
+    /// a subtype, `select c.someNullableColumn` becomes ambiguous between `'Selected` and
+    /// `'Mapped option` (FS0041) in ordinary user code. Matching the derived type exactly
+    /// restores the resolution, and every result modifier (`toList`, `tryHead`, `count`, ...)
+    /// returns a plain `QuerySource`, so a bare `select` is the only ending that lands here.
+    member this.Run(state: SelectedQuerySource<'Selected>) = this.RunSelected(state.Query, id)
 
     // Run: count
     member this.Run(state: QuerySource<ResultModifier.Count<int>, SelectQueryIR>) =

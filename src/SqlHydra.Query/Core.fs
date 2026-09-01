@@ -147,6 +147,28 @@ type QuerySource<'T, 'Query>(query, tableMappings) =
     inherit QuerySource<'T>(tableMappings)
     member this.Query : 'Query = query
 
+/// The state a `select` leaves behind. It carries nothing `QuerySource<'T, SelectQueryIR>`
+/// does not, and every existing operation still accepts it, so queries read and run exactly
+/// as before. What it adds is a name a signature can ask for.
+///
+/// A custom operation that expands what `select` emitted — an extension projecting a system
+/// column onto the `SELECT alias.*` of a whole-entity select, say — means nothing before a
+/// projection exists. Taking `SelectedQuerySource<'T>` instead of `QuerySource<'T, SelectQueryIR>`
+/// says so in the type, and misplacement stops compiling rather than raising at
+/// query-construction time:
+///
+///     [<CustomOperation("withSystemColumns", MaintainsVariableSpace = true)>]
+///     member _.WithSystemColumns
+///         (state: SelectedQuerySource<'T>,
+///          [<ProjectionParameter>] columnSelector: Expression<Func<'T, 'Prop>>) = ...
+///
+/// The row type does the rest: after `select u.email` the state is `SelectedQuerySource<string>`,
+/// so a `u.xmin` selector fails to typecheck on its own. Note that the operations following a
+/// select return a plain `QuerySource`, so an operation constrained this way must come directly
+/// after `select`.
+type SelectedQuerySource<'T>(query, tableMappings) =
+    inherit QuerySource<'T, SelectQueryIR>(query, tableMappings)
+
 /// The type of join for predicate-style joins
 type JoinType =
     | Inner
