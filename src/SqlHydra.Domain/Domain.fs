@@ -210,6 +210,39 @@ type IExtendNaming =
     abstract member ExtendTableName: baseFn: (NamingContext -> string) -> (NamingContext -> string)
     abstract member ExtendColumnName: baseFn: (NamingContext -> string) -> (NamingContext -> string)
 
+/// What an extension is handed when it is offered a table to contribute columns to.
+type ColumnContributionContext =
+    {
+        /// The table as the provider discovered it: type mappings resolved (extensions
+        /// included) and column filters already applied. `Type` distinguishes a base table
+        /// from a view, and `Columns` is what was found, so an extension can decide per
+        /// table rather than blanketing the schema.
+        Table: Table
+
+        /// Which provider discovered it. A column that only exists on one database engine
+        /// is contributed only when this matches.
+        Provider: ProviderType
+    }
+
+/// Contributes columns that the provider's discovery cannot see.
+///
+/// A schema provider learns its columns from the catalog, so a column the catalog does not
+/// list -- a PostgreSQL system column such as `xmin`, a pseudo-column, a column projected by
+/// a companion library -- can never be typed, named or emitted, because no later stage is
+/// ever asked about it. This runs once over the finished schema, after discovery and type
+/// mapping and before emission, and returns the columns to append to a table.
+///
+/// A contributed `Column` is an ordinary one from there on: its `TypeMapping.ProviderDbType`
+/// becomes a `[<ProviderDbType(...)>]` attribute, `IExtendNaming` renames it like any other,
+/// and whatever marks a column as one the database owns applies to it too.
+///
+/// Contributing a name the table already has is an error rather than an override: an
+/// extension that silently shadows a discovered column produces a file that compiles and is
+/// wrong.
+type IContributeColumns =
+    inherit ISqlHydraExtension
+    abstract member Contribute: baseFn: (ColumnContributionContext -> Column list) -> (ColumnContributionContext -> Column list)
+
 type ISqlHydraDbProvider =
     abstract member Id: string
     abstract member Name: string

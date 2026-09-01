@@ -1,4 +1,4 @@
-module SqlHydra.MySql.MySqlSchemaProvider
+﻿module SqlHydra.MySql.MySqlSchemaProvider
 
 open System.Data
 open MySql.Data
