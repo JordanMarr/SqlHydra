@@ -802,54 +802,68 @@ let ``a functional index on a nullable column is usable through lower and unusab
     // Seq Scan then means the expression cannot match it.
     use! ctx = db.OpenContextAsync()
 
-    let run (sql: string) =
+    let exec (sql: string) =
         use cmd = ctx.Connection.CreateCommand()
         cmd.CommandText <- sql
-        cmd.ExecuteScalar() |> ignore
+        cmd.ExecuteNonQuery() |> ignore
 
-    let plan (sql: string) =
-        use cmd = ctx.Connection.CreateCommand()
-        cmd.CommandText <- $"EXPLAIN {sql}"
+    // EXPLAIN the SQL SqlHydra actually emits, not a hand-written equivalent.
+    let planOf (q: SelectQuery<_>) =
+        use cmd = ctx.BuildCommand(q.IR)
+        cmd.CommandText <- "EXPLAIN " + cmd.CommandText
         use reader = cmd.ExecuteReader()
         let mutable text = ""
         while reader.Read() do
             text <- text + reader.GetString(0) + "\n"
         text
 
-    run "CREATE INDEX IF NOT EXISTS test_address_lower_line2 ON person.address (LOWER(addressline2))"
+    exec "CREATE INDEX IF NOT EXISTS test_address_lower_line2 ON person.address (LOWER(addressline2))"
 
     try
-        run "SET enable_seqscan = off"
+        exec "SET enable_seqscan = off"
 
-        let viaLower =
-            plan "SELECT * FROM person.address WHERE LOWER(addressline2) = 'suite 100'"
+        let viaOverload =
+            planOf (
+                select {
+                    for a in person.address do
+                        where (SqlFn.lower a.addressline2 = "suite 100")
+                }
+            )
 
-        let viaCoalesce =
-            plan "SELECT * FROM person.address WHERE LOWER(COALESCE(addressline2, '')) = 'suite 100'"
+        let viaWorkaround =
+            planOf (
+                select {
+                    for a in person.address do
+                        where (SqlFn.lower (SqlFn.coalesce (a.addressline2, "")) = "suite 100")
+                }
+            )
 
-        viaLower.Contains "test_address_lower_line2" =! true
+        viaOverload.Contains "test_address_lower_line2" =! true
         // The control: without it, an index used by everything would pass too.
-        viaCoalesce.Contains "test_address_lower_line2" =! false
+        viaWorkaround.Contains "test_address_lower_line2" =! false
     finally
-        run "RESET enable_seqscan"
-        run "DROP INDEX IF EXISTS person.test_address_lower_line2"
+        exec "RESET enable_seqscan"
+        exec "DROP INDEX IF EXISTS person.test_address_lower_line2"
 }
 
 [<Test>]
 let ``lower over a nullable column leaves NULL rows out, where the coalesce workaround pulls them in``() = task {
     // A different answer, not just a different plan: COALESCE maps NULL to '', so every
     // NULL row matches a search for "".
-    use! ctx = db.OpenContextAsync()
+    let! viaOverload =
+        selectTask db {
+            for a in person.address do
+                where (SqlFn.lower a.addressline2 = "")
+        }
 
-    let count (sql: string) =
-        use cmd = ctx.Connection.CreateCommand()
-        cmd.CommandText <- sql
-        cmd.ExecuteScalar() :?> int64
+    let! viaWorkaround =
+        selectTask db {
+            for a in person.address do
+                where (SqlFn.lower (SqlFn.coalesce (a.addressline2, "")) = "")
+        }
 
-    let nulls = count "SELECT count(*) FROM person.address WHERE addressline2 IS NULL"
     // Without NULL rows both counts would be zero and this would prove nothing.
-    Assert.That(nulls, Is.GreaterThan 0L, "fixture has no NULL addressline2 rows to distinguish")
-
-    count "SELECT count(*) FROM person.address WHERE LOWER(addressline2) = ''" =! 0L
-    count "SELECT count(*) FROM person.address WHERE LOWER(COALESCE(addressline2, '')) = ''" =! nulls
+    Assert.That(Seq.length viaWorkaround, Is.GreaterThan 0, "fixture has no NULL addressline2 rows")
+    Seq.length viaOverload =! 0
+    viaWorkaround |> Seq.forall (fun a -> a.addressline2.IsNone) =! true
 }
