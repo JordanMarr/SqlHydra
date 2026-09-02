@@ -1781,3 +1781,15 @@ let ``entity: an insert of the read record still names every column, the databas
         }
         |> toInsertSql
     sql =! """INSERT INTO "sales"."invoice" ("id", "currencycode", "price", "tax") VALUES (@p0, @p1, @p2, @p3)"""
+
+[<Test>]
+let ``doUpdateWrite: without onConflict the query is refused as it is built``() =
+    let build () =
+        insert {
+            for i in WriteRecordFixture.invoice do
+            writeEntity (WriteRecordFixture.readRow.ToWrite())
+            doUpdateWrite (fun w -> w.price)
+        }
+        |> ignore
+    let ex = Assert.Throws<System.Exception>(fun () -> build ())
+    ex.Message =! "doUpdateWrite requires onConflict to be called first"

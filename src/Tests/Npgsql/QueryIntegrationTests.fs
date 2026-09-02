@@ -983,3 +983,159 @@ let ``writeEntity: a nullable generated column reads back as Some where the data
 
     do! WriteRecordFixture.exec ctx WriteRecordFixture.dropDdl
 }
+
+// The typed DO UPDATE members end to end, on a table whose conflict column is unique.
+
+module DoUpdateWriteFixture =
+    module sales =
+        /// Mirrors the DDL below. `note` is nullable so that a coalesce has something to keep.
+        [<CLIMutable>]
+        type sqlhydra_do_update_write =
+            { id: int
+              code: string
+              price: decimal
+              note: Option<string>
+              tax: decimal }
+
+        and [<CLIMutable>] sqlhydra_do_update_write_write =
+            { code: string
+              price: decimal
+              note: Option<string> }
+            interface SqlHydra.IWriteOf<sqlhydra_do_update_write>
+
+    let rows = table<sales.sqlhydra_do_update_write>
+
+    let row : sales.sqlhydra_do_update_write_write = { code = "a"; price = 10m; note = None }
+
+    let ddl =
+        """
+        DROP TABLE IF EXISTS sales.sqlhydra_do_update_write;
+        CREATE TABLE sales.sqlhydra_do_update_write (
+            id    int GENERATED ALWAYS AS IDENTITY,
+            code  text NOT NULL UNIQUE,
+            price numeric NOT NULL,
+            note  text,
+            tax   numeric GENERATED ALWAYS AS (price * 0.1) STORED
+        );
+        """
+
+    let dropDdl = "DROP TABLE sales.sqlhydra_do_update_write;"
+
+    /// A context on a freshly created table, appending each statement's SQL to `sqlLog`.
+    let openFresh (sqlLog: ResizeArray<string>) = task {
+        let! ctx = db.OpenContextAsync()
+        ctx.Logger <- fun compiled -> sqlLog.Add compiled.Sql
+        do! WriteRecordFixture.exec ctx ddl
+        return ctx
+    }
+
+    /// The one statement the upserts so far have emitted, whitespace collapsed.
+    let upsertSql (sqlLog: ResizeArray<string>) =
+        System.Text.RegularExpressions.Regex.Replace(sqlLog |> Seq.distinct |> Seq.exactlyOne, @"\s+", " ").Trim()
+
+    let readOne ctx = task {
+        let! rows = selectTask ctx { for r in rows do select r }
+        return rows |> Seq.exactlyOne
+    }
+
+[<Test>]
+let ``doUpdateWrite: the upsert names only the write record's fields, and the conflicting row is updated``() = task {
+    let sqlLog = ResizeArray<string>()
+    use! ctx = DoUpdateWriteFixture.openFresh sqlLog
+
+    let upsert (price: decimal) =
+        insertTask ctx {
+            for r in DoUpdateWriteFixture.rows do
+            writeEntity { DoUpdateWriteFixture.row with price = price }
+            onConflict r.code
+            doUpdateWrite (fun w -> w.price)
+        }
+    let! inserted = upsert 10m
+    let! updated = upsert 25m
+    inserted =! 1
+    updated =! 1
+    DoUpdateWriteFixture.upsertSql sqlLog =! """INSERT INTO "sales"."sqlhydra_do_update_write" ("code", "price", "note") VALUES (@p0, @p1, @p2) ON CONFLICT(code) DO UPDATE SET price=EXCLUDED."price" ;"""
+
+    let! row = DoUpdateWriteFixture.readOne ctx
+    row.id =! 1
+    row.price =! 25m
+    row.tax =! 2.5m
+
+    do! WriteRecordFixture.exec ctx DoUpdateWriteFixture.dropDdl
+}
+
+[<Test>]
+let ``doUpdateCoalesceWrite: a null in the new row keeps the existing value where coalesced, and the rest is updated``() = task {
+    let sqlLog = ResizeArray<string>()
+    use! ctx = DoUpdateWriteFixture.openFresh sqlLog
+
+    let upsert (price: decimal) (note: string option) =
+        insertTask ctx {
+            for r in DoUpdateWriteFixture.rows do
+            writeEntity { DoUpdateWriteFixture.row with price = price; note = note }
+            onConflict r.code
+            doUpdateCoalesceWrite (fun w -> (w.price, w.note)) (fun w -> w.note)
+        }
+    let! inserted = upsert 10m (Some "kept")
+    let! updated = upsert 25m None
+    inserted =! 1
+    updated =! 1
+    DoUpdateWriteFixture.upsertSql sqlLog =! """INSERT INTO "sales"."sqlhydra_do_update_write" ("code", "price", "note") VALUES (@p0, @p1, @p2) ON CONFLICT(code) DO UPDATE SET "price" = EXCLUDED."price" ,"note" = COALESCE(EXCLUDED."note", "sqlhydra_do_update_write"."note") ;"""
+
+    let! row = DoUpdateWriteFixture.readOne ctx
+    row.price =! 25m
+    row.note =! Some "kept"
+    row.tax =! 2.5m
+
+    do! WriteRecordFixture.exec ctx DoUpdateWriteFixture.dropDdl
+}
+
+[<Test>]
+let ``onConflictDoUpdateWrite: the upsert names only the write record's fields, and the conflicting row is updated``() = task {
+    let sqlLog = ResizeArray<string>()
+    use! ctx = DoUpdateWriteFixture.openFresh sqlLog
+
+    let upsert (price: decimal) =
+        insertTask ctx {
+            for r in DoUpdateWriteFixture.rows do
+            writeEntity { DoUpdateWriteFixture.row with price = price }
+            onConflictDoUpdateWrite r.code (fun w -> w.price)
+        }
+    let! inserted = upsert 10m
+    let! updated = upsert 25m
+    inserted =! 1
+    updated =! 1
+    DoUpdateWriteFixture.upsertSql sqlLog =! """INSERT INTO "sales"."sqlhydra_do_update_write" ("code", "price", "note") VALUES (@p0, @p1, @p2) ON CONFLICT(code) DO UPDATE SET price=EXCLUDED."price" ;"""
+
+    let! row = DoUpdateWriteFixture.readOne ctx
+    row.id =! 1
+    row.price =! 25m
+    row.tax =! 2.5m
+
+    do! WriteRecordFixture.exec ctx DoUpdateWriteFixture.dropDdl
+}
+
+[<Test>]
+let ``onConflictDoUpdateCoalesceWrite: a null in the new row keeps the existing value where coalesced, and the rest is updated``() = task {
+    let sqlLog = ResizeArray<string>()
+    use! ctx = DoUpdateWriteFixture.openFresh sqlLog
+
+    let upsert (price: decimal) (note: string option) =
+        insertTask ctx {
+            for r in DoUpdateWriteFixture.rows do
+            writeEntity { DoUpdateWriteFixture.row with price = price; note = note }
+            onConflictDoUpdateCoalesceWrite r.code (fun w -> (w.price, w.note)) (fun w -> w.note)
+        }
+    let! inserted = upsert 10m (Some "kept")
+    let! updated = upsert 25m None
+    inserted =! 1
+    updated =! 1
+    DoUpdateWriteFixture.upsertSql sqlLog =! """INSERT INTO "sales"."sqlhydra_do_update_write" ("code", "price", "note") VALUES (@p0, @p1, @p2) ON CONFLICT(code) DO UPDATE SET "price" = EXCLUDED."price" ,"note" = COALESCE(EXCLUDED."note", "sqlhydra_do_update_write"."note") ;"""
+
+    let! row = DoUpdateWriteFixture.readOne ctx
+    row.price =! 25m
+    row.note =! Some "kept"
+    row.tax =! 2.5m
+
+    do! WriteRecordFixture.exec ctx DoUpdateWriteFixture.dropDdl
+}
