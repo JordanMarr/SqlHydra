@@ -1721,3 +1721,63 @@ let ``two ordinary .NET calls in a where are evaluated, not rendered``() =
         |> ignore
     let ex = Assert.Throws<NotImplementedException>(fun () -> build ())
     test <@ ex.Message.Contains("Value to value") @>
+
+// Fixture standing in for generated output: `id` is GENERATED ALWAYS AS IDENTITY and
+// `tax` is GENERATED ALWAYS AS (price * 0.1) STORED. PostgreSQL rejects naming either.
+
+module WriteRecordFixture =
+    module sales =
+        [<CLIMutable>]
+        type invoice =
+            { id: int
+              currencycode: string
+              price: decimal
+              tax: decimal }
+            member this.ToWrite() : invoice_write =
+                { currencycode = this.currencycode
+                  price = this.price }
+
+        and [<CLIMutable>] invoice_write =
+            { currencycode: string
+              price: decimal }
+            interface SqlHydra.IWriteOf<invoice>
+
+    let invoice = table<sales.invoice>
+
+    let readRow : sales.invoice =
+        { id = 1
+          currencycode = "BTC"
+          price = 10m
+          tax = 1m }
+
+[<Test>]
+let ``writeEntity: an insert names only the write record's fields``() =
+    let sql =
+        insert {
+            into WriteRecordFixture.invoice
+            writeEntity (WriteRecordFixture.readRow.ToWrite())
+        }
+        |> toInsertSql
+    sql =! """INSERT INTO "sales"."invoice" ("currencycode", "price") VALUES (@p0, @p1)"""
+
+[<Test>]
+let ``writeEntity: an update sets only the write record's fields, with a where over the read record``() =
+    let sql =
+        update {
+            for i in WriteRecordFixture.invoice do
+            writeEntity { WriteRecordFixture.readRow.ToWrite() with price = 20m }
+            where (i.id = 1)
+        }
+        |> toUpdateSql
+    sql =! """UPDATE "sales"."invoice" SET "currencycode" = @p0, "price" = @p1 WHERE ("sales"."invoice"."id" = @p2)"""
+
+[<Test>]
+let ``entity: an insert of the read record still names every column, the database-owned ones included``() =
+    // Nothing is filtered at runtime: this is the statement PostgreSQL rejects, exactly as before.
+    let sql =
+        insert {
+            into WriteRecordFixture.invoice
+            entity WriteRecordFixture.readRow
+        }
+        |> toInsertSql
+    sql =! """INSERT INTO "sales"."invoice" ("id", "currencycode", "price", "tax") VALUES (@p0, @p1, @p2, @p3)"""

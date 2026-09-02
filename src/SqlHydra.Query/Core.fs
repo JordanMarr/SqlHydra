@@ -88,7 +88,8 @@ type PendingConflictTarget =
 type InsertQuerySpec<'T, 'Identity> =
     {
         Table: string
-        Entities: 'T list
+        /// Boxed: a `'T` row, or an `IWriteOf<'T>` row that has no field for a read-only column.
+        Entities: obj list
         Fields: string list
         IdentityField: string option
         OutputFields: OutputField list
@@ -109,7 +110,8 @@ type InsertQuerySpec<'T, 'Identity> =
 type UpdateQuerySpec<'T, 'UpdateReturn> =
     {
         Table: string
-        Entity: 'T option
+        /// Boxed: a `'T` row, or an `IWriteOf<'T>` row that has no field for a read-only column.
+        Entity: obj option
         Fields: string list
         SetValues: (string * obj) list
         RawSetValues: (string * string * obj[]) list
@@ -120,7 +122,7 @@ type UpdateQuerySpec<'T, 'UpdateReturn> =
         CommandOptions: CommandOptions
     }
     static member Default : UpdateQuerySpec<'T, 'UpdateReturn> =
-        { Table = ""; Entity = Option<'T>.None; Fields = []; SetValues = []; RawSetValues = []
+        { Table = ""; Entity = None; Fields = []; SetValues = []; RawSetValues = []
           Where = WhereClause.Empty; OutputFields = []; UpdateAll = false; Returning = []
           CommandOptions = CommandOptions.Default }
 
@@ -223,15 +225,17 @@ module internal QueryUtils =
         let kvps =
             match spec.Entity, spec.SetValues with
             | Some entity, [] ->
+                // The row's own type, not 'T: a write record carries only the writable fields.
+                let rowType = entity.GetType()
                 match spec.Fields with
                 | [] ->
-                    FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>)
+                    FSharp.Reflection.FSharpType.GetRecordFields(rowType)
                     |> Array.map (fun p -> p.Name, getQueryParameterForEntity entity p)
                     |> Array.toList
 
                 | fields ->
                     let included = fields |> Set.ofList
-                    FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>)
+                    FSharp.Reflection.FSharpType.GetRecordFields(rowType)
                     |> Array.filter (fun p -> included.Contains(p.Name))
                     |> Array.map (fun p -> p.Name, getQueryParameterForEntity entity p)
                     |> Array.toList
@@ -252,13 +256,20 @@ module internal QueryUtils =
         }
 
     let fromInsert (spec: InsertQuerySpec<'T, 'InsertReturn>) : InsertQueryIR =
+        // The rows' own type, not 'T: a write record carries only the writable fields.
+        // With no rows the columns come from 'T, as `insert ... select` needs.
+        let rowType =
+            match spec.Entities with
+            | [] -> typeof<'T>
+            | firstRow :: _ -> firstRow.GetType()
+
         let includedProperties =
             match spec.Fields with
             | [] ->
-                FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>)
+                FSharp.Reflection.FSharpType.GetRecordFields(rowType)
             | fields ->
                 let included = fields |> Set.ofList
-                FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>)
+                FSharp.Reflection.FSharpType.GetRecordFields(rowType)
                 |> Array.filter (fun p -> included.Contains(p.Name))
 
         let columns = includedProperties |> Array.map (fun p -> p.Name) |> Array.toList

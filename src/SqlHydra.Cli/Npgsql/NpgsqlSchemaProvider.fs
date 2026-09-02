@@ -4,6 +4,25 @@ open System.Data
 open SqlHydra.Domain
 open SqlHydra
 
+/// A column's generation flags, named as `pg_attribute` names them.
+/// https://www.postgresql.org/docs/current/catalog-pg-attribute.html
+type PgAttribute =
+    { AttGenerated: string
+      AttIdentity: string }
+
+/// True for a column PostgreSQL writes itself: generated ('s' stored, 'v' virtual) or
+/// identity ALWAYS ('a'). Identity BY DEFAULT ('d') is writable and must not match.
+/// `AttGenerated` is compared, not matched, so a kind added in a later PostgreSQL is caught.
+let isDatabaseGenerated (att: PgAttribute) =
+    att.AttGenerated <> "" || att.AttIdentity = "a"
+
+/// One column, named. A tuple key here would let the schema and table be probed in the
+/// wrong order — which compiles, finds nothing, and marks nothing read-only.
+type ColumnRef =
+    { Schema: string
+      Table: string
+      Column: string }
+
 let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list) : Schema =
     use conn = new Npgsql.NpgsqlConnection(cfg.ConnectionString)
     conn.Open()
@@ -52,6 +71,43 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
                 rdr.["COLUMN_NAME"] :?> string
         ]
         |> Set.ofList
+
+    let generatedColumns =
+        let sql =
+            """
+            SELECT
+                pg_namespace.nspname AS table_schema,
+                pg_class.relname AS table_name,
+                pg_attribute.attname AS column_name,
+                pg_attribute.attgenerated::text AS attgenerated,
+                pg_attribute.attidentity::text AS attidentity
+            FROM pg_attribute
+            INNER JOIN pg_class ON pg_class.oid = pg_attribute.attrelid
+            INNER JOIN pg_namespace ON pg_namespace.oid = pg_class.relnamespace
+            WHERE
+                -- ordinary (r) and partitioned (p) tables; nothing else can be written
+                pg_class.relkind in ('r', 'p') AND
+                pg_attribute.attnum >= 1 AND
+                NOT pg_attribute.attisdropped AND
+                pg_namespace.nspname not in ('pg_catalog', 'information_schema');
+            """
+
+        use cmd = new Npgsql.NpgsqlCommand(sql, conn)
+        use rdr = cmd.ExecuteReader()
+        [
+            while rdr.Read() do
+                let att =
+                    { AttGenerated = rdr["attgenerated"] :?> string
+                      AttIdentity = rdr["attidentity"] :?> string }
+                if isDatabaseGenerated att then
+                    { Schema = rdr["table_schema"] :?> string
+                      Table = rdr["table_name"] :?> string
+                      Column = rdr["column_name"] :?> string }
+        ]
+        |> Set.ofList
+
+    let isReadOnly (col: ColumnSchema) =
+        generatedColumns.Contains { Schema = col.Schema; Table = col.Table; Column = col.Name }
 
     let enums =
         let sql =
@@ -231,6 +287,7 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
                             Column.IsNullable = col.IsNullable
                             Column.TypeMapping = typeMapping
                             Column.IsPK = col.IsPrimaryKey
+                            Column.IsReadOnly = false
                         }
                     )
                 )
@@ -288,6 +345,7 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
                             Column.IsNullable = col.IsNullable
                             Column.TypeMapping = typeMapping
                             Column.IsPK = col.IsPrimaryKey
+                            Column.IsReadOnly = isReadOnly col
                         }
                     )
                 )
@@ -320,6 +378,7 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
                                 TypeMapping.ProviderDbType = None
                             }
                         Column.IsPK = col.IsPrimaryKey
+                        Column.IsReadOnly = isReadOnly col
                     }
                 )
 

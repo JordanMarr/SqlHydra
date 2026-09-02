@@ -794,3 +794,192 @@ let ``SqlFn - PostgreSQL functions smoke test``() = task {
     upperName =! "KEN"
     Assert.That(middleName, Is.Not.Null)
 }
+
+// The write record end to end: what the generator emits for a table with read-only columns,
+// written through `writeEntity` and read back as the read record.
+
+module WriteRecordFixture =
+    module sales =
+        /// Mirrors the DDL below. `disc` is NULL at price 20: a generated column that is also nullable.
+        [<CLIMutable>]
+        type sqlhydra_write_record =
+            { id: int
+              code: string
+              price: decimal
+              tax: decimal
+              disc: Option<decimal> }
+            member this.ToWrite() : sqlhydra_write_record_write =
+                { code = this.code
+                  price = this.price }
+
+        /// What `SchemaTemplate` emits alongside the record above.
+        and [<CLIMutable>] sqlhydra_write_record_write =
+            { code: string
+              price: decimal }
+            interface SqlHydra.IWriteOf<sqlhydra_write_record>
+
+    let rows = table<sales.sqlhydra_write_record>
+
+    let row : sales.sqlhydra_write_record_write = { code = "a"; price = 10m }
+
+    let ddl =
+        """
+        DROP TABLE IF EXISTS sales.sqlhydra_write_record;
+        CREATE TABLE sales.sqlhydra_write_record (
+            id    int GENERATED ALWAYS AS IDENTITY,
+            code  text NOT NULL,
+            price numeric NOT NULL,
+            tax   numeric GENERATED ALWAYS AS (price * 0.1) STORED,
+            disc  numeric GENERATED ALWAYS AS (nullif(price, 20) * 0.05) STORED
+        );
+        """
+
+    let dropDdl = "DROP TABLE sales.sqlhydra_write_record;"
+
+    let exec (ctx: QueryContext) (sql: string) = task {
+        use cmd = ctx.Connection.CreateCommand()
+        cmd.CommandText <- sql
+        let! _ = cmd.ExecuteNonQueryAsync()
+        ()
+    }
+
+    /// A context on a freshly created table, appending each statement's SQL to `sqlLog`.
+    let openFresh (sqlLog: ResizeArray<string>) = task {
+        let! ctx = db.OpenContextAsync()
+        ctx.Logger <- fun compiled -> sqlLog.Add compiled.Sql
+        do! exec ctx ddl
+        return ctx
+    }
+
+    /// Seeds a row without going through the insert builder, so an update test stands on its own.
+    let seed ctx (price: decimal) =
+        exec ctx $"INSERT INTO sales.sqlhydra_write_record (code, price) VALUES ('seeded', {price});"
+
+    let read ctx =
+        selectTask ctx {
+            for r in rows do
+            orderBy r.id
+            select r
+        }
+
+[<Test>]
+let ``writeEntity: an insert names only the write record's fields, and the row reads back as the read record with the generated values``() = task {
+    let sqlLog = ResizeArray<string>()
+    use! ctx = WriteRecordFixture.openFresh sqlLog
+
+    let! inserted =
+        insertTask ctx {
+            into WriteRecordFixture.rows
+            writeEntity WriteRecordFixture.row
+        }
+    inserted =! 1
+    (sqlLog |> Seq.exactlyOne) =! """INSERT INTO "sales"."sqlhydra_write_record" ("code", "price") VALUES (@p0, @p1)"""
+
+    let! rows = WriteRecordFixture.read ctx
+    let row = rows |> Seq.exactlyOne
+    row.id =! 1
+    row.code =! "a"
+    row.price =! 10m
+    row.tax =! 1.0m
+
+    do! WriteRecordFixture.exec ctx WriteRecordFixture.dropDdl
+}
+
+[<Test>]
+let ``writeEntity: an update sets only the write record's fields, with a where over the read record``() = task {
+    let sqlLog = ResizeArray<string>()
+    use! ctx = WriteRecordFixture.openFresh sqlLog
+    do! WriteRecordFixture.seed ctx 10m
+
+    // `r` is the read record: `id` has no field on the write record, and is still there to filter on.
+    let! updated =
+        updateTask ctx {
+            for r in WriteRecordFixture.rows do
+            writeEntity { WriteRecordFixture.row with price = 30m }
+            where (r.id = 1)
+        }
+    updated =! 1
+    (sqlLog |> Seq.exactlyOne)
+        =! """UPDATE "sales"."sqlhydra_write_record" SET "code" = @p0, "price" = @p1 WHERE ("sales"."sqlhydra_write_record"."id" = @p2)"""
+
+    let! rows = WriteRecordFixture.read ctx
+    let row = rows |> Seq.exactlyOne
+    row.price =! 30m
+    row.tax =! 3.0m
+
+    do! WriteRecordFixture.exec ctx WriteRecordFixture.dropDdl
+}
+
+[<Test>]
+let ``ToWrite: a row read back round-trips through writeEntity with one field changed``() = task {
+    // The read record carries `id` and `tax`; `ToWrite()` drops them, so nothing is left to exclude.
+    use! ctx = WriteRecordFixture.openFresh (ResizeArray())
+    do! WriteRecordFixture.seed ctx 10m
+    let! seeded = WriteRecordFixture.read ctx
+    let readRow = seeded |> Seq.exactlyOne
+
+    let! updated =
+        updateTask ctx {
+            for r in WriteRecordFixture.rows do
+            writeEntity { readRow.ToWrite() with price = 30m }
+            where (r.id = readRow.id)
+        }
+    updated =! 1
+
+    let! rows = WriteRecordFixture.read ctx
+    (rows |> Seq.exactlyOne) =! { readRow with price = 30m; tax = 3.0m; disc = Some 1.5m }
+
+    do! WriteRecordFixture.exec ctx WriteRecordFixture.dropDdl
+}
+
+[<Test>]
+let ``writeEntity: getId returns the generated identity``() = task {
+    // `getId` narrows the field list through `excludeColumn`, a second path to the write record's fields.
+    use! ctx = WriteRecordFixture.openFresh (ResizeArray())
+
+    let! newId =
+        insertTask ctx {
+            for r in WriteRecordFixture.rows do
+            writeEntity WriteRecordFixture.row
+            getId r.id
+        }
+    newId >! 0
+
+    let! rows = WriteRecordFixture.read ctx
+    (rows |> Seq.exactlyOne).id =! newId
+
+    do! WriteRecordFixture.exec ctx WriteRecordFixture.dropDdl
+}
+
+[<Test>]
+let ``writeEntities: inserts one row per write record``() = task {
+    let sqlLog = ResizeArray<string>()
+    use! ctx = WriteRecordFixture.openFresh sqlLog
+
+    let! inserted =
+        insertTask ctx {
+            into WriteRecordFixture.rows
+            writeEntities [ { WriteRecordFixture.row with code = "a" }; { WriteRecordFixture.row with code = "b" } ]
+        }
+    inserted =! 2
+    (sqlLog |> Seq.exactlyOne) =! """INSERT INTO "sales"."sqlhydra_write_record" ("code", "price") VALUES (@p0, @p1), (@p2, @p3)"""
+
+    let! rows = WriteRecordFixture.read ctx
+    (rows |> Seq.map (fun r -> r.code) |> List.ofSeq) =! [ "a"; "b" ]
+
+    do! WriteRecordFixture.exec ctx WriteRecordFixture.dropDdl
+}
+
+[<Test>]
+let ``writeEntity: a nullable generated column reads back as Some where the database computed a value and None where it did not``() = task {
+    // The write record has no field for `disc` at all; the read record has to carry both cases.
+    use! ctx = WriteRecordFixture.openFresh (ResizeArray())
+
+    let! _ = insertTask ctx { into WriteRecordFixture.rows; writeEntity { WriteRecordFixture.row with price = 10m } }
+    let! _ = insertTask ctx { into WriteRecordFixture.rows; writeEntity { WriteRecordFixture.row with price = 20m } }
+
+    let! rows = WriteRecordFixture.read ctx
+    (rows |> Seq.map (fun r -> r.disc) |> List.ofSeq) =! [ Some 0.5m; None ]
+
+    do! WriteRecordFixture.exec ctx WriteRecordFixture.dropDdl
+}

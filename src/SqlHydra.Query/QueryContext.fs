@@ -333,7 +333,7 @@ type QueryContext(conn: DbConnection, emitter: ISqlEmitter) =
         match iq.Spec.InsertType with
         | InsertOrUpdateOnUnique (keyFields, updateFields) ->
             let entity = iq.Spec.Entities |> List.head
-            let propMap = FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>) |> Array.map (fun p -> p.Name, p) |> Map.ofArray
+            let propMap = FSharp.Reflection.FSharpType.GetRecordFields(entity.GetType()) |> Array.map (fun p -> p.Name, p) |> Map.ofArray
             let getColumnValue col = QueryUtils.getQueryParameterForEntity entity propMap[col]
             let existingParams = [ for i in 0 .. cmd.Parameters.Count - 1 -> cmd.Parameters[i] :> Data.IDbDataParameter ]
             let newSql, allParams =
