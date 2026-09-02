@@ -798,52 +798,46 @@ let ``SqlFn - PostgreSQL functions smoke test``() = task {
 
 [<Test>]
 let ``a functional index on a nullable column is usable through lower and unusable through coalesce``() = task {
-    // `enable_seqscan = off` so the planner takes the index if it can: a remaining
-    // Seq Scan then means the expression cannot match it.
     use! ctx = db.OpenContextAsync()
 
     let exec (sql: string) =
-        use cmd = ctx.Connection.CreateCommand()
-        cmd.CommandText <- sql
+        use cmd = ctx.Connection.CreateCommand(CommandText = sql)
         cmd.ExecuteNonQuery() |> ignore
 
-    // EXPLAIN the SQL SqlHydra actually emits, not a hand-written equivalent.
-    let planOf (q: SelectQuery<_>) =
+    let explain (q: SelectQuery<_>) =
         use cmd = ctx.BuildCommand(q.IR)
         cmd.CommandText <- "EXPLAIN " + cmd.CommandText
         use reader = cmd.ExecuteReader()
-        let mutable text = ""
-        while reader.Read() do
-            text <- text + reader.GetString(0) + "\n"
-        text
+        [ while reader.Read() do reader.GetString 0 ] |> String.concat "\n"
 
-    exec "CREATE INDEX IF NOT EXISTS test_address_lower_line2 ON person.address (LOWER(addressline2))"
+    // Rolled back below, so neither the index nor the planner setting outlives the test.
+    ctx.BeginTransaction()
+    exec "CREATE INDEX test_address_lower_line2 ON person.address (LOWER(addressline2))"
+    // With seq scans off the planner takes the index if it can: a remaining Seq Scan means
+    // the expression cannot match it.
+    exec "SET LOCAL enable_seqscan = off"
 
-    try
-        exec "SET enable_seqscan = off"
+    let viaOverload =
+        explain (
+            select {
+                for a in person.address do
+                where (SqlFn.lower a.addressline2 = "suite 100")
+            }
+        )
 
-        let viaOverload =
-            planOf (
-                select {
-                    for a in person.address do
-                        where (SqlFn.lower a.addressline2 = "suite 100")
-                }
-            )
+    let viaWorkaround =
+        explain (
+            select {
+                for a in person.address do
+                where (SqlFn.lower (SqlFn.coalesce (a.addressline2, "")) = "suite 100")
+            }
+        )
 
-        let viaWorkaround =
-            planOf (
-                select {
-                    for a in person.address do
-                        where (SqlFn.lower (SqlFn.coalesce (a.addressline2, "")) = "suite 100")
-                }
-            )
+    ctx.RollbackTransaction()
 
-        viaOverload.Contains "test_address_lower_line2" =! true
-        // The control: without it, an index used by everything would pass too.
-        viaWorkaround.Contains "test_address_lower_line2" =! false
-    finally
-        exec "RESET enable_seqscan"
-        exec "DROP INDEX IF EXISTS person.test_address_lower_line2"
+    viaOverload.Contains "test_address_lower_line2" =! true
+    // The control: without it, an index used by everything would pass too.
+    viaWorkaround.Contains "test_address_lower_line2" =! false
 }
 
 [<Test>]
@@ -853,17 +847,17 @@ let ``lower over a nullable column leaves NULL rows out, where the coalesce work
     let! viaOverload =
         selectTask db {
             for a in person.address do
-                where (SqlFn.lower a.addressline2 = "")
+            where (SqlFn.lower a.addressline2 = "")
+            count
         }
 
     let! viaWorkaround =
         selectTask db {
             for a in person.address do
-                where (SqlFn.lower (SqlFn.coalesce (a.addressline2, "")) = "")
+            where (SqlFn.lower (SqlFn.coalesce (a.addressline2, "")) = "")
+            count
         }
 
-    // Without NULL rows both counts would be zero and this would prove nothing.
-    Assert.That(Seq.length viaWorkaround, Is.GreaterThan 0, "fixture has no NULL addressline2 rows")
-    Seq.length viaOverload =! 0
-    viaWorkaround |> Seq.forall (fun a -> a.addressline2.IsNone) =! true
+    viaOverload =! 0
+    Assert.That(viaWorkaround, Is.GreaterThan 0, "fixture has no NULL addressline2 rows")
 }

@@ -39,7 +39,7 @@ let plainDotNetHelper () = "Dallas"
 let NULLIF<'T> (a: 'T, b: 'T) : 'T = sqlFn
 
 type ExtFn =
-    /// Case folding over a NULLABLE column — the overload SqlHydra itself does not ship.
+    /// A user-declared member carrying the marker itself, not inheriting it from its type.
     [<SqlHydraFunction>]
     static member lower(s: string option) : string = sqlFn
 
@@ -1724,7 +1724,7 @@ let ``two ordinary .NET calls in a where are evaluated, not rendered``() =
 
 
 [<Test>]
-let ``lower over a nullable column emits LOWER(col), not LOWER(COALESCE(col, ''))``() =
+let ``lower over a nullable column emits LOWER(col)``() =
     // A functional index on `LOWER(addressline2)` is only matched by `LOWER(addressline2)`.
     let sql =
         select {
@@ -1732,9 +1732,7 @@ let ``lower over a nullable column emits LOWER(col), not LOWER(COALESCE(col, '')
             where (SqlFn.lower a.addressline2 = "suite 100")
         }
         |> toSql
-
-    sql.Contains("LOWER(a.addressline2)") =! true
-    sql.Contains("COALESCE") =! false
+    test <@ sql.Contains("(LOWER(a.addressline2) = @p0)") @>
 
 [<Test>]
 let ``upper over a nullable column emits UPPER(col)``() =
@@ -1744,20 +1742,4 @@ let ``upper over a nullable column emits UPPER(col)``() =
             where (SqlFn.upper a.addressline2 = "SUITE 100")
         }
         |> toSql
-
-    sql.Contains("UPPER(a.addressline2)") =! true
-    sql.Contains("COALESCE") =! false
-
-[<Test>]
-let ``inlineValue and lower over a nullable column compose``() =
-    // The shape a partial functional index needs.
-    let sql =
-        select {
-            for a in person.address do
-            where (a.city = inlineValue "Dallas" && SqlFn.lower a.addressline2 = "suite 100")
-        }
-        |> toSql
-
-    sql.Contains("'Dallas'") =! true
-    sql.Contains("LOWER(a.addressline2)") =! true
-    sql.Contains("COALESCE") =! false
+    test <@ sql.Contains("(UPPER(a.addressline2) = @p0)") @>

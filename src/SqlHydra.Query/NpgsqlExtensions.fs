@@ -10,14 +10,11 @@ type SqlFn =
     static member char_length(s: string) : int = sqlFn
     static member character_length(s: string) : int = sqlFn
     static member length(s: string) : int = sqlFn
+    // `string option` overloads: `LOWER(COALESCE(col, ''))` cannot use an index on `LOWER(col)`.
     static member upper(s: string) : string = sqlFn
-    static member lower(s: string) : string = sqlFn
-
-    // A nullable column forces `lower (coalesce (col, ""))`, which emits
-    // `LOWER(COALESCE(col, ''))` and cannot match a functional index on `LOWER(col)`.
     static member upper(s: string option) : string = sqlFn
+    static member lower(s: string) : string = sqlFn
     static member lower(s: string option) : string = sqlFn
-
     static member ltrim(s: string) : string = sqlFn
     static member rtrim(s: string) : string = sqlFn
     static member btrim(s: string) : string = sqlFn
