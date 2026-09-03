@@ -4,6 +4,18 @@ open System.Data
 open SqlHydra.Domain
 open SqlHydra
 
+/// True for an ordinary base table, false for a view.
+///
+/// Npgsql's `GetSchema("Tables")` reports TABLE_TYPE straight from
+/// `information_schema.tables`, so a plain table arrives as the SQL-standard
+/// "BASE TABLE" — never the literal "table" this used to test for, which meant every
+/// PostgreSQL table was typed as a view. The `views` and `materialized views` rows
+/// appended further down carry our own "view" / "materialized view" labels instead, so
+/// testing by exclusion keeps this right regardless of how a future Npgsql spells the
+/// base-table case.
+let isBaseTableType tableType =
+    tableType <> "view" && tableType <> "materialized view"
+
 let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list) : Schema =
     use conn = new Npgsql.NpgsqlConnection(cfg.ConnectionString)
     conn.Open()
@@ -273,7 +285,7 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
                     TableSchema.Catalog = tbl.Catalog
                     TableSchema.Schema = tbl.Schema
                     TableSchema.Name = tbl.Name
-                    TableSchema.Type = if tbl.Type = "table" then TableType.Table else TableType.View
+                    TableSchema.Type = if isBaseTableType tbl.Type then TableType.Table else TableType.View
                     TableSchema.Columns = tableCols
                 }
 
@@ -337,7 +349,7 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
                     Table.Catalog = tbl.Catalog
                     Table.Schema = tbl.Schema
                     Table.Name =  tbl.Name
-                    Table.Type = if tbl.Type = "table" then TableType.Table else TableType.View
+                    Table.Type = if isBaseTableType tbl.Type then TableType.Table else TableType.View
                     Table.Columns = filteredColumns
                     Table.TotalColumns = tableCols |> List.length
                 }
