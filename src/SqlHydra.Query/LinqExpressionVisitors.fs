@@ -20,6 +20,12 @@ let isSqlHydraFunction (mi: MethodInfo) =
     mi.IsDefined(typeof<SqlHydraFunctionAttribute>, false)
     || isMarkedContainer mi.DeclaringType
 
+/// `[<SqlHydraFunction("pg_catalog.position")>]` renders that spelling; otherwise the member name upper-cased.
+let sqlFunctionName (mi: MethodInfo) =
+    match Attribute.GetCustomAttribute(mi, typeof<SqlHydraFunctionAttribute>, false) with
+    | :? SqlHydraFunctionAttribute as att when not (isNull att.SqlName) -> att.SqlName
+    | _ -> mi.Name.ToUpperInvariant()
+
 /// Aggregate method names recognized by the visitor. Used by visitSqlFn / pattern matchers.
 /// Keep in sync with QueryFunctions.Aggregates.
 let aggregateMethodNames =
@@ -695,7 +701,7 @@ let rec visitSqlFn (qualifyColumn: string -> MemberInfo -> string) (exp: Express
             $"({renderExpr m.Arguments.[0]} {op} {renderExpr m.Arguments.[1]})"
         | None ->
             let args = m.Arguments |> Seq.map renderExpr |> String.concat ", "
-            $"{m.Method.Name.ToUpperInvariant()}({args})"
+            $"{sqlFunctionName m.Method}({args})"
     | _ ->
         notImplMsg $"Expected a method call expression but got: {exp.NodeType}"
 
@@ -1321,7 +1327,7 @@ let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'
                     renderAggregate aggType (render mc.Arguments.[0])
                 | :? MethodCallExpression as mc ->
                     let args = mc.Arguments |> Seq.map render |> String.concat ", "
-                    $"{mc.Method.Name.ToUpperInvariant()}({args})"
+                    $"{sqlFunctionName mc.Method}({args})"
                 | _ ->
                     notImplMsg $"Unsupported expression in orderBy method-call: {e.NodeType}"
             let frag = render (m :> Expression)
@@ -1636,7 +1642,7 @@ let private renderSelectExpression (exp: Expression) : string * obj[] =
             try visitSqlFn qualifyColumn (mc :> Expression)
             with :? System.NotImplementedException ->
                 let args = mc.Arguments |> Seq.map render |> String.concat ", "
-                $"{mc.Method.Name.ToUpperInvariant()}({args})"
+                $"{sqlFunctionName mc.Method}({args})"
         | _ ->
             notImplMsg $"Unsupported expression in select projection: {e.NodeType}"
     let frag = render exp
