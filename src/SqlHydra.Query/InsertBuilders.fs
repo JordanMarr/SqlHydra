@@ -42,7 +42,7 @@ type InsertBuilder<'Inserted, 'InsertReturn, 'Write when 'Write :> SqlHydra.IWri
     member this.Entity (state:QuerySource<'T>, value: 'T) = 
         let spec = state |> getQueryOrDefault
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
-            { spec with Entities = [ box value ] }
+            { spec with Entities = [ QueryUtils.writeColumns (box value) ] }
             , state.TableMappings)
 
     /// Sets a single value for INSERT from the table's write record, which has no field for a read-only column.
@@ -50,7 +50,7 @@ type InsertBuilder<'Inserted, 'InsertReturn, 'Write when 'Write :> SqlHydra.IWri
     member this.WriteEntity (state: QuerySource<'Inserted>, value: 'Write) =
         let spec = state |> getQueryOrDefault
         QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>(
-            { spec with Entities = [ box value ] }
+            { spec with Entities = [ QueryUtils.writeColumns (box value) ] }
             , state.TableMappings)
 
     /// Sets multiple values for INSERT. (Must have at least one value.)
@@ -58,7 +58,7 @@ type InsertBuilder<'Inserted, 'InsertReturn, 'Write when 'Write :> SqlHydra.IWri
     member this.Entities (state:QuerySource<'T>, entities: AtLeastOne.AtLeastOne<'T>) = 
         let spec = state |> getQueryOrDefault
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
-            { spec with Entities = entities |> AtLeastOne.getSeq |> Seq.map box |> Seq.toList }
+            { spec with Entities = entities |> AtLeastOne.getSeq |> Seq.map (box >> QueryUtils.writeColumns) |> Seq.toList }
             , state.TableMappings)
 
     /// Sets multiple values for INSERT. (Should have at least one value.)
@@ -66,7 +66,7 @@ type InsertBuilder<'Inserted, 'InsertReturn, 'Write when 'Write :> SqlHydra.IWri
     member this.Entities (state:QuerySource<'T>, entities: 'T seq) = 
         let spec = state |> getQueryOrDefault
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
-            { spec with Entities = entities |> Seq.map box |> Seq.toList }
+            { spec with Entities = entities |> Seq.map (box >> QueryUtils.writeColumns) |> Seq.toList }
             , state.TableMappings)
 
     /// Sets multiple values for INSERT from the table's write record. (Should have at least one value.)
@@ -74,7 +74,7 @@ type InsertBuilder<'Inserted, 'InsertReturn, 'Write when 'Write :> SqlHydra.IWri
     member this.WriteEntities (state: QuerySource<'Inserted>, entities: 'Write seq) =
         let spec = state |> getQueryOrDefault
         QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>(
-            { spec with Entities = entities |> Seq.map box |> Seq.toList }
+            { spec with Entities = entities |> Seq.map (box >> QueryUtils.writeColumns) |> Seq.toList }
             , state.TableMappings)
 
     /// Includes a column in the insert query.

@@ -1208,14 +1208,25 @@ module WriteRecordFixture =
               Code: string
               Price: decimal
               Tax: decimal }
-            member this.ToWrite() : Invoice_write =
-                { Code = this.Code
-                  Price = this.Price }
+            interface SqlHydra.IHasWrite<Invoice_write> with
+                member this.ToWrite() =
+                    { Code = this.Code; Price = this.Price }
+            interface SqlHydra.IWriteColumns with
+                member this.WriteColumns =
+                    [
+                      { SqlHydra.WriteColumn.Name = "Code"; Value = box this.Code; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "Price"; Value = box this.Price; ProviderDbType = None }
+                    ]
 
         and [<CLIMutable>] Invoice_write =
             { Code: string
               Price: decimal }
-            interface SqlHydra.IWriteOf<Invoice>
+            interface SqlHydra.IWriteOf<Invoice> with
+                member this.WriteColumns =
+                    [
+                      { SqlHydra.WriteColumn.Name = "Code"; Value = box this.Code; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "Price"; Value = box this.Price; ProviderDbType = None }
+                    ]
 
     let invoice = table<Sales.Invoice>
 
@@ -1232,7 +1243,7 @@ let ``insertOrUpdateOnUniqueWrite: the insert names only the write record's fiel
     let query =
         insert {
             for i in WriteRecordFixture.invoice do
-            writeEntity (WriteRecordFixture.readRow.ToWrite())
+            writeEntity (toWrite WriteRecordFixture.readRow)
             insertOrUpdateOnUniqueWrite i.Code (fun w -> w.Price)
         }
     toInsertSql query =! "INSERT INTO [Sales].[Invoice] ([Code], [Price]) VALUES (@p0, @p1)"

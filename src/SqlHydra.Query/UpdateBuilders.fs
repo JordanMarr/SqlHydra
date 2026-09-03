@@ -37,7 +37,7 @@ type UpdateBuilder<'Updated, 'UpdateReturn>() =
     member this.Entity (state: QuerySource<'T>, value: 'T) =
         let query = state |> getQueryOrDefault
         QuerySource<'T, UpdateQuerySpec<'T, 'UpdateReturn>>(
-            { query with Entity = Some (box value) }
+            { query with Entity = Some (QueryUtils.writeColumns (box value)) }
             , state.TableMappings)
 
     /// Sets the entity to be updated from the table's write record, which has no field for a read-only column.
@@ -45,7 +45,7 @@ type UpdateBuilder<'Updated, 'UpdateReturn>() =
     member this.WriteEntity<'T, 'Write when 'Write :> SqlHydra.IWriteOf<'T>> (state: QuerySource<'T>, value: 'Write) =
         let query = state |> getQueryOrDefault
         QuerySource<'T, UpdateQuerySpec<'T, 'UpdateReturn>>(
-            { query with Entity = Some (box value) }
+            { query with Entity = Some (QueryUtils.writeColumns (box value)) }
             , state.TableMappings)
 
     /// Sets a property of the entity ('T) to be updated

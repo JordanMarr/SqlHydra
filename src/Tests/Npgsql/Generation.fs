@@ -234,6 +234,26 @@ let ``The read record projects its writable columns onto the write record with T
     readRecord.Contains("rate = this.rate") =! false
 
 [<Test>]
+let ``Every table record lists the columns it writes, so the query layer never reflects over it``() =
+    let readRecord = generateColumns [] |> readRecordOf "currency"
+    readRecord.Contains("interface IWriteColumns with") =! true
+    readRecord.Contains("""{ WriteColumn.Name = "name"; Value = box this.name;""") =! true
+
+[<Test>]
+let ``The read record's write columns leave out the read-only column``() =
+    let readRecord = generateColumns [ generatedRate ] |> readRecordOf "currency"
+    readRecord.Contains("interface IHasWrite<currency_write> with") =! true
+    readRecord.Contains("""{ WriteColumn.Name = "name"; Value = box this.name;""") =! true
+    readRecord.Contains("""WriteColumn.Name = "rate";""") =! false
+
+[<Test>]
+let ``The write record lists the same columns``() =
+    let writeRecord = generateColumns [ generatedRate ] |> writeRecordOf "currency"
+    writeRecord.Contains("interface IWriteOf<currency> with") =! true
+    writeRecord.Contains("""{ WriteColumn.Name = "currencycode"; Value = box this.currencycode;""") =! true
+    writeRecord.Contains("""WriteColumn.Name = "rate";""") =! false
+
+[<Test>]
 let ``A table with no read-only column gets no write record``() =
     let code = generateColumns []
     code.Contains("_write") =! false

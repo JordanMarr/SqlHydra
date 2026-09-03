@@ -1733,14 +1733,25 @@ module WriteRecordFixture =
               currencycode: string
               price: decimal
               tax: decimal }
-            member this.ToWrite() : invoice_write =
-                { currencycode = this.currencycode
-                  price = this.price }
+            interface SqlHydra.IHasWrite<invoice_write> with
+                member this.ToWrite() =
+                    { currencycode = this.currencycode; price = this.price }
+            interface SqlHydra.IWriteColumns with
+                member this.WriteColumns =
+                    [
+                      { SqlHydra.WriteColumn.Name = "currencycode"; Value = box this.currencycode; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "price"; Value = box this.price; ProviderDbType = None }
+                    ]
 
         and [<CLIMutable>] invoice_write =
             { currencycode: string
               price: decimal }
-            interface SqlHydra.IWriteOf<invoice>
+            interface SqlHydra.IWriteOf<invoice> with
+                member this.WriteColumns =
+                    [
+                      { SqlHydra.WriteColumn.Name = "currencycode"; Value = box this.currencycode; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "price"; Value = box this.price; ProviderDbType = None }
+                    ]
 
     let invoice = table<sales.invoice>
 
@@ -1755,7 +1766,7 @@ let ``writeEntity: an insert names only the write record's fields``() =
     let sql =
         insert {
             into WriteRecordFixture.invoice
-            writeEntity (WriteRecordFixture.readRow.ToWrite())
+            writeEntity (toWrite WriteRecordFixture.readRow)
         }
         |> toInsertSql
     sql =! """INSERT INTO "sales"."invoice" ("currencycode", "price") VALUES (@p0, @p1)"""
@@ -1765,29 +1776,42 @@ let ``writeEntity: an update sets only the write record's fields, with a where o
     let sql =
         update {
             for i in WriteRecordFixture.invoice do
-            writeEntity { WriteRecordFixture.readRow.ToWrite() with price = 20m }
+            writeEntity { toWrite WriteRecordFixture.readRow with price = 20m }
             where (i.id = 1)
         }
         |> toUpdateSql
     sql =! """UPDATE "sales"."invoice" SET "currencycode" = @p0, "price" = @p1 WHERE ("sales"."invoice"."id" = @p2)"""
 
 [<Test>]
-let ``entity: an insert of the read record still names every column, the database-owned ones included``() =
-    // Nothing is filtered at runtime: this is the statement PostgreSQL rejects, exactly as before.
+let ``entity: the read record's insert names only the columns the database lets it write``() =
+    // The generated record lists them; nothing is inspected at runtime.
     let sql =
         insert {
             into WriteRecordFixture.invoice
             entity WriteRecordFixture.readRow
         }
         |> toInsertSql
-    sql =! """INSERT INTO "sales"."invoice" ("id", "currencycode", "price", "tax") VALUES (@p0, @p1, @p2, @p3)"""
+    sql =! """INSERT INTO "sales"."invoice" ("currencycode", "price") VALUES (@p0, @p1)"""
+
+[<Test>]
+let ``entity: a record without write columns is reflected, so every field is named``() =
+    let row : person.address =
+        { addressid = 1; addressline1 = "a"; addressline2 = None; city = "c"; stateprovinceid = 1
+          postalcode = "p"; spatiallocation = None; rowguid = System.Guid.Empty; modifieddate = System.DateTime.MinValue }
+    let sql = insert { into person.address; entity row } |> toInsertSql
+    test <@ sql.StartsWith """INSERT INTO "person"."address" ("addressid", "addressline1", "addressline2", "city",""" @>
+
+[<Test>]
+let ``the insert spec holds each row as column and parameter pairs``() =
+    let query = insert { into WriteRecordFixture.invoice; entity WriteRecordFixture.readRow }
+    query.Spec.Entities |> List.map (List.map fst) =! [ [ "currencycode"; "price" ] ]
 
 [<Test>]
 let ``doUpdateWrite: without onConflict the query is refused as it is built``() =
     let build () =
         insert {
             for i in WriteRecordFixture.invoice do
-            writeEntity (WriteRecordFixture.readRow.ToWrite())
+            writeEntity (toWrite WriteRecordFixture.readRow)
             doUpdateWrite (fun w -> w.price)
         }
         |> ignore

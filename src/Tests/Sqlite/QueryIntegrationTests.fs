@@ -600,7 +600,12 @@ module DoUpdateWriteFixture =
         and [<CLIMutable>] sqlhydra_do_update_write_write =
             { code: string
               price: float }
-            interface SqlHydra.IWriteOf<sqlhydra_do_update_write>
+            interface SqlHydra.IWriteOf<sqlhydra_do_update_write> with
+                member this.WriteColumns =
+                    [
+                      { SqlHydra.WriteColumn.Name = "code"; Value = box this.code; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "price"; Value = box this.price; ProviderDbType = None }
+                    ]
 
     let rows = table<main.sqlhydra_do_update_write>
 

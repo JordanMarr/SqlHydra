@@ -92,8 +92,25 @@ let mkTable cfg db (table: Table) schema tableName columnName = stringBuffer {
         | _ ->
             None
 
-    let fieldName (col: Column) =
-        backticks (columnName { NamingContext.Table = table; Column = Some col })
+    let rawFieldName (col: Column) = columnName { NamingContext.Table = table; Column = Some col }
+    let fieldName (col: Column) = backticks (rawFieldName col)
+
+    /// `IWriteColumns.WriteColumns` for `columns`: what the query layer binds instead of reflecting.
+    let writeColumnsMember (columns: Column list) = stringBuffer {
+        "member this.WriteColumns ="
+        indent {
+            "["
+            indent {
+                for col in columns do
+                    let providerDbType =
+                        match col.TypeMapping.ProviderDbType with
+                        | Some providerDbType when cfg.ProviderDbTypeAttributes -> $"Some \"{providerDbType}\""
+                        | _ -> "None"
+                    $"{{ WriteColumn.Name = \"{rawFieldName col}\"; Value = box this.{fieldName col}; ProviderDbType = {providerDbType} }}"
+            }
+            "]"
+        }
+    }
 
     /// One record of a `type ... and ...` group: the read record opens it and the write record
     /// continues it, so each may name the other.
@@ -128,10 +145,11 @@ let mkTable cfg db (table: Table) schema tableName columnName = stringBuffer {
     // Only a table with something to hide needs a write record, and a record cannot be empty.
     let hasWriteRecord = not readOnlyColumns.IsEmpty && not writableColumns.IsEmpty
 
-    let toWrite =
+    let readMembers = stringBuffer {
         if hasWriteRecord then
-            stringBuffer {
-                "/// This row's writable columns, as `writeEntity` takes them."
+            $"interface IHasWrite<{backticks writeName}> with"
+            indent {
+                "/// This row's writable columns, as `writeEntity` takes them: `toWrite row`."
                 $"member this.ToWrite() : {backticks writeName} ="
                 indent {
                     "{"
@@ -142,16 +160,20 @@ let mkTable cfg db (table: Table) schema tableName columnName = stringBuffer {
                     "}"
                 }
             }
-            |> Some
-        else
-            None
+        "interface IWriteColumns with"
+        indent { writeColumnsMember writableColumns }
+    }
 
-    mkRecord OpensGroup tblName tableType.Columns toWrite
+    mkRecord OpensGroup tblName tableType.Columns (Some readMembers)
 
     if hasWriteRecord then
         ""
         $"/// The columns of `{tblName}` a caller may write; the database owns the rest."
-        mkRecord ContinuesGroup writeName writableColumns (Some $"interface IWriteOf<{backticks tblName}>")
+        let writeMembers = stringBuffer {
+            $"interface IWriteOf<{backticks tblName}> with"
+            indent { writeColumnsMember writableColumns }
+        }
+        mkRecord ContinuesGroup writeName writableColumns (Some writeMembers)
 }
 
 let generate (cfg: Config) (provider: ISqlHydraDbProvider) (db: Schema) (version: Version.InformationalVersion) (namingExtensions: IExtendNaming list) = stringBuffer {

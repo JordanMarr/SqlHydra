@@ -808,15 +808,25 @@ module WriteRecordFixture =
               price: decimal
               tax: decimal
               disc: Option<decimal> }
-            member this.ToWrite() : sqlhydra_write_record_write =
-                { code = this.code
-                  price = this.price }
+            interface SqlHydra.IHasWrite<sqlhydra_write_record_write> with
+                member this.ToWrite() =
+                    { code = this.code; price = this.price }
+            interface SqlHydra.IWriteColumns with
+                member this.WriteColumns =
+                    [
+                      { SqlHydra.WriteColumn.Name = "code"; Value = box this.code; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "price"; Value = box this.price; ProviderDbType = None }
+                    ]
 
-        /// What `SchemaTemplate` emits alongside the record above.
         and [<CLIMutable>] sqlhydra_write_record_write =
             { code: string
               price: decimal }
-            interface SqlHydra.IWriteOf<sqlhydra_write_record>
+            interface SqlHydra.IWriteOf<sqlhydra_write_record> with
+                member this.WriteColumns =
+                    [
+                      { SqlHydra.WriteColumn.Name = "code"; Value = box this.code; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "price"; Value = box this.price; ProviderDbType = None }
+                    ]
 
     let rows = table<sales.sqlhydra_write_record>
 
@@ -911,8 +921,7 @@ let ``writeEntity: an update sets only the write record's fields, with a where o
 }
 
 [<Test>]
-let ``ToWrite: a row read back round-trips through writeEntity with one field changed``() = task {
-    // The read record carries `id` and `tax`; `ToWrite()` drops them, so nothing is left to exclude.
+let ``entity: a row read back round-trips with one field changed, the database-owned columns dropped``() = task {
     use! ctx = WriteRecordFixture.openFresh (ResizeArray())
     do! WriteRecordFixture.seed ctx 10m
     let! seeded = WriteRecordFixture.read ctx
@@ -921,7 +930,29 @@ let ``ToWrite: a row read back round-trips through writeEntity with one field ch
     let! updated =
         updateTask ctx {
             for r in WriteRecordFixture.rows do
-            writeEntity { readRow.ToWrite() with price = 30m }
+            entity { readRow with price = 30m }
+            where (r.id = readRow.id)
+        }
+    updated =! 1
+
+    let! rows = WriteRecordFixture.read ctx
+    (rows |> Seq.exactlyOne) =! { readRow with price = 30m; tax = 3.0m; disc = Some 1.5m }
+
+    do! WriteRecordFixture.exec ctx WriteRecordFixture.dropDdl
+}
+
+[<Test>]
+let ``toWrite: a row read back round-trips through writeEntity with one field changed``() = task {
+    // The read record carries `id` and `tax`; `toWrite` drops them, so nothing is left to exclude.
+    use! ctx = WriteRecordFixture.openFresh (ResizeArray())
+    do! WriteRecordFixture.seed ctx 10m
+    let! seeded = WriteRecordFixture.read ctx
+    let readRow = seeded |> Seq.exactlyOne
+
+    let! updated =
+        updateTask ctx {
+            for r in WriteRecordFixture.rows do
+            writeEntity { toWrite readRow with price = 30m }
             where (r.id = readRow.id)
         }
     updated =! 1
@@ -1001,7 +1032,13 @@ module DoUpdateWriteFixture =
             { code: string
               price: decimal
               note: Option<string> }
-            interface SqlHydra.IWriteOf<sqlhydra_do_update_write>
+            interface SqlHydra.IWriteOf<sqlhydra_do_update_write> with
+                member this.WriteColumns =
+                    [
+                      { SqlHydra.WriteColumn.Name = "code"; Value = box this.code; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "price"; Value = box this.price; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "note"; Value = box this.note; ProviderDbType = None }
+                    ]
 
     let rows = table<sales.sqlhydra_do_update_write>
 
