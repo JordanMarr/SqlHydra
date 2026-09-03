@@ -6,34 +6,54 @@ open System
 /// Use `open type SqlFn` to access functions without qualification.
 [<SqlHydraFunction>]
 type SqlFn =
-    // String functions (PostgreSQL uses lowercase)
+    // String functions (PostgreSQL uses lowercase). Each NULL-propagating function has a
+    // `string option` twin returning an option, so `LOWER(col)` on a nullable column matches
+    // a functional index (`LOWER(COALESCE(col, ''))` does not) and NULL rows hydrate as None.
     static member char_length(s: string) : int = sqlFn
+    static member char_length(s: string option) : int option = sqlFn
     static member character_length(s: string) : int = sqlFn
+    static member character_length(s: string option) : int option = sqlFn
     static member length(s: string) : int = sqlFn
-    // `string option` overloads: `LOWER(COALESCE(col, ''))` cannot use an index on `LOWER(col)`.
+    static member length(s: string option) : int option = sqlFn
     static member upper(s: string) : string = sqlFn
-    static member upper(s: string option) : string = sqlFn
+    static member upper(s: string option) : string option = sqlFn
     static member lower(s: string) : string = sqlFn
-    static member lower(s: string option) : string = sqlFn
+    static member lower(s: string option) : string option = sqlFn
     static member ltrim(s: string) : string = sqlFn
+    static member ltrim(s: string option) : string option = sqlFn
     static member rtrim(s: string) : string = sqlFn
+    static member rtrim(s: string option) : string option = sqlFn
     static member btrim(s: string) : string = sqlFn
+    static member btrim(s: string option) : string option = sqlFn
     static member trim(s: string) : string = sqlFn
+    static member trim(s: string option) : string option = sqlFn
     static member substring(s: string, start: int, length: int) : string = sqlFn
+    static member substring(s: string option, start: int, length: int) : string option = sqlFn
     static member replace(s: string, from: string, ``to``: string) : string = sqlFn
+    static member replace(s: string option, from: string, ``to``: string) : string option = sqlFn
     static member position(substring: string, s: string) : int = sqlFn
+    static member position(substring: string, s: string option) : int option = sqlFn
     static member strpos(s: string, substring: string) : int = sqlFn
+    static member strpos(s: string option, substring: string) : int option = sqlFn
+    // concat / concat_ws ignore NULL arguments, so their results are never NULL: no twins.
     static member concat(s1: string, s2: string) : string = sqlFn
     static member concat(s1: string, s2: string, s3: string) : string = sqlFn
     static member concat_ws(separator: string, s1: string, s2: string) : string = sqlFn
     static member concat_ws(separator: string, s1: string, s2: string, s3: string) : string = sqlFn
     static member left(s: string, length: int) : string = sqlFn
+    static member left(s: string option, length: int) : string option = sqlFn
     static member right(s: string, length: int) : string = sqlFn
+    static member right(s: string option, length: int) : string option = sqlFn
     static member reverse(s: string) : string = sqlFn
+    static member reverse(s: string option) : string option = sqlFn
     static member repeat(s: string, count: int) : string = sqlFn
+    static member repeat(s: string option, count: int) : string option = sqlFn
     static member lpad(s: string, length: int, fill: string) : string = sqlFn
+    static member lpad(s: string option, length: int, fill: string) : string option = sqlFn
     static member rpad(s: string, length: int, fill: string) : string = sqlFn
+    static member rpad(s: string option, length: int, fill: string) : string option = sqlFn
     static member initcap(s: string) : string = sqlFn
+    static member initcap(s: string option) : string option = sqlFn
 
     // Null handling - with overloads for Option and Nullable
     static member coalesce(a: Option<'T>, b: 'T) : 'T = sqlFn

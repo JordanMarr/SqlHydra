@@ -821,7 +821,7 @@ let ``a functional index on a nullable column is usable through lower and unusab
         explain (
             select {
                 for a in person.address do
-                where (SqlFn.lower a.addressline2 = "suite 100")
+                where (SqlFn.lower a.addressline2 = Some "suite 100")
             }
         )
 
@@ -847,7 +847,7 @@ let ``lower over a nullable column leaves NULL rows out, where the coalesce work
     let! viaOverload =
         selectTask db {
             for a in person.address do
-            where (SqlFn.lower a.addressline2 = "")
+            where (SqlFn.lower a.addressline2 = Some "")
             count
         }
 
@@ -860,4 +860,39 @@ let ``lower over a nullable column leaves NULL rows out, where the coalesce work
 
     viaOverload =! 0
     Assert.That(viaWorkaround, Is.GreaterThan 0, "fixture has no NULL addressline2 rows")
+}
+
+[<Test>]
+let ``lower over a nullable column hydrates NULL rows as None``() = task {
+    let! nullRows =
+        selectTask db {
+            for a in person.address do
+            where (isNullValue a.addressline2)
+            select (SqlFn.lower a.addressline2)
+            take 1
+        }
+    let nullRow : string option = nullRows |> Seq.head
+    nullRow =! None
+
+    let! someRows =
+        selectTask db {
+            for a in person.address do
+            where (isNotNullValue a.addressline2)
+            select (SqlFn.lower a.addressline2)
+            take 1
+        }
+    let someRow : string option = someRows |> Seq.head
+    test <@ someRow.IsSome @>
+}
+
+[<Test>]
+let ``an option-returning function compared to Some binds the inner value``() = task {
+    // Previously the boxed `Some` reached the driver: "Writing values of 'FSharpOption`1' is not supported".
+    let! matches =
+        selectTask db {
+            for a in person.address do
+            where (SqlFn.nullif (a.city, "") = Some "Bothell")
+            count
+        }
+    Assert.That(matches, Is.GreaterThan 0)
 }

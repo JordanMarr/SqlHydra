@@ -705,6 +705,13 @@ let nVisitSqlFn (qualifyColumn: string -> MemberInfo -> string) (nexp: Normalize
     | NMethodCall(m, _) -> visitSqlFn qualifyColumn (m :> Expression)
     | _ -> notImplMsg $"Expected NMethodCall for SQL function"
 
+/// `fn = Some x` binds x; `fn = None` is `fn IS NULL`, since `= NULL` never matches.
+let private compareSqlFnToValue (sqlFragment: string) (comparison: string) (op: ExpressionType) (value: obj) =
+    match QueryUtils.boxValueOrOption value with
+    | :? DBNull when op = ExpressionType.Equal -> RawWhere($"{sqlFragment} IS NULL", [||])
+    | :? DBNull when op = ExpressionType.NotEqual -> RawWhere($"{sqlFragment} IS NOT NULL", [||])
+    | v -> RawWhere($"{sqlFragment} {comparison} ?", [| v |])
+
 let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -> MemberInfo -> string) : WhereClause =
     let (|NColumn|_|) (nexp: NormalizedExpression) =
         match nexp with
@@ -977,13 +984,12 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
             // SQL function compared to value
             | NMethodCall (m, _), NValue value when isSqlHydraFunction m.Method ->
                 let sqlFragment = nVisitSqlFn qualifyColumn left
-                RawWhere($"{sqlFragment} {comparison} ?", [| value |])
+                compareSqlFnToValue sqlFragment comparison op value
 
             // Value compared to SQL function
             | NValue value, NMethodCall (m, _) when isSqlHydraFunction m.Method ->
                 let sqlFragment = nVisitSqlFn qualifyColumn right
-                let reversedComparison = getReverseComparison op
-                RawWhere($"{sqlFragment} {reversedComparison} ?", [| value |])
+                compareSqlFnToValue sqlFragment (getReverseComparison op) op value
 
             // SQL function compared to column
             | NMethodCall (m, _), NColumn (p, _) when isSqlHydraFunction m.Method ->

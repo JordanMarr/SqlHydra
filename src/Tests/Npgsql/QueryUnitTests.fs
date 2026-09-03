@@ -1729,7 +1729,7 @@ let ``lower over a nullable column emits LOWER(col)``() =
     let sql =
         select {
             for a in person.address do
-            where (SqlFn.lower a.addressline2 = "suite 100")
+            where (SqlFn.lower a.addressline2 = Some "suite 100")
         }
         |> toSql
     test <@ sql.Contains("(LOWER(a.addressline2) = @p0)") @>
@@ -1739,7 +1739,58 @@ let ``upper over a nullable column emits UPPER(col)``() =
     let sql =
         select {
             for a in person.address do
-            where (SqlFn.upper a.addressline2 = "SUITE 100")
+            where (SqlFn.upper a.addressline2 = Some "SUITE 100")
         }
         |> toSql
     test <@ sql.Contains("(UPPER(a.addressline2) = @p0)") @>
+
+[<Test>]
+let ``lower over a nullable column compared to None emits IS NULL``() =
+    let sql =
+        select {
+            for a in person.address do
+            where (SqlFn.lower a.addressline2 = None)
+        }
+        |> toSql
+    test <@ sql.Contains("(LOWER(a.addressline2) IS NULL)") @>
+
+[<Test>]
+let ``nullable string functions compose``() =
+    let sql =
+        select {
+            for a in person.address do
+            where (SqlFn.length (SqlFn.ltrim (SqlFn.lower a.addressline2)) = Some 9)
+        }
+        |> toSql
+    test <@ sql.Contains("(LENGTH(LTRIM(LOWER(a.addressline2))) = @p0)") @>
+
+[<Test>]
+let ``an option-returning function compared to None emits IS NULL``() =
+    // `= @p0` with a NULL parameter matches no rows.
+    let sql =
+        select {
+            for a in person.address do
+            where (SqlFn.nullif (a.city, "") = None)
+        }
+        |> toSql
+    test <@ sql.Contains("(NULLIF(a.city, '') IS NULL)") @>
+
+[<Test>]
+let ``every string option overload is the option-lifting of a string sibling``() =
+    let isOption (t: Type) = t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<option<_>>
+    let liftedTwins =
+        typeof<SqlFn>.GetMethods(Reflection.BindingFlags.Public ||| Reflection.BindingFlags.Static)
+        |> Array.filter (fun m -> m.GetParameters() |> Array.exists (fun p -> p.ParameterType = typeof<string option>))
+    test <@ liftedTwins.Length > 0 @>
+    for twin in liftedTwins do
+        let twinParams = twin.GetParameters() |> Array.map (fun p -> p.ParameterType)
+        let siblingParams =
+            twinParams |> Array.map (fun t -> if t = typeof<string option> then typeof<string> else t)
+        let sibling = typeof<SqlFn>.GetMethod(twin.Name, siblingParams)
+        Assert.That(sibling, Is.Not.Null, $"{twin.Name} has no `string` sibling with the same shape")
+        Assert.That(
+            (twinParams |> Array.filter ((=) typeof<string option>)).Length, Is.EqualTo 1,
+            $"{twin.Name}: lift exactly one parameter")
+        Assert.That(
+            twin.ReturnType, Is.EqualTo(typedefof<option<_>>.MakeGenericType sibling.ReturnType),
+            $"{twin.Name}: NULL in, NULL out, so the return type must be option")
