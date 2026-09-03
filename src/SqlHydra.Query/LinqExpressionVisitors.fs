@@ -711,8 +711,15 @@ let nVisitSqlFn (qualifyColumn: string -> MemberInfo -> string) (nexp: Normalize
     | NMethodCall(m, _) -> visitSqlFn qualifyColumn (m :> Expression)
     | _ -> notImplMsg $"Expected NMethodCall for SQL function"
 
-/// `fn = None` is `fn IS NULL`, since `= NULL` never matches; `fn = Some x` binds x (createParam unwraps it).
-let private compareSqlFnToValue (sqlFragment: string) (op: ExpressionType) (value: obj) =
+/// `x = None` (a null) is `x IS NULL`, since `= NULL` never matches; `x = Some v` binds v.
+/// A column binds a parameter typed from its member; a rendered fragment binds a raw one.
+let private compareColumnToValue (fqCol: string) (column: MemberInfo) (op: ComparisonOp) (value: obj) =
+    match value, op with
+    | null, Eq -> IsNull fqCol
+    | null, NotEq -> IsNotNull fqCol
+    | _ -> Compare(fqCol, op, Parameter (QueryUtils.getQueryParameterForValue column value))
+
+let private compareFragmentToValue (sqlFragment: string) (op: ExpressionType) (value: obj) =
     match value, op with
     | null, ExpressionType.Equal -> RawWhere($"{sqlFragment} IS NULL", [||])
     | null, ExpressionType.NotEqual -> RawWhere($"{sqlFragment} IS NOT NULL", [||])
@@ -990,12 +997,12 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
             // SQL function compared to value
             | NMethodCall (m, _), NValue value when isSqlHydraFunction m.Method ->
                 let sqlFragment = nVisitSqlFn qualifyColumn left
-                compareSqlFnToValue sqlFragment op value
+                compareFragmentToValue sqlFragment op value
 
             // Value compared to SQL function
             | NValue value, NMethodCall (m, _) when isSqlHydraFunction m.Method ->
                 let sqlFragment = nVisitSqlFn qualifyColumn right
-                compareSqlFnToValue sqlFragment (reverseComparison op) value
+                compareFragmentToValue sqlFragment (reverseComparison op) value
 
             // SQL function compared to column
             | NMethodCall (m, _), NColumn (p, _) when isSqlHydraFunction m.Method ->
@@ -1033,13 +1040,7 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
                     // everything also swallowed the sqlFn stub, losing the message it carries.
                     try Some (nEvaluate right) with :? NotImplementedException -> None
                 match valueResult with
-                | Some value ->
-                    match value with
-                    | null when op = ExpressionType.Equal -> IsNull(fqCol)
-                    | null when op = ExpressionType.NotEqual -> IsNotNull(fqCol)
-                    | _ ->
-                        let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
-                        Compare(fqCol, compOp, Parameter queryParameter)
+                | Some value -> compareColumnToValue fqCol p.Member compOp value
                 | None ->
                     match right with
                     | NMemberAccess(_, m) when m.Expression <> null ->
@@ -1062,13 +1063,7 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
                         let lhsCol = qualifyColumn lhsAlias m.Member
                         CompareColumns(lhsCol, compOp, fqCol)
                     | _ -> notImplMsg $"Unable to evaluate where LHS: {left}"
-                | Some value ->
-                match value with
-                | null when reversedOp = Eq -> IsNull(fqCol)
-                | null when reversedOp = NotEq -> IsNotNull(fqCol)
-                | _ ->
-                    let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
-                    Compare(fqCol, reversedOp, Parameter queryParameter)
+                | Some value -> compareColumnToValue fqCol p.Member reversedOp value
 
             | NParameter p, _ | _, NParameter p when p.Type |> isOptionType ->
                 let innerType = p.Type.GetGenericArguments().[0]
@@ -1102,21 +1097,13 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
                 | Some ml, None ->
                     let fq = qualifyColumn (visitAlias ml.Expression) ml.Member
                     match tryEval right with
-                    | Some null when op = ExpressionType.Equal -> IsNull(fq)
-                    | Some null when op = ExpressionType.NotEqual -> IsNotNull(fq)
-                    | Some v ->
-                        let qp = QueryUtils.getQueryParameterForValue ml.Member v
-                        Compare(fq, compOp, Parameter qp)
+                    | Some v -> compareColumnToValue fq ml.Member compOp v
                     | None -> notImplMsg $"[where-cmp] cannot eval RHS: {right}"
                 | None, Some mr ->
                     let fq = qualifyColumn (visitAlias mr.Expression) mr.Member
                     let rev = reverseComparisonOp compOp
                     match tryEval left with
-                    | Some null when op = ExpressionType.Equal -> IsNull(fq)
-                    | Some null when op = ExpressionType.NotEqual -> IsNotNull(fq)
-                    | Some v ->
-                        let qp = QueryUtils.getQueryParameterForValue mr.Member v
-                        Compare(fq, rev, Parameter qp)
+                    | Some v -> compareColumnToValue fq mr.Member rev v
                     | None -> notImplMsg $"[where-cmp] cannot eval LHS: {left}"
                 | None, None ->
                     notImplMsg $"[where-cmp-fallthrough] op={compOp}\nleft={left}\nright={right}"
@@ -1228,8 +1215,7 @@ let visitHaving<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool
                 RawWhere($"{renderAggregate aggType lt} {comparison} {rt}", [||])
             | NAggregateColumn (aggType, (p, _)), NValue value ->
                 let alias = visitAlias p.Expression
-                let lt = qualifyColumn alias p.Member
-                RawWhere($"{renderAggregate aggType lt} {comparison} ?", [|value|])
+                compareFragmentToValue (renderAggregate aggType (qualifyColumn alias p.Member)) op value
             | NColumn (p1, _), NColumn (p2, _) ->
                 let lt =
                     let alias = visitAlias p1.Expression
@@ -1239,17 +1225,8 @@ let visitHaving<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool
                     qualifyColumn alias p2.Member
                 CompareColumns(lt, compOp, rt)
             | NColumn (p, _), NValue value ->
-                match op, value with
-                | ExpressionType.Equal, null ->
-                    let alias = visitAlias p.Expression
-                    IsNull(qualifyColumn alias p.Member)
-                | ExpressionType.NotEqual, null ->
-                    let alias = visitAlias p.Expression
-                    IsNotNull(qualifyColumn alias p.Member)
-                | _ ->
-                    let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
-                    let alias = visitAlias p.Expression
-                    Compare(qualifyColumn alias p.Member, compOp, Parameter queryParameter)
+                let alias = visitAlias p.Expression
+                compareColumnToValue (qualifyColumn alias p.Member) p.Member compOp value
             | NValue _, NValue _ ->
                 notImplMsg("Value to value comparisons are not currently supported. Ex: having (1 = 1)")
             | _ ->
@@ -1436,10 +1413,10 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
                 RawWhere($"{nVisitSqlFn qualifyColumn left} {comparison} {fqCol}", [||])
 
             | NMethodCall (m, _), NValue value when isSqlHydraFunction m.Method ->
-                compareSqlFnToValue (nVisitSqlFn qualifyColumn left) op value
+                compareFragmentToValue (nVisitSqlFn qualifyColumn left) op value
 
             | NValue value, NMethodCall (m, _) when isSqlHydraFunction m.Method ->
-                compareSqlFnToValue (nVisitSqlFn qualifyColumn right) (reverseComparison op) value
+                compareFragmentToValue (nVisitSqlFn qualifyColumn right) (reverseComparison op) value
 
             | NMethodCall (m1, _), NMethodCall (m2, _) when
                 isSqlHydraFunction m1.Method && isSqlHydraFunction m2.Method ->
@@ -1459,24 +1436,14 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
             | NColumn (p, _), NValue value ->
                 let alias = visitAlias p.Expression
                 let fqCol = qualifyColumn alias p.Member
-                match value with
-                | null when op = ExpressionType.Equal -> IsNull(fqCol)
-                | null when op = ExpressionType.NotEqual -> IsNotNull(fqCol)
-                | _ ->
-                    let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
-                    Compare(fqCol, compOp, Parameter queryParameter)
+                compareColumnToValue fqCol p.Member compOp value
 
             // Handle value to column comparisons (reversed)
             | NValue value, NColumn (p, _) ->
                 let alias = visitAlias p.Expression
                 let fqCol = qualifyColumn alias p.Member
                 let reversedOp = reverseComparisonOp compOp
-                match value with
-                | null when reversedOp = Eq -> IsNull(fqCol)
-                | null when reversedOp = NotEq -> IsNotNull(fqCol)
-                | _ ->
-                    let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
-                    Compare(fqCol, reversedOp, Parameter queryParameter)
+                compareColumnToValue fqCol p.Member reversedOp value
 
             // Option.Value / Nullable.Value column compared to another column → CompareColumns.
             | NColumn (p, ext), NColumn (p2, _) when ext = ExtProperty.Value ->
@@ -1513,12 +1480,7 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
                 let alias = visitAlias p.Expression
                 let m = tryGetMember p
                 let fqCol = qualifyColumn alias m.Value.Member
-                match value with
-                | null when op = ExpressionType.Equal -> IsNull(fqCol)
-                | null when op = ExpressionType.NotEqual -> IsNotNull(fqCol)
-                | _ ->
-                    let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
-                    Compare(fqCol, compOp, Parameter queryParameter)
+                compareColumnToValue fqCol p.Member compOp value
 
             // Column compared to a non-NValue expression. Could be either:
             //   (a) a captured local / static member — compile-and-eval to a parameter, or
@@ -1549,12 +1511,7 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
                     with :? NotImplementedException -> tryColumnRef () |> Option.map Choice2Of2
                 match result with
                 | Some (Choice1Of2 value) ->
-                    match value with
-                    | null when op = ExpressionType.Equal -> IsNull(fqCol)
-                    | null when op = ExpressionType.NotEqual -> IsNotNull(fqCol)
-                    | _ ->
-                        let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
-                        Compare(fqCol, compOp, Parameter queryParameter)
+                    compareColumnToValue fqCol p.Member compOp value
                 | Some (Choice2Of2 rhsCol) ->
                     CompareColumns(fqCol, compOp, rhsCol)
                 | None ->
@@ -1584,12 +1541,7 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
                 let reversedOp = reverseComparisonOp compOp
                 match result with
                 | Some (Choice1Of2 value) ->
-                    match value with
-                    | null when reversedOp = Eq -> IsNull(fqCol)
-                    | null when reversedOp = NotEq -> IsNotNull(fqCol)
-                    | _ ->
-                        let queryParameter = QueryUtils.getQueryParameterForValue p.Member value
-                        Compare(fqCol, reversedOp, Parameter queryParameter)
+                    compareColumnToValue fqCol p.Member reversedOp value
                 | Some (Choice2Of2 lhsCol) ->
                     CompareColumns(lhsCol, compOp, fqCol)
                 | None ->
