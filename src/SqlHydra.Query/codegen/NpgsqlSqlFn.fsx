@@ -164,6 +164,8 @@ let memberLines (m: Member) =
     [ yield! line m.Entry.Params m.Ret
       if m.Overload.Strict then
           for i in 0 .. m.Entry.Params.Length - 1 do
+              let lifted = fst m.Entry.Params.[i]
+              yield $"    /// NULL `{lifted}` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`."
               yield! line (m.Entry.Params |> List.mapi (fun j (n, t) -> if i = j then n, $"{t} option" else n, t)) $"{m.Ret} option" ]
 
 let header = "    // <generated> by codegen/NpgsqlSqlFn.fsx from pg_proc; edit the allowlist, not this block."
