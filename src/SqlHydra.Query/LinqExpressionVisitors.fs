@@ -705,6 +705,13 @@ let nVisitSqlFn (qualifyColumn: string -> MemberInfo -> string) (nexp: Normalize
     | NMethodCall(m, _) -> visitSqlFn qualifyColumn (m :> Expression)
     | _ -> notImplMsg $"Expected NMethodCall for SQL function"
 
+/// `fn = None` is `fn IS NULL`, since `= NULL` never matches; `fn = Some x` binds x (createParam unwraps it).
+let private compareSqlFnToValue (sqlFragment: string) (op: ExpressionType) (value: obj) =
+    match value, op with
+    | null, ExpressionType.Equal -> RawWhere($"{sqlFragment} IS NULL", [||])
+    | null, ExpressionType.NotEqual -> RawWhere($"{sqlFragment} IS NOT NULL", [||])
+    | _ -> RawWhere($"{sqlFragment} {getComparison op} ?", [| value |])
+
 let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>>) (qualifyColumn: string -> MemberInfo -> string) : WhereClause =
     let (|NColumn|_|) (nexp: NormalizedExpression) =
         match nexp with
@@ -977,13 +984,12 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
             // SQL function compared to value
             | NMethodCall (m, _), NValue value when isSqlHydraFunction m.Method ->
                 let sqlFragment = nVisitSqlFn qualifyColumn left
-                RawWhere($"{sqlFragment} {comparison} ?", [| value |])
+                compareSqlFnToValue sqlFragment op value
 
             // Value compared to SQL function
             | NValue value, NMethodCall (m, _) when isSqlHydraFunction m.Method ->
                 let sqlFragment = nVisitSqlFn qualifyColumn right
-                let reversedComparison = getReverseComparison op
-                RawWhere($"{sqlFragment} {reversedComparison} ?", [| value |])
+                compareSqlFnToValue sqlFragment (reverseComparison op) value
 
             // SQL function compared to column
             | NMethodCall (m, _), NColumn (p, _) when isSqlHydraFunction m.Method ->
@@ -1301,7 +1307,7 @@ let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'
                     render u.Operand
                 | :? MethodCallExpression as mc when mc.Method.Name = nameof inlineValue && mc.Arguments.Count = 1 ->
                     let value = compileAndEval mc.Arguments.[0]
-                    parms.Add(if isNull value then box System.DBNull.Value else value)
+                    parms.Add value
                     "?"
                 | :? MemberExpression as mem when mem.Expression <> null ->
                     let alias = visitAlias mem.Expression
@@ -1424,10 +1430,10 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
                 RawWhere($"{nVisitSqlFn qualifyColumn left} {comparison} {fqCol}", [||])
 
             | NMethodCall (m, _), NValue value when isSqlHydraFunction m.Method ->
-                RawWhere($"{nVisitSqlFn qualifyColumn left} {comparison} ?", [| value |])
+                compareSqlFnToValue (nVisitSqlFn qualifyColumn left) op value
 
             | NValue value, NMethodCall (m, _) when isSqlHydraFunction m.Method ->
-                RawWhere($"{nVisitSqlFn qualifyColumn right} {getReverseComparison op} ?", [| value |])
+                compareSqlFnToValue (nVisitSqlFn qualifyColumn right) (reverseComparison op) value
 
             | NMethodCall (m1, _), NMethodCall (m2, _) when
                 isSqlHydraFunction m1.Method && isSqlHydraFunction m2.Method ->
@@ -1603,7 +1609,7 @@ let private renderSelectExpression (exp: Expression) : string * obj[] =
             render u.Operand
         | :? MethodCallExpression as mc when mc.Method.Name = nameof inlineValue && mc.Arguments.Count = 1 ->
             let value = compileAndEval mc.Arguments.[0]
-            parms.Add(if isNull value then box System.DBNull.Value else value)
+            parms.Add value
             "?"
         | :? MemberExpression as mem when mem.Expression <> null ->
             let alias = visitAlias mem.Expression

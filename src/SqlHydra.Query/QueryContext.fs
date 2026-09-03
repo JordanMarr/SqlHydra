@@ -36,7 +36,8 @@ type QueryContext(conn: DbConnection, emitter: ISqlEmitter) =
             setProviderDbType param "SqlDbType" type'
         | _ -> ()
 
-    /// Creates a DbParameter from a name and value, handling QueryParameter type and DateOnly/TimeOnly conversion.
+    /// Creates a DbParameter from a name and value. A raw value (`RawWhere`, `inlineValue`, `havingRaw`)
+    /// is unwrapped like a column value: `Some x` binds x, `None` and null bind DBNull.
     let createParam (cmd: DbCommand) (name: string) (value: obj) =
         let p = cmd.CreateParameter()
         p.ParameterName <- name
@@ -45,7 +46,7 @@ type QueryContext(conn: DbConnection, emitter: ISqlEmitter) =
             | :? QueryParameter as qp ->
                 do setParameterDbType p qp
                 qp.Value
-            | _ -> value
+            | _ -> QueryUtils.boxValueOrOption value
             |> QueryUtils.convertIfDateOnlyTimeOnly
         p :> Data.IDbDataParameter
 
