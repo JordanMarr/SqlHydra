@@ -1,0 +1,42 @@
+# PostgreSQL functions on SqlFn: one line per overload. Shapes and NULL behaviour come from pg_proc (see NpgsqlSqlFn.fsx).
+char_length s:string
+character_length s:string
+length s:string
+length bytes:byte[]
+upper s:string
+lower s:string
+ltrim s:string
+ltrim s:string chars:string
+rtrim s:string
+rtrim s:string chars:string
+btrim s:string
+btrim s:string chars:string
+trim=btrim s:string
+trim=btrim s:string chars:string
+substring s:string start:int
+substring s:string start:int length:int
+substring s:string pattern:string
+replace s:string from:string ``to``:string
+position s:string substring:string
+strpos s:string substring:string
+left s:string length:int
+right s:string length:int
+reverse s:string
+repeat s:string count:int
+lpad s:string length:int
+lpad s:string length:int fill:string
+rpad s:string length:int
+rpad s:string length:int fill:string
+initcap s:string
+concat s1:string s2:string
+concat s1:string s2:string s3:string
+concat_ws separator:string s1:string s2:string
+concat_ws separator:string s1:string s2:string s3:string
+now
+extract field:string source:DateTime
+date_trunc field:string source:DateTime
+date_part field:string source:DateTime
+age timestamp:DateTime
+age timestamp1:DateTime timestamp2:DateTime
+make_date year:int month:int day:int
+make_time hour:int minute:int second:float
