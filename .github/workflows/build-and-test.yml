@@ -39,6 +39,10 @@ jobs:
       - name: Start containers
         working-directory: src/.devcontainer
         run: docker compose up -d --wait mssql postgresql orcl
+      - name: Build
+        working-directory: src/
+        run: dotnet build --no-restore
+      # After Build: the sqlite tomls load a codegen extension from the compiled Tests assembly.
       - name: Regenerate AdventureWorks schemas
         working-directory: src/Build
         run: dotnet run -- Regen
@@ -49,9 +53,6 @@ jobs:
             echo "::error::Generated AdventureWorks files are stale. Run 'dotnet run -- Regen' from src/Build (or src/Tests/regen-all.bat) and commit the result."
             exit 1
           fi
-      - name: Build
-        working-directory: src/
-        run: dotnet build --no-restore
       - name: Test net8.0
         working-directory: src/
         run: dotnet test --framework net8.0
