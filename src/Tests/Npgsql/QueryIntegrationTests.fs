@@ -795,6 +795,129 @@ let ``SqlFn - PostgreSQL functions smoke test``() = task {
     Assert.That(middleName, Is.Not.Null)
 }
 
+
+[<Test>]
+let ``a functional index on a nullable column is usable through lower and unusable through coalesce``() = task {
+    use! ctx = db.OpenContextAsync()
+
+    let exec (sql: string) =
+        use cmd = ctx.Connection.CreateCommand(CommandText = sql)
+        cmd.ExecuteNonQuery() |> ignore
+
+    let explain (q: SelectQuery<_>) =
+        use cmd = ctx.BuildCommand(q.IR)
+        cmd.CommandText <- "EXPLAIN " + cmd.CommandText
+        use reader = cmd.ExecuteReader()
+        [ while reader.Read() do reader.GetString 0 ] |> String.concat "\n"
+
+    // Rolled back below, so neither the index nor the planner setting outlives the test.
+    ctx.BeginTransaction()
+    exec "CREATE INDEX test_address_lower_line2 ON person.address (LOWER(addressline2))"
+    // With seq scans off the planner takes the index if it can: a remaining Seq Scan means
+    // the expression cannot match it.
+    exec "SET LOCAL enable_seqscan = off"
+
+    let viaOverload =
+        explain (
+            select {
+                for a in person.address do
+                where (SqlFn.lower a.addressline2 = Some "suite 100")
+            }
+        )
+
+    let viaWorkaround =
+        explain (
+            select {
+                for a in person.address do
+                where (SqlFn.lower (SqlFn.coalesce (a.addressline2, "")) = "suite 100")
+            }
+        )
+
+    ctx.RollbackTransaction()
+
+    viaOverload.Contains "test_address_lower_line2" =! true
+    // The control: without it, an index used by everything would pass too.
+    viaWorkaround.Contains "test_address_lower_line2" =! false
+}
+
+[<Test>]
+let ``lower over a nullable column leaves NULL rows out, where the coalesce workaround pulls them in``() = task {
+    // A different answer, not just a different plan: COALESCE maps NULL to '', so every
+    // NULL row matches a search for "".
+    let! viaOverload =
+        selectTask db {
+            for a in person.address do
+            where (SqlFn.lower a.addressline2 = Some "")
+            count
+        }
+
+    let! viaWorkaround =
+        selectTask db {
+            for a in person.address do
+            where (SqlFn.lower (SqlFn.coalesce (a.addressline2, "")) = "")
+            count
+        }
+
+    viaOverload =! 0
+    Assert.That(viaWorkaround, Is.GreaterThan 0, "fixture has no NULL addressline2 rows")
+}
+
+[<Test>]
+let ``lower over a nullable column hydrates NULL rows as None``() = task {
+    let! nullRows =
+        selectTask db {
+            for a in person.address do
+            where (isNullValue a.addressline2)
+            select (SqlFn.lower a.addressline2)
+            take 1
+        }
+    (Seq.exactlyOne nullRows : string option) =! None
+
+    let! someRows =
+        selectTask db {
+            for a in person.address do
+            where (isNotNullValue a.addressline2)
+            select (SqlFn.lower a.addressline2)
+            take 1
+        }
+    test <@ (Seq.exactlyOne someRows).IsSome @>
+}
+
+[<Test>]
+let ``an option-returning function compared to Some binds the inner value``() = task {
+    // Previously the boxed `Some` reached the driver: "Writing values of 'FSharpOption`1' is not supported".
+    let! matches =
+        selectTask db {
+            for a in person.address do
+            where (SqlFn.nullif (a.city, "") = Some "Bothell")
+            count
+        }
+    Assert.That(matches, Is.GreaterThan 0)
+}
+
+[<Test>]
+let ``a SQL function compared to Some in a join predicate binds the inner value``() = task {
+    let! rows =
+        selectTask db {
+            for a in person.address do
+            join' a2 in person.address; on' (SqlFn.lower a2.addressline2 = Some "suite 100")
+            select a.addressid
+            take 1
+        }
+    Assert.That(Seq.length rows, Is.LessThanOrEqualTo 1)
+}
+
+[<Test>]
+let ``a keyword-named function executes schema-qualified``() = task {
+    let! matches =
+        selectTask db {
+            for a in person.address do
+            where (SqlFn.position (a.city, "a") > 0)
+            count
+        }
+    Assert.That(matches, Is.GreaterThan 0)
+}
+
 // The write record end to end: what the generator emits for a table with read-only columns,
 // written through `writeEntity` and read back as the read record.
 

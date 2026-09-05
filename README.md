@@ -388,6 +388,29 @@ type TextFn =
 >
 > A `sqlFn` body has no runtime meaning, so executing one raises `SqlFunctionNotRenderedException` - which is what a missing marker gets you, rather than a query that quietly compares your column to `NULL`. If you use a function name the database does not have, you get a database error at runtime.
 
+**PostgreSQL functions are generated from the catalog.** The members of the Npgsql `SqlFn` between `// <generated>` and `// </generated>` come from `pg_proc`: argument and return types, and `proisstrict` (NULL in means NULL out), which gives every parameter of a strict function a `'T option` twin. `src/SqlHydra.Query/codegen/NpgsqlSqlFn.allowlist` lists one overload per line and chooses which functions appear; the catalog decides their shape. Each member is executed once at generation, so a function that cannot be called as `NAME(args)` is never emitted, and a keyword-named one such as `position` renders schema-qualified.
+
+```
+lpad s:string length:int fill:string     # the (text, integer, text) overload, with parameter names
+trim=btrim s:string                      # `trim` is parser sugar; its shape lives under btrim
+concat s1:string s2:string               # a variadic function takes whatever list you write
+```
+
+```bash
+dotnet fsi src/SqlHydra.Query/codegen/NpgsqlSqlFn.fsx           # rewrites the region
+dotnet fsi src/SqlHydra.Query/codegen/NpgsqlSqlFn.fsx --check   # CI: fails when the region is stale
+```
+
+The same script emits a type for your own database, extensions included:
+
+```bash
+dotnet fsi NpgsqlSqlFn.fsx --conn "Host=...;Database=app" --allowlist app-fns.txt \
+    --schema public --map vector=Pgvector.Vector \
+    --module App.Sql --type PgFn --out src/App/PgFn.fs
+```
+
+Then `open type PgFn` next to `SqlFn`. The query visitor only needs `[<SqlHydraFunction>]` and the member name, so a generated type is treated exactly like the built-in one.
+
 ### Subqueries
 
 ```fsharp

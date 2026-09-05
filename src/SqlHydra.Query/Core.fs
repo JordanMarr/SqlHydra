@@ -195,7 +195,7 @@ module internal QueryUtils =
         | _ -> value
 
     /// Boxes values (and option values)
-    let private boxValueOrOption (value: obj) =
+    let boxValueOrOption (value: obj) =
         if isNull value then
             box System.DBNull.Value
         else

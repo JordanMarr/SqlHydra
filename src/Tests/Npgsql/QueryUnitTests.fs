@@ -39,7 +39,7 @@ let plainDotNetHelper () = "Dallas"
 let NULLIF<'T> (a: 'T, b: 'T) : 'T = sqlFn
 
 type ExtFn =
-    /// Case folding over a NULLABLE column — the overload SqlHydra itself does not ship.
+    /// A user-declared member carrying the marker itself, not inheriting it from its type.
     [<SqlHydraFunction>]
     static member lower(s: string option) : string = sqlFn
 
@@ -1721,6 +1721,68 @@ let ``two ordinary .NET calls in a where are evaluated, not rendered``() =
         |> ignore
     let ex = Assert.Throws<NotImplementedException>(fun () -> build ())
     test <@ ex.Message.Contains("Value to value") @>
+
+
+[<Test>]
+let ``lower over a nullable column emits LOWER(col)``() =
+    // A functional index on `LOWER(addressline2)` is only matched by `LOWER(addressline2)`.
+    let sql =
+        select {
+            for a in person.address do
+            where (SqlFn.lower a.addressline2 = Some "suite 100")
+        }
+        |> toSql
+    test <@ sql.Contains("(LOWER(a.addressline2) = @p0)") @>
+
+[<Test>]
+let ``nullable string functions compose``() =
+    let sql =
+        select {
+            for a in person.address do
+            where (SqlFn.length (SqlFn.ltrim (SqlFn.lower a.addressline2)) = Some 9)
+        }
+        |> toSql
+    test <@ sql.Contains("(LENGTH(LTRIM(LOWER(a.addressline2))) = @p0)") @>
+
+[<Test>]
+let ``an option-returning function compared to None emits IS NULL``() =
+    // `= @p0` with a NULL parameter matches no row.
+    let sql =
+        select {
+            for a in person.address do
+            where (SqlFn.nullif (a.city, "") = None && SqlFn.lower a.addressline2 <> None && None = SqlFn.upper a.addressline2)
+        }
+        |> toSql
+    test <@ sql.Contains("(NULLIF(a.city, '') IS NULL)") @>
+    test <@ sql.Contains("(LOWER(a.addressline2) IS NOT NULL)") @>
+    test <@ sql.Contains("(UPPER(a.addressline2) IS NULL)") @>
+
+[<Test>]
+let ``a keyword-named function renders schema-qualified``() =
+    let sql =
+        select {
+            for a in person.address do
+            where (SqlFn.position (a.city, "a") > 0)
+        }
+        |> toSql
+    test <@ sql.Contains("(pg_catalog.position(a.city, 'a') > @p0)") @>
+
+[<Test>]
+let ``every option overload is the option-lifting of one sibling``() =
+    let isOption (t: Type) = t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<option<_>>
+    let twins =
+        typeof<SqlFn>.GetMethods(Reflection.BindingFlags.Public ||| Reflection.BindingFlags.Static)
+        // `coalesce(Option<'T>, 'T)` is hand-written null handling, not a lifted twin.
+        |> Array.filter (fun m -> not m.IsGenericMethodDefinition && m.GetParameters() |> Array.exists (fun p -> isOption p.ParameterType))
+    test <@ twins.Length > 0 @>
+    for twin in twins do
+        let twinParams = twin.GetParameters() |> Array.map (fun p -> p.ParameterType)
+        let siblingParams = twinParams |> Array.map (fun t -> if isOption t then t.GenericTypeArguments.[0] else t)
+        let sibling = typeof<SqlFn>.GetMethod(twin.Name, siblingParams)
+        Assert.That(sibling, Is.Not.Null, $"{twin.Name} has no sibling with the same shape")
+        Assert.That((twinParams |> Array.filter isOption).Length, Is.EqualTo 1, $"{twin.Name}: lift exactly one parameter")
+        Assert.That(twin.ReturnType, Is.EqualTo(typedefof<option<_>>.MakeGenericType sibling.ReturnType),
+            $"{twin.Name}: NULL in, NULL out, so the return type must be option")
 
 // Fixture standing in for generated output: `id` is GENERATED ALWAYS AS IDENTITY and
 // `tax` is GENERATED ALWAYS AS (price * 0.1) STORED. PostgreSQL rejects naming either.
