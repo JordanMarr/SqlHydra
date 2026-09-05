@@ -42,6 +42,14 @@ module Table =
         let tables = Map [Root, { Name = ent.Name; Schema = ent.DeclaringType.Name}]
         QuerySource<'T>(tables)
 
+    /// Maps the generated left-view record 'View to the physical table of its base record
+    /// 'Table. Use it as the source of a `leftJoin`: the ON clause binds plain 'Table columns
+    /// (no `.Value`), and downstream the joined row is 'View, whose columns are each nullable.
+    let leftTable<'Table, 'View when 'View :> SqlHydra.ILeftViewOf<'Table>> : LeftViewQuerySource<'Table, 'View> =
+        let ent = typeof<'Table>
+        let tables = Map [Root, { Name = ent.Name; Schema = ent.DeclaringType.Name }]
+        LeftViewQuerySource<'Table, 'View>(tables)
+
     /// Creates a CTE source: `WITH alias AS (innerQuery) SELECT ... FROM alias`.
     /// The inner query's row type matches the outer 'T.
     let cte<'T> (alias: string) (innerQuery: SelectQuery<'T>) : QuerySource<'T> =

@@ -464,7 +464,77 @@ let ``Left Join - Multi Column``() =
     sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID] AND [o].[ModifiedDate] = [d].[ModifiedDate])") =! true
 
 [<Test>]
-let ``Correlated Subquery``() = 
+let ``Left Join Left-View - plain ON, nullable columns downstream``() =
+    let sql =
+        select {
+            for o in Sales.SalesOrderHeader do
+            leftJoin d in Sales.LeftJoined.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
+            where (d.OrderQty = Some 1s)
+            select (o, d)
+        }
+        |> toSql
+
+    sql =!
+        "SELECT [o].*, [d].* FROM [Sales].[SalesOrderHeader] AS [o] \
+        LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID]) \
+        WHERE ([d].[OrderQty] = @p0)"
+
+[<Test>]
+let ``Left Join Left-View - Multi Column``() =
+    let sql =
+        select {
+            for o in Sales.SalesOrderHeader do
+            leftJoin d in Sales.LeftJoined.SalesOrderDetail on ((o.SalesOrderID, o.ModifiedDate) = (d.SalesOrderID, d.ModifiedDate))
+            select o
+        }
+        |> toSql
+
+    sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID] AND [o].[ModifiedDate] = [d].[ModifiedDate])") =! true
+
+[<Test>]
+let ``Left Join Left-View - anti-join via isNullValue on the witness column``() =
+    let sql =
+        select {
+            for o in Sales.SalesOrderHeader do
+            leftJoin d in Sales.LeftJoined.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
+            where (isNullValue d.SalesOrderDetailID)
+            select o.SalesOrderID
+        }
+        |> toSql
+
+    sql =!
+        "SELECT [o].[SalesOrderID] FROM [Sales].[SalesOrderHeader] AS [o] \
+        LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID]) \
+        WHERE ([d].[SalesOrderDetailID] IS NULL)"
+
+[<Test>]
+let ``Left Join Left-View - groupBy and aggregate over view columns``() =
+    let sql =
+        select {
+            for o in Sales.SalesOrderHeader do
+            leftJoin d in Sales.LeftJoined.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
+            groupBy d.ProductID
+            select (d.ProductID, countBy o.SalesOrderID)
+        }
+        |> toSql
+
+    sql.Contains("GROUP BY [d].[ProductID]") =! true
+    sql.Contains("COUNT([o].[SalesOrderID])") =! true
+
+[<Test>]
+let ``Left Join Left-View - individual view columns in select``() =
+    let sql =
+        select {
+            for o in Sales.SalesOrderHeader do
+            leftJoin d in Sales.LeftJoined.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
+            select (o.SalesOrderID, d.OrderQty)
+        }
+        |> toSql
+
+    sql.Contains("SELECT [o].[SalesOrderID], [d].[OrderQty]") =! true
+
+[<Test>]
+let ``Correlated Subquery``() =
     let maxOrderQty = 
         select {
             for d in Sales.SalesOrderDetail do

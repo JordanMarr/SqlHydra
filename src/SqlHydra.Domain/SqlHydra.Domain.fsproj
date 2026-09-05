@@ -14,6 +14,7 @@
         <Compile Include="Domain.fs" />
         <Compile Include="ProviderDbTypeAttribute.fs" />
         <Compile Include="IWriteOf.fs" />
+        <Compile Include="ILeftViewOf.fs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -36,6 +36,7 @@ let private mkConfig connectionString restrictions =
         NullablePropertyType = NullablePropertyType.Option
         ProviderDbTypeAttributes = true
         TableDeclarations = true
+        LeftJoinedViews = false
         Readers = Some { ReadersConfig.ReaderType = "System.Data.Common.DbDataReader" }
         Filters = { Filters.Empty with Restrictions = restrictions }
         TypeMappingExtensions = []

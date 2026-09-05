@@ -16,6 +16,7 @@ let private mkCfg () : Config =
         NullablePropertyType = NullablePropertyType.Option
         ProviderDbTypeAttributes = true
         TableDeclarations = false
+        LeftJoinedViews = false
         Readers = None
         Filters = Filters.Empty
         TypeMappingExtensions = []

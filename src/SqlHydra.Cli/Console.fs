@@ -49,6 +49,7 @@ let newConfigWizard (args: Args) =
             Config.NullablePropertyType = NullablePropertyType.Option
             Config.ProviderDbTypeAttributes = true
             Config.TableDeclarations = true
+            Config.LeftJoinedViews = true // Default-on for new configs; existing configs opt in.
             Config.Readers = None
             Config.Filters = Filters.Empty // User must manually configure filter in .toml file
             Config.TypeMappingExtensions = []
@@ -156,5 +157,11 @@ let run (args: Args) =
     File.WriteAllText(outputFile.FullName, generatedCode)
     Fsproj.addFileToProject args.Project cfg
     AnsiConsole.WriteLine()
+
+    // Left-views are Option-shaped by design, so a Nullable-typed config silently gets none;
+    // say so rather than leaving the user to wonder where the LeftJoined modules went.
+    if cfg.LeftJoinedViews && cfg.NullablePropertyType = NullablePropertyType.Nullable then
+        AnsiConsole.MarkupLine($"[yellow]- `left_joined_views` requires `nullable_property_type = \"option\"`; no LeftJoined views were generated.[/]")
+
     AnsiConsole.MarkupLine($"[gray]https://github.com/JordanMarr/SqlHydra/wiki/TOML-Configuration[/]")
     AnsiConsole.MarkupLine($"[green1]Generated: \"{outputFile.FullName}\"![/]")

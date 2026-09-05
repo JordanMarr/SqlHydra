@@ -60,19 +60,30 @@ type RecordDeclaration =
     | OpensGroup
     | ContinuesGroup
 
+/// The CLR type of a column, with array type names normalized:
+/// "byte[]", "string[]", "int[]", "int []", "int array" → "byte []", etc.
+let clrBaseType (col: Column) =
+    if col.TypeMapping.ClrType.EndsWith "[]" || col.TypeMapping.ClrType.EndsWith "array" then
+        let baseTypeNm = col.TypeMapping.ClrType.Split([| "[]"; " []"; " array" |], System.StringSplitOptions.RemoveEmptyEntries) |> Array.head
+        $"{baseTypeNm} []"
+    else
+        col.TypeMapping.ClrType
+
+/// `[<ProviderDbType(...)>]` for a column, when the schema declared one and the config wants them.
+let providerDbTypeAttribute (cfg: Config) (col: Column) =
+    match col.TypeMapping.ProviderDbType with
+    | Some providerDbType when cfg.ProviderDbTypeAttributes ->
+        Some $"[<ProviderDbType(\"{providerDbType}\")>]"
+    | _ ->
+        None
+
 let mkTable cfg db (table: Table) schema tableName columnName = stringBuffer {
     let tableType =
         db.Tables
         |> List.find (fun t -> t.Schema = schema && t.Name = table.Name)
 
     let columnPropertyType (col: Column) =
-        let baseType =
-            // Handles array types: "byte[]", "string[]", "int[]", "int []", "int array"
-            if col.TypeMapping.ClrType.EndsWith "[]" || col.TypeMapping.ClrType.EndsWith "array" then
-                let baseTypeNm = col.TypeMapping.ClrType.Split([| "[]"; " []"; " array" |], System.StringSplitOptions.RemoveEmptyEntries) |> Array.head
-                $"{baseTypeNm} []"
-            else
-                col.TypeMapping.ClrType
+        let baseType = clrBaseType col
 
         if col.IsNullable then
             match cfg.NullablePropertyType with
@@ -85,12 +96,7 @@ let mkTable cfg db (table: Table) schema tableName columnName = stringBuffer {
         else
             baseType
 
-    let providerDbTypeAttribute (col: Column) =
-        match col.TypeMapping.ProviderDbType with
-        | Some providerDbType when cfg.ProviderDbTypeAttributes ->
-            Some $"[<ProviderDbType(\"{providerDbType}\")>]"
-        | _ ->
-            None
+    let providerDbTypeAttribute = providerDbTypeAttribute cfg
 
     let rawFieldName (col: Column) = columnName { NamingContext.Table = table; Column = Some col }
     let fieldName (col: Column) = backticks (rawFieldName col)
@@ -176,6 +182,91 @@ let mkTable cfg db (table: Table) schema tableName columnName = stringBuffer {
         mkRecord ContinuesGroup writeName writableColumns (Some writeMembers)
 }
 
+/// Emits the per-schema `LeftJoined` module: for each table, a left-view record — the same
+/// record with every column in its nullable form — implementing `ILeftViewOf<base>`, plus a
+/// `ToOption()` that recovers the whole-record option after materialization, and (with
+/// table_declarations) a `leftTable` token for use as a `leftJoin` source.
+/// Only generated for `NullablePropertyType.Option` configs.
+let mkLeftJoinedViews (cfg: Config) (tables: Table list) tableName columnName = stringBuffer {
+    "/// Left-views for `leftJoin`: each table record with every column in its nullable form,"
+    "/// so an unmatched row reads as None per column instead of one Option around the record."
+    "module LeftJoined ="
+    indent {
+        for table in tables do
+            let rawFieldName (col: Column) = columnName { NamingContext.Table = table; Column = Some col }
+            let fieldName (col: Column) = backticks (rawFieldName col)
+            let rawTblName = tableName { NamingContext.Table = table; Column = None }
+            let tblName = backticks rawTblName
+            // The base record, aliased before the view of the same name shadows it. The enclosing
+            // schema module cannot be referenced by its qualified path from within itself.
+            let baseAlias = backticks $"{rawTblName} (base)"
+
+            $"type private {baseAlias} = {tblName}"
+            ""
+            // NoEquality/NoComparison: the views are transient query artifacts users never
+            // construct; comparisons go through columns — and it halves their compile cost.
+            if cfg.IsCLIMutable
+            then "[<CLIMutable; NoEquality; NoComparison>]"
+            else "[<NoEquality; NoComparison>]"
+            $"type {tblName} ="
+            indent {
+                "{"
+                indent {
+                    for col in table.Columns do
+                        match providerDbTypeAttribute cfg col with
+                        | Some attribute -> attribute
+                        | None -> ()
+                        // An already-nullable column stays a single Option: a NULL from a
+                        // missed join is indistinguishable from a stored NULL, as in SQL.
+                        $"""{if cfg.IsMutableProperties then "mutable " else ""}{fieldName col}: Option<{clrBaseType col}>"""
+                }
+                "}"
+                $"interface ILeftViewOf<{baseAlias}>"
+
+                // The match witness may be any NOT NULL column: a missed join makes every column
+                // None; a matched row makes every NOT NULL column Some. Prefer the PK. A table
+                // whose columns are all nullable gets no ToOption: a row of all NULLs is
+                // indistinguishable from a missed join, in SQL itself.
+                let witness =
+                    table.Columns
+                    |> List.tryFind (fun col -> col.IsPK && not col.IsNullable)
+                    |> Option.orElseWith (fun () -> table.Columns |> List.tryFind (fun col -> not col.IsNullable))
+
+                match witness with
+                | Some w ->
+                    ""
+                    "/// Recovers the whole-record option after materialization (pure .NET, not SQL):"
+                    "/// Some when the left join matched, None when it did not."
+                    $"member this.ToOption() : {baseAlias} option ="
+                    indent {
+                        $"match this.{fieldName w} with"
+                        "| Some value ->"
+                        indent {
+                            $"let record : {baseAlias} ="
+                            indent {
+                                "{"
+                                indent {
+                                    for col in table.Columns do
+                                        if col.Name = w.Name then $"{fieldName col} = value"
+                                        elif col.IsNullable then $"{fieldName col} = this.{fieldName col}"
+                                        else $"{fieldName col} = this.{fieldName col}.Value"
+                                }
+                                "}"
+                            }
+                            "Some record"
+                        }
+                        "| None -> None"
+                    }
+                | None -> ()
+            }
+            ""
+
+            if cfg.TableDeclarations then
+                $"let {tblName} = leftTable<{baseAlias}, {tblName}>"
+                ""
+    }
+}
+
 let generate (cfg: Config) (provider: ISqlHydraDbProvider) (db: Schema) (version: Version.InformationalVersion) (namingExtensions: IExtendNaming list) = stringBuffer {
     let tableName =
         let baseFn (ctx: NamingContext) = ctx.Table.Name
@@ -231,6 +322,11 @@ namespace {{cfg.Namespace}}
                     let tblName = tableName { NamingContext.Table = table; Column = None }
                     $"let {backticks tblName} = table<{backticks tblName}>"
                     newLine
+
+            // Left-views are Option-shaped by design; Nullable-typed configs skip them.
+            if cfg.LeftJoinedViews && cfg.NullablePropertyType = NullablePropertyType.Option && not tables.IsEmpty then
+                mkLeftJoinedViews cfg tables tableName columnName
+                newLine
         }
 
     // If the user configures ProviderDbTypeAttributes, we know they are using SqlHydra.Query.

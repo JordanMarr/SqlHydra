@@ -215,6 +215,317 @@ module OT =
 
     let WAREHOUSES = table<WAREHOUSES>
 
+    /// Left-views for `leftJoin`: each table record with every column in its nullable form,
+    /// so an unmatched row reads as None per column instead of one Option around the record.
+    module LeftJoined =
+        type private ``CONTACTS (base)`` = CONTACTS
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type CONTACTS =
+            { CONTACT_ID: Option<int64>
+              CUSTOMER_ID: Option<int64>
+              EMAIL: Option<string>
+              FIRST_NAME: Option<string>
+              LAST_NAME: Option<string>
+              PHONE: Option<string> }
+
+            interface ILeftViewOf<``CONTACTS (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``CONTACTS (base)`` option =
+                match this.CONTACT_ID with
+                | Some value ->
+                    let record: ``CONTACTS (base)`` =
+                        { CONTACT_ID = value; CUSTOMER_ID = this.CUSTOMER_ID; EMAIL = this.EMAIL.Value; FIRST_NAME = this.FIRST_NAME.Value; LAST_NAME = this.LAST_NAME.Value; PHONE = this.PHONE }
+
+                    Some record
+                | None -> None
+
+        let CONTACTS = leftTable<``CONTACTS (base)``, CONTACTS>
+
+        type private ``COUNTRIES (base)`` = COUNTRIES
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type COUNTRIES =
+            { COUNTRY_ID: Option<string>
+              COUNTRY_NAME: Option<string>
+              REGION_ID: Option<int64> }
+
+            interface ILeftViewOf<``COUNTRIES (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``COUNTRIES (base)`` option =
+                match this.COUNTRY_ID with
+                | Some value ->
+                    let record: ``COUNTRIES (base)`` =
+                        { COUNTRY_ID = value; COUNTRY_NAME = this.COUNTRY_NAME.Value; REGION_ID = this.REGION_ID }
+
+                    Some record
+                | None -> None
+
+        let COUNTRIES = leftTable<``COUNTRIES (base)``, COUNTRIES>
+
+        type private ``CUSTOMERS (base)`` = CUSTOMERS
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type CUSTOMERS =
+            { ADDRESS: Option<string>
+              CREDIT_LIMIT: Option<decimal>
+              CUSTOMER_ID: Option<int64>
+              NAME: Option<string>
+              WEBSITE: Option<string> }
+
+            interface ILeftViewOf<``CUSTOMERS (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``CUSTOMERS (base)`` option =
+                match this.CUSTOMER_ID with
+                | Some value ->
+                    let record: ``CUSTOMERS (base)`` =
+                        { ADDRESS = this.ADDRESS; CREDIT_LIMIT = this.CREDIT_LIMIT; CUSTOMER_ID = value; NAME = this.NAME.Value; WEBSITE = this.WEBSITE }
+
+                    Some record
+                | None -> None
+
+        let CUSTOMERS = leftTable<``CUSTOMERS (base)``, CUSTOMERS>
+
+        type private ``EMPLOYEES (base)`` = EMPLOYEES
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type EMPLOYEES =
+            { EMAIL: Option<string>
+              EMPLOYEE_ID: Option<int64>
+              FIRST_NAME: Option<string>
+              HIRE_DATE: Option<System.DateTime>
+              JOB_TITLE: Option<string>
+              LAST_NAME: Option<string>
+              MANAGER_ID: Option<int64>
+              PHONE: Option<string> }
+
+            interface ILeftViewOf<``EMPLOYEES (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``EMPLOYEES (base)`` option =
+                match this.EMPLOYEE_ID with
+                | Some value ->
+                    let record: ``EMPLOYEES (base)`` =
+                        { EMAIL = this.EMAIL.Value
+                          EMPLOYEE_ID = value
+                          FIRST_NAME = this.FIRST_NAME.Value
+                          HIRE_DATE = this.HIRE_DATE.Value
+                          JOB_TITLE = this.JOB_TITLE.Value
+                          LAST_NAME = this.LAST_NAME.Value
+                          MANAGER_ID = this.MANAGER_ID
+                          PHONE = this.PHONE.Value }
+
+                    Some record
+                | None -> None
+
+        let EMPLOYEES = leftTable<``EMPLOYEES (base)``, EMPLOYEES>
+
+        type private ``INVENTORIES (base)`` = INVENTORIES
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type INVENTORIES =
+            { PRODUCT_ID: Option<int64>
+              QUANTITY: Option<int64>
+              WAREHOUSE_ID: Option<int64> }
+
+            interface ILeftViewOf<``INVENTORIES (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``INVENTORIES (base)`` option =
+                match this.PRODUCT_ID with
+                | Some value ->
+                    let record: ``INVENTORIES (base)`` =
+                        { PRODUCT_ID = value; QUANTITY = this.QUANTITY.Value; WAREHOUSE_ID = this.WAREHOUSE_ID.Value }
+
+                    Some record
+                | None -> None
+
+        let INVENTORIES = leftTable<``INVENTORIES (base)``, INVENTORIES>
+
+        type private ``LOCATIONS (base)`` = LOCATIONS
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type LOCATIONS =
+            { ADDRESS: Option<string>
+              CITY: Option<string>
+              COUNTRY_ID: Option<string>
+              LOCATION_ID: Option<int64>
+              POSTAL_CODE: Option<string>
+              STATE: Option<string> }
+
+            interface ILeftViewOf<``LOCATIONS (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``LOCATIONS (base)`` option =
+                match this.LOCATION_ID with
+                | Some value ->
+                    let record: ``LOCATIONS (base)`` =
+                        { ADDRESS = this.ADDRESS.Value; CITY = this.CITY; COUNTRY_ID = this.COUNTRY_ID; LOCATION_ID = value; POSTAL_CODE = this.POSTAL_CODE; STATE = this.STATE }
+
+                    Some record
+                | None -> None
+
+        let LOCATIONS = leftTable<``LOCATIONS (base)``, LOCATIONS>
+
+        type private ``ORDERS (base)`` = ORDERS
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type ORDERS =
+            { CUSTOMER_ID: Option<int64>
+              ORDER_DATE: Option<System.DateTime>
+              ORDER_ID: Option<int64>
+              SALESMAN_ID: Option<int64>
+              STATUS: Option<string> }
+
+            interface ILeftViewOf<``ORDERS (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``ORDERS (base)`` option =
+                match this.ORDER_ID with
+                | Some value ->
+                    let record: ``ORDERS (base)`` =
+                        { CUSTOMER_ID = this.CUSTOMER_ID.Value; ORDER_DATE = this.ORDER_DATE.Value; ORDER_ID = value; SALESMAN_ID = this.SALESMAN_ID; STATUS = this.STATUS.Value }
+
+                    Some record
+                | None -> None
+
+        let ORDERS = leftTable<``ORDERS (base)``, ORDERS>
+
+        type private ``ORDER_ITEMS (base)`` = ORDER_ITEMS
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type ORDER_ITEMS =
+            { ITEM_ID: Option<int64>
+              ORDER_ID: Option<int64>
+              PRODUCT_ID: Option<int64>
+              QUANTITY: Option<int64>
+              UNIT_PRICE: Option<decimal> }
+
+            interface ILeftViewOf<``ORDER_ITEMS (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``ORDER_ITEMS (base)`` option =
+                match this.ITEM_ID with
+                | Some value ->
+                    let record: ``ORDER_ITEMS (base)`` =
+                        { ITEM_ID = value; ORDER_ID = this.ORDER_ID.Value; PRODUCT_ID = this.PRODUCT_ID.Value; QUANTITY = this.QUANTITY.Value; UNIT_PRICE = this.UNIT_PRICE.Value }
+
+                    Some record
+                | None -> None
+
+        let ORDER_ITEMS = leftTable<``ORDER_ITEMS (base)``, ORDER_ITEMS>
+
+        type private ``PRODUCTS (base)`` = PRODUCTS
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type PRODUCTS =
+            { CATEGORY_ID: Option<int64>
+              DESCRIPTION: Option<string>
+              LIST_PRICE: Option<decimal>
+              PRODUCT_ID: Option<int64>
+              PRODUCT_NAME: Option<string>
+              STANDARD_COST: Option<decimal> }
+
+            interface ILeftViewOf<``PRODUCTS (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``PRODUCTS (base)`` option =
+                match this.PRODUCT_ID with
+                | Some value ->
+                    let record: ``PRODUCTS (base)`` =
+                        { CATEGORY_ID = this.CATEGORY_ID.Value
+                          DESCRIPTION = this.DESCRIPTION
+                          LIST_PRICE = this.LIST_PRICE
+                          PRODUCT_ID = value
+                          PRODUCT_NAME = this.PRODUCT_NAME.Value
+                          STANDARD_COST = this.STANDARD_COST }
+
+                    Some record
+                | None -> None
+
+        let PRODUCTS = leftTable<``PRODUCTS (base)``, PRODUCTS>
+
+        type private ``PRODUCT_CATEGORIES (base)`` = PRODUCT_CATEGORIES
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type PRODUCT_CATEGORIES =
+            { CATEGORY_ID: Option<int64>
+              CATEGORY_NAME: Option<string> }
+
+            interface ILeftViewOf<``PRODUCT_CATEGORIES (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``PRODUCT_CATEGORIES (base)`` option =
+                match this.CATEGORY_ID with
+                | Some value ->
+                    let record: ``PRODUCT_CATEGORIES (base)`` =
+                        { CATEGORY_ID = value; CATEGORY_NAME = this.CATEGORY_NAME.Value }
+
+                    Some record
+                | None -> None
+
+        let PRODUCT_CATEGORIES =
+            leftTable<``PRODUCT_CATEGORIES (base)``, PRODUCT_CATEGORIES>
+
+        type private ``REGIONS (base)`` = REGIONS
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type REGIONS =
+            { REGION_ID: Option<int64>
+              REGION_NAME: Option<string> }
+
+            interface ILeftViewOf<``REGIONS (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``REGIONS (base)`` option =
+                match this.REGION_ID with
+                | Some value ->
+                    let record: ``REGIONS (base)`` =
+                        { REGION_ID = value; REGION_NAME = this.REGION_NAME.Value }
+
+                    Some record
+                | None -> None
+
+        let REGIONS = leftTable<``REGIONS (base)``, REGIONS>
+
+        type private ``WAREHOUSES (base)`` = WAREHOUSES
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type WAREHOUSES =
+            { LOCATION_ID: Option<int64>
+              WAREHOUSE_ID: Option<int64>
+              WAREHOUSE_NAME: Option<string> }
+
+            interface ILeftViewOf<``WAREHOUSES (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``WAREHOUSES (base)`` option =
+                match this.WAREHOUSE_ID with
+                | Some value ->
+                    let record: ``WAREHOUSES (base)`` =
+                        { LOCATION_ID = this.LOCATION_ID; WAREHOUSE_ID = value; WAREHOUSE_NAME = this.WAREHOUSE_NAME }
+
+                    Some record
+                | None -> None
+
+        let WAREHOUSES = leftTable<``WAREHOUSES (base)``, WAREHOUSES>
+
+
 
 
 type QueryContextFactory =

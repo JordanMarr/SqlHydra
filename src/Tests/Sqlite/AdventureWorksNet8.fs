@@ -325,6 +325,444 @@ module main =
 
     let SalesOrderHeader = table<SalesOrderHeader>
 
+    /// Left-views for `leftJoin`: each table record with every column in its nullable form,
+    /// so an unmatched row reads as None per column instead of one Option around the record.
+    module LeftJoined =
+        type private ``Address (base)`` = Address
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type Address =
+            { AddressID: Option<int64>
+              AddressLine1: Option<Sqlite.CustomTypes.Text>
+              AddressLine2: Option<Sqlite.CustomTypes.Text>
+              City: Option<Sqlite.CustomTypes.Text>
+              StateProvince: Option<Sqlite.CustomTypes.Text>
+              CountryRegion: Option<Sqlite.CustomTypes.Text>
+              PostalCode: Option<Sqlite.CustomTypes.Text>
+              rowguid: Option<Sqlite.CustomTypes.Text>
+              ModifiedDate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``Address (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``Address (base)`` option =
+                match this.AddressID with
+                | Some value ->
+                    let record: ``Address (base)`` =
+                        { AddressID = value
+                          AddressLine1 = this.AddressLine1.Value
+                          AddressLine2 = this.AddressLine2
+                          City = this.City.Value
+                          StateProvince = this.StateProvince.Value
+                          CountryRegion = this.CountryRegion.Value
+                          PostalCode = this.PostalCode.Value
+                          rowguid = this.rowguid.Value
+                          ModifiedDate = this.ModifiedDate.Value }
+
+                    Some record
+                | None -> None
+
+        let Address = leftTable<``Address (base)``, Address>
+
+        type private ``BuildVersion (base)`` = BuildVersion
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type BuildVersion =
+            { SystemInformationID: Option<int64>
+              ``Database Version``: Option<Sqlite.CustomTypes.Text>
+              VersionDate: Option<System.DateTime>
+              ModifiedDate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``BuildVersion (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``BuildVersion (base)`` option =
+                match this.SystemInformationID with
+                | Some value ->
+                    let record: ``BuildVersion (base)`` =
+                        { SystemInformationID = value; ``Database Version`` = this.``Database Version``.Value; VersionDate = this.VersionDate.Value; ModifiedDate = this.ModifiedDate.Value }
+
+                    Some record
+                | None -> None
+
+        let BuildVersion = leftTable<``BuildVersion (base)``, BuildVersion>
+
+        type private ``Customer (base)`` = Customer
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type Customer =
+            { CustomerID: Option<int64>
+              NameStyle: Option<int64>
+              Title: Option<Sqlite.CustomTypes.Text>
+              FirstName: Option<Sqlite.CustomTypes.Text>
+              MiddleName: Option<Sqlite.CustomTypes.Text>
+              LastName: Option<Sqlite.CustomTypes.Text>
+              Suffix: Option<Sqlite.CustomTypes.Text>
+              CompanyName: Option<Sqlite.CustomTypes.Text>
+              SalesPerson: Option<Sqlite.CustomTypes.Text>
+              EmailAddress: Option<Sqlite.CustomTypes.Text>
+              Phone: Option<Sqlite.CustomTypes.Text>
+              PasswordHash: Option<Sqlite.CustomTypes.Text>
+              PasswordSalt: Option<Sqlite.CustomTypes.Text>
+              rowguid: Option<Sqlite.CustomTypes.Text>
+              ModifiedDate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``Customer (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``Customer (base)`` option =
+                match this.CustomerID with
+                | Some value ->
+                    let record: ``Customer (base)`` =
+                        { CustomerID = value
+                          NameStyle = this.NameStyle.Value
+                          Title = this.Title
+                          FirstName = this.FirstName.Value
+                          MiddleName = this.MiddleName
+                          LastName = this.LastName.Value
+                          Suffix = this.Suffix
+                          CompanyName = this.CompanyName
+                          SalesPerson = this.SalesPerson
+                          EmailAddress = this.EmailAddress
+                          Phone = this.Phone
+                          PasswordHash = this.PasswordHash.Value
+                          PasswordSalt = this.PasswordSalt.Value
+                          rowguid = this.rowguid.Value
+                          ModifiedDate = this.ModifiedDate.Value }
+
+                    Some record
+                | None -> None
+
+        let Customer = leftTable<``Customer (base)``, Customer>
+
+        type private ``CustomerAddress (base)`` = CustomerAddress
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type CustomerAddress =
+            { CustomerID: Option<int64>
+              AddressID: Option<int64>
+              AddressType: Option<Sqlite.CustomTypes.Text>
+              rowguid: Option<Sqlite.CustomTypes.Text>
+              ModifiedDate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``CustomerAddress (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``CustomerAddress (base)`` option =
+                match this.CustomerID with
+                | Some value ->
+                    let record: ``CustomerAddress (base)`` =
+                        { CustomerID = value; AddressID = this.AddressID.Value; AddressType = this.AddressType.Value; rowguid = this.rowguid.Value; ModifiedDate = this.ModifiedDate.Value }
+
+                    Some record
+                | None -> None
+
+        let CustomerAddress = leftTable<``CustomerAddress (base)``, CustomerAddress>
+
+        type private ``ErrorLog (base)`` = ErrorLog
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type ErrorLog =
+            { ErrorLogID: Option<int64>
+              ErrorTime: Option<System.DateTime>
+              UserName: Option<Sqlite.CustomTypes.Text>
+              ErrorNumber: Option<int64>
+              ErrorSeverity: Option<int64>
+              ErrorState: Option<int64>
+              ErrorProcedure: Option<Sqlite.CustomTypes.Text>
+              ErrorLine: Option<int64>
+              ErrorMessage: Option<Sqlite.CustomTypes.Text> }
+
+            interface ILeftViewOf<``ErrorLog (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``ErrorLog (base)`` option =
+                match this.ErrorLogID with
+                | Some value ->
+                    let record: ``ErrorLog (base)`` =
+                        { ErrorLogID = value
+                          ErrorTime = this.ErrorTime.Value
+                          UserName = this.UserName.Value
+                          ErrorNumber = this.ErrorNumber.Value
+                          ErrorSeverity = this.ErrorSeverity
+                          ErrorState = this.ErrorState
+                          ErrorProcedure = this.ErrorProcedure
+                          ErrorLine = this.ErrorLine
+                          ErrorMessage = this.ErrorMessage.Value }
+
+                    Some record
+                | None -> None
+
+        let ErrorLog = leftTable<``ErrorLog (base)``, ErrorLog>
+
+        type private ``Product (base)`` = Product
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type Product =
+            { ProductID: Option<int64>
+              Name: Option<Sqlite.CustomTypes.Text>
+              ProductNumber: Option<Sqlite.CustomTypes.Text>
+              Color: Option<Sqlite.CustomTypes.Text>
+              StandardCost: Option<int64>
+              ListPrice: Option<int64>
+              Size: Option<Sqlite.CustomTypes.Text>
+              Weight: Option<int64>
+              ProductCategoryID: Option<int64>
+              ProductModelID: Option<int64>
+              SellStartDate: Option<System.DateTime>
+              SellEndDate: Option<System.DateTime>
+              DiscontinuedDate: Option<System.DateTime>
+              ThumbNailPhoto: Option<byte[]>
+              ThumbnailPhotoFileName: Option<Sqlite.CustomTypes.Text>
+              rowguid: Option<Sqlite.CustomTypes.Text>
+              ModifiedDate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``Product (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``Product (base)`` option =
+                match this.ProductID with
+                | Some value ->
+                    let record: ``Product (base)`` =
+                        { ProductID = value
+                          Name = this.Name.Value
+                          ProductNumber = this.ProductNumber.Value
+                          Color = this.Color
+                          StandardCost = this.StandardCost.Value
+                          ListPrice = this.ListPrice.Value
+                          Size = this.Size
+                          Weight = this.Weight
+                          ProductCategoryID = this.ProductCategoryID
+                          ProductModelID = this.ProductModelID
+                          SellStartDate = this.SellStartDate.Value
+                          SellEndDate = this.SellEndDate
+                          DiscontinuedDate = this.DiscontinuedDate
+                          ThumbNailPhoto = this.ThumbNailPhoto
+                          ThumbnailPhotoFileName = this.ThumbnailPhotoFileName
+                          rowguid = this.rowguid.Value
+                          ModifiedDate = this.ModifiedDate.Value }
+
+                    Some record
+                | None -> None
+
+        let Product = leftTable<``Product (base)``, Product>
+
+        type private ``ProductCategory (base)`` = ProductCategory
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type ProductCategory =
+            { ProductCategoryID: Option<int64>
+              ParentProductCategoryID: Option<int64>
+              Name: Option<Sqlite.CustomTypes.Text>
+              rowguid: Option<Sqlite.CustomTypes.Text>
+              ModifiedDate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``ProductCategory (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``ProductCategory (base)`` option =
+                match this.ProductCategoryID with
+                | Some value ->
+                    let record: ``ProductCategory (base)`` =
+                        { ProductCategoryID = value
+                          ParentProductCategoryID = this.ParentProductCategoryID
+                          Name = this.Name.Value
+                          rowguid = this.rowguid.Value
+                          ModifiedDate = this.ModifiedDate.Value }
+
+                    Some record
+                | None -> None
+
+        let ProductCategory = leftTable<``ProductCategory (base)``, ProductCategory>
+
+        type private ``ProductDescription (base)`` = ProductDescription
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type ProductDescription =
+            { ProductDescriptionID: Option<int64>
+              Description: Option<Sqlite.CustomTypes.Text>
+              rowguid: Option<Sqlite.CustomTypes.Text>
+              ModifiedDate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``ProductDescription (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``ProductDescription (base)`` option =
+                match this.ProductDescriptionID with
+                | Some value ->
+                    let record: ``ProductDescription (base)`` =
+                        { ProductDescriptionID = value; Description = this.Description.Value; rowguid = this.rowguid.Value; ModifiedDate = this.ModifiedDate.Value }
+
+                    Some record
+                | None -> None
+
+        let ProductDescription =
+            leftTable<``ProductDescription (base)``, ProductDescription>
+
+        type private ``ProductModel (base)`` = ProductModel
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type ProductModel =
+            { ProductModelID: Option<int64>
+              Name: Option<Sqlite.CustomTypes.Text>
+              CatalogDescription: Option<Sqlite.CustomTypes.Text>
+              rowguid: Option<Sqlite.CustomTypes.Text>
+              ModifiedDate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``ProductModel (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``ProductModel (base)`` option =
+                match this.ProductModelID with
+                | Some value ->
+                    let record: ``ProductModel (base)`` =
+                        { ProductModelID = value; Name = this.Name.Value; CatalogDescription = this.CatalogDescription; rowguid = this.rowguid.Value; ModifiedDate = this.ModifiedDate.Value }
+
+                    Some record
+                | None -> None
+
+        let ProductModel = leftTable<``ProductModel (base)``, ProductModel>
+
+        type private ``ProductModelProductDescription (base)`` = ProductModelProductDescription
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type ProductModelProductDescription =
+            { ProductModelID: Option<int64>
+              ProductDescriptionID: Option<int64>
+              Culture: Option<Sqlite.CustomTypes.Text>
+              rowguid: Option<Sqlite.CustomTypes.Text>
+              ModifiedDate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``ProductModelProductDescription (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``ProductModelProductDescription (base)`` option =
+                match this.ProductModelID with
+                | Some value ->
+                    let record: ``ProductModelProductDescription (base)`` =
+                        { ProductModelID = value
+                          ProductDescriptionID = this.ProductDescriptionID.Value
+                          Culture = this.Culture.Value
+                          rowguid = this.rowguid.Value
+                          ModifiedDate = this.ModifiedDate.Value }
+
+                    Some record
+                | None -> None
+
+        let ProductModelProductDescription =
+            leftTable<``ProductModelProductDescription (base)``, ProductModelProductDescription>
+
+        type private ``SalesOrderDetail (base)`` = SalesOrderDetail
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type SalesOrderDetail =
+            { SalesOrderID: Option<int64>
+              SalesOrderDetailID: Option<int64>
+              OrderQty: Option<int64>
+              ProductID: Option<int64>
+              UnitPrice: Option<int64>
+              UnitPriceDiscount: Option<int64>
+              LineTotal: Option<int64>
+              rowguid: Option<Sqlite.CustomTypes.Text>
+              ModifiedDate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``SalesOrderDetail (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``SalesOrderDetail (base)`` option =
+                match this.SalesOrderID with
+                | Some value ->
+                    let record: ``SalesOrderDetail (base)`` =
+                        { SalesOrderID = value
+                          SalesOrderDetailID = this.SalesOrderDetailID.Value
+                          OrderQty = this.OrderQty.Value
+                          ProductID = this.ProductID.Value
+                          UnitPrice = this.UnitPrice.Value
+                          UnitPriceDiscount = this.UnitPriceDiscount.Value
+                          LineTotal = this.LineTotal.Value
+                          rowguid = this.rowguid.Value
+                          ModifiedDate = this.ModifiedDate.Value }
+
+                    Some record
+                | None -> None
+
+        let SalesOrderDetail = leftTable<``SalesOrderDetail (base)``, SalesOrderDetail>
+
+        type private ``SalesOrderHeader (base)`` = SalesOrderHeader
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type SalesOrderHeader =
+            { SalesOrderID: Option<int64>
+              RevisionNumber: Option<int64>
+              OrderDate: Option<System.DateTime>
+              DueDate: Option<System.DateTime>
+              ShipDate: Option<System.DateTime>
+              Status: Option<int64>
+              OnlineOrderFlag: Option<int64>
+              SalesOrderNumber: Option<string>
+              PurchaseOrderNumber: Option<int64>
+              AccountNumber: Option<Sqlite.CustomTypes.Text>
+              CustomerID: Option<int64>
+              ShipToAddressID: Option<int>
+              BillToAddressID: Option<int>
+              ShipMethod: Option<Sqlite.CustomTypes.Text>
+              CreditCardApprovalCode: Option<Sqlite.CustomTypes.Text>
+              SubTotal: Option<int64>
+              TaxAmt: Option<int64>
+              Freight: Option<int64>
+              TotalDue: Option<int64>
+              Comment: Option<Sqlite.CustomTypes.Text>
+              rowguid: Option<Sqlite.CustomTypes.Text>
+              ModifiedDate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``SalesOrderHeader (base)``>
+
+            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+            /// Some when the left join matched, None when it did not.
+            member this.ToOption() : ``SalesOrderHeader (base)`` option =
+                match this.SalesOrderID with
+                | Some value ->
+                    let record: ``SalesOrderHeader (base)`` =
+                        { SalesOrderID = value
+                          RevisionNumber = this.RevisionNumber.Value
+                          OrderDate = this.OrderDate.Value
+                          DueDate = this.DueDate.Value
+                          ShipDate = this.ShipDate
+                          Status = this.Status.Value
+                          OnlineOrderFlag = this.OnlineOrderFlag.Value
+                          SalesOrderNumber = this.SalesOrderNumber.Value
+                          PurchaseOrderNumber = this.PurchaseOrderNumber
+                          AccountNumber = this.AccountNumber
+                          CustomerID = this.CustomerID.Value
+                          ShipToAddressID = this.ShipToAddressID
+                          BillToAddressID = this.BillToAddressID
+                          ShipMethod = this.ShipMethod.Value
+                          CreditCardApprovalCode = this.CreditCardApprovalCode
+                          SubTotal = this.SubTotal.Value
+                          TaxAmt = this.TaxAmt.Value
+                          Freight = this.Freight.Value
+                          TotalDue = this.TotalDue.Value
+                          Comment = this.Comment
+                          rowguid = this.rowguid.Value
+                          ModifiedDate = this.ModifiedDate.Value }
+
+                    Some record
+                | None -> None
+
+        let SalesOrderHeader = leftTable<``SalesOrderHeader (base)``, SalesOrderHeader>
+
+
 
 
 type QueryContextFactory =
