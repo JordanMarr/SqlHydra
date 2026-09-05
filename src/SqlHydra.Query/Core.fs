@@ -88,7 +88,8 @@ type PendingConflictTarget =
 type InsertQuerySpec<'T, 'Identity> =
     {
         Table: string
-        Entities: 'T list
+        /// One list per row: column name and its `QueryParameter`, as `set` stores them.
+        Entities: (string * obj) list list
         Fields: string list
         IdentityField: string option
         OutputFields: OutputField list
@@ -109,7 +110,9 @@ type InsertQuerySpec<'T, 'Identity> =
 type UpdateQuerySpec<'T, 'UpdateReturn> =
     {
         Table: string
-        Entity: 'T option
+        /// Boxed: a `'T` row, or an `IWriteOf<'T>` row that has no field for a read-only column.
+        /// Column name and its `QueryParameter` per field, as `SetValues` stores them.
+        Entity: (string * obj) list option
         Fields: string list
         SetValues: (string * obj) list
         RawSetValues: (string * string * obj[]) list
@@ -120,7 +123,7 @@ type UpdateQuerySpec<'T, 'UpdateReturn> =
         CommandOptions: CommandOptions
     }
     static member Default : UpdateQuerySpec<'T, 'UpdateReturn> =
-        { Table = ""; Entity = Option<'T>.None; Fields = []; SetValues = []; RawSetValues = []
+        { Table = ""; Entity = None; Fields = []; SetValues = []; RawSetValues = []
           Where = WhereClause.Empty; OutputFields = []; UpdateAll = false; Returning = []
           CommandOptions = CommandOptions.Default }
 
@@ -219,23 +222,28 @@ module internal QueryUtils =
         p.GetValue(entity)
         |> getQueryParameterForValue p
 
+    /// The columns a row writes, each with its `QueryParameter`. A generated record says so
+    /// through `IWriteColumns`; any other record is reflected.
+    let writeColumns (row: obj) : (string * obj) list =
+        match row with
+        | :? SqlHydra.IWriteColumns as generated ->
+            generated.WriteColumns
+            |> List.map (fun c -> c.Name, box { Value = boxValueOrOption c.Value; ProviderDbType = c.ProviderDbType })
+        | _ ->
+            FSharp.Reflection.FSharpType.GetRecordFields(row.GetType())
+            |> Array.map (fun p -> p.Name, getQueryParameterForEntity row p)
+            |> Array.toList
+
+    /// `spec.Fields` narrows a row to the columns `includeColumn`/`excludeColumn` selected.
+    let private selectedColumns (fields: string list) (row: (string * obj) list) =
+        match fields with
+        | [] -> row
+        | fields -> row |> List.filter (fun (name, _) -> List.contains name fields)
+
     let fromUpdate (spec: UpdateQuerySpec<'T, 'UpdateReturn>) : UpdateQueryIR =
         let kvps =
             match spec.Entity, spec.SetValues with
-            | Some entity, [] ->
-                match spec.Fields with
-                | [] ->
-                    FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>)
-                    |> Array.map (fun p -> p.Name, getQueryParameterForEntity entity p)
-                    |> Array.toList
-
-                | fields ->
-                    let included = fields |> Set.ofList
-                    FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>)
-                    |> Array.filter (fun p -> included.Contains(p.Name))
-                    |> Array.map (fun p -> p.Name, getQueryParameterForEntity entity p)
-                    |> Array.toList
-
+            | Some row, [] -> selectedColumns spec.Fields row
             | Some _, _ -> failwith "Cannot have both `entity` and `set` operations in an `update` expression."
             | None, [] when spec.RawSetValues.IsEmpty ->
                 failwith "Either an `entity`, `set`, or `setRaw` operation must be present in an `update` expression."
@@ -252,16 +260,16 @@ module internal QueryUtils =
         }
 
     let fromInsert (spec: InsertQuerySpec<'T, 'InsertReturn>) : InsertQueryIR =
-        let includedProperties =
-            match spec.Fields with
+        // The rows say which columns they write; with no rows (`insert ... select`) 'T's fields do.
+        let rows = spec.Entities |> List.map (selectedColumns spec.Fields)
+        let columns =
+            match rows with
+            | first :: _ -> first |> List.map fst
             | [] ->
                 FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>)
-            | fields ->
-                let included = fields |> Set.ofList
-                FSharp.Reflection.FSharpType.GetRecordFields(typeof<'T>)
-                |> Array.filter (fun p -> included.Contains(p.Name))
-
-        let columns = includedProperties |> Array.map (fun p -> p.Name) |> Array.toList
+                |> Array.map (fun p -> p.Name)
+                |> Array.toList
+                |> List.filter (fun name -> spec.Fields.IsEmpty || List.contains name spec.Fields)
 
         match spec.FromSelect, spec.Entities with
         | Some selectIR, _ ->
@@ -282,16 +290,10 @@ module internal QueryUtils =
         | None, entities ->
             if spec.IdentityField.IsSome && entities.Length > 1
             then failwith "`getId` is not currently supported for multiple inserts via the `entities` operation."
-            let rows =
-                entities
-                |> List.map (fun entity ->
-                    includedProperties
-                    |> Array.map (fun p -> getQueryParameterForEntity entity p)
-                )
             {
                 Table = spec.Table
                 Columns = columns
-                Rows = rows
+                Rows = rows |> List.map (List.map snd >> List.toArray)
                 FromSelect = None
                 IdentityField = spec.IdentityField
                 InsertType = spec.InsertType

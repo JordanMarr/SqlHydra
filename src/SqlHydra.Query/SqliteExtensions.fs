@@ -60,7 +60,7 @@ type SqlFn =
     // Type functions
     static member typeof'(value: 'T) : string = sqlFn
 
-type InsertBuilder<'Inserted, 'InsertReturn> with
+type InsertBuilder<'Inserted, 'InsertReturn, 'Write when 'Write :> SqlHydra.IWriteOf<'Inserted>> with
 
     /// Performs an update on one or more update fields if a conflict occurs.
     [<CustomOperation("onConflictDoUpdate", MaintainsVariableSpace = true)>]
@@ -73,6 +73,17 @@ type InsertBuilder<'Inserted, 'InsertReturn> with
         let updateFields = LinqExpressionVisitors.visitPropertiesSelector<'T, 'UpdateProperties> updateFieldsSelector (fun tblAlias p -> p.Name)
         let newSpec = { spec with InsertType = OnConflictDoUpdate (conflictFields, updateFields) }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
+
+    /// `onConflictDoUpdate` with the update fields selected over the write record, so a read-only column cannot be named.
+    [<CustomOperation("onConflictDoUpdateWrite", MaintainsVariableSpace = true)>]
+    member this.OnConflictDoUpdateWrite(state: QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>,
+        [<ProjectionParameter>] conflictFieldsSelector: System.Linq.Expressions.Expression<Func<'Inserted, 'ConflictProperty>>,
+        updateFieldsSelector: System.Linq.Expressions.Expression<Func<'Write, 'UpdateProperties>>) =
+        let spec = state.Query
+        let conflictFields = LinqExpressionVisitors.visitPropertiesSelector<'Inserted, 'ConflictProperty> conflictFieldsSelector (fun _ p -> p.Name)
+        let updateFields = LinqExpressionVisitors.visitPropertiesSelector<'Write, 'UpdateProperties> updateFieldsSelector (fun _ p -> p.Name)
+        QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>(
+            { spec with InsertType = OnConflictDoUpdate (conflictFields, updateFields) }, state.TableMappings)
 
     /// Insert is ignored if a conflict occurs.
     [<CustomOperation("onConflictDoNothing", MaintainsVariableSpace = true)>]

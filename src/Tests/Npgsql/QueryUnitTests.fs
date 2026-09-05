@@ -1783,3 +1783,99 @@ let ``every option overload is the option-lifting of one sibling``() =
         Assert.That((twinParams |> Array.filter isOption).Length, Is.EqualTo 1, $"{twin.Name}: lift exactly one parameter")
         Assert.That(twin.ReturnType, Is.EqualTo(typedefof<option<_>>.MakeGenericType sibling.ReturnType),
             $"{twin.Name}: NULL in, NULL out, so the return type must be option")
+
+// Fixture standing in for generated output: `id` is GENERATED ALWAYS AS IDENTITY and
+// `tax` is GENERATED ALWAYS AS (price * 0.1) STORED. PostgreSQL rejects naming either.
+
+module WriteRecordFixture =
+    module sales =
+        [<CLIMutable>]
+        type invoice =
+            { id: int
+              currencycode: string
+              price: decimal
+              tax: decimal }
+            interface SqlHydra.IHasWrite<invoice_write> with
+                member this.ToWrite() =
+                    { currencycode = this.currencycode; price = this.price }
+            interface SqlHydra.IWriteColumns with
+                member this.WriteColumns =
+                    [
+                      { SqlHydra.WriteColumn.Name = "currencycode"; Value = box this.currencycode; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "price"; Value = box this.price; ProviderDbType = None }
+                    ]
+
+        and [<CLIMutable>] invoice_write =
+            { currencycode: string
+              price: decimal }
+            interface SqlHydra.IWriteOf<invoice> with
+                member this.WriteColumns =
+                    [
+                      { SqlHydra.WriteColumn.Name = "currencycode"; Value = box this.currencycode; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "price"; Value = box this.price; ProviderDbType = None }
+                    ]
+
+    let invoice = table<sales.invoice>
+
+    let readRow : sales.invoice =
+        { id = 1
+          currencycode = "BTC"
+          price = 10m
+          tax = 1m }
+
+[<Test>]
+let ``writeEntity: an insert names only the write record's fields``() =
+    let sql =
+        insert {
+            into WriteRecordFixture.invoice
+            writeEntity (toWrite WriteRecordFixture.readRow)
+        }
+        |> toInsertSql
+    sql =! """INSERT INTO "sales"."invoice" ("currencycode", "price") VALUES (@p0, @p1)"""
+
+[<Test>]
+let ``writeEntity: an update sets only the write record's fields, with a where over the read record``() =
+    let sql =
+        update {
+            for i in WriteRecordFixture.invoice do
+            writeEntity { toWrite WriteRecordFixture.readRow with price = 20m }
+            where (i.id = 1)
+        }
+        |> toUpdateSql
+    sql =! """UPDATE "sales"."invoice" SET "currencycode" = @p0, "price" = @p1 WHERE ("sales"."invoice"."id" = @p2)"""
+
+[<Test>]
+let ``entity: the read record's insert names only the columns the database lets it write``() =
+    // The generated record lists them; nothing is inspected at runtime.
+    let sql =
+        insert {
+            into WriteRecordFixture.invoice
+            entity WriteRecordFixture.readRow
+        }
+        |> toInsertSql
+    sql =! """INSERT INTO "sales"."invoice" ("currencycode", "price") VALUES (@p0, @p1)"""
+
+[<Test>]
+let ``entity: a record without write columns is reflected, so every field is named``() =
+    let row : person.address =
+        { addressid = 1; addressline1 = "a"; addressline2 = None; city = "c"; stateprovinceid = 1
+          postalcode = "p"; spatiallocation = None; rowguid = System.Guid.Empty; modifieddate = System.DateTime.MinValue }
+    let sql = insert { into person.address; entity row } |> toInsertSql
+    test <@ sql.StartsWith """INSERT INTO "person"."address" ("addressid", "addressline1", "addressline2", "city",""" @>
+
+[<Test>]
+let ``the insert spec holds each row as column and parameter pairs``() =
+    let query = insert { into WriteRecordFixture.invoice; entity WriteRecordFixture.readRow }
+    query.Spec.Entities |> List.map (List.map fst) =! [ [ "currencycode"; "price" ] ]
+
+[<Test>]
+let ``doUpdateWrite: without onConflict the query is refused as it is built``() =
+    let build () =
+        insert {
+            for i in WriteRecordFixture.invoice do
+            writeEntity (toWrite WriteRecordFixture.readRow)
+            doUpdateWrite (fun w -> w.price)
+        }
+        |> ignore
+    let ex = Assert.Throws<System.Exception>(fun () -> build ())
+    ex.Message =! "doUpdateWrite requires onConflict to be called first"

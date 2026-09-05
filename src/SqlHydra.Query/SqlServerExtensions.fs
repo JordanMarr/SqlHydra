@@ -62,7 +62,7 @@ type SqlFn =
     static member EOMONTH(date: DateTime, months: int) : DateTime = sqlFn
 
 /// SQL Server specific extensions for the insert builder.
-type InsertBuilder<'Inserted, 'InsertReturn> with
+type InsertBuilder<'Inserted, 'InsertReturn, 'Write when 'Write :> SqlHydra.IWriteOf<'Inserted>> with
 
     /// Performs an insert-first upsert. On duplicate key (PK/UNIQUE violation), updates the specified columns.
     [<CustomOperation("insertOrUpdateOnUnique", MaintainsVariableSpace = true)>]
@@ -75,6 +75,17 @@ type InsertBuilder<'Inserted, 'InsertReturn> with
         let updateFields = LinqExpressionVisitors.visitPropertiesSelector<'T, 'UpdateProperties> updateFieldsSelector (fun tblAlias p -> p.Name)
         let newSpec = { spec with InsertType = InsertOrUpdateOnUnique (keyFields, updateFields) }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
+
+    /// `insertOrUpdateOnUnique` with the update fields selected over the write record, so a read-only column cannot be named.
+    [<CustomOperation("insertOrUpdateOnUniqueWrite", MaintainsVariableSpace = true)>]
+    member this.InsertOrUpdateOnUniqueWrite(state: QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>,
+        [<ProjectionParameter>] keyFieldsSelector: System.Linq.Expressions.Expression<Func<'Inserted, 'KeyProperty>>,
+        updateFieldsSelector: System.Linq.Expressions.Expression<Func<'Write, 'UpdateProperties>>) =
+        let spec = state.Query
+        let keyFields = LinqExpressionVisitors.visitPropertiesSelector<'Inserted, 'KeyProperty> keyFieldsSelector (fun _ p -> p.Name)
+        let updateFields = LinqExpressionVisitors.visitPropertiesSelector<'Write, 'UpdateProperties> updateFieldsSelector (fun _ p -> p.Name)
+        QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>(
+            { spec with InsertType = InsertOrUpdateOnUnique (keyFields, updateFields) }, state.TableMappings)
 
     /// Selects columns to output from the insert statement.
     [<CustomOperation("output", MaintainsVariableSpace = true)>]

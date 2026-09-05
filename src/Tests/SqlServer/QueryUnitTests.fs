@@ -1196,3 +1196,55 @@ END CATCH;"""
     allParams.Length =! 6
     let paramNames = allParams |> List.map (fun p -> p.ParameterName)
     paramNames =! [ "@p0"; "@p1"; "@p2"; "@__update_AccountNumber"; "@__key_CustomerID"; "@__key_StoreID" ]
+
+// Fixture standing in for generated output: `Id` is an IDENTITY and `Tax` a computed column,
+// so neither is on the write record.
+
+module WriteRecordFixture =
+    module Sales =
+        [<CLIMutable>]
+        type Invoice =
+            { Id: int
+              Code: string
+              Price: decimal
+              Tax: decimal }
+            interface SqlHydra.IHasWrite<Invoice_write> with
+                member this.ToWrite() =
+                    { Code = this.Code; Price = this.Price }
+            interface SqlHydra.IWriteColumns with
+                member this.WriteColumns =
+                    [
+                      { SqlHydra.WriteColumn.Name = "Code"; Value = box this.Code; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "Price"; Value = box this.Price; ProviderDbType = None }
+                    ]
+
+        and [<CLIMutable>] Invoice_write =
+            { Code: string
+              Price: decimal }
+            interface SqlHydra.IWriteOf<Invoice> with
+                member this.WriteColumns =
+                    [
+                      { SqlHydra.WriteColumn.Name = "Code"; Value = box this.Code; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "Price"; Value = box this.Price; ProviderDbType = None }
+                    ]
+
+    let invoice = table<Sales.Invoice>
+
+    let readRow : Sales.Invoice =
+        { Id = 1
+          Code = "a"
+          Price = 10m
+          Tax = 1m }
+
+open SqlHydra.Query.SqlServerExtensions
+
+[<Test>]
+let ``insertOrUpdateOnUniqueWrite: the insert names only the write record's fields, and the update columns are taken from it``() =
+    let query =
+        insert {
+            for i in WriteRecordFixture.invoice do
+            writeEntity (toWrite WriteRecordFixture.readRow)
+            insertOrUpdateOnUniqueWrite i.Code (fun w -> w.Price)
+        }
+    toInsertSql query =! "INSERT INTO [Sales].[Invoice] ([Code], [Price]) VALUES (@p0, @p1)"
+    query.Spec.InsertType =! InsertType.InsertOrUpdateOnUnique ([ "Code" ], [ "Price" ])

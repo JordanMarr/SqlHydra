@@ -48,6 +48,10 @@ type Column =
         TypeMapping: TypeMapping
         IsNullable: bool
         IsPK: bool
+
+        /// True when the database owns the value and rejects a statement that names the
+        /// column: a generated column, or `GENERATED ALWAYS AS IDENTITY`.
+        IsReadOnly: bool
     }
 
 type TableType = 

@@ -228,7 +228,15 @@ type PgSqlFn =
     /// Example: `interval "7 days"` → `INTERVAL '7 days'`
     static member interval(value: string) : TimeSpan = sqlFn
 
-type InsertBuilder<'Inserted, 'InsertReturn> with
+/// The columns `onConflict` left pending, for `keyword` to close into a DO UPDATE action.
+let private pendingConflictFields (keyword: string) (spec: InsertQuerySpec<'T, 'InsertReturn>) =
+    match spec.PendingConflict with
+    | Some (TypedConflictColumns (fields, None)) -> fields
+    | Some (TypedConflictColumns _) -> failwith $"{keyword} does not currently support a partial-index WHERE clause"
+    | Some (RawConflictTarget _) -> failwith $"{keyword} requires a typed conflict target (use onConflict, not onConflictRaw)"
+    | None -> failwith $"{keyword} requires onConflict to be called first"
+
+type InsertBuilder<'Inserted, 'InsertReturn, 'Write when 'Write :> SqlHydra.IWriteOf<'Inserted>> with
     
     /// Performs an update on one or more update fields if a conflict occurs.
     [<CustomOperation("onConflictDoUpdate", MaintainsVariableSpace = true)>]
@@ -241,6 +249,17 @@ type InsertBuilder<'Inserted, 'InsertReturn> with
         let updateFields = LinqExpressionVisitors.visitPropertiesSelector<'T, 'UpdateProperties> updateFields (fun tblAlias p -> p.Name)
         let newSpec = { spec with InsertType = OnConflictDoUpdate (conflictFields, updateFields) }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
+
+    /// `onConflictDoUpdate` with the update fields selected over the write record, so a read-only column cannot be named.
+    [<CustomOperation("onConflictDoUpdateWrite", MaintainsVariableSpace = true)>]
+    member this.OnConflictDoUpdateWrite(state: QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>,
+        [<ProjectionParameter>] conflictFields: System.Linq.Expressions.Expression<Func<'Inserted, 'ConflictProperty>>,
+        updateFields: System.Linq.Expressions.Expression<Func<'Write, 'UpdateProperties>>) =
+        let spec = state.Query
+        let conflictColumns = LinqExpressionVisitors.visitPropertiesSelector<'Inserted, 'ConflictProperty> conflictFields (fun _ p -> p.Name)
+        let updateColumns = LinqExpressionVisitors.visitPropertiesSelector<'Write, 'UpdateProperties> updateFields (fun _ p -> p.Name)
+        QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>(
+            { spec with InsertType = OnConflictDoUpdate (conflictColumns, updateColumns) }, state.TableMappings)
 
     /// Insert is ignored if a conflict occurs.
     [<CustomOperation("onConflictDoNothing", MaintainsVariableSpace = true)>]
@@ -267,6 +286,20 @@ type InsertBuilder<'Inserted, 'InsertReturn> with
         let coalesceFields = LinqExpressionVisitors.visitPropertiesSelector<'T, 'CoalesceProperties> coalesceFields (fun _ p -> p.Name)
         let newSpec = { spec with InsertType = OnConflictDoUpdateCoalesce (conflictFields, updateFields, coalesceFields) }
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(newSpec, state.TableMappings)
+
+    /// `onConflictDoUpdateCoalesce` with the update and coalesce fields selected over the write record,
+    /// so a read-only column cannot be named.
+    [<CustomOperation("onConflictDoUpdateCoalesceWrite", MaintainsVariableSpace = true)>]
+    member this.OnConflictDoUpdateCoalesceWrite(state: QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>,
+        [<ProjectionParameter>] conflictFields: System.Linq.Expressions.Expression<Func<'Inserted, 'ConflictProperty>>,
+        updateFields: System.Linq.Expressions.Expression<Func<'Write, 'UpdateProperties>>,
+        coalesceFields: System.Linq.Expressions.Expression<Func<'Write, 'CoalesceProperties>>) =
+        let spec = state.Query
+        let conflictColumns = LinqExpressionVisitors.visitPropertiesSelector<'Inserted, 'ConflictProperty> conflictFields (fun _ p -> p.Name)
+        let updateColumns = LinqExpressionVisitors.visitPropertiesSelector<'Write, 'UpdateProperties> updateFields (fun _ p -> p.Name)
+        let coalesceColumns = LinqExpressionVisitors.visitPropertiesSelector<'Write, 'CoalesceProperties> coalesceFields (fun _ p -> p.Name)
+        QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>(
+            { spec with InsertType = OnConflictDoUpdateCoalesce (conflictColumns, updateColumns, coalesceColumns) }, state.TableMappings)
 
     /// ON CONFLICT (cols) WHERE <whereFragment> DO NOTHING — for partial-index conflicts.
     /// Use ? as parameter placeholders in the where fragment.
@@ -353,14 +386,20 @@ type InsertBuilder<'Inserted, 'InsertReturn> with
         [<ProjectionParameter>] updateFields) =
         let spec = state.Query
         let updateFields = LinqExpressionVisitors.visitPropertiesSelector<'T, 'UpdateProperties> updateFields (fun _ p -> p.Name)
-        let conflictFields =
-            match spec.PendingConflict with
-            | Some (TypedConflictColumns (fields, None)) -> fields
-            | Some (TypedConflictColumns _) -> failwith "doUpdate does not currently support a partial-index WHERE clause"
-            | Some (RawConflictTarget _) -> failwith "doUpdate requires a typed conflict target (use onConflict, not onConflictRaw)"
-            | None -> failwith "doUpdate requires onConflict to be called first"
+        let conflictFields = pendingConflictFields "doUpdate" spec
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
             { spec with InsertType = OnConflictDoUpdate (conflictFields, updateFields); PendingConflict = None },
+            state.TableMappings)
+
+    /// `doUpdate` with the update fields selected over the write record, so a read-only column cannot be named.
+    [<CustomOperation("doUpdateWrite", MaintainsVariableSpace = true)>]
+    member this.DoUpdateWrite(state: QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>,
+        updateFields: System.Linq.Expressions.Expression<Func<'Write, 'UpdateProperties>>) =
+        let spec = state.Query
+        let updateColumns = LinqExpressionVisitors.visitPropertiesSelector<'Write, 'UpdateProperties> updateFields (fun _ p -> p.Name)
+        let conflictColumns = pendingConflictFields "doUpdateWrite" spec
+        QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>(
+            { spec with InsertType = OnConflictDoUpdate (conflictColumns, updateColumns); PendingConflict = None },
             state.TableMappings)
 
     /// Conflict action: DO UPDATE SET — `updateFields` are updated as `col = EXCLUDED.col`,
@@ -373,14 +412,23 @@ type InsertBuilder<'Inserted, 'InsertReturn> with
         let spec = state.Query
         let updateFields = LinqExpressionVisitors.visitPropertiesSelector<'T, 'UpdateProperties> updateFields (fun _ p -> p.Name)
         let coalesceFields = LinqExpressionVisitors.visitPropertiesSelector<'T, 'CoalesceProperties> coalesceFields (fun _ p -> p.Name)
-        let conflictFields =
-            match spec.PendingConflict with
-            | Some (TypedConflictColumns (fields, None)) -> fields
-            | Some (TypedConflictColumns _) -> failwith "doUpdateCoalesce does not currently support a partial-index WHERE clause"
-            | Some (RawConflictTarget _) -> failwith "doUpdateCoalesce requires a typed conflict target (use onConflict, not onConflictRaw)"
-            | None -> failwith "doUpdateCoalesce requires onConflict to be called first"
+        let conflictFields = pendingConflictFields "doUpdateCoalesce" spec
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
             { spec with InsertType = OnConflictDoUpdateCoalesce (conflictFields, updateFields, coalesceFields); PendingConflict = None },
+            state.TableMappings)
+
+    /// `doUpdateCoalesce` with the update and coalesce fields selected over the write record,
+    /// so a read-only column cannot be named.
+    [<CustomOperation("doUpdateCoalesceWrite", MaintainsVariableSpace = true)>]
+    member this.DoUpdateCoalesceWrite(state: QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>,
+        updateFields: System.Linq.Expressions.Expression<Func<'Write, 'UpdateProperties>>,
+        coalesceFields: System.Linq.Expressions.Expression<Func<'Write, 'CoalesceProperties>>) =
+        let spec = state.Query
+        let updateColumns = LinqExpressionVisitors.visitPropertiesSelector<'Write, 'UpdateProperties> updateFields (fun _ p -> p.Name)
+        let coalesceColumns = LinqExpressionVisitors.visitPropertiesSelector<'Write, 'CoalesceProperties> coalesceFields (fun _ p -> p.Name)
+        let conflictColumns = pendingConflictFields "doUpdateCoalesceWrite" spec
+        QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>(
+            { spec with InsertType = OnConflictDoUpdateCoalesce (conflictColumns, updateColumns, coalesceColumns); PendingConflict = None },
             state.TableMappings)
 
 type SelectBuilder<'Selected, 'Mapped> with

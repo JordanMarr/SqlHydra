@@ -584,3 +584,78 @@ let ``DateOnly round-trip in SQLite``() = task {
     results.Length =! 1
     results.[0].date =! expected
 }
+
+// The typed `onConflictDoUpdateWrite` end to end, on a table with a generated column.
+
+module DoUpdateWriteFixture =
+    module main =
+        /// Mirrors the DDL below.
+        [<CLIMutable>]
+        type sqlhydra_do_update_write =
+            { id: int64
+              code: string
+              price: float
+              tax: float }
+
+        and [<CLIMutable>] sqlhydra_do_update_write_write =
+            { code: string
+              price: float }
+            interface SqlHydra.IWriteOf<sqlhydra_do_update_write> with
+                member this.WriteColumns =
+                    [
+                      { SqlHydra.WriteColumn.Name = "code"; Value = box this.code; ProviderDbType = None }
+                      { SqlHydra.WriteColumn.Name = "price"; Value = box this.price; ProviderDbType = None }
+                    ]
+
+    let rows = table<main.sqlhydra_do_update_write>
+
+    let row : main.sqlhydra_do_update_write_write = { code = "a"; price = 10.0 }
+
+    let ddl =
+        """
+        DROP TABLE IF EXISTS sqlhydra_do_update_write;
+        CREATE TABLE sqlhydra_do_update_write (
+            id    INTEGER PRIMARY KEY AUTOINCREMENT,
+            code  TEXT NOT NULL UNIQUE,
+            price REAL NOT NULL,
+            tax   REAL GENERATED ALWAYS AS (price * 0.1) STORED
+        );
+        """
+
+    let dropDdl = "DROP TABLE sqlhydra_do_update_write;"
+
+    let exec (ctx: QueryContext) (sql: string) = task {
+        use cmd = ctx.Connection.CreateCommand()
+        cmd.CommandText <- sql
+        let! _ = cmd.ExecuteNonQueryAsync()
+        ()
+    }
+
+[<Test>]
+let ``onConflictDoUpdateWrite: the upsert names only the write record's fields, and the conflicting row is updated``() = task {
+    let sqlLog = ResizeArray<string>()
+    use! ctx = db.OpenContextAsync()
+    ctx.Logger <- fun compiled -> sqlLog.Add compiled.Sql
+    do! DoUpdateWriteFixture.exec ctx DoUpdateWriteFixture.ddl
+
+    let upsert (price: float) =
+        insertTask ctx {
+            for r in DoUpdateWriteFixture.rows do
+            writeEntity { DoUpdateWriteFixture.row with price = price }
+            onConflictDoUpdateWrite r.code (fun w -> w.price)
+        }
+    let! inserted = upsert 10.0
+    let! updated = upsert 25.0
+    inserted =! 1
+    updated =! 1
+    let upsertSql = System.Text.RegularExpressions.Regex.Replace(sqlLog |> Seq.distinct |> Seq.exactlyOne, @"\s+", " ").Trim()
+    upsertSql =! """INSERT INTO "main"."sqlhydra_do_update_write" ("code", "price") VALUES (@p0, @p1) ON CONFLICT(code) DO UPDATE SET price=EXCLUDED."price" ;"""
+
+    let! rows = selectTask ctx { for r in DoUpdateWriteFixture.rows do select r }
+    let row = rows |> Seq.exactlyOne
+    row.id =! 1L
+    row.price =! 25.0
+    row.tax =! 2.5
+
+    do! DoUpdateWriteFixture.exec ctx DoUpdateWriteFixture.dropDdl
+}
