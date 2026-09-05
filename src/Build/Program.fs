@@ -63,6 +63,25 @@ Target.create "TestNet10" <| fun _ ->
 Target.create "Test" <| fun _ ->
     printfn "Testing on all supported frameworks."
 
+Target.create "Regen" <| fun _ ->
+    // Regenerates every AdventureWorks*.fs in Tests from its sqlhydra-*.toml, against the
+    // running database containers. CI reruns this and fails if a PR left the generated
+    // files stale, so the generated diff always travels with the generator change.
+    let tomlPattern = System.Text.RegularExpressions.Regex(@"^sqlhydra-([a-z]+)-(?:nullable-)?net(\d+)\.toml$")
+    let tomls =
+        DirectoryInfo(tests).GetFiles("sqlhydra-*.toml")
+        |> Array.choose (fun f ->
+            match tomlPattern.Match(f.Name) with
+            | m when m.Success -> Some(f.Name, m.Groups.[1].Value, $"net{m.Groups.[2].Value}.0")
+            | _ -> None)
+        |> Array.sortBy (fun (name, _, _) -> name)
+    if tomls.Length = 0 then failwith $"No sqlhydra-*.toml files found in '{tests}'."
+    tomls
+    |> Array.iter (fun (toml, provider, framework) ->
+        printfn $"Regenerating {toml} ({provider}, {framework})"
+        let code = Shell.Exec(Tools.dotnet, $"run --project {cli} --framework {framework} -- {provider} -t {toml}", tests)
+        if code <> 0 then failwith $"Regeneration failed for '{toml}'.")
+
 Target.create "Pack" <| fun _ ->
     allPackages
     |> List.map (fun pkg -> Shell.Exec(Tools.dotnet, "pack --configuration Release -o nupkg/Release", pkg), pkg)

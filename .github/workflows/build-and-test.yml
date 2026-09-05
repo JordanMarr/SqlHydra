@@ -39,6 +39,16 @@ jobs:
       - name: Start containers
         working-directory: src/.devcontainer
         run: docker compose up -d --wait mssql postgresql orcl
+      - name: Regenerate AdventureWorks schemas
+        working-directory: src/Build
+        run: dotnet run -- Regen
+      - name: Generated code is current
+        run: |
+          if [ -n "$(git status --porcelain -- ':(glob)src/Tests/**/AdventureWorks*.fs')" ]; then
+            git diff -- ':(glob)src/Tests/**/AdventureWorks*.fs'
+            echo "::error::Generated AdventureWorks files are stale. Run 'dotnet run -- Regen' from src/Build (or src/Tests/regen-all.bat) and commit the result."
+            exit 1
+          fi
       - name: Build
         working-directory: src/
         run: dotnet build --no-restore
