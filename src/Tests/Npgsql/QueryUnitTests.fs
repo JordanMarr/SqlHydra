@@ -1855,13 +1855,22 @@ let ``entity: the read record's insert names only the columns the database lets 
         |> toInsertSql
     sql =! """INSERT INTO "sales"."invoice" ("currencycode", "price") VALUES (@p0, @p1)"""
 
+/// A record with no IWriteColumns: the reflection fallback's audience (hand-written records,
+/// or code generated before write columns existed). Deliberately NOT a generated record —
+/// every generated record now implements IWriteColumns, so one from AdventureWorks.fs would
+/// silently stop exercising the fallback on the next regeneration.
+module ReflectedRecordFixture =
+    module legacy =
+        [<CLIMutable>]
+        type unmarked_row =
+            { id: int
+              name: string }
+
 [<Test>]
 let ``entity: a record without write columns is reflected, so every field is named``() =
-    let row : person.address =
-        { addressid = 1; addressline1 = "a"; addressline2 = None; city = "c"; stateprovinceid = 1
-          postalcode = "p"; spatiallocation = None; rowguid = System.Guid.Empty; modifieddate = System.DateTime.MinValue }
-    let sql = insert { into person.address; entity row } |> toInsertSql
-    test <@ sql.StartsWith """INSERT INTO "person"."address" ("addressid", "addressline1", "addressline2", "city",""" @>
+    let row : ReflectedRecordFixture.legacy.unmarked_row = { id = 1; name = "a" }
+    let sql = insert { into (table<ReflectedRecordFixture.legacy.unmarked_row>); entity row } |> toInsertSql
+    test <@ sql.Contains """("id", "name")""" @>
 
 [<Test>]
 let ``the insert spec holds each row as column and parameter pairs``() =

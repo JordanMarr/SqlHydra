@@ -115,7 +115,10 @@ let getOrCreateConfig (args: Args) =
 open Fantomas.Core
 
 let formatCodeWithFantomas (code: string) =
-    let cfg = FormatConfig.Default
+    // Generated code is read, not hand-edited: a wide line beats a stacked one. Records split
+    // when wider than MaxRecordWidth (default 40!), so every WriteColumn became a three-line
+    // stanza and the write-column lists dominated the file. At 200/200 each column is one line.
+    let cfg = { FormatConfig.Default with MaxLineLength = 200; MaxRecordWidth = 200 }
 
     CodeFormatter.FormatDocumentAsync(false, code, cfg) 
     |> Async.RunSynchronously

@@ -44,6 +44,17 @@ jobs:
       - name: Build
         working-directory: src/
         run: dotnet build --no-restore
+      # After Build: the sqlite tomls load a codegen extension from the compiled Tests assembly.
+      - name: Regenerate AdventureWorks schemas
+        working-directory: src/Build
+        run: dotnet run -- Regen
+      - name: Generated code is current
+        run: |
+          if [ -n "$(git status --porcelain -- ':(glob)src/Tests/**/AdventureWorks*.fs')" ]; then
+            git diff -- ':(glob)src/Tests/**/AdventureWorks*.fs'
+            echo "::error::Generated AdventureWorks files are stale. Run 'dotnet run -- Regen' from src/Build (or src/Tests/regen-all.bat) and commit the result."
+            exit 1
+          fi
       - name: Test net8.0
         working-directory: src/
         run: dotnet test --framework net8.0
