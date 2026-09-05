@@ -6,7 +6,7 @@ open System
 open System.Threading
 
 /// The base insert builder that contains all common operations
-type InsertBuilder<'Inserted, 'InsertReturn>() =
+type InsertBuilder<'Inserted, 'InsertReturn, 'Write when 'Write :> SqlHydra.IWriteOf<'Inserted>>() =
 
     let getQueryOrDefault (state: QuerySource<'T>) =
         match state with
@@ -42,7 +42,15 @@ type InsertBuilder<'Inserted, 'InsertReturn>() =
     member this.Entity (state:QuerySource<'T>, value: 'T) = 
         let spec = state |> getQueryOrDefault
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
-            { spec with Entities = [ value ] }
+            { spec with Entities = [ QueryUtils.writeColumns (box value) ] }
+            , state.TableMappings)
+
+    /// Sets a single value for INSERT from the table's write record, which has no field for a read-only column.
+    [<CustomOperation("writeEntity", MaintainsVariableSpace = true)>]
+    member this.WriteEntity (state: QuerySource<'Inserted>, value: 'Write) =
+        let spec = state |> getQueryOrDefault
+        QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>(
+            { spec with Entities = [ QueryUtils.writeColumns (box value) ] }
             , state.TableMappings)
 
     /// Sets multiple values for INSERT. (Must have at least one value.)
@@ -50,7 +58,7 @@ type InsertBuilder<'Inserted, 'InsertReturn>() =
     member this.Entities (state:QuerySource<'T>, entities: AtLeastOne.AtLeastOne<'T>) = 
         let spec = state |> getQueryOrDefault
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
-            { spec with Entities = entities |> AtLeastOne.getSeq |> Seq.toList }
+            { spec with Entities = entities |> AtLeastOne.getSeq |> Seq.map (box >> QueryUtils.writeColumns) |> Seq.toList }
             , state.TableMappings)
 
     /// Sets multiple values for INSERT. (Should have at least one value.)
@@ -58,7 +66,15 @@ type InsertBuilder<'Inserted, 'InsertReturn>() =
     member this.Entities (state:QuerySource<'T>, entities: 'T seq) = 
         let spec = state |> getQueryOrDefault
         QuerySource<'T, InsertQuerySpec<'T, 'InsertReturn>>(
-            { spec with Entities = entities |> Seq.toList }
+            { spec with Entities = entities |> Seq.map (box >> QueryUtils.writeColumns) |> Seq.toList }
+            , state.TableMappings)
+
+    /// Sets multiple values for INSERT from the table's write record. (Should have at least one value.)
+    [<CustomOperation("writeEntities", MaintainsVariableSpace = true)>]
+    member this.WriteEntities (state: QuerySource<'Inserted>, entities: 'Write seq) =
+        let spec = state |> getQueryOrDefault
+        QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>(
+            { spec with Entities = entities |> Seq.map (box >> QueryUtils.writeColumns) |> Seq.toList }
             , state.TableMappings)
 
     /// Includes a column in the insert query.
@@ -130,8 +146,8 @@ type InsertBuilder<'Inserted, 'InsertReturn>() =
 
 
 /// An insert builder that returns a Task result.
-type InsertAsyncBuilder<'Inserted, 'InsertReturn>(ct: ContextType) =
-    inherit InsertBuilder<'Inserted, 'InsertReturn>()
+type InsertAsyncBuilder<'Inserted, 'InsertReturn, 'Write when 'Write :> SqlHydra.IWriteOf<'Inserted>>(ct: ContextType) =
+    inherit InsertBuilder<'Inserted, 'InsertReturn, 'Write>()
 
     member this.Run (state: QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>) = 
         async {
@@ -151,8 +167,8 @@ type InsertAsyncBuilder<'Inserted, 'InsertReturn>(ct: ContextType) =
 
 
 /// An insert builder that returns an Async result.
-type InsertTaskBuilder<'Inserted, 'InsertReturn>(ct: ContextType) =
-    inherit InsertBuilder<'Inserted, 'InsertReturn>()
+type InsertTaskBuilder<'Inserted, 'InsertReturn, 'Write when 'Write :> SqlHydra.IWriteOf<'Inserted>>(ct: ContextType) =
+    inherit InsertBuilder<'Inserted, 'InsertReturn, 'Write>()
 
     member this.Run (state: QuerySource<'Inserted, InsertQuerySpec<'Inserted, 'InsertReturn>>) =
         task {
@@ -170,20 +186,20 @@ type InsertTaskBuilder<'Inserted, 'InsertReturn>(ct: ContextType) =
 
 
 /// Builds an insert query that can be manually run by piping into QueryContext insert methods
-let insert<'Inserted, 'InsertReturn> = 
-    InsertBuilder<'Inserted, 'InsertReturn>()
+let insert<'Inserted, 'InsertReturn, 'Write when 'Write :> SqlHydra.IWriteOf<'Inserted>> = 
+    InsertBuilder<'Inserted, 'InsertReturn, 'Write>()
 
 /// Builds an insert query that returns an Async result
-let inline insertAsync< ^Inserted, ^InsertReturn, ^Context
-    when (ContextTypeResolver.Resolver or ^Context) : (static member ($) : ContextTypeResolver.Resolver * ^Context -> ContextType)>
+let inline insertAsync< ^Inserted, ^InsertReturn, ^Write, ^Context
+    when ^Write :> SqlHydra.IWriteOf< ^Inserted> and (ContextTypeResolver.Resolver or ^Context) : (static member ($) : ContextTypeResolver.Resolver * ^Context -> ContextType)>
     (ctSource: ^Context) =
     let ct = ContextTypeResolver.resolve ctSource
-    InsertAsyncBuilder< ^Inserted, ^InsertReturn>(ct)
+    InsertAsyncBuilder< ^Inserted, ^InsertReturn, ^Write>(ct)
 
 /// Builds an insert query that returns a Task result
-let inline insertTask< ^Inserted, ^InsertReturn, ^Context
-    when (ContextTypeResolver.Resolver or ^Context) : (static member ($) : ContextTypeResolver.Resolver * ^Context -> ContextType)>
+let inline insertTask< ^Inserted, ^InsertReturn, ^Write, ^Context
+    when ^Write :> SqlHydra.IWriteOf< ^Inserted> and (ContextTypeResolver.Resolver or ^Context) : (static member ($) : ContextTypeResolver.Resolver * ^Context -> ContextType)>
     (ctSource: ^Context) =
     let ct = ContextTypeResolver.resolve ctSource
-    InsertTaskBuilder< ^Inserted, ^InsertReturn>(ct)
+    InsertTaskBuilder< ^Inserted, ^InsertReturn, ^Write>(ct)
     

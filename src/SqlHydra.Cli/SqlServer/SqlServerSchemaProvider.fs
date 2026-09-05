@@ -108,6 +108,7 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
                             Column.IsNullable = col.IsNullable
                             Column.TypeMapping = typeMapping
                             Column.IsPK = col.IsPrimaryKey
+                            Column.IsReadOnly = false
                         }
                     )
                 )

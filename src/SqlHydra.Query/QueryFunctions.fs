@@ -29,6 +29,9 @@ type SqlFunctionNotRenderedException(message: string, inner: exn) =
 [<SqlHydraFunction>]
 module Table =
 
+    /// A table row's write record, for `writeEntity` and the typed `…Write` operations.
+    let toWrite (row: #SqlHydra.IHasWrite<'Write>) : 'Write = row.ToWrite()
+
     /// Maps the entity 'T to a table of the exact same name.
     let table<'T> =
         let ent = typeof<'T>
