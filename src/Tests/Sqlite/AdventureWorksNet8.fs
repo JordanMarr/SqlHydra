@@ -25,33 +25,15 @@ module main =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "AddressID"
-                    Value = box this.AddressID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "AddressLine1"
-                    Value = box this.AddressLine1
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "AddressLine2"
-                    Value = box this.AddressLine2
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "City"
-                    Value = box this.City
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "StateProvince"
-                    Value = box this.StateProvince
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "CountryRegion"
-                    Value = box this.CountryRegion
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "PostalCode"
-                    Value = box this.PostalCode
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "AddressID"; Value = box this.AddressID; ProviderDbType = None }
+                  { WriteColumn.Name = "AddressLine1"; Value = box this.AddressLine1; ProviderDbType = None }
+                  { WriteColumn.Name = "AddressLine2"; Value = box this.AddressLine2; ProviderDbType = None }
+                  { WriteColumn.Name = "City"; Value = box this.City; ProviderDbType = None }
+                  { WriteColumn.Name = "StateProvince"; Value = box this.StateProvince; ProviderDbType = None }
+                  { WriteColumn.Name = "CountryRegion"; Value = box this.CountryRegion; ProviderDbType = None }
+                  { WriteColumn.Name = "PostalCode"; Value = box this.PostalCode; ProviderDbType = None }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = None }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = None } ]
 
     let Address = table<Address>
 
@@ -64,18 +46,10 @@ module main =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "SystemInformationID"
-                    Value = box this.SystemInformationID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Database Version"
-                    Value = box this.``Database Version``
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "VersionDate"
-                    Value = box this.VersionDate
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "SystemInformationID"; Value = box this.SystemInformationID; ProviderDbType = None }
+                  { WriteColumn.Name = "Database Version"; Value = box this.``Database Version``; ProviderDbType = None }
+                  { WriteColumn.Name = "VersionDate"; Value = box this.VersionDate; ProviderDbType = None }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = None } ]
 
     let BuildVersion = table<BuildVersion>
 
@@ -99,51 +73,21 @@ module main =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "CustomerID"
-                    Value = box this.CustomerID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "NameStyle"
-                    Value = box this.NameStyle
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Title"
-                    Value = box this.Title
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "FirstName"
-                    Value = box this.FirstName
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "MiddleName"
-                    Value = box this.MiddleName
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "LastName"
-                    Value = box this.LastName
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Suffix"
-                    Value = box this.Suffix
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "CompanyName"
-                    Value = box this.CompanyName
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "SalesPerson"
-                    Value = box this.SalesPerson
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "EmailAddress"
-                    Value = box this.EmailAddress
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Phone"
-                    Value = box this.Phone
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "PasswordHash"
-                    Value = box this.PasswordHash
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "PasswordSalt"
-                    Value = box this.PasswordSalt
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "CustomerID"; Value = box this.CustomerID; ProviderDbType = None }
+                  { WriteColumn.Name = "NameStyle"; Value = box this.NameStyle; ProviderDbType = None }
+                  { WriteColumn.Name = "Title"; Value = box this.Title; ProviderDbType = None }
+                  { WriteColumn.Name = "FirstName"; Value = box this.FirstName; ProviderDbType = None }
+                  { WriteColumn.Name = "MiddleName"; Value = box this.MiddleName; ProviderDbType = None }
+                  { WriteColumn.Name = "LastName"; Value = box this.LastName; ProviderDbType = None }
+                  { WriteColumn.Name = "Suffix"; Value = box this.Suffix; ProviderDbType = None }
+                  { WriteColumn.Name = "CompanyName"; Value = box this.CompanyName; ProviderDbType = None }
+                  { WriteColumn.Name = "SalesPerson"; Value = box this.SalesPerson; ProviderDbType = None }
+                  { WriteColumn.Name = "EmailAddress"; Value = box this.EmailAddress; ProviderDbType = None }
+                  { WriteColumn.Name = "Phone"; Value = box this.Phone; ProviderDbType = None }
+                  { WriteColumn.Name = "PasswordHash"; Value = box this.PasswordHash; ProviderDbType = None }
+                  { WriteColumn.Name = "PasswordSalt"; Value = box this.PasswordSalt; ProviderDbType = None }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = None }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = None } ]
 
     let Customer = table<Customer>
 
@@ -157,21 +101,11 @@ module main =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "CustomerID"
-                    Value = box this.CustomerID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "AddressID"
-                    Value = box this.AddressID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "AddressType"
-                    Value = box this.AddressType
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "CustomerID"; Value = box this.CustomerID; ProviderDbType = None }
+                  { WriteColumn.Name = "AddressID"; Value = box this.AddressID; ProviderDbType = None }
+                  { WriteColumn.Name = "AddressType"; Value = box this.AddressType; ProviderDbType = None }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = None }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = None } ]
 
     let CustomerAddress = table<CustomerAddress>
 
@@ -189,33 +123,15 @@ module main =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ErrorLogID"
-                    Value = box this.ErrorLogID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ErrorTime"
-                    Value = box this.ErrorTime
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "UserName"
-                    Value = box this.UserName
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ErrorNumber"
-                    Value = box this.ErrorNumber
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ErrorSeverity"
-                    Value = box this.ErrorSeverity
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ErrorState"
-                    Value = box this.ErrorState
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ErrorProcedure"
-                    Value = box this.ErrorProcedure
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ErrorLine"
-                    Value = box this.ErrorLine
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ErrorMessage"
-                    Value = box this.ErrorMessage
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "ErrorLogID"; Value = box this.ErrorLogID; ProviderDbType = None }
+                  { WriteColumn.Name = "ErrorTime"; Value = box this.ErrorTime; ProviderDbType = None }
+                  { WriteColumn.Name = "UserName"; Value = box this.UserName; ProviderDbType = None }
+                  { WriteColumn.Name = "ErrorNumber"; Value = box this.ErrorNumber; ProviderDbType = None }
+                  { WriteColumn.Name = "ErrorSeverity"; Value = box this.ErrorSeverity; ProviderDbType = None }
+                  { WriteColumn.Name = "ErrorState"; Value = box this.ErrorState; ProviderDbType = None }
+                  { WriteColumn.Name = "ErrorProcedure"; Value = box this.ErrorProcedure; ProviderDbType = None }
+                  { WriteColumn.Name = "ErrorLine"; Value = box this.ErrorLine; ProviderDbType = None }
+                  { WriteColumn.Name = "ErrorMessage"; Value = box this.ErrorMessage; ProviderDbType = None } ]
 
     let ErrorLog = table<ErrorLog>
 
@@ -241,57 +157,23 @@ module main =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ProductNumber"
-                    Value = box this.ProductNumber
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Color"
-                    Value = box this.Color
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "StandardCost"
-                    Value = box this.StandardCost
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ListPrice"
-                    Value = box this.ListPrice
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Size"
-                    Value = box this.Size
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Weight"
-                    Value = box this.Weight
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ProductCategoryID"
-                    Value = box this.ProductCategoryID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ProductModelID"
-                    Value = box this.ProductModelID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "SellStartDate"
-                    Value = box this.SellStartDate
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "SellEndDate"
-                    Value = box this.SellEndDate
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "DiscontinuedDate"
-                    Value = box this.DiscontinuedDate
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ThumbNailPhoto"
-                    Value = box this.ThumbNailPhoto
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ThumbnailPhotoFileName"
-                    Value = box this.ThumbnailPhotoFileName
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = None }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = None }
+                  { WriteColumn.Name = "ProductNumber"; Value = box this.ProductNumber; ProviderDbType = None }
+                  { WriteColumn.Name = "Color"; Value = box this.Color; ProviderDbType = None }
+                  { WriteColumn.Name = "StandardCost"; Value = box this.StandardCost; ProviderDbType = None }
+                  { WriteColumn.Name = "ListPrice"; Value = box this.ListPrice; ProviderDbType = None }
+                  { WriteColumn.Name = "Size"; Value = box this.Size; ProviderDbType = None }
+                  { WriteColumn.Name = "Weight"; Value = box this.Weight; ProviderDbType = None }
+                  { WriteColumn.Name = "ProductCategoryID"; Value = box this.ProductCategoryID; ProviderDbType = None }
+                  { WriteColumn.Name = "ProductModelID"; Value = box this.ProductModelID; ProviderDbType = None }
+                  { WriteColumn.Name = "SellStartDate"; Value = box this.SellStartDate; ProviderDbType = None }
+                  { WriteColumn.Name = "SellEndDate"; Value = box this.SellEndDate; ProviderDbType = None }
+                  { WriteColumn.Name = "DiscontinuedDate"; Value = box this.DiscontinuedDate; ProviderDbType = None }
+                  { WriteColumn.Name = "ThumbNailPhoto"; Value = box this.ThumbNailPhoto; ProviderDbType = None }
+                  { WriteColumn.Name = "ThumbnailPhotoFileName"; Value = box this.ThumbnailPhotoFileName; ProviderDbType = None }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = None }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = None } ]
 
     let Product = table<Product>
 
@@ -305,21 +187,11 @@ module main =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductCategoryID"
-                    Value = box this.ProductCategoryID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ParentProductCategoryID"
-                    Value = box this.ParentProductCategoryID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "ProductCategoryID"; Value = box this.ProductCategoryID; ProviderDbType = None }
+                  { WriteColumn.Name = "ParentProductCategoryID"; Value = box this.ParentProductCategoryID; ProviderDbType = None }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = None }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = None }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = None } ]
 
     let ProductCategory = table<ProductCategory>
 
@@ -332,18 +204,10 @@ module main =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductDescriptionID"
-                    Value = box this.ProductDescriptionID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Description"
-                    Value = box this.Description
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "ProductDescriptionID"; Value = box this.ProductDescriptionID; ProviderDbType = None }
+                  { WriteColumn.Name = "Description"; Value = box this.Description; ProviderDbType = None }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = None }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = None } ]
 
     let ProductDescription = table<ProductDescription>
 
@@ -357,21 +221,11 @@ module main =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductModelID"
-                    Value = box this.ProductModelID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "CatalogDescription"
-                    Value = box this.CatalogDescription
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "ProductModelID"; Value = box this.ProductModelID; ProviderDbType = None }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = None }
+                  { WriteColumn.Name = "CatalogDescription"; Value = box this.CatalogDescription; ProviderDbType = None }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = None }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = None } ]
 
     let ProductModel = table<ProductModel>
 
@@ -385,21 +239,11 @@ module main =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductModelID"
-                    Value = box this.ProductModelID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ProductDescriptionID"
-                    Value = box this.ProductDescriptionID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Culture"
-                    Value = box this.Culture
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "ProductModelID"; Value = box this.ProductModelID; ProviderDbType = None }
+                  { WriteColumn.Name = "ProductDescriptionID"; Value = box this.ProductDescriptionID; ProviderDbType = None }
+                  { WriteColumn.Name = "Culture"; Value = box this.Culture; ProviderDbType = None }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = None }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = None } ]
 
     let ProductModelProductDescription = table<ProductModelProductDescription>
 
@@ -417,33 +261,15 @@ module main =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "SalesOrderID"
-                    Value = box this.SalesOrderID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "SalesOrderDetailID"
-                    Value = box this.SalesOrderDetailID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "OrderQty"
-                    Value = box this.OrderQty
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "UnitPrice"
-                    Value = box this.UnitPrice
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "UnitPriceDiscount"
-                    Value = box this.UnitPriceDiscount
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "LineTotal"
-                    Value = box this.LineTotal
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "SalesOrderID"; Value = box this.SalesOrderID; ProviderDbType = None }
+                  { WriteColumn.Name = "SalesOrderDetailID"; Value = box this.SalesOrderDetailID; ProviderDbType = None }
+                  { WriteColumn.Name = "OrderQty"; Value = box this.OrderQty; ProviderDbType = None }
+                  { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = None }
+                  { WriteColumn.Name = "UnitPrice"; Value = box this.UnitPrice; ProviderDbType = None }
+                  { WriteColumn.Name = "UnitPriceDiscount"; Value = box this.UnitPriceDiscount; ProviderDbType = None }
+                  { WriteColumn.Name = "LineTotal"; Value = box this.LineTotal; ProviderDbType = None }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = None }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = None } ]
 
     let SalesOrderDetail = table<SalesOrderDetail>
 
@@ -474,72 +300,28 @@ module main =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "SalesOrderID"
-                    Value = box this.SalesOrderID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "RevisionNumber"
-                    Value = box this.RevisionNumber
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "OrderDate"
-                    Value = box this.OrderDate
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "DueDate"
-                    Value = box this.DueDate
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ShipDate"
-                    Value = box this.ShipDate
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Status"
-                    Value = box this.Status
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "OnlineOrderFlag"
-                    Value = box this.OnlineOrderFlag
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "SalesOrderNumber"
-                    Value = box this.SalesOrderNumber
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "PurchaseOrderNumber"
-                    Value = box this.PurchaseOrderNumber
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "AccountNumber"
-                    Value = box this.AccountNumber
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "CustomerID"
-                    Value = box this.CustomerID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ShipToAddressID"
-                    Value = box this.ShipToAddressID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "BillToAddressID"
-                    Value = box this.BillToAddressID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ShipMethod"
-                    Value = box this.ShipMethod
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "CreditCardApprovalCode"
-                    Value = box this.CreditCardApprovalCode
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "SubTotal"
-                    Value = box this.SubTotal
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "TaxAmt"
-                    Value = box this.TaxAmt
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Freight"
-                    Value = box this.Freight
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "TotalDue"
-                    Value = box this.TotalDue
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "Comment"
-                    Value = box this.Comment
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "SalesOrderID"; Value = box this.SalesOrderID; ProviderDbType = None }
+                  { WriteColumn.Name = "RevisionNumber"; Value = box this.RevisionNumber; ProviderDbType = None }
+                  { WriteColumn.Name = "OrderDate"; Value = box this.OrderDate; ProviderDbType = None }
+                  { WriteColumn.Name = "DueDate"; Value = box this.DueDate; ProviderDbType = None }
+                  { WriteColumn.Name = "ShipDate"; Value = box this.ShipDate; ProviderDbType = None }
+                  { WriteColumn.Name = "Status"; Value = box this.Status; ProviderDbType = None }
+                  { WriteColumn.Name = "OnlineOrderFlag"; Value = box this.OnlineOrderFlag; ProviderDbType = None }
+                  { WriteColumn.Name = "SalesOrderNumber"; Value = box this.SalesOrderNumber; ProviderDbType = None }
+                  { WriteColumn.Name = "PurchaseOrderNumber"; Value = box this.PurchaseOrderNumber; ProviderDbType = None }
+                  { WriteColumn.Name = "AccountNumber"; Value = box this.AccountNumber; ProviderDbType = None }
+                  { WriteColumn.Name = "CustomerID"; Value = box this.CustomerID; ProviderDbType = None }
+                  { WriteColumn.Name = "ShipToAddressID"; Value = box this.ShipToAddressID; ProviderDbType = None }
+                  { WriteColumn.Name = "BillToAddressID"; Value = box this.BillToAddressID; ProviderDbType = None }
+                  { WriteColumn.Name = "ShipMethod"; Value = box this.ShipMethod; ProviderDbType = None }
+                  { WriteColumn.Name = "CreditCardApprovalCode"; Value = box this.CreditCardApprovalCode; ProviderDbType = None }
+                  { WriteColumn.Name = "SubTotal"; Value = box this.SubTotal; ProviderDbType = None }
+                  { WriteColumn.Name = "TaxAmt"; Value = box this.TaxAmt; ProviderDbType = None }
+                  { WriteColumn.Name = "Freight"; Value = box this.Freight; ProviderDbType = None }
+                  { WriteColumn.Name = "TotalDue"; Value = box this.TotalDue; ProviderDbType = None }
+                  { WriteColumn.Name = "Comment"; Value = box this.Comment; ProviderDbType = None }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = None }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = None } ]
 
     let SalesOrderHeader = table<SalesOrderHeader>
 
@@ -579,5 +361,4 @@ type QueryContextFactory =
                 return ctx
             }
 
-        { OpenContext = openContext
-          OpenContextAsync = openContextAsync }
+        { OpenContext = openContext; OpenContextAsync = openContextAsync }

@@ -22,24 +22,12 @@ module OT =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "CONTACT_ID"
-                    Value = box this.CONTACT_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "CUSTOMER_ID"
-                    Value = box this.CUSTOMER_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "EMAIL"
-                    Value = box this.EMAIL
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "FIRST_NAME"
-                    Value = box this.FIRST_NAME
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "LAST_NAME"
-                    Value = box this.LAST_NAME
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "PHONE"
-                    Value = box this.PHONE
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "CONTACT_ID"; Value = box this.CONTACT_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "CUSTOMER_ID"; Value = box this.CUSTOMER_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "EMAIL"; Value = box this.EMAIL; ProviderDbType = None }
+                  { WriteColumn.Name = "FIRST_NAME"; Value = box this.FIRST_NAME; ProviderDbType = None }
+                  { WriteColumn.Name = "LAST_NAME"; Value = box this.LAST_NAME; ProviderDbType = None }
+                  { WriteColumn.Name = "PHONE"; Value = box this.PHONE; ProviderDbType = None } ]
 
     let CONTACTS = table<CONTACTS>
 
@@ -51,15 +39,9 @@ module OT =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "COUNTRY_ID"
-                    Value = box this.COUNTRY_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "COUNTRY_NAME"
-                    Value = box this.COUNTRY_NAME
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "REGION_ID"
-                    Value = box this.REGION_ID
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "COUNTRY_ID"; Value = box this.COUNTRY_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "COUNTRY_NAME"; Value = box this.COUNTRY_NAME; ProviderDbType = None }
+                  { WriteColumn.Name = "REGION_ID"; Value = box this.REGION_ID; ProviderDbType = None } ]
 
     let COUNTRIES = table<COUNTRIES>
 
@@ -73,21 +55,11 @@ module OT =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ADDRESS"
-                    Value = box this.ADDRESS
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "CREDIT_LIMIT"
-                    Value = box this.CREDIT_LIMIT
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "CUSTOMER_ID"
-                    Value = box this.CUSTOMER_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "NAME"
-                    Value = box this.NAME
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "WEBSITE"
-                    Value = box this.WEBSITE
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "ADDRESS"; Value = box this.ADDRESS; ProviderDbType = None }
+                  { WriteColumn.Name = "CREDIT_LIMIT"; Value = box this.CREDIT_LIMIT; ProviderDbType = None }
+                  { WriteColumn.Name = "CUSTOMER_ID"; Value = box this.CUSTOMER_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "NAME"; Value = box this.NAME; ProviderDbType = None }
+                  { WriteColumn.Name = "WEBSITE"; Value = box this.WEBSITE; ProviderDbType = None } ]
 
     let CUSTOMERS = table<CUSTOMERS>
 
@@ -104,30 +76,14 @@ module OT =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "EMAIL"
-                    Value = box this.EMAIL
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "EMPLOYEE_ID"
-                    Value = box this.EMPLOYEE_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "FIRST_NAME"
-                    Value = box this.FIRST_NAME
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "HIRE_DATE"
-                    Value = box this.HIRE_DATE
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "JOB_TITLE"
-                    Value = box this.JOB_TITLE
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "LAST_NAME"
-                    Value = box this.LAST_NAME
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "MANAGER_ID"
-                    Value = box this.MANAGER_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "PHONE"
-                    Value = box this.PHONE
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "EMAIL"; Value = box this.EMAIL; ProviderDbType = None }
+                  { WriteColumn.Name = "EMPLOYEE_ID"; Value = box this.EMPLOYEE_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "FIRST_NAME"; Value = box this.FIRST_NAME; ProviderDbType = None }
+                  { WriteColumn.Name = "HIRE_DATE"; Value = box this.HIRE_DATE; ProviderDbType = None }
+                  { WriteColumn.Name = "JOB_TITLE"; Value = box this.JOB_TITLE; ProviderDbType = None }
+                  { WriteColumn.Name = "LAST_NAME"; Value = box this.LAST_NAME; ProviderDbType = None }
+                  { WriteColumn.Name = "MANAGER_ID"; Value = box this.MANAGER_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "PHONE"; Value = box this.PHONE; ProviderDbType = None } ]
 
     let EMPLOYEES = table<EMPLOYEES>
 
@@ -139,15 +95,9 @@ module OT =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "PRODUCT_ID"
-                    Value = box this.PRODUCT_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "QUANTITY"
-                    Value = box this.QUANTITY
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "WAREHOUSE_ID"
-                    Value = box this.WAREHOUSE_ID
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "PRODUCT_ID"; Value = box this.PRODUCT_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "QUANTITY"; Value = box this.QUANTITY; ProviderDbType = None }
+                  { WriteColumn.Name = "WAREHOUSE_ID"; Value = box this.WAREHOUSE_ID; ProviderDbType = None } ]
 
     let INVENTORIES = table<INVENTORIES>
 
@@ -162,24 +112,12 @@ module OT =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ADDRESS"
-                    Value = box this.ADDRESS
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "CITY"
-                    Value = box this.CITY
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "COUNTRY_ID"
-                    Value = box this.COUNTRY_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "LOCATION_ID"
-                    Value = box this.LOCATION_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "POSTAL_CODE"
-                    Value = box this.POSTAL_CODE
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "STATE"
-                    Value = box this.STATE
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "ADDRESS"; Value = box this.ADDRESS; ProviderDbType = None }
+                  { WriteColumn.Name = "CITY"; Value = box this.CITY; ProviderDbType = None }
+                  { WriteColumn.Name = "COUNTRY_ID"; Value = box this.COUNTRY_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "LOCATION_ID"; Value = box this.LOCATION_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "POSTAL_CODE"; Value = box this.POSTAL_CODE; ProviderDbType = None }
+                  { WriteColumn.Name = "STATE"; Value = box this.STATE; ProviderDbType = None } ]
 
     let LOCATIONS = table<LOCATIONS>
 
@@ -193,21 +131,11 @@ module OT =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "CUSTOMER_ID"
-                    Value = box this.CUSTOMER_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ORDER_DATE"
-                    Value = box this.ORDER_DATE
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ORDER_ID"
-                    Value = box this.ORDER_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "SALESMAN_ID"
-                    Value = box this.SALESMAN_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "STATUS"
-                    Value = box this.STATUS
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "CUSTOMER_ID"; Value = box this.CUSTOMER_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "ORDER_DATE"; Value = box this.ORDER_DATE; ProviderDbType = None }
+                  { WriteColumn.Name = "ORDER_ID"; Value = box this.ORDER_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "SALESMAN_ID"; Value = box this.SALESMAN_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "STATUS"; Value = box this.STATUS; ProviderDbType = None } ]
 
     let ORDERS = table<ORDERS>
 
@@ -221,21 +149,11 @@ module OT =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ITEM_ID"
-                    Value = box this.ITEM_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "ORDER_ID"
-                    Value = box this.ORDER_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "PRODUCT_ID"
-                    Value = box this.PRODUCT_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "QUANTITY"
-                    Value = box this.QUANTITY
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "UNIT_PRICE"
-                    Value = box this.UNIT_PRICE
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "ITEM_ID"; Value = box this.ITEM_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "ORDER_ID"; Value = box this.ORDER_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "PRODUCT_ID"; Value = box this.PRODUCT_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "QUANTITY"; Value = box this.QUANTITY; ProviderDbType = None }
+                  { WriteColumn.Name = "UNIT_PRICE"; Value = box this.UNIT_PRICE; ProviderDbType = None } ]
 
     let ORDER_ITEMS = table<ORDER_ITEMS>
 
@@ -250,24 +168,12 @@ module OT =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "CATEGORY_ID"
-                    Value = box this.CATEGORY_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "DESCRIPTION"
-                    Value = box this.DESCRIPTION
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "LIST_PRICE"
-                    Value = box this.LIST_PRICE
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "PRODUCT_ID"
-                    Value = box this.PRODUCT_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "PRODUCT_NAME"
-                    Value = box this.PRODUCT_NAME
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "STANDARD_COST"
-                    Value = box this.STANDARD_COST
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "CATEGORY_ID"; Value = box this.CATEGORY_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "DESCRIPTION"; Value = box this.DESCRIPTION; ProviderDbType = None }
+                  { WriteColumn.Name = "LIST_PRICE"; Value = box this.LIST_PRICE; ProviderDbType = None }
+                  { WriteColumn.Name = "PRODUCT_ID"; Value = box this.PRODUCT_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "PRODUCT_NAME"; Value = box this.PRODUCT_NAME; ProviderDbType = None }
+                  { WriteColumn.Name = "STANDARD_COST"; Value = box this.STANDARD_COST; ProviderDbType = None } ]
 
     let PRODUCTS = table<PRODUCTS>
 
@@ -278,12 +184,8 @@ module OT =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "CATEGORY_ID"
-                    Value = box this.CATEGORY_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "CATEGORY_NAME"
-                    Value = box this.CATEGORY_NAME
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "CATEGORY_ID"; Value = box this.CATEGORY_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "CATEGORY_NAME"; Value = box this.CATEGORY_NAME; ProviderDbType = None } ]
 
     let PRODUCT_CATEGORIES = table<PRODUCT_CATEGORIES>
 
@@ -294,12 +196,8 @@ module OT =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "REGION_ID"
-                    Value = box this.REGION_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "REGION_NAME"
-                    Value = box this.REGION_NAME
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "REGION_ID"; Value = box this.REGION_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "REGION_NAME"; Value = box this.REGION_NAME; ProviderDbType = None } ]
 
     let REGIONS = table<REGIONS>
 
@@ -311,15 +209,9 @@ module OT =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "LOCATION_ID"
-                    Value = box this.LOCATION_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "WAREHOUSE_ID"
-                    Value = box this.WAREHOUSE_ID
-                    ProviderDbType = None }
-                  { WriteColumn.Name = "WAREHOUSE_NAME"
-                    Value = box this.WAREHOUSE_NAME
-                    ProviderDbType = None } ]
+                [ { WriteColumn.Name = "LOCATION_ID"; Value = box this.LOCATION_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "WAREHOUSE_ID"; Value = box this.WAREHOUSE_ID; ProviderDbType = None }
+                  { WriteColumn.Name = "WAREHOUSE_NAME"; Value = box this.WAREHOUSE_NAME; ProviderDbType = None } ]
 
     let WAREHOUSES = table<WAREHOUSES>
 
@@ -359,5 +251,4 @@ type QueryContextFactory =
                 return ctx
             }
 
-        { OpenContext = openContext
-          OpenContextAsync = openContextAsync }
+        { OpenContext = openContext; OpenContextAsync = openContextAsync }

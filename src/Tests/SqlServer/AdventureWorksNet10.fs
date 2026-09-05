@@ -24,18 +24,10 @@ module HumanResources =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "DepartmentID"
-                    Value = box this.DepartmentID
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "GroupName"
-                    Value = box this.GroupName
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "DepartmentID"; Value = box this.DepartmentID; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "GroupName"; Value = box this.GroupName; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Department = table<Department>
 
@@ -76,54 +68,22 @@ module HumanResources =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "NationalIDNumber"
-                    Value = box this.NationalIDNumber
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "LoginID"
-                    Value = box this.LoginID
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "OrganizationNode"
-                    Value = box this.OrganizationNode
-                    ProviderDbType = Some "SqlHierarchyId" }
-                  { WriteColumn.Name = "OrganizationLevel"
-                    Value = box this.OrganizationLevel
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "JobTitle"
-                    Value = box this.JobTitle
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "BirthDate"
-                    Value = box this.BirthDate
-                    ProviderDbType = Some "Date" }
-                  { WriteColumn.Name = "MaritalStatus"
-                    Value = box this.MaritalStatus
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "Gender"
-                    Value = box this.Gender
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "HireDate"
-                    Value = box this.HireDate
-                    ProviderDbType = Some "Date" }
-                  { WriteColumn.Name = "SalariedFlag"
-                    Value = box this.SalariedFlag
-                    ProviderDbType = Some "Bit" }
-                  { WriteColumn.Name = "VacationHours"
-                    Value = box this.VacationHours
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "SickLeaveHours"
-                    Value = box this.SickLeaveHours
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "CurrentFlag"
-                    Value = box this.CurrentFlag
-                    ProviderDbType = Some "Bit" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "NationalIDNumber"; Value = box this.NationalIDNumber; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "LoginID"; Value = box this.LoginID; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "OrganizationNode"; Value = box this.OrganizationNode; ProviderDbType = Some "SqlHierarchyId" }
+                  { WriteColumn.Name = "OrganizationLevel"; Value = box this.OrganizationLevel; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "JobTitle"; Value = box this.JobTitle; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "BirthDate"; Value = box this.BirthDate; ProviderDbType = Some "Date" }
+                  { WriteColumn.Name = "MaritalStatus"; Value = box this.MaritalStatus; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "Gender"; Value = box this.Gender; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "HireDate"; Value = box this.HireDate; ProviderDbType = Some "Date" }
+                  { WriteColumn.Name = "SalariedFlag"; Value = box this.SalariedFlag; ProviderDbType = Some "Bit" }
+                  { WriteColumn.Name = "VacationHours"; Value = box this.VacationHours; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "SickLeaveHours"; Value = box this.SickLeaveHours; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "CurrentFlag"; Value = box this.CurrentFlag; ProviderDbType = Some "Bit" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Employee = table<Employee>
 
@@ -144,24 +104,12 @@ module HumanResources =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "DepartmentID"
-                    Value = box this.DepartmentID
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "ShiftID"
-                    Value = box this.ShiftID
-                    ProviderDbType = Some "TinyInt" }
-                  { WriteColumn.Name = "StartDate"
-                    Value = box this.StartDate
-                    ProviderDbType = Some "Date" }
-                  { WriteColumn.Name = "EndDate"
-                    Value = box this.EndDate
-                    ProviderDbType = Some "Date" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "DepartmentID"; Value = box this.DepartmentID; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "ShiftID"; Value = box this.ShiftID; ProviderDbType = Some "TinyInt" }
+                  { WriteColumn.Name = "StartDate"; Value = box this.StartDate; ProviderDbType = Some "Date" }
+                  { WriteColumn.Name = "EndDate"; Value = box this.EndDate; ProviderDbType = Some "Date" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let EmployeeDepartmentHistory = table<EmployeeDepartmentHistory>
 
@@ -180,21 +128,11 @@ module HumanResources =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "RateChangeDate"
-                    Value = box this.RateChangeDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "Rate"
-                    Value = box this.Rate
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "PayFrequency"
-                    Value = box this.PayFrequency
-                    ProviderDbType = Some "TinyInt" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "RateChangeDate"; Value = box this.RateChangeDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "Rate"; Value = box this.Rate; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "PayFrequency"; Value = box this.PayFrequency; ProviderDbType = Some "TinyInt" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let EmployeePayHistory = table<EmployeePayHistory>
 
@@ -209,15 +147,9 @@ module HumanResources =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "JobCandidateID"
-                    Value = box this.JobCandidateID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "JobCandidateID"; Value = box this.JobCandidateID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let JobCandidate = table<JobCandidate>
 
@@ -236,21 +168,11 @@ module HumanResources =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ShiftID"
-                    Value = box this.ShiftID
-                    ProviderDbType = Some "TinyInt" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "StartTime"
-                    Value = box this.StartTime
-                    ProviderDbType = Some "Time" }
-                  { WriteColumn.Name = "EndTime"
-                    Value = box this.EndTime
-                    ProviderDbType = Some "Time" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ShiftID"; Value = box this.ShiftID; ProviderDbType = Some "TinyInt" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "StartTime"; Value = box this.StartTime; ProviderDbType = Some "Time" }
+                  { WriteColumn.Name = "EndTime"; Value = box this.EndTime; ProviderDbType = Some "Time" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Shift = table<Shift>
 
@@ -277,30 +199,14 @@ module Person =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "AddressID"
-                    Value = box this.AddressID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "AddressLine1"
-                    Value = box this.AddressLine1
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "AddressLine2"
-                    Value = box this.AddressLine2
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "City"
-                    Value = box this.City
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "StateProvinceID"
-                    Value = box this.StateProvinceID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "PostalCode"
-                    Value = box this.PostalCode
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "AddressID"; Value = box this.AddressID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "AddressLine1"; Value = box this.AddressLine1; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "AddressLine2"; Value = box this.AddressLine2; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "City"; Value = box this.City; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "StateProvinceID"; Value = box this.StateProvinceID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "PostalCode"; Value = box this.PostalCode; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Address = table<Address>
 
@@ -317,18 +223,10 @@ module Person =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "AddressTypeID"
-                    Value = box this.AddressTypeID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "AddressTypeID"; Value = box this.AddressTypeID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let AddressType = table<AddressType>
 
@@ -343,15 +241,9 @@ module Person =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let BusinessEntity = table<BusinessEntity>
 
@@ -370,21 +262,11 @@ module Person =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "AddressID"
-                    Value = box this.AddressID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "AddressTypeID"
-                    Value = box this.AddressTypeID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "AddressID"; Value = box this.AddressID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "AddressTypeID"; Value = box this.AddressTypeID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let BusinessEntityAddress = table<BusinessEntityAddress>
 
@@ -403,21 +285,11 @@ module Person =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "PersonID"
-                    Value = box this.PersonID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ContactTypeID"
-                    Value = box this.ContactTypeID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "PersonID"; Value = box this.PersonID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ContactTypeID"; Value = box this.ContactTypeID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let BusinessEntityContact = table<BusinessEntityContact>
 
@@ -432,15 +304,9 @@ module Person =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ContactTypeID"
-                    Value = box this.ContactTypeID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ContactTypeID"; Value = box this.ContactTypeID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ContactType = table<ContactType>
 
@@ -455,15 +321,9 @@ module Person =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "CountryRegionCode"
-                    Value = box this.CountryRegionCode
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "CountryRegionCode"; Value = box this.CountryRegionCode; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let CountryRegion = table<CountryRegion>
 
@@ -482,21 +342,11 @@ module Person =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "EmailAddressID"
-                    Value = box this.EmailAddressID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "EmailAddress"
-                    Value = box this.EmailAddress
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "EmailAddressID"; Value = box this.EmailAddressID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "EmailAddress"; Value = box this.EmailAddress; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let EmailAddress = table<EmailAddress>
 
@@ -515,21 +365,11 @@ module Person =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "PasswordHash"
-                    Value = box this.PasswordHash
-                    ProviderDbType = Some "VarChar" }
-                  { WriteColumn.Name = "PasswordSalt"
-                    Value = box this.PasswordSalt
-                    ProviderDbType = Some "VarChar" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "PasswordHash"; Value = box this.PasswordHash; ProviderDbType = Some "VarChar" }
+                  { WriteColumn.Name = "PasswordSalt"; Value = box this.PasswordSalt; ProviderDbType = Some "VarChar" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Password = table<Password>
 
@@ -560,39 +400,17 @@ module Person =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "PersonType"
-                    Value = box this.PersonType
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "NameStyle"
-                    Value = box this.NameStyle
-                    ProviderDbType = Some "Bit" }
-                  { WriteColumn.Name = "Title"
-                    Value = box this.Title
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "FirstName"
-                    Value = box this.FirstName
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "MiddleName"
-                    Value = box this.MiddleName
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "LastName"
-                    Value = box this.LastName
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Suffix"
-                    Value = box this.Suffix
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "EmailPromotion"
-                    Value = box this.EmailPromotion
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "PersonType"; Value = box this.PersonType; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "NameStyle"; Value = box this.NameStyle; ProviderDbType = Some "Bit" }
+                  { WriteColumn.Name = "Title"; Value = box this.Title; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "FirstName"; Value = box this.FirstName; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "MiddleName"; Value = box this.MiddleName; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "LastName"; Value = box this.LastName; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Suffix"; Value = box this.Suffix; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "EmailPromotion"; Value = box this.EmailPromotion; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Person = table<Person>
 
@@ -609,18 +427,10 @@ module Person =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "PhoneNumber"
-                    Value = box this.PhoneNumber
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "PhoneNumberTypeID"
-                    Value = box this.PhoneNumberTypeID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "PhoneNumber"; Value = box this.PhoneNumber; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "PhoneNumberTypeID"; Value = box this.PhoneNumberTypeID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let PersonPhone = table<PersonPhone>
 
@@ -635,15 +445,9 @@ module Person =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "PhoneNumberTypeID"
-                    Value = box this.PhoneNumberTypeID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "PhoneNumberTypeID"; Value = box this.PhoneNumberTypeID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let PhoneNumberType = table<PhoneNumberType>
 
@@ -668,30 +472,14 @@ module Person =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "StateProvinceID"
-                    Value = box this.StateProvinceID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "StateProvinceCode"
-                    Value = box this.StateProvinceCode
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "CountryRegionCode"
-                    Value = box this.CountryRegionCode
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "IsOnlyStateProvinceFlag"
-                    Value = box this.IsOnlyStateProvinceFlag
-                    ProviderDbType = Some "Bit" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "TerritoryID"
-                    Value = box this.TerritoryID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "StateProvinceID"; Value = box this.StateProvinceID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "StateProvinceCode"; Value = box this.StateProvinceCode; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "CountryRegionCode"; Value = box this.CountryRegionCode; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "IsOnlyStateProvinceFlag"; Value = box this.IsOnlyStateProvinceFlag; ProviderDbType = Some "Bit" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "TerritoryID"; Value = box this.TerritoryID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let StateProvince = table<StateProvince>
 
@@ -720,33 +508,15 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BillOfMaterialsID"
-                    Value = box this.BillOfMaterialsID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ProductAssemblyID"
-                    Value = box this.ProductAssemblyID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ComponentID"
-                    Value = box this.ComponentID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "StartDate"
-                    Value = box this.StartDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "EndDate"
-                    Value = box this.EndDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "UnitMeasureCode"
-                    Value = box this.UnitMeasureCode
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "BOMLevel"
-                    Value = box this.BOMLevel
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "PerAssemblyQty"
-                    Value = box this.PerAssemblyQty
-                    ProviderDbType = Some "Decimal" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BillOfMaterialsID"; Value = box this.BillOfMaterialsID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ProductAssemblyID"; Value = box this.ProductAssemblyID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ComponentID"; Value = box this.ComponentID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "StartDate"; Value = box this.StartDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "EndDate"; Value = box this.EndDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "UnitMeasureCode"; Value = box this.UnitMeasureCode; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "BOMLevel"; Value = box this.BOMLevel; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "PerAssemblyQty"; Value = box this.PerAssemblyQty; ProviderDbType = Some "Decimal" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let BillOfMaterials = table<BillOfMaterials>
 
@@ -761,15 +531,9 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "CultureID"
-                    Value = box this.CultureID
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "CultureID"; Value = box this.CultureID; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Culture = table<Culture>
 
@@ -806,48 +570,20 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "DocumentNode"
-                    Value = box this.DocumentNode
-                    ProviderDbType = Some "SqlHierarchyId" }
-                  { WriteColumn.Name = "DocumentLevel"
-                    Value = box this.DocumentLevel
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "Title"
-                    Value = box this.Title
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Owner"
-                    Value = box this.Owner
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "FolderFlag"
-                    Value = box this.FolderFlag
-                    ProviderDbType = Some "Bit" }
-                  { WriteColumn.Name = "FileName"
-                    Value = box this.FileName
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "FileExtension"
-                    Value = box this.FileExtension
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Revision"
-                    Value = box this.Revision
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "ChangeNumber"
-                    Value = box this.ChangeNumber
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Status"
-                    Value = box this.Status
-                    ProviderDbType = Some "TinyInt" }
-                  { WriteColumn.Name = "DocumentSummary"
-                    Value = box this.DocumentSummary
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Document"
-                    Value = box this.Document
-                    ProviderDbType = Some "VarBinary" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "DocumentNode"; Value = box this.DocumentNode; ProviderDbType = Some "SqlHierarchyId" }
+                  { WriteColumn.Name = "DocumentLevel"; Value = box this.DocumentLevel; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "Title"; Value = box this.Title; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Owner"; Value = box this.Owner; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "FolderFlag"; Value = box this.FolderFlag; ProviderDbType = Some "Bit" }
+                  { WriteColumn.Name = "FileName"; Value = box this.FileName; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "FileExtension"; Value = box this.FileExtension; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Revision"; Value = box this.Revision; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "ChangeNumber"; Value = box this.ChangeNumber; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Status"; Value = box this.Status; ProviderDbType = Some "TinyInt" }
+                  { WriteColumn.Name = "DocumentSummary"; Value = box this.DocumentSummary; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Document"; Value = box this.Document; ProviderDbType = Some "VarBinary" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Document = table<Document>
 
@@ -860,12 +596,8 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "IllustrationID"
-                    Value = box this.IllustrationID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "IllustrationID"; Value = box this.IllustrationID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Illustration = table<Illustration>
 
@@ -884,21 +616,11 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "LocationID"
-                    Value = box this.LocationID
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "CostRate"
-                    Value = box this.CostRate
-                    ProviderDbType = Some "SmallMoney" }
-                  { WriteColumn.Name = "Availability"
-                    Value = box this.Availability
-                    ProviderDbType = Some "Decimal" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "LocationID"; Value = box this.LocationID; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "CostRate"; Value = box this.CostRate; ProviderDbType = Some "SmallMoney" }
+                  { WriteColumn.Name = "Availability"; Value = box this.Availability; ProviderDbType = Some "Decimal" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Location = table<Location>
 
@@ -957,81 +679,31 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ProductNumber"
-                    Value = box this.ProductNumber
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "MakeFlag"
-                    Value = box this.MakeFlag
-                    ProviderDbType = Some "Bit" }
-                  { WriteColumn.Name = "FinishedGoodsFlag"
-                    Value = box this.FinishedGoodsFlag
-                    ProviderDbType = Some "Bit" }
-                  { WriteColumn.Name = "Color"
-                    Value = box this.Color
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "SafetyStockLevel"
-                    Value = box this.SafetyStockLevel
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "ReorderPoint"
-                    Value = box this.ReorderPoint
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "StandardCost"
-                    Value = box this.StandardCost
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "ListPrice"
-                    Value = box this.ListPrice
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "Size"
-                    Value = box this.Size
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "SizeUnitMeasureCode"
-                    Value = box this.SizeUnitMeasureCode
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "WeightUnitMeasureCode"
-                    Value = box this.WeightUnitMeasureCode
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "Weight"
-                    Value = box this.Weight
-                    ProviderDbType = Some "Decimal" }
-                  { WriteColumn.Name = "DaysToManufacture"
-                    Value = box this.DaysToManufacture
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ProductLine"
-                    Value = box this.ProductLine
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "Class"
-                    Value = box this.Class
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "Style"
-                    Value = box this.Style
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "ProductSubcategoryID"
-                    Value = box this.ProductSubcategoryID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ProductModelID"
-                    Value = box this.ProductModelID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "SellStartDate"
-                    Value = box this.SellStartDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "SellEndDate"
-                    Value = box this.SellEndDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "DiscontinuedDate"
-                    Value = box this.DiscontinuedDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ProductNumber"; Value = box this.ProductNumber; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "MakeFlag"; Value = box this.MakeFlag; ProviderDbType = Some "Bit" }
+                  { WriteColumn.Name = "FinishedGoodsFlag"; Value = box this.FinishedGoodsFlag; ProviderDbType = Some "Bit" }
+                  { WriteColumn.Name = "Color"; Value = box this.Color; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "SafetyStockLevel"; Value = box this.SafetyStockLevel; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "ReorderPoint"; Value = box this.ReorderPoint; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "StandardCost"; Value = box this.StandardCost; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "ListPrice"; Value = box this.ListPrice; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "Size"; Value = box this.Size; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "SizeUnitMeasureCode"; Value = box this.SizeUnitMeasureCode; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "WeightUnitMeasureCode"; Value = box this.WeightUnitMeasureCode; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "Weight"; Value = box this.Weight; ProviderDbType = Some "Decimal" }
+                  { WriteColumn.Name = "DaysToManufacture"; Value = box this.DaysToManufacture; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ProductLine"; Value = box this.ProductLine; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "Class"; Value = box this.Class; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "Style"; Value = box this.Style; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "ProductSubcategoryID"; Value = box this.ProductSubcategoryID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ProductModelID"; Value = box this.ProductModelID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "SellStartDate"; Value = box this.SellStartDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "SellEndDate"; Value = box this.SellEndDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "DiscontinuedDate"; Value = box this.DiscontinuedDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Product = table<Product>
 
@@ -1048,18 +720,10 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductCategoryID"
-                    Value = box this.ProductCategoryID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductCategoryID"; Value = box this.ProductCategoryID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductCategory = table<ProductCategory>
 
@@ -1078,21 +742,11 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "StartDate"
-                    Value = box this.StartDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "EndDate"
-                    Value = box this.EndDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "StandardCost"
-                    Value = box this.StandardCost
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "StartDate"; Value = box this.StartDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "EndDate"; Value = box this.EndDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "StandardCost"; Value = box this.StandardCost; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductCostHistory = table<ProductCostHistory>
 
@@ -1109,18 +763,10 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductDescriptionID"
-                    Value = box this.ProductDescriptionID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Description"
-                    Value = box this.Description
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductDescriptionID"; Value = box this.ProductDescriptionID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Description"; Value = box this.Description; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductDescription = table<ProductDescription>
 
@@ -1135,15 +781,9 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "DocumentNode"
-                    Value = box this.DocumentNode
-                    ProviderDbType = Some "SqlHierarchyId" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "DocumentNode"; Value = box this.DocumentNode; ProviderDbType = Some "SqlHierarchyId" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductDocument = table<ProductDocument>
 
@@ -1166,27 +806,13 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "LocationID"
-                    Value = box this.LocationID
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "Shelf"
-                    Value = box this.Shelf
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Bin"
-                    Value = box this.Bin
-                    ProviderDbType = Some "TinyInt" }
-                  { WriteColumn.Name = "Quantity"
-                    Value = box this.Quantity
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "LocationID"; Value = box this.LocationID; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "Shelf"; Value = box this.Shelf; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Bin"; Value = box this.Bin; ProviderDbType = Some "TinyInt" }
+                  { WriteColumn.Name = "Quantity"; Value = box this.Quantity; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductInventory = table<ProductInventory>
 
@@ -1205,21 +831,11 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "StartDate"
-                    Value = box this.StartDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "EndDate"
-                    Value = box this.EndDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "ListPrice"
-                    Value = box this.ListPrice
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "StartDate"; Value = box this.StartDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "EndDate"; Value = box this.EndDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "ListPrice"; Value = box this.ListPrice; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductListPriceHistory = table<ProductListPriceHistory>
 
@@ -1236,18 +852,10 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductModelID"
-                    Value = box this.ProductModelID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductModelID"; Value = box this.ProductModelID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductModel = table<ProductModel>
 
@@ -1262,15 +870,9 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductModelID"
-                    Value = box this.ProductModelID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "IllustrationID"
-                    Value = box this.IllustrationID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductModelID"; Value = box this.ProductModelID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "IllustrationID"; Value = box this.IllustrationID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductModelIllustration = table<ProductModelIllustration>
 
@@ -1287,18 +889,10 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductModelID"
-                    Value = box this.ProductModelID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ProductDescriptionID"
-                    Value = box this.ProductDescriptionID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "CultureID"
-                    Value = box this.CultureID
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductModelID"; Value = box this.ProductModelID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ProductDescriptionID"; Value = box this.ProductDescriptionID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "CultureID"; Value = box this.CultureID; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductModelProductDescriptionCulture =
         table<ProductModelProductDescriptionCulture>
@@ -1320,24 +914,12 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductPhotoID"
-                    Value = box this.ProductPhotoID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ThumbNailPhoto"
-                    Value = box this.ThumbNailPhoto
-                    ProviderDbType = Some "VarBinary" }
-                  { WriteColumn.Name = "ThumbnailPhotoFileName"
-                    Value = box this.ThumbnailPhotoFileName
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "LargePhoto"
-                    Value = box this.LargePhoto
-                    ProviderDbType = Some "VarBinary" }
-                  { WriteColumn.Name = "LargePhotoFileName"
-                    Value = box this.LargePhotoFileName
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductPhotoID"; Value = box this.ProductPhotoID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ThumbNailPhoto"; Value = box this.ThumbNailPhoto; ProviderDbType = Some "VarBinary" }
+                  { WriteColumn.Name = "ThumbnailPhotoFileName"; Value = box this.ThumbnailPhotoFileName; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "LargePhoto"; Value = box this.LargePhoto; ProviderDbType = Some "VarBinary" }
+                  { WriteColumn.Name = "LargePhotoFileName"; Value = box this.LargePhotoFileName; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductPhoto = table<ProductPhoto>
 
@@ -1354,18 +936,10 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ProductPhotoID"
-                    Value = box this.ProductPhotoID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Primary"
-                    Value = box this.Primary
-                    ProviderDbType = Some "Bit" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ProductPhotoID"; Value = box this.ProductPhotoID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Primary"; Value = box this.Primary; ProviderDbType = Some "Bit" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductProductPhoto = table<ProductProductPhoto>
 
@@ -1390,30 +964,14 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductReviewID"
-                    Value = box this.ProductReviewID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ReviewerName"
-                    Value = box this.ReviewerName
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ReviewDate"
-                    Value = box this.ReviewDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "EmailAddress"
-                    Value = box this.EmailAddress
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Rating"
-                    Value = box this.Rating
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Comments"
-                    Value = box this.Comments
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductReviewID"; Value = box this.ProductReviewID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ReviewerName"; Value = box this.ReviewerName; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ReviewDate"; Value = box this.ReviewDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "EmailAddress"; Value = box this.EmailAddress; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Rating"; Value = box this.Rating; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Comments"; Value = box this.Comments; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductReview = table<ProductReview>
 
@@ -1432,21 +990,11 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductSubcategoryID"
-                    Value = box this.ProductSubcategoryID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ProductCategoryID"
-                    Value = box this.ProductCategoryID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductSubcategoryID"; Value = box this.ProductSubcategoryID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ProductCategoryID"; Value = box this.ProductCategoryID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductSubcategory = table<ProductSubcategory>
 
@@ -1461,15 +1009,9 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ScrapReasonID"
-                    Value = box this.ScrapReasonID
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ScrapReasonID"; Value = box this.ScrapReasonID; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ScrapReason = table<ScrapReason>
 
@@ -1496,33 +1038,15 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "TransactionID"
-                    Value = box this.TransactionID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ReferenceOrderID"
-                    Value = box this.ReferenceOrderID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ReferenceOrderLineID"
-                    Value = box this.ReferenceOrderLineID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "TransactionDate"
-                    Value = box this.TransactionDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "TransactionType"
-                    Value = box this.TransactionType
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "Quantity"
-                    Value = box this.Quantity
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ActualCost"
-                    Value = box this.ActualCost
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "TransactionID"; Value = box this.TransactionID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ReferenceOrderID"; Value = box this.ReferenceOrderID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ReferenceOrderLineID"; Value = box this.ReferenceOrderLineID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "TransactionDate"; Value = box this.TransactionDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "TransactionType"; Value = box this.TransactionType; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "Quantity"; Value = box this.Quantity; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ActualCost"; Value = box this.ActualCost; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let TransactionHistory = table<TransactionHistory>
 
@@ -1549,33 +1073,15 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "TransactionID"
-                    Value = box this.TransactionID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ReferenceOrderID"
-                    Value = box this.ReferenceOrderID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ReferenceOrderLineID"
-                    Value = box this.ReferenceOrderLineID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "TransactionDate"
-                    Value = box this.TransactionDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "TransactionType"
-                    Value = box this.TransactionType
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "Quantity"
-                    Value = box this.Quantity
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ActualCost"
-                    Value = box this.ActualCost
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "TransactionID"; Value = box this.TransactionID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ReferenceOrderID"; Value = box this.ReferenceOrderID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ReferenceOrderLineID"; Value = box this.ReferenceOrderLineID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "TransactionDate"; Value = box this.TransactionDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "TransactionType"; Value = box this.TransactionType; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "Quantity"; Value = box this.Quantity; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ActualCost"; Value = box this.ActualCost; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let TransactionHistoryArchive = table<TransactionHistoryArchive>
 
@@ -1590,15 +1096,9 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "UnitMeasureCode"
-                    Value = box this.UnitMeasureCode
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "UnitMeasureCode"; Value = box this.UnitMeasureCode; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let UnitMeasure = table<UnitMeasure>
 
@@ -1627,36 +1127,16 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "WorkOrderID"
-                    Value = box this.WorkOrderID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "OrderQty"
-                    Value = box this.OrderQty
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "StockedQty"
-                    Value = box this.StockedQty
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ScrappedQty"
-                    Value = box this.ScrappedQty
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "StartDate"
-                    Value = box this.StartDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "EndDate"
-                    Value = box this.EndDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "DueDate"
-                    Value = box this.DueDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "ScrapReasonID"
-                    Value = box this.ScrapReasonID
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "WorkOrderID"; Value = box this.WorkOrderID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "OrderQty"; Value = box this.OrderQty; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "StockedQty"; Value = box this.StockedQty; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ScrappedQty"; Value = box this.ScrappedQty; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "StartDate"; Value = box this.StartDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "EndDate"; Value = box this.EndDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "DueDate"; Value = box this.DueDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "ScrapReasonID"; Value = box this.ScrapReasonID; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let WorkOrder = table<WorkOrder>
 
@@ -1689,42 +1169,18 @@ module Production =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "WorkOrderID"
-                    Value = box this.WorkOrderID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "OperationSequence"
-                    Value = box this.OperationSequence
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "LocationID"
-                    Value = box this.LocationID
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "ScheduledStartDate"
-                    Value = box this.ScheduledStartDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "ScheduledEndDate"
-                    Value = box this.ScheduledEndDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "ActualStartDate"
-                    Value = box this.ActualStartDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "ActualEndDate"
-                    Value = box this.ActualEndDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "ActualResourceHrs"
-                    Value = box this.ActualResourceHrs
-                    ProviderDbType = Some "Decimal" }
-                  { WriteColumn.Name = "PlannedCost"
-                    Value = box this.PlannedCost
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "ActualCost"
-                    Value = box this.ActualCost
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "WorkOrderID"; Value = box this.WorkOrderID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "OperationSequence"; Value = box this.OperationSequence; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "LocationID"; Value = box this.LocationID; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "ScheduledStartDate"; Value = box this.ScheduledStartDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "ScheduledEndDate"; Value = box this.ScheduledEndDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "ActualStartDate"; Value = box this.ActualStartDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "ActualEndDate"; Value = box this.ActualEndDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "ActualResourceHrs"; Value = box this.ActualResourceHrs; ProviderDbType = Some "Decimal" }
+                  { WriteColumn.Name = "PlannedCost"; Value = box this.PlannedCost; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "ActualCost"; Value = box this.ActualCost; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let WorkOrderRouting = table<WorkOrderRouting>
 
@@ -1757,39 +1213,17 @@ module Purchasing =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "AverageLeadTime"
-                    Value = box this.AverageLeadTime
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "StandardPrice"
-                    Value = box this.StandardPrice
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "LastReceiptCost"
-                    Value = box this.LastReceiptCost
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "LastReceiptDate"
-                    Value = box this.LastReceiptDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "MinOrderQty"
-                    Value = box this.MinOrderQty
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "MaxOrderQty"
-                    Value = box this.MaxOrderQty
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "OnOrderQty"
-                    Value = box this.OnOrderQty
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "UnitMeasureCode"
-                    Value = box this.UnitMeasureCode
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "AverageLeadTime"; Value = box this.AverageLeadTime; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "StandardPrice"; Value = box this.StandardPrice; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "LastReceiptCost"; Value = box this.LastReceiptCost; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "LastReceiptDate"; Value = box this.LastReceiptDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "MinOrderQty"; Value = box this.MinOrderQty; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "MaxOrderQty"; Value = box this.MaxOrderQty; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "OnOrderQty"; Value = box this.OnOrderQty; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "UnitMeasureCode"; Value = box this.UnitMeasureCode; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ProductVendor = table<ProductVendor>
 
@@ -1820,39 +1254,17 @@ module Purchasing =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "PurchaseOrderID"
-                    Value = box this.PurchaseOrderID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "PurchaseOrderDetailID"
-                    Value = box this.PurchaseOrderDetailID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "DueDate"
-                    Value = box this.DueDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "OrderQty"
-                    Value = box this.OrderQty
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "UnitPrice"
-                    Value = box this.UnitPrice
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "LineTotal"
-                    Value = box this.LineTotal
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "ReceivedQty"
-                    Value = box this.ReceivedQty
-                    ProviderDbType = Some "Decimal" }
-                  { WriteColumn.Name = "RejectedQty"
-                    Value = box this.RejectedQty
-                    ProviderDbType = Some "Decimal" }
-                  { WriteColumn.Name = "StockedQty"
-                    Value = box this.StockedQty
-                    ProviderDbType = Some "Decimal" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "PurchaseOrderID"; Value = box this.PurchaseOrderID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "PurchaseOrderDetailID"; Value = box this.PurchaseOrderDetailID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "DueDate"; Value = box this.DueDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "OrderQty"; Value = box this.OrderQty; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "UnitPrice"; Value = box this.UnitPrice; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "LineTotal"; Value = box this.LineTotal; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "ReceivedQty"; Value = box this.ReceivedQty; ProviderDbType = Some "Decimal" }
+                  { WriteColumn.Name = "RejectedQty"; Value = box this.RejectedQty; ProviderDbType = Some "Decimal" }
+                  { WriteColumn.Name = "StockedQty"; Value = box this.StockedQty; ProviderDbType = Some "Decimal" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let PurchaseOrderDetail = table<PurchaseOrderDetail>
 
@@ -1887,45 +1299,19 @@ module Purchasing =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "PurchaseOrderID"
-                    Value = box this.PurchaseOrderID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "RevisionNumber"
-                    Value = box this.RevisionNumber
-                    ProviderDbType = Some "TinyInt" }
-                  { WriteColumn.Name = "Status"
-                    Value = box this.Status
-                    ProviderDbType = Some "TinyInt" }
-                  { WriteColumn.Name = "EmployeeID"
-                    Value = box this.EmployeeID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "VendorID"
-                    Value = box this.VendorID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ShipMethodID"
-                    Value = box this.ShipMethodID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "OrderDate"
-                    Value = box this.OrderDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "ShipDate"
-                    Value = box this.ShipDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "SubTotal"
-                    Value = box this.SubTotal
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "TaxAmt"
-                    Value = box this.TaxAmt
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "Freight"
-                    Value = box this.Freight
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "TotalDue"
-                    Value = box this.TotalDue
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "PurchaseOrderID"; Value = box this.PurchaseOrderID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "RevisionNumber"; Value = box this.RevisionNumber; ProviderDbType = Some "TinyInt" }
+                  { WriteColumn.Name = "Status"; Value = box this.Status; ProviderDbType = Some "TinyInt" }
+                  { WriteColumn.Name = "EmployeeID"; Value = box this.EmployeeID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "VendorID"; Value = box this.VendorID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ShipMethodID"; Value = box this.ShipMethodID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "OrderDate"; Value = box this.OrderDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "ShipDate"; Value = box this.ShipDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "SubTotal"; Value = box this.SubTotal; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "TaxAmt"; Value = box this.TaxAmt; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "Freight"; Value = box this.Freight; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "TotalDue"; Value = box this.TotalDue; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let PurchaseOrderHeader = table<PurchaseOrderHeader>
 
@@ -1946,24 +1332,12 @@ module Purchasing =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ShipMethodID"
-                    Value = box this.ShipMethodID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ShipBase"
-                    Value = box this.ShipBase
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "ShipRate"
-                    Value = box this.ShipRate
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ShipMethodID"; Value = box this.ShipMethodID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ShipBase"; Value = box this.ShipBase; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "ShipRate"; Value = box this.ShipRate; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ShipMethod = table<ShipMethod>
 
@@ -1988,30 +1362,14 @@ module Purchasing =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "AccountNumber"
-                    Value = box this.AccountNumber
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "CreditRating"
-                    Value = box this.CreditRating
-                    ProviderDbType = Some "TinyInt" }
-                  { WriteColumn.Name = "PreferredVendorStatus"
-                    Value = box this.PreferredVendorStatus
-                    ProviderDbType = Some "Bit" }
-                  { WriteColumn.Name = "ActiveFlag"
-                    Value = box this.ActiveFlag
-                    ProviderDbType = Some "Bit" }
-                  { WriteColumn.Name = "PurchasingWebServiceURL"
-                    Value = box this.PurchasingWebServiceURL
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "AccountNumber"; Value = box this.AccountNumber; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "CreditRating"; Value = box this.CreditRating; ProviderDbType = Some "TinyInt" }
+                  { WriteColumn.Name = "PreferredVendorStatus"; Value = box this.PreferredVendorStatus; ProviderDbType = Some "Bit" }
+                  { WriteColumn.Name = "ActiveFlag"; Value = box this.ActiveFlag; ProviderDbType = Some "Bit" }
+                  { WriteColumn.Name = "PurchasingWebServiceURL"; Value = box this.PurchasingWebServiceURL; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Vendor = table<Vendor>
 
@@ -2028,15 +1386,9 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "CountryRegionCode"
-                    Value = box this.CountryRegionCode
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "CurrencyCode"
-                    Value = box this.CurrencyCode
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "CountryRegionCode"; Value = box this.CountryRegionCode; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "CurrencyCode"; Value = box this.CurrencyCode; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let CountryRegionCurrency = table<CountryRegionCurrency>
 
@@ -2057,24 +1409,12 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "CreditCardID"
-                    Value = box this.CreditCardID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "CardType"
-                    Value = box this.CardType
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "CardNumber"
-                    Value = box this.CardNumber
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ExpMonth"
-                    Value = box this.ExpMonth
-                    ProviderDbType = Some "TinyInt" }
-                  { WriteColumn.Name = "ExpYear"
-                    Value = box this.ExpYear
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "CreditCardID"; Value = box this.CreditCardID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "CardType"; Value = box this.CardType; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "CardNumber"; Value = box this.CardNumber; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ExpMonth"; Value = box this.ExpMonth; ProviderDbType = Some "TinyInt" }
+                  { WriteColumn.Name = "ExpYear"; Value = box this.ExpYear; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let CreditCard = table<CreditCard>
 
@@ -2089,15 +1429,9 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "CurrencyCode"
-                    Value = box this.CurrencyCode
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "CurrencyCode"; Value = box this.CurrencyCode; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Currency = table<Currency>
 
@@ -2120,27 +1454,13 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "CurrencyRateID"
-                    Value = box this.CurrencyRateID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "CurrencyRateDate"
-                    Value = box this.CurrencyRateDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "FromCurrencyCode"
-                    Value = box this.FromCurrencyCode
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "ToCurrencyCode"
-                    Value = box this.ToCurrencyCode
-                    ProviderDbType = Some "NChar" }
-                  { WriteColumn.Name = "AverageRate"
-                    Value = box this.AverageRate
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "EndOfDayRate"
-                    Value = box this.EndOfDayRate
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "CurrencyRateID"; Value = box this.CurrencyRateID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "CurrencyRateDate"; Value = box this.CurrencyRateDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "FromCurrencyCode"; Value = box this.FromCurrencyCode; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "ToCurrencyCode"; Value = box this.ToCurrencyCode; ProviderDbType = Some "NChar" }
+                  { WriteColumn.Name = "AverageRate"; Value = box this.AverageRate; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "EndOfDayRate"; Value = box this.EndOfDayRate; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let CurrencyRate = table<CurrencyRate>
 
@@ -2163,27 +1483,13 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "CustomerID"
-                    Value = box this.CustomerID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "PersonID"
-                    Value = box this.PersonID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "StoreID"
-                    Value = box this.StoreID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "TerritoryID"
-                    Value = box this.TerritoryID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "AccountNumber"
-                    Value = box this.AccountNumber
-                    ProviderDbType = Some "VarChar" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "CustomerID"; Value = box this.CustomerID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "PersonID"; Value = box this.PersonID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "StoreID"; Value = box this.StoreID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "TerritoryID"; Value = box this.TerritoryID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "AccountNumber"; Value = box this.AccountNumber; ProviderDbType = Some "VarChar" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Customer = table<Customer>
 
@@ -2198,15 +1504,9 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "CreditCardID"
-                    Value = box this.CreditCardID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "CreditCardID"; Value = box this.CreditCardID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let PersonCreditCard = table<PersonCreditCard>
 
@@ -2237,39 +1537,17 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "SalesOrderID"
-                    Value = box this.SalesOrderID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "SalesOrderDetailID"
-                    Value = box this.SalesOrderDetailID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "CarrierTrackingNumber"
-                    Value = box this.CarrierTrackingNumber
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "OrderQty"
-                    Value = box this.OrderQty
-                    ProviderDbType = Some "SmallInt" }
-                  { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "SpecialOfferID"
-                    Value = box this.SpecialOfferID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "UnitPrice"
-                    Value = box this.UnitPrice
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "UnitPriceDiscount"
-                    Value = box this.UnitPriceDiscount
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "LineTotal"
-                    Value = box this.LineTotal
-                    ProviderDbType = Some "Decimal" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "SalesOrderID"; Value = box this.SalesOrderID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "SalesOrderDetailID"; Value = box this.SalesOrderDetailID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "CarrierTrackingNumber"; Value = box this.CarrierTrackingNumber; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "OrderQty"; Value = box this.OrderQty; ProviderDbType = Some "SmallInt" }
+                  { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "SpecialOfferID"; Value = box this.SpecialOfferID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "UnitPrice"; Value = box this.UnitPrice; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "UnitPriceDiscount"; Value = box this.UnitPriceDiscount; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "LineTotal"; Value = box this.LineTotal; ProviderDbType = Some "Decimal" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let SalesOrderDetail = table<SalesOrderDetail>
 
@@ -2330,84 +1608,32 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "SalesOrderID"
-                    Value = box this.SalesOrderID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "RevisionNumber"
-                    Value = box this.RevisionNumber
-                    ProviderDbType = Some "TinyInt" }
-                  { WriteColumn.Name = "OrderDate"
-                    Value = box this.OrderDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "DueDate"
-                    Value = box this.DueDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "ShipDate"
-                    Value = box this.ShipDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "Status"
-                    Value = box this.Status
-                    ProviderDbType = Some "TinyInt" }
-                  { WriteColumn.Name = "OnlineOrderFlag"
-                    Value = box this.OnlineOrderFlag
-                    ProviderDbType = Some "Bit" }
-                  { WriteColumn.Name = "SalesOrderNumber"
-                    Value = box this.SalesOrderNumber
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "PurchaseOrderNumber"
-                    Value = box this.PurchaseOrderNumber
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "AccountNumber"
-                    Value = box this.AccountNumber
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "CustomerID"
-                    Value = box this.CustomerID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "SalesPersonID"
-                    Value = box this.SalesPersonID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "TerritoryID"
-                    Value = box this.TerritoryID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "BillToAddressID"
-                    Value = box this.BillToAddressID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ShipToAddressID"
-                    Value = box this.ShipToAddressID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ShipMethodID"
-                    Value = box this.ShipMethodID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "CreditCardID"
-                    Value = box this.CreditCardID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "CreditCardApprovalCode"
-                    Value = box this.CreditCardApprovalCode
-                    ProviderDbType = Some "VarChar" }
-                  { WriteColumn.Name = "CurrencyRateID"
-                    Value = box this.CurrencyRateID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "SubTotal"
-                    Value = box this.SubTotal
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "TaxAmt"
-                    Value = box this.TaxAmt
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "Freight"
-                    Value = box this.Freight
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "TotalDue"
-                    Value = box this.TotalDue
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "Comment"
-                    Value = box this.Comment
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "SalesOrderID"; Value = box this.SalesOrderID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "RevisionNumber"; Value = box this.RevisionNumber; ProviderDbType = Some "TinyInt" }
+                  { WriteColumn.Name = "OrderDate"; Value = box this.OrderDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "DueDate"; Value = box this.DueDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "ShipDate"; Value = box this.ShipDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "Status"; Value = box this.Status; ProviderDbType = Some "TinyInt" }
+                  { WriteColumn.Name = "OnlineOrderFlag"; Value = box this.OnlineOrderFlag; ProviderDbType = Some "Bit" }
+                  { WriteColumn.Name = "SalesOrderNumber"; Value = box this.SalesOrderNumber; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "PurchaseOrderNumber"; Value = box this.PurchaseOrderNumber; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "AccountNumber"; Value = box this.AccountNumber; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "CustomerID"; Value = box this.CustomerID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "SalesPersonID"; Value = box this.SalesPersonID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "TerritoryID"; Value = box this.TerritoryID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "BillToAddressID"; Value = box this.BillToAddressID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ShipToAddressID"; Value = box this.ShipToAddressID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ShipMethodID"; Value = box this.ShipMethodID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "CreditCardID"; Value = box this.CreditCardID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "CreditCardApprovalCode"; Value = box this.CreditCardApprovalCode; ProviderDbType = Some "VarChar" }
+                  { WriteColumn.Name = "CurrencyRateID"; Value = box this.CurrencyRateID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "SubTotal"; Value = box this.SubTotal; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "TaxAmt"; Value = box this.TaxAmt; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "Freight"; Value = box this.Freight; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "TotalDue"; Value = box this.TotalDue; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "Comment"; Value = box this.Comment; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let SalesOrderHeader = table<SalesOrderHeader>
 
@@ -2422,15 +1648,9 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "SalesOrderID"
-                    Value = box this.SalesOrderID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "SalesReasonID"
-                    Value = box this.SalesReasonID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "SalesOrderID"; Value = box this.SalesOrderID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "SalesReasonID"; Value = box this.SalesReasonID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let SalesOrderHeaderSalesReason = table<SalesOrderHeaderSalesReason>
 
@@ -2457,33 +1677,15 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "TerritoryID"
-                    Value = box this.TerritoryID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "SalesQuota"
-                    Value = box this.SalesQuota
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "Bonus"
-                    Value = box this.Bonus
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "CommissionPct"
-                    Value = box this.CommissionPct
-                    ProviderDbType = Some "SmallMoney" }
-                  { WriteColumn.Name = "SalesYTD"
-                    Value = box this.SalesYTD
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "SalesLastYear"
-                    Value = box this.SalesLastYear
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "TerritoryID"; Value = box this.TerritoryID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "SalesQuota"; Value = box this.SalesQuota; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "Bonus"; Value = box this.Bonus; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "CommissionPct"; Value = box this.CommissionPct; ProviderDbType = Some "SmallMoney" }
+                  { WriteColumn.Name = "SalesYTD"; Value = box this.SalesYTD; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "SalesLastYear"; Value = box this.SalesLastYear; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let SalesPerson = table<SalesPerson>
 
@@ -2502,21 +1704,11 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "QuotaDate"
-                    Value = box this.QuotaDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "SalesQuota"
-                    Value = box this.SalesQuota
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "QuotaDate"; Value = box this.QuotaDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "SalesQuota"; Value = box this.SalesQuota; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let SalesPersonQuotaHistory = table<SalesPersonQuotaHistory>
 
@@ -2533,18 +1725,10 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "SalesReasonID"
-                    Value = box this.SalesReasonID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ReasonType"
-                    Value = box this.ReasonType
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "SalesReasonID"; Value = box this.SalesReasonID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ReasonType"; Value = box this.ReasonType; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let SalesReason = table<SalesReason>
 
@@ -2567,27 +1751,13 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "SalesTaxRateID"
-                    Value = box this.SalesTaxRateID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "StateProvinceID"
-                    Value = box this.StateProvinceID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "TaxType"
-                    Value = box this.TaxType
-                    ProviderDbType = Some "TinyInt" }
-                  { WriteColumn.Name = "TaxRate"
-                    Value = box this.TaxRate
-                    ProviderDbType = Some "SmallMoney" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "SalesTaxRateID"; Value = box this.SalesTaxRateID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "StateProvinceID"; Value = box this.StateProvinceID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "TaxType"; Value = box this.TaxType; ProviderDbType = Some "TinyInt" }
+                  { WriteColumn.Name = "TaxRate"; Value = box this.TaxRate; ProviderDbType = Some "SmallMoney" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let SalesTaxRate = table<SalesTaxRate>
 
@@ -2616,36 +1786,16 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "TerritoryID"
-                    Value = box this.TerritoryID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "CountryRegionCode"
-                    Value = box this.CountryRegionCode
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Group"
-                    Value = box this.Group
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "SalesYTD"
-                    Value = box this.SalesYTD
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "SalesLastYear"
-                    Value = box this.SalesLastYear
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "CostYTD"
-                    Value = box this.CostYTD
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "CostLastYear"
-                    Value = box this.CostLastYear
-                    ProviderDbType = Some "Money" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "TerritoryID"; Value = box this.TerritoryID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "CountryRegionCode"; Value = box this.CountryRegionCode; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Group"; Value = box this.Group; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "SalesYTD"; Value = box this.SalesYTD; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "SalesLastYear"; Value = box this.SalesLastYear; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "CostYTD"; Value = box this.CostYTD; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "CostLastYear"; Value = box this.CostLastYear; ProviderDbType = Some "Money" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let SalesTerritory = table<SalesTerritory>
 
@@ -2666,24 +1816,12 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "TerritoryID"
-                    Value = box this.TerritoryID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "StartDate"
-                    Value = box this.StartDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "EndDate"
-                    Value = box this.EndDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "TerritoryID"; Value = box this.TerritoryID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "StartDate"; Value = box this.StartDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "EndDate"; Value = box this.EndDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let SalesTerritoryHistory = table<SalesTerritoryHistory>
 
@@ -2704,24 +1842,12 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ShoppingCartItemID"
-                    Value = box this.ShoppingCartItemID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ShoppingCartID"
-                    Value = box this.ShoppingCartID
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Quantity"
-                    Value = box this.Quantity
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "DateCreated"
-                    Value = box this.DateCreated
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "ShoppingCartItemID"; Value = box this.ShoppingCartItemID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ShoppingCartID"; Value = box this.ShoppingCartID; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Quantity"; Value = box this.Quantity; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "DateCreated"; Value = box this.DateCreated; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let ShoppingCartItem = table<ShoppingCartItem>
 
@@ -2752,39 +1878,17 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "SpecialOfferID"
-                    Value = box this.SpecialOfferID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Description"
-                    Value = box this.Description
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "DiscountPct"
-                    Value = box this.DiscountPct
-                    ProviderDbType = Some "SmallMoney" }
-                  { WriteColumn.Name = "Type"
-                    Value = box this.Type
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Category"
-                    Value = box this.Category
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "StartDate"
-                    Value = box this.StartDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "EndDate"
-                    Value = box this.EndDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "MinQty"
-                    Value = box this.MinQty
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "MaxQty"
-                    Value = box this.MaxQty
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "SpecialOfferID"; Value = box this.SpecialOfferID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Description"; Value = box this.Description; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "DiscountPct"; Value = box this.DiscountPct; ProviderDbType = Some "SmallMoney" }
+                  { WriteColumn.Name = "Type"; Value = box this.Type; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Category"; Value = box this.Category; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "StartDate"; Value = box this.StartDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "EndDate"; Value = box this.EndDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "MinQty"; Value = box this.MinQty; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "MaxQty"; Value = box this.MaxQty; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let SpecialOffer = table<SpecialOffer>
 
@@ -2801,18 +1905,10 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "SpecialOfferID"
-                    Value = box this.SpecialOfferID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ProductID"
-                    Value = box this.ProductID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "SpecialOfferID"; Value = box this.SpecialOfferID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ProductID"; Value = box this.ProductID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let SpecialOfferProduct = table<SpecialOfferProduct>
 
@@ -2831,21 +1927,11 @@ module Sales =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "BusinessEntityID"
-                    Value = box this.BusinessEntityID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "Name"
-                    Value = box this.Name
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "SalesPersonID"
-                    Value = box this.SalesPersonID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "rowguid"
-                    Value = box this.rowguid
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "BusinessEntityID"; Value = box this.BusinessEntityID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "Name"; Value = box this.Name; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "SalesPersonID"; Value = box this.SalesPersonID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "rowguid"; Value = box this.rowguid; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let Store = table<Store>
 
@@ -2864,18 +1950,10 @@ module dbo =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "SystemInformationID"
-                    Value = box this.SystemInformationID
-                    ProviderDbType = Some "TinyInt" }
-                  { WriteColumn.Name = "Database Version"
-                    Value = box this.``Database Version``
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "VersionDate"
-                    Value = box this.VersionDate
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "ModifiedDate"
-                    Value = box this.ModifiedDate
-                    ProviderDbType = Some "DateTime" } ]
+                [ { WriteColumn.Name = "SystemInformationID"; Value = box this.SystemInformationID; ProviderDbType = Some "TinyInt" }
+                  { WriteColumn.Name = "Database Version"; Value = box this.``Database Version``; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "VersionDate"; Value = box this.VersionDate; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "ModifiedDate"; Value = box this.ModifiedDate; ProviderDbType = Some "DateTime" } ]
 
     let AWBuildVersion = table<AWBuildVersion>
 
@@ -2898,27 +1976,13 @@ module dbo =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "DatabaseLogID"
-                    Value = box this.DatabaseLogID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "PostTime"
-                    Value = box this.PostTime
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "DatabaseUser"
-                    Value = box this.DatabaseUser
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Event"
-                    Value = box this.Event
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Schema"
-                    Value = box this.Schema
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Object"
-                    Value = box this.Object
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "TSQL"
-                    Value = box this.TSQL
-                    ProviderDbType = Some "NVarChar" } ]
+                [ { WriteColumn.Name = "DatabaseLogID"; Value = box this.DatabaseLogID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "PostTime"; Value = box this.PostTime; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "DatabaseUser"; Value = box this.DatabaseUser; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Event"; Value = box this.Event; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Schema"; Value = box this.Schema; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Object"; Value = box this.Object; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "TSQL"; Value = box this.TSQL; ProviderDbType = Some "NVarChar" } ]
 
     let DatabaseLog = table<DatabaseLog>
 
@@ -2945,33 +2009,15 @@ module dbo =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ErrorLogID"
-                    Value = box this.ErrorLogID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ErrorTime"
-                    Value = box this.ErrorTime
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "UserName"
-                    Value = box this.UserName
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ErrorNumber"
-                    Value = box this.ErrorNumber
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ErrorSeverity"
-                    Value = box this.ErrorSeverity
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ErrorState"
-                    Value = box this.ErrorState
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ErrorProcedure"
-                    Value = box this.ErrorProcedure
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "ErrorLine"
-                    Value = box this.ErrorLine
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "ErrorMessage"
-                    Value = box this.ErrorMessage
-                    ProviderDbType = Some "NVarChar" } ]
+                [ { WriteColumn.Name = "ErrorLogID"; Value = box this.ErrorLogID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ErrorTime"; Value = box this.ErrorTime; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "UserName"; Value = box this.UserName; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ErrorNumber"; Value = box this.ErrorNumber; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ErrorSeverity"; Value = box this.ErrorSeverity; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ErrorState"; Value = box this.ErrorState; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ErrorProcedure"; Value = box this.ErrorProcedure; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "ErrorLine"; Value = box this.ErrorLine; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "ErrorMessage"; Value = box this.ErrorMessage; ProviderDbType = Some "NVarChar" } ]
 
     let ErrorLog = table<ErrorLog>
 
@@ -2988,15 +2034,9 @@ module ext =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "ID"
-                    Value = box this.ID
-                    ProviderDbType = Some "Int" }
-                  { WriteColumn.Name = "LessPrecision"
-                    Value = box this.LessPrecision
-                    ProviderDbType = Some "DateTime" }
-                  { WriteColumn.Name = "MorePrecision"
-                    Value = box this.MorePrecision
-                    ProviderDbType = Some "DateTime2" } ]
+                [ { WriteColumn.Name = "ID"; Value = box this.ID; ProviderDbType = Some "Int" }
+                  { WriteColumn.Name = "LessPrecision"; Value = box this.LessPrecision; ProviderDbType = Some "DateTime" }
+                  { WriteColumn.Name = "MorePrecision"; Value = box this.MorePrecision; ProviderDbType = Some "DateTime2" } ]
 
     let DateTime2Support = table<DateTime2Support>
 
@@ -3009,12 +2049,8 @@ module ext =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "Id"
-                    Value = box this.Id
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "EmailAddress"
-                    Value = box this.EmailAddress
-                    ProviderDbType = Some "NChar" } ]
+                [ { WriteColumn.Name = "Id"; Value = box this.Id; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "EmailAddress"; Value = box this.EmailAddress; ProviderDbType = Some "NChar" } ]
 
     let GetIdGuidRepro = table<GetIdGuidRepro>
 
@@ -3027,12 +2063,8 @@ module ext =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "Id"
-                    Value = box this.Id
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "Hierarchy"
-                    Value = box this.Hierarchy
-                    ProviderDbType = Some "SqlHierarchyId" } ]
+                [ { WriteColumn.Name = "Id"; Value = box this.Id; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "Hierarchy"; Value = box this.Hierarchy; ProviderDbType = Some "SqlHierarchyId" } ]
 
     let HierarchyIdSupport = table<HierarchyIdSupport>
 
@@ -3047,15 +2079,9 @@ module ext =
 
         interface IWriteColumns with
             member this.WriteColumns =
-                [ { WriteColumn.Name = "Key1"
-                    Value = box this.Key1
-                    ProviderDbType = Some "UniqueIdentifier" }
-                  { WriteColumn.Name = "Key2"
-                    Value = box this.Key2
-                    ProviderDbType = Some "NVarChar" }
-                  { WriteColumn.Name = "Value"
-                    Value = box this.Value
-                    ProviderDbType = Some "NVarChar" } ]
+                [ { WriteColumn.Name = "Key1"; Value = box this.Key1; ProviderDbType = Some "UniqueIdentifier" }
+                  { WriteColumn.Name = "Key2"; Value = box this.Key2; ProviderDbType = Some "NVarChar" }
+                  { WriteColumn.Name = "Value"; Value = box this.Value; ProviderDbType = Some "NVarChar" } ]
 
     let NullableKeyUpsert = table<NullableKeyUpsert>
 
@@ -3095,5 +2121,4 @@ type QueryContextFactory =
                 return ctx
             }
 
-        { OpenContext = openContext
-          OpenContextAsync = openContextAsync }
+        { OpenContext = openContext; OpenContextAsync = openContextAsync }
