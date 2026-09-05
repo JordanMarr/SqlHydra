@@ -8,6 +8,17 @@ open VerifyTests
 open VerifyNUnit
 open SqlHydra.Npgsql
 
+// ==========================================
+// Base table vs. view.
+// ==========================================
+
+[<TestCase("BASE TABLE", true)>]
+[<TestCase("table", true)>]
+[<TestCase("view", false)>]
+[<TestCase("materialized view", false)>]
+let ``Npgsql table types distinguish base tables from appended views`` tableType expected =
+    NpgsqlSchemaProvider.isBaseTableType tableType =! expected
+
 //let cfg = 
 //    {
 //        ConnectionString = DB.connectionString
