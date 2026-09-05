@@ -15,8 +15,12 @@
 ///       let SOUNDEX (s: string) : string = sqlFn
 ///       let DIFFERENCE (s1: string, s2: string) : int = sqlFn
 [<System.AttributeUsage(System.AttributeTargets.Method ||| System.AttributeTargets.Class)>]
-type SqlHydraFunctionAttribute() =
+type SqlHydraFunctionAttribute(sqlName: string) =
     inherit System.Attribute()
+    new() = SqlHydraFunctionAttribute(null)
+    /// Rendered instead of the member name, e.g. `pg_catalog.position` for a function whose
+    /// plain spelling is keyword syntax.
+    member _.SqlName = sqlName
 
 /// Raised when a `sqlFn` wrapper is executed as ordinary .NET code instead of being rendered
 /// as SQL: either it was called outside a query expression, or it is used in a `where`/`on'`

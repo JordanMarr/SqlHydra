@@ -39,6 +39,8 @@ jobs:
       - name: Start containers
         working-directory: src/.devcontainer
         run: docker compose up -d --wait mssql postgresql orcl
+      - name: Generated SqlFn matches pg_proc
+        run: dotnet fsi src/SqlHydra.Query/codegen/NpgsqlSqlFn.fsx --check
       - name: Build
         working-directory: src/
         run: dotnet build --no-restore

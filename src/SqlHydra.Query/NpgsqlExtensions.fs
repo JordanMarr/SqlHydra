@@ -1,4 +1,4 @@
-﻿module SqlHydra.Query.NpgsqlExtensions
+module SqlHydra.Query.NpgsqlExtensions
 
 open System
 
@@ -6,32 +6,187 @@ open System
 /// Use `open type SqlFn` to access functions without qualification.
 [<SqlHydraFunction>]
 type SqlFn =
-    // String functions (PostgreSQL uses lowercase)
+    // <generated> by codegen/NpgsqlSqlFn.fsx from pg_proc; edit the allowlist, not this block.
     static member char_length(s: string) : int = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member char_length(s: string option) : int option = sqlFn
     static member character_length(s: string) : int = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member character_length(s: string option) : int option = sqlFn
     static member length(s: string) : int = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member length(s: string option) : int option = sqlFn
+    static member length(bytes: byte[]) : int = sqlFn
+    /// NULL `bytes` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member length(bytes: byte[] option) : int option = sqlFn
     static member upper(s: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member upper(s: string option) : string option = sqlFn
     static member lower(s: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member lower(s: string option) : string option = sqlFn
     static member ltrim(s: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member ltrim(s: string option) : string option = sqlFn
+    static member ltrim(s: string, chars: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member ltrim(s: string option, chars: string) : string option = sqlFn
+    /// NULL `chars` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member ltrim(s: string, chars: string option) : string option = sqlFn
     static member rtrim(s: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member rtrim(s: string option) : string option = sqlFn
+    static member rtrim(s: string, chars: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member rtrim(s: string option, chars: string) : string option = sqlFn
+    /// NULL `chars` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member rtrim(s: string, chars: string option) : string option = sqlFn
     static member btrim(s: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member btrim(s: string option) : string option = sqlFn
+    static member btrim(s: string, chars: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member btrim(s: string option, chars: string) : string option = sqlFn
+    /// NULL `chars` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member btrim(s: string, chars: string option) : string option = sqlFn
     static member trim(s: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member trim(s: string option) : string option = sqlFn
+    static member trim(s: string, chars: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member trim(s: string option, chars: string) : string option = sqlFn
+    /// NULL `chars` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member trim(s: string, chars: string option) : string option = sqlFn
+    static member substring(s: string, start: int) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member substring(s: string option, start: int) : string option = sqlFn
+    /// NULL `start` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member substring(s: string, start: int option) : string option = sqlFn
     static member substring(s: string, start: int, length: int) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member substring(s: string option, start: int, length: int) : string option = sqlFn
+    /// NULL `start` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member substring(s: string, start: int option, length: int) : string option = sqlFn
+    /// NULL `length` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member substring(s: string, start: int, length: int option) : string option = sqlFn
+    static member substring(s: string, pattern: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member substring(s: string option, pattern: string) : string option = sqlFn
+    /// NULL `pattern` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member substring(s: string, pattern: string option) : string option = sqlFn
     static member replace(s: string, from: string, ``to``: string) : string = sqlFn
-    static member position(substring: string, s: string) : int = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member replace(s: string option, from: string, ``to``: string) : string option = sqlFn
+    /// NULL `from` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member replace(s: string, from: string option, ``to``: string) : string option = sqlFn
+    /// NULL ```to``` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member replace(s: string, from: string, ``to``: string option) : string option = sqlFn
+    [<SqlHydraFunction("pg_catalog.position")>]
+    static member position(s: string, substring: string) : int = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    [<SqlHydraFunction("pg_catalog.position")>]
+    static member position(s: string option, substring: string) : int option = sqlFn
+    /// NULL `substring` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    [<SqlHydraFunction("pg_catalog.position")>]
+    static member position(s: string, substring: string option) : int option = sqlFn
     static member strpos(s: string, substring: string) : int = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member strpos(s: string option, substring: string) : int option = sqlFn
+    /// NULL `substring` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member strpos(s: string, substring: string option) : int option = sqlFn
+    static member left(s: string, length: int) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member left(s: string option, length: int) : string option = sqlFn
+    /// NULL `length` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member left(s: string, length: int option) : string option = sqlFn
+    static member right(s: string, length: int) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member right(s: string option, length: int) : string option = sqlFn
+    /// NULL `length` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member right(s: string, length: int option) : string option = sqlFn
+    static member reverse(s: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member reverse(s: string option) : string option = sqlFn
+    static member repeat(s: string, count: int) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member repeat(s: string option, count: int) : string option = sqlFn
+    /// NULL `count` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member repeat(s: string, count: int option) : string option = sqlFn
+    static member lpad(s: string, length: int) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member lpad(s: string option, length: int) : string option = sqlFn
+    /// NULL `length` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member lpad(s: string, length: int option) : string option = sqlFn
+    static member lpad(s: string, length: int, fill: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member lpad(s: string option, length: int, fill: string) : string option = sqlFn
+    /// NULL `length` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member lpad(s: string, length: int option, fill: string) : string option = sqlFn
+    /// NULL `fill` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member lpad(s: string, length: int, fill: string option) : string option = sqlFn
+    static member rpad(s: string, length: int) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member rpad(s: string option, length: int) : string option = sqlFn
+    /// NULL `length` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member rpad(s: string, length: int option) : string option = sqlFn
+    static member rpad(s: string, length: int, fill: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member rpad(s: string option, length: int, fill: string) : string option = sqlFn
+    /// NULL `length` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member rpad(s: string, length: int option, fill: string) : string option = sqlFn
+    /// NULL `fill` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member rpad(s: string, length: int, fill: string option) : string option = sqlFn
+    static member initcap(s: string) : string = sqlFn
+    /// NULL `s` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member initcap(s: string option) : string option = sqlFn
     static member concat(s1: string, s2: string) : string = sqlFn
     static member concat(s1: string, s2: string, s3: string) : string = sqlFn
     static member concat_ws(separator: string, s1: string, s2: string) : string = sqlFn
     static member concat_ws(separator: string, s1: string, s2: string, s3: string) : string = sqlFn
-    static member left(s: string, length: int) : string = sqlFn
-    static member right(s: string, length: int) : string = sqlFn
-    static member reverse(s: string) : string = sqlFn
-    static member repeat(s: string, count: int) : string = sqlFn
-    static member lpad(s: string, length: int, fill: string) : string = sqlFn
-    static member rpad(s: string, length: int, fill: string) : string = sqlFn
-    static member initcap(s: string) : string = sqlFn
+    static member now() : DateTime = sqlFn
+    [<SqlHydraFunction("pg_catalog.extract")>]
+    static member extract(field: string, source: DateTime) : decimal = sqlFn
+    /// NULL `field` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    [<SqlHydraFunction("pg_catalog.extract")>]
+    static member extract(field: string option, source: DateTime) : decimal option = sqlFn
+    /// NULL `source` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    [<SqlHydraFunction("pg_catalog.extract")>]
+    static member extract(field: string, source: DateTime option) : decimal option = sqlFn
+    static member date_trunc(field: string, source: DateTime) : DateTime = sqlFn
+    /// NULL `field` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member date_trunc(field: string option, source: DateTime) : DateTime option = sqlFn
+    /// NULL `source` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member date_trunc(field: string, source: DateTime option) : DateTime option = sqlFn
+    static member date_part(field: string, source: DateTime) : float = sqlFn
+    /// NULL `field` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member date_part(field: string option, source: DateTime) : float option = sqlFn
+    /// NULL `source` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member date_part(field: string, source: DateTime option) : float option = sqlFn
+    static member age(timestamp: DateTime) : TimeSpan = sqlFn
+    /// NULL `timestamp` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member age(timestamp: DateTime option) : TimeSpan option = sqlFn
+    static member age(timestamp1: DateTime, timestamp2: DateTime) : TimeSpan = sqlFn
+    /// NULL `timestamp1` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member age(timestamp1: DateTime option, timestamp2: DateTime) : TimeSpan option = sqlFn
+    /// NULL `timestamp2` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member age(timestamp1: DateTime, timestamp2: DateTime option) : TimeSpan option = sqlFn
+    static member make_date(year: int, month: int, day: int) : DateTime = sqlFn
+    /// NULL `year` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member make_date(year: int option, month: int, day: int) : DateTime option = sqlFn
+    /// NULL `month` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member make_date(year: int, month: int option, day: int) : DateTime option = sqlFn
+    /// NULL `day` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member make_date(year: int, month: int, day: int option) : DateTime option = sqlFn
+    static member make_time(hour: int, minute: int, second: float) : TimeSpan = sqlFn
+    /// NULL `hour` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member make_time(hour: int option, minute: int, second: float) : TimeSpan option = sqlFn
+    /// NULL `minute` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member make_time(hour: int, minute: int option, second: float) : TimeSpan option = sqlFn
+    /// NULL `second` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
+    static member make_time(hour: int, minute: int, second: float option) : TimeSpan option = sqlFn
+    // </generated>
 
+    // Expression nodes, not catalog functions: hand-written.
     // Null handling - with overloads for Option and Nullable
     static member coalesce(a: Option<'T>, b: 'T) : 'T = sqlFn
     static member coalesce(a: Nullable<'T>, b: 'T) : 'T when 'T : struct = sqlFn
@@ -54,17 +209,9 @@ type SqlFn =
     static member trunc(n: 'T, decimals: int) : 'T when 'T : struct = sqlFn
 
     // Date/time functions
-    static member now() : DateTime = sqlFn
     static member current_date() : DateTime = sqlFn
     static member current_time() : TimeSpan = sqlFn
     static member current_timestamp() : DateTime = sqlFn
-    static member date_trunc(field: string, source: DateTime) : DateTime = sqlFn
-    static member date_part(field: string, source: DateTime) : float = sqlFn
-    static member extract(field: string, source: DateTime) : float = sqlFn
-    static member age(timestamp: DateTime) : TimeSpan = sqlFn
-    static member age(timestamp1: DateTime, timestamp2: DateTime) : TimeSpan = sqlFn
-    static member make_date(year: int, month: int, day: int) : DateTime = sqlFn
-    static member make_time(hour: int, minute: int, second: float) : TimeSpan = sqlFn
 
     // GREATEST / LEAST — variadic standard SQL functions
     static member greatest(a: 'T, b: 'T) : 'T = sqlFn
