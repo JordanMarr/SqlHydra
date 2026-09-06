@@ -273,6 +273,8 @@ An unmatched left join hydrates the view with every column `None`. To recover th
 let orders = rows |> Seq.map (fun (o, d) -> o, d.ToOption())  // d.ToOption() : SalesOrderDetail option
 ```
 
+`ToOption()` is generated as an extension member, so it is available whenever the generated namespace is `open`ed (which query code already requires).
+
 The classic `leftJoin ... on (o.Id = d.Value.Id)` form (whole record as `Option`) still works; both forms can be mixed per join site, so queries can be migrated one at a time.
 
 ### Selecting Columns

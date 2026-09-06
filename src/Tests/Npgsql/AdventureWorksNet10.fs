@@ -78,17 +78,6 @@ module ext =
 
             interface ILeftViewOf<``arrays (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``arrays (base)`` option =
-                match this.id with
-                | Some value ->
-                    let record: ``arrays (base)`` =
-                        { id = value; text_array = this.text_array.Value; integer_array = this.integer_array.Value }
-
-                    Some record
-                | None -> None
-
         let arrays = leftTable<``arrays (base)``, arrays>
 
         type private ``jsonsupport (base)`` = jsonsupport
@@ -104,17 +93,6 @@ module ext =
 
             interface ILeftViewOf<``jsonsupport (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``jsonsupport (base)`` option =
-                match this.id with
-                | Some value ->
-                    let record: ``jsonsupport (base)`` =
-                        { id = value; json_field = this.json_field.Value; jsonb_field = this.jsonb_field.Value }
-
-                    Some record
-                | None -> None
-
         let jsonsupport = leftTable<``jsonsupport (base)``, jsonsupport>
 
         type private ``person (base)`` = person
@@ -126,17 +104,6 @@ module ext =
               currentmood: Option<mood> }
 
             interface ILeftViewOf<``person (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``person (base)`` option =
-                match this.name with
-                | Some value ->
-                    let record: ``person (base)`` =
-                        { name = value; currentmood = this.currentmood.Value }
-
-                    Some record
-                | None -> None
 
         let person = leftTable<``person (base)``, person>
 
@@ -611,17 +578,6 @@ module humanresources =
 
             interface ILeftViewOf<``department (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``department (base)`` option =
-                match this.departmentid with
-                | Some value ->
-                    let record: ``department (base)`` =
-                        { departmentid = value; name = this.name.Value; groupname = this.groupname.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let department = leftTable<``department (base)``, department>
 
         type private ``employee (base)`` = employee
@@ -661,31 +617,6 @@ module humanresources =
 
             interface ILeftViewOf<``employee (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``employee (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``employee (base)`` =
-                        { businessentityid = value
-                          nationalidnumber = this.nationalidnumber.Value
-                          loginid = this.loginid.Value
-                          jobtitle = this.jobtitle.Value
-                          birthdate = this.birthdate.Value
-                          maritalstatus = this.maritalstatus.Value
-                          gender = this.gender.Value
-                          hiredate = this.hiredate.Value
-                          salariedflag = this.salariedflag.Value
-                          vacationhours = this.vacationhours.Value
-                          sickleavehours = this.sickleavehours.Value
-                          currentflag = this.currentflag.Value
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value
-                          organizationnode = this.organizationnode }
-
-                    Some record
-                | None -> None
-
         let employee = leftTable<``employee (base)``, employee>
 
         type private ``employeedepartmenthistory (base)`` = employeedepartmenthistory
@@ -707,22 +638,6 @@ module humanresources =
 
             interface ILeftViewOf<``employeedepartmenthistory (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``employeedepartmenthistory (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``employeedepartmenthistory (base)`` =
-                        { businessentityid = value
-                          departmentid = this.departmentid.Value
-                          shiftid = this.shiftid.Value
-                          startdate = this.startdate.Value
-                          enddate = this.enddate
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let employeedepartmenthistory =
             leftTable<``employeedepartmenthistory (base)``, employeedepartmenthistory>
 
@@ -743,17 +658,6 @@ module humanresources =
 
             interface ILeftViewOf<``employeepayhistory (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``employeepayhistory (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``employeepayhistory (base)`` =
-                        { businessentityid = value; ratechangedate = this.ratechangedate.Value; rate = this.rate.Value; payfrequency = this.payfrequency.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let employeepayhistory =
             leftTable<``employeepayhistory (base)``, employeepayhistory>
 
@@ -771,17 +675,6 @@ module humanresources =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``jobcandidate (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``jobcandidate (base)`` option =
-                match this.jobcandidateid with
-                | Some value ->
-                    let record: ``jobcandidate (base)`` =
-                        { jobcandidateid = value; businessentityid = this.businessentityid; resume = this.resume; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let jobcandidate = leftTable<``jobcandidate (base)``, jobcandidate>
 
@@ -801,17 +694,6 @@ module humanresources =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``shift (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``shift (base)`` option =
-                match this.shiftid with
-                | Some value ->
-                    let record: ``shift (base)`` =
-                        { shiftid = value; name = this.name.Value; starttime = this.starttime.Value; endtime = this.endtime.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let shift = leftTable<``shift (base)``, shift>
 
@@ -1076,17 +958,6 @@ module network_sample =
               net_macaddr8: Option<System.Net.NetworkInformation.PhysicalAddress> }
 
             interface ILeftViewOf<``network_addresses (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``network_addresses (base)`` option =
-                match this.id with
-                | Some value ->
-                    let record: ``network_addresses (base)`` =
-                        { id = value; net_cidr = this.net_cidr.Value; net_inet = this.net_inet.Value; net_macaddr = this.net_macaddr.Value; net_macaddr8 = this.net_macaddr8.Value }
-
-                    Some record
-                | None -> None
 
         let network_addresses = leftTable<``network_addresses (base)``, network_addresses>
 
@@ -1641,30 +1512,6 @@ module pe =
 
             interface ILeftViewOf<``p (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``p (base)`` option =
-                match this.namestyle with
-                | Some value ->
-                    let record: ``p (base)`` =
-                        { id = this.id
-                          businessentityid = this.businessentityid
-                          persontype = this.persontype
-                          namestyle = value
-                          title = this.title
-                          firstname = this.firstname
-                          middlename = this.middlename
-                          lastname = this.lastname
-                          suffix = this.suffix
-                          emailpromotion = this.emailpromotion
-                          additionalcontactinfo = this.additionalcontactinfo
-                          demographics = this.demographics
-                          rowguid = this.rowguid
-                          modifieddate = this.modifieddate }
-
-                    Some record
-                | None -> None
-
         let p = leftTable<``p (base)``, p>
 
         type private ``pa (base)`` = pa
@@ -1748,25 +1595,6 @@ module pe =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``sp (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``sp (base)`` option =
-                match this.isonlystateprovinceflag with
-                | Some value ->
-                    let record: ``sp (base)`` =
-                        { id = this.id
-                          stateprovinceid = this.stateprovinceid
-                          stateprovincecode = this.stateprovincecode
-                          countryregioncode = this.countryregioncode
-                          isonlystateprovinceflag = value
-                          name = this.name
-                          territoryid = this.territoryid
-                          rowguid = this.rowguid
-                          modifieddate = this.modifieddate }
-
-                    Some record
-                | None -> None
 
         let sp = leftTable<``sp (base)``, sp>
 
@@ -2197,25 +2025,6 @@ module person =
 
             interface ILeftViewOf<``address (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``address (base)`` option =
-                match this.addressid with
-                | Some value ->
-                    let record: ``address (base)`` =
-                        { addressid = value
-                          addressline1 = this.addressline1.Value
-                          addressline2 = this.addressline2
-                          city = this.city.Value
-                          stateprovinceid = this.stateprovinceid.Value
-                          postalcode = this.postalcode.Value
-                          spatiallocation = this.spatiallocation
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let address = leftTable<``address (base)``, address>
 
         type private ``addresstype (base)`` = addresstype
@@ -2233,17 +2042,6 @@ module person =
 
             interface ILeftViewOf<``addresstype (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``addresstype (base)`` option =
-                match this.addresstypeid with
-                | Some value ->
-                    let record: ``addresstype (base)`` =
-                        { addresstypeid = value; name = this.name.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let addresstype = leftTable<``addresstype (base)``, addresstype>
 
         type private ``businessentity (base)`` = businessentity
@@ -2258,17 +2056,6 @@ module person =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``businessentity (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``businessentity (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``businessentity (base)`` =
-                        { businessentityid = value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let businessentity = leftTable<``businessentity (base)``, businessentity>
 
@@ -2288,17 +2075,6 @@ module person =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``businessentityaddress (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``businessentityaddress (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``businessentityaddress (base)`` =
-                        { businessentityid = value; addressid = this.addressid.Value; addresstypeid = this.addresstypeid.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let businessentityaddress =
             leftTable<``businessentityaddress (base)``, businessentityaddress>
@@ -2320,17 +2096,6 @@ module person =
 
             interface ILeftViewOf<``businessentitycontact (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``businessentitycontact (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``businessentitycontact (base)`` =
-                        { businessentityid = value; personid = this.personid.Value; contacttypeid = this.contacttypeid.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let businessentitycontact =
             leftTable<``businessentitycontact (base)``, businessentitycontact>
 
@@ -2347,17 +2112,6 @@ module person =
 
             interface ILeftViewOf<``contacttype (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``contacttype (base)`` option =
-                match this.contacttypeid with
-                | Some value ->
-                    let record: ``contacttype (base)`` =
-                        { contacttypeid = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let contacttype = leftTable<``contacttype (base)``, contacttype>
 
         type private ``countryregion (base)`` = countryregion
@@ -2372,17 +2126,6 @@ module person =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``countryregion (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``countryregion (base)`` option =
-                match this.countryregioncode with
-                | Some value ->
-                    let record: ``countryregion (base)`` =
-                        { countryregioncode = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let countryregion = leftTable<``countryregion (base)``, countryregion>
 
@@ -2403,17 +2146,6 @@ module person =
 
             interface ILeftViewOf<``emailaddress (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``emailaddress (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``emailaddress (base)`` =
-                        { businessentityid = value; emailaddressid = this.emailaddressid.Value; emailaddress = this.emailaddress; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let emailaddress = leftTable<``emailaddress (base)``, emailaddress>
 
         type private ``password (base)`` = password
@@ -2432,21 +2164,6 @@ module person =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``password (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``password (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``password (base)`` =
-                        { businessentityid = value
-                          passwordhash = this.passwordhash.Value
-                          passwordsalt = this.passwordsalt.Value
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let password = leftTable<``password (base)``, password>
 
@@ -2483,29 +2200,6 @@ module person =
 
             interface ILeftViewOf<``person (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``person (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``person (base)`` =
-                        { businessentityid = value
-                          persontype = this.persontype.Value
-                          namestyle = this.namestyle.Value
-                          title = this.title
-                          firstname = this.firstname.Value
-                          middlename = this.middlename
-                          lastname = this.lastname.Value
-                          suffix = this.suffix
-                          emailpromotion = this.emailpromotion.Value
-                          additionalcontactinfo = this.additionalcontactinfo
-                          demographics = this.demographics
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let person = leftTable<``person (base)``, person>
 
         type private ``personphone (base)`` = personphone
@@ -2523,17 +2217,6 @@ module person =
 
             interface ILeftViewOf<``personphone (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``personphone (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``personphone (base)`` =
-                        { businessentityid = value; phonenumber = this.phonenumber.Value; phonenumbertypeid = this.phonenumbertypeid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let personphone = leftTable<``personphone (base)``, personphone>
 
         type private ``phonenumbertype (base)`` = phonenumbertype
@@ -2548,17 +2231,6 @@ module person =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``phonenumbertype (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``phonenumbertype (base)`` option =
-                match this.phonenumbertypeid with
-                | Some value ->
-                    let record: ``phonenumbertype (base)`` =
-                        { phonenumbertypeid = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let phonenumbertype = leftTable<``phonenumbertype (base)``, phonenumbertype>
 
@@ -2584,24 +2256,6 @@ module person =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``stateprovince (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``stateprovince (base)`` option =
-                match this.stateprovinceid with
-                | Some value ->
-                    let record: ``stateprovince (base)`` =
-                        { stateprovinceid = value
-                          stateprovincecode = this.stateprovincecode.Value
-                          countryregioncode = this.countryregioncode.Value
-                          isonlystateprovinceflag = this.isonlystateprovinceflag.Value
-                          name = this.name.Value
-                          territoryid = this.territoryid.Value
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let stateprovince = leftTable<``stateprovince (base)``, stateprovince>
 
@@ -3518,29 +3172,6 @@ module pr =
 
             interface ILeftViewOf<``d (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``d (base)`` option =
-                match this.folderflag with
-                | Some value ->
-                    let record: ``d (base)`` =
-                        { title = this.title
-                          owner = this.owner
-                          folderflag = value
-                          filename = this.filename
-                          fileextension = this.fileextension
-                          revision = this.revision
-                          changenumber = this.changenumber
-                          status = this.status
-                          documentsummary = this.documentsummary
-                          document = this.document
-                          rowguid = this.rowguid
-                          modifieddate = this.modifieddate
-                          documentnode = this.documentnode }
-
-                    Some record
-                | None -> None
-
         let d = leftTable<``d (base)``, d>
 
         type private ``i (base)`` = i
@@ -3639,42 +3270,6 @@ module pr =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``p (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``p (base)`` option =
-                match this.makeflag with
-                | Some value ->
-                    let record: ``p (base)`` =
-                        { id = this.id
-                          productid = this.productid
-                          name = this.name
-                          productnumber = this.productnumber
-                          makeflag = value
-                          finishedgoodsflag = this.finishedgoodsflag.Value
-                          color = this.color
-                          safetystocklevel = this.safetystocklevel
-                          reorderpoint = this.reorderpoint
-                          standardcost = this.standardcost
-                          listprice = this.listprice
-                          size = this.size
-                          sizeunitmeasurecode = this.sizeunitmeasurecode
-                          weightunitmeasurecode = this.weightunitmeasurecode
-                          weight = this.weight
-                          daystomanufacture = this.daystomanufacture
-                          productline = this.productline
-                          ``class`` = this.``class``
-                          style = this.style
-                          productsubcategoryid = this.productsubcategoryid
-                          productmodelid = this.productmodelid
-                          sellstartdate = this.sellstartdate
-                          sellenddate = this.sellenddate
-                          discontinueddate = this.discontinueddate
-                          rowguid = this.rowguid
-                          modifieddate = this.modifieddate }
-
-                    Some record
-                | None -> None
 
         let p = leftTable<``p (base)``, p>
 
@@ -3892,17 +3487,6 @@ module pr =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``ppp (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``ppp (base)`` option =
-                match this.primary with
-                | Some value ->
-                    let record: ``ppp (base)`` =
-                        { productid = this.productid; productphotoid = this.productphotoid; primary = value; modifieddate = this.modifieddate }
-
-                    Some record
-                | None -> None
 
         let ppp = leftTable<``ppp (base)``, ppp>
 
@@ -4987,25 +4571,6 @@ module production =
 
             interface ILeftViewOf<``billofmaterials (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``billofmaterials (base)`` option =
-                match this.billofmaterialsid with
-                | Some value ->
-                    let record: ``billofmaterials (base)`` =
-                        { billofmaterialsid = value
-                          productassemblyid = this.productassemblyid
-                          componentid = this.componentid.Value
-                          startdate = this.startdate.Value
-                          enddate = this.enddate
-                          unitmeasurecode = this.unitmeasurecode.Value
-                          bomlevel = this.bomlevel.Value
-                          perassemblyqty = this.perassemblyqty.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let billofmaterials = leftTable<``billofmaterials (base)``, billofmaterials>
 
         type private ``culture (base)`` = culture
@@ -5020,17 +4585,6 @@ module production =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``culture (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``culture (base)`` option =
-                match this.cultureid with
-                | Some value ->
-                    let record: ``culture (base)`` =
-                        { cultureid = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let culture = leftTable<``culture (base)``, culture>
 
@@ -5067,29 +4621,6 @@ module production =
 
             interface ILeftViewOf<``document (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``document (base)`` option =
-                match this.documentnode with
-                | Some value ->
-                    let record: ``document (base)`` =
-                        { title = this.title.Value
-                          owner = this.owner.Value
-                          folderflag = this.folderflag.Value
-                          filename = this.filename.Value
-                          fileextension = this.fileextension
-                          revision = this.revision.Value
-                          changenumber = this.changenumber.Value
-                          status = this.status.Value
-                          documentsummary = this.documentsummary
-                          document = this.document
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value
-                          documentnode = value }
-
-                    Some record
-                | None -> None
-
         let document = leftTable<``document (base)``, document>
 
         type private ``illustration (base)`` = illustration
@@ -5104,17 +4635,6 @@ module production =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``illustration (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``illustration (base)`` option =
-                match this.illustrationid with
-                | Some value ->
-                    let record: ``illustration (base)`` =
-                        { illustrationid = value; diagram = this.diagram; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let illustration = leftTable<``illustration (base)``, illustration>
 
@@ -5134,17 +4654,6 @@ module production =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``location (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``location (base)`` option =
-                match this.locationid with
-                | Some value ->
-                    let record: ``location (base)`` =
-                        { locationid = value; name = this.name.Value; costrate = this.costrate.Value; availability = this.availability.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let location = leftTable<``location (base)``, location>
 
@@ -5205,41 +4714,6 @@ module production =
 
             interface ILeftViewOf<``product (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``product (base)`` option =
-                match this.productid with
-                | Some value ->
-                    let record: ``product (base)`` =
-                        { productid = value
-                          name = this.name.Value
-                          productnumber = this.productnumber.Value
-                          makeflag = this.makeflag.Value
-                          finishedgoodsflag = this.finishedgoodsflag.Value
-                          color = this.color
-                          safetystocklevel = this.safetystocklevel.Value
-                          reorderpoint = this.reorderpoint.Value
-                          standardcost = this.standardcost.Value
-                          listprice = this.listprice.Value
-                          size = this.size
-                          sizeunitmeasurecode = this.sizeunitmeasurecode
-                          weightunitmeasurecode = this.weightunitmeasurecode
-                          weight = this.weight
-                          daystomanufacture = this.daystomanufacture.Value
-                          productline = this.productline
-                          ``class`` = this.``class``
-                          style = this.style
-                          productsubcategoryid = this.productsubcategoryid
-                          productmodelid = this.productmodelid
-                          sellstartdate = this.sellstartdate.Value
-                          sellenddate = this.sellenddate
-                          discontinueddate = this.discontinueddate
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let product = leftTable<``product (base)``, product>
 
         type private ``productcategory (base)`` = productcategory
@@ -5256,17 +4730,6 @@ module production =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``productcategory (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productcategory (base)`` option =
-                match this.productcategoryid with
-                | Some value ->
-                    let record: ``productcategory (base)`` =
-                        { productcategoryid = value; name = this.name.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let productcategory = leftTable<``productcategory (base)``, productcategory>
 
@@ -5287,17 +4750,6 @@ module production =
 
             interface ILeftViewOf<``productcosthistory (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productcosthistory (base)`` option =
-                match this.productid with
-                | Some value ->
-                    let record: ``productcosthistory (base)`` =
-                        { productid = value; startdate = this.startdate.Value; enddate = this.enddate; standardcost = this.standardcost.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let productcosthistory =
             leftTable<``productcosthistory (base)``, productcosthistory>
 
@@ -5316,17 +4768,6 @@ module production =
 
             interface ILeftViewOf<``productdescription (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productdescription (base)`` option =
-                match this.productdescriptionid with
-                | Some value ->
-                    let record: ``productdescription (base)`` =
-                        { productdescriptionid = value; description = this.description.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let productdescription =
             leftTable<``productdescription (base)``, productdescription>
 
@@ -5342,17 +4783,6 @@ module production =
               documentnode: Option<string> }
 
             interface ILeftViewOf<``productdocument (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productdocument (base)`` option =
-                match this.productid with
-                | Some value ->
-                    let record: ``productdocument (base)`` =
-                        { productid = value; modifieddate = this.modifieddate.Value; documentnode = this.documentnode.Value }
-
-                    Some record
-                | None -> None
 
         let productdocument = leftTable<``productdocument (base)``, productdocument>
 
@@ -5377,23 +4807,6 @@ module production =
 
             interface ILeftViewOf<``productinventory (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productinventory (base)`` option =
-                match this.productid with
-                | Some value ->
-                    let record: ``productinventory (base)`` =
-                        { productid = value
-                          locationid = this.locationid.Value
-                          shelf = this.shelf.Value
-                          bin = this.bin.Value
-                          quantity = this.quantity.Value
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let productinventory = leftTable<``productinventory (base)``, productinventory>
 
         type private ``productlistpricehistory (base)`` = productlistpricehistory
@@ -5412,17 +4825,6 @@ module production =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``productlistpricehistory (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productlistpricehistory (base)`` option =
-                match this.productid with
-                | Some value ->
-                    let record: ``productlistpricehistory (base)`` =
-                        { productid = value; startdate = this.startdate.Value; enddate = this.enddate; listprice = this.listprice.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let productlistpricehistory =
             leftTable<``productlistpricehistory (base)``, productlistpricehistory>
@@ -5446,22 +4848,6 @@ module production =
 
             interface ILeftViewOf<``productmodel (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productmodel (base)`` option =
-                match this.productmodelid with
-                | Some value ->
-                    let record: ``productmodel (base)`` =
-                        { productmodelid = value
-                          name = this.name.Value
-                          catalogdescription = this.catalogdescription
-                          instructions = this.instructions
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let productmodel = leftTable<``productmodel (base)``, productmodel>
 
         type private ``productmodelillustration (base)`` = productmodelillustration
@@ -5476,17 +4862,6 @@ module production =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``productmodelillustration (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productmodelillustration (base)`` option =
-                match this.productmodelid with
-                | Some value ->
-                    let record: ``productmodelillustration (base)`` =
-                        { productmodelid = value; illustrationid = this.illustrationid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let productmodelillustration =
             leftTable<``productmodelillustration (base)``, productmodelillustration>
@@ -5505,17 +4880,6 @@ module production =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``productmodelproductdescriptionculture (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productmodelproductdescriptionculture (base)`` option =
-                match this.productmodelid with
-                | Some value ->
-                    let record: ``productmodelproductdescriptionculture (base)`` =
-                        { productmodelid = value; productdescriptionid = this.productdescriptionid.Value; cultureid = this.cultureid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let productmodelproductdescriptionculture =
             leftTable<``productmodelproductdescriptionculture (base)``, productmodelproductdescriptionculture>
@@ -5539,22 +4903,6 @@ module production =
 
             interface ILeftViewOf<``productphoto (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productphoto (base)`` option =
-                match this.productphotoid with
-                | Some value ->
-                    let record: ``productphoto (base)`` =
-                        { productphotoid = value
-                          thumbnailphoto = this.thumbnailphoto
-                          thumbnailphotofilename = this.thumbnailphotofilename
-                          largephoto = this.largephoto
-                          largephotofilename = this.largephotofilename
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let productphoto = leftTable<``productphoto (base)``, productphoto>
 
         type private ``productproductphoto (base)`` = productproductphoto
@@ -5571,17 +4919,6 @@ module production =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``productproductphoto (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productproductphoto (base)`` option =
-                match this.productid with
-                | Some value ->
-                    let record: ``productproductphoto (base)`` =
-                        { productid = value; productphotoid = this.productphotoid.Value; primary = this.primary.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let productproductphoto =
             leftTable<``productproductphoto (base)``, productproductphoto>
@@ -5609,24 +4946,6 @@ module production =
 
             interface ILeftViewOf<``productreview (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productreview (base)`` option =
-                match this.productreviewid with
-                | Some value ->
-                    let record: ``productreview (base)`` =
-                        { productreviewid = value
-                          productid = this.productid.Value
-                          reviewername = this.reviewername.Value
-                          reviewdate = this.reviewdate.Value
-                          emailaddress = this.emailaddress.Value
-                          rating = this.rating.Value
-                          comments = this.comments
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let productreview = leftTable<``productreview (base)``, productreview>
 
         type private ``productsubcategory (base)`` = productsubcategory
@@ -5646,17 +4965,6 @@ module production =
 
             interface ILeftViewOf<``productsubcategory (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productsubcategory (base)`` option =
-                match this.productsubcategoryid with
-                | Some value ->
-                    let record: ``productsubcategory (base)`` =
-                        { productsubcategoryid = value; productcategoryid = this.productcategoryid.Value; name = this.name.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let productsubcategory =
             leftTable<``productsubcategory (base)``, productsubcategory>
 
@@ -5672,17 +4980,6 @@ module production =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``scrapreason (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``scrapreason (base)`` option =
-                match this.scrapreasonid with
-                | Some value ->
-                    let record: ``scrapreason (base)`` =
-                        { scrapreasonid = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let scrapreason = leftTable<``scrapreason (base)``, scrapreason>
 
@@ -5710,25 +5007,6 @@ module production =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``transactionhistory (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``transactionhistory (base)`` option =
-                match this.transactionid with
-                | Some value ->
-                    let record: ``transactionhistory (base)`` =
-                        { transactionid = value
-                          productid = this.productid.Value
-                          referenceorderid = this.referenceorderid.Value
-                          referenceorderlineid = this.referenceorderlineid.Value
-                          transactiondate = this.transactiondate.Value
-                          transactiontype = this.transactiontype.Value
-                          quantity = this.quantity.Value
-                          actualcost = this.actualcost.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let transactionhistory =
             leftTable<``transactionhistory (base)``, transactionhistory>
@@ -5758,25 +5036,6 @@ module production =
 
             interface ILeftViewOf<``transactionhistoryarchive (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``transactionhistoryarchive (base)`` option =
-                match this.transactionid with
-                | Some value ->
-                    let record: ``transactionhistoryarchive (base)`` =
-                        { transactionid = value
-                          productid = this.productid.Value
-                          referenceorderid = this.referenceorderid.Value
-                          referenceorderlineid = this.referenceorderlineid.Value
-                          transactiondate = this.transactiondate.Value
-                          transactiontype = this.transactiontype.Value
-                          quantity = this.quantity.Value
-                          actualcost = this.actualcost.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let transactionhistoryarchive =
             leftTable<``transactionhistoryarchive (base)``, transactionhistoryarchive>
 
@@ -5792,17 +5051,6 @@ module production =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``unitmeasure (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``unitmeasure (base)`` option =
-                match this.unitmeasurecode with
-                | Some value ->
-                    let record: ``unitmeasure (base)`` =
-                        { unitmeasurecode = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let unitmeasure = leftTable<``unitmeasure (base)``, unitmeasure>
 
@@ -5941,25 +5189,6 @@ module production =
 
             interface ILeftViewOf<``workorder (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``workorder (base)`` option =
-                match this.workorderid with
-                | Some value ->
-                    let record: ``workorder (base)`` =
-                        { workorderid = value
-                          productid = this.productid.Value
-                          orderqty = this.orderqty.Value
-                          scrappedqty = this.scrappedqty.Value
-                          startdate = this.startdate.Value
-                          enddate = this.enddate
-                          duedate = this.duedate.Value
-                          scrapreasonid = this.scrapreasonid
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let workorder = leftTable<``workorder (base)``, workorder>
 
         type private ``workorderrouting (base)`` = workorderrouting
@@ -5992,28 +5221,6 @@ module production =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``workorderrouting (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``workorderrouting (base)`` option =
-                match this.workorderid with
-                | Some value ->
-                    let record: ``workorderrouting (base)`` =
-                        { workorderid = value
-                          productid = this.productid.Value
-                          operationsequence = this.operationsequence.Value
-                          locationid = this.locationid.Value
-                          scheduledstartdate = this.scheduledstartdate.Value
-                          scheduledenddate = this.scheduledenddate.Value
-                          actualstartdate = this.actualstartdate
-                          actualenddate = this.actualenddate
-                          actualresourcehrs = this.actualresourcehrs
-                          plannedcost = this.plannedcost.Value
-                          actualcost = this.actualcost
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let workorderrouting = leftTable<``workorderrouting (base)``, workorderrouting>
 
@@ -6361,25 +5568,6 @@ module pu =
 
             interface ILeftViewOf<``v (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``v (base)`` option =
-                match this.preferredvendorstatus with
-                | Some value ->
-                    let record: ``v (base)`` =
-                        { id = this.id
-                          businessentityid = this.businessentityid
-                          accountnumber = this.accountnumber
-                          name = this.name
-                          creditrating = this.creditrating
-                          preferredvendorstatus = value
-                          activeflag = this.activeflag.Value
-                          purchasingwebserviceurl = this.purchasingwebserviceurl
-                          modifieddate = this.modifieddate }
-
-                    Some record
-                | None -> None
-
         let v = leftTable<``v (base)``, v>
 
 
@@ -6674,27 +5862,6 @@ module purchasing =
 
             interface ILeftViewOf<``productvendor (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``productvendor (base)`` option =
-                match this.productid with
-                | Some value ->
-                    let record: ``productvendor (base)`` =
-                        { productid = value
-                          businessentityid = this.businessentityid.Value
-                          averageleadtime = this.averageleadtime.Value
-                          standardprice = this.standardprice.Value
-                          lastreceiptcost = this.lastreceiptcost
-                          lastreceiptdate = this.lastreceiptdate
-                          minorderqty = this.minorderqty.Value
-                          maxorderqty = this.maxorderqty.Value
-                          onorderqty = this.onorderqty
-                          unitmeasurecode = this.unitmeasurecode.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let productvendor = leftTable<``productvendor (base)``, productvendor>
 
         type private ``purchaseorderdetail (base)`` = purchaseorderdetail
@@ -6721,25 +5888,6 @@ module purchasing =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``purchaseorderdetail (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``purchaseorderdetail (base)`` option =
-                match this.purchaseorderid with
-                | Some value ->
-                    let record: ``purchaseorderdetail (base)`` =
-                        { purchaseorderid = value
-                          purchaseorderdetailid = this.purchaseorderdetailid.Value
-                          duedate = this.duedate.Value
-                          orderqty = this.orderqty.Value
-                          productid = this.productid.Value
-                          unitprice = this.unitprice.Value
-                          receivedqty = this.receivedqty.Value
-                          rejectedqty = this.rejectedqty.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let purchaseorderdetail =
             leftTable<``purchaseorderdetail (base)``, purchaseorderdetail>
@@ -6775,28 +5923,6 @@ module purchasing =
 
             interface ILeftViewOf<``purchaseorderheader (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``purchaseorderheader (base)`` option =
-                match this.purchaseorderid with
-                | Some value ->
-                    let record: ``purchaseorderheader (base)`` =
-                        { purchaseorderid = value
-                          revisionnumber = this.revisionnumber.Value
-                          status = this.status.Value
-                          employeeid = this.employeeid.Value
-                          vendorid = this.vendorid.Value
-                          shipmethodid = this.shipmethodid.Value
-                          orderdate = this.orderdate.Value
-                          shipdate = this.shipdate
-                          subtotal = this.subtotal.Value
-                          taxamt = this.taxamt.Value
-                          freight = this.freight.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let purchaseorderheader =
             leftTable<``purchaseorderheader (base)``, purchaseorderheader>
 
@@ -6818,22 +5944,6 @@ module purchasing =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``shipmethod (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``shipmethod (base)`` option =
-                match this.shipmethodid with
-                | Some value ->
-                    let record: ``shipmethod (base)`` =
-                        { shipmethodid = value
-                          name = this.name.Value
-                          shipbase = this.shipbase.Value
-                          shiprate = this.shiprate.Value
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let shipmethod = leftTable<``shipmethod (base)``, shipmethod>
 
@@ -6859,24 +5969,6 @@ module purchasing =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``vendor (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``vendor (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``vendor (base)`` =
-                        { businessentityid = value
-                          accountnumber = this.accountnumber.Value
-                          name = this.name.Value
-                          creditrating = this.creditrating.Value
-                          preferredvendorstatus = this.preferredvendorstatus.Value
-                          activeflag = this.activeflag.Value
-                          purchasingwebserviceurl = this.purchasingwebserviceurl
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let vendor = leftTable<``vendor (base)``, vendor>
 
@@ -7836,42 +6928,6 @@ module sa =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``soh (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``soh (base)`` option =
-                match this.onlineorderflag with
-                | Some value ->
-                    let record: ``soh (base)`` =
-                        { id = this.id
-                          salesorderid = this.salesorderid
-                          revisionnumber = this.revisionnumber
-                          orderdate = this.orderdate
-                          duedate = this.duedate
-                          shipdate = this.shipdate
-                          status = this.status
-                          onlineorderflag = value
-                          purchaseordernumber = this.purchaseordernumber
-                          accountnumber = this.accountnumber
-                          customerid = this.customerid
-                          salespersonid = this.salespersonid
-                          territoryid = this.territoryid
-                          billtoaddressid = this.billtoaddressid
-                          shiptoaddressid = this.shiptoaddressid
-                          shipmethodid = this.shipmethodid
-                          creditcardid = this.creditcardid
-                          creditcardapprovalcode = this.creditcardapprovalcode
-                          currencyrateid = this.currencyrateid
-                          subtotal = this.subtotal
-                          taxamt = this.taxamt
-                          freight = this.freight
-                          totaldue = this.totaldue
-                          comment = this.comment
-                          rowguid = this.rowguid
-                          modifieddate = this.modifieddate }
-
-                    Some record
-                | None -> None
 
         let soh = leftTable<``soh (base)``, soh>
 
@@ -8991,17 +8047,6 @@ module sales =
 
             interface ILeftViewOf<``countryregioncurrency (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``countryregioncurrency (base)`` option =
-                match this.countryregioncode with
-                | Some value ->
-                    let record: ``countryregioncurrency (base)`` =
-                        { countryregioncode = value; currencycode = this.currencycode.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let countryregioncurrency =
             leftTable<``countryregioncurrency (base)``, countryregioncurrency>
 
@@ -9024,22 +8069,6 @@ module sales =
 
             interface ILeftViewOf<``creditcard (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``creditcard (base)`` option =
-                match this.creditcardid with
-                | Some value ->
-                    let record: ``creditcard (base)`` =
-                        { creditcardid = value
-                          cardtype = this.cardtype.Value
-                          cardnumber = this.cardnumber.Value
-                          expmonth = this.expmonth.Value
-                          expyear = this.expyear.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let creditcard = leftTable<``creditcard (base)``, creditcard>
 
         type private ``currency (base)`` = currency
@@ -9054,17 +8083,6 @@ module sales =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``currency (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``currency (base)`` option =
-                match this.currencycode with
-                | Some value ->
-                    let record: ``currency (base)`` =
-                        { currencycode = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let currency = leftTable<``currency (base)``, currency>
 
@@ -9089,23 +8107,6 @@ module sales =
 
             interface ILeftViewOf<``currencyrate (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``currencyrate (base)`` option =
-                match this.currencyrateid with
-                | Some value ->
-                    let record: ``currencyrate (base)`` =
-                        { currencyrateid = value
-                          currencyratedate = this.currencyratedate.Value
-                          fromcurrencycode = this.fromcurrencycode.Value
-                          tocurrencycode = this.tocurrencycode.Value
-                          averagerate = this.averagerate.Value
-                          endofdayrate = this.endofdayrate.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let currencyrate = leftTable<``currencyrate (base)``, currencyrate>
 
         type private ``customer (base)`` = customer
@@ -9127,17 +8128,6 @@ module sales =
 
             interface ILeftViewOf<``customer (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``customer (base)`` option =
-                match this.customerid with
-                | Some value ->
-                    let record: ``customer (base)`` =
-                        { customerid = value; personid = this.personid; storeid = this.storeid; territoryid = this.territoryid; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let customer = leftTable<``customer (base)``, customer>
 
         type private ``personcreditcard (base)`` = personcreditcard
@@ -9152,17 +8142,6 @@ module sales =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``personcreditcard (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``personcreditcard (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``personcreditcard (base)`` =
-                        { businessentityid = value; creditcardid = this.creditcardid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let personcreditcard = leftTable<``personcreditcard (base)``, personcreditcard>
 
@@ -9192,26 +8171,6 @@ module sales =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``salesorderdetail (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``salesorderdetail (base)`` option =
-                match this.salesorderid with
-                | Some value ->
-                    let record: ``salesorderdetail (base)`` =
-                        { salesorderid = value
-                          salesorderdetailid = this.salesorderdetailid.Value
-                          carriertrackingnumber = this.carriertrackingnumber
-                          orderqty = this.orderqty.Value
-                          productid = this.productid.Value
-                          specialofferid = this.specialofferid.Value
-                          unitprice = this.unitprice.Value
-                          unitpricediscount = this.unitpricediscount.Value
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let salesorderdetail = leftTable<``salesorderdetail (base)``, salesorderdetail>
 
@@ -9272,41 +8231,6 @@ module sales =
 
             interface ILeftViewOf<``salesorderheader (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``salesorderheader (base)`` option =
-                match this.salesorderid with
-                | Some value ->
-                    let record: ``salesorderheader (base)`` =
-                        { salesorderid = value
-                          revisionnumber = this.revisionnumber.Value
-                          orderdate = this.orderdate.Value
-                          duedate = this.duedate.Value
-                          shipdate = this.shipdate
-                          status = this.status.Value
-                          onlineorderflag = this.onlineorderflag.Value
-                          purchaseordernumber = this.purchaseordernumber
-                          accountnumber = this.accountnumber
-                          customerid = this.customerid.Value
-                          salespersonid = this.salespersonid
-                          territoryid = this.territoryid
-                          billtoaddressid = this.billtoaddressid.Value
-                          shiptoaddressid = this.shiptoaddressid.Value
-                          shipmethodid = this.shipmethodid.Value
-                          creditcardid = this.creditcardid
-                          creditcardapprovalcode = this.creditcardapprovalcode
-                          currencyrateid = this.currencyrateid
-                          subtotal = this.subtotal.Value
-                          taxamt = this.taxamt.Value
-                          freight = this.freight.Value
-                          totaldue = this.totaldue
-                          comment = this.comment
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let salesorderheader = leftTable<``salesorderheader (base)``, salesorderheader>
 
         type private ``salesorderheadersalesreason (base)`` = salesorderheadersalesreason
@@ -9321,17 +8245,6 @@ module sales =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``salesorderheadersalesreason (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``salesorderheadersalesreason (base)`` option =
-                match this.salesorderid with
-                | Some value ->
-                    let record: ``salesorderheadersalesreason (base)`` =
-                        { salesorderid = value; salesreasonid = this.salesreasonid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let salesorderheadersalesreason =
             leftTable<``salesorderheadersalesreason (base)``, salesorderheadersalesreason>
@@ -9361,25 +8274,6 @@ module sales =
 
             interface ILeftViewOf<``salesperson (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``salesperson (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``salesperson (base)`` =
-                        { businessentityid = value
-                          territoryid = this.territoryid
-                          salesquota = this.salesquota
-                          bonus = this.bonus.Value
-                          commissionpct = this.commissionpct.Value
-                          salesytd = this.salesytd.Value
-                          saleslastyear = this.saleslastyear.Value
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let salesperson = leftTable<``salesperson (base)``, salesperson>
 
         type private ``salespersonquotahistory (base)`` = salespersonquotahistory
@@ -9399,17 +8293,6 @@ module sales =
 
             interface ILeftViewOf<``salespersonquotahistory (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``salespersonquotahistory (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``salespersonquotahistory (base)`` =
-                        { businessentityid = value; quotadate = this.quotadate.Value; salesquota = this.salesquota.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let salespersonquotahistory =
             leftTable<``salespersonquotahistory (base)``, salespersonquotahistory>
 
@@ -9427,17 +8310,6 @@ module sales =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``salesreason (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``salesreason (base)`` option =
-                match this.salesreasonid with
-                | Some value ->
-                    let record: ``salesreason (base)`` =
-                        { salesreasonid = value; name = this.name.Value; reasontype = this.reasontype.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let salesreason = leftTable<``salesreason (base)``, salesreason>
 
@@ -9461,23 +8333,6 @@ module sales =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``salestaxrate (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``salestaxrate (base)`` option =
-                match this.salestaxrateid with
-                | Some value ->
-                    let record: ``salestaxrate (base)`` =
-                        { salestaxrateid = value
-                          stateprovinceid = this.stateprovinceid.Value
-                          taxtype = this.taxtype.Value
-                          taxrate = this.taxrate.Value
-                          name = this.name.Value
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let salestaxrate = leftTable<``salestaxrate (base)``, salestaxrate>
 
@@ -9508,26 +8363,6 @@ module sales =
 
             interface ILeftViewOf<``salesterritory (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``salesterritory (base)`` option =
-                match this.territoryid with
-                | Some value ->
-                    let record: ``salesterritory (base)`` =
-                        { territoryid = value
-                          name = this.name.Value
-                          countryregioncode = this.countryregioncode.Value
-                          group = this.group.Value
-                          salesytd = this.salesytd.Value
-                          saleslastyear = this.saleslastyear.Value
-                          costytd = this.costytd.Value
-                          costlastyear = this.costlastyear.Value
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let salesterritory = leftTable<``salesterritory (base)``, salesterritory>
 
         type private ``salesterritoryhistory (base)`` = salesterritoryhistory
@@ -9548,22 +8383,6 @@ module sales =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``salesterritoryhistory (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``salesterritoryhistory (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``salesterritoryhistory (base)`` =
-                        { businessentityid = value
-                          territoryid = this.territoryid.Value
-                          startdate = this.startdate.Value
-                          enddate = this.enddate
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let salesterritoryhistory =
             leftTable<``salesterritoryhistory (base)``, salesterritoryhistory>
@@ -9586,22 +8405,6 @@ module sales =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``shoppingcartitem (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``shoppingcartitem (base)`` option =
-                match this.shoppingcartitemid with
-                | Some value ->
-                    let record: ``shoppingcartitem (base)`` =
-                        { shoppingcartitemid = value
-                          shoppingcartid = this.shoppingcartid.Value
-                          quantity = this.quantity.Value
-                          productid = this.productid.Value
-                          datecreated = this.datecreated.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let shoppingcartitem = leftTable<``shoppingcartitem (base)``, shoppingcartitem>
 
@@ -9634,27 +8437,6 @@ module sales =
 
             interface ILeftViewOf<``specialoffer (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``specialoffer (base)`` option =
-                match this.specialofferid with
-                | Some value ->
-                    let record: ``specialoffer (base)`` =
-                        { specialofferid = value
-                          description = this.description.Value
-                          discountpct = this.discountpct.Value
-                          ``type`` = this.``type``.Value
-                          category = this.category.Value
-                          startdate = this.startdate.Value
-                          enddate = this.enddate.Value
-                          minqty = this.minqty.Value
-                          maxqty = this.maxqty
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
-
         let specialoffer = leftTable<``specialoffer (base)``, specialoffer>
 
         type private ``specialofferproduct (base)`` = specialofferproduct
@@ -9671,17 +8453,6 @@ module sales =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``specialofferproduct (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``specialofferproduct (base)`` option =
-                match this.specialofferid with
-                | Some value ->
-                    let record: ``specialofferproduct (base)`` =
-                        { specialofferid = value; productid = this.productid.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let specialofferproduct =
             leftTable<``specialofferproduct (base)``, specialofferproduct>
@@ -9704,22 +8475,6 @@ module sales =
               modifieddate: Option<System.DateTime> }
 
             interface ILeftViewOf<``store (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``store (base)`` option =
-                match this.businessentityid with
-                | Some value ->
-                    let record: ``store (base)`` =
-                        { businessentityid = value
-                          name = this.name.Value
-                          salespersonid = this.salespersonid
-                          demographics = this.demographics
-                          rowguid = this.rowguid.Value
-                          modifieddate = this.modifieddate.Value }
-
-                    Some record
-                | None -> None
 
         let store = leftTable<``store (base)``, store>
 
@@ -9999,6 +8754,1327 @@ module sales =
 
         let vstorewithdemographics =
             leftTable<``vstorewithdemographics (base)``, vstorewithdemographics>
+
+
+[<AutoOpen>]
+module LeftViewExtensions =
+    type ext.LeftJoined.arrays with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : ext.arrays option =
+            match this.id with
+            | Some value ->
+                let record: ext.arrays =
+                    { id = value; text_array = this.text_array.Value; integer_array = this.integer_array.Value }
+
+                Some record
+            | None -> None
+
+    type ext.LeftJoined.jsonsupport with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : ext.jsonsupport option =
+            match this.id with
+            | Some value ->
+                let record: ext.jsonsupport =
+                    { id = value; json_field = this.json_field.Value; jsonb_field = this.jsonb_field.Value }
+
+                Some record
+            | None -> None
+
+    type ext.LeftJoined.person with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : ext.person option =
+            match this.name with
+            | Some value ->
+                let record: ext.person = { name = value; currentmood = this.currentmood.Value }
+                Some record
+            | None -> None
+
+    type humanresources.LeftJoined.department with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : humanresources.department option =
+            match this.departmentid with
+            | Some value ->
+                let record: humanresources.department =
+                    { departmentid = value; name = this.name.Value; groupname = this.groupname.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type humanresources.LeftJoined.employee with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : humanresources.employee option =
+            match this.businessentityid with
+            | Some value ->
+                let record: humanresources.employee =
+                    { businessentityid = value
+                      nationalidnumber = this.nationalidnumber.Value
+                      loginid = this.loginid.Value
+                      jobtitle = this.jobtitle.Value
+                      birthdate = this.birthdate.Value
+                      maritalstatus = this.maritalstatus.Value
+                      gender = this.gender.Value
+                      hiredate = this.hiredate.Value
+                      salariedflag = this.salariedflag.Value
+                      vacationhours = this.vacationhours.Value
+                      sickleavehours = this.sickleavehours.Value
+                      currentflag = this.currentflag.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value
+                      organizationnode = this.organizationnode }
+
+                Some record
+            | None -> None
+
+    type humanresources.LeftJoined.employeedepartmenthistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : humanresources.employeedepartmenthistory option =
+            match this.businessentityid with
+            | Some value ->
+                let record: humanresources.employeedepartmenthistory =
+                    { businessentityid = value
+                      departmentid = this.departmentid.Value
+                      shiftid = this.shiftid.Value
+                      startdate = this.startdate.Value
+                      enddate = this.enddate
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type humanresources.LeftJoined.employeepayhistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : humanresources.employeepayhistory option =
+            match this.businessentityid with
+            | Some value ->
+                let record: humanresources.employeepayhistory =
+                    { businessentityid = value; ratechangedate = this.ratechangedate.Value; rate = this.rate.Value; payfrequency = this.payfrequency.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type humanresources.LeftJoined.jobcandidate with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : humanresources.jobcandidate option =
+            match this.jobcandidateid with
+            | Some value ->
+                let record: humanresources.jobcandidate =
+                    { jobcandidateid = value; businessentityid = this.businessentityid; resume = this.resume; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type humanresources.LeftJoined.shift with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : humanresources.shift option =
+            match this.shiftid with
+            | Some value ->
+                let record: humanresources.shift =
+                    { shiftid = value; name = this.name.Value; starttime = this.starttime.Value; endtime = this.endtime.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type network_sample.LeftJoined.network_addresses with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : network_sample.network_addresses option =
+            match this.id with
+            | Some value ->
+                let record: network_sample.network_addresses =
+                    { id = value; net_cidr = this.net_cidr.Value; net_inet = this.net_inet.Value; net_macaddr = this.net_macaddr.Value; net_macaddr8 = this.net_macaddr8.Value }
+
+                Some record
+            | None -> None
+
+    type pe.LeftJoined.p with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : pe.p option =
+            match this.namestyle with
+            | Some value ->
+                let record: pe.p =
+                    { id = this.id
+                      businessentityid = this.businessentityid
+                      persontype = this.persontype
+                      namestyle = value
+                      title = this.title
+                      firstname = this.firstname
+                      middlename = this.middlename
+                      lastname = this.lastname
+                      suffix = this.suffix
+                      emailpromotion = this.emailpromotion
+                      additionalcontactinfo = this.additionalcontactinfo
+                      demographics = this.demographics
+                      rowguid = this.rowguid
+                      modifieddate = this.modifieddate }
+
+                Some record
+            | None -> None
+
+    type pe.LeftJoined.sp with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : pe.sp option =
+            match this.isonlystateprovinceflag with
+            | Some value ->
+                let record: pe.sp =
+                    { id = this.id
+                      stateprovinceid = this.stateprovinceid
+                      stateprovincecode = this.stateprovincecode
+                      countryregioncode = this.countryregioncode
+                      isonlystateprovinceflag = value
+                      name = this.name
+                      territoryid = this.territoryid
+                      rowguid = this.rowguid
+                      modifieddate = this.modifieddate }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.address with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.address option =
+            match this.addressid with
+            | Some value ->
+                let record: person.address =
+                    { addressid = value
+                      addressline1 = this.addressline1.Value
+                      addressline2 = this.addressline2
+                      city = this.city.Value
+                      stateprovinceid = this.stateprovinceid.Value
+                      postalcode = this.postalcode.Value
+                      spatiallocation = this.spatiallocation
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.addresstype with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.addresstype option =
+            match this.addresstypeid with
+            | Some value ->
+                let record: person.addresstype =
+                    { addresstypeid = value; name = this.name.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.businessentity with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.businessentity option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.businessentity =
+                    { businessentityid = value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.businessentityaddress with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.businessentityaddress option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.businessentityaddress =
+                    { businessentityid = value; addressid = this.addressid.Value; addresstypeid = this.addresstypeid.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.businessentitycontact with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.businessentitycontact option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.businessentitycontact =
+                    { businessentityid = value; personid = this.personid.Value; contacttypeid = this.contacttypeid.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.contacttype with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.contacttype option =
+            match this.contacttypeid with
+            | Some value ->
+                let record: person.contacttype =
+                    { contacttypeid = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.countryregion with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.countryregion option =
+            match this.countryregioncode with
+            | Some value ->
+                let record: person.countryregion =
+                    { countryregioncode = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.emailaddress with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.emailaddress option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.emailaddress =
+                    { businessentityid = value; emailaddressid = this.emailaddressid.Value; emailaddress = this.emailaddress; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.password with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.password option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.password =
+                    { businessentityid = value; passwordhash = this.passwordhash.Value; passwordsalt = this.passwordsalt.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.person with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.person option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.person =
+                    { businessentityid = value
+                      persontype = this.persontype.Value
+                      namestyle = this.namestyle.Value
+                      title = this.title
+                      firstname = this.firstname.Value
+                      middlename = this.middlename
+                      lastname = this.lastname.Value
+                      suffix = this.suffix
+                      emailpromotion = this.emailpromotion.Value
+                      additionalcontactinfo = this.additionalcontactinfo
+                      demographics = this.demographics
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.personphone with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.personphone option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.personphone =
+                    { businessentityid = value; phonenumber = this.phonenumber.Value; phonenumbertypeid = this.phonenumbertypeid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.phonenumbertype with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.phonenumbertype option =
+            match this.phonenumbertypeid with
+            | Some value ->
+                let record: person.phonenumbertype =
+                    { phonenumbertypeid = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.stateprovince with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.stateprovince option =
+            match this.stateprovinceid with
+            | Some value ->
+                let record: person.stateprovince =
+                    { stateprovinceid = value
+                      stateprovincecode = this.stateprovincecode.Value
+                      countryregioncode = this.countryregioncode.Value
+                      isonlystateprovinceflag = this.isonlystateprovinceflag.Value
+                      name = this.name.Value
+                      territoryid = this.territoryid.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type pr.LeftJoined.d with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : pr.d option =
+            match this.folderflag with
+            | Some value ->
+                let record: pr.d =
+                    { title = this.title
+                      owner = this.owner
+                      folderflag = value
+                      filename = this.filename
+                      fileextension = this.fileextension
+                      revision = this.revision
+                      changenumber = this.changenumber
+                      status = this.status
+                      documentsummary = this.documentsummary
+                      document = this.document
+                      rowguid = this.rowguid
+                      modifieddate = this.modifieddate
+                      documentnode = this.documentnode }
+
+                Some record
+            | None -> None
+
+    type pr.LeftJoined.p with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : pr.p option =
+            match this.makeflag with
+            | Some value ->
+                let record: pr.p =
+                    { id = this.id
+                      productid = this.productid
+                      name = this.name
+                      productnumber = this.productnumber
+                      makeflag = value
+                      finishedgoodsflag = this.finishedgoodsflag.Value
+                      color = this.color
+                      safetystocklevel = this.safetystocklevel
+                      reorderpoint = this.reorderpoint
+                      standardcost = this.standardcost
+                      listprice = this.listprice
+                      size = this.size
+                      sizeunitmeasurecode = this.sizeunitmeasurecode
+                      weightunitmeasurecode = this.weightunitmeasurecode
+                      weight = this.weight
+                      daystomanufacture = this.daystomanufacture
+                      productline = this.productline
+                      ``class`` = this.``class``
+                      style = this.style
+                      productsubcategoryid = this.productsubcategoryid
+                      productmodelid = this.productmodelid
+                      sellstartdate = this.sellstartdate
+                      sellenddate = this.sellenddate
+                      discontinueddate = this.discontinueddate
+                      rowguid = this.rowguid
+                      modifieddate = this.modifieddate }
+
+                Some record
+            | None -> None
+
+    type pr.LeftJoined.ppp with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : pr.ppp option =
+            match this.primary with
+            | Some value ->
+                let record: pr.ppp =
+                    { productid = this.productid; productphotoid = this.productphotoid; primary = value; modifieddate = this.modifieddate }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.billofmaterials with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.billofmaterials option =
+            match this.billofmaterialsid with
+            | Some value ->
+                let record: production.billofmaterials =
+                    { billofmaterialsid = value
+                      productassemblyid = this.productassemblyid
+                      componentid = this.componentid.Value
+                      startdate = this.startdate.Value
+                      enddate = this.enddate
+                      unitmeasurecode = this.unitmeasurecode.Value
+                      bomlevel = this.bomlevel.Value
+                      perassemblyqty = this.perassemblyqty.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.culture with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.culture option =
+            match this.cultureid with
+            | Some value ->
+                let record: production.culture =
+                    { cultureid = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.document with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.document option =
+            match this.documentnode with
+            | Some value ->
+                let record: production.document =
+                    { title = this.title.Value
+                      owner = this.owner.Value
+                      folderflag = this.folderflag.Value
+                      filename = this.filename.Value
+                      fileextension = this.fileextension
+                      revision = this.revision.Value
+                      changenumber = this.changenumber.Value
+                      status = this.status.Value
+                      documentsummary = this.documentsummary
+                      document = this.document
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value
+                      documentnode = value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.illustration with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.illustration option =
+            match this.illustrationid with
+            | Some value ->
+                let record: production.illustration =
+                    { illustrationid = value; diagram = this.diagram; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.location with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.location option =
+            match this.locationid with
+            | Some value ->
+                let record: production.location =
+                    { locationid = value; name = this.name.Value; costrate = this.costrate.Value; availability = this.availability.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.product with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.product option =
+            match this.productid with
+            | Some value ->
+                let record: production.product =
+                    { productid = value
+                      name = this.name.Value
+                      productnumber = this.productnumber.Value
+                      makeflag = this.makeflag.Value
+                      finishedgoodsflag = this.finishedgoodsflag.Value
+                      color = this.color
+                      safetystocklevel = this.safetystocklevel.Value
+                      reorderpoint = this.reorderpoint.Value
+                      standardcost = this.standardcost.Value
+                      listprice = this.listprice.Value
+                      size = this.size
+                      sizeunitmeasurecode = this.sizeunitmeasurecode
+                      weightunitmeasurecode = this.weightunitmeasurecode
+                      weight = this.weight
+                      daystomanufacture = this.daystomanufacture.Value
+                      productline = this.productline
+                      ``class`` = this.``class``
+                      style = this.style
+                      productsubcategoryid = this.productsubcategoryid
+                      productmodelid = this.productmodelid
+                      sellstartdate = this.sellstartdate.Value
+                      sellenddate = this.sellenddate
+                      discontinueddate = this.discontinueddate
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productcategory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productcategory option =
+            match this.productcategoryid with
+            | Some value ->
+                let record: production.productcategory =
+                    { productcategoryid = value; name = this.name.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productcosthistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productcosthistory option =
+            match this.productid with
+            | Some value ->
+                let record: production.productcosthistory =
+                    { productid = value; startdate = this.startdate.Value; enddate = this.enddate; standardcost = this.standardcost.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productdescription with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productdescription option =
+            match this.productdescriptionid with
+            | Some value ->
+                let record: production.productdescription =
+                    { productdescriptionid = value; description = this.description.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productdocument with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productdocument option =
+            match this.productid with
+            | Some value ->
+                let record: production.productdocument =
+                    { productid = value; modifieddate = this.modifieddate.Value; documentnode = this.documentnode.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productinventory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productinventory option =
+            match this.productid with
+            | Some value ->
+                let record: production.productinventory =
+                    { productid = value
+                      locationid = this.locationid.Value
+                      shelf = this.shelf.Value
+                      bin = this.bin.Value
+                      quantity = this.quantity.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productlistpricehistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productlistpricehistory option =
+            match this.productid with
+            | Some value ->
+                let record: production.productlistpricehistory =
+                    { productid = value; startdate = this.startdate.Value; enddate = this.enddate; listprice = this.listprice.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productmodel with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productmodel option =
+            match this.productmodelid with
+            | Some value ->
+                let record: production.productmodel =
+                    { productmodelid = value
+                      name = this.name.Value
+                      catalogdescription = this.catalogdescription
+                      instructions = this.instructions
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productmodelillustration with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productmodelillustration option =
+            match this.productmodelid with
+            | Some value ->
+                let record: production.productmodelillustration =
+                    { productmodelid = value; illustrationid = this.illustrationid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productmodelproductdescriptionculture with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productmodelproductdescriptionculture option =
+            match this.productmodelid with
+            | Some value ->
+                let record: production.productmodelproductdescriptionculture =
+                    { productmodelid = value; productdescriptionid = this.productdescriptionid.Value; cultureid = this.cultureid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productphoto with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productphoto option =
+            match this.productphotoid with
+            | Some value ->
+                let record: production.productphoto =
+                    { productphotoid = value
+                      thumbnailphoto = this.thumbnailphoto
+                      thumbnailphotofilename = this.thumbnailphotofilename
+                      largephoto = this.largephoto
+                      largephotofilename = this.largephotofilename
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productproductphoto with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productproductphoto option =
+            match this.productid with
+            | Some value ->
+                let record: production.productproductphoto =
+                    { productid = value; productphotoid = this.productphotoid.Value; primary = this.primary.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productreview with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productreview option =
+            match this.productreviewid with
+            | Some value ->
+                let record: production.productreview =
+                    { productreviewid = value
+                      productid = this.productid.Value
+                      reviewername = this.reviewername.Value
+                      reviewdate = this.reviewdate.Value
+                      emailaddress = this.emailaddress.Value
+                      rating = this.rating.Value
+                      comments = this.comments
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productsubcategory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productsubcategory option =
+            match this.productsubcategoryid with
+            | Some value ->
+                let record: production.productsubcategory =
+                    { productsubcategoryid = value; productcategoryid = this.productcategoryid.Value; name = this.name.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.scrapreason with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.scrapreason option =
+            match this.scrapreasonid with
+            | Some value ->
+                let record: production.scrapreason =
+                    { scrapreasonid = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.transactionhistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.transactionhistory option =
+            match this.transactionid with
+            | Some value ->
+                let record: production.transactionhistory =
+                    { transactionid = value
+                      productid = this.productid.Value
+                      referenceorderid = this.referenceorderid.Value
+                      referenceorderlineid = this.referenceorderlineid.Value
+                      transactiondate = this.transactiondate.Value
+                      transactiontype = this.transactiontype.Value
+                      quantity = this.quantity.Value
+                      actualcost = this.actualcost.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.transactionhistoryarchive with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.transactionhistoryarchive option =
+            match this.transactionid with
+            | Some value ->
+                let record: production.transactionhistoryarchive =
+                    { transactionid = value
+                      productid = this.productid.Value
+                      referenceorderid = this.referenceorderid.Value
+                      referenceorderlineid = this.referenceorderlineid.Value
+                      transactiondate = this.transactiondate.Value
+                      transactiontype = this.transactiontype.Value
+                      quantity = this.quantity.Value
+                      actualcost = this.actualcost.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.unitmeasure with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.unitmeasure option =
+            match this.unitmeasurecode with
+            | Some value ->
+                let record: production.unitmeasure =
+                    { unitmeasurecode = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.workorder with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.workorder option =
+            match this.workorderid with
+            | Some value ->
+                let record: production.workorder =
+                    { workorderid = value
+                      productid = this.productid.Value
+                      orderqty = this.orderqty.Value
+                      scrappedqty = this.scrappedqty.Value
+                      startdate = this.startdate.Value
+                      enddate = this.enddate
+                      duedate = this.duedate.Value
+                      scrapreasonid = this.scrapreasonid
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.workorderrouting with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.workorderrouting option =
+            match this.workorderid with
+            | Some value ->
+                let record: production.workorderrouting =
+                    { workorderid = value
+                      productid = this.productid.Value
+                      operationsequence = this.operationsequence.Value
+                      locationid = this.locationid.Value
+                      scheduledstartdate = this.scheduledstartdate.Value
+                      scheduledenddate = this.scheduledenddate.Value
+                      actualstartdate = this.actualstartdate
+                      actualenddate = this.actualenddate
+                      actualresourcehrs = this.actualresourcehrs
+                      plannedcost = this.plannedcost.Value
+                      actualcost = this.actualcost
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type pu.LeftJoined.v with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : pu.v option =
+            match this.preferredvendorstatus with
+            | Some value ->
+                let record: pu.v =
+                    { id = this.id
+                      businessentityid = this.businessentityid
+                      accountnumber = this.accountnumber
+                      name = this.name
+                      creditrating = this.creditrating
+                      preferredvendorstatus = value
+                      activeflag = this.activeflag.Value
+                      purchasingwebserviceurl = this.purchasingwebserviceurl
+                      modifieddate = this.modifieddate }
+
+                Some record
+            | None -> None
+
+    type purchasing.LeftJoined.productvendor with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : purchasing.productvendor option =
+            match this.productid with
+            | Some value ->
+                let record: purchasing.productvendor =
+                    { productid = value
+                      businessentityid = this.businessentityid.Value
+                      averageleadtime = this.averageleadtime.Value
+                      standardprice = this.standardprice.Value
+                      lastreceiptcost = this.lastreceiptcost
+                      lastreceiptdate = this.lastreceiptdate
+                      minorderqty = this.minorderqty.Value
+                      maxorderqty = this.maxorderqty.Value
+                      onorderqty = this.onorderqty
+                      unitmeasurecode = this.unitmeasurecode.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type purchasing.LeftJoined.purchaseorderdetail with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : purchasing.purchaseorderdetail option =
+            match this.purchaseorderid with
+            | Some value ->
+                let record: purchasing.purchaseorderdetail =
+                    { purchaseorderid = value
+                      purchaseorderdetailid = this.purchaseorderdetailid.Value
+                      duedate = this.duedate.Value
+                      orderqty = this.orderqty.Value
+                      productid = this.productid.Value
+                      unitprice = this.unitprice.Value
+                      receivedqty = this.receivedqty.Value
+                      rejectedqty = this.rejectedqty.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type purchasing.LeftJoined.purchaseorderheader with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : purchasing.purchaseorderheader option =
+            match this.purchaseorderid with
+            | Some value ->
+                let record: purchasing.purchaseorderheader =
+                    { purchaseorderid = value
+                      revisionnumber = this.revisionnumber.Value
+                      status = this.status.Value
+                      employeeid = this.employeeid.Value
+                      vendorid = this.vendorid.Value
+                      shipmethodid = this.shipmethodid.Value
+                      orderdate = this.orderdate.Value
+                      shipdate = this.shipdate
+                      subtotal = this.subtotal.Value
+                      taxamt = this.taxamt.Value
+                      freight = this.freight.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type purchasing.LeftJoined.shipmethod with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : purchasing.shipmethod option =
+            match this.shipmethodid with
+            | Some value ->
+                let record: purchasing.shipmethod =
+                    { shipmethodid = value
+                      name = this.name.Value
+                      shipbase = this.shipbase.Value
+                      shiprate = this.shiprate.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type purchasing.LeftJoined.vendor with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : purchasing.vendor option =
+            match this.businessentityid with
+            | Some value ->
+                let record: purchasing.vendor =
+                    { businessentityid = value
+                      accountnumber = this.accountnumber.Value
+                      name = this.name.Value
+                      creditrating = this.creditrating.Value
+                      preferredvendorstatus = this.preferredvendorstatus.Value
+                      activeflag = this.activeflag.Value
+                      purchasingwebserviceurl = this.purchasingwebserviceurl
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sa.LeftJoined.soh with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sa.soh option =
+            match this.onlineorderflag with
+            | Some value ->
+                let record: sa.soh =
+                    { id = this.id
+                      salesorderid = this.salesorderid
+                      revisionnumber = this.revisionnumber
+                      orderdate = this.orderdate
+                      duedate = this.duedate
+                      shipdate = this.shipdate
+                      status = this.status
+                      onlineorderflag = value
+                      purchaseordernumber = this.purchaseordernumber
+                      accountnumber = this.accountnumber
+                      customerid = this.customerid
+                      salespersonid = this.salespersonid
+                      territoryid = this.territoryid
+                      billtoaddressid = this.billtoaddressid
+                      shiptoaddressid = this.shiptoaddressid
+                      shipmethodid = this.shipmethodid
+                      creditcardid = this.creditcardid
+                      creditcardapprovalcode = this.creditcardapprovalcode
+                      currencyrateid = this.currencyrateid
+                      subtotal = this.subtotal
+                      taxamt = this.taxamt
+                      freight = this.freight
+                      totaldue = this.totaldue
+                      comment = this.comment
+                      rowguid = this.rowguid
+                      modifieddate = this.modifieddate }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.countryregioncurrency with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.countryregioncurrency option =
+            match this.countryregioncode with
+            | Some value ->
+                let record: sales.countryregioncurrency =
+                    { countryregioncode = value; currencycode = this.currencycode.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.creditcard with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.creditcard option =
+            match this.creditcardid with
+            | Some value ->
+                let record: sales.creditcard =
+                    { creditcardid = value
+                      cardtype = this.cardtype.Value
+                      cardnumber = this.cardnumber.Value
+                      expmonth = this.expmonth.Value
+                      expyear = this.expyear.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.currency with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.currency option =
+            match this.currencycode with
+            | Some value ->
+                let record: sales.currency =
+                    { currencycode = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.currencyrate with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.currencyrate option =
+            match this.currencyrateid with
+            | Some value ->
+                let record: sales.currencyrate =
+                    { currencyrateid = value
+                      currencyratedate = this.currencyratedate.Value
+                      fromcurrencycode = this.fromcurrencycode.Value
+                      tocurrencycode = this.tocurrencycode.Value
+                      averagerate = this.averagerate.Value
+                      endofdayrate = this.endofdayrate.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.customer with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.customer option =
+            match this.customerid with
+            | Some value ->
+                let record: sales.customer =
+                    { customerid = value; personid = this.personid; storeid = this.storeid; territoryid = this.territoryid; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.personcreditcard with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.personcreditcard option =
+            match this.businessentityid with
+            | Some value ->
+                let record: sales.personcreditcard =
+                    { businessentityid = value; creditcardid = this.creditcardid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesorderdetail with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesorderdetail option =
+            match this.salesorderid with
+            | Some value ->
+                let record: sales.salesorderdetail =
+                    { salesorderid = value
+                      salesorderdetailid = this.salesorderdetailid.Value
+                      carriertrackingnumber = this.carriertrackingnumber
+                      orderqty = this.orderqty.Value
+                      productid = this.productid.Value
+                      specialofferid = this.specialofferid.Value
+                      unitprice = this.unitprice.Value
+                      unitpricediscount = this.unitpricediscount.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesorderheader with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesorderheader option =
+            match this.salesorderid with
+            | Some value ->
+                let record: sales.salesorderheader =
+                    { salesorderid = value
+                      revisionnumber = this.revisionnumber.Value
+                      orderdate = this.orderdate.Value
+                      duedate = this.duedate.Value
+                      shipdate = this.shipdate
+                      status = this.status.Value
+                      onlineorderflag = this.onlineorderflag.Value
+                      purchaseordernumber = this.purchaseordernumber
+                      accountnumber = this.accountnumber
+                      customerid = this.customerid.Value
+                      salespersonid = this.salespersonid
+                      territoryid = this.territoryid
+                      billtoaddressid = this.billtoaddressid.Value
+                      shiptoaddressid = this.shiptoaddressid.Value
+                      shipmethodid = this.shipmethodid.Value
+                      creditcardid = this.creditcardid
+                      creditcardapprovalcode = this.creditcardapprovalcode
+                      currencyrateid = this.currencyrateid
+                      subtotal = this.subtotal.Value
+                      taxamt = this.taxamt.Value
+                      freight = this.freight.Value
+                      totaldue = this.totaldue
+                      comment = this.comment
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesorderheadersalesreason with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesorderheadersalesreason option =
+            match this.salesorderid with
+            | Some value ->
+                let record: sales.salesorderheadersalesreason =
+                    { salesorderid = value; salesreasonid = this.salesreasonid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesperson with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesperson option =
+            match this.businessentityid with
+            | Some value ->
+                let record: sales.salesperson =
+                    { businessentityid = value
+                      territoryid = this.territoryid
+                      salesquota = this.salesquota
+                      bonus = this.bonus.Value
+                      commissionpct = this.commissionpct.Value
+                      salesytd = this.salesytd.Value
+                      saleslastyear = this.saleslastyear.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salespersonquotahistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salespersonquotahistory option =
+            match this.businessentityid with
+            | Some value ->
+                let record: sales.salespersonquotahistory =
+                    { businessentityid = value; quotadate = this.quotadate.Value; salesquota = this.salesquota.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesreason with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesreason option =
+            match this.salesreasonid with
+            | Some value ->
+                let record: sales.salesreason =
+                    { salesreasonid = value; name = this.name.Value; reasontype = this.reasontype.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salestaxrate with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salestaxrate option =
+            match this.salestaxrateid with
+            | Some value ->
+                let record: sales.salestaxrate =
+                    { salestaxrateid = value
+                      stateprovinceid = this.stateprovinceid.Value
+                      taxtype = this.taxtype.Value
+                      taxrate = this.taxrate.Value
+                      name = this.name.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesterritory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesterritory option =
+            match this.territoryid with
+            | Some value ->
+                let record: sales.salesterritory =
+                    { territoryid = value
+                      name = this.name.Value
+                      countryregioncode = this.countryregioncode.Value
+                      group = this.group.Value
+                      salesytd = this.salesytd.Value
+                      saleslastyear = this.saleslastyear.Value
+                      costytd = this.costytd.Value
+                      costlastyear = this.costlastyear.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesterritoryhistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesterritoryhistory option =
+            match this.businessentityid with
+            | Some value ->
+                let record: sales.salesterritoryhistory =
+                    { businessentityid = value
+                      territoryid = this.territoryid.Value
+                      startdate = this.startdate.Value
+                      enddate = this.enddate
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.shoppingcartitem with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.shoppingcartitem option =
+            match this.shoppingcartitemid with
+            | Some value ->
+                let record: sales.shoppingcartitem =
+                    { shoppingcartitemid = value
+                      shoppingcartid = this.shoppingcartid.Value
+                      quantity = this.quantity.Value
+                      productid = this.productid.Value
+                      datecreated = this.datecreated.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.specialoffer with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.specialoffer option =
+            match this.specialofferid with
+            | Some value ->
+                let record: sales.specialoffer =
+                    { specialofferid = value
+                      description = this.description.Value
+                      discountpct = this.discountpct.Value
+                      ``type`` = this.``type``.Value
+                      category = this.category.Value
+                      startdate = this.startdate.Value
+                      enddate = this.enddate.Value
+                      minqty = this.minqty.Value
+                      maxqty = this.maxqty
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.specialofferproduct with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.specialofferproduct option =
+            match this.specialofferid with
+            | Some value ->
+                let record: sales.specialofferproduct =
+                    { specialofferid = value; productid = this.productid.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.store with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.store option =
+            match this.businessentityid with
+            | Some value ->
+                let record: sales.store =
+                    { businessentityid = value
+                      name = this.name.Value
+                      salespersonid = this.salespersonid
+                      demographics = this.demographics
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
 
 
 

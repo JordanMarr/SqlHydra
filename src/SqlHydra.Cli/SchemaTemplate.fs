@@ -183,9 +183,9 @@ let mkTable cfg db (table: Table) schema tableName columnName = stringBuffer {
 }
 
 /// Emits the per-schema `LeftJoined` module: for each table, a left-view record — the same
-/// record with every column in its nullable form — implementing `ILeftViewOf<base>`, plus a
-/// `ToOption()` that recovers the whole-record option after materialization, and (with
+/// record with every column in its nullable form — implementing `ILeftViewOf<base>`, and (with
 /// table_declarations) a `leftTable` token for use as a `leftJoin` source.
+/// `ToOption()` is emitted separately in `mkLeftViewExtensions`, after the schema modules close.
 /// Only generated for `NullablePropertyType.Option` configs.
 let mkLeftJoinedViews (cfg: Config) (tables: Table list) tableName columnName = stringBuffer {
     "/// Left-views for `leftJoin`: each table record with every column in its nullable form,"
@@ -222,27 +222,57 @@ let mkLeftJoinedViews (cfg: Config) (tables: Table list) tableName columnName = 
                 }
                 "}"
                 $"interface ILeftViewOf<{baseAlias}>"
+            }
+            ""
 
-                // The match witness may be any NOT NULL column: a missed join makes every column
-                // None; a matched row makes every NOT NULL column Some. Prefer the PK. A table
-                // whose columns are all nullable gets no ToOption: a row of all NULLs is
-                // indistinguishable from a missed join, in SQL itself.
-                let witness =
-                    table.Columns
-                    |> List.tryFind (fun col -> col.IsPK && not col.IsNullable)
-                    |> Option.orElseWith (fun () -> table.Columns |> List.tryFind (fun col -> not col.IsNullable))
+            if cfg.TableDeclarations then
+                $"let {tblName} = leftTable<{baseAlias}, {tblName}>"
+                ""
+    }
+}
 
-                match witness with
-                | Some w ->
-                    ""
+/// Emits `[<AutoOpen>] module LeftViewExtensions`: one `ToOption()` extension member per left-view,
+/// declared after the schema modules close. Inside `LeftJoined` the view shadows its base record's
+/// name (and F# forbids referencing the enclosing module by qualified path from within itself), so
+/// an inline `ToOption` could only name the base through a `(base)` alias — out here both types are
+/// addressable by their real paths and the signature reads `Schema.Table option`, as users expect.
+/// AutoOpen activates when the generated namespace is opened, which query code already requires.
+let mkLeftViewExtensions (tablesBySchema: (string * Table list) list) tableName columnName = stringBuffer {
+    // The match witness may be any NOT NULL column: a missed join makes every column None; a
+    // matched row makes every NOT NULL column Some. Prefer the PK. A table whose columns are all
+    // nullable gets no ToOption: a row of all NULLs is indistinguishable from a missed join, in
+    // SQL itself.
+    let witnessOf (table: Table) =
+        table.Columns
+        |> List.tryFind (fun col -> col.IsPK && not col.IsNullable)
+        |> Option.orElseWith (fun () -> table.Columns |> List.tryFind (fun col -> not col.IsNullable))
+
+    let eligible =
+        tablesBySchema
+        |> List.collect (fun (schema, tables) ->
+            tables |> List.choose (fun table -> witnessOf table |> Option.map (fun w -> schema, table, w)))
+
+    if not eligible.IsEmpty then
+        "[<AutoOpen>]"
+        "module LeftViewExtensions ="
+        indent {
+            for (schema, table, w) in eligible do
+                let rawFieldName (col: Column) = columnName { NamingContext.Table = table; Column = Some col }
+                let fieldName (col: Column) = backticks (rawFieldName col)
+                let tblName = backticks (tableName { NamingContext.Table = table; Column = None })
+                let baseType = $"{backticks schema}.{tblName}"
+                let viewType = $"{backticks schema}.LeftJoined.{tblName}"
+
+                $"type {viewType} with"
+                indent {
                     "/// Recovers the whole-record option after materialization (pure .NET, not SQL):"
                     "/// Some when the left join matched, None when it did not."
-                    $"member this.ToOption() : {baseAlias} option ="
+                    $"member this.ToOption() : {baseType} option ="
                     indent {
                         $"match this.{fieldName w} with"
                         "| Some value ->"
                         indent {
-                            $"let record : {baseAlias} ="
+                            $"let record : {baseType} ="
                             indent {
                                 "{"
                                 indent {
@@ -257,14 +287,9 @@ let mkLeftJoinedViews (cfg: Config) (tables: Table list) tableName columnName = 
                         }
                         "| None -> None"
                     }
-                | None -> ()
-            }
-            ""
-
-            if cfg.TableDeclarations then
-                $"let {tblName} = leftTable<{baseAlias}, {tblName}>"
+                }
                 ""
-    }
+        }
 }
 
 let generate (cfg: Config) (provider: ISqlHydraDbProvider) (db: Schema) (version: Version.InformationalVersion) (namingExtensions: IExtendNaming list) = stringBuffer {
@@ -328,6 +353,16 @@ namespace {{cfg.Namespace}}
                 mkLeftJoinedViews cfg tables tableName columnName
                 newLine
         }
+
+    // The left-views' ToOption() lives outside the schema modules: see mkLeftViewExtensions.
+    if cfg.LeftJoinedViews && cfg.NullablePropertyType = NullablePropertyType.Option then
+        let tablesBySchema =
+            schemas
+            |> List.map (fun schema -> schema, filteredTables |> List.filter (fun t -> t.Schema = schema))
+            |> List.filter (fun (_, tables) -> not tables.IsEmpty)
+
+        mkLeftViewExtensions tablesBySchema tableName columnName
+        newLine
 
     // If the user configures ProviderDbTypeAttributes, we know they are using SqlHydra.Query.
     if cfg.ProviderDbTypeAttributes then

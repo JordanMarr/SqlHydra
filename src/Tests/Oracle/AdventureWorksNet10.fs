@@ -231,17 +231,6 @@ module OT =
 
             interface ILeftViewOf<``CONTACTS (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``CONTACTS (base)`` option =
-                match this.CONTACT_ID with
-                | Some value ->
-                    let record: ``CONTACTS (base)`` =
-                        { CONTACT_ID = value; CUSTOMER_ID = this.CUSTOMER_ID; EMAIL = this.EMAIL.Value; FIRST_NAME = this.FIRST_NAME.Value; LAST_NAME = this.LAST_NAME.Value; PHONE = this.PHONE }
-
-                    Some record
-                | None -> None
-
         let CONTACTS = leftTable<``CONTACTS (base)``, CONTACTS>
 
         type private ``COUNTRIES (base)`` = COUNTRIES
@@ -253,17 +242,6 @@ module OT =
               REGION_ID: Option<int64> }
 
             interface ILeftViewOf<``COUNTRIES (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``COUNTRIES (base)`` option =
-                match this.COUNTRY_ID with
-                | Some value ->
-                    let record: ``COUNTRIES (base)`` =
-                        { COUNTRY_ID = value; COUNTRY_NAME = this.COUNTRY_NAME.Value; REGION_ID = this.REGION_ID }
-
-                    Some record
-                | None -> None
 
         let COUNTRIES = leftTable<``COUNTRIES (base)``, COUNTRIES>
 
@@ -278,17 +256,6 @@ module OT =
               WEBSITE: Option<string> }
 
             interface ILeftViewOf<``CUSTOMERS (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``CUSTOMERS (base)`` option =
-                match this.CUSTOMER_ID with
-                | Some value ->
-                    let record: ``CUSTOMERS (base)`` =
-                        { ADDRESS = this.ADDRESS; CREDIT_LIMIT = this.CREDIT_LIMIT; CUSTOMER_ID = value; NAME = this.NAME.Value; WEBSITE = this.WEBSITE }
-
-                    Some record
-                | None -> None
 
         let CUSTOMERS = leftTable<``CUSTOMERS (base)``, CUSTOMERS>
 
@@ -307,24 +274,6 @@ module OT =
 
             interface ILeftViewOf<``EMPLOYEES (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``EMPLOYEES (base)`` option =
-                match this.EMPLOYEE_ID with
-                | Some value ->
-                    let record: ``EMPLOYEES (base)`` =
-                        { EMAIL = this.EMAIL.Value
-                          EMPLOYEE_ID = value
-                          FIRST_NAME = this.FIRST_NAME.Value
-                          HIRE_DATE = this.HIRE_DATE.Value
-                          JOB_TITLE = this.JOB_TITLE.Value
-                          LAST_NAME = this.LAST_NAME.Value
-                          MANAGER_ID = this.MANAGER_ID
-                          PHONE = this.PHONE.Value }
-
-                    Some record
-                | None -> None
-
         let EMPLOYEES = leftTable<``EMPLOYEES (base)``, EMPLOYEES>
 
         type private ``INVENTORIES (base)`` = INVENTORIES
@@ -336,17 +285,6 @@ module OT =
               WAREHOUSE_ID: Option<int64> }
 
             interface ILeftViewOf<``INVENTORIES (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``INVENTORIES (base)`` option =
-                match this.PRODUCT_ID with
-                | Some value ->
-                    let record: ``INVENTORIES (base)`` =
-                        { PRODUCT_ID = value; QUANTITY = this.QUANTITY.Value; WAREHOUSE_ID = this.WAREHOUSE_ID.Value }
-
-                    Some record
-                | None -> None
 
         let INVENTORIES = leftTable<``INVENTORIES (base)``, INVENTORIES>
 
@@ -363,17 +301,6 @@ module OT =
 
             interface ILeftViewOf<``LOCATIONS (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``LOCATIONS (base)`` option =
-                match this.LOCATION_ID with
-                | Some value ->
-                    let record: ``LOCATIONS (base)`` =
-                        { ADDRESS = this.ADDRESS.Value; CITY = this.CITY; COUNTRY_ID = this.COUNTRY_ID; LOCATION_ID = value; POSTAL_CODE = this.POSTAL_CODE; STATE = this.STATE }
-
-                    Some record
-                | None -> None
-
         let LOCATIONS = leftTable<``LOCATIONS (base)``, LOCATIONS>
 
         type private ``ORDERS (base)`` = ORDERS
@@ -388,17 +315,6 @@ module OT =
 
             interface ILeftViewOf<``ORDERS (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``ORDERS (base)`` option =
-                match this.ORDER_ID with
-                | Some value ->
-                    let record: ``ORDERS (base)`` =
-                        { CUSTOMER_ID = this.CUSTOMER_ID.Value; ORDER_DATE = this.ORDER_DATE.Value; ORDER_ID = value; SALESMAN_ID = this.SALESMAN_ID; STATUS = this.STATUS.Value }
-
-                    Some record
-                | None -> None
-
         let ORDERS = leftTable<``ORDERS (base)``, ORDERS>
 
         type private ``ORDER_ITEMS (base)`` = ORDER_ITEMS
@@ -412,17 +328,6 @@ module OT =
               UNIT_PRICE: Option<decimal> }
 
             interface ILeftViewOf<``ORDER_ITEMS (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``ORDER_ITEMS (base)`` option =
-                match this.ITEM_ID with
-                | Some value ->
-                    let record: ``ORDER_ITEMS (base)`` =
-                        { ITEM_ID = value; ORDER_ID = this.ORDER_ID.Value; PRODUCT_ID = this.PRODUCT_ID.Value; QUANTITY = this.QUANTITY.Value; UNIT_PRICE = this.UNIT_PRICE.Value }
-
-                    Some record
-                | None -> None
 
         let ORDER_ITEMS = leftTable<``ORDER_ITEMS (base)``, ORDER_ITEMS>
 
@@ -439,22 +344,6 @@ module OT =
 
             interface ILeftViewOf<``PRODUCTS (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``PRODUCTS (base)`` option =
-                match this.PRODUCT_ID with
-                | Some value ->
-                    let record: ``PRODUCTS (base)`` =
-                        { CATEGORY_ID = this.CATEGORY_ID.Value
-                          DESCRIPTION = this.DESCRIPTION
-                          LIST_PRICE = this.LIST_PRICE
-                          PRODUCT_ID = value
-                          PRODUCT_NAME = this.PRODUCT_NAME.Value
-                          STANDARD_COST = this.STANDARD_COST }
-
-                    Some record
-                | None -> None
-
         let PRODUCTS = leftTable<``PRODUCTS (base)``, PRODUCTS>
 
         type private ``PRODUCT_CATEGORIES (base)`` = PRODUCT_CATEGORIES
@@ -465,17 +354,6 @@ module OT =
               CATEGORY_NAME: Option<string> }
 
             interface ILeftViewOf<``PRODUCT_CATEGORIES (base)``>
-
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``PRODUCT_CATEGORIES (base)`` option =
-                match this.CATEGORY_ID with
-                | Some value ->
-                    let record: ``PRODUCT_CATEGORIES (base)`` =
-                        { CATEGORY_ID = value; CATEGORY_NAME = this.CATEGORY_NAME.Value }
-
-                    Some record
-                | None -> None
 
         let PRODUCT_CATEGORIES =
             leftTable<``PRODUCT_CATEGORIES (base)``, PRODUCT_CATEGORIES>
@@ -489,17 +367,6 @@ module OT =
 
             interface ILeftViewOf<``REGIONS (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``REGIONS (base)`` option =
-                match this.REGION_ID with
-                | Some value ->
-                    let record: ``REGIONS (base)`` =
-                        { REGION_ID = value; REGION_NAME = this.REGION_NAME.Value }
-
-                    Some record
-                | None -> None
-
         let REGIONS = leftTable<``REGIONS (base)``, REGIONS>
 
         type private ``WAREHOUSES (base)`` = WAREHOUSES
@@ -512,18 +379,164 @@ module OT =
 
             interface ILeftViewOf<``WAREHOUSES (base)``>
 
-            /// Recovers the whole-record option after materialization (pure .NET, not SQL):
-            /// Some when the left join matched, None when it did not.
-            member this.ToOption() : ``WAREHOUSES (base)`` option =
-                match this.WAREHOUSE_ID with
-                | Some value ->
-                    let record: ``WAREHOUSES (base)`` =
-                        { LOCATION_ID = this.LOCATION_ID; WAREHOUSE_ID = value; WAREHOUSE_NAME = this.WAREHOUSE_NAME }
-
-                    Some record
-                | None -> None
-
         let WAREHOUSES = leftTable<``WAREHOUSES (base)``, WAREHOUSES>
+
+
+[<AutoOpen>]
+module LeftViewExtensions =
+    type OT.LeftJoined.CONTACTS with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : OT.CONTACTS option =
+            match this.CONTACT_ID with
+            | Some value ->
+                let record: OT.CONTACTS =
+                    { CONTACT_ID = value; CUSTOMER_ID = this.CUSTOMER_ID; EMAIL = this.EMAIL.Value; FIRST_NAME = this.FIRST_NAME.Value; LAST_NAME = this.LAST_NAME.Value; PHONE = this.PHONE }
+
+                Some record
+            | None -> None
+
+    type OT.LeftJoined.COUNTRIES with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : OT.COUNTRIES option =
+            match this.COUNTRY_ID with
+            | Some value ->
+                let record: OT.COUNTRIES =
+                    { COUNTRY_ID = value; COUNTRY_NAME = this.COUNTRY_NAME.Value; REGION_ID = this.REGION_ID }
+
+                Some record
+            | None -> None
+
+    type OT.LeftJoined.CUSTOMERS with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : OT.CUSTOMERS option =
+            match this.CUSTOMER_ID with
+            | Some value ->
+                let record: OT.CUSTOMERS =
+                    { ADDRESS = this.ADDRESS; CREDIT_LIMIT = this.CREDIT_LIMIT; CUSTOMER_ID = value; NAME = this.NAME.Value; WEBSITE = this.WEBSITE }
+
+                Some record
+            | None -> None
+
+    type OT.LeftJoined.EMPLOYEES with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : OT.EMPLOYEES option =
+            match this.EMPLOYEE_ID with
+            | Some value ->
+                let record: OT.EMPLOYEES =
+                    { EMAIL = this.EMAIL.Value
+                      EMPLOYEE_ID = value
+                      FIRST_NAME = this.FIRST_NAME.Value
+                      HIRE_DATE = this.HIRE_DATE.Value
+                      JOB_TITLE = this.JOB_TITLE.Value
+                      LAST_NAME = this.LAST_NAME.Value
+                      MANAGER_ID = this.MANAGER_ID
+                      PHONE = this.PHONE.Value }
+
+                Some record
+            | None -> None
+
+    type OT.LeftJoined.INVENTORIES with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : OT.INVENTORIES option =
+            match this.PRODUCT_ID with
+            | Some value ->
+                let record: OT.INVENTORIES =
+                    { PRODUCT_ID = value; QUANTITY = this.QUANTITY.Value; WAREHOUSE_ID = this.WAREHOUSE_ID.Value }
+
+                Some record
+            | None -> None
+
+    type OT.LeftJoined.LOCATIONS with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : OT.LOCATIONS option =
+            match this.LOCATION_ID with
+            | Some value ->
+                let record: OT.LOCATIONS =
+                    { ADDRESS = this.ADDRESS.Value; CITY = this.CITY; COUNTRY_ID = this.COUNTRY_ID; LOCATION_ID = value; POSTAL_CODE = this.POSTAL_CODE; STATE = this.STATE }
+
+                Some record
+            | None -> None
+
+    type OT.LeftJoined.ORDERS with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : OT.ORDERS option =
+            match this.ORDER_ID with
+            | Some value ->
+                let record: OT.ORDERS =
+                    { CUSTOMER_ID = this.CUSTOMER_ID.Value; ORDER_DATE = this.ORDER_DATE.Value; ORDER_ID = value; SALESMAN_ID = this.SALESMAN_ID; STATUS = this.STATUS.Value }
+
+                Some record
+            | None -> None
+
+    type OT.LeftJoined.ORDER_ITEMS with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : OT.ORDER_ITEMS option =
+            match this.ITEM_ID with
+            | Some value ->
+                let record: OT.ORDER_ITEMS =
+                    { ITEM_ID = value; ORDER_ID = this.ORDER_ID.Value; PRODUCT_ID = this.PRODUCT_ID.Value; QUANTITY = this.QUANTITY.Value; UNIT_PRICE = this.UNIT_PRICE.Value }
+
+                Some record
+            | None -> None
+
+    type OT.LeftJoined.PRODUCTS with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : OT.PRODUCTS option =
+            match this.PRODUCT_ID with
+            | Some value ->
+                let record: OT.PRODUCTS =
+                    { CATEGORY_ID = this.CATEGORY_ID.Value
+                      DESCRIPTION = this.DESCRIPTION
+                      LIST_PRICE = this.LIST_PRICE
+                      PRODUCT_ID = value
+                      PRODUCT_NAME = this.PRODUCT_NAME.Value
+                      STANDARD_COST = this.STANDARD_COST }
+
+                Some record
+            | None -> None
+
+    type OT.LeftJoined.PRODUCT_CATEGORIES with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : OT.PRODUCT_CATEGORIES option =
+            match this.CATEGORY_ID with
+            | Some value ->
+                let record: OT.PRODUCT_CATEGORIES =
+                    { CATEGORY_ID = value; CATEGORY_NAME = this.CATEGORY_NAME.Value }
+
+                Some record
+            | None -> None
+
+    type OT.LeftJoined.REGIONS with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : OT.REGIONS option =
+            match this.REGION_ID with
+            | Some value ->
+                let record: OT.REGIONS = { REGION_ID = value; REGION_NAME = this.REGION_NAME.Value }
+                Some record
+            | None -> None
+
+    type OT.LeftJoined.WAREHOUSES with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : OT.WAREHOUSES option =
+            match this.WAREHOUSE_ID with
+            | Some value ->
+                let record: OT.WAREHOUSES =
+                    { LOCATION_ID = this.LOCATION_ID; WAREHOUSE_ID = value; WAREHOUSE_NAME = this.WAREHOUSE_NAME }
+
+                Some record
+            | None -> None
 
 
 

@@ -315,7 +315,12 @@ let ``The left view makes every column nullable, without double-wrapping``() =
 [<Test>]
 let ``The left view recovers the whole-record option through its PK witness``() =
     let code = generateTableWith leftViewCfg [ currencycode; name; nullableNotes ]
-    code.Contains("member this.ToOption() : ``currency (base)`` option =") =! true
+    // ToOption is an AutoOpen extension declared after the schema modules close, so its
+    // signature can name the base record honestly instead of through a `(base)` alias.
+    code.Contains("module LeftViewExtensions =") =! true
+    code.Contains("type sales.LeftJoined.currency with") =! true
+    code.Contains("member this.ToOption() : sales.currency option =") =! true
+    code.IndexOf("module LeftViewExtensions =") >! code.IndexOf("module LeftJoined =")
     code.Contains("match this.currencycode with") =! true
     code.Contains("currencycode = value") =! true
     code.Contains("name = this.name.Value") =! true
@@ -335,6 +340,8 @@ let ``A table whose columns are all nullable gets a view but no ToOption``() =
             [ { currencycode with Column.IsPK = false; Column.IsNullable = true }; nullableNotes ]
     code.Contains("module LeftJoined =") =! true
     code.Contains("ToOption") =! false
+    // With no eligible view, the extensions module is not emitted at all.
+    code.Contains("LeftViewExtensions") =! false
 
 [<Test>]
 let ``The left view keeps ProviderDbType attributes for parameter binding``() =
