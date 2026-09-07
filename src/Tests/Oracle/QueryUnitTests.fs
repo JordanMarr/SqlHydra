@@ -506,3 +506,32 @@ let ``a niladic member takes no arguments``() =
     test <@ niladic.Length > 0 @>
     for m in niladic do
         Assert.That(m.GetParameters().Length, Is.EqualTo 0, $"{m.Name} is marked Niladic but takes arguments")
+[<Test>]
+[<Ignore("Fails: the column loses its quotes on the SQL-function path. See the comment below.")>]
+let ``a column compared to a SQL function is quoted like any other column``() =
+    // A column keeps its quotes when compared to a value, and loses them when compared to a
+    // SQL function. The value path builds a `Compare` node and the emitter runs QuoteColumn
+    // over it; the function path builds a `RawWhere` whose fragment is emitted verbatim, and
+    // `qualifyColumn` returns the bare `alias.column`.
+    //
+    // The select path already solved this: `renderSelectExpression` marks identifiers as
+    // `{alias}.{column}` and the emitter expands them through `QuoteRawFragment`. The where,
+    // having and join paths do not, and `RawWhere` never calls it.
+    //
+    // Oracle folds the unquoted name to upper case, looks for "O"."ORDER_DATE" against an
+    // alias declared as "o", and fails with ORA-00904 at the server.
+    let viaValue =
+        select {
+            for o in OT.ORDERS do
+            where (o.ORDER_DATE < System.DateTime.Now)
+        }
+        |> toSql
+    let viaFunction =
+        select {
+            for o in OT.ORDERS do
+            where (o.ORDER_DATE < SYSDATE())
+        }
+        |> toSql
+
+    test <@ viaValue.Contains "\"o\".\"ORDER_DATE\"" @>      // control: already correct
+    test <@ viaFunction.Contains "\"o\".\"ORDER_DATE\"" @>

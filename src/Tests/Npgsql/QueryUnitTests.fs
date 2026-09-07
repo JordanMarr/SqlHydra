@@ -1978,3 +1978,31 @@ let ``an aggregate compared to None in a having emits IS NULL``() =
         }
         |> toSql
     test <@ sql.Contains("HAVING (MAX(a.addressline2) IS NULL)") @>
+[<Ignore("Fails: the column loses its quotes on the SQL-function path. See the comment below.")>]
+let ``a column compared to a SQL function is quoted like any other column``() =
+    // A column keeps its quotes when compared to a value, and loses them when compared to a
+    // SQL function. The value path builds a `Compare` node and the emitter runs QuoteColumn
+    // over it; the function path builds a `RawWhere` whose fragment is emitted verbatim, and
+    // `qualifyColumn` returns the bare `alias.column`.
+    //
+    // The select path already solved this: `renderSelectExpression` marks identifiers as
+    // `{alias}.{column}` and the emitter expands them through `QuoteRawFragment`. The where,
+    // having and join paths do not, and `RawWhere` never calls it.
+    //
+    // PostgreSQL survives this only because it folds unquoted names to lower case and
+    // AdventureWorks is lower case throughout. A mixed-case column would fail here too.
+    let viaValue =
+        select {
+            for a in person.address do
+            where (a.city < "x")
+        }
+        |> toSql
+    let viaFunction =
+        select {
+            for a in person.address do
+            where (a.city < SqlFn.upper a.addressline1)
+        }
+        |> toSql
+
+    test <@ viaValue.Contains "\"a\".\"city\"" @>            // control: already correct
+    test <@ viaFunction.Contains "\"a\".\"city\"" @>
