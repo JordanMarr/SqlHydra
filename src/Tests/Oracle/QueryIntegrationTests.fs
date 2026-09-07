@@ -427,8 +427,8 @@ let ``SqlFn - Oracle functions smoke test``() = task {
 }
 
 [<Test>]
-let ``Oracle accepts the niladic date functions``() = task {
-    // Oracle takes no argument list for any of these, so `SYSDATE()` never reached the server.
+let ``Oracle accepts a niladic function``() = task {
+    // The parenthesised spelling is a syntax error, so this query never reached the server.
     let! rows =
         selectTask db {
             for c in OT.CUSTOMERS do

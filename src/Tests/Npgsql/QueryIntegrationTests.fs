@@ -1303,32 +1303,12 @@ let ``onConflictDoUpdateCoalesceWrite: a null in the new row keeps the existing 
 [<Test>]
 let ``PostgreSQL accepts a niladic function``() = task {
     // The parenthesised spelling is a syntax error, so this query never reached the server.
-    let! addresses =
-        selectTask db {
-            for a in person.address do
-            where (a.modifieddate < current_timestamp())
-        }
-
-    gt0 addresses
-}
-
-[<Test>]
-let ``a niladic function hydrates as the type PostgreSQL returns``() = task {
-    // current_time is `time with time zone`, which Npgsql reads as DateTimeOffset.
-    let! times =
-        selectTask db {
-            for a in person.address do
-            select (current_time())
-        }
-
-    gt0 times
-}
-
-[<Test>]
-let ``the generated date and time keywords round-trip``() = task {
+    // Hydration is part of the claim: current_time is `time with time zone`, which Npgsql
+    // reads as DateTimeOffset, not the TimeSpan of `time without time zone`.
     let! rows =
         selectTask db {
             for a in person.address do
+            where (a.modifieddate < current_timestamp())
             select (current_date(), current_time(), current_timestamp(), localtime(), localtimestamp())
         }
 
@@ -1336,7 +1316,7 @@ let ``the generated date and time keywords round-trip``() = task {
 }
 
 [<Test>]
-let ``the generated name keywords round-trip``() = task {
+let ``PostgreSQL accepts a niladic function that names the current session``() = task {
     // current_user and session_user are ordinary catalog functions that the parser reads as
     // keywords, so they render schema-qualified rather than bare. current_schema is neither.
     let! rows =

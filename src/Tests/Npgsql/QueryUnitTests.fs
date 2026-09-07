@@ -1767,6 +1767,9 @@ let ``a keyword-named function renders schema-qualified``() =
         |> toSql
     test <@ sql.Contains("(pg_catalog.position(a.city, 'a') > @p0)") @>
 
+// Niladic functions, one test per site the visitor renders a call from. Each assertion carries the
+// token that follows the name, so a stray `()` breaks the match instead of hiding inside it.
+
 [<Test>]
 let ``a niladic function renders as a bare keyword in a where``() =
     // CURRENT_DATE is a keyword, not a call: PostgreSQL rejects `CURRENT_DATE()`.
@@ -1776,7 +1779,7 @@ let ``a niladic function renders as a bare keyword in a where``() =
             where (SqlFn.current_date() > System.DateTime.MinValue)
         }
         |> toSql
-    test <@ sql.Contains("(CURRENT_DATE > @p0)") @>
+    test <@ sql.Contains "WHERE (CURRENT_DATE > @p0)" @>
 
 [<Test>]
 let ``a niladic function renders as a bare keyword in a select``() =
@@ -1786,8 +1789,7 @@ let ``a niladic function renders as a bare keyword in a select``() =
             select (a.city, SqlFn.current_timestamp())
         }
         |> toSql
-    test <@ sql.Contains("CURRENT_TIMESTAMP") @>
-    test <@ not (sql.Contains "CURRENT_TIMESTAMP()") @>
+    test <@ sql.Contains "CURRENT_TIMESTAMP FROM" @>
 
 [<Test>]
 let ``a niladic function renders as a bare keyword in an orderBy``() =
@@ -1797,8 +1799,7 @@ let ``a niladic function renders as a bare keyword in an orderBy``() =
             orderBy (SqlFn.current_time())
         }
         |> toSql
-    test <@ sql.Contains("CURRENT_TIME") @>
-    test <@ not (sql.Contains "CURRENT_TIME()") @>
+    test <@ sql.EndsWith "ORDER BY CURRENT_TIME" @>
 
 [<Test>]
 let ``every option overload is the option-lifting of one sibling``() =

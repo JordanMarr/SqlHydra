@@ -20,23 +20,26 @@ let isSqlHydraFunction (mi: MethodInfo) =
     mi.IsDefined(typeof<SqlHydraFunctionAttribute>, false)
     || isMarkedContainer mi.DeclaringType
 
-/// `[<SqlHydraFunction("pg_catalog.position")>]` renders that spelling; otherwise the member name upper-cased.
 let private sqlFunctionAttribute (mi: MethodInfo) =
     match Attribute.GetCustomAttribute(mi, typeof<SqlHydraFunctionAttribute>, false) with
     | :? SqlHydraFunctionAttribute as att -> Some att
     | _ -> None
 
-let sqlFunctionName (mi: MethodInfo) =
-    match sqlFunctionAttribute mi with
-    | Some att when not (isNull att.SqlName) -> att.SqlName
+let private nameFrom (mi: MethodInfo) (att: SqlHydraFunctionAttribute option) =
+    match att with
+    | Some a when not (isNull a.SqlName) -> a.SqlName
     | _ -> mi.Name.ToUpperInvariant()
+
+/// `[<SqlHydraFunction("pg_catalog.position")>]` renders that spelling; otherwise the member name upper-cased.
+let sqlFunctionName (mi: MethodInfo) = nameFrom mi (sqlFunctionAttribute mi)
 
 /// `NAME(args)`, or the bare name for a function marked `Niladic`: `CURRENT_DATE` and its
 /// siblings are keywords, and the databases that parse them as such reject `CURRENT_DATE()`.
+/// One attribute lookup, since this runs for every rendered call.
 let renderSqlFunctionCall (mi: MethodInfo) (args: string) =
-    match sqlFunctionAttribute mi with
-    | Some att when att.Niladic -> sqlFunctionName mi
-    | _ -> $"{sqlFunctionName mi}({args})"
+    let att = sqlFunctionAttribute mi
+    let name = nameFrom mi att
+    if att |> Option.exists (fun a -> a.Niladic) then name else $"{name}({args})"
 
 /// Aggregate method names recognized by the visitor. Used by visitSqlFn / pattern matchers.
 /// Keep in sync with QueryFunctions.Aggregates.

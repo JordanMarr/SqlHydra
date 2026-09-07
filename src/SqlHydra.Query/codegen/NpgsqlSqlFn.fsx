@@ -137,20 +137,18 @@ let niladicType (name: string) =
 let resolve (e: Entry) =
     let candidates = catalog |> List.filter (fun o -> o.Name = e.Catalog)
     let wanted = e.Params |> List.map snd
-    let ret (o: Overload) =
-        fsharpType o.Ret |> Option.defaultWith (fun () -> failwith $"{e.Member}: return type {o.Ret} has no F# type; add --map {o.Ret}=<Type>")
+    let ret pg =
+        fsharpType pg |> Option.defaultWith (fun () -> failwith $"{e.Member}: return type {pg} has no F# type; add --map {pg}=<Type>")
     let exact = candidates |> List.tryFind (fun o -> not o.Variadic && (o.Args |> Array.map fsharpType |> List.ofArray) = List.map Some wanted)
     match exact, candidates |> List.tryFind (fun o -> o.Variadic) with
-    | Some o, _ -> { Entry = e; Overload = Some o; ProbeArgs = o.Args; Ret = ret o; SqlName = None }
+    | Some o, _ -> { Entry = e; Overload = Some o; ProbeArgs = o.Args; Ret = ret o.Ret; SqlName = None }
     | None, Some o ->
         let probeArgs =
             wanted |> List.map (fun t -> catalogType t |> Option.defaultWith (fun () -> failwith $"{e.Member}: no catalog type maps to {t}; add --map <pgtype>={t}"))
-        { Entry = e; Overload = Some o; ProbeArgs = List.toArray probeArgs; Ret = ret o; SqlName = None }
+        { Entry = e; Overload = Some o; ProbeArgs = List.toArray probeArgs; Ret = ret o.Ret; SqlName = None }
     | None, None when candidates.IsEmpty ->
         match (if e.Params.IsEmpty then niladicType e.Catalog else None) with
-        | Some pg ->
-            let fs = fsharpType pg |> Option.defaultWith (fun () -> failwith $"{e.Member}: return type {pg} has no F# type; add --map {pg}=<Type>")
-            { Entry = e; Overload = None; ProbeArgs = [||]; Ret = fs; SqlName = None }
+        | Some pg -> { Entry = e; Overload = None; ProbeArgs = [||]; Ret = ret pg; SqlName = None }
         | None ->
             failwith $"""{e.Catalog}: neither a plain function in {String.Join("/", schemas)} nor a niladic keyword. Keyword sugar has a catalog name (trim=btrim); expression nodes (coalesce, nullif) are hand-written."""
     | None, None ->

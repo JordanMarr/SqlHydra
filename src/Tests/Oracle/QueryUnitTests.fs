@@ -3,6 +3,8 @@
 open System
 open Swensen.Unquote
 open SqlHydra.Query
+open SqlHydra.Query.OracleExtensions
+open type SqlFn
 open NUnit.Framework
 open DB
 
@@ -457,23 +459,17 @@ let ``Inline Aggregates``() =
 
     sql =! "SELECT COUNT(\"o\".\"ORDER_ID\") AS __hydra_expr_0 FROM \"OT\".\"ORDERS\" \"o\"".RemoveHydraExpr()
 
+// The visitor is shared, so the where and orderBy sites are covered once, in the Npgsql tests.
+// What is Oracle's own is which members are marked, so all four are named here.
+
 [<Test>]
-let ``Niladic date functions render as bare keywords``() =
+let ``a niladic function renders as a bare keyword in a select``() =
     // Oracle parses these as keywords and takes no argument list for any of them,
     // so `SYSDATE()` never reaches a result set.
     let sql =
         select {
             for o in OT.ORDERS do
-            select (SqlHydra.Query.OracleExtensions.SqlFn.SYSDATE(),
-                    SqlHydra.Query.OracleExtensions.SqlFn.SYSTIMESTAMP(),
-                    SqlHydra.Query.OracleExtensions.SqlFn.CURRENT_DATE(),
-                    SqlHydra.Query.OracleExtensions.SqlFn.CURRENT_TIMESTAMP())
+            select (SYSDATE(), SYSTIMESTAMP(), CURRENT_DATE(), CURRENT_TIMESTAMP())
         }
         |> toSql
-
-    sql.Contains "SYSDATE()" =! false
-    sql.Contains "SYSTIMESTAMP()" =! false
-    sql.Contains "CURRENT_DATE()" =! false
-    sql.Contains "CURRENT_TIMESTAMP()" =! false
-    sql.Contains "SYSDATE" =! true
-    sql.Contains "CURRENT_TIMESTAMP" =! true
+    test <@ sql.Contains "SELECT SYSDATE, SYSTIMESTAMP, CURRENT_DATE, CURRENT_TIMESTAMP FROM" @>
