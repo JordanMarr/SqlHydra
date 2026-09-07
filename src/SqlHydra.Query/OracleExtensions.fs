@@ -55,8 +55,8 @@ type SqlFn =
     static member TRUNC(n: 'T) : 'T when 'T : struct = sqlFn
     static member TRUNC(n: 'T, decimals: int) : 'T when 'T : struct = sqlFn
 
-    // Date/time functions. The first four are niladic: Oracle parses them as keywords and
-    // accepts no argument list, so `SYSDATE()` is a syntax error.
+    // Date/time functions. Oracle parses the marked ones as keywords and accepts no argument
+    // list for them, so `SYSDATE()` is a syntax error.
     [<SqlHydraFunction(Niladic = true)>]
     static member SYSDATE() : DateTime = sqlFn
     [<SqlHydraFunction(Niladic = true)>]

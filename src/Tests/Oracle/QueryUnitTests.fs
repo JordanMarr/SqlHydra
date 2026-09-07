@@ -473,3 +473,17 @@ let ``a niladic function renders as a bare keyword in a select``() =
         }
         |> toSql
     test <@ sql.Contains "SELECT SYSDATE, SYSTIMESTAMP, CURRENT_DATE, CURRENT_TIMESTAMP FROM" @>
+
+[<Test>]
+let ``a niladic member takes no arguments``() =
+    // renderSqlFunctionCall drops the argument list for a Niladic member, so marking one that
+    // takes arguments would render SQL that silently loses them. Nothing else catches that.
+    let niladic =
+        typeof<SqlFn>.GetMethods(Reflection.BindingFlags.Public ||| Reflection.BindingFlags.Static)
+        |> Array.filter (fun m ->
+            match Attribute.GetCustomAttribute(m, typeof<SqlHydraFunctionAttribute>, false) with
+            | :? SqlHydraFunctionAttribute as att -> att.Niladic
+            | _ -> false)
+    test <@ niladic.Length > 0 @>
+    for m in niladic do
+        Assert.That(m.GetParameters().Length, Is.EqualTo 0, $"{m.Name} is marked Niladic but takes arguments")

@@ -433,6 +433,7 @@ let ``Oracle accepts a niladic function``() = task {
         selectTask db {
             for c in OT.CUSTOMERS do
             select (SYSDATE(), SYSTIMESTAMP(), CURRENT_DATE(), CURRENT_TIMESTAMP())
+            take 1
         }
 
     gt0 rows

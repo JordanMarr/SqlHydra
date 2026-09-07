@@ -1310,6 +1310,7 @@ let ``PostgreSQL accepts a niladic function``() = task {
             for a in person.address do
             where (a.modifieddate < current_timestamp())
             select (current_date(), current_time(), current_timestamp(), localtime(), localtimestamp())
+            take 1
         }
 
     gt0 rows
@@ -1323,6 +1324,7 @@ let ``PostgreSQL accepts a niladic function that names the current session``() =
         selectTask db {
             for a in person.address do
             select (current_catalog(), current_schema(), current_user(), session_user(), user())
+            take 1
         }
 
     gt0 rows

@@ -121,16 +121,22 @@ let catalog =
 
 let describe (o: Overload) = $"""({String.Join(", ", o.Args)}) -> {o.Ret}"""
 
-/// A member to emit: the allowlist line, its catalog overload, and the catalog types to probe with.
-/// `Overload` is None for a niladic keyword, which has no `pg_proc` row to resolve against.
-type Member = { Entry: Entry; Overload: Overload option; ProbeArgs: string []; Ret: string; SqlName: string option }
+/// What the database says a member is: an ordinary function backed by a `pg_proc` row, or a
+/// keyword the parser accepts on its own and that no row describes.
+type Shape =
+    | Call of Overload
+    | Keyword
 
-/// A name with no `pg_proc` row may still be a niladic keyword. `SELECT pg_typeof(current_date)`
-/// settles both questions at once: that the bare spelling parses, and what it returns.
-let niladicType (name: string) =
+/// A member to emit: the allowlist line, what it turned out to be, and the catalog types to probe with.
+type Member = { Entry: Entry; Shape: Shape; ProbeArgs: string []; Ret: string; SqlName: string option }
+
+/// Only a parameterless name can be a keyword, and `SELECT pg_typeof(current_date)` settles both
+/// questions at once: that the bare spelling parses, and what it returns.
+let keywordType (e: Entry) =
+    if not e.Params.IsEmpty then None else
     try
         use cmd = db.CreateCommand()
-        cmd.CommandText <- $"SELECT pg_typeof({name})::text"
+        cmd.CommandText <- $"SELECT pg_typeof({e.Catalog})::text"
         Some (cmd.ExecuteScalar() :?> string)
     with :? PostgresException as ex when ex.SqlState = "42601" || ex.SqlState = "42703" -> None
 
@@ -141,38 +147,40 @@ let resolve (e: Entry) =
         fsharpType pg |> Option.defaultWith (fun () -> failwith $"{e.Member}: return type {pg} has no F# type; add --map {pg}=<Type>")
     let exact = candidates |> List.tryFind (fun o -> not o.Variadic && (o.Args |> Array.map fsharpType |> List.ofArray) = List.map Some wanted)
     match exact, candidates |> List.tryFind (fun o -> o.Variadic) with
-    | Some o, _ -> { Entry = e; Overload = Some o; ProbeArgs = o.Args; Ret = ret o.Ret; SqlName = None }
+    | Some o, _ -> { Entry = e; Shape = Call o; ProbeArgs = o.Args; Ret = ret o.Ret; SqlName = None }
     | None, Some o ->
         let probeArgs =
             wanted |> List.map (fun t -> catalogType t |> Option.defaultWith (fun () -> failwith $"{e.Member}: no catalog type maps to {t}; add --map <pgtype>={t}"))
-        { Entry = e; Overload = Some o; ProbeArgs = List.toArray probeArgs; Ret = ret o.Ret; SqlName = None }
+        { Entry = e; Shape = Call o; ProbeArgs = List.toArray probeArgs; Ret = ret o.Ret; SqlName = None }
     | None, None when candidates.IsEmpty ->
-        match (if e.Params.IsEmpty then niladicType e.Catalog else None) with
-        | Some pg -> { Entry = e; Overload = None; ProbeArgs = [||]; Ret = ret pg; SqlName = None }
+        match keywordType e with
+        | Some pg -> { Entry = e; Shape = Keyword; ProbeArgs = [||]; Ret = ret pg; SqlName = None }
+        | None when e.Params.IsEmpty ->
+            failwith $"""{e.Catalog}: neither a plain function in {String.Join("/", schemas)} nor a bare keyword pg_typeof accepts. Keyword sugar has a catalog name (trim=btrim); expression nodes (coalesce, nullif) are hand-written."""
         | None ->
-            failwith $"""{e.Catalog}: neither a plain function in {String.Join("/", schemas)} nor a niladic keyword. Keyword sugar has a catalog name (trim=btrim); expression nodes (coalesce, nullif) are hand-written."""
+            failwith $"""{e.Catalog}: not a plain function in {String.Join("/", schemas)}. Keyword sugar has a catalog name (trim=btrim); expression nodes (coalesce, nullif) are hand-written. Only a parameterless line is offered to pg_typeof as a keyword."""
     | None, None ->
         failwith $"""{e.Member}({String.Join(", ", wanted)}): no such overload. The catalog has {String.Join("; ", candidates |> List.map describe)}"""
 
-/// Runs `name(NULL::t1, …)` once. A spelling PostgreSQL rejects as syntax (`position(a, b)`) is
-/// retried schema-qualified, and the member then renders that spelling.
+/// Runs `name(NULL::t1, …)` once for a Call. A spelling PostgreSQL rejects as syntax
+/// (`position(a, b)`) is retried schema-qualified, and the member then renders that spelling.
+/// A Keyword was already executed by `keywordType`, so there is nothing left to ask.
 let probe (m: Member) =
-    match m.Overload with
-    | None -> m // pg_typeof already ran it
-    | Some overload ->
-
-    let nulls = m.ProbeArgs |> Array.map (fun t -> $"NULL::{t}") |> String.concat ", "
-    let parses (spelling: string) =
-        try
-            use cmd = db.CreateCommand()
-            cmd.CommandText <- $"SELECT {spelling}({nulls})"
-            cmd.ExecuteScalar() |> ignore
-            true
-        with :? PostgresException as ex when ex.SqlState = "42601" -> false
-    let qualified = $"{overload.Schema}.{overload.Name}"
-    if parses m.Entry.Member then m
-    elif parses qualified then { m with SqlName = Some qualified }
-    else failwith $"{m.Entry.Member}({nulls}) cannot be called as a function, even as {qualified}"
+    match m.Shape with
+    | Keyword -> m
+    | Call overload ->
+        let nulls = m.ProbeArgs |> Array.map (fun t -> $"NULL::{t}") |> String.concat ", "
+        let parses (spelling: string) =
+            try
+                use cmd = db.CreateCommand()
+                cmd.CommandText <- $"SELECT {spelling}({nulls})"
+                cmd.ExecuteScalar() |> ignore
+                true
+            with :? PostgresException as ex when ex.SqlState = "42601" -> false
+        let qualified = $"{overload.Schema}.{overload.Name}"
+        if parses m.Entry.Member then m
+        elif parses qualified then { m with SqlName = Some qualified }
+        else failwith $"{m.Entry.Member}({nulls}) cannot be called as a function, even as {qualified}"
 
 let members = entries |> List.map (resolve >> probe)
 db.Close()
@@ -181,18 +189,20 @@ db.Close()
 
 let memberLines (m: Member) =
     let attribute =
-        match m.Overload, m.SqlName with
-        | None, _ -> [ "    [<SqlHydraFunction(Niladic = true)>]" ]
-        | Some _, s -> s |> Option.map (fun n -> $"    [<SqlHydraFunction(\"{n}\")>]") |> Option.toList
+        match m.Shape with
+        | Keyword -> [ "    [<SqlHydraFunction(Niladic = true)>]" ]
+        | Call _ -> m.SqlName |> Option.map (fun n -> $"    [<SqlHydraFunction(\"{n}\")>]") |> Option.toList
     let line (ps: (string * string) list) ret =
         let plist = ps |> List.map (fun (n, t) -> $"{n}: {t}") |> String.concat ", "
         attribute @ [ $"    static member {m.Entry.Member}({plist}) : {ret} = sqlFn" ]
     [ yield! line m.Entry.Params m.Ret
-      if m.Overload |> Option.exists (fun o -> o.Strict) then
+      match m.Shape with
+      | Call o when o.Strict ->
           for i in 0 .. m.Entry.Params.Length - 1 do
               let lifted = fst m.Entry.Params.[i]
               yield $"    /// NULL `{lifted}` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`."
-              yield! line (m.Entry.Params |> List.mapi (fun j (n, t) -> if i = j then n, $"{t} option" else n, t)) $"{m.Ret} option" ]
+              yield! line (m.Entry.Params |> List.mapi (fun j (n, t) -> if i = j then n, $"{t} option" else n, t)) $"{m.Ret} option"
+      | _ -> () ]
 
 let header = "    // <generated> by codegen/NpgsqlSqlFn.fsx from pg_proc; edit the allowlist, not this block."
 let footer = "    // </generated>"
