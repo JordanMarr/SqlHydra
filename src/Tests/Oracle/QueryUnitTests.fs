@@ -456,3 +456,24 @@ let ``Inline Aggregates``() =
         |> toSql
 
     sql =! "SELECT COUNT(\"o\".\"ORDER_ID\") AS __hydra_expr_0 FROM \"OT\".\"ORDERS\" \"o\"".RemoveHydraExpr()
+
+[<Test>]
+let ``Niladic date functions render as bare keywords``() =
+    // Oracle parses these as keywords and takes no argument list for any of them,
+    // so `SYSDATE()` never reaches a result set.
+    let sql =
+        select {
+            for o in OT.ORDERS do
+            select (SqlHydra.Query.OracleExtensions.SqlFn.SYSDATE(),
+                    SqlHydra.Query.OracleExtensions.SqlFn.SYSTIMESTAMP(),
+                    SqlHydra.Query.OracleExtensions.SqlFn.CURRENT_DATE(),
+                    SqlHydra.Query.OracleExtensions.SqlFn.CURRENT_TIMESTAMP())
+        }
+        |> toSql
+
+    sql.Contains "SYSDATE()" =! false
+    sql.Contains "SYSTIMESTAMP()" =! false
+    sql.Contains "CURRENT_DATE()" =! false
+    sql.Contains "CURRENT_TIMESTAMP()" =! false
+    sql.Contains "SYSDATE" =! true
+    sql.Contains "CURRENT_TIMESTAMP" =! true

@@ -425,3 +425,15 @@ let ``SqlFn - Oracle functions smoke test``() = task {
     Assert.That(upperName, Is.EqualTo(name.ToUpper()))
     Assert.That(website, Is.Not.Null)
 }
+
+[<Test>]
+let ``Oracle accepts the niladic date functions``() = task {
+    // Oracle takes no argument list for any of these, so `SYSDATE()` never reached the server.
+    let! rows =
+        selectTask db {
+            for c in OT.CUSTOMERS do
+            select (SYSDATE(), SYSTIMESTAMP(), CURRENT_DATE(), CURRENT_TIMESTAMP())
+        }
+
+    gt0 rows
+}

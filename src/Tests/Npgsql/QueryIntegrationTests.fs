@@ -1299,3 +1299,15 @@ let ``onConflictDoUpdateCoalesceWrite: a null in the new row keeps the existing 
 
     do! WriteRecordFixture.exec ctx DoUpdateWriteFixture.dropDdl
 }
+
+[<Test>]
+let ``PostgreSQL accepts a niladic function``() = task {
+    // The parenthesised spelling is a syntax error, so this query never reached the server.
+    let! addresses =
+        selectTask db {
+            for a in person.address do
+            where (a.modifieddate < current_timestamp())
+        }
+
+    gt0 addresses
+}

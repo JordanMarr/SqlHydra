@@ -208,9 +208,13 @@ type SqlFn =
     static member trunc(n: 'T) : 'T when 'T : struct = sqlFn
     static member trunc(n: 'T, decimals: int) : 'T when 'T : struct = sqlFn
 
-    // Date/time functions
+    // Date/time functions. These three are niladic: PostgreSQL parses them as keywords and
+    // rejects `CURRENT_DATE()`. `now()` is an ordinary function and is generated above.
+    [<SqlHydraFunction(Niladic = true)>]
     static member current_date() : DateTime = sqlFn
+    [<SqlHydraFunction(Niladic = true)>]
     static member current_time() : TimeSpan = sqlFn
+    [<SqlHydraFunction(Niladic = true)>]
     static member current_timestamp() : DateTime = sqlFn
 
     // GREATEST / LEAST — variadic standard SQL functions

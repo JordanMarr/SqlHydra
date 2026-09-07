@@ -21,10 +21,22 @@ let isSqlHydraFunction (mi: MethodInfo) =
     || isMarkedContainer mi.DeclaringType
 
 /// `[<SqlHydraFunction("pg_catalog.position")>]` renders that spelling; otherwise the member name upper-cased.
-let sqlFunctionName (mi: MethodInfo) =
+let private sqlFunctionAttribute (mi: MethodInfo) =
     match Attribute.GetCustomAttribute(mi, typeof<SqlHydraFunctionAttribute>, false) with
-    | :? SqlHydraFunctionAttribute as att when not (isNull att.SqlName) -> att.SqlName
+    | :? SqlHydraFunctionAttribute as att -> Some att
+    | _ -> None
+
+let sqlFunctionName (mi: MethodInfo) =
+    match sqlFunctionAttribute mi with
+    | Some att when not (isNull att.SqlName) -> att.SqlName
     | _ -> mi.Name.ToUpperInvariant()
+
+/// `NAME(args)`, or the bare name for a function marked `Niladic`: `CURRENT_DATE` and its
+/// siblings are keywords, and the databases that parse them as such reject `CURRENT_DATE()`.
+let renderSqlFunctionCall (mi: MethodInfo) (args: string) =
+    match sqlFunctionAttribute mi with
+    | Some att when att.Niladic -> sqlFunctionName mi
+    | _ -> $"{sqlFunctionName mi}({args})"
 
 /// Aggregate method names recognized by the visitor. Used by visitSqlFn / pattern matchers.
 /// Keep in sync with QueryFunctions.Aggregates.
@@ -701,7 +713,7 @@ let rec visitSqlFn (qualifyColumn: string -> MemberInfo -> string) (exp: Express
             $"({renderExpr m.Arguments.[0]} {op} {renderExpr m.Arguments.[1]})"
         | None ->
             let args = m.Arguments |> Seq.map renderExpr |> String.concat ", "
-            $"{sqlFunctionName m.Method}({args})"
+            renderSqlFunctionCall m.Method args
     | _ ->
         notImplMsg $"Expected a method call expression but got: {exp.NodeType}"
 
@@ -1327,7 +1339,7 @@ let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'
                     renderAggregate aggType (render mc.Arguments.[0])
                 | :? MethodCallExpression as mc ->
                     let args = mc.Arguments |> Seq.map render |> String.concat ", "
-                    $"{sqlFunctionName mc.Method}({args})"
+                    renderSqlFunctionCall mc.Method args
                 | _ ->
                     notImplMsg $"Unsupported expression in orderBy method-call: {e.NodeType}"
             let frag = render (m :> Expression)
@@ -1642,7 +1654,7 @@ let private renderSelectExpression (exp: Expression) : string * obj[] =
             try visitSqlFn qualifyColumn (mc :> Expression)
             with :? System.NotImplementedException ->
                 let args = mc.Arguments |> Seq.map render |> String.concat ", "
-                $"{sqlFunctionName mc.Method}({args})"
+                renderSqlFunctionCall mc.Method args
         | _ ->
             notImplMsg $"Unsupported expression in select projection: {e.NodeType}"
     let frag = render exp

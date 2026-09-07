@@ -1768,6 +1768,39 @@ let ``a keyword-named function renders schema-qualified``() =
     test <@ sql.Contains("(pg_catalog.position(a.city, 'a') > @p0)") @>
 
 [<Test>]
+let ``a niladic function renders as a bare keyword in a where``() =
+    // CURRENT_DATE is a keyword, not a call: PostgreSQL rejects `CURRENT_DATE()`.
+    let sql =
+        select {
+            for a in person.address do
+            where (SqlFn.current_date() > System.DateTime.MinValue)
+        }
+        |> toSql
+    test <@ sql.Contains("(CURRENT_DATE > @p0)") @>
+
+[<Test>]
+let ``a niladic function renders as a bare keyword in a select``() =
+    let sql =
+        select {
+            for a in person.address do
+            select (a.city, SqlFn.current_timestamp())
+        }
+        |> toSql
+    test <@ sql.Contains("CURRENT_TIMESTAMP") @>
+    test <@ not (sql.Contains "CURRENT_TIMESTAMP()") @>
+
+[<Test>]
+let ``a niladic function renders as a bare keyword in an orderBy``() =
+    let sql =
+        select {
+            for a in person.address do
+            orderBy (SqlFn.current_time())
+        }
+        |> toSql
+    test <@ sql.Contains("CURRENT_TIME") @>
+    test <@ not (sql.Contains "CURRENT_TIME()") @>
+
+[<Test>]
 let ``every option overload is the option-lifting of one sibling``() =
     let isOption (t: Type) = t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<option<_>>
     let twins =
