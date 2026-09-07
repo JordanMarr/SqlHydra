@@ -459,13 +459,22 @@ let ``Inline Aggregates``() =
 
     sql =! "SELECT COUNT(\"o\".\"ORDER_ID\") AS __hydra_expr_0 FROM \"OT\".\"ORDERS\" \"o\"".RemoveHydraExpr()
 
-// The visitor is shared, so the where and orderBy sites are covered once, in the Npgsql tests.
-// What is Oracle's own is which members are marked, so all four are named here.
+// Niladic functions, one test per site the visitor renders a call from. Each assertion carries the
+// token that follows the name, so a stray `()` breaks the match instead of hiding inside it.
 
 [<Test>]
-let ``a niladic function renders as a bare keyword in a select``() =
-    // Oracle parses these as keywords and takes no argument list for any of them,
-    // so `SYSDATE()` never reaches a result set.
+let ``a niladic function renders as a bare keyword in a where``() =
+    // SYSDATE is a keyword, not a call: Oracle rejects `SYSDATE()`.
+    let sql =
+        select {
+            for o in OT.ORDERS do
+            where (SYSDATE() > System.DateTime.MinValue)
+        }
+        |> toSql
+    test <@ sql.Contains "WHERE (SYSDATE > :p0)" @>
+
+[<Test>]
+let ``every niladic date and time member renders as a bare keyword in a select``() =
     let sql =
         select {
             for o in OT.ORDERS do
@@ -473,6 +482,16 @@ let ``a niladic function renders as a bare keyword in a select``() =
         }
         |> toSql
     test <@ sql.Contains "SELECT SYSDATE, SYSTIMESTAMP, CURRENT_DATE, CURRENT_TIMESTAMP FROM" @>
+
+[<Test>]
+let ``a niladic function renders as a bare keyword in an orderBy``() =
+    let sql =
+        select {
+            for o in OT.ORDERS do
+            orderBy (SYSTIMESTAMP())
+        }
+        |> toSql
+    test <@ sql.EndsWith "ORDER BY SYSTIMESTAMP" @>
 
 [<Test>]
 let ``a niladic member takes no arguments``() =

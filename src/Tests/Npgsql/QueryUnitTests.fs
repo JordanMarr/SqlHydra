@@ -1782,14 +1782,14 @@ let ``a niladic function renders as a bare keyword in a where``() =
     test <@ sql.Contains "WHERE (CURRENT_DATE > @p0)" @>
 
 [<Test>]
-let ``a niladic function renders as a bare keyword in a select``() =
+let ``every niladic date and time member renders as a bare keyword in a select``() =
     let sql =
         select {
             for a in person.address do
-            select (a.city, SqlFn.current_timestamp())
+            select (SqlFn.current_date(), SqlFn.current_time(), SqlFn.current_timestamp(), SqlFn.localtime(), SqlFn.localtimestamp())
         }
         |> toSql
-    test <@ sql.Contains "CURRENT_TIMESTAMP FROM" @>
+    test <@ sql.Contains "SELECT CURRENT_DATE, CURRENT_TIME, CURRENT_TIMESTAMP, LOCALTIME, LOCALTIMESTAMP FROM" @>
 
 [<Test>]
 let ``a niladic function renders as a bare keyword in an orderBy``() =

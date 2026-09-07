@@ -1320,6 +1320,7 @@ let ``PostgreSQL accepts a niladic function``() = task {
 let ``PostgreSQL accepts a niladic function that names the current session``() = task {
     // current_user and session_user are ordinary catalog functions that the parser reads as
     // keywords, so they render schema-qualified rather than bare. current_schema is neither.
+    // No Oracle twin: SqlHydra wraps no Oracle function that names the session.
     let! rows =
         selectTask db {
             for a in person.address do
