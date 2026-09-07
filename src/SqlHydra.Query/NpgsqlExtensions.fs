@@ -212,8 +212,10 @@ type SqlFn =
     // rejects `CURRENT_DATE()`. `now()` is an ordinary function and is generated above.
     [<SqlHydraFunction(Niladic = true)>]
     static member current_date() : DateTime = sqlFn
+    /// `time with time zone`, which Npgsql reads as DateTimeOffset. `localtime` is the
+    /// `time without time zone` sibling, and would be a TimeSpan.
     [<SqlHydraFunction(Niladic = true)>]
-    static member current_time() : TimeSpan = sqlFn
+    static member current_time() : DateTimeOffset = sqlFn
     [<SqlHydraFunction(Niladic = true)>]
     static member current_timestamp() : DateTime = sqlFn
 

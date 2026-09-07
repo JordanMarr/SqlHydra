@@ -1311,3 +1311,15 @@ let ``PostgreSQL accepts a niladic function``() = task {
 
     gt0 addresses
 }
+
+[<Test>]
+let ``a niladic function hydrates as the type PostgreSQL returns``() = task {
+    // current_time is `time with time zone`, which Npgsql reads as DateTimeOffset.
+    let! times =
+        selectTask db {
+            for a in person.address do
+            select (current_time())
+        }
+
+    gt0 times
+}
