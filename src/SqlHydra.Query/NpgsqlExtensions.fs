@@ -144,6 +144,25 @@ type SqlFn =
     static member concat_ws(separator: string, s1: string, s2: string) : string = sqlFn
     static member concat_ws(separator: string, s1: string, s2: string, s3: string) : string = sqlFn
     static member now() : DateTime = sqlFn
+    [<SqlHydraFunction(Niladic = true)>]
+    static member current_date() : DateTime = sqlFn
+    [<SqlHydraFunction(Niladic = true)>]
+    static member current_time() : DateTimeOffset = sqlFn
+    [<SqlHydraFunction(Niladic = true)>]
+    static member current_timestamp() : DateTime = sqlFn
+    [<SqlHydraFunction(Niladic = true)>]
+    static member localtime() : TimeSpan = sqlFn
+    [<SqlHydraFunction(Niladic = true)>]
+    static member localtimestamp() : DateTime = sqlFn
+    [<SqlHydraFunction(Niladic = true)>]
+    static member current_catalog() : string = sqlFn
+    static member current_schema() : string = sqlFn
+    [<SqlHydraFunction("pg_catalog.current_user")>]
+    static member current_user() : string = sqlFn
+    [<SqlHydraFunction("pg_catalog.session_user")>]
+    static member session_user() : string = sqlFn
+    [<SqlHydraFunction(Niladic = true)>]
+    static member user() : string = sqlFn
     [<SqlHydraFunction("pg_catalog.extract")>]
     static member extract(field: string, source: DateTime) : decimal = sqlFn
     /// NULL `field` is NULL out: hydrates as None, and `= None` renders IS NULL; compare with `= Some x`.
@@ -207,17 +226,6 @@ type SqlFn =
     static member mod'(n: 'T, divisor: 'T) : 'T when 'T : struct = sqlFn
     static member trunc(n: 'T) : 'T when 'T : struct = sqlFn
     static member trunc(n: 'T, decimals: int) : 'T when 'T : struct = sqlFn
-
-    // Date/time functions. These three are niladic: PostgreSQL parses them as keywords and
-    // rejects `CURRENT_DATE()`. `now()` is an ordinary function and is generated above.
-    [<SqlHydraFunction(Niladic = true)>]
-    static member current_date() : DateTime = sqlFn
-    /// `time with time zone`, which Npgsql reads as DateTimeOffset. `localtime` is the
-    /// `time without time zone` sibling, and would be a TimeSpan.
-    [<SqlHydraFunction(Niladic = true)>]
-    static member current_time() : DateTimeOffset = sqlFn
-    [<SqlHydraFunction(Niladic = true)>]
-    static member current_timestamp() : DateTime = sqlFn
 
     // GREATEST / LEAST — variadic standard SQL functions
     static member greatest(a: 'T, b: 'T) : 'T = sqlFn

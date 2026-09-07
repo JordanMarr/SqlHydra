@@ -33,6 +33,16 @@ concat s1:string s2:string s3:string
 concat_ws separator:string s1:string s2:string
 concat_ws separator:string s1:string s2:string s3:string
 now
+current_date
+current_time
+current_timestamp
+localtime
+localtimestamp
+current_catalog
+current_schema
+current_user
+session_user
+user
 extract field:string source:DateTime
 date_trunc field:string source:DateTime
 date_part field:string source:DateTime

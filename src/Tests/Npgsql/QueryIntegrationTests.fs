@@ -1323,3 +1323,27 @@ let ``a niladic function hydrates as the type PostgreSQL returns``() = task {
 
     gt0 times
 }
+
+[<Test>]
+let ``the generated date and time keywords round-trip``() = task {
+    let! rows =
+        selectTask db {
+            for a in person.address do
+            select (current_date(), current_time(), current_timestamp(), localtime(), localtimestamp())
+        }
+
+    gt0 rows
+}
+
+[<Test>]
+let ``the generated name keywords round-trip``() = task {
+    // current_user and session_user are ordinary catalog functions that the parser reads as
+    // keywords, so they render schema-qualified rather than bare. current_schema is neither.
+    let! rows =
+        selectTask db {
+            for a in person.address do
+            select (current_catalog(), current_schema(), current_user(), session_user(), user())
+        }
+
+    gt0 rows
+}
