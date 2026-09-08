@@ -1936,3 +1936,16 @@ let ``doUpdateWrite: without onConflict the query is refused as it is built``() 
         |> ignore
     let ex = Assert.Throws<System.Exception>(fun () -> build ())
     ex.Message =! "doUpdateWrite requires onConflict to be called first"
+
+[<Test>]
+let ``an aggregate compared to None in a having emits IS NULL``() =
+    // `= @p0` with a NULL parameter matches no group.
+    let sql =
+        select {
+            for a in person.address do
+            groupBy a.city
+            having (maxBy a.addressline2 = None)
+            select (a.city, maxBy a.addressline2)
+        }
+        |> toSql
+    test <@ sql.Contains("HAVING (MAX(a.addressline2) IS NULL)") @>
