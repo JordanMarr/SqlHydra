@@ -1071,14 +1071,59 @@ let ``Individual column from a leftJoin table should be optional if Some``() = t
         }
         |> ctx.SelectAsync
 
-    let reasonsExist = 
-        results 
-        |> Seq.forall (fun (id, reasonType, name) -> 
+    let reasonsExist =
+        results
+        |> Seq.forall (fun (id, reasonType, name) ->
             reasonType <> None && name <> None
         )
 
     gt0 results
     reasonsExist =! false
+}
+
+[<Test>]
+let ``Left-view leftJoin: an unmatched row hydrates as all-None and ToOption is None``() = task {
+    use! ctx = db.OpenContextAsync()
+
+    let! results =
+        select {
+            for o in Sales.SalesOrderHeader do
+            leftJoin sr in Sales.LeftJoined.SalesOrderHeaderSalesReason on (o.SalesOrderID = sr.SalesOrderID)
+            where (isNullValue sr.SalesReasonID)
+            select (o.SalesOrderID, sr)
+            take 10
+        }
+        |> ctx.SelectAsync
+
+    gt0 results
+
+    for (_, sr) in results do
+        sr.SalesOrderID =! None
+        sr.SalesReasonID =! None
+        sr.ModifiedDate =! None
+        sr.ToOption() =! None
+}
+
+[<Test>]
+let ``Left-view leftJoin: a matched row hydrates as all-Some and ToOption recovers the record``() = task {
+    use! ctx = db.OpenContextAsync()
+
+    let! results =
+        select {
+            for o in Sales.SalesOrderHeader do
+            leftJoin sr in Sales.LeftJoined.SalesOrderHeaderSalesReason on (o.SalesOrderID = sr.SalesOrderID)
+            where (isNotNullValue sr.SalesReasonID)
+            select (o.SalesOrderID, sr)
+            take 10
+        }
+        |> ctx.SelectAsync
+
+    gt0 results
+
+    for (oid, sr) in results do
+        match sr.ToOption() with
+        | Some record -> record.SalesOrderID =! oid
+        | None -> failwith "expected a matched row"
 }
     
 type Person = { Id: int; Name: string; Age: int }

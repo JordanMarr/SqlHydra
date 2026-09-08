@@ -149,6 +149,7 @@ let private baseCfg : Config =
         NullablePropertyType = NullablePropertyType.Option
         ProviderDbTypeAttributes = true
         TableDeclarations = true
+        LeftJoinedViews = false
         Readers = None
         Filters = Filters.Empty
         TypeMappingExtensions = []
@@ -188,7 +189,7 @@ let private generatedRate =
                 TypeMapping.ProviderDbType = Some "Numeric"
             } }
 
-let private generateTable columns =
+let private generateTableWith cfg columns =
     let schema : Schema =
         {
             Tables =
@@ -203,7 +204,9 @@ let private generateTable columns =
             Enums = []
         }
 
-    SchemaTemplate.generate baseCfg Provider.instance schema (Version.get()) []
+    SchemaTemplate.generate cfg Provider.instance schema (Version.get()) []
+
+let private generateTable columns = generateTableWith baseCfg columns
 
 /// `currency` with its two writable columns and the given ones.
 let private generateColumns columns = generateTable (currencycode :: name :: columns)
@@ -278,6 +281,86 @@ let ``A table with no write record has no ToWrite``() =
 let ``A table where every column is read-only gets no write record, since a record cannot be empty``() =
     let code = generateTable [ { currencycode with Column.IsReadOnly = true }; generatedRate ]
     code.Contains("_write") =! false
+
+// The left-view module (`left_joined_views`), DB-free: drives SchemaTemplate.generate with a
+// synthetic schema and asserts the generated `LeftJoined` module's shape.
+
+let private leftViewCfg = { baseCfg with LeftJoinedViews = true }
+
+let private nullableNotes =
+    { currencycode with
+        Column.Name = "notes"
+        Column.IsPK = false
+        Column.IsNullable = true }
+
+[<Test>]
+let ``left_joined_views generates a LeftJoined module with a view record and token``() =
+    let code = generateTableWith leftViewCfg [ currencycode; name; nullableNotes ]
+    code.Contains("module LeftJoined =") =! true
+    code.Contains("type private ``currency (base)`` = currency") =! true
+    code.Contains("interface ILeftViewOf<``currency (base)``>") =! true
+    code.Contains("let currency = leftTable<``currency (base)``, currency>") =! true
+
+[<Test>]
+let ``The left view makes every column nullable, without double-wrapping``() =
+    let code = generateTableWith leftViewCfg [ currencycode; name; nullableNotes ]
+    let leftJoined = code.Substring(code.IndexOf "module LeftJoined =")
+    leftJoined.Contains("currencycode: Option<string>") =! true
+    leftJoined.Contains("name: Option<string>") =! true
+    // Already-nullable stays a single Option: a NULL from a missed join is
+    // indistinguishable from a stored NULL.
+    leftJoined.Contains("notes: Option<string>") =! true
+    leftJoined.Contains("Option<Option<") =! false
+
+[<Test>]
+let ``The left view recovers the whole-record option through its PK witness``() =
+    let code = generateTableWith leftViewCfg [ currencycode; name; nullableNotes ]
+    // ToOption is an AutoOpen extension declared after the schema modules close, so its
+    // signature can name the base record honestly instead of through a `(base)` alias.
+    code.Contains("module LeftViewExtensions =") =! true
+    code.Contains("type sales.LeftJoined.currency with") =! true
+    code.Contains("member this.ToOption() : sales.currency option =") =! true
+    code.IndexOf("module LeftViewExtensions =") >! code.IndexOf("module LeftJoined =")
+    code.Contains("match this.currencycode with") =! true
+    code.Contains("currencycode = value") =! true
+    code.Contains("name = this.name.Value") =! true
+    // The nullable column carries over as-is.
+    code.Contains("notes = this.notes") =! true
+
+[<Test>]
+let ``Without a PK the witness is the first NOT NULL column``() =
+    let code = generateTableWith leftViewCfg [ { currencycode with Column.IsPK = false }; name; nullableNotes ]
+    code.Contains("match this.currencycode with") =! true
+
+[<Test>]
+let ``A table whose columns are all nullable gets a view but no ToOption``() =
+    // A row of all NULLs is indistinguishable from a missed join, in SQL itself.
+    let code =
+        generateTableWith leftViewCfg
+            [ { currencycode with Column.IsPK = false; Column.IsNullable = true }; nullableNotes ]
+    code.Contains("module LeftJoined =") =! true
+    code.Contains("ToOption") =! false
+    // With no eligible view, the extensions module is not emitted at all.
+    code.Contains("LeftViewExtensions") =! false
+
+[<Test>]
+let ``The left view keeps ProviderDbType attributes for parameter binding``() =
+    let code = generateTableWith leftViewCfg [ currencycode; name ]
+    let leftJoined = code.Substring(code.IndexOf "module LeftJoined =")
+    leftJoined.Contains("[<ProviderDbType(\"Char\")>]") =! true
+
+[<Test>]
+let ``No left views without the flag``() =
+    let code = generateTable [ currencycode; name ]
+    code.Contains("LeftJoined") =! false
+    code.Contains("leftTable") =! false
+
+[<Test>]
+let ``No left views for a Nullable-typed config``() =
+    // The views are Option-shaped by design.
+    let cfg = { leftViewCfg with NullablePropertyType = NullablePropertyType.Nullable }
+    let code = generateTableWith cfg [ currencycode; name ]
+    code.Contains("LeftJoined") =! false
 
 // Read-only detection against a live PostgreSQL: the four column kinds in one table, plus a
 // writable `tax` in the same schema and another in a same-named table elsewhere. Drop either

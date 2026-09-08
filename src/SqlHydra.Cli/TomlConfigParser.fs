@@ -46,13 +46,19 @@ let read(toml: string) =
             match queryIntegrationTableMaybe with
             | Some queryIntegrationTable -> queryIntegrationTable.Get "provider_db_type_attributes"
             | None -> true // Default to true if missing
-        Config.TableDeclarations = 
+        Config.TableDeclarations =
             match queryIntegrationTableMaybe with
-            | Some queryIntegrationTable -> 
+            | Some queryIntegrationTable ->
                 match queryIntegrationTable.TryGet "table_declarations" with
                 | Some tblDecl -> tblDecl
                 | None -> true // Default to true [sqlhydra_query_integration] table already exists
             | None -> false // Default to false if [sqlhydra_query_integration] table is missing
+        Config.LeftJoinedViews =
+            // Absent means false so existing codebases see no change; the init wizard writes
+            // `left_joined_views = true` into new configs.
+            queryIntegrationTableMaybe
+            |> Option.bind (fun queryIntegrationTable -> queryIntegrationTable.TryGet "left_joined_views")
+            |> Option.defaultValue false
         Config.Readers = 
             readersTableMaybe
             |> Option.map (fun rdrsTbl -> 
@@ -106,6 +112,7 @@ let save(cfg: Config) =
     let queryInt = TableSyntax("sqlhydra_query_integration")
     queryInt.Items.Add("provider_db_type_attributes", cfg.ProviderDbTypeAttributes)
     queryInt.Items.Add("table_declarations", cfg.TableDeclarations)
+    queryInt.Items.Add("left_joined_views", cfg.LeftJoinedViews)
     doc.Tables.Add(queryInt)
 
     cfg.Readers |> Option.iter (fun readersConfig ->

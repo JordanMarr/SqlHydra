@@ -288,7 +288,36 @@ let ``Left Join - Multi Column``() =
     sql.Contains("LEFT JOIN \"sales\".\"salesorderdetail\" AS \"d\" ON (\"o\".\"salesorderid\" = \"d\".\"salesorderid\" AND \"o\".\"modifieddate\" = \"d\".\"modifieddate\")") =! true
 
 [<Test>]
-let ``Correlated Subquery``() = 
+let ``Left Join Left-View - plain ON, nullable columns downstream``() =
+    let sql =
+        select {
+            for o in sales.salesorderheader do
+            leftJoin d in sales.LeftJoined.salesorderdetail on (o.salesorderid = d.salesorderid)
+            where (d.orderqty = Some 1s)
+            select (o, d)
+        }
+        |> toSql
+
+    sql =!
+        "SELECT \"o\".*, \"d\".* FROM \"sales\".\"salesorderheader\" AS \"o\" \
+        LEFT JOIN \"sales\".\"salesorderdetail\" AS \"d\" ON (\"o\".\"salesorderid\" = \"d\".\"salesorderid\") \
+        WHERE (\"d\".\"orderqty\" = @p0)"
+
+[<Test>]
+let ``Left Join Left-View - anti-join via isNullValue on the witness column``() =
+    let sql =
+        select {
+            for o in sales.salesorderheader do
+            leftJoin d in sales.LeftJoined.salesorderdetail on (o.salesorderid = d.salesorderid)
+            where (isNullValue d.salesorderdetailid)
+            select o.salesorderid
+        }
+        |> toSql
+
+    sql.Contains("WHERE (\"d\".\"salesorderdetailid\" IS NULL)") =! true
+
+[<Test>]
+let ``Correlated Subquery``() =
     let latestOrderByCustomer = 
         select {
             for d in sales.salesorderheader do

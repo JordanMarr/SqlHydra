@@ -23,6 +23,7 @@ let ``Save: All``() =
             NullablePropertyType = NullablePropertyType.Option
             ProviderDbTypeAttributes = true
             TableDeclarations = true
+            LeftJoinedViews = true
             Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
             Filters = Filters.Empty
             TypeMappingExtensions = []
@@ -40,6 +41,7 @@ let ``Save: All``() =
         [sqlhydra_query_integration]
         provider_db_type_attributes = true
         table_declarations = true
+        left_joined_views = true
         [readers]
         reader_type = "Microsoft.Data.SqlClient.SqlDataReader"
         [filters]
@@ -72,6 +74,7 @@ let ``Read: with no filters``() =
             NullablePropertyType = NullablePropertyType.Option
             ProviderDbTypeAttributes = true
             TableDeclarations = false
+            LeftJoinedViews = false
             Readers = Some { ReadersConfig.ReaderType = "Microsoft.Data.SqlClient.SqlDataReader" }
             Filters = Filters.Empty
             TypeMappingExtensions = []
@@ -102,6 +105,7 @@ let ``Read: when no readers section should be None``() =
             NullablePropertyType = NullablePropertyType.Option
             ProviderDbTypeAttributes = true
             TableDeclarations = false
+            LeftJoinedViews = false
             Readers = None
             Filters = Filters.Empty
             TypeMappingExtensions = []

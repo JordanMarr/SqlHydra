@@ -4,15 +4,35 @@ open System.Reflection
 open System.Collections.Generic
 open System
 
+/// Resolves a generated left-view record (one implementing `SqlHydra.ILeftViewOf<'Table>`)
+/// to its base table record, so the view maps to the same physical table.
+module LeftViews =
+
+    let private cache = Collections.Concurrent.ConcurrentDictionary<Type, Type option>()
+
+    /// Returns the base table record type when `t` is a left-view record, else None.
+    let tryBaseTable (t: Type) : Type option =
+        if isNull t then None
+        else
+            cache.GetOrAdd(t, fun t ->
+                t.GetInterfaces()
+                |> Array.tryFind (fun i -> i.IsGenericType && i.GetGenericTypeDefinition() = typedefof<SqlHydra.ILeftViewOf<_>>)
+                |> Option.map (fun i -> i.GetGenericArguments().[0]))
+
 type TableMapping =
     {
         Name: string
         Schema: string
     }
     member this.IsInTable (m: Linq.Expressions.MemberExpression) =
-        m.Member.ReflectedType.DeclaringType <> null &&
-        m.Member.ReflectedType.DeclaringType.Name = this.Schema &&
-        m.Member.ReflectedType.Name = this.Name
+        // A left-view record lives in a nested `LeftJoined` module; judge it by its base table.
+        let t =
+            match LeftViews.tryBaseTable m.Member.ReflectedType with
+            | Some baseTable -> baseTable
+            | None -> m.Member.ReflectedType
+        t.DeclaringType <> null &&
+        t.DeclaringType.Name = this.Schema &&
+        t.Name = this.Name
 
 type TableMappingKey =
     | Root
@@ -149,6 +169,15 @@ type QuerySource<'T>(tableMappings) =
 type QuerySource<'T, 'Query>(query, tableMappings) =
     inherit QuerySource<'T>(tableMappings)
     member this.Query : 'Query = query
+
+/// A table token for the left-view 'View of table record 'Table, mapped to 'Table's physical
+/// table. Produced by `leftTable`; the `leftJoin` overload keyed on it binds the ON clause
+/// against plain 'Table and the downstream variable space against 'View, whose columns are
+/// each nullable.
+/// Deliberately NOT a QuerySource: were it one, both `leftJoin` overloads would apply and
+/// overload resolution could not commit before typing the ON lambda (FS0072).
+type LeftViewQuerySource<'Table, 'View>(tableMappings) =
+    member this.TableMappings : Map<TableMappingKey, TableMapping> = tableMappings
 
 /// The type of join for predicate-style joins
 type JoinType =

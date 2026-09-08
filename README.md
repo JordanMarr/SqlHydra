@@ -248,6 +248,35 @@ selectTask db {
 
 > **Note:** In join `on` clauses, put the known (left) table on the left side of the `=`.
 
+### Left Joins with Left-Views
+
+Enabling `left_joined_views = true` under `[sqlhydra_query_integration]` in your `.toml` config generates a `LeftJoined` module inside each schema module, containing a "left-view" of each table record: the same record with every column in its nullable form. (The init wizard enables it for new configs.)
+
+Left-joining a left-view applies nullability at the **column** level (as SQL does) instead of wrapping the whole record in an `Option`, which removes the `.Value` theater from join conditions and projections:
+
+```fsharp
+selectTask db {
+    for o in Sales.SalesOrderHeader do
+    // The ON clause binds the plain record: no `.Value`, no `Some`.
+    leftJoin d in Sales.LeftJoined.SalesOrderDetail on (o.SalesOrderID = d.SalesOrderID)
+    // Downstream, d's columns behave like any nullable column.
+    where (d.OrderQty = Some 2s)
+    // "no match" is a column IS NULL check, the classic SQL anti-join idiom:
+    // where (isNullValue d.SalesOrderDetailID)
+    select (o, d)
+}
+```
+
+An unmatched left join hydrates the view with every column `None`. To recover the whole-record option after materialization, use the generated `ToOption()`:
+
+```fsharp
+let orders = rows |> Seq.map (fun (o, d) -> o, d.ToOption())  // d.ToOption() : SalesOrderDetail option
+```
+
+`ToOption()` is generated as an extension member, so it is available whenever the generated namespace is `open`ed (which query code already requires).
+
+The classic `leftJoin ... on (o.Id = d.Value.Id)` form (whole record as `Option`) still works; both forms can be mixed per join site, so queries can be migrated one at a time.
+
 ### Selecting Columns
 
 ```fsharp

@@ -135,6 +135,10 @@ type Config =
         /// SqlHydra.Query Integration: creates a SqlHydra.Query table declaration for each table
         TableDeclarations: bool
 
+        /// SqlHydra.Query Integration: generates a `LeftJoined` module per schema with a
+        /// left-view record per table (every column nullable), for `leftJoin` sources.
+        LeftJoinedViews: bool
+
         /// Readers: provides a Db provider specific IDataReader type (for access to Db-specific features)
         Readers: ReadersConfig option
         

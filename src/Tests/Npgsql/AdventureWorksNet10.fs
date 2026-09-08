@@ -62,6 +62,52 @@ module ext =
 
     let person = table<person>
 
+    /// Left-views for `leftJoin`: each table record with every column in its nullable form,
+    /// so an unmatched row reads as None per column instead of one Option around the record.
+    module LeftJoined =
+        type private ``arrays (base)`` = arrays
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type arrays =
+            { [<ProviderDbType("Text")>]
+              id: Option<string>
+              [<ProviderDbType("Text,Array")>]
+              text_array: Option<string[]>
+              [<ProviderDbType("Integer,Array")>]
+              integer_array: Option<int[]> }
+
+            interface ILeftViewOf<``arrays (base)``>
+
+        let arrays = leftTable<``arrays (base)``, arrays>
+
+        type private ``jsonsupport (base)`` = jsonsupport
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type jsonsupport =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Json")>]
+              json_field: Option<string>
+              [<ProviderDbType("Jsonb")>]
+              jsonb_field: Option<string> }
+
+            interface ILeftViewOf<``jsonsupport (base)``>
+
+        let jsonsupport = leftTable<``jsonsupport (base)``, jsonsupport>
+
+        type private ``person (base)`` = person
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type person =
+            { [<ProviderDbType("Text")>]
+              name: Option<string>
+              currentmood: Option<mood> }
+
+            interface ILeftViewOf<``person (base)``>
+
+        let person = leftTable<``person (base)``, person>
+
+
 module humanresources =
 
     [<CLIMutable>]
@@ -514,6 +560,360 @@ module humanresources =
 
     let vjobcandidateemployment = table<vjobcandidateemployment>
 
+    /// Left-views for `leftJoin`: each table record with every column in its nullable form,
+    /// so an unmatched row reads as None per column instead of one Option around the record.
+    module LeftJoined =
+        type private ``department (base)`` = department
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type department =
+            { [<ProviderDbType("Integer")>]
+              departmentid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Varchar")>]
+              groupname: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``department (base)``>
+
+        let department = leftTable<``department (base)``, department>
+
+        type private ``employee (base)`` = employee
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type employee =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              nationalidnumber: Option<string>
+              [<ProviderDbType("Varchar")>]
+              loginid: Option<string>
+              [<ProviderDbType("Varchar")>]
+              jobtitle: Option<string>
+              [<ProviderDbType("Date")>]
+              birthdate: Option<System.DateOnly>
+              [<ProviderDbType("Char")>]
+              maritalstatus: Option<string>
+              [<ProviderDbType("Char")>]
+              gender: Option<string>
+              [<ProviderDbType("Date")>]
+              hiredate: Option<System.DateOnly>
+              [<ProviderDbType("Boolean")>]
+              salariedflag: Option<bool>
+              [<ProviderDbType("Smallint")>]
+              vacationhours: Option<int16>
+              [<ProviderDbType("Smallint")>]
+              sickleavehours: Option<int16>
+              [<ProviderDbType("Boolean")>]
+              currentflag: Option<bool>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime>
+              [<ProviderDbType("Varchar")>]
+              organizationnode: Option<string> }
+
+            interface ILeftViewOf<``employee (base)``>
+
+        let employee = leftTable<``employee (base)``, employee>
+
+        type private ``employeedepartmenthistory (base)`` = employeedepartmenthistory
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type employeedepartmenthistory =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Smallint")>]
+              departmentid: Option<int16>
+              [<ProviderDbType("Smallint")>]
+              shiftid: Option<int16>
+              [<ProviderDbType("Date")>]
+              startdate: Option<System.DateOnly>
+              [<ProviderDbType("Date")>]
+              enddate: Option<System.DateOnly>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``employeedepartmenthistory (base)``>
+
+        let employeedepartmenthistory =
+            leftTable<``employeedepartmenthistory (base)``, employeedepartmenthistory>
+
+        type private ``employeepayhistory (base)`` = employeepayhistory
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type employeepayhistory =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              ratechangedate: Option<System.DateTime>
+              [<ProviderDbType("Numeric")>]
+              rate: Option<decimal>
+              [<ProviderDbType("Smallint")>]
+              payfrequency: Option<int16>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``employeepayhistory (base)``>
+
+        let employeepayhistory =
+            leftTable<``employeepayhistory (base)``, employeepayhistory>
+
+        type private ``jobcandidate (base)`` = jobcandidate
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type jobcandidate =
+            { [<ProviderDbType("Integer")>]
+              jobcandidateid: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Xml")>]
+              resume: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``jobcandidate (base)``>
+
+        let jobcandidate = leftTable<``jobcandidate (base)``, jobcandidate>
+
+        type private ``shift (base)`` = shift
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type shift =
+            { [<ProviderDbType("Integer")>]
+              shiftid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Time")>]
+              starttime: Option<System.TimeOnly>
+              [<ProviderDbType("Time")>]
+              endtime: Option<System.TimeOnly>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``shift (base)``>
+
+        let shift = leftTable<``shift (base)``, shift>
+
+        type private ``vemployee (base)`` = vemployee
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vemployee =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              title: Option<string>
+              [<ProviderDbType("Varchar")>]
+              firstname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              middlename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              lastname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              suffix: Option<string>
+              [<ProviderDbType("Varchar")>]
+              jobtitle: Option<string>
+              [<ProviderDbType("Varchar")>]
+              phonenumber: Option<string>
+              [<ProviderDbType("Varchar")>]
+              phonenumbertype: Option<string>
+              [<ProviderDbType("Varchar")>]
+              emailaddress: Option<string>
+              [<ProviderDbType("Integer")>]
+              emailpromotion: Option<int>
+              [<ProviderDbType("Varchar")>]
+              addressline1: Option<string>
+              [<ProviderDbType("Varchar")>]
+              addressline2: Option<string>
+              [<ProviderDbType("Varchar")>]
+              city: Option<string>
+              [<ProviderDbType("Varchar")>]
+              stateprovincename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              postalcode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              countryregionname: Option<string>
+              [<ProviderDbType("Xml")>]
+              additionalcontactinfo: Option<string> }
+
+            interface ILeftViewOf<``vemployee (base)``>
+
+        let vemployee = leftTable<``vemployee (base)``, vemployee>
+
+        type private ``vemployeedepartment (base)`` = vemployeedepartment
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vemployeedepartment =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              title: Option<string>
+              [<ProviderDbType("Varchar")>]
+              firstname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              middlename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              lastname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              suffix: Option<string>
+              [<ProviderDbType("Varchar")>]
+              jobtitle: Option<string>
+              [<ProviderDbType("Varchar")>]
+              department: Option<string>
+              [<ProviderDbType("Varchar")>]
+              groupname: Option<string>
+              [<ProviderDbType("Date")>]
+              startdate: Option<System.DateOnly> }
+
+            interface ILeftViewOf<``vemployeedepartment (base)``>
+
+        let vemployeedepartment =
+            leftTable<``vemployeedepartment (base)``, vemployeedepartment>
+
+        type private ``vemployeedepartmenthistory (base)`` = vemployeedepartmenthistory
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vemployeedepartmenthistory =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              title: Option<string>
+              [<ProviderDbType("Varchar")>]
+              firstname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              middlename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              lastname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              suffix: Option<string>
+              [<ProviderDbType("Varchar")>]
+              shift: Option<string>
+              [<ProviderDbType("Varchar")>]
+              department: Option<string>
+              [<ProviderDbType("Varchar")>]
+              groupname: Option<string>
+              [<ProviderDbType("Date")>]
+              startdate: Option<System.DateOnly>
+              [<ProviderDbType("Date")>]
+              enddate: Option<System.DateOnly> }
+
+            interface ILeftViewOf<``vemployeedepartmenthistory (base)``>
+
+        let vemployeedepartmenthistory =
+            leftTable<``vemployeedepartmenthistory (base)``, vemployeedepartmenthistory>
+
+        type private ``vjobcandidate (base)`` = vjobcandidate
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vjobcandidate =
+            { [<ProviderDbType("Integer")>]
+              jobcandidateid: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              ``Name.Prefix``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Name.First``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Name.Middle``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Name.Last``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Name.Suffix``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              Skills: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Addr.Type``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Addr.Loc.CountryRegion``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Addr.Loc.State``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Addr.Loc.City``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Addr.PostalCode``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              EMail: Option<string>
+              [<ProviderDbType("Varchar")>]
+              WebSite: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``vjobcandidate (base)``>
+
+        let vjobcandidate = leftTable<``vjobcandidate (base)``, vjobcandidate>
+
+        type private ``vjobcandidateeducation (base)`` = vjobcandidateeducation
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vjobcandidateeducation =
+            { [<ProviderDbType("Integer")>]
+              jobcandidateid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              ``Edu.Level``: Option<string>
+              [<ProviderDbType("Date")>]
+              ``Edu.StartDate``: Option<System.DateOnly>
+              [<ProviderDbType("Date")>]
+              ``Edu.EndDate``: Option<System.DateOnly>
+              [<ProviderDbType("Varchar")>]
+              ``Edu.Degree``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Edu.Major``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Edu.Minor``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Edu.GPA``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Edu.GPAScale``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Edu.School``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Edu.Loc.CountryRegion``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Edu.Loc.State``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Edu.Loc.City``: Option<string> }
+
+            interface ILeftViewOf<``vjobcandidateeducation (base)``>
+
+        let vjobcandidateeducation =
+            leftTable<``vjobcandidateeducation (base)``, vjobcandidateeducation>
+
+        type private ``vjobcandidateemployment (base)`` = vjobcandidateemployment
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vjobcandidateemployment =
+            { [<ProviderDbType("Integer")>]
+              jobcandidateid: Option<int>
+              [<ProviderDbType("Date")>]
+              ``Emp.StartDate``: Option<System.DateOnly>
+              [<ProviderDbType("Date")>]
+              ``Emp.EndDate``: Option<System.DateOnly>
+              [<ProviderDbType("Varchar")>]
+              ``Emp.OrgName``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Emp.JobTitle``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Emp.Responsibility``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Emp.FunctionCategory``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Emp.IndustryCategory``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Emp.Loc.CountryRegion``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Emp.Loc.State``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              ``Emp.Loc.City``: Option<string> }
+
+            interface ILeftViewOf<``vjobcandidateemployment (base)``>
+
+        let vjobcandidateemployment =
+            leftTable<``vjobcandidateemployment (base)``, vjobcandidateemployment>
+
+
 module network_sample =
 
     [<CLIMutable>]
@@ -538,6 +938,29 @@ module network_sample =
                   { WriteColumn.Name = "net_macaddr8"; Value = box this.net_macaddr8; ProviderDbType = Some "MacAddr8" } ]
 
     let network_addresses = table<network_addresses>
+
+    /// Left-views for `leftJoin`: each table record with every column in its nullable form,
+    /// so an unmatched row reads as None per column instead of one Option around the record.
+    module LeftJoined =
+        type private ``network_addresses (base)`` = network_addresses
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type network_addresses =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Cidr")>]
+              net_cidr: Option<System.Net.IPNetwork>
+              [<ProviderDbType("Inet")>]
+              net_inet: Option<System.Net.IPAddress>
+              [<ProviderDbType("MacAddr")>]
+              net_macaddr: Option<System.Net.NetworkInformation.PhysicalAddress>
+              [<ProviderDbType("MacAddr8")>]
+              net_macaddr8: Option<System.Net.NetworkInformation.PhysicalAddress> }
+
+            interface ILeftViewOf<``network_addresses (base)``>
+
+        let network_addresses = leftTable<``network_addresses (base)``, network_addresses>
+
 
 module pe =
 
@@ -890,6 +1313,291 @@ module pe =
                   { WriteColumn.Name = "modifieddate"; Value = box this.modifieddate; ProviderDbType = Some "Timestamp" } ]
 
     let sp = table<sp>
+
+    /// Left-views for `leftJoin`: each table record with every column in its nullable form,
+    /// so an unmatched row reads as None per column instead of one Option around the record.
+    module LeftJoined =
+        type private ``a (base)`` = a
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type a =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              addressid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              addressline1: Option<string>
+              [<ProviderDbType("Varchar")>]
+              addressline2: Option<string>
+              [<ProviderDbType("Varchar")>]
+              city: Option<string>
+              [<ProviderDbType("Integer")>]
+              stateprovinceid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              postalcode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              spatiallocation: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``a (base)``>
+
+        let a = leftTable<``a (base)``, a>
+
+        type private ``at (base)`` = at
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type at =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              addresstypeid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``at (base)``>
+
+        let at = leftTable<``at (base)``, at>
+
+        type private ``be (base)`` = be
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type be =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``be (base)``>
+
+        let be = leftTable<``be (base)``, be>
+
+        type private ``bea (base)`` = bea
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type bea =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              addressid: Option<int>
+              [<ProviderDbType("Integer")>]
+              addresstypeid: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``bea (base)``>
+
+        let bea = leftTable<``bea (base)``, bea>
+
+        type private ``bec (base)`` = bec
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type bec =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              personid: Option<int>
+              [<ProviderDbType("Integer")>]
+              contacttypeid: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``bec (base)``>
+
+        let bec = leftTable<``bec (base)``, bec>
+
+        type private ``cr (base)`` = cr
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type cr =
+            { [<ProviderDbType("Varchar")>]
+              countryregioncode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``cr (base)``>
+
+        let cr = leftTable<``cr (base)``, cr>
+
+        type private ``ct (base)`` = ct
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type ct =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              contacttypeid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``ct (base)``>
+
+        let ct = leftTable<``ct (base)``, ct>
+
+        type private ``e (base)`` = e
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type e =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              emailaddressid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              emailaddress: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``e (base)``>
+
+        let e = leftTable<``e (base)``, e>
+
+        type private ``p (base)`` = p
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type p =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Char")>]
+              persontype: Option<string>
+              [<ProviderDbType("Boolean")>]
+              namestyle: Option<bool>
+              [<ProviderDbType("Varchar")>]
+              title: Option<string>
+              [<ProviderDbType("Varchar")>]
+              firstname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              middlename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              lastname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              suffix: Option<string>
+              [<ProviderDbType("Integer")>]
+              emailpromotion: Option<int>
+              [<ProviderDbType("Xml")>]
+              additionalcontactinfo: Option<string>
+              [<ProviderDbType("Xml")>]
+              demographics: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``p (base)``>
+
+        let p = leftTable<``p (base)``, p>
+
+        type private ``pa (base)`` = pa
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pa =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              passwordhash: Option<string>
+              [<ProviderDbType("Varchar")>]
+              passwordsalt: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pa (base)``>
+
+        let pa = leftTable<``pa (base)``, pa>
+
+        type private ``pnt (base)`` = pnt
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pnt =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              phonenumbertypeid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pnt (base)``>
+
+        let pnt = leftTable<``pnt (base)``, pnt>
+
+        type private ``pp (base)`` = pp
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pp =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              phonenumber: Option<string>
+              [<ProviderDbType("Integer")>]
+              phonenumbertypeid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pp (base)``>
+
+        let pp = leftTable<``pp (base)``, pp>
+
+        type private ``sp (base)`` = sp
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type sp =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              stateprovinceid: Option<int>
+              [<ProviderDbType("Char")>]
+              stateprovincecode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              countryregioncode: Option<string>
+              [<ProviderDbType("Boolean")>]
+              isonlystateprovinceflag: Option<bool>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Integer")>]
+              territoryid: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``sp (base)``>
+
+        let sp = leftTable<``sp (base)``, sp>
+
 
 module person =
 
@@ -1288,6 +1996,333 @@ module person =
                   { WriteColumn.Name = "countryregionname"; Value = box this.countryregionname; ProviderDbType = Some "Name" } ]
 
     let vstateprovincecountryregion = table<vstateprovincecountryregion>
+
+    /// Left-views for `leftJoin`: each table record with every column in its nullable form,
+    /// so an unmatched row reads as None per column instead of one Option around the record.
+    module LeftJoined =
+        type private ``address (base)`` = address
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type address =
+            { [<ProviderDbType("Integer")>]
+              addressid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              addressline1: Option<string>
+              [<ProviderDbType("Varchar")>]
+              addressline2: Option<string>
+              [<ProviderDbType("Varchar")>]
+              city: Option<string>
+              [<ProviderDbType("Integer")>]
+              stateprovinceid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              postalcode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              spatiallocation: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``address (base)``>
+
+        let address = leftTable<``address (base)``, address>
+
+        type private ``addresstype (base)`` = addresstype
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type addresstype =
+            { [<ProviderDbType("Integer")>]
+              addresstypeid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``addresstype (base)``>
+
+        let addresstype = leftTable<``addresstype (base)``, addresstype>
+
+        type private ``businessentity (base)`` = businessentity
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type businessentity =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``businessentity (base)``>
+
+        let businessentity = leftTable<``businessentity (base)``, businessentity>
+
+        type private ``businessentityaddress (base)`` = businessentityaddress
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type businessentityaddress =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              addressid: Option<int>
+              [<ProviderDbType("Integer")>]
+              addresstypeid: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``businessentityaddress (base)``>
+
+        let businessentityaddress =
+            leftTable<``businessentityaddress (base)``, businessentityaddress>
+
+        type private ``businessentitycontact (base)`` = businessentitycontact
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type businessentitycontact =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              personid: Option<int>
+              [<ProviderDbType("Integer")>]
+              contacttypeid: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``businessentitycontact (base)``>
+
+        let businessentitycontact =
+            leftTable<``businessentitycontact (base)``, businessentitycontact>
+
+        type private ``contacttype (base)`` = contacttype
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type contacttype =
+            { [<ProviderDbType("Integer")>]
+              contacttypeid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``contacttype (base)``>
+
+        let contacttype = leftTable<``contacttype (base)``, contacttype>
+
+        type private ``countryregion (base)`` = countryregion
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type countryregion =
+            { [<ProviderDbType("Varchar")>]
+              countryregioncode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``countryregion (base)``>
+
+        let countryregion = leftTable<``countryregion (base)``, countryregion>
+
+        type private ``emailaddress (base)`` = emailaddress
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type emailaddress =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              emailaddressid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              emailaddress: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``emailaddress (base)``>
+
+        let emailaddress = leftTable<``emailaddress (base)``, emailaddress>
+
+        type private ``password (base)`` = password
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type password =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              passwordhash: Option<string>
+              [<ProviderDbType("Varchar")>]
+              passwordsalt: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``password (base)``>
+
+        let password = leftTable<``password (base)``, password>
+
+        type private ``person (base)`` = person
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type person =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Char")>]
+              persontype: Option<string>
+              [<ProviderDbType("Boolean")>]
+              namestyle: Option<bool>
+              [<ProviderDbType("Varchar")>]
+              title: Option<string>
+              [<ProviderDbType("Varchar")>]
+              firstname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              middlename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              lastname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              suffix: Option<string>
+              [<ProviderDbType("Integer")>]
+              emailpromotion: Option<int>
+              [<ProviderDbType("Xml")>]
+              additionalcontactinfo: Option<string>
+              [<ProviderDbType("Xml")>]
+              demographics: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``person (base)``>
+
+        let person = leftTable<``person (base)``, person>
+
+        type private ``personphone (base)`` = personphone
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type personphone =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              phonenumber: Option<string>
+              [<ProviderDbType("Integer")>]
+              phonenumbertypeid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``personphone (base)``>
+
+        let personphone = leftTable<``personphone (base)``, personphone>
+
+        type private ``phonenumbertype (base)`` = phonenumbertype
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type phonenumbertype =
+            { [<ProviderDbType("Integer")>]
+              phonenumbertypeid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``phonenumbertype (base)``>
+
+        let phonenumbertype = leftTable<``phonenumbertype (base)``, phonenumbertype>
+
+        type private ``stateprovince (base)`` = stateprovince
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type stateprovince =
+            { [<ProviderDbType("Integer")>]
+              stateprovinceid: Option<int>
+              [<ProviderDbType("Char")>]
+              stateprovincecode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              countryregioncode: Option<string>
+              [<ProviderDbType("Boolean")>]
+              isonlystateprovinceflag: Option<bool>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Integer")>]
+              territoryid: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``stateprovince (base)``>
+
+        let stateprovince = leftTable<``stateprovince (base)``, stateprovince>
+
+        type private ``vadditionalcontactinfo (base)`` = vadditionalcontactinfo
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vadditionalcontactinfo =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              firstname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              middlename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              lastname: Option<string>
+              [<ProviderDbType("Xml")>]
+              telephonenumber: Option<string>
+              [<ProviderDbType("Text")>]
+              telephonespecialinstructions: Option<string>
+              [<ProviderDbType("Xml")>]
+              street: Option<string>
+              [<ProviderDbType("Xml")>]
+              city: Option<string>
+              [<ProviderDbType("Xml")>]
+              stateprovince: Option<string>
+              [<ProviderDbType("Xml")>]
+              postalcode: Option<string>
+              [<ProviderDbType("Xml")>]
+              countryregion: Option<string>
+              [<ProviderDbType("Xml")>]
+              homeaddressspecialinstructions: Option<string>
+              [<ProviderDbType("Xml")>]
+              emailaddress: Option<string>
+              [<ProviderDbType("Text")>]
+              emailspecialinstructions: Option<string>
+              [<ProviderDbType("Xml")>]
+              emailtelephonenumber: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``vadditionalcontactinfo (base)``>
+
+        let vadditionalcontactinfo =
+            leftTable<``vadditionalcontactinfo (base)``, vadditionalcontactinfo>
+
+        type private ``vstateprovincecountryregion (base)`` = vstateprovincecountryregion
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vstateprovincecountryregion =
+            { [<ProviderDbType("Integer")>]
+              stateprovinceid: Option<int>
+              [<ProviderDbType("Name")>]
+              stateprovincename: Option<string>
+              [<ProviderDbType("Integer")>]
+              territoryid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              countryregioncode: Option<string>
+              [<ProviderDbType("Name")>]
+              countryregionname: Option<string> }
+
+            interface ILeftViewOf<``vstateprovincecountryregion (base)``>
+
+        let vstateprovincecountryregion =
+            leftTable<``vstateprovincecountryregion (base)``, vstateprovincecountryregion>
+
 
 module pr =
 
@@ -2054,6 +3089,611 @@ module pr =
                   { WriteColumn.Name = "modifieddate"; Value = box this.modifieddate; ProviderDbType = Some "Timestamp" } ]
 
     let wr = table<wr>
+
+    /// Left-views for `leftJoin`: each table record with every column in its nullable form,
+    /// so an unmatched row reads as None per column instead of one Option around the record.
+    module LeftJoined =
+        type private ``bom (base)`` = bom
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type bom =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              billofmaterialsid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productassemblyid: Option<int>
+              [<ProviderDbType("Integer")>]
+              componentid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              startdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              enddate: Option<System.DateTime>
+              [<ProviderDbType("Char")>]
+              unitmeasurecode: Option<string>
+              [<ProviderDbType("Smallint")>]
+              bomlevel: Option<int16>
+              [<ProviderDbType("Numeric")>]
+              perassemblyqty: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``bom (base)``>
+
+        let bom = leftTable<``bom (base)``, bom>
+
+        type private ``c (base)`` = c
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type c =
+            { [<ProviderDbType("Char")>]
+              id: Option<string>
+              [<ProviderDbType("Char")>]
+              cultureid: Option<string>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``c (base)``>
+
+        let c = leftTable<``c (base)``, c>
+
+        type private ``d (base)`` = d
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type d =
+            { [<ProviderDbType("Varchar")>]
+              title: Option<string>
+              [<ProviderDbType("Integer")>]
+              owner: Option<int>
+              [<ProviderDbType("Boolean")>]
+              folderflag: Option<bool>
+              [<ProviderDbType("Varchar")>]
+              filename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              fileextension: Option<string>
+              [<ProviderDbType("Char")>]
+              revision: Option<string>
+              [<ProviderDbType("Integer")>]
+              changenumber: Option<int>
+              [<ProviderDbType("Smallint")>]
+              status: Option<int16>
+              [<ProviderDbType("Text")>]
+              documentsummary: Option<string>
+              [<ProviderDbType("Bytea")>]
+              document: Option<byte[]>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime>
+              [<ProviderDbType("Varchar")>]
+              documentnode: Option<string> }
+
+            interface ILeftViewOf<``d (base)``>
+
+        let d = leftTable<``d (base)``, d>
+
+        type private ``i (base)`` = i
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type i =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              illustrationid: Option<int>
+              [<ProviderDbType("Xml")>]
+              diagram: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``i (base)``>
+
+        let i = leftTable<``i (base)``, i>
+
+        type private ``l (base)`` = l
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type l =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              locationid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Numeric")>]
+              costrate: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              availability: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``l (base)``>
+
+        let l = leftTable<``l (base)``, l>
+
+        type private ``p (base)`` = p
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type p =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Varchar")>]
+              productnumber: Option<string>
+              [<ProviderDbType("Boolean")>]
+              makeflag: Option<bool>
+              [<ProviderDbType("Boolean")>]
+              finishedgoodsflag: Option<bool>
+              [<ProviderDbType("Varchar")>]
+              color: Option<string>
+              [<ProviderDbType("Smallint")>]
+              safetystocklevel: Option<int16>
+              [<ProviderDbType("Smallint")>]
+              reorderpoint: Option<int16>
+              [<ProviderDbType("Numeric")>]
+              standardcost: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              listprice: Option<decimal>
+              [<ProviderDbType("Varchar")>]
+              size: Option<string>
+              [<ProviderDbType("Char")>]
+              sizeunitmeasurecode: Option<string>
+              [<ProviderDbType("Char")>]
+              weightunitmeasurecode: Option<string>
+              [<ProviderDbType("Numeric")>]
+              weight: Option<decimal>
+              [<ProviderDbType("Integer")>]
+              daystomanufacture: Option<int>
+              [<ProviderDbType("Char")>]
+              productline: Option<string>
+              [<ProviderDbType("Char")>]
+              ``class``: Option<string>
+              [<ProviderDbType("Char")>]
+              style: Option<string>
+              [<ProviderDbType("Integer")>]
+              productsubcategoryid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productmodelid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              sellstartdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              sellenddate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              discontinueddate: Option<System.DateTime>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``p (base)``>
+
+        let p = leftTable<``p (base)``, p>
+
+        type private ``pc (base)`` = pc
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pc =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              productcategoryid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pc (base)``>
+
+        let pc = leftTable<``pc (base)``, pc>
+
+        type private ``pch (base)`` = pch
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pch =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              startdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              enddate: Option<System.DateTime>
+              [<ProviderDbType("Numeric")>]
+              standardcost: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pch (base)``>
+
+        let pch = leftTable<``pch (base)``, pch>
+
+        type private ``pd (base)`` = pd
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pd =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              productdescriptionid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              description: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pd (base)``>
+
+        let pd = leftTable<``pd (base)``, pd>
+
+        type private ``pdoc (base)`` = pdoc
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pdoc =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime>
+              [<ProviderDbType("Varchar")>]
+              documentnode: Option<string> }
+
+            interface ILeftViewOf<``pdoc (base)``>
+
+        let pdoc = leftTable<``pdoc (base)``, pdoc>
+
+        type private ``pi (base)`` = pi
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pi =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Smallint")>]
+              locationid: Option<int16>
+              [<ProviderDbType("Varchar")>]
+              shelf: Option<string>
+              [<ProviderDbType("Smallint")>]
+              bin: Option<int16>
+              [<ProviderDbType("Smallint")>]
+              quantity: Option<int16>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pi (base)``>
+
+        let pi = leftTable<``pi (base)``, pi>
+
+        type private ``plph (base)`` = plph
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type plph =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              startdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              enddate: Option<System.DateTime>
+              [<ProviderDbType("Numeric")>]
+              listprice: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``plph (base)``>
+
+        let plph = leftTable<``plph (base)``, plph>
+
+        type private ``pm (base)`` = pm
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pm =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              productmodelid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Xml")>]
+              catalogdescription: Option<string>
+              [<ProviderDbType("Xml")>]
+              instructions: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pm (base)``>
+
+        let pm = leftTable<``pm (base)``, pm>
+
+        type private ``pmi (base)`` = pmi
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pmi =
+            { [<ProviderDbType("Integer")>]
+              productmodelid: Option<int>
+              [<ProviderDbType("Integer")>]
+              illustrationid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pmi (base)``>
+
+        let pmi = leftTable<``pmi (base)``, pmi>
+
+        type private ``pmpdc (base)`` = pmpdc
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pmpdc =
+            { [<ProviderDbType("Integer")>]
+              productmodelid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productdescriptionid: Option<int>
+              [<ProviderDbType("Char")>]
+              cultureid: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pmpdc (base)``>
+
+        let pmpdc = leftTable<``pmpdc (base)``, pmpdc>
+
+        type private ``pp (base)`` = pp
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pp =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              productphotoid: Option<int>
+              [<ProviderDbType("Bytea")>]
+              thumbnailphoto: Option<byte[]>
+              [<ProviderDbType("Varchar")>]
+              thumbnailphotofilename: Option<string>
+              [<ProviderDbType("Bytea")>]
+              largephoto: Option<byte[]>
+              [<ProviderDbType("Varchar")>]
+              largephotofilename: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pp (base)``>
+
+        let pp = leftTable<``pp (base)``, pp>
+
+        type private ``ppp (base)`` = ppp
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type ppp =
+            { [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productphotoid: Option<int>
+              [<ProviderDbType("Boolean")>]
+              primary: Option<bool>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``ppp (base)``>
+
+        let ppp = leftTable<``ppp (base)``, ppp>
+
+        type private ``pr (base)`` = pr
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pr =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              productreviewid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              reviewername: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              reviewdate: Option<System.DateTime>
+              [<ProviderDbType("Varchar")>]
+              emailaddress: Option<string>
+              [<ProviderDbType("Integer")>]
+              rating: Option<int>
+              [<ProviderDbType("Varchar")>]
+              comments: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pr (base)``>
+
+        let pr = leftTable<``pr (base)``, pr>
+
+        type private ``psc (base)`` = psc
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type psc =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              productsubcategoryid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productcategoryid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``psc (base)``>
+
+        let psc = leftTable<``psc (base)``, psc>
+
+        type private ``sr (base)`` = sr
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type sr =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              scrapreasonid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``sr (base)``>
+
+        let sr = leftTable<``sr (base)``, sr>
+
+        type private ``th (base)`` = th
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type th =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              transactionid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Integer")>]
+              referenceorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              referenceorderlineid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              transactiondate: Option<System.DateTime>
+              [<ProviderDbType("Char")>]
+              transactiontype: Option<string>
+              [<ProviderDbType("Integer")>]
+              quantity: Option<int>
+              [<ProviderDbType("Numeric")>]
+              actualcost: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``th (base)``>
+
+        let th = leftTable<``th (base)``, th>
+
+        type private ``tha (base)`` = tha
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type tha =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              transactionid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Integer")>]
+              referenceorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              referenceorderlineid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              transactiondate: Option<System.DateTime>
+              [<ProviderDbType("Char")>]
+              transactiontype: Option<string>
+              [<ProviderDbType("Integer")>]
+              quantity: Option<int>
+              [<ProviderDbType("Numeric")>]
+              actualcost: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``tha (base)``>
+
+        let tha = leftTable<``tha (base)``, tha>
+
+        type private ``um (base)`` = um
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type um =
+            { [<ProviderDbType("Char")>]
+              id: Option<string>
+              [<ProviderDbType("Char")>]
+              unitmeasurecode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``um (base)``>
+
+        let um = leftTable<``um (base)``, um>
+
+        type private ``w (base)`` = w
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type w =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              workorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Integer")>]
+              orderqty: Option<int>
+              [<ProviderDbType("Smallint")>]
+              scrappedqty: Option<int16>
+              [<ProviderDbType("Timestamp")>]
+              startdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              enddate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              duedate: Option<System.DateTime>
+              [<ProviderDbType("Smallint")>]
+              scrapreasonid: Option<int16>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``w (base)``>
+
+        let w = leftTable<``w (base)``, w>
+
+        type private ``wr (base)`` = wr
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type wr =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              workorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Smallint")>]
+              operationsequence: Option<int16>
+              [<ProviderDbType("Smallint")>]
+              locationid: Option<int16>
+              [<ProviderDbType("Timestamp")>]
+              scheduledstartdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              scheduledenddate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              actualstartdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              actualenddate: Option<System.DateTime>
+              [<ProviderDbType("Numeric")>]
+              actualresourcehrs: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              plannedcost: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              actualcost: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``wr (base)``>
+
+        let wr = leftTable<``wr (base)``, wr>
+
 
 module production =
 
@@ -2903,6 +4543,688 @@ module production =
 
     let workorderrouting = table<workorderrouting>
 
+    /// Left-views for `leftJoin`: each table record with every column in its nullable form,
+    /// so an unmatched row reads as None per column instead of one Option around the record.
+    module LeftJoined =
+        type private ``billofmaterials (base)`` = billofmaterials
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type billofmaterials =
+            { [<ProviderDbType("Integer")>]
+              billofmaterialsid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productassemblyid: Option<int>
+              [<ProviderDbType("Integer")>]
+              componentid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              startdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              enddate: Option<System.DateTime>
+              [<ProviderDbType("Char")>]
+              unitmeasurecode: Option<string>
+              [<ProviderDbType("Smallint")>]
+              bomlevel: Option<int16>
+              [<ProviderDbType("Numeric")>]
+              perassemblyqty: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``billofmaterials (base)``>
+
+        let billofmaterials = leftTable<``billofmaterials (base)``, billofmaterials>
+
+        type private ``culture (base)`` = culture
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type culture =
+            { [<ProviderDbType("Char")>]
+              cultureid: Option<string>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``culture (base)``>
+
+        let culture = leftTable<``culture (base)``, culture>
+
+        type private ``document (base)`` = document
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type document =
+            { [<ProviderDbType("Varchar")>]
+              title: Option<string>
+              [<ProviderDbType("Integer")>]
+              owner: Option<int>
+              [<ProviderDbType("Boolean")>]
+              folderflag: Option<bool>
+              [<ProviderDbType("Varchar")>]
+              filename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              fileextension: Option<string>
+              [<ProviderDbType("Char")>]
+              revision: Option<string>
+              [<ProviderDbType("Integer")>]
+              changenumber: Option<int>
+              [<ProviderDbType("Smallint")>]
+              status: Option<int16>
+              [<ProviderDbType("Text")>]
+              documentsummary: Option<string>
+              [<ProviderDbType("Bytea")>]
+              document: Option<byte[]>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime>
+              [<ProviderDbType("Varchar")>]
+              documentnode: Option<string> }
+
+            interface ILeftViewOf<``document (base)``>
+
+        let document = leftTable<``document (base)``, document>
+
+        type private ``illustration (base)`` = illustration
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type illustration =
+            { [<ProviderDbType("Integer")>]
+              illustrationid: Option<int>
+              [<ProviderDbType("Xml")>]
+              diagram: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``illustration (base)``>
+
+        let illustration = leftTable<``illustration (base)``, illustration>
+
+        type private ``location (base)`` = location
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type location =
+            { [<ProviderDbType("Integer")>]
+              locationid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Numeric")>]
+              costrate: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              availability: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``location (base)``>
+
+        let location = leftTable<``location (base)``, location>
+
+        type private ``product (base)`` = product
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type product =
+            { [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Varchar")>]
+              productnumber: Option<string>
+              [<ProviderDbType("Boolean")>]
+              makeflag: Option<bool>
+              [<ProviderDbType("Boolean")>]
+              finishedgoodsflag: Option<bool>
+              [<ProviderDbType("Varchar")>]
+              color: Option<string>
+              [<ProviderDbType("Smallint")>]
+              safetystocklevel: Option<int16>
+              [<ProviderDbType("Smallint")>]
+              reorderpoint: Option<int16>
+              [<ProviderDbType("Numeric")>]
+              standardcost: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              listprice: Option<decimal>
+              [<ProviderDbType("Varchar")>]
+              size: Option<string>
+              [<ProviderDbType("Char")>]
+              sizeunitmeasurecode: Option<string>
+              [<ProviderDbType("Char")>]
+              weightunitmeasurecode: Option<string>
+              [<ProviderDbType("Numeric")>]
+              weight: Option<decimal>
+              [<ProviderDbType("Integer")>]
+              daystomanufacture: Option<int>
+              [<ProviderDbType("Char")>]
+              productline: Option<string>
+              [<ProviderDbType("Char")>]
+              ``class``: Option<string>
+              [<ProviderDbType("Char")>]
+              style: Option<string>
+              [<ProviderDbType("Integer")>]
+              productsubcategoryid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productmodelid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              sellstartdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              sellenddate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              discontinueddate: Option<System.DateTime>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``product (base)``>
+
+        let product = leftTable<``product (base)``, product>
+
+        type private ``productcategory (base)`` = productcategory
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productcategory =
+            { [<ProviderDbType("Integer")>]
+              productcategoryid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``productcategory (base)``>
+
+        let productcategory = leftTable<``productcategory (base)``, productcategory>
+
+        type private ``productcosthistory (base)`` = productcosthistory
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productcosthistory =
+            { [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              startdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              enddate: Option<System.DateTime>
+              [<ProviderDbType("Numeric")>]
+              standardcost: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``productcosthistory (base)``>
+
+        let productcosthistory =
+            leftTable<``productcosthistory (base)``, productcosthistory>
+
+        type private ``productdescription (base)`` = productdescription
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productdescription =
+            { [<ProviderDbType("Integer")>]
+              productdescriptionid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              description: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``productdescription (base)``>
+
+        let productdescription =
+            leftTable<``productdescription (base)``, productdescription>
+
+        type private ``productdocument (base)`` = productdocument
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productdocument =
+            { [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime>
+              [<ProviderDbType("Varchar")>]
+              documentnode: Option<string> }
+
+            interface ILeftViewOf<``productdocument (base)``>
+
+        let productdocument = leftTable<``productdocument (base)``, productdocument>
+
+        type private ``productinventory (base)`` = productinventory
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productinventory =
+            { [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Smallint")>]
+              locationid: Option<int16>
+              [<ProviderDbType("Varchar")>]
+              shelf: Option<string>
+              [<ProviderDbType("Smallint")>]
+              bin: Option<int16>
+              [<ProviderDbType("Smallint")>]
+              quantity: Option<int16>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``productinventory (base)``>
+
+        let productinventory = leftTable<``productinventory (base)``, productinventory>
+
+        type private ``productlistpricehistory (base)`` = productlistpricehistory
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productlistpricehistory =
+            { [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              startdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              enddate: Option<System.DateTime>
+              [<ProviderDbType("Numeric")>]
+              listprice: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``productlistpricehistory (base)``>
+
+        let productlistpricehistory =
+            leftTable<``productlistpricehistory (base)``, productlistpricehistory>
+
+        type private ``productmodel (base)`` = productmodel
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productmodel =
+            { [<ProviderDbType("Integer")>]
+              productmodelid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Xml")>]
+              catalogdescription: Option<string>
+              [<ProviderDbType("Xml")>]
+              instructions: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``productmodel (base)``>
+
+        let productmodel = leftTable<``productmodel (base)``, productmodel>
+
+        type private ``productmodelillustration (base)`` = productmodelillustration
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productmodelillustration =
+            { [<ProviderDbType("Integer")>]
+              productmodelid: Option<int>
+              [<ProviderDbType("Integer")>]
+              illustrationid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``productmodelillustration (base)``>
+
+        let productmodelillustration =
+            leftTable<``productmodelillustration (base)``, productmodelillustration>
+
+        type private ``productmodelproductdescriptionculture (base)`` = productmodelproductdescriptionculture
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productmodelproductdescriptionculture =
+            { [<ProviderDbType("Integer")>]
+              productmodelid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productdescriptionid: Option<int>
+              [<ProviderDbType("Char")>]
+              cultureid: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``productmodelproductdescriptionculture (base)``>
+
+        let productmodelproductdescriptionculture =
+            leftTable<``productmodelproductdescriptionculture (base)``, productmodelproductdescriptionculture>
+
+        type private ``productphoto (base)`` = productphoto
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productphoto =
+            { [<ProviderDbType("Integer")>]
+              productphotoid: Option<int>
+              [<ProviderDbType("Bytea")>]
+              thumbnailphoto: Option<byte[]>
+              [<ProviderDbType("Varchar")>]
+              thumbnailphotofilename: Option<string>
+              [<ProviderDbType("Bytea")>]
+              largephoto: Option<byte[]>
+              [<ProviderDbType("Varchar")>]
+              largephotofilename: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``productphoto (base)``>
+
+        let productphoto = leftTable<``productphoto (base)``, productphoto>
+
+        type private ``productproductphoto (base)`` = productproductphoto
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productproductphoto =
+            { [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productphotoid: Option<int>
+              [<ProviderDbType("Boolean")>]
+              primary: Option<bool>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``productproductphoto (base)``>
+
+        let productproductphoto =
+            leftTable<``productproductphoto (base)``, productproductphoto>
+
+        type private ``productreview (base)`` = productreview
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productreview =
+            { [<ProviderDbType("Integer")>]
+              productreviewid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              reviewername: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              reviewdate: Option<System.DateTime>
+              [<ProviderDbType("Varchar")>]
+              emailaddress: Option<string>
+              [<ProviderDbType("Integer")>]
+              rating: Option<int>
+              [<ProviderDbType("Varchar")>]
+              comments: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``productreview (base)``>
+
+        let productreview = leftTable<``productreview (base)``, productreview>
+
+        type private ``productsubcategory (base)`` = productsubcategory
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productsubcategory =
+            { [<ProviderDbType("Integer")>]
+              productsubcategoryid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productcategoryid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``productsubcategory (base)``>
+
+        let productsubcategory =
+            leftTable<``productsubcategory (base)``, productsubcategory>
+
+        type private ``scrapreason (base)`` = scrapreason
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type scrapreason =
+            { [<ProviderDbType("Integer")>]
+              scrapreasonid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``scrapreason (base)``>
+
+        let scrapreason = leftTable<``scrapreason (base)``, scrapreason>
+
+        type private ``transactionhistory (base)`` = transactionhistory
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type transactionhistory =
+            { [<ProviderDbType("Integer")>]
+              transactionid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Integer")>]
+              referenceorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              referenceorderlineid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              transactiondate: Option<System.DateTime>
+              [<ProviderDbType("Char")>]
+              transactiontype: Option<string>
+              [<ProviderDbType("Integer")>]
+              quantity: Option<int>
+              [<ProviderDbType("Numeric")>]
+              actualcost: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``transactionhistory (base)``>
+
+        let transactionhistory =
+            leftTable<``transactionhistory (base)``, transactionhistory>
+
+        type private ``transactionhistoryarchive (base)`` = transactionhistoryarchive
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type transactionhistoryarchive =
+            { [<ProviderDbType("Integer")>]
+              transactionid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Integer")>]
+              referenceorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              referenceorderlineid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              transactiondate: Option<System.DateTime>
+              [<ProviderDbType("Char")>]
+              transactiontype: Option<string>
+              [<ProviderDbType("Integer")>]
+              quantity: Option<int>
+              [<ProviderDbType("Numeric")>]
+              actualcost: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``transactionhistoryarchive (base)``>
+
+        let transactionhistoryarchive =
+            leftTable<``transactionhistoryarchive (base)``, transactionhistoryarchive>
+
+        type private ``unitmeasure (base)`` = unitmeasure
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type unitmeasure =
+            { [<ProviderDbType("Char")>]
+              unitmeasurecode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``unitmeasure (base)``>
+
+        let unitmeasure = leftTable<``unitmeasure (base)``, unitmeasure>
+
+        type private ``vproductanddescription (base)`` = vproductanddescription
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vproductanddescription =
+            { [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Name")>]
+              name: Option<string>
+              [<ProviderDbType("Name")>]
+              productmodel: Option<string>
+              [<ProviderDbType("Varchar")>]
+              description: Option<string> }
+
+            interface ILeftViewOf<``vproductanddescription (base)``>
+
+        let vproductanddescription =
+            leftTable<``vproductanddescription (base)``, vproductanddescription>
+
+        type private ``vproductmodelcatalogdescription (base)`` = vproductmodelcatalogdescription
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vproductmodelcatalogdescription =
+            { [<ProviderDbType("Integer")>]
+              productmodelid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Varchar")>]
+              Summary: Option<string>
+              [<ProviderDbType("Varchar")>]
+              manufacturer: Option<string>
+              [<ProviderDbType("Varchar")>]
+              copyright: Option<string>
+              [<ProviderDbType("Varchar")>]
+              producturl: Option<string>
+              [<ProviderDbType("Varchar")>]
+              warrantyperiod: Option<string>
+              [<ProviderDbType("Varchar")>]
+              warrantydescription: Option<string>
+              [<ProviderDbType("Varchar")>]
+              noofyears: Option<string>
+              [<ProviderDbType("Varchar")>]
+              maintenancedescription: Option<string>
+              [<ProviderDbType("Varchar")>]
+              wheel: Option<string>
+              [<ProviderDbType("Varchar")>]
+              saddle: Option<string>
+              [<ProviderDbType("Varchar")>]
+              pedal: Option<string>
+              [<ProviderDbType("Varchar")>]
+              bikeframe: Option<string>
+              [<ProviderDbType("Varchar")>]
+              crankset: Option<string>
+              [<ProviderDbType("Varchar")>]
+              pictureangle: Option<string>
+              [<ProviderDbType("Varchar")>]
+              picturesize: Option<string>
+              [<ProviderDbType("Varchar")>]
+              productphotoid: Option<string>
+              [<ProviderDbType("Varchar")>]
+              material: Option<string>
+              [<ProviderDbType("Varchar")>]
+              color: Option<string>
+              [<ProviderDbType("Varchar")>]
+              productline: Option<string>
+              [<ProviderDbType("Varchar")>]
+              style: Option<string>
+              [<ProviderDbType("Varchar")>]
+              riderexperience: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``vproductmodelcatalogdescription (base)``>
+
+        let vproductmodelcatalogdescription =
+            leftTable<``vproductmodelcatalogdescription (base)``, vproductmodelcatalogdescription>
+
+        type private ``vproductmodelinstructions (base)`` = vproductmodelinstructions
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vproductmodelinstructions =
+            { [<ProviderDbType("Integer")>]
+              productmodelid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Varchar")>]
+              instructions: Option<string>
+              [<ProviderDbType("Integer")>]
+              LocationID: Option<int>
+              [<ProviderDbType("Numeric")>]
+              SetupHours: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              MachineHours: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              LaborHours: Option<decimal>
+              [<ProviderDbType("Integer")>]
+              LotSize: Option<int>
+              [<ProviderDbType("Varchar")>]
+              Step: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``vproductmodelinstructions (base)``>
+
+        let vproductmodelinstructions =
+            leftTable<``vproductmodelinstructions (base)``, vproductmodelinstructions>
+
+        type private ``workorder (base)`` = workorder
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type workorder =
+            { [<ProviderDbType("Integer")>]
+              workorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Integer")>]
+              orderqty: Option<int>
+              [<ProviderDbType("Smallint")>]
+              scrappedqty: Option<int16>
+              [<ProviderDbType("Timestamp")>]
+              startdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              enddate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              duedate: Option<System.DateTime>
+              [<ProviderDbType("Smallint")>]
+              scrapreasonid: Option<int16>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``workorder (base)``>
+
+        let workorder = leftTable<``workorder (base)``, workorder>
+
+        type private ``workorderrouting (base)`` = workorderrouting
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type workorderrouting =
+            { [<ProviderDbType("Integer")>]
+              workorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Smallint")>]
+              operationsequence: Option<int16>
+              [<ProviderDbType("Smallint")>]
+              locationid: Option<int16>
+              [<ProviderDbType("Timestamp")>]
+              scheduledstartdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              scheduledenddate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              actualstartdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              actualenddate: Option<System.DateTime>
+              [<ProviderDbType("Numeric")>]
+              actualresourcehrs: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              plannedcost: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              actualcost: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``workorderrouting (base)``>
+
+        let workorderrouting = leftTable<``workorderrouting (base)``, workorderrouting>
+
+
 module pu =
 
     [<CLIMutable>]
@@ -3097,6 +5419,157 @@ module pu =
                   { WriteColumn.Name = "modifieddate"; Value = box this.modifieddate; ProviderDbType = Some "Timestamp" } ]
 
     let v = table<v>
+
+    /// Left-views for `leftJoin`: each table record with every column in its nullable form,
+    /// so an unmatched row reads as None per column instead of one Option around the record.
+    module LeftJoined =
+        type private ``pod (base)`` = pod
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pod =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              purchaseorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              purchaseorderdetailid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              duedate: Option<System.DateTime>
+              [<ProviderDbType("Smallint")>]
+              orderqty: Option<int16>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Numeric")>]
+              unitprice: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              receivedqty: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              rejectedqty: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pod (base)``>
+
+        let pod = leftTable<``pod (base)``, pod>
+
+        type private ``poh (base)`` = poh
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type poh =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              purchaseorderid: Option<int>
+              [<ProviderDbType("Smallint")>]
+              revisionnumber: Option<int16>
+              [<ProviderDbType("Smallint")>]
+              status: Option<int16>
+              [<ProviderDbType("Integer")>]
+              employeeid: Option<int>
+              [<ProviderDbType("Integer")>]
+              vendorid: Option<int>
+              [<ProviderDbType("Integer")>]
+              shipmethodid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              orderdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              shipdate: Option<System.DateTime>
+              [<ProviderDbType("Numeric")>]
+              subtotal: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              taxamt: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              freight: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``poh (base)``>
+
+        let poh = leftTable<``poh (base)``, poh>
+
+        type private ``pv (base)`` = pv
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pv =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              averageleadtime: Option<int>
+              [<ProviderDbType("Numeric")>]
+              standardprice: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              lastreceiptcost: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              lastreceiptdate: Option<System.DateTime>
+              [<ProviderDbType("Integer")>]
+              minorderqty: Option<int>
+              [<ProviderDbType("Integer")>]
+              maxorderqty: Option<int>
+              [<ProviderDbType("Integer")>]
+              onorderqty: Option<int>
+              [<ProviderDbType("Char")>]
+              unitmeasurecode: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pv (base)``>
+
+        let pv = leftTable<``pv (base)``, pv>
+
+        type private ``sm (base)`` = sm
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type sm =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              shipmethodid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Numeric")>]
+              shipbase: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              shiprate: Option<decimal>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``sm (base)``>
+
+        let sm = leftTable<``sm (base)``, sm>
+
+        type private ``v (base)`` = v
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type v =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              accountnumber: Option<string>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Smallint")>]
+              creditrating: Option<int16>
+              [<ProviderDbType("Boolean")>]
+              preferredvendorstatus: Option<bool>
+              [<ProviderDbType("Boolean")>]
+              activeflag: Option<bool>
+              [<ProviderDbType("Varchar")>]
+              purchasingwebserviceurl: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``v (base)``>
+
+        let v = leftTable<``v (base)``, v>
+
 
 module purchasing =
 
@@ -3356,6 +5829,211 @@ module purchasing =
                   { WriteColumn.Name = "emailpromotion"; Value = box this.emailpromotion; ProviderDbType = Some "Integer" } ]
 
     let vvendorwithcontacts = table<vvendorwithcontacts>
+
+    /// Left-views for `leftJoin`: each table record with every column in its nullable form,
+    /// so an unmatched row reads as None per column instead of one Option around the record.
+    module LeftJoined =
+        type private ``productvendor (base)`` = productvendor
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type productvendor =
+            { [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              averageleadtime: Option<int>
+              [<ProviderDbType("Numeric")>]
+              standardprice: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              lastreceiptcost: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              lastreceiptdate: Option<System.DateTime>
+              [<ProviderDbType("Integer")>]
+              minorderqty: Option<int>
+              [<ProviderDbType("Integer")>]
+              maxorderqty: Option<int>
+              [<ProviderDbType("Integer")>]
+              onorderqty: Option<int>
+              [<ProviderDbType("Char")>]
+              unitmeasurecode: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``productvendor (base)``>
+
+        let productvendor = leftTable<``productvendor (base)``, productvendor>
+
+        type private ``purchaseorderdetail (base)`` = purchaseorderdetail
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type purchaseorderdetail =
+            { [<ProviderDbType("Integer")>]
+              purchaseorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              purchaseorderdetailid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              duedate: Option<System.DateTime>
+              [<ProviderDbType("Smallint")>]
+              orderqty: Option<int16>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Numeric")>]
+              unitprice: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              receivedqty: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              rejectedqty: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``purchaseorderdetail (base)``>
+
+        let purchaseorderdetail =
+            leftTable<``purchaseorderdetail (base)``, purchaseorderdetail>
+
+        type private ``purchaseorderheader (base)`` = purchaseorderheader
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type purchaseorderheader =
+            { [<ProviderDbType("Integer")>]
+              purchaseorderid: Option<int>
+              [<ProviderDbType("Smallint")>]
+              revisionnumber: Option<int16>
+              [<ProviderDbType("Smallint")>]
+              status: Option<int16>
+              [<ProviderDbType("Integer")>]
+              employeeid: Option<int>
+              [<ProviderDbType("Integer")>]
+              vendorid: Option<int>
+              [<ProviderDbType("Integer")>]
+              shipmethodid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              orderdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              shipdate: Option<System.DateTime>
+              [<ProviderDbType("Numeric")>]
+              subtotal: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              taxamt: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              freight: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``purchaseorderheader (base)``>
+
+        let purchaseorderheader =
+            leftTable<``purchaseorderheader (base)``, purchaseorderheader>
+
+        type private ``shipmethod (base)`` = shipmethod
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type shipmethod =
+            { [<ProviderDbType("Integer")>]
+              shipmethodid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Numeric")>]
+              shipbase: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              shiprate: Option<decimal>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``shipmethod (base)``>
+
+        let shipmethod = leftTable<``shipmethod (base)``, shipmethod>
+
+        type private ``vendor (base)`` = vendor
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vendor =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              accountnumber: Option<string>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Smallint")>]
+              creditrating: Option<int16>
+              [<ProviderDbType("Boolean")>]
+              preferredvendorstatus: Option<bool>
+              [<ProviderDbType("Boolean")>]
+              activeflag: Option<bool>
+              [<ProviderDbType("Varchar")>]
+              purchasingwebserviceurl: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``vendor (base)``>
+
+        let vendor = leftTable<``vendor (base)``, vendor>
+
+        type private ``vvendorwithaddresses (base)`` = vvendorwithaddresses
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vvendorwithaddresses =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Varchar")>]
+              addresstype: Option<string>
+              [<ProviderDbType("Varchar")>]
+              addressline1: Option<string>
+              [<ProviderDbType("Varchar")>]
+              addressline2: Option<string>
+              [<ProviderDbType("Varchar")>]
+              city: Option<string>
+              [<ProviderDbType("Varchar")>]
+              stateprovincename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              postalcode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              countryregionname: Option<string> }
+
+            interface ILeftViewOf<``vvendorwithaddresses (base)``>
+
+        let vvendorwithaddresses =
+            leftTable<``vvendorwithaddresses (base)``, vvendorwithaddresses>
+
+        type private ``vvendorwithcontacts (base)`` = vvendorwithcontacts
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vvendorwithcontacts =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Varchar")>]
+              contacttype: Option<string>
+              [<ProviderDbType("Varchar")>]
+              title: Option<string>
+              [<ProviderDbType("Varchar")>]
+              firstname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              middlename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              lastname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              suffix: Option<string>
+              [<ProviderDbType("Varchar")>]
+              phonenumber: Option<string>
+              [<ProviderDbType("Varchar")>]
+              phonenumbertype: Option<string>
+              [<ProviderDbType("Varchar")>]
+              emailaddress: Option<string>
+              [<ProviderDbType("Integer")>]
+              emailpromotion: Option<int> }
+
+            interface ILeftViewOf<``vvendorwithcontacts (base)``>
+
+        let vvendorwithcontacts =
+            leftTable<``vvendorwithcontacts (base)``, vvendorwithcontacts>
+
 
 module sa =
 
@@ -3960,6 +6638,481 @@ module sa =
                   { WriteColumn.Name = "modifieddate"; Value = box this.modifieddate; ProviderDbType = Some "Timestamp" } ]
 
     let tr = table<tr>
+
+    /// Left-views for `leftJoin`: each table record with every column in its nullable form,
+    /// so an unmatched row reads as None per column instead of one Option around the record.
+    module LeftJoined =
+        type private ``c (base)`` = c
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type c =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              customerid: Option<int>
+              [<ProviderDbType("Integer")>]
+              personid: Option<int>
+              [<ProviderDbType("Integer")>]
+              storeid: Option<int>
+              [<ProviderDbType("Integer")>]
+              territoryid: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``c (base)``>
+
+        let c = leftTable<``c (base)``, c>
+
+        type private ``cc (base)`` = cc
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type cc =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              creditcardid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              cardtype: Option<string>
+              [<ProviderDbType("Varchar")>]
+              cardnumber: Option<string>
+              [<ProviderDbType("Smallint")>]
+              expmonth: Option<int16>
+              [<ProviderDbType("Smallint")>]
+              expyear: Option<int16>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``cc (base)``>
+
+        let cc = leftTable<``cc (base)``, cc>
+
+        type private ``cr (base)`` = cr
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type cr =
+            { [<ProviderDbType("Integer")>]
+              currencyrateid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              currencyratedate: Option<System.DateTime>
+              [<ProviderDbType("Char")>]
+              fromcurrencycode: Option<string>
+              [<ProviderDbType("Char")>]
+              tocurrencycode: Option<string>
+              [<ProviderDbType("Numeric")>]
+              averagerate: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              endofdayrate: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``cr (base)``>
+
+        let cr = leftTable<``cr (base)``, cr>
+
+        type private ``crc (base)`` = crc
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type crc =
+            { [<ProviderDbType("Varchar")>]
+              countryregioncode: Option<string>
+              [<ProviderDbType("Char")>]
+              currencycode: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``crc (base)``>
+
+        let crc = leftTable<``crc (base)``, crc>
+
+        type private ``cu (base)`` = cu
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type cu =
+            { [<ProviderDbType("Char")>]
+              id: Option<string>
+              [<ProviderDbType("Char")>]
+              currencycode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``cu (base)``>
+
+        let cu = leftTable<``cu (base)``, cu>
+
+        type private ``pcc (base)`` = pcc
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type pcc =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              creditcardid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``pcc (base)``>
+
+        let pcc = leftTable<``pcc (base)``, pcc>
+
+        type private ``s (base)`` = s
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type s =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Integer")>]
+              salespersonid: Option<int>
+              [<ProviderDbType("Xml")>]
+              demographics: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``s (base)``>
+
+        let s = leftTable<``s (base)``, s>
+
+        type private ``sci (base)`` = sci
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type sci =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              shoppingcartitemid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              shoppingcartid: Option<string>
+              [<ProviderDbType("Integer")>]
+              quantity: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              datecreated: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``sci (base)``>
+
+        let sci = leftTable<``sci (base)``, sci>
+
+        type private ``so (base)`` = so
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type so =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              specialofferid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              description: Option<string>
+              [<ProviderDbType("Numeric")>]
+              discountpct: Option<decimal>
+              [<ProviderDbType("Varchar")>]
+              ``type``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              category: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              startdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              enddate: Option<System.DateTime>
+              [<ProviderDbType("Integer")>]
+              minqty: Option<int>
+              [<ProviderDbType("Integer")>]
+              maxqty: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``so (base)``>
+
+        let so = leftTable<``so (base)``, so>
+
+        type private ``sod (base)`` = sod
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type sod =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              salesorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              salesorderdetailid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              carriertrackingnumber: Option<string>
+              [<ProviderDbType("Smallint")>]
+              orderqty: Option<int16>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Integer")>]
+              specialofferid: Option<int>
+              [<ProviderDbType("Numeric")>]
+              unitprice: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              unitpricediscount: Option<decimal>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``sod (base)``>
+
+        let sod = leftTable<``sod (base)``, sod>
+
+        type private ``soh (base)`` = soh
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type soh =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              salesorderid: Option<int>
+              [<ProviderDbType("Smallint")>]
+              revisionnumber: Option<int16>
+              [<ProviderDbType("Timestamp")>]
+              orderdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              duedate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              shipdate: Option<System.DateTime>
+              [<ProviderDbType("Smallint")>]
+              status: Option<int16>
+              [<ProviderDbType("Boolean")>]
+              onlineorderflag: Option<bool>
+              [<ProviderDbType("Varchar")>]
+              purchaseordernumber: Option<string>
+              [<ProviderDbType("Varchar")>]
+              accountnumber: Option<string>
+              [<ProviderDbType("Integer")>]
+              customerid: Option<int>
+              [<ProviderDbType("Integer")>]
+              salespersonid: Option<int>
+              [<ProviderDbType("Integer")>]
+              territoryid: Option<int>
+              [<ProviderDbType("Integer")>]
+              billtoaddressid: Option<int>
+              [<ProviderDbType("Integer")>]
+              shiptoaddressid: Option<int>
+              [<ProviderDbType("Integer")>]
+              shipmethodid: Option<int>
+              [<ProviderDbType("Integer")>]
+              creditcardid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              creditcardapprovalcode: Option<string>
+              [<ProviderDbType("Integer")>]
+              currencyrateid: Option<int>
+              [<ProviderDbType("Numeric")>]
+              subtotal: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              taxamt: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              freight: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              totaldue: Option<decimal>
+              [<ProviderDbType("Varchar")>]
+              comment: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``soh (base)``>
+
+        let soh = leftTable<``soh (base)``, soh>
+
+        type private ``sohsr (base)`` = sohsr
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type sohsr =
+            { [<ProviderDbType("Integer")>]
+              salesorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              salesreasonid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``sohsr (base)``>
+
+        let sohsr = leftTable<``sohsr (base)``, sohsr>
+
+        type private ``sop (base)`` = sop
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type sop =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              specialofferid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``sop (base)``>
+
+        let sop = leftTable<``sop (base)``, sop>
+
+        type private ``sp (base)`` = sp
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type sp =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              territoryid: Option<int>
+              [<ProviderDbType("Numeric")>]
+              salesquota: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              bonus: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              commissionpct: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              salesytd: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              saleslastyear: Option<decimal>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``sp (base)``>
+
+        let sp = leftTable<``sp (base)``, sp>
+
+        type private ``spqh (base)`` = spqh
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type spqh =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              quotadate: Option<System.DateTime>
+              [<ProviderDbType("Numeric")>]
+              salesquota: Option<decimal>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``spqh (base)``>
+
+        let spqh = leftTable<``spqh (base)``, spqh>
+
+        type private ``sr (base)`` = sr
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type sr =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              salesreasonid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Varchar")>]
+              reasontype: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``sr (base)``>
+
+        let sr = leftTable<``sr (base)``, sr>
+
+        type private ``st (base)`` = st
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type st =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              territoryid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Varchar")>]
+              countryregioncode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              group: Option<string>
+              [<ProviderDbType("Numeric")>]
+              salesytd: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              saleslastyear: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              costytd: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              costlastyear: Option<decimal>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``st (base)``>
+
+        let st = leftTable<``st (base)``, st>
+
+        type private ``sth (base)`` = sth
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type sth =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              territoryid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              startdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              enddate: Option<System.DateTime>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``sth (base)``>
+
+        let sth = leftTable<``sth (base)``, sth>
+
+        type private ``tr (base)`` = tr
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type tr =
+            { [<ProviderDbType("Integer")>]
+              id: Option<int>
+              [<ProviderDbType("Integer")>]
+              salestaxrateid: Option<int>
+              [<ProviderDbType("Integer")>]
+              stateprovinceid: Option<int>
+              [<ProviderDbType("Smallint")>]
+              taxtype: Option<int16>
+              [<ProviderDbType("Numeric")>]
+              taxrate: Option<decimal>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``tr (base)``>
+
+        let tr = leftTable<``tr (base)``, tr>
+
 
 module sales =
 
@@ -4877,6 +8030,2052 @@ module sales =
                   { WriteColumn.Name = "NumberEmployees"; Value = box this.NumberEmployees; ProviderDbType = Some "Integer" } ]
 
     let vstorewithdemographics = table<vstorewithdemographics>
+
+    /// Left-views for `leftJoin`: each table record with every column in its nullable form,
+    /// so an unmatched row reads as None per column instead of one Option around the record.
+    module LeftJoined =
+        type private ``countryregioncurrency (base)`` = countryregioncurrency
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type countryregioncurrency =
+            { [<ProviderDbType("Varchar")>]
+              countryregioncode: Option<string>
+              [<ProviderDbType("Char")>]
+              currencycode: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``countryregioncurrency (base)``>
+
+        let countryregioncurrency =
+            leftTable<``countryregioncurrency (base)``, countryregioncurrency>
+
+        type private ``creditcard (base)`` = creditcard
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type creditcard =
+            { [<ProviderDbType("Integer")>]
+              creditcardid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              cardtype: Option<string>
+              [<ProviderDbType("Varchar")>]
+              cardnumber: Option<string>
+              [<ProviderDbType("Smallint")>]
+              expmonth: Option<int16>
+              [<ProviderDbType("Smallint")>]
+              expyear: Option<int16>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``creditcard (base)``>
+
+        let creditcard = leftTable<``creditcard (base)``, creditcard>
+
+        type private ``currency (base)`` = currency
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type currency =
+            { [<ProviderDbType("Char")>]
+              currencycode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``currency (base)``>
+
+        let currency = leftTable<``currency (base)``, currency>
+
+        type private ``currencyrate (base)`` = currencyrate
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type currencyrate =
+            { [<ProviderDbType("Integer")>]
+              currencyrateid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              currencyratedate: Option<System.DateTime>
+              [<ProviderDbType("Char")>]
+              fromcurrencycode: Option<string>
+              [<ProviderDbType("Char")>]
+              tocurrencycode: Option<string>
+              [<ProviderDbType("Numeric")>]
+              averagerate: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              endofdayrate: Option<decimal>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``currencyrate (base)``>
+
+        let currencyrate = leftTable<``currencyrate (base)``, currencyrate>
+
+        type private ``customer (base)`` = customer
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type customer =
+            { [<ProviderDbType("Integer")>]
+              customerid: Option<int>
+              [<ProviderDbType("Integer")>]
+              personid: Option<int>
+              [<ProviderDbType("Integer")>]
+              storeid: Option<int>
+              [<ProviderDbType("Integer")>]
+              territoryid: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``customer (base)``>
+
+        let customer = leftTable<``customer (base)``, customer>
+
+        type private ``personcreditcard (base)`` = personcreditcard
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type personcreditcard =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              creditcardid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``personcreditcard (base)``>
+
+        let personcreditcard = leftTable<``personcreditcard (base)``, personcreditcard>
+
+        type private ``salesorderdetail (base)`` = salesorderdetail
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type salesorderdetail =
+            { [<ProviderDbType("Integer")>]
+              salesorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              salesorderdetailid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              carriertrackingnumber: Option<string>
+              [<ProviderDbType("Smallint")>]
+              orderqty: Option<int16>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Integer")>]
+              specialofferid: Option<int>
+              [<ProviderDbType("Numeric")>]
+              unitprice: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              unitpricediscount: Option<decimal>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``salesorderdetail (base)``>
+
+        let salesorderdetail = leftTable<``salesorderdetail (base)``, salesorderdetail>
+
+        type private ``salesorderheader (base)`` = salesorderheader
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type salesorderheader =
+            { [<ProviderDbType("Integer")>]
+              salesorderid: Option<int>
+              [<ProviderDbType("Smallint")>]
+              revisionnumber: Option<int16>
+              [<ProviderDbType("Timestamp")>]
+              orderdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              duedate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              shipdate: Option<System.DateTime>
+              [<ProviderDbType("Smallint")>]
+              status: Option<int16>
+              [<ProviderDbType("Boolean")>]
+              onlineorderflag: Option<bool>
+              [<ProviderDbType("Varchar")>]
+              purchaseordernumber: Option<string>
+              [<ProviderDbType("Varchar")>]
+              accountnumber: Option<string>
+              [<ProviderDbType("Integer")>]
+              customerid: Option<int>
+              [<ProviderDbType("Integer")>]
+              salespersonid: Option<int>
+              [<ProviderDbType("Integer")>]
+              territoryid: Option<int>
+              [<ProviderDbType("Integer")>]
+              billtoaddressid: Option<int>
+              [<ProviderDbType("Integer")>]
+              shiptoaddressid: Option<int>
+              [<ProviderDbType("Integer")>]
+              shipmethodid: Option<int>
+              [<ProviderDbType("Integer")>]
+              creditcardid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              creditcardapprovalcode: Option<string>
+              [<ProviderDbType("Integer")>]
+              currencyrateid: Option<int>
+              [<ProviderDbType("Numeric")>]
+              subtotal: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              taxamt: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              freight: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              totaldue: Option<decimal>
+              [<ProviderDbType("Varchar")>]
+              comment: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``salesorderheader (base)``>
+
+        let salesorderheader = leftTable<``salesorderheader (base)``, salesorderheader>
+
+        type private ``salesorderheadersalesreason (base)`` = salesorderheadersalesreason
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type salesorderheadersalesreason =
+            { [<ProviderDbType("Integer")>]
+              salesorderid: Option<int>
+              [<ProviderDbType("Integer")>]
+              salesreasonid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``salesorderheadersalesreason (base)``>
+
+        let salesorderheadersalesreason =
+            leftTable<``salesorderheadersalesreason (base)``, salesorderheadersalesreason>
+
+        type private ``salesperson (base)`` = salesperson
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type salesperson =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              territoryid: Option<int>
+              [<ProviderDbType("Numeric")>]
+              salesquota: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              bonus: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              commissionpct: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              salesytd: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              saleslastyear: Option<decimal>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``salesperson (base)``>
+
+        let salesperson = leftTable<``salesperson (base)``, salesperson>
+
+        type private ``salespersonquotahistory (base)`` = salespersonquotahistory
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type salespersonquotahistory =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              quotadate: Option<System.DateTime>
+              [<ProviderDbType("Numeric")>]
+              salesquota: Option<decimal>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``salespersonquotahistory (base)``>
+
+        let salespersonquotahistory =
+            leftTable<``salespersonquotahistory (base)``, salespersonquotahistory>
+
+        type private ``salesreason (base)`` = salesreason
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type salesreason =
+            { [<ProviderDbType("Integer")>]
+              salesreasonid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Varchar")>]
+              reasontype: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``salesreason (base)``>
+
+        let salesreason = leftTable<``salesreason (base)``, salesreason>
+
+        type private ``salestaxrate (base)`` = salestaxrate
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type salestaxrate =
+            { [<ProviderDbType("Integer")>]
+              salestaxrateid: Option<int>
+              [<ProviderDbType("Integer")>]
+              stateprovinceid: Option<int>
+              [<ProviderDbType("Smallint")>]
+              taxtype: Option<int16>
+              [<ProviderDbType("Numeric")>]
+              taxrate: Option<decimal>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``salestaxrate (base)``>
+
+        let salestaxrate = leftTable<``salestaxrate (base)``, salestaxrate>
+
+        type private ``salesterritory (base)`` = salesterritory
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type salesterritory =
+            { [<ProviderDbType("Integer")>]
+              territoryid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Varchar")>]
+              countryregioncode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              group: Option<string>
+              [<ProviderDbType("Numeric")>]
+              salesytd: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              saleslastyear: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              costytd: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              costlastyear: Option<decimal>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``salesterritory (base)``>
+
+        let salesterritory = leftTable<``salesterritory (base)``, salesterritory>
+
+        type private ``salesterritoryhistory (base)`` = salesterritoryhistory
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type salesterritoryhistory =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Integer")>]
+              territoryid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              startdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              enddate: Option<System.DateTime>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``salesterritoryhistory (base)``>
+
+        let salesterritoryhistory =
+            leftTable<``salesterritoryhistory (base)``, salesterritoryhistory>
+
+        type private ``shoppingcartitem (base)`` = shoppingcartitem
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type shoppingcartitem =
+            { [<ProviderDbType("Integer")>]
+              shoppingcartitemid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              shoppingcartid: Option<string>
+              [<ProviderDbType("Integer")>]
+              quantity: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Timestamp")>]
+              datecreated: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``shoppingcartitem (base)``>
+
+        let shoppingcartitem = leftTable<``shoppingcartitem (base)``, shoppingcartitem>
+
+        type private ``specialoffer (base)`` = specialoffer
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type specialoffer =
+            { [<ProviderDbType("Integer")>]
+              specialofferid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              description: Option<string>
+              [<ProviderDbType("Numeric")>]
+              discountpct: Option<decimal>
+              [<ProviderDbType("Varchar")>]
+              ``type``: Option<string>
+              [<ProviderDbType("Varchar")>]
+              category: Option<string>
+              [<ProviderDbType("Timestamp")>]
+              startdate: Option<System.DateTime>
+              [<ProviderDbType("Timestamp")>]
+              enddate: Option<System.DateTime>
+              [<ProviderDbType("Integer")>]
+              minqty: Option<int>
+              [<ProviderDbType("Integer")>]
+              maxqty: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``specialoffer (base)``>
+
+        let specialoffer = leftTable<``specialoffer (base)``, specialoffer>
+
+        type private ``specialofferproduct (base)`` = specialofferproduct
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type specialofferproduct =
+            { [<ProviderDbType("Integer")>]
+              specialofferid: Option<int>
+              [<ProviderDbType("Integer")>]
+              productid: Option<int>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``specialofferproduct (base)``>
+
+        let specialofferproduct =
+            leftTable<``specialofferproduct (base)``, specialofferproduct>
+
+        type private ``store (base)`` = store
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type store =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Integer")>]
+              salespersonid: Option<int>
+              [<ProviderDbType("Xml")>]
+              demographics: Option<string>
+              [<ProviderDbType("Uuid")>]
+              rowguid: Option<System.Guid>
+              [<ProviderDbType("Timestamp")>]
+              modifieddate: Option<System.DateTime> }
+
+            interface ILeftViewOf<``store (base)``>
+
+        let store = leftTable<``store (base)``, store>
+
+        type private ``vindividualcustomer (base)`` = vindividualcustomer
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vindividualcustomer =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              title: Option<string>
+              [<ProviderDbType("Varchar")>]
+              firstname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              middlename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              lastname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              suffix: Option<string>
+              [<ProviderDbType("Varchar")>]
+              phonenumber: Option<string>
+              [<ProviderDbType("Varchar")>]
+              phonenumbertype: Option<string>
+              [<ProviderDbType("Varchar")>]
+              emailaddress: Option<string>
+              [<ProviderDbType("Integer")>]
+              emailpromotion: Option<int>
+              [<ProviderDbType("Varchar")>]
+              addresstype: Option<string>
+              [<ProviderDbType("Varchar")>]
+              addressline1: Option<string>
+              [<ProviderDbType("Varchar")>]
+              addressline2: Option<string>
+              [<ProviderDbType("Varchar")>]
+              city: Option<string>
+              [<ProviderDbType("Varchar")>]
+              stateprovincename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              postalcode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              countryregionname: Option<string>
+              [<ProviderDbType("Xml")>]
+              demographics: Option<string> }
+
+            interface ILeftViewOf<``vindividualcustomer (base)``>
+
+        let vindividualcustomer =
+            leftTable<``vindividualcustomer (base)``, vindividualcustomer>
+
+        type private ``vpersondemographics (base)`` = vpersondemographics
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vpersondemographics =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Money")>]
+              totalpurchaseytd: Option<decimal>
+              [<ProviderDbType("Date")>]
+              datefirstpurchase: Option<System.DateOnly>
+              [<ProviderDbType("Date")>]
+              birthdate: Option<System.DateOnly>
+              [<ProviderDbType("Varchar")>]
+              maritalstatus: Option<string>
+              [<ProviderDbType("Varchar")>]
+              yearlyincome: Option<string>
+              [<ProviderDbType("Varchar")>]
+              gender: Option<string>
+              [<ProviderDbType("Integer")>]
+              totalchildren: Option<int>
+              [<ProviderDbType("Integer")>]
+              numberchildrenathome: Option<int>
+              [<ProviderDbType("Varchar")>]
+              education: Option<string>
+              [<ProviderDbType("Varchar")>]
+              occupation: Option<string>
+              [<ProviderDbType("Boolean")>]
+              homeownerflag: Option<bool>
+              [<ProviderDbType("Integer")>]
+              numbercarsowned: Option<int> }
+
+            interface ILeftViewOf<``vpersondemographics (base)``>
+
+        let vpersondemographics =
+            leftTable<``vpersondemographics (base)``, vpersondemographics>
+
+        type private ``vsalesperson (base)`` = vsalesperson
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vsalesperson =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              title: Option<string>
+              [<ProviderDbType("Varchar")>]
+              firstname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              middlename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              lastname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              suffix: Option<string>
+              [<ProviderDbType("Varchar")>]
+              jobtitle: Option<string>
+              [<ProviderDbType("Varchar")>]
+              phonenumber: Option<string>
+              [<ProviderDbType("Varchar")>]
+              phonenumbertype: Option<string>
+              [<ProviderDbType("Varchar")>]
+              emailaddress: Option<string>
+              [<ProviderDbType("Integer")>]
+              emailpromotion: Option<int>
+              [<ProviderDbType("Varchar")>]
+              addressline1: Option<string>
+              [<ProviderDbType("Varchar")>]
+              addressline2: Option<string>
+              [<ProviderDbType("Varchar")>]
+              city: Option<string>
+              [<ProviderDbType("Varchar")>]
+              stateprovincename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              postalcode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              countryregionname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              territoryname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              territorygroup: Option<string>
+              [<ProviderDbType("Numeric")>]
+              salesquota: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              salesytd: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              saleslastyear: Option<decimal> }
+
+            interface ILeftViewOf<``vsalesperson (base)``>
+
+        let vsalesperson = leftTable<``vsalesperson (base)``, vsalesperson>
+
+        type private ``vsalespersonsalesbyfiscalyears (base)`` = vsalespersonsalesbyfiscalyears
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vsalespersonsalesbyfiscalyears =
+            { [<ProviderDbType("Integer")>]
+              SalesPersonID: Option<int>
+              [<ProviderDbType("Text")>]
+              FullName: Option<string>
+              [<ProviderDbType("Text")>]
+              JobTitle: Option<string>
+              [<ProviderDbType("Text")>]
+              SalesTerritory: Option<string>
+              [<ProviderDbType("Numeric")>]
+              ``2012``: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              ``2013``: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              ``2014``: Option<decimal> }
+
+            interface ILeftViewOf<``vsalespersonsalesbyfiscalyears (base)``>
+
+        let vsalespersonsalesbyfiscalyears =
+            leftTable<``vsalespersonsalesbyfiscalyears (base)``, vsalespersonsalesbyfiscalyears>
+
+        type private ``vsalespersonsalesbyfiscalyearsdata (base)`` = vsalespersonsalesbyfiscalyearsdata
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vsalespersonsalesbyfiscalyearsdata =
+            { [<ProviderDbType("Integer")>]
+              salespersonid: Option<int>
+              [<ProviderDbType("Text")>]
+              fullname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              jobtitle: Option<string>
+              [<ProviderDbType("Varchar")>]
+              salesterritory: Option<string>
+              [<ProviderDbType("Numeric")>]
+              salestotal: Option<decimal>
+              [<ProviderDbType("Numeric")>]
+              fiscalyear: Option<decimal> }
+
+            interface ILeftViewOf<``vsalespersonsalesbyfiscalyearsdata (base)``>
+
+        let vsalespersonsalesbyfiscalyearsdata =
+            leftTable<``vsalespersonsalesbyfiscalyearsdata (base)``, vsalespersonsalesbyfiscalyearsdata>
+
+        type private ``vstorewithaddresses (base)`` = vstorewithaddresses
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vstorewithaddresses =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Varchar")>]
+              addresstype: Option<string>
+              [<ProviderDbType("Varchar")>]
+              addressline1: Option<string>
+              [<ProviderDbType("Varchar")>]
+              addressline2: Option<string>
+              [<ProviderDbType("Varchar")>]
+              city: Option<string>
+              [<ProviderDbType("Varchar")>]
+              stateprovincename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              postalcode: Option<string>
+              [<ProviderDbType("Varchar")>]
+              countryregionname: Option<string> }
+
+            interface ILeftViewOf<``vstorewithaddresses (base)``>
+
+        let vstorewithaddresses =
+            leftTable<``vstorewithaddresses (base)``, vstorewithaddresses>
+
+        type private ``vstorewithcontacts (base)`` = vstorewithcontacts
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vstorewithcontacts =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Varchar")>]
+              contacttype: Option<string>
+              [<ProviderDbType("Varchar")>]
+              title: Option<string>
+              [<ProviderDbType("Varchar")>]
+              firstname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              middlename: Option<string>
+              [<ProviderDbType("Varchar")>]
+              lastname: Option<string>
+              [<ProviderDbType("Varchar")>]
+              suffix: Option<string>
+              [<ProviderDbType("Varchar")>]
+              phonenumber: Option<string>
+              [<ProviderDbType("Varchar")>]
+              phonenumbertype: Option<string>
+              [<ProviderDbType("Varchar")>]
+              emailaddress: Option<string>
+              [<ProviderDbType("Integer")>]
+              emailpromotion: Option<int> }
+
+            interface ILeftViewOf<``vstorewithcontacts (base)``>
+
+        let vstorewithcontacts =
+            leftTable<``vstorewithcontacts (base)``, vstorewithcontacts>
+
+        type private ``vstorewithdemographics (base)`` = vstorewithdemographics
+
+        [<CLIMutable; NoEquality; NoComparison>]
+        type vstorewithdemographics =
+            { [<ProviderDbType("Integer")>]
+              businessentityid: Option<int>
+              [<ProviderDbType("Varchar")>]
+              name: Option<string>
+              [<ProviderDbType("Money")>]
+              AnnualSales: Option<decimal>
+              [<ProviderDbType("Money")>]
+              AnnualRevenue: Option<decimal>
+              [<ProviderDbType("Varchar")>]
+              BankName: Option<string>
+              [<ProviderDbType("Varchar")>]
+              BusinessType: Option<string>
+              [<ProviderDbType("Integer")>]
+              YearOpened: Option<int>
+              [<ProviderDbType("Varchar")>]
+              Specialty: Option<string>
+              [<ProviderDbType("Integer")>]
+              SquareFeet: Option<int>
+              [<ProviderDbType("Varchar")>]
+              Brands: Option<string>
+              [<ProviderDbType("Varchar")>]
+              Internet: Option<string>
+              [<ProviderDbType("Integer")>]
+              NumberEmployees: Option<int> }
+
+            interface ILeftViewOf<``vstorewithdemographics (base)``>
+
+        let vstorewithdemographics =
+            leftTable<``vstorewithdemographics (base)``, vstorewithdemographics>
+
+
+[<AutoOpen>]
+module LeftViewExtensions =
+    type ext.LeftJoined.arrays with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : ext.arrays option =
+            match this.id with
+            | Some value ->
+                let record: ext.arrays =
+                    { id = value; text_array = this.text_array.Value; integer_array = this.integer_array.Value }
+
+                Some record
+            | None -> None
+
+    type ext.LeftJoined.jsonsupport with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : ext.jsonsupport option =
+            match this.id with
+            | Some value ->
+                let record: ext.jsonsupport =
+                    { id = value; json_field = this.json_field.Value; jsonb_field = this.jsonb_field.Value }
+
+                Some record
+            | None -> None
+
+    type ext.LeftJoined.person with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : ext.person option =
+            match this.name with
+            | Some value ->
+                let record: ext.person = { name = value; currentmood = this.currentmood.Value }
+                Some record
+            | None -> None
+
+    type humanresources.LeftJoined.department with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : humanresources.department option =
+            match this.departmentid with
+            | Some value ->
+                let record: humanresources.department =
+                    { departmentid = value; name = this.name.Value; groupname = this.groupname.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type humanresources.LeftJoined.employee with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : humanresources.employee option =
+            match this.businessentityid with
+            | Some value ->
+                let record: humanresources.employee =
+                    { businessentityid = value
+                      nationalidnumber = this.nationalidnumber.Value
+                      loginid = this.loginid.Value
+                      jobtitle = this.jobtitle.Value
+                      birthdate = this.birthdate.Value
+                      maritalstatus = this.maritalstatus.Value
+                      gender = this.gender.Value
+                      hiredate = this.hiredate.Value
+                      salariedflag = this.salariedflag.Value
+                      vacationhours = this.vacationhours.Value
+                      sickleavehours = this.sickleavehours.Value
+                      currentflag = this.currentflag.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value
+                      organizationnode = this.organizationnode }
+
+                Some record
+            | None -> None
+
+    type humanresources.LeftJoined.employeedepartmenthistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : humanresources.employeedepartmenthistory option =
+            match this.businessentityid with
+            | Some value ->
+                let record: humanresources.employeedepartmenthistory =
+                    { businessentityid = value
+                      departmentid = this.departmentid.Value
+                      shiftid = this.shiftid.Value
+                      startdate = this.startdate.Value
+                      enddate = this.enddate
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type humanresources.LeftJoined.employeepayhistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : humanresources.employeepayhistory option =
+            match this.businessentityid with
+            | Some value ->
+                let record: humanresources.employeepayhistory =
+                    { businessentityid = value; ratechangedate = this.ratechangedate.Value; rate = this.rate.Value; payfrequency = this.payfrequency.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type humanresources.LeftJoined.jobcandidate with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : humanresources.jobcandidate option =
+            match this.jobcandidateid with
+            | Some value ->
+                let record: humanresources.jobcandidate =
+                    { jobcandidateid = value; businessentityid = this.businessentityid; resume = this.resume; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type humanresources.LeftJoined.shift with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : humanresources.shift option =
+            match this.shiftid with
+            | Some value ->
+                let record: humanresources.shift =
+                    { shiftid = value; name = this.name.Value; starttime = this.starttime.Value; endtime = this.endtime.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type network_sample.LeftJoined.network_addresses with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : network_sample.network_addresses option =
+            match this.id with
+            | Some value ->
+                let record: network_sample.network_addresses =
+                    { id = value; net_cidr = this.net_cidr.Value; net_inet = this.net_inet.Value; net_macaddr = this.net_macaddr.Value; net_macaddr8 = this.net_macaddr8.Value }
+
+                Some record
+            | None -> None
+
+    type pe.LeftJoined.p with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : pe.p option =
+            match this.namestyle with
+            | Some value ->
+                let record: pe.p =
+                    { id = this.id
+                      businessentityid = this.businessentityid
+                      persontype = this.persontype
+                      namestyle = value
+                      title = this.title
+                      firstname = this.firstname
+                      middlename = this.middlename
+                      lastname = this.lastname
+                      suffix = this.suffix
+                      emailpromotion = this.emailpromotion
+                      additionalcontactinfo = this.additionalcontactinfo
+                      demographics = this.demographics
+                      rowguid = this.rowguid
+                      modifieddate = this.modifieddate }
+
+                Some record
+            | None -> None
+
+    type pe.LeftJoined.sp with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : pe.sp option =
+            match this.isonlystateprovinceflag with
+            | Some value ->
+                let record: pe.sp =
+                    { id = this.id
+                      stateprovinceid = this.stateprovinceid
+                      stateprovincecode = this.stateprovincecode
+                      countryregioncode = this.countryregioncode
+                      isonlystateprovinceflag = value
+                      name = this.name
+                      territoryid = this.territoryid
+                      rowguid = this.rowguid
+                      modifieddate = this.modifieddate }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.address with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.address option =
+            match this.addressid with
+            | Some value ->
+                let record: person.address =
+                    { addressid = value
+                      addressline1 = this.addressline1.Value
+                      addressline2 = this.addressline2
+                      city = this.city.Value
+                      stateprovinceid = this.stateprovinceid.Value
+                      postalcode = this.postalcode.Value
+                      spatiallocation = this.spatiallocation
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.addresstype with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.addresstype option =
+            match this.addresstypeid with
+            | Some value ->
+                let record: person.addresstype =
+                    { addresstypeid = value; name = this.name.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.businessentity with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.businessentity option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.businessentity =
+                    { businessentityid = value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.businessentityaddress with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.businessentityaddress option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.businessentityaddress =
+                    { businessentityid = value; addressid = this.addressid.Value; addresstypeid = this.addresstypeid.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.businessentitycontact with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.businessentitycontact option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.businessentitycontact =
+                    { businessentityid = value; personid = this.personid.Value; contacttypeid = this.contacttypeid.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.contacttype with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.contacttype option =
+            match this.contacttypeid with
+            | Some value ->
+                let record: person.contacttype =
+                    { contacttypeid = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.countryregion with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.countryregion option =
+            match this.countryregioncode with
+            | Some value ->
+                let record: person.countryregion =
+                    { countryregioncode = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.emailaddress with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.emailaddress option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.emailaddress =
+                    { businessentityid = value; emailaddressid = this.emailaddressid.Value; emailaddress = this.emailaddress; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.password with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.password option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.password =
+                    { businessentityid = value; passwordhash = this.passwordhash.Value; passwordsalt = this.passwordsalt.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.person with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.person option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.person =
+                    { businessentityid = value
+                      persontype = this.persontype.Value
+                      namestyle = this.namestyle.Value
+                      title = this.title
+                      firstname = this.firstname.Value
+                      middlename = this.middlename
+                      lastname = this.lastname.Value
+                      suffix = this.suffix
+                      emailpromotion = this.emailpromotion.Value
+                      additionalcontactinfo = this.additionalcontactinfo
+                      demographics = this.demographics
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.personphone with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.personphone option =
+            match this.businessentityid with
+            | Some value ->
+                let record: person.personphone =
+                    { businessentityid = value; phonenumber = this.phonenumber.Value; phonenumbertypeid = this.phonenumbertypeid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.phonenumbertype with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.phonenumbertype option =
+            match this.phonenumbertypeid with
+            | Some value ->
+                let record: person.phonenumbertype =
+                    { phonenumbertypeid = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.stateprovince with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.stateprovince option =
+            match this.stateprovinceid with
+            | Some value ->
+                let record: person.stateprovince =
+                    { stateprovinceid = value
+                      stateprovincecode = this.stateprovincecode.Value
+                      countryregioncode = this.countryregioncode.Value
+                      isonlystateprovinceflag = this.isonlystateprovinceflag.Value
+                      name = this.name.Value
+                      territoryid = this.territoryid.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type pr.LeftJoined.d with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : pr.d option =
+            match this.folderflag with
+            | Some value ->
+                let record: pr.d =
+                    { title = this.title
+                      owner = this.owner
+                      folderflag = value
+                      filename = this.filename
+                      fileextension = this.fileextension
+                      revision = this.revision
+                      changenumber = this.changenumber
+                      status = this.status
+                      documentsummary = this.documentsummary
+                      document = this.document
+                      rowguid = this.rowguid
+                      modifieddate = this.modifieddate
+                      documentnode = this.documentnode }
+
+                Some record
+            | None -> None
+
+    type pr.LeftJoined.p with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : pr.p option =
+            match this.makeflag with
+            | Some value ->
+                let record: pr.p =
+                    { id = this.id
+                      productid = this.productid
+                      name = this.name
+                      productnumber = this.productnumber
+                      makeflag = value
+                      finishedgoodsflag = this.finishedgoodsflag.Value
+                      color = this.color
+                      safetystocklevel = this.safetystocklevel
+                      reorderpoint = this.reorderpoint
+                      standardcost = this.standardcost
+                      listprice = this.listprice
+                      size = this.size
+                      sizeunitmeasurecode = this.sizeunitmeasurecode
+                      weightunitmeasurecode = this.weightunitmeasurecode
+                      weight = this.weight
+                      daystomanufacture = this.daystomanufacture
+                      productline = this.productline
+                      ``class`` = this.``class``
+                      style = this.style
+                      productsubcategoryid = this.productsubcategoryid
+                      productmodelid = this.productmodelid
+                      sellstartdate = this.sellstartdate
+                      sellenddate = this.sellenddate
+                      discontinueddate = this.discontinueddate
+                      rowguid = this.rowguid
+                      modifieddate = this.modifieddate }
+
+                Some record
+            | None -> None
+
+    type pr.LeftJoined.ppp with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : pr.ppp option =
+            match this.primary with
+            | Some value ->
+                let record: pr.ppp =
+                    { productid = this.productid; productphotoid = this.productphotoid; primary = value; modifieddate = this.modifieddate }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.billofmaterials with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.billofmaterials option =
+            match this.billofmaterialsid with
+            | Some value ->
+                let record: production.billofmaterials =
+                    { billofmaterialsid = value
+                      productassemblyid = this.productassemblyid
+                      componentid = this.componentid.Value
+                      startdate = this.startdate.Value
+                      enddate = this.enddate
+                      unitmeasurecode = this.unitmeasurecode.Value
+                      bomlevel = this.bomlevel.Value
+                      perassemblyqty = this.perassemblyqty.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.culture with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.culture option =
+            match this.cultureid with
+            | Some value ->
+                let record: production.culture =
+                    { cultureid = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.document with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.document option =
+            match this.documentnode with
+            | Some value ->
+                let record: production.document =
+                    { title = this.title.Value
+                      owner = this.owner.Value
+                      folderflag = this.folderflag.Value
+                      filename = this.filename.Value
+                      fileextension = this.fileextension
+                      revision = this.revision.Value
+                      changenumber = this.changenumber.Value
+                      status = this.status.Value
+                      documentsummary = this.documentsummary
+                      document = this.document
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value
+                      documentnode = value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.illustration with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.illustration option =
+            match this.illustrationid with
+            | Some value ->
+                let record: production.illustration =
+                    { illustrationid = value; diagram = this.diagram; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.location with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.location option =
+            match this.locationid with
+            | Some value ->
+                let record: production.location =
+                    { locationid = value; name = this.name.Value; costrate = this.costrate.Value; availability = this.availability.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.product with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.product option =
+            match this.productid with
+            | Some value ->
+                let record: production.product =
+                    { productid = value
+                      name = this.name.Value
+                      productnumber = this.productnumber.Value
+                      makeflag = this.makeflag.Value
+                      finishedgoodsflag = this.finishedgoodsflag.Value
+                      color = this.color
+                      safetystocklevel = this.safetystocklevel.Value
+                      reorderpoint = this.reorderpoint.Value
+                      standardcost = this.standardcost.Value
+                      listprice = this.listprice.Value
+                      size = this.size
+                      sizeunitmeasurecode = this.sizeunitmeasurecode
+                      weightunitmeasurecode = this.weightunitmeasurecode
+                      weight = this.weight
+                      daystomanufacture = this.daystomanufacture.Value
+                      productline = this.productline
+                      ``class`` = this.``class``
+                      style = this.style
+                      productsubcategoryid = this.productsubcategoryid
+                      productmodelid = this.productmodelid
+                      sellstartdate = this.sellstartdate.Value
+                      sellenddate = this.sellenddate
+                      discontinueddate = this.discontinueddate
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productcategory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productcategory option =
+            match this.productcategoryid with
+            | Some value ->
+                let record: production.productcategory =
+                    { productcategoryid = value; name = this.name.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productcosthistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productcosthistory option =
+            match this.productid with
+            | Some value ->
+                let record: production.productcosthistory =
+                    { productid = value; startdate = this.startdate.Value; enddate = this.enddate; standardcost = this.standardcost.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productdescription with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productdescription option =
+            match this.productdescriptionid with
+            | Some value ->
+                let record: production.productdescription =
+                    { productdescriptionid = value; description = this.description.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productdocument with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productdocument option =
+            match this.productid with
+            | Some value ->
+                let record: production.productdocument =
+                    { productid = value; modifieddate = this.modifieddate.Value; documentnode = this.documentnode.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productinventory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productinventory option =
+            match this.productid with
+            | Some value ->
+                let record: production.productinventory =
+                    { productid = value
+                      locationid = this.locationid.Value
+                      shelf = this.shelf.Value
+                      bin = this.bin.Value
+                      quantity = this.quantity.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productlistpricehistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productlistpricehistory option =
+            match this.productid with
+            | Some value ->
+                let record: production.productlistpricehistory =
+                    { productid = value; startdate = this.startdate.Value; enddate = this.enddate; listprice = this.listprice.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productmodel with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productmodel option =
+            match this.productmodelid with
+            | Some value ->
+                let record: production.productmodel =
+                    { productmodelid = value
+                      name = this.name.Value
+                      catalogdescription = this.catalogdescription
+                      instructions = this.instructions
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productmodelillustration with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productmodelillustration option =
+            match this.productmodelid with
+            | Some value ->
+                let record: production.productmodelillustration =
+                    { productmodelid = value; illustrationid = this.illustrationid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productmodelproductdescriptionculture with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productmodelproductdescriptionculture option =
+            match this.productmodelid with
+            | Some value ->
+                let record: production.productmodelproductdescriptionculture =
+                    { productmodelid = value; productdescriptionid = this.productdescriptionid.Value; cultureid = this.cultureid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productphoto with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productphoto option =
+            match this.productphotoid with
+            | Some value ->
+                let record: production.productphoto =
+                    { productphotoid = value
+                      thumbnailphoto = this.thumbnailphoto
+                      thumbnailphotofilename = this.thumbnailphotofilename
+                      largephoto = this.largephoto
+                      largephotofilename = this.largephotofilename
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productproductphoto with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productproductphoto option =
+            match this.productid with
+            | Some value ->
+                let record: production.productproductphoto =
+                    { productid = value; productphotoid = this.productphotoid.Value; primary = this.primary.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productreview with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productreview option =
+            match this.productreviewid with
+            | Some value ->
+                let record: production.productreview =
+                    { productreviewid = value
+                      productid = this.productid.Value
+                      reviewername = this.reviewername.Value
+                      reviewdate = this.reviewdate.Value
+                      emailaddress = this.emailaddress.Value
+                      rating = this.rating.Value
+                      comments = this.comments
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.productsubcategory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.productsubcategory option =
+            match this.productsubcategoryid with
+            | Some value ->
+                let record: production.productsubcategory =
+                    { productsubcategoryid = value; productcategoryid = this.productcategoryid.Value; name = this.name.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.scrapreason with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.scrapreason option =
+            match this.scrapreasonid with
+            | Some value ->
+                let record: production.scrapreason =
+                    { scrapreasonid = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.transactionhistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.transactionhistory option =
+            match this.transactionid with
+            | Some value ->
+                let record: production.transactionhistory =
+                    { transactionid = value
+                      productid = this.productid.Value
+                      referenceorderid = this.referenceorderid.Value
+                      referenceorderlineid = this.referenceorderlineid.Value
+                      transactiondate = this.transactiondate.Value
+                      transactiontype = this.transactiontype.Value
+                      quantity = this.quantity.Value
+                      actualcost = this.actualcost.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.transactionhistoryarchive with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.transactionhistoryarchive option =
+            match this.transactionid with
+            | Some value ->
+                let record: production.transactionhistoryarchive =
+                    { transactionid = value
+                      productid = this.productid.Value
+                      referenceorderid = this.referenceorderid.Value
+                      referenceorderlineid = this.referenceorderlineid.Value
+                      transactiondate = this.transactiondate.Value
+                      transactiontype = this.transactiontype.Value
+                      quantity = this.quantity.Value
+                      actualcost = this.actualcost.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.unitmeasure with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.unitmeasure option =
+            match this.unitmeasurecode with
+            | Some value ->
+                let record: production.unitmeasure =
+                    { unitmeasurecode = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.workorder with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.workorder option =
+            match this.workorderid with
+            | Some value ->
+                let record: production.workorder =
+                    { workorderid = value
+                      productid = this.productid.Value
+                      orderqty = this.orderqty.Value
+                      scrappedqty = this.scrappedqty.Value
+                      startdate = this.startdate.Value
+                      enddate = this.enddate
+                      duedate = this.duedate.Value
+                      scrapreasonid = this.scrapreasonid
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type production.LeftJoined.workorderrouting with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : production.workorderrouting option =
+            match this.workorderid with
+            | Some value ->
+                let record: production.workorderrouting =
+                    { workorderid = value
+                      productid = this.productid.Value
+                      operationsequence = this.operationsequence.Value
+                      locationid = this.locationid.Value
+                      scheduledstartdate = this.scheduledstartdate.Value
+                      scheduledenddate = this.scheduledenddate.Value
+                      actualstartdate = this.actualstartdate
+                      actualenddate = this.actualenddate
+                      actualresourcehrs = this.actualresourcehrs
+                      plannedcost = this.plannedcost.Value
+                      actualcost = this.actualcost
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type pu.LeftJoined.v with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : pu.v option =
+            match this.preferredvendorstatus with
+            | Some value ->
+                let record: pu.v =
+                    { id = this.id
+                      businessentityid = this.businessentityid
+                      accountnumber = this.accountnumber
+                      name = this.name
+                      creditrating = this.creditrating
+                      preferredvendorstatus = value
+                      activeflag = this.activeflag.Value
+                      purchasingwebserviceurl = this.purchasingwebserviceurl
+                      modifieddate = this.modifieddate }
+
+                Some record
+            | None -> None
+
+    type purchasing.LeftJoined.productvendor with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : purchasing.productvendor option =
+            match this.productid with
+            | Some value ->
+                let record: purchasing.productvendor =
+                    { productid = value
+                      businessentityid = this.businessentityid.Value
+                      averageleadtime = this.averageleadtime.Value
+                      standardprice = this.standardprice.Value
+                      lastreceiptcost = this.lastreceiptcost
+                      lastreceiptdate = this.lastreceiptdate
+                      minorderqty = this.minorderqty.Value
+                      maxorderqty = this.maxorderqty.Value
+                      onorderqty = this.onorderqty
+                      unitmeasurecode = this.unitmeasurecode.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type purchasing.LeftJoined.purchaseorderdetail with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : purchasing.purchaseorderdetail option =
+            match this.purchaseorderid with
+            | Some value ->
+                let record: purchasing.purchaseorderdetail =
+                    { purchaseorderid = value
+                      purchaseorderdetailid = this.purchaseorderdetailid.Value
+                      duedate = this.duedate.Value
+                      orderqty = this.orderqty.Value
+                      productid = this.productid.Value
+                      unitprice = this.unitprice.Value
+                      receivedqty = this.receivedqty.Value
+                      rejectedqty = this.rejectedqty.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type purchasing.LeftJoined.purchaseorderheader with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : purchasing.purchaseorderheader option =
+            match this.purchaseorderid with
+            | Some value ->
+                let record: purchasing.purchaseorderheader =
+                    { purchaseorderid = value
+                      revisionnumber = this.revisionnumber.Value
+                      status = this.status.Value
+                      employeeid = this.employeeid.Value
+                      vendorid = this.vendorid.Value
+                      shipmethodid = this.shipmethodid.Value
+                      orderdate = this.orderdate.Value
+                      shipdate = this.shipdate
+                      subtotal = this.subtotal.Value
+                      taxamt = this.taxamt.Value
+                      freight = this.freight.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type purchasing.LeftJoined.shipmethod with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : purchasing.shipmethod option =
+            match this.shipmethodid with
+            | Some value ->
+                let record: purchasing.shipmethod =
+                    { shipmethodid = value
+                      name = this.name.Value
+                      shipbase = this.shipbase.Value
+                      shiprate = this.shiprate.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type purchasing.LeftJoined.vendor with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : purchasing.vendor option =
+            match this.businessentityid with
+            | Some value ->
+                let record: purchasing.vendor =
+                    { businessentityid = value
+                      accountnumber = this.accountnumber.Value
+                      name = this.name.Value
+                      creditrating = this.creditrating.Value
+                      preferredvendorstatus = this.preferredvendorstatus.Value
+                      activeflag = this.activeflag.Value
+                      purchasingwebserviceurl = this.purchasingwebserviceurl
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sa.LeftJoined.soh with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sa.soh option =
+            match this.onlineorderflag with
+            | Some value ->
+                let record: sa.soh =
+                    { id = this.id
+                      salesorderid = this.salesorderid
+                      revisionnumber = this.revisionnumber
+                      orderdate = this.orderdate
+                      duedate = this.duedate
+                      shipdate = this.shipdate
+                      status = this.status
+                      onlineorderflag = value
+                      purchaseordernumber = this.purchaseordernumber
+                      accountnumber = this.accountnumber
+                      customerid = this.customerid
+                      salespersonid = this.salespersonid
+                      territoryid = this.territoryid
+                      billtoaddressid = this.billtoaddressid
+                      shiptoaddressid = this.shiptoaddressid
+                      shipmethodid = this.shipmethodid
+                      creditcardid = this.creditcardid
+                      creditcardapprovalcode = this.creditcardapprovalcode
+                      currencyrateid = this.currencyrateid
+                      subtotal = this.subtotal
+                      taxamt = this.taxamt
+                      freight = this.freight
+                      totaldue = this.totaldue
+                      comment = this.comment
+                      rowguid = this.rowguid
+                      modifieddate = this.modifieddate }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.countryregioncurrency with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.countryregioncurrency option =
+            match this.countryregioncode with
+            | Some value ->
+                let record: sales.countryregioncurrency =
+                    { countryregioncode = value; currencycode = this.currencycode.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.creditcard with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.creditcard option =
+            match this.creditcardid with
+            | Some value ->
+                let record: sales.creditcard =
+                    { creditcardid = value
+                      cardtype = this.cardtype.Value
+                      cardnumber = this.cardnumber.Value
+                      expmonth = this.expmonth.Value
+                      expyear = this.expyear.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.currency with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.currency option =
+            match this.currencycode with
+            | Some value ->
+                let record: sales.currency =
+                    { currencycode = value; name = this.name.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.currencyrate with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.currencyrate option =
+            match this.currencyrateid with
+            | Some value ->
+                let record: sales.currencyrate =
+                    { currencyrateid = value
+                      currencyratedate = this.currencyratedate.Value
+                      fromcurrencycode = this.fromcurrencycode.Value
+                      tocurrencycode = this.tocurrencycode.Value
+                      averagerate = this.averagerate.Value
+                      endofdayrate = this.endofdayrate.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.customer with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.customer option =
+            match this.customerid with
+            | Some value ->
+                let record: sales.customer =
+                    { customerid = value; personid = this.personid; storeid = this.storeid; territoryid = this.territoryid; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.personcreditcard with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.personcreditcard option =
+            match this.businessentityid with
+            | Some value ->
+                let record: sales.personcreditcard =
+                    { businessentityid = value; creditcardid = this.creditcardid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesorderdetail with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesorderdetail option =
+            match this.salesorderid with
+            | Some value ->
+                let record: sales.salesorderdetail =
+                    { salesorderid = value
+                      salesorderdetailid = this.salesorderdetailid.Value
+                      carriertrackingnumber = this.carriertrackingnumber
+                      orderqty = this.orderqty.Value
+                      productid = this.productid.Value
+                      specialofferid = this.specialofferid.Value
+                      unitprice = this.unitprice.Value
+                      unitpricediscount = this.unitpricediscount.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesorderheader with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesorderheader option =
+            match this.salesorderid with
+            | Some value ->
+                let record: sales.salesorderheader =
+                    { salesorderid = value
+                      revisionnumber = this.revisionnumber.Value
+                      orderdate = this.orderdate.Value
+                      duedate = this.duedate.Value
+                      shipdate = this.shipdate
+                      status = this.status.Value
+                      onlineorderflag = this.onlineorderflag.Value
+                      purchaseordernumber = this.purchaseordernumber
+                      accountnumber = this.accountnumber
+                      customerid = this.customerid.Value
+                      salespersonid = this.salespersonid
+                      territoryid = this.territoryid
+                      billtoaddressid = this.billtoaddressid.Value
+                      shiptoaddressid = this.shiptoaddressid.Value
+                      shipmethodid = this.shipmethodid.Value
+                      creditcardid = this.creditcardid
+                      creditcardapprovalcode = this.creditcardapprovalcode
+                      currencyrateid = this.currencyrateid
+                      subtotal = this.subtotal.Value
+                      taxamt = this.taxamt.Value
+                      freight = this.freight.Value
+                      totaldue = this.totaldue
+                      comment = this.comment
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesorderheadersalesreason with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesorderheadersalesreason option =
+            match this.salesorderid with
+            | Some value ->
+                let record: sales.salesorderheadersalesreason =
+                    { salesorderid = value; salesreasonid = this.salesreasonid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesperson with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesperson option =
+            match this.businessentityid with
+            | Some value ->
+                let record: sales.salesperson =
+                    { businessentityid = value
+                      territoryid = this.territoryid
+                      salesquota = this.salesquota
+                      bonus = this.bonus.Value
+                      commissionpct = this.commissionpct.Value
+                      salesytd = this.salesytd.Value
+                      saleslastyear = this.saleslastyear.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salespersonquotahistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salespersonquotahistory option =
+            match this.businessentityid with
+            | Some value ->
+                let record: sales.salespersonquotahistory =
+                    { businessentityid = value; quotadate = this.quotadate.Value; salesquota = this.salesquota.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesreason with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesreason option =
+            match this.salesreasonid with
+            | Some value ->
+                let record: sales.salesreason =
+                    { salesreasonid = value; name = this.name.Value; reasontype = this.reasontype.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salestaxrate with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salestaxrate option =
+            match this.salestaxrateid with
+            | Some value ->
+                let record: sales.salestaxrate =
+                    { salestaxrateid = value
+                      stateprovinceid = this.stateprovinceid.Value
+                      taxtype = this.taxtype.Value
+                      taxrate = this.taxrate.Value
+                      name = this.name.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesterritory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesterritory option =
+            match this.territoryid with
+            | Some value ->
+                let record: sales.salesterritory =
+                    { territoryid = value
+                      name = this.name.Value
+                      countryregioncode = this.countryregioncode.Value
+                      group = this.group.Value
+                      salesytd = this.salesytd.Value
+                      saleslastyear = this.saleslastyear.Value
+                      costytd = this.costytd.Value
+                      costlastyear = this.costlastyear.Value
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.salesterritoryhistory with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.salesterritoryhistory option =
+            match this.businessentityid with
+            | Some value ->
+                let record: sales.salesterritoryhistory =
+                    { businessentityid = value
+                      territoryid = this.territoryid.Value
+                      startdate = this.startdate.Value
+                      enddate = this.enddate
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.shoppingcartitem with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.shoppingcartitem option =
+            match this.shoppingcartitemid with
+            | Some value ->
+                let record: sales.shoppingcartitem =
+                    { shoppingcartitemid = value
+                      shoppingcartid = this.shoppingcartid.Value
+                      quantity = this.quantity.Value
+                      productid = this.productid.Value
+                      datecreated = this.datecreated.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.specialoffer with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.specialoffer option =
+            match this.specialofferid with
+            | Some value ->
+                let record: sales.specialoffer =
+                    { specialofferid = value
+                      description = this.description.Value
+                      discountpct = this.discountpct.Value
+                      ``type`` = this.``type``.Value
+                      category = this.category.Value
+                      startdate = this.startdate.Value
+                      enddate = this.enddate.Value
+                      minqty = this.minqty.Value
+                      maxqty = this.maxqty
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.specialofferproduct with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.specialofferproduct option =
+            match this.specialofferid with
+            | Some value ->
+                let record: sales.specialofferproduct =
+                    { specialofferid = value; productid = this.productid.Value; rowguid = this.rowguid.Value; modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type sales.LeftJoined.store with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : sales.store option =
+            match this.businessentityid with
+            | Some value ->
+                let record: sales.store =
+                    { businessentityid = value
+                      name = this.name.Value
+                      salespersonid = this.salespersonid
+                      demographics = this.demographics
+                      rowguid = this.rowguid.Value
+                      modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
 
 
 [<RequireQualifiedAccess>]

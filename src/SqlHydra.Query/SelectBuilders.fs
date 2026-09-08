@@ -422,6 +422,55 @@ type SelectBuilder<'Selected, 'Mapped> () =
         let joinClause = { Kind = LeftJoin; Table = innerTableNameAsAlias; Subquery = None; Condition = joinCondition }
         QuerySource<'JoinResult, SelectQueryIR>({ ir with Joins = ir.Joins @ [joinClause] }, mergedTables)
 
+    /// LEFT JOIN a generated left-view (`Schema.LeftJoined.tbl`) on one or more columns.
+    /// The ON clause binds the plain 'Table record (no `.Value`); downstream, the joined row
+    /// is the 'View record, whose columns are each nullable.
+    [<CustomOperation("leftJoin", MaintainsVariableSpace = true, IsLikeJoin = true, JoinConditionWord = "on")>]
+    member this.LeftJoin (outerSource: QuerySource<'Outer>,
+                          innerSource: LeftViewQuerySource<'Table, 'View>,
+                          outerKeySelector: Expression<Func<'Outer,'Key>>,
+                          innerKeySelector: Expression<Func<'Table,'Key>>,
+                          resultSelector: Expression<Func<'Outer,'View,'JoinResult>> ) =
+
+        let outerProperties = LinqExpressionVisitors.visitJoin<'Outer, 'Key> outerKeySelector
+        let innerProperties = LinqExpressionVisitors.visitJoin<'Table, 'Key> innerKeySelector
+
+        let mergedTables =
+            // Update outer table mappings with join aliases
+            let outerTableMappings =
+                outerProperties
+                |> List.fold (fun (mappings: Map<TableMappingKey, TableMapping>) joinPI ->
+                    let _, updatedMappings = TableMappings.tryGetByRootOrAlias joinPI.Alias mappings
+                    updatedMappings
+                ) outerSource.TableMappings
+
+            // Update inner table mappings with join aliases
+            let innerTableMappings =
+                innerProperties
+                |> List.fold (fun (mappings: Map<TableMappingKey, TableMapping>) joinPI ->
+                    let _, updatedMappings = TableMappings.tryGetByRootOrAlias joinPI.Alias mappings
+                    updatedMappings
+                ) innerSource.TableMappings
+
+            mergeTableMappings (outerTableMappings, innerTableMappings)
+
+        let ir = outerSource |> getQueryOrDefault
+        let innerTableNameAsAlias =
+            innerProperties
+            |> Seq.map (fun p -> p, mergedTables[TableAliasKey p.Alias])
+            |> Seq.map (fun (p, tbl) -> $"%s{FQ.qualifiedTable tbl} AS %s{p.Alias}")
+            |> Seq.head
+
+        let joinCondition =
+            List.zip outerProperties innerProperties
+            |> List.fold (fun (acc: WhereClause) (outerProp, innerProp) ->
+                let cond = CompareColumns($"%s{outerProp.Alias}.%s{outerProp.Member.Name}", Eq, $"%s{innerProp.Alias}.%s{innerProp.Member.Name}")
+                WhereClause.combineAndFlat acc cond
+            ) WhereClause.Empty
+
+        let joinClause = { Kind = LeftJoin; Table = innerTableNameAsAlias; Subquery = None; Condition = joinCondition }
+        QuerySource<'JoinResult, SelectQueryIR>({ ir with Joins = ir.Joins @ [joinClause] }, mergedTables)
+
     /// References a table variable from a correlated parent query from within a subquery.
     [<CustomOperation("correlate", MaintainsVariableSpace = true, IsLikeZip = true)>]
     member this.Correlate (outerSource: QuerySource<'Outer>,
