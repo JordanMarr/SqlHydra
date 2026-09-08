@@ -55,10 +55,15 @@ type SqlFn =
     static member TRUNC(n: 'T) : 'T when 'T : struct = sqlFn
     static member TRUNC(n: 'T, decimals: int) : 'T when 'T : struct = sqlFn
 
-    // Date/time functions
+    // Date/time functions. Oracle parses the marked ones as keywords and accepts no argument
+    // list for them, so `SYSDATE()` is a syntax error.
+    [<SqlHydraFunction(Niladic = true)>]
     static member SYSDATE() : DateTime = sqlFn
+    [<SqlHydraFunction(Niladic = true)>]
     static member SYSTIMESTAMP() : DateTime = sqlFn
+    [<SqlHydraFunction(Niladic = true)>]
     static member CURRENT_DATE() : DateTime = sqlFn
+    [<SqlHydraFunction(Niladic = true)>]
     static member CURRENT_TIMESTAMP() : DateTime = sqlFn
     static member EXTRACT(field: string, source: DateTime) : int = sqlFn
     static member ADD_MONTHS(date: DateTime, months: int) : DateTime = sqlFn

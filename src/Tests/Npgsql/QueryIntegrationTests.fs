@@ -1299,3 +1299,34 @@ let ``onConflictDoUpdateCoalesceWrite: a null in the new row keeps the existing 
 
     do! WriteRecordFixture.exec ctx DoUpdateWriteFixture.dropDdl
 }
+
+[<Test>]
+let ``PostgreSQL accepts a niladic function``() = task {
+    // The parenthesised spelling is a syntax error, so this query never reached the server.
+    // Hydration is part of the claim: current_time is `time with time zone`, which Npgsql
+    // reads as DateTimeOffset, not the TimeSpan of `time without time zone`.
+    let! rows =
+        selectTask db {
+            for a in person.address do
+            where (a.modifieddate < current_timestamp())
+            select (current_date(), current_time(), current_timestamp(), localtime(), localtimestamp())
+            take 1
+        }
+
+    gt0 rows
+}
+
+[<Test>]
+let ``PostgreSQL accepts a niladic function that names the current session``() = task {
+    // current_user and session_user are ordinary catalog functions that the parser reads as
+    // keywords, so they render schema-qualified rather than bare. current_schema is neither.
+    // No Oracle twin: SqlHydra wraps no Oracle function that names the session.
+    let! rows =
+        selectTask db {
+            for a in person.address do
+            select (current_catalog(), current_schema(), current_user(), session_user(), user())
+            take 1
+        }
+
+    gt0 rows
+}

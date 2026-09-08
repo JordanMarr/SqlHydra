@@ -388,12 +388,29 @@ type TextFn =
 >
 > A `sqlFn` body has no runtime meaning, so executing one raises `SqlFunctionNotRenderedException` - which is what a missing marker gets you, rather than a query that quietly compares your column to `NULL`. If you use a function name the database does not have, you get a database error at runtime.
 
+**Functions that are keywords, not calls.** SQL's niladic functions - `CURRENT_DATE`, `CURRENT_TIMESTAMP`, Oracle's `SYSDATE` - are parsed as keywords and take no argument list at all, so `CURRENT_DATE()` is a syntax error. Mark such a wrapper `Niladic` and only its name is rendered:
+
+```fsharp
+[<SqlHydraFunction(Niladic = true)>]
+static member current_date() : DateTime = sqlFn   // CURRENT_DATE, not CURRENT_DATE()
+```
+
+Oracle's `SYSDATE`, `SYSTIMESTAMP`, `CURRENT_DATE` and `CURRENT_TIMESTAMP` are marked by hand. The PostgreSQL ones are generated, and nothing in the allowlist says so - see below.
+
 **PostgreSQL functions are generated from the catalog.** The members of the Npgsql `SqlFn` between `// <generated>` and `// </generated>` come from `pg_proc`: argument and return types, and `proisstrict` (NULL in means NULL out), which gives every parameter of a strict function a `'T option` twin. `src/SqlHydra.Query/codegen/NpgsqlSqlFn.allowlist` lists one overload per line and chooses which functions appear; the catalog decides their shape. Each member is executed once at generation, so a function that cannot be called as `NAME(args)` is never emitted, and a keyword-named one such as `position` renders schema-qualified.
+
 
 ```
 lpad s:string length:int fill:string     # the (text, integer, text) overload, with parameter names
 trim=btrim s:string                      # `trim` is parser sugar; its shape lives under btrim
 concat s1:string s2:string               # a variadic function takes whatever list you write
+```
+A niladic function has no `pg_proc` row at all, so a parameterless line the catalog cannot resolve is offered to `SELECT pg_typeof(<name>)`, which proves the bare spelling parses and names its return type. Those come out `Niladic`. The allowlist never says which is which, so one plain list of names produces all three renderings:
+
+```
+current_date        ->  CURRENT_DATE                  a keyword, no pg_proc row
+current_schema      ->  CURRENT_SCHEMA()              an ordinary function
+current_user        ->  pg_catalog.current_user()     a function the parser reads as a keyword
 ```
 
 ```bash

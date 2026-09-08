@@ -21,6 +21,10 @@ type SqlHydraFunctionAttribute(sqlName: string) =
     /// Rendered instead of the member name, e.g. `pg_catalog.position` for a function whose
     /// plain spelling is keyword syntax.
     member _.SqlName = sqlName
+    /// SQL's niladic functions — `CURRENT_DATE`, `CURRENT_TIMESTAMP`, `SYSDATE` — are keywords,
+    /// not calls, and a database that parses them as such rejects `CURRENT_DATE()`. Set this on
+    /// a member that takes no arguments to render the name on its own.
+    member val Niladic = false with get, set
 
 /// Raised when a `sqlFn` wrapper is executed as ordinary .NET code instead of being rendered
 /// as SQL: either it was called outside a query expression, or it is used in a `where`/`on'`
