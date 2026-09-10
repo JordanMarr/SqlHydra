@@ -1116,6 +1116,8 @@ type_mappings = ["SqlHydra.Query.Pgvector"]
 
 SqlHydra will resolve the assembly from your project's build output and load any `IExtendTypeMapping` implementations it finds.
 
+> **If your project is a library**, add `<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>` to it. A library does not copy its package assemblies into `bin/` — they are resolved from the NuGet cache at run time — so the extension is not in the build output for SqlHydra to load, however correctly it is referenced and registered.
+
 [**SqlHydra.Query.Pgvector**](https://github.com/michaelglass/SqlHydra.Query.Pgvector) is a worked example of such a package: it maps the PostgreSQL `vector` column type to `Pgvector.Vector` and adds pgvector distance operators (`<=>`, `<->`, `<#>`) for `SqlHydra.Query`.
 
 #### Multiple Extensions
