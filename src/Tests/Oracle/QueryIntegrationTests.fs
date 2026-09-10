@@ -429,14 +429,31 @@ let ``SqlFn - Oracle functions smoke test``() = task {
 [<Test>]
 let ``Oracle accepts a niladic function``() = task {
     // The parenthesised spelling is a syntax error, so this query never reached the server.
-    // The Npgsql twin compares a column to the function; here the function is compared to a
-    // value instead, because `where (col < FN())` renders the column unquoted and Oracle then
-    // folds it to upper case and cannot find it. That is a separate, pre-existing bug.
     let! rows =
         selectTask db {
             for o in OT.ORDERS do
             where (SYSDATE() > System.DateTime.MinValue)
             select (SYSDATE(), SYSTIMESTAMP(), CURRENT_DATE(), CURRENT_TIMESTAMP())
+            take 1
+        }
+
+    gt0 rows
+}
+
+[<Test>]
+let ``Oracle accepts a column compared to a SQL function``() = task {
+    // `where (col < FN())` used to render the column unquoted, as `o.ORDER_DATE`. Oracle folds
+    // an unquoted name to upper case, looks for "O"."ORDER_DATE" against an alias declared as
+    // "o", and rejects the statement with:
+    //
+    //     ORA-00904: "O"."ORDER_DATE": invalid identifier
+    //
+    // The rendered-SQL twin lives in QueryUnitTests; this one proves the server accepts it.
+    let! rows =
+        selectTask db {
+            for o in OT.ORDERS do
+            where (o.ORDER_DATE < SYSDATE())
+            select o.ORDER_ID
             take 1
         }
 

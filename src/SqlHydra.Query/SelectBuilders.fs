@@ -237,7 +237,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
                     let fqCol = $"%s{tableAlias}.%s{p.Name}"
                     [OrderByColumn (fqCol, Asc)]
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, tableAlias, p) ->
-                    let fqCol = $"{{%s{tableAlias}}}.{{%s{p.Name}}}"
+                    let fqCol = LinqExpressionVisitors.markQualified $"%s{tableAlias}.%s{p.Name}"
                     [OrderByRaw (LinqExpressionVisitors.renderAggregate aggType fqCol, [||])]
                 | LinqExpressionVisitors.OrderByExpression (frag, parms) ->
                     [OrderByRaw (frag, parms)]
@@ -261,7 +261,7 @@ type SelectBuilder<'Selected, 'Mapped> () =
                     let fqCol = $"%s{tableAlias}.%s{p.Name}"
                     [OrderByColumn (fqCol, Desc)]
                 | LinqExpressionVisitors.OrderByAggregateColumn (aggType, tableAlias, p) ->
-                    let fqCol = $"{{%s{tableAlias}}}.{{%s{p.Name}}}"
+                    let fqCol = LinqExpressionVisitors.markQualified $"%s{tableAlias}.%s{p.Name}"
                     [OrderByRaw ($"{LinqExpressionVisitors.renderAggregate aggType fqCol} DESC", [||])]
                 | LinqExpressionVisitors.OrderByExpression (frag, parms) ->
                     [OrderByRaw ($"{frag} DESC", parms)]

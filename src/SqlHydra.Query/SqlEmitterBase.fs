@@ -148,12 +148,21 @@ type SqlEmitterBase() =
     member this.QuoteColumn(col: string) =
         this.QuoteDotted(col)
 
-    /// Processes a raw SQL fragment, replacing {alias}.{column} templates with quoted identifiers.
+    /// Processes a raw SQL fragment, replacing dotted `{a}.{b}` / `{a}.{b}.{c}` identifier
+    /// templates with quoted identifiers. The visitors mark every column they interpolate into
+    /// a raw fragment this way, so `{alias}.{column}` (select/where/join) and
+    /// `{schema}.{table}.{column}` (delete/update) both round-trip.
+    ///
+    /// A run of two or more segments is required, so a lone `{...}` in a hand-written fragment
+    /// (`havingRaw`, `whereRawConflict`, a user-built `RawWhere`) is left alone.
     member this.QuoteRawFragment(fragment: string) =
-        Regex.Replace(fragment, @"\{(\w+)\}\.\{(\w+)\}", fun m ->
-            let alias = m.Groups.[1].Value
-            let col = m.Groups.[2].Value
-            $"{this.QuoteIdentifier(alias)}.{this.QuoteIdentifier(col)}"
+        Regex.Replace(fragment, @"\{(\w+)\}(?:\.\{(\w+)\})+", fun m ->
+            seq {
+                yield m.Groups.[1].Value
+                for c in m.Groups.[2].Captures -> c.Value
+            }
+            |> Seq.map this.QuoteIdentifier
+            |> String.concat "."
         )
 
     /// Emits a SqlValue, returning the SQL fragment.
@@ -240,7 +249,7 @@ type SqlEmitterBase() =
         | Grouped inner ->
             this.EmitWhere(inner, collector) // wrap in parens
         | RawWhere (fragment, parms) ->
-            this.SubstituteParams(fragment, parms, collector)
+            this.SubstituteParams(this.QuoteRawFragment(fragment), parms, collector)
         | BoolColumn (col, value) ->
             let quotedCol = this.QuoteColumn(col)
             this.EmitBoolColumn(quotedCol, value, collector)
