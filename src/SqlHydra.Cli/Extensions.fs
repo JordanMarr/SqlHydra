@@ -2,6 +2,7 @@ module SqlHydra.Extensions
 
 open System
 open System.IO
+open System.Collections.Generic
 open System.Reflection
 open System.Runtime.Loader
 open SqlHydra.Domain
@@ -101,6 +102,27 @@ let loadProvider (project: FileInfo) (assemblyName: string) : ISqlHydraDbProvide
     | [||] -> failwith $"No ISqlHydraDbProvider implementation found in '{dllName}'."
     | _ -> failwith $"Multiple ISqlHydraDbProvider implementations found in '{dllName}'. Expected exactly one."
 
+/// How a project brings an extension in.
+type private ExtensionReference =
+    | NotReferenced
+    | AsPackage
+    | AsProject
+
+/// Nothing stops a project declaring both. `AsProject` wins and ends the search, because its
+/// output is copied either way, which is what rules out the copy-local trap.
+let private referenceKind (root: ProjectRootElement) (extName: string) =
+    let rec search (items: IEnumerator<ProjectItemElement>) found =
+        if not (items.MoveNext()) then
+            found
+        else
+            match items.Current with
+            | i when i.ItemType = "ProjectReference" && Path.GetFileNameWithoutExtension(i.Include) = extName -> AsProject
+            | i when i.ItemType = "PackageReference" && i.Include = extName -> search items AsPackage
+            | _ -> search items found
+
+    use items = (root.ItemGroups |> Seq.collect _.Items).GetEnumerator()
+    search items NotReferenced
+
 /// Loads named extension assemblies (from TOML [extensions] config).
 /// Each name must be a PackageReference, ProjectReference, or the target project itself.
 let loadNamed (project: FileInfo) (extensionNames: string list) : ISqlHydraExtension list =
@@ -108,27 +130,46 @@ let loadNamed (project: FileInfo) (extensionNames: string list) : ISqlHydraExten
     |> List.collect (fun extName ->
         let projectName = Path.GetFileNameWithoutExtension(project.Name)
 
-        // Allow the target project itself as an extension source
-        let isTargetProject = extName = projectName
+        // The target project is its own extension source, so there is no reference to check.
+        let root =
+            if extName = projectName then None else Some(ProjectRootElement.Open(project.FullName))
 
-        if not isTargetProject then
-            let root = ProjectRootElement.Open(project.FullName)
-            let hasRef =
-                root.ItemGroups
-                |> Seq.collect _.Items
-                |> Seq.exists (fun item ->
-                    match item.ItemType with
-                    | "PackageReference" -> item.Include = extName
-                    | "ProjectReference" -> Path.GetFileNameWithoutExtension(item.Include) = extName
-                    | _ -> false
-                )
-            if not hasRef then
-                failwith $"Extension '{extName}' was not found as a PackageReference or ProjectReference in '{project.Name}'."
+        // Has to fire whether or not a dll is sitting in bin/: a stale one would load silently.
+        if root |> Option.exists (fun r -> referenceKind r extName = NotReferenced) then
+            failwith $"Extension '{extName}' was not found as a PackageReference or ProjectReference in '{project.Name}'."
 
         let dllName = $"{extName}.dll"
         match findDll project dllName with
         | None ->
-            failwith $"Could not find '{dllName}' in the build output of '{project.Name}'. Ensure the project has been built."
+            let hint =
+                // Imports are not evaluated, so a value set in Directory.Build.props is
+                // invisible here. That only costs the hint.
+                let declared name =
+                    root
+                    |> Option.bind (fun r ->
+                        r.Properties |> Seq.tryFind (fun p -> p.Name = name) |> Option.map _.Value)
+
+                let referencedAsPackage =
+                    root |> Option.exists (fun r -> referenceKind r extName = AsPackage)
+
+                let says name value =
+                    declared name |> Option.map (fun v -> v.Trim().Equals(value, StringComparison.OrdinalIgnoreCase))
+
+                // An SDK-style project that says nothing builds a library.
+                let buildsLibrary = says "OutputType" "Library" |> Option.defaultValue true
+                let copyLocalOn = says "CopyLocalLockFileAssemblies" "true" |> Option.defaultValue false
+
+                if referencedAsPackage && buildsLibrary && not copyLocalOn then
+                    $" '{projectName}' builds a library and references '{extName}' as a package: a library does not copy "
+                    + "package assemblies to its output directory, so there is nothing here to load. Add "
+                    + "<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies> to it."
+                else
+                    ""
+
+            failwith (
+                $"Could not find '{dllName}' in the build output of '{project.Name}'. Ensure the project has been built."
+                + hint
+            )
         | Some path ->
             // A registered extension that yields no ISqlHydraExtension is always a mistake worth
             // stopping for: otherwise generation silently proceeds without the mapping and exits 0,
