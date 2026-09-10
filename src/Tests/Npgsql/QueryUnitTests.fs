@@ -1345,7 +1345,7 @@ let ``inlineValue beside another SQL function is a value, not a database call``(
             where (SqlFn.lower a.city = inlineValue "smith")
         }
         |> toSql
-    test <@ sql.Contains("(LOWER(a.city) = 'smith')") @>
+    test <@ sql.Contains("(LOWER(\"a\".\"city\") = 'smith')") @>
     test <@ not (sql.Contains("INLINEVALUE")) @>
 
 [<Test>]
@@ -1363,7 +1363,7 @@ let ``a where on a value does not silently become a NULL check``() =
         |> toSql
     // The whole predicate, not just the literal: rendering the marker itself as a
     // function (`INLINEVALUE('Dallas')`) would satisfy any looser assertion.
-    test <@ sql.Contains("(a.city = 'Dallas')") @>
+    test <@ sql.Contains("(\"a\".\"city\" = 'Dallas')") @>
     test <@ not (sql.Contains("IS NULL")) @>
     test <@ not (sql.Contains("@p")) @>
 
@@ -1376,7 +1376,7 @@ let ``a where against a raw SQL expression does not silently become a NULL check
             where (a.city = rawExpr<string> "'Dallas'")
         }
         |> toSql
-    test <@ sql.Contains("(a.city = 'Dallas')") @>
+    test <@ sql.Contains("(\"a\".\"city\" = 'Dallas')") @>
     test <@ not (sql.Contains("RAWEXPR")) @>
     test <@ not (sql.Contains("IS NULL")) @>
 
@@ -1391,7 +1391,7 @@ let ``a SQL function can be compared against a column``() =
             where (SqlFn.lower a.city = a.addressline1)
         }
         |> toSql
-    test <@ sql.Contains("(LOWER(a.city) = a.addressline1)") @>
+    test <@ sql.Contains("(LOWER(\"a\".\"city\") = \"a\".\"addressline1\")") @>
 
 [<Test>]
 let ``a captured .NET value is still bound as a parameter``() =
@@ -1419,7 +1419,7 @@ let ``a SQL function can be used in a join predicate``() =
             select a
         }
         |> toSql
-    test <@ sql.Contains("ON (a.city = LOWER(a2.city))") @>
+    test <@ sql.Contains("ON (\"a\".\"city\" = LOWER(\"a2\".\"city\"))") @>
 
 [<Test>]
 let ``a SQL function on the left of a join predicate``() =
@@ -1430,7 +1430,7 @@ let ``a SQL function on the left of a join predicate``() =
             select a
         }
         |> toSql
-    test <@ sql.Contains("ON (LOWER(a.city) = a2.city)") @>
+    test <@ sql.Contains("ON (LOWER(\"a\".\"city\") = \"a2\".\"city\")") @>
 
 [<Test>]
 let ``a SQL function compared to a value in a join predicate``() =
@@ -1441,7 +1441,7 @@ let ``a SQL function compared to a value in a join predicate``() =
             select a
         }
         |> toSql
-    test <@ sql.Contains("ON (LOWER(a2.city) = @p0)") @>
+    test <@ sql.Contains("ON (LOWER(\"a2\".\"city\") = @p0)") @>
 
 [<Test>]
 let ``two SQL functions compared in a join predicate``() =
@@ -1453,7 +1453,7 @@ let ``two SQL functions compared in a join predicate``() =
             select a
         }
         |> toSql
-    test <@ sql.Contains("ON (LOWER(a.city) = LOWER(a2.city))") @>
+    test <@ sql.Contains("ON (LOWER(\"a\".\"city\") = LOWER(\"a2\".\"city\"))") @>
 
 [<Test>]
 let ``a captured .NET value on the left is still bound as a parameter``() =
@@ -1479,7 +1479,7 @@ let ``a user-defined SQL function can be used in a where``() =
             where (ExtFn.lower a.addressline2 = "dallas")
         }
         |> toSql
-    test <@ sql.Contains("(LOWER(a.addressline2) = @p0)") @>
+    test <@ sql.Contains("(LOWER(\"a\".\"addressline2\") = @p0)") @>
 
 [<Test>]
 let ``the README's custom-function example runs``() =
@@ -1493,7 +1493,7 @@ let ``the README's custom-function example runs``() =
             where (SOUNDEX(a.city) = SOUNDEX("Smith"))
         }
         |> toSql
-    test <@ sql.Contains("(SOUNDEX(a.city) = SOUNDEX('Smith'))") @>
+    test <@ sql.Contains("(SOUNDEX(\"a\".\"city\") = SOUNDEX('Smith'))") @>
 
 [<Test>]
 let ``a user-defined SQL function over constants does not silently become a NULL check``() =
@@ -1506,7 +1506,7 @@ let ``a user-defined SQL function over constants does not silently become a NULL
             where (a.city = SOUNDEX "Smith")
         }
         |> toSql
-    test <@ sql.Contains("(a.city = SOUNDEX('Smith'))") @>
+    test <@ sql.Contains("(\"a\".\"city\" = SOUNDEX('Smith'))") @>
     test <@ not (sql.Contains("IS NULL")) @>
 
 [<Test>]
@@ -1517,7 +1517,7 @@ let ``a generic user-defined SQL function is recognized in a where``() =
             where (NULLIF(a.city, "Dallas") = "Seattle")
         }
         |> toSql
-    test <@ sql.Contains("NULLIF(a.city, 'Dallas')") @>
+    test <@ sql.Contains("NULLIF(\"a\".\"city\", 'Dallas')") @>
 
 [<Test>]
 let ``an unmarked SQL function over constants raises instead of emitting IS NULL``() =
@@ -1599,7 +1599,7 @@ let ``a user-defined SQL function can be used in an on' join predicate``() =
             select a
         }
         |> toSql
-    test <@ sql.Contains("ON (SOUNDEX(a.city) = SOUNDEX(a2.city))") @>
+    test <@ sql.Contains("ON (SOUNDEX(\"a\".\"city\") = SOUNDEX(\"a2\".\"city\"))") @>
 
 [<Test>]
 let ``a marked module covers the wrappers declared in it``() =
@@ -1611,7 +1611,7 @@ let ``a marked module covers the wrappers declared in it``() =
             where (Grouped.DIFFERENCE(a.city, "Dallas") = 4)
         }
         |> toSql
-    test <@ sql.Contains("DIFFERENCE(a.city, 'Dallas')") @>
+    test <@ sql.Contains("DIFFERENCE(\"a\".\"city\", 'Dallas')") @>
 
 [<Test>]
 let ``a marked module covers nested modules``() =
@@ -1621,7 +1621,7 @@ let ``a marked module covers nested modules``() =
             where (Grouped.Text.INITCAP a.city = "Dallas")
         }
         |> toSql
-    test <@ sql.Contains("INITCAP(a.city)") @>
+    test <@ sql.Contains("INITCAP(\"a\".\"city\")") @>
 
 [<Test>]
 let ``a marked type covers its static members``() =
@@ -1631,7 +1631,7 @@ let ``a marked type covers its static members``() =
             where (GroupedFn.ASCII a.city = 68)
         }
         |> toSql
-    test <@ sql.Contains("ASCII(a.city)") @>
+    test <@ sql.Contains("ASCII(\"a\".\"city\")") @>
 
 // A member access over a wrapper is the one shape `NValue` doesn't match, so it reaches the
 // fall-through arms with the stub intact. Four: two clauses x two operand orders.
@@ -1761,7 +1761,7 @@ let ``lower over a nullable column emits LOWER(col)``() =
             where (SqlFn.lower a.addressline2 = Some "suite 100")
         }
         |> toSql
-    test <@ sql.Contains("(LOWER(a.addressline2) = @p0)") @>
+    test <@ sql.Contains("(LOWER(\"a\".\"addressline2\") = @p0)") @>
 
 [<Test>]
 let ``nullable string functions compose``() =
@@ -1771,7 +1771,7 @@ let ``nullable string functions compose``() =
             where (SqlFn.length (SqlFn.ltrim (SqlFn.lower a.addressline2)) = Some 9)
         }
         |> toSql
-    test <@ sql.Contains("(LENGTH(LTRIM(LOWER(a.addressline2))) = @p0)") @>
+    test <@ sql.Contains("(LENGTH(LTRIM(LOWER(\"a\".\"addressline2\"))) = @p0)") @>
 
 [<Test>]
 let ``an option-returning function compared to None emits IS NULL``() =
@@ -1782,9 +1782,9 @@ let ``an option-returning function compared to None emits IS NULL``() =
             where (SqlFn.nullif (a.city, "") = None && SqlFn.lower a.addressline2 <> None && None = SqlFn.upper a.addressline2)
         }
         |> toSql
-    test <@ sql.Contains("(NULLIF(a.city, '') IS NULL)") @>
-    test <@ sql.Contains("(LOWER(a.addressline2) IS NOT NULL)") @>
-    test <@ sql.Contains("(UPPER(a.addressline2) IS NULL)") @>
+    test <@ sql.Contains("(NULLIF(\"a\".\"city\", '') IS NULL)") @>
+    test <@ sql.Contains("(LOWER(\"a\".\"addressline2\") IS NOT NULL)") @>
+    test <@ sql.Contains("(UPPER(\"a\".\"addressline2\") IS NULL)") @>
 
 [<Test>]
 let ``a keyword-named function renders schema-qualified``() =
@@ -1794,7 +1794,7 @@ let ``a keyword-named function renders schema-qualified``() =
             where (SqlFn.position (a.city, "a") > 0)
         }
         |> toSql
-    test <@ sql.Contains("(pg_catalog.position(a.city, 'a') > @p0)") @>
+    test <@ sql.Contains("(pg_catalog.position(\"a\".\"city\", 'a') > @p0)") @>
 
 // Niladic functions, one test per site the visitor renders a call from. Each assertion carries the
 // token that follows the name, so a stray `()` breaks the match instead of hiding inside it.
@@ -1977,4 +1977,56 @@ let ``an aggregate compared to None in a having emits IS NULL``() =
             select (a.city, maxBy a.addressline2)
         }
         |> toSql
-    test <@ sql.Contains("HAVING (MAX(a.addressline2) IS NULL)") @>
+    test <@ sql.Contains("HAVING (MAX(\"a\".\"addressline2\") IS NULL)") @>
+
+[<Test>]
+let ``a column compared to a SQL function is quoted like any other column``() =
+    // A column used to keep its quotes when compared to a value and lose them when compared to
+    // a SQL function. The value path builds a `Compare` node and the emitter runs QuoteColumn
+    // over it; the function path builds a `RawWhere`, whose fragment used to be emitted
+    // verbatim with the bare `alias.column` that `qualifyColumn` returns.
+    //
+    // The select path had already solved this: it marks identifiers as `{alias}.{column}` and
+    // the emitter expands them through `QuoteRawFragment`. The where, having and join paths
+    // now mark their columns the same way, and `RawWhere` runs the expansion too.
+    //
+    // PostgreSQL survived the unquoted form only because it folds unquoted names to lower case
+    // and AdventureWorks is lower case throughout. A mixed-case column would have failed here.
+    let viaValue =
+        select {
+            for a in person.address do
+            where (a.city < "x")
+        }
+        |> toSql
+    let viaFunction =
+        select {
+            for a in person.address do
+            where (a.city < SqlFn.upper a.addressline1)
+        }
+        |> toSql
+
+    test <@ viaValue.Contains "\"a\".\"city\"" @>            // control: already correct
+    test <@ viaFunction.Contains "\"a\".\"city\"" @>
+
+[<Test>]
+let ``a delete qualifies a SQL-function comparison three parts deep``() =
+    // A select qualifies a column as `alias.column`; delete and update qualify it as
+    // `schema.table.column`. The marker the emitter expands has to cover both arities.
+    let sql =
+        delete {
+            for a in person.address do
+            where (a.city < SqlFn.upper a.addressline1)
+        }
+        |> toSql
+    test <@ sql.Contains("WHERE (\"person\".\"address\".\"city\" < UPPER(\"person\".\"address\".\"addressline1\"))") @>
+
+[<Test>]
+let ``an update qualifies a SQL-function comparison three parts deep``() =
+    let sql =
+        update {
+            for a in person.address do
+            set a.city "Dallas"
+            where (a.city < SqlFn.upper a.addressline1)
+        }
+        |> toUpdateSql
+    test <@ sql.Contains("WHERE (\"person\".\"address\".\"city\" < UPPER(\"person\".\"address\".\"addressline1\"))") @>
