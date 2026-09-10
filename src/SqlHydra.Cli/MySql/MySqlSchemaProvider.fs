@@ -1,4 +1,4 @@
-module SqlHydra.MySql.MySqlSchemaProvider
+﻿module SqlHydra.MySql.MySqlSchemaProvider
 
 open System.Data
 open MySql.Data
@@ -114,6 +114,7 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
                             Column.TypeMapping = typeMapping
                             Column.IsPK = col.IsPrimaryKey
                             Column.IsReadOnly = false
+                            Column.Doc = []
                         }
                     )
                 )

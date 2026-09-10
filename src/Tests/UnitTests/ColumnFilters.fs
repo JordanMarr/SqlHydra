@@ -12,6 +12,7 @@ let col nm =
         IsNullable = false
         IsPK = false
         IsReadOnly = false
+        Doc = []
     }
 
 let equalLists lst1 lst2 = 
