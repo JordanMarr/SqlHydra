@@ -1,4 +1,4 @@
-module Npgsql.Generation
+﻿module Npgsql.Generation
 
 open Swensen.Unquote
 open SqlHydra
@@ -429,3 +429,43 @@ let ``The schema provider marks the columns PostgreSQL generates, and only those
         readOnly =! set expected
     finally
         execute dropProbes
+// Table filters, against a live PostgreSQL.
+
+let private filterCfg filters : Config =
+    {
+        LeftJoinedViews = false
+        ConnectionString = DB.connectionString
+        OutputFile = ""
+        Namespace = "TestNS"
+        IsCLIMutable = true
+        IsMutableProperties = false
+        NullablePropertyType = NullablePropertyType.Option
+        ProviderDbTypeAttributes = true
+        TableDeclarations = true
+        Readers = None
+        Filters = filters
+        TypeMappingExtensions = []
+    }
+
+let private generatedPaths filters =
+    (NpgsqlSchemaProvider.getSchema(filterCfg filters, false, [])).Tables
+    |> List.map (fun tbl -> $"{tbl.Schema}/{tbl.Name}")
+
+[<Test>]
+let ``Table filters exclude materialized views, which used to bypass them``() =
+    // AdventureWorks has two: person/vstateprovincecountryregion and
+    // production/vproductanddescription. Both came back whatever the filters said.
+    generatedPaths { Filters.Empty with Includes = [ "person/address" ] } =! [ "person/address" ]
+
+[<Test>]
+let ``Table filters keep materialized views that match``() =
+    let paths = generatedPaths { Filters.Empty with Includes = [ "person/*" ] }
+    (paths |> List.contains "person/vstateprovincecountryregion") =! true
+    (paths |> List.contains "production/vproductanddescription") =! false
+
+[<Test>]
+let ``A wildcard include keeps every relation, materialized views included``() =
+    // `include = [ "*" ]` is what the repo's own .toml files use; it must still mean "all".
+    let paths = generatedPaths { Filters.Empty with Includes = [ "*" ] }
+    (paths |> List.contains "person/address") =! true
+    (paths |> List.contains "person/vstateprovincecountryregion") =! true
