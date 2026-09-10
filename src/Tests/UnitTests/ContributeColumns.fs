@@ -62,8 +62,12 @@ let private xminColumn =
               "It changes on every write to the row." ]
     }
 
+// `private` is load-bearing: without it these are visible outside the assembly, and the sqlite
+// tomls register `Tests`, so a regeneration would put their columns in every committed
+// AdventureWorks fixture.
+
 /// Contributes `xmin` to PostgreSQL base tables only — a view has no system columns.
-type XminContribution() =
+type private XminContribution() =
     interface IContributeColumns with
         member _.Contribute(baseFn) =
             fun (ctx: ColumnContributionContext) ->
@@ -75,7 +79,7 @@ type XminContribution() =
                     contributed
 
 /// A second extension, to pin down composition order and that each sees the running list.
-type CtidContribution() =
+type private CtidContribution() =
     interface IContributeColumns with
         member _.Contribute(baseFn) =
             fun ctx ->

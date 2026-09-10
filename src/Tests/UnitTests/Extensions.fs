@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.Reflection
 open NUnit.Framework
 open Swensen.Unquote
 open SqlHydra
@@ -22,6 +23,21 @@ let private withTempProject (name: string) (placeDll: bool) (run: FileInfo -> un
         File.Copy(asm.Location, Path.Combine(bin.FullName, $"{name}.dll"))
     try run proj
     finally (try Directory.Delete(root, true) with _ -> ())
+
+[<Test>]
+let ``only externally visible types are discovered as extensions`` () =
+    // A registered assembly is scanned for anything implementing the marker, so an object
+    // expression or an internal helper would be constructed and applied. This assembly holds
+    // both: private contributions in UnitTests.ContributeColumns, and the closure classes F#
+    // generates for object expressions there.
+    let discoverable =
+        Assembly.GetExecutingAssembly().GetTypes()
+        |> Array.filter (fun t ->
+            not t.IsAbstract && not t.IsInterface
+            && typeof<SqlHydra.Domain.IContributeColumns>.IsAssignableFrom(t))
+
+    test <@ discoverable.Length > 0 @>
+    test <@ discoverable |> Array.forall (fun t -> not t.IsVisible) @>
 
 [<Test>]
 let ``loadNamed raises when a registered extension yields no implementations`` () =

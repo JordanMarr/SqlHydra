@@ -45,7 +45,11 @@ let private discoverExtensions (asm: Assembly) =
 
     types
     |> Array.filter (fun t ->
-        not t.IsAbstract && not t.IsInterface &&
+        // Visible from outside the assembly. A compiler-generated closure class -- an object
+        // expression implementing the interface, say -- is not something the author meant to
+        // register, and neither is an internal helper. `IsVisible` rather than `IsPublic`
+        // because a type declared in a module is nested, and that is a normal way to write one.
+        t.IsVisible && not t.IsAbstract && not t.IsInterface &&
         markerType.IsAssignableFrom(t))
     |> Array.map (fun t -> Activator.CreateInstance(t) :?> ISqlHydraExtension)
     |> Array.toList
