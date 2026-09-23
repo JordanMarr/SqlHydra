@@ -163,6 +163,17 @@ let ``Contributing a discovered column's name raises rather than shadowing it`` 
     test <@ ex.Message.Contains "public.users" @>
 
 [<Test>]
+let ``A contributed name differing from a discovered one only by case raises`` () =
+    // On SQL Server or MySQL `Age` is the `age` column, and two fields bound to it would compile.
+    let collide =
+        { new IContributeColumns with
+            member _.Contribute(baseFn) = fun ctx -> baseFn ctx @ [ { xminColumn with Name = "Age" } ] }
+
+    let ex = Assert.Throws<Exception>(fun () -> apply [ collide ] |> ignore)
+
+    test <@ ex.Message.Contains "Age" @>
+
+[<Test>]
 let ``Two extensions contributing the same name raises`` () =
     let ex = Assert.Throws<Exception>(fun () -> apply [ XminContribution(); XminContribution() ] |> ignore)
 

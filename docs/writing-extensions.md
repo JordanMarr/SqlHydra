@@ -3,7 +3,9 @@
 SqlHydra can be extended in three ways without changing the tool: a whole new database
 provider, a type mapping for a column the built-in mappings do not cover, and a column the
 database catalog never reports. Each is a plain interface from `SqlHydra.Domain` that you
-implement in your own project and register in the TOML `[extensions]` section.
+implement in your own project and register in the TOML `[extensions]` section. The
+implementing type must be visible outside its assembly: SqlHydra does not discover one declared
+`private` or `internal`.
 
 ## Creating a Custom Database Provider
 

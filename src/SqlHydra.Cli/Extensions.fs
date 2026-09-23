@@ -187,7 +187,8 @@ let loadNamed (project: FileInfo) (extensionNames: string list) : ISqlHydraExten
                     + $"Check that '{extName}' in the TOML [extensions] section matches the package or assembly that "
                     + "implements the extension, and that it is referenced by the project. If the name is correct, the "
                     + "extension's types may have failed to load — ensure its dependencies are present and that it "
-                    + "targets a compatible SqlHydra version."
+                    + "targets a compatible SqlHydra version. An extension type must be visible outside its "
+                    + "assembly: one declared `private` or `internal` is not discovered."
                 )
             | extensions -> extensions
     )
@@ -220,8 +221,11 @@ let contributeColumns
         let contributed = contribute { Table = table; Provider = provider }
         let tableName = $"{table.Schema}.{table.Name}"
 
+        // Ignoring case: SQL Server and MySQL do, so `Age` and `age` are one column there, and
+        // two fields bound to it would compile. A false alarm on a case-sensitive engine raises;
+        // a missed collision would not.
         contributed
-        |> List.countBy _.Name
+        |> List.countBy _.Name.ToLowerInvariant()
         |> List.tryFind (fun (_, count) -> count > 1)
         |> Option.iter (fun (name, count) ->
             failwith (
@@ -230,14 +234,14 @@ let contributeColumns
                 + "earlier contribution should filter it out of the list it is given."
             ))
 
-        let discovered = table.Columns |> List.map _.Name |> Set.ofList
+        let discovered = HashSet(table.Columns |> List.map _.Name, StringComparer.OrdinalIgnoreCase)
 
         contributed
         |> List.tryFind (fun col -> discovered.Contains col.Name)
         |> Option.iter (fun col ->
             failwith (
                 $"A column-contribution extension contributed '{col.Name}' to '{tableName}', which already "
-                + "has a column of that name. Contribution adds columns the provider could not discover; it "
+                + "has a column of that name (names are compared ignoring case). Contribution adds columns the provider could not discover; it "
                 + "does not override discovered ones. Use an `IExtendTypeMapping` to retype a discovered "
                 + "column, or an `IExtendNaming` to rename one."
             ))
