@@ -134,9 +134,8 @@ let mkTable cfg db (table: Table) schema tableName columnName = stringBuffer {
                 for col in columns do
                     // Before the attributes, so the doc comment binds to the field. Split, so a line
                     // break inside an entry cannot put raw text into the file.
-                    for entry in col.Doc do
-                        for line in entry.ReplaceLineEndings("\n").Split '\n' do
-                            $"/// {line}"
+                    for line in col.Doc |> Seq.collect _.ReplaceLineEndings("\n").Split('\n') do
+                        $"/// {line}"
                     match providerDbTypeAttribute col with
                     | Some attribute -> attribute
                     | None -> ()

@@ -5,30 +5,6 @@ open Swensen.Unquote
 open SqlHydra.Domain
 open SqlHydra
 
-// A minimal Config suitable for exercising SchemaTemplate.generate without a live database.
-let private mkCfg () : Config =
-    {
-        ConnectionString = ""
-        OutputFile = ""
-        Namespace = "TestNS"
-        IsCLIMutable = true
-        IsMutableProperties = false
-        NullablePropertyType = NullablePropertyType.Option
-        ProviderDbTypeAttributes = true
-        TableDeclarations = false
-        LeftJoinedViews = false
-        Readers = None
-        Filters = Filters.Empty
-        TypeMappingExtensions = []
-    }
-
-let private mkVersion () : Version.InformationalVersion =
-    {
-        InformationalVersion = "0.0.0"
-        Version = System.Version(0, 0, 0)
-        PreReleaseSuffix = None
-    }
-
 let private moodEnum () : Enum =
     {
         Schema = "public"
@@ -42,9 +18,9 @@ let private moodEnum () : Enum =
     }
 
 let private generateWith (cfg: Config) (db: Schema) =
-    SchemaTemplate.generate cfg SqlHydra.Npgsql.Provider.instance db (mkVersion ()) []
+    SchemaTemplate.generate cfg SqlHydra.Npgsql.Provider.instance db testVersion []
 
-let private generate (db: Schema) = generateWith (mkCfg ()) db
+let private generate (db: Schema) = generateWith testConfig db
 
 [<Test>]
 let ``Generates Enums registration module for Npgsql enum`` () =
@@ -64,7 +40,7 @@ let ``Does not generate Enums registration module when no enums`` () =
 
 [<Test>]
 let ``Does not generate Enums registration module when ProviderDbTypeAttributes is off`` () =
-    let cfg = { mkCfg () with ProviderDbTypeAttributes = false }
+    let cfg = { testConfig with ProviderDbTypeAttributes = false }
     let db: Schema = { Tables = []; Enums = [ moodEnum () ] }
     let output = generateWith cfg db
 

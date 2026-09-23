@@ -128,16 +128,14 @@ let ``The ContributedColumn case decides IsReadOnly, not the wrapped column`` ()
 let ``No extensions leaves the schema untouched`` () =
     test <@ Extensions.contributeColumns [] ProviderType.Npgsql schema = schema @>
 
-[<Test>]
-let ``Contributing a discovered column's name raises rather than shadowing it`` () =
-    let message = raises [ contributing [ ContributedColumn.ReadOnly(discovered "age") ] ]
+// `Age` covers SQL Server and MySQL, where it is the `age` column and two fields bound to it
+// would compile.
+[<TestCase "age">]
+[<TestCase "Age">]
+let ``Contributing a discovered column's name, in any case, raises rather than shadowing it`` (name: string) =
+    let message = raises [ contributing [ ContributedColumn.ReadOnly { xminColumn with Name = name } ] ]
 
-    test <@ message.Contains "'age'" && message.Contains "public.users" @>
-
-[<Test>]
-let ``A contributed name differing from a discovered one only by case raises`` () =
-    // On SQL Server or MySQL `Age` is the `age` column, and two fields bound to it would compile.
-    test <@ (raises [ contributing [ ContributedColumn.ReadOnly { xminColumn with Name = "Age" } ] ]).Contains "'Age'" @>
+    test <@ message.Contains $"'{name}'" && message.Contains "public.users" @>
 
 [<Test>]
 let ``Two extensions contributing the same name raises`` () =
@@ -149,31 +147,8 @@ let ``Two extensions contributing the same name raises`` () =
 // What the contributed column becomes in the generated file
 // ---------------------------------------------------------------------------------------
 
-let private cfg: Config =
-    {
-        LeftJoinedViews = false
-        ConnectionString = ""
-        OutputFile = ""
-        Namespace = "TestNS"
-        IsCLIMutable = true
-        IsMutableProperties = false
-        NullablePropertyType = NullablePropertyType.Option
-        ProviderDbTypeAttributes = true
-        TableDeclarations = false
-        Readers = None
-        Filters = Filters.Empty
-        TypeMappingExtensions = []
-    }
-
-let private version: Version.InformationalVersion =
-    {
-        InformationalVersion = "0.0.0"
-        Version = Version(0, 0, 0)
-        PreReleaseSuffix = None
-    }
-
 let private generate namingExts s =
-    SchemaTemplate.generate cfg SqlHydra.Npgsql.Provider.instance s version namingExts
+    SchemaTemplate.generate testConfig SqlHydra.Npgsql.Provider.instance s testVersion namingExts
 
 /// The body of the record declared as `{declaration} =`. The last match, since a read record
 /// names its write record in `ToWrite() : {table}_write =` before the write record's declaration.
