@@ -44,10 +44,10 @@ let private withTempProject (name: string) (placeDll: bool) (run: FileInfo -> un
 
 [<Test>]
 let ``only externally visible types are discovered as extensions`` () =
-    // A registered assembly is scanned for anything implementing the marker, so an object
-    // expression or an internal helper would be constructed and applied. This assembly holds
-    // both: private contributions in UnitTests.ContributeColumns, and the closure classes F#
-    // generates for object expressions there.
+    // A registered assembly is scanned for anything implementing the marker, and this one holds
+    // the closure classes F# generates for the object expressions in UnitTests.ContributeColumns.
+    // Were they discovered, regenerating the sqlite fixtures (whose tomls register `Tests`)
+    // would add their columns to every table.
     let discoverable =
         Assembly.GetExecutingAssembly().GetTypes()
         |> Array.filter (fun t ->

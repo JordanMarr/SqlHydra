@@ -52,12 +52,9 @@ type Column =
         /// True when the database owns the value and rejects a statement that names the
         /// column: a generated column, or `GENERATED ALWAYS AS IDENTITY`.
         IsReadOnly: bool
-        /// Doc-comment lines emitted above the generated field, one `///` line each. An entry
-        /// containing a line break becomes several lines.
-        ///
-        /// A caution that lives only in an extension's README reaches whoever configured
-        /// the extension and nobody else. This puts it on the field, where the person
-        /// reaching for the column is looking.
+        /// Doc-comment lines emitted above the generated field, one `///` line each (an entry
+        /// containing a line break becomes several). Puts a caution where whoever uses the
+        /// column is looking, rather than only in an extension's README.
         Doc: string list
     }
 
@@ -220,23 +217,15 @@ type IExtendNaming =
 /// What an extension is handed when it is offered a table to contribute columns to.
 type ColumnContributionContext =
     {
-        /// The table as the provider discovered it: type mappings resolved (extensions
-        /// included) and column filters already applied. `Type` distinguishes a base table
-        /// from a view, and `Columns` is what was found, so an extension can decide per
-        /// table rather than blanketing the schema.
+        /// The table as discovered: type mappings resolved and column filters applied.
         Table: Table
 
-        /// Which provider discovered it. A column that only exists on one database engine
-        /// is contributed only when this matches.
+        /// The provider that discovered it, for a column that exists on one engine only.
         Provider: ProviderType
     }
 
-/// A contributed column, and whether a statement may write it.
-///
-/// Each contribution names its case, so writability is never inherited by omission.
-/// `ReadOnly` is the usual one: a column the catalog does not list is almost always one the
-/// database owns. `Writable` is the opt-in for one that is not. The case decides; the
-/// `IsReadOnly` of the wrapped `Column` is overwritten from it.
+/// A contributed column, and whether a statement may write it. The case decides: the wrapped
+/// column's `IsReadOnly` is overwritten from it, so writability is never inherited by omission.
 [<RequireQualifiedAccess>]
 type ContributedColumn =
     /// The database owns the value and rejects a statement that assigns to it, like
@@ -252,21 +241,14 @@ type ContributedColumn =
         | ReadOnly col -> { col with IsReadOnly = true }
         | Writable col -> { col with IsReadOnly = false }
 
-/// Contributes columns that the provider's discovery cannot see.
+/// Contributes columns the catalog does not list, such as PostgreSQL's `xmin`, which no
+/// provider can discover and so no later stage is ever asked about.
 ///
-/// A schema provider learns its columns from the catalog, so a column the catalog does not
-/// list -- a PostgreSQL system column such as `xmin`, a pseudo-column, a column projected by
-/// a companion library -- can never be typed, named or emitted, because no later stage is
-/// ever asked about it. This runs once over the finished schema, after discovery and type
-/// mapping and before emission, and returns the columns to append to a table.
-///
-/// A contributed `Column` is an ordinary one from there on: its `TypeMapping.ProviderDbType`
-/// becomes a `[<ProviderDbType(...)>]` attribute and `IExtendNaming` renames it like any other.
-/// Whether it lands on the write record is the `ContributedColumn` case the extension chose.
-///
-/// Contributing a name the table already has is an error rather than an override: an
-/// extension that silently shadows a discovered column produces a file that compiles and is
-/// wrong.
+/// Runs once per table, after discovery and type mapping and before emission. Extensions
+/// compose in registration order, each wrapping the last, as `IExtendTypeMapping` does. From
+/// there a contributed column is an ordinary one: `ProviderDbType` becomes an attribute and
+/// `IExtendNaming` renames it. A name the table already has raises rather than shadowing it,
+/// since a shadowed column still compiles.
 type IContributeColumns =
     inherit ISqlHydraExtension
     abstract member Contribute: baseFn: (ColumnContributionContext -> ContributedColumn list) -> (ColumnContributionContext -> ContributedColumn list)

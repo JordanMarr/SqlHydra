@@ -47,118 +47,82 @@ let private schema: Schema =
         Enums = []
     }
 
-/// The column PgSystemColumns needs and cannot currently produce: it is not in
-/// `information_schema`, so no type mapping is ever consulted for it, and `uint32` with no
-/// `NpgsqlDbType` throws client-side on a compare-and-swap.
+/// A system column: absent from `information_schema`, so no provider discovers it.
 let private xminColumn =
     {
         Column.Name = "xmin"
         Column.TypeMapping = mapping "uint" Data.DbType.UInt32 (Some "Xid") "xid"
         Column.IsNullable = false
         Column.IsPK = false
-        // Deliberately false: the `ContributedColumn` case decides, not this field.
         Column.IsReadOnly = false
         Column.Doc =
             [ "The id of the transaction that inserted this row version — PostgreSQL's row version."
               "It changes on every write to the row." ]
     }
 
-// `private` is load-bearing: without it these are visible outside the assembly, and the sqlite
-// tomls register `Tests`, so a regeneration would put their columns in every committed
-// AdventureWorks fixture.
+/// An extension appending `cols` to every table it is offered.
+let private contributing cols =
+    { new IContributeColumns with
+        member _.Contribute(baseFn) = fun ctx -> baseFn ctx @ cols }
 
-/// Contributes `xmin` to PostgreSQL base tables only — a view has no system columns.
-type private XminContribution() =
-    interface IContributeColumns with
-        member _.Contribute(baseFn) =
-            fun (ctx: ColumnContributionContext) ->
-                let contributed = baseFn ctx
-
-                if ctx.Provider = ProviderType.Npgsql && ctx.Table.Type = TableType.Table then
-                    contributed @ [ ContributedColumn.ReadOnly xminColumn ]
-                else
-                    contributed
-
-/// A second extension, to pin down composition order and that each sees the running list.
-type private CtidContribution() =
-    interface IContributeColumns with
+/// `xmin`, on PostgreSQL base tables only: a view has no system columns.
+let private xmin =
+    { new IContributeColumns with
         member _.Contribute(baseFn) =
             fun ctx ->
-                baseFn ctx
-                @ [ ContributedColumn.ReadOnly
-                        { xminColumn with
-                            Name = "ctid"
-                            TypeMapping = mapping "NpgsqlTypes.NpgsqlTid" Data.DbType.Object (Some "Tid") "tid" } ]
+                let contributed = baseFn ctx
+
+                if ctx.Provider = ProviderType.Npgsql && ctx.Table.Type = TableType.Table
+                then contributed @ [ ContributedColumn.ReadOnly xminColumn ]
+                else contributed }
 
 let private apply extensions = Extensions.contributeColumns extensions ProviderType.Npgsql schema
 
-let private columnNames tableName (s: Schema) =
-    s.Tables |> List.find (fun t -> t.Name = tableName) |> _.Columns |> List.map _.Name
+let private columnsOf tableName (s: Schema) =
+    s.Tables |> List.find (fun t -> t.Name = tableName) |> _.Columns
+
+let private columnNames tableName = columnsOf tableName >> List.map _.Name
+
+let private raises extensions =
+    Assert.Throws<Exception>(fun () -> apply extensions |> ignore).Message
 
 // ---------------------------------------------------------------------------------------
 // The seam itself
 // ---------------------------------------------------------------------------------------
 
 [<Test>]
-let ``Contributes a column the provider could not discover`` () =
-    let result = apply [ XminContribution() ]
+let ``Contributes a column the provider could not discover, with the extension's type mapping`` () =
+    let result = apply [ xmin ]
 
     test <@ columnNames "users" result = [ "id"; "age"; "xmin" ] @>
-
-[<Test>]
-let ``Contributed column keeps the type mapping the extension gave it`` () =
-    let result = apply [ XminContribution() ]
-    let xmin = result.Tables |> List.find (fun t -> t.Name = "users") |> _.Columns |> List.last
-
-    test <@ xmin.TypeMapping.ClrType = "uint" @>
-    test <@ xmin.TypeMapping.ProviderDbType = Some "Xid" @>
+    test <@ (columnsOf "users" result |> List.last).TypeMapping = xminColumn.TypeMapping @>
 
 [<Test>]
 let ``Context carries the table, so an extension can skip a view`` () =
-    let result = apply [ XminContribution() ]
-
-    // A view has no system columns; the extension decided that, not the seam.
-    test <@ columnNames "active_users" result = [ "id" ] @>
+    test <@ columnNames "active_users" (apply [ xmin ]) = [ "id" ] @>
 
 [<Test>]
 let ``Context carries the provider, so a column contributes only where it exists`` () =
-    let result = Extensions.contributeColumns [ XminContribution() ] ProviderType.Sqlite schema
+    let result = Extensions.contributeColumns [ xmin ] ProviderType.Sqlite schema
 
     test <@ columnNames "users" result = [ "id"; "age" ] @>
 
 [<Test>]
 let ``Extensions compose in registration order, each wrapping the last`` () =
-    let result = apply [ XminContribution(); CtidContribution() ]
+    let ctid = contributing [ ContributedColumn.ReadOnly { xminColumn with Name = "ctid" } ]
 
-    test <@ columnNames "users" result = [ "id"; "age"; "xmin"; "ctid" ] @>
-
-[<Test>]
-let ``A ReadOnly contribution is read-only whatever the wrapped column says`` () =
-    let result = apply [ XminContribution() ]
-    let xmin = result.Tables |> List.find (fun t -> t.Name = "users") |> _.Columns |> List.last
-
-    // `xminColumn` has `IsReadOnly = false`; honoured, every insert and update would name
-    // `xmin` and PostgreSQL would reject it.
-    test <@ xmin.IsReadOnly @>
+    test <@ columnNames "users" (apply [ xmin; ctid ]) = [ "id"; "age"; "xmin"; "ctid" ] @>
 
 [<Test>]
-let ``A Writable contribution is writable whatever the wrapped column says`` () =
-    let rowid =
-        { new IContributeColumns with
-            member _.Contribute(baseFn) =
-                fun ctx -> baseFn ctx @ [ ContributedColumn.Writable { xminColumn with Name = "rowid"; IsReadOnly = true } ] }
+let ``The ContributedColumn case decides IsReadOnly, not the wrapped column`` () =
+    let result =
+        apply
+            [ contributing
+                  [ ContributedColumn.ReadOnly { xminColumn with IsReadOnly = false }
+                    ContributedColumn.Writable { xminColumn with Name = "rowid"; IsReadOnly = true } ] ]
 
-    let result = apply [ rowid ]
-    let col = result.Tables |> List.find (fun t -> t.Name = "users") |> _.Columns |> List.last
-
-    test <@ not col.IsReadOnly @>
-
-[<Test>]
-let ``Discovered columns keep the read-only flag the provider gave them`` () =
-    let result = apply [ XminContribution() ]
-    let users = result.Tables |> List.find (fun t -> t.Name = "users")
-
-    test <@ users.Columns |> List.filter (fun c -> c.Name <> "xmin") |> List.forall (fun c -> not c.IsReadOnly) @>
+    // Discovered columns keep the flag their provider gave them.
+    test <@ columnsOf "users" result |> List.map (fun c -> c.Name, c.IsReadOnly) = [ "id", false; "age", false; "xmin", true; "rowid", false ] @>
 
 [<Test>]
 let ``No extensions leaves the schema untouched`` () =
@@ -166,32 +130,20 @@ let ``No extensions leaves the schema untouched`` () =
 
 [<Test>]
 let ``Contributing a discovered column's name raises rather than shadowing it`` () =
-    let collide =
-        { new IContributeColumns with
-            member _.Contribute(baseFn) = fun ctx -> baseFn ctx @ [ ContributedColumn.ReadOnly(discovered "age") ] }
+    let message = raises [ contributing [ ContributedColumn.ReadOnly(discovered "age") ] ]
 
-    let ex = Assert.Throws<Exception>(fun () -> apply [ collide ] |> ignore)
-
-    test <@ ex.Message.Contains "age" @>
-    test <@ ex.Message.Contains "public.users" @>
+    test <@ message.Contains "'age'" && message.Contains "public.users" @>
 
 [<Test>]
 let ``A contributed name differing from a discovered one only by case raises`` () =
     // On SQL Server or MySQL `Age` is the `age` column, and two fields bound to it would compile.
-    let collide =
-        { new IContributeColumns with
-            member _.Contribute(baseFn) = fun ctx -> baseFn ctx @ [ ContributedColumn.ReadOnly { xminColumn with Name = "Age" } ] }
-
-    let ex = Assert.Throws<Exception>(fun () -> apply [ collide ] |> ignore)
-
-    test <@ ex.Message.Contains "Age" @>
+    test <@ (raises [ contributing [ ContributedColumn.ReadOnly { xminColumn with Name = "Age" } ] ]).Contains "'Age'" @>
 
 [<Test>]
 let ``Two extensions contributing the same name raises`` () =
-    let ex = Assert.Throws<Exception>(fun () -> apply [ XminContribution(); XminContribution() ] |> ignore)
+    let message = raises [ xmin; xmin ]
 
-    test <@ ex.Message.Contains "xmin" @>
-    test <@ ex.Message.Contains "public.users" @>
+    test <@ message.Contains "'xmin'" && message.Contains "public.users" @>
 
 // ---------------------------------------------------------------------------------------
 // What the contributed column becomes in the generated file
@@ -223,34 +175,36 @@ let private version: Version.InformationalVersion =
 let private generate namingExts s =
     SchemaTemplate.generate cfg SqlHydra.Npgsql.Provider.instance s version namingExts
 
-[<Test>]
-let ``Generated field carries the provider db type the extension asked for`` () =
-    let code = apply [ XminContribution() ] |> generate []
-
-    // Mandatory, not decoration: Npgsql has no default mapping for uint32, so a parameter
-    // without it throws client-side.
-    test <@ code.Contains "[<ProviderDbType(\"Xid\")>]" @>
-    test <@ code.Contains "xmin: uint" @>
-
-/// The body of a generated record, so an assertion about a field is not answered by a doc
-/// comment somewhere else in the file.
-let private recordBody (typeName: string) (code: string) =
-    let fromType = code.Substring(code.IndexOf $"type {typeName} =")
+/// The body of the record declared as `{declaration} =`. The last match, since a read record
+/// names its write record in `ToWrite() : {table}_write =` before the write record's declaration.
+let private recordBody (declaration: string) (code: string) =
+    let fromType = code.Substring(code.LastIndexOf $"{declaration} =")
     fromType.Substring(0, fromType.IndexOf "}")
 
 [<Test>]
-let ``A column with an empty Doc emits no comment`` () =
-    let body = generate [] schema |> recordBody "users"
+let ``Generated field carries the provider db type the extension asked for`` () =
+    let body = apply [ xmin ] |> generate [] |> recordBody "type users"
 
-    test <@ not (body.Contains "///") @>
+    // Npgsql has no default mapping for uint32, so a parameter without it throws client-side.
+    test <@ body.Contains "[<ProviderDbType(\"Xid\")>]" && body.Contains "xmin: uint" @>
+
+[<Test>]
+let ``A column with an empty Doc emits no comment`` () =
+    test <@ not ((generate [] schema |> recordBody "type users").Contains "///") @>
 
 [<Test>]
 let ``A contributed column carries the doc comment the extension gave it`` () =
-    let body = apply [ XminContribution() ] |> generate [] |> recordBody "users"
+    let body = apply [ xmin ] |> generate [] |> recordBody "type users"
 
-    // The caution belongs on the field, not only in the extension's README: whoever reaches
-    // for the column is reading the generated type, not the extension's docs.
     test <@ body.Contains "/// It changes on every write to the row." @>
+
+[<Test>]
+let ``A doc entry with a line break is emitted as separate comment lines`` () =
+    let multiLine = contributing [ ContributedColumn.ReadOnly { xminColumn with Doc = [ "first\nsecond\r\nthird" ] } ]
+    let lines = apply [ multiLine ] |> generate [] |> recordBody "type users" |> _.Split('\n') |> Array.map _.Trim()
+
+    test <@ [ "/// first"; "/// second"; "/// third" ] |> List.forall (fun l -> Array.contains l lines) @>
+    test <@ not (lines |> Array.exists (fun l -> l = "second" || l = "third")) @>
 
 [<Test>]
 let ``A naming extension renames a contributed column like any other`` () =
@@ -259,40 +213,13 @@ let ``A naming extension renames a contributed column like any other`` () =
             member _.ExtendTableName(baseFn) = baseFn
             member _.ExtendColumnName(baseFn) = fun ctx -> (baseFn ctx).ToUpper() }
 
-    let code = apply [ XminContribution() ] |> generate [ upperCase ]
+    let code = apply [ xmin ] |> generate [ upperCase ]
 
-    test <@ code.Contains "XMIN: uint" @>
-    test <@ not (code.Contains "xmin: uint") @>
-
-[<Test>]
-let ``A doc entry with a line break is emitted as separate comment lines`` () =
-    let multiLine =
-        { new IContributeColumns with
-            member _.Contribute(baseFn) =
-                fun ctx -> baseFn ctx @ [ ContributedColumn.ReadOnly { xminColumn with Doc = [ "first\nsecond\r\nthird" ] } ] }
-
-    let body = apply [ multiLine ] |> generate [] |> recordBody "users"
-    let lines = body.Split('\n') |> Array.map _.Trim()
-
-    test <@ lines |> Array.contains "/// first" @>
-    test <@ lines |> Array.contains "/// second" @>
-    test <@ lines |> Array.contains "/// third" @>
-    test <@ not (lines |> Array.exists (fun l -> l = "second" || l = "third")) @>
-
-/// The body of the generated write record for `tableName`. It continues the read record's
-/// `type ... and ...` group, after the read record's `ToWrite() : {tableName}_write =`.
-let private writeRecordBody (tableName: string) (code: string) =
-    let fromType = code.Substring(code.LastIndexOf $"{tableName}_write =")
-    fromType.Substring(0, fromType.IndexOf "}")
+    test <@ code.Contains "XMIN: uint" && not (code.Contains "xmin: uint") @>
 
 [<Test>]
 let ``Only a Writable contribution lands on the write record`` () =
-    let rowid =
-        { new IContributeColumns with
-            member _.Contribute(baseFn) =
-                fun ctx -> baseFn ctx @ [ ContributedColumn.Writable { xminColumn with Name = "rowid"; Doc = [] } ] }
+    let rowid = contributing [ ContributedColumn.Writable { xminColumn with Name = "rowid"; Doc = [] } ]
+    let body = apply [ xmin; rowid ] |> generate [] |> recordBody "users_write"
 
-    let body = apply [ XminContribution(); rowid ] |> generate [] |> writeRecordBody "users"
-
-    test <@ body.Contains "rowid: uint" @>
-    test <@ not (body.Contains "xmin") @>
+    test <@ body.Contains "rowid: uint" && not (body.Contains "xmin") @>

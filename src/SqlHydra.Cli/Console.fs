@@ -153,8 +153,7 @@ let run (args: Args) =
         let contributionExts = extensions |> Extensions.ofType<IContributeColumns>
         let schema =
             args.Provider.GetSchema(cfg, isLegacy, typeMappingExts)
-            // After discovery, before emission: a contributed column is type-mapped by the
-            // extension that contributes it, and named by the naming extensions like any other.
+            // After discovery, before emission, so naming extensions see contributed columns too.
             |> Extensions.contributeColumns contributionExts args.Provider.Type
         SchemaTemplate.generate cfg args.Provider schema args.Version namingExts
         |> formatCodeWithFantomas
