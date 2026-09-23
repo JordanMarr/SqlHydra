@@ -124,12 +124,9 @@ Multiple extensions compose in order -- each wraps the previous one. An extensio
 
 ## Contributing Columns the Catalog Does Not List
 
-`IExtendTypeMapping` retypes a column that was *discovered*. Some columns are never discovered:
-a PostgreSQL system column such as `xmin` is not in `information_schema`, so no type mapping is
-ever consulted for it and it cannot appear in the generated record at all.
-
-`IContributeColumns` fills that gap. It runs once over the finished schema -- after discovery and
-type mapping, before emission -- and returns the columns to append to a table:
+`IExtendTypeMapping` retypes a *discovered* column. A column the catalog does not list, such as
+PostgreSQL's `xmin`, is never discovered, so `IContributeColumns` appends it after discovery and
+before emission:
 
 ```fsharp
 open SqlHydra.Domain
@@ -143,7 +140,6 @@ type XminColumn() =
                 // A system column exists on base tables, on PostgreSQL only.
                 if ctx.Provider = ProviderType.Npgsql && ctx.Table.Type = TableType.Table then
                     contributed @ [
-                        // The database owns xmin: PostgreSQL rejects a statement that assigns to it.
                         ContributedColumn.ReadOnly
                             {
                                 Column.Name = "xmin"
@@ -158,8 +154,7 @@ type XminColumn() =
                                     }
                                 Column.IsNullable = false
                                 Column.IsPK = false
-                                // Overwritten from the case above: see below.
-                                Column.IsReadOnly = true
+                                Column.IsReadOnly = true // Ignored: `ReadOnly` above decides.
                                 Column.Doc =
                                     [ "PostgreSQL's row version: the id of the transaction that"
                                       "inserted this row version." ]
@@ -169,26 +164,16 @@ type XminColumn() =
                     contributed
 ```
 
-Register it exactly like a type-mapping extension, in the TOML `[extensions]` section.
+Register it like a type-mapping extension. From there it is an ordinary column: `ProviderDbType`
+becomes an attribute, `IExtendNaming` renames it, and a name the table already has raises rather
+than shadowing it.
 
-A contributed column is an ordinary one from there on: its `ProviderDbType` becomes a
-`[<ProviderDbType(...)>]` attribute and `IExtendNaming` renames it like any other. Contributing a
-name the table already has raises, rather than shadowing the discovered column.
+Each contribution names whether a statement may write it, and that case sets `IsReadOnly`:
 
-Every contribution says whether a statement may write it, and there is no default to fall into:
+- `ContributedColumn.ReadOnly`, the usual case, for a column the database owns (assigning to
+  `xmin` fails with `cannot assign to system column`). It is left off the write record.
+- `ContributedColumn.Writable`, for one the caller may set, such as SQLite's `rowid` on a table
+  without an `INTEGER PRIMARY KEY`, which an FTS5 external-content table inserts explicitly.
 
-- `ContributedColumn.ReadOnly` is the usual case. A column the catalog does not list is almost
-  always one the database owns, and assigning to it fails (`cannot assign to system column
-  "xmin"`). It is on the read record and never on the write record.
-- `ContributedColumn.Writable` is the opt-in for one the caller may set, such as SQLite's `rowid`
-  on a table without an `INTEGER PRIMARY KEY`, which an FTS5 external-content table inserts
-  explicitly. It is on both records.
-
-The case decides; SqlHydra overwrites the wrapped column's `IsReadOnly` from it.
-
-### Documenting a Contributed Column
-
-`Column.Doc` is emitted as `///` lines above the generated field, one per entry; an entry
-containing a line break is split into several. A caution that lives only in an
-extension's README reaches whoever configured the extension and nobody else; on the field it
-reaches whoever reaches for the column.
+`Column.Doc` is emitted as `///` lines above the generated field, one per line of each entry, so a
+caution reaches whoever uses the column rather than only whoever read the extension's README.
