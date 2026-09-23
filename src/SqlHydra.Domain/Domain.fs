@@ -52,7 +52,8 @@ type Column =
         /// True when the database owns the value and rejects a statement that names the
         /// column: a generated column, or `GENERATED ALWAYS AS IDENTITY`.
         IsReadOnly: bool
-        /// Doc-comment lines emitted above the generated field, one `///` line each.
+        /// Doc-comment lines emitted above the generated field, one `///` line each. An entry
+        /// containing a line break becomes several lines.
         ///
         /// A caution that lives only in an extension's README reaches whoever configured
         /// the extension and nobody else. This puts it on the field, where the person
@@ -239,8 +240,9 @@ type ColumnContributionContext =
 /// mapping and before emission, and returns the columns to append to a table.
 ///
 /// A contributed `Column` is an ordinary one from there on: its `TypeMapping.ProviderDbType`
-/// becomes a `[<ProviderDbType(...)>]` attribute, `IExtendNaming` renames it like any other,
-/// and whatever marks a column as one the database owns applies to it too.
+/// becomes a `[<ProviderDbType(...)>]` attribute and `IExtendNaming` renames it like any other.
+/// It is always read-only: the seam sets `IsReadOnly`, whatever the extension returned, so a
+/// contributed column never lands on the write record.
 ///
 /// Contributing a name the table already has is an error rather than an override: an
 /// extension that silently shadows a discovered column produces a file that compiles and is

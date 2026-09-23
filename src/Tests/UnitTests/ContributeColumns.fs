@@ -56,6 +56,7 @@ let private xminColumn =
         Column.TypeMapping = mapping "uint" Data.DbType.UInt32 (Some "Xid") "xid"
         Column.IsNullable = false
         Column.IsPK = false
+        // Deliberately false: the seam marks every contributed column read-only regardless.
         Column.IsReadOnly = false
         Column.Doc =
             [ "The id of the transaction that inserted this row version — PostgreSQL's row version."
@@ -129,6 +130,22 @@ let ``Extensions compose in registration order, each wrapping the last`` () =
     let result = apply [ XminContribution(); CtidContribution() ]
 
     test <@ columnNames "users" result = [ "id"; "age"; "xmin"; "ctid" ] @>
+
+[<Test>]
+let ``A contributed column is read-only even when the extension says otherwise`` () =
+    let result = apply [ XminContribution() ]
+    let xmin = result.Tables |> List.find (fun t -> t.Name = "users") |> _.Columns |> List.last
+
+    // `xminColumn` has `IsReadOnly = false`; left that way, every insert and update would name
+    // `xmin` and PostgreSQL would reject it.
+    test <@ xmin.IsReadOnly @>
+
+[<Test>]
+let ``Discovered columns keep the read-only flag the provider gave them`` () =
+    let result = apply [ XminContribution() ]
+    let users = result.Tables |> List.find (fun t -> t.Name = "users")
+
+    test <@ users.Columns |> List.filter (fun c -> c.Name <> "xmin") |> List.forall (fun c -> not c.IsReadOnly) @>
 
 [<Test>]
 let ``No extensions leaves the schema untouched`` () =
@@ -222,3 +239,18 @@ let ``A naming extension renames a contributed column like any other`` () =
 
     test <@ code.Contains "XMIN: uint" @>
     test <@ not (code.Contains "xmin: uint") @>
+
+[<Test>]
+let ``A doc entry with a line break is emitted as separate comment lines`` () =
+    let multiLine =
+        { new IContributeColumns with
+            member _.Contribute(baseFn) =
+                fun ctx -> baseFn ctx @ [ { xminColumn with Doc = [ "first\nsecond\r\nthird" ] } ] }
+
+    let body = apply [ multiLine ] |> generate [] |> recordBody "users"
+    let lines = body.Split('\n') |> Array.map _.Trim()
+
+    test <@ lines |> Array.contains "/// first" @>
+    test <@ lines |> Array.contains "/// second" @>
+    test <@ lines |> Array.contains "/// third" @>
+    test <@ not (lines |> Array.exists (fun l -> l = "second" || l = "third")) @>

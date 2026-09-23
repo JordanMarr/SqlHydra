@@ -242,6 +242,11 @@ let contributeColumns
                 + "column, or an `IExtendNaming` to rename one."
             ))
 
+        // A column the catalog does not list is one the database owns: a system column or a
+        // pseudo-column, which rejects a statement that assigns to it. Marked here rather than
+        // left to each extension, so one that forgets cannot put it on the write record.
+        let contributed = contributed |> List.map (fun col -> { col with IsReadOnly = true })
+
         if contributed.IsEmpty
         then table
         else { table with Columns = table.Columns @ contributed }

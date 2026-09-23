@@ -154,6 +154,8 @@ type XminColumn() =
                                 }
                             Column.IsNullable = false
                             Column.IsPK = false
+                            // Set to true by SqlHydra regardless: see below.
+                            Column.IsReadOnly = true
                             Column.Doc =
                                 [ "PostgreSQL's row version: the id of the transaction that"
                                   "inserted this row version." ]
@@ -169,8 +171,14 @@ A contributed column is an ordinary one from there on: its `ProviderDbType` beco
 `[<ProviderDbType(...)>]` attribute and `IExtendNaming` renames it like any other. Contributing a
 name the table already has raises, rather than shadowing the discovered column.
 
+A contributed column is always read-only. A column the catalog does not list is one the database
+owns, and assigning to it fails (`cannot assign to system column "xmin"`), so SqlHydra sets
+`IsReadOnly = true` on everything an extension contributes. It is on the read record and never on
+the write record.
+
 ### Documenting a Contributed Column
 
-`Column.Doc` is emitted as `///` lines above the generated field. A caution that lives only in an
+`Column.Doc` is emitted as `///` lines above the generated field, one per entry; an entry
+containing a line break is split into several. A caution that lives only in an
 extension's README reaches whoever configured the extension and nobody else; on the field it
 reaches whoever reaches for the column.
