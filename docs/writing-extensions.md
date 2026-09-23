@@ -143,25 +143,27 @@ type XminColumn() =
                 // A system column exists on base tables, on PostgreSQL only.
                 if ctx.Provider = ProviderType.Npgsql && ctx.Table.Type = TableType.Table then
                     contributed @ [
-                        {
-                            Column.Name = "xmin"
-                            Column.TypeMapping =
-                                {
-                                    ClrType = "uint"
-                                    DbType = System.Data.DbType.UInt32
-                                    // Npgsql has no default mapping for uint32; without this,
-                                    // binding the column as a parameter throws client-side.
-                                    ProviderDbType = Some "Xid"
-                                    ColumnTypeAlias = "xid"
-                                }
-                            Column.IsNullable = false
-                            Column.IsPK = false
-                            // Set to true by SqlHydra regardless: see below.
-                            Column.IsReadOnly = true
-                            Column.Doc =
-                                [ "PostgreSQL's row version: the id of the transaction that"
-                                  "inserted this row version." ]
-                        }
+                        // The database owns xmin: PostgreSQL rejects a statement that assigns to it.
+                        ContributedColumn.ReadOnly
+                            {
+                                Column.Name = "xmin"
+                                Column.TypeMapping =
+                                    {
+                                        ClrType = "uint"
+                                        DbType = System.Data.DbType.UInt32
+                                        // Npgsql has no default mapping for uint32; without this,
+                                        // binding the column as a parameter throws client-side.
+                                        ProviderDbType = Some "Xid"
+                                        ColumnTypeAlias = "xid"
+                                    }
+                                Column.IsNullable = false
+                                Column.IsPK = false
+                                // Overwritten from the case above: see below.
+                                Column.IsReadOnly = true
+                                Column.Doc =
+                                    [ "PostgreSQL's row version: the id of the transaction that"
+                                      "inserted this row version." ]
+                            }
                     ]
                 else
                     contributed
@@ -173,10 +175,16 @@ A contributed column is an ordinary one from there on: its `ProviderDbType` beco
 `[<ProviderDbType(...)>]` attribute and `IExtendNaming` renames it like any other. Contributing a
 name the table already has raises, rather than shadowing the discovered column.
 
-A contributed column is always read-only. A column the catalog does not list is one the database
-owns, and assigning to it fails (`cannot assign to system column "xmin"`), so SqlHydra sets
-`IsReadOnly = true` on everything an extension contributes. It is on the read record and never on
-the write record.
+Every contribution says whether a statement may write it, and there is no default to fall into:
+
+- `ContributedColumn.ReadOnly` is the usual case. A column the catalog does not list is almost
+  always one the database owns, and assigning to it fails (`cannot assign to system column
+  "xmin"`). It is on the read record and never on the write record.
+- `ContributedColumn.Writable` is the opt-in for one the caller may set, such as SQLite's `rowid`
+  on a table without an `INTEGER PRIMARY KEY`, which an FTS5 external-content table inserts
+  explicitly. It is on both records.
+
+The case decides; SqlHydra overwrites the wrapped column's `IsReadOnly` from it.
 
 ### Documenting a Contributed Column
 

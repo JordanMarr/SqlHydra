@@ -231,6 +231,27 @@ type ColumnContributionContext =
         Provider: ProviderType
     }
 
+/// A contributed column, and whether a statement may write it.
+///
+/// Each contribution names its case, so writability is never inherited by omission.
+/// `ReadOnly` is the usual one: a column the catalog does not list is almost always one the
+/// database owns. `Writable` is the opt-in for one that is not. The case decides; the
+/// `IsReadOnly` of the wrapped `Column` is overwritten from it.
+[<RequireQualifiedAccess>]
+type ContributedColumn =
+    /// The database owns the value and rejects a statement that assigns to it, like
+    /// PostgreSQL's `xmin`. Emitted on the read record only.
+    | ReadOnly of Column
+    /// A caller may write the value, like SQLite's `rowid` on a table without an
+    /// `INTEGER PRIMARY KEY`, which an FTS5 external-content table inserts explicitly.
+    /// Emitted on the read record and the write record.
+    | Writable of Column
+
+    member this.Column =
+        match this with
+        | ReadOnly col -> { col with IsReadOnly = true }
+        | Writable col -> { col with IsReadOnly = false }
+
 /// Contributes columns that the provider's discovery cannot see.
 ///
 /// A schema provider learns its columns from the catalog, so a column the catalog does not
@@ -241,15 +262,14 @@ type ColumnContributionContext =
 ///
 /// A contributed `Column` is an ordinary one from there on: its `TypeMapping.ProviderDbType`
 /// becomes a `[<ProviderDbType(...)>]` attribute and `IExtendNaming` renames it like any other.
-/// It is always read-only: the seam sets `IsReadOnly`, whatever the extension returned, so a
-/// contributed column never lands on the write record.
+/// Whether it lands on the write record is the `ContributedColumn` case the extension chose.
 ///
 /// Contributing a name the table already has is an error rather than an override: an
 /// extension that silently shadows a discovered column produces a file that compiles and is
 /// wrong.
 type IContributeColumns =
     inherit ISqlHydraExtension
-    abstract member Contribute: baseFn: (ColumnContributionContext -> Column list) -> (ColumnContributionContext -> Column list)
+    abstract member Contribute: baseFn: (ColumnContributionContext -> ContributedColumn list) -> (ColumnContributionContext -> ContributedColumn list)
 
 type ISqlHydraDbProvider =
     abstract member Id: string

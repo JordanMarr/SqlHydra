@@ -56,7 +56,7 @@ let private xminColumn =
         Column.TypeMapping = mapping "uint" Data.DbType.UInt32 (Some "Xid") "xid"
         Column.IsNullable = false
         Column.IsPK = false
-        // Deliberately false: the seam marks every contributed column read-only regardless.
+        // Deliberately false: the `ContributedColumn` case decides, not this field.
         Column.IsReadOnly = false
         Column.Doc =
             [ "The id of the transaction that inserted this row version — PostgreSQL's row version."
@@ -75,7 +75,7 @@ type private XminContribution() =
                 let contributed = baseFn ctx
 
                 if ctx.Provider = ProviderType.Npgsql && ctx.Table.Type = TableType.Table then
-                    contributed @ [ xminColumn ]
+                    contributed @ [ ContributedColumn.ReadOnly xminColumn ]
                 else
                     contributed
 
@@ -85,9 +85,10 @@ type private CtidContribution() =
         member _.Contribute(baseFn) =
             fun ctx ->
                 baseFn ctx
-                @ [ { xminColumn with
-                        Name = "ctid"
-                        TypeMapping = mapping "NpgsqlTypes.NpgsqlTid" Data.DbType.Object (Some "Tid") "tid" } ]
+                @ [ ContributedColumn.ReadOnly
+                        { xminColumn with
+                            Name = "ctid"
+                            TypeMapping = mapping "NpgsqlTypes.NpgsqlTid" Data.DbType.Object (Some "Tid") "tid" } ]
 
 let private apply extensions = Extensions.contributeColumns extensions ProviderType.Npgsql schema
 
@@ -132,13 +133,25 @@ let ``Extensions compose in registration order, each wrapping the last`` () =
     test <@ columnNames "users" result = [ "id"; "age"; "xmin"; "ctid" ] @>
 
 [<Test>]
-let ``A contributed column is read-only even when the extension says otherwise`` () =
+let ``A ReadOnly contribution is read-only whatever the wrapped column says`` () =
     let result = apply [ XminContribution() ]
     let xmin = result.Tables |> List.find (fun t -> t.Name = "users") |> _.Columns |> List.last
 
-    // `xminColumn` has `IsReadOnly = false`; left that way, every insert and update would name
+    // `xminColumn` has `IsReadOnly = false`; honoured, every insert and update would name
     // `xmin` and PostgreSQL would reject it.
     test <@ xmin.IsReadOnly @>
+
+[<Test>]
+let ``A Writable contribution is writable whatever the wrapped column says`` () =
+    let rowid =
+        { new IContributeColumns with
+            member _.Contribute(baseFn) =
+                fun ctx -> baseFn ctx @ [ ContributedColumn.Writable { xminColumn with Name = "rowid"; IsReadOnly = true } ] }
+
+    let result = apply [ rowid ]
+    let col = result.Tables |> List.find (fun t -> t.Name = "users") |> _.Columns |> List.last
+
+    test <@ not col.IsReadOnly @>
 
 [<Test>]
 let ``Discovered columns keep the read-only flag the provider gave them`` () =
@@ -155,7 +168,7 @@ let ``No extensions leaves the schema untouched`` () =
 let ``Contributing a discovered column's name raises rather than shadowing it`` () =
     let collide =
         { new IContributeColumns with
-            member _.Contribute(baseFn) = fun ctx -> baseFn ctx @ [ discovered "age" ] }
+            member _.Contribute(baseFn) = fun ctx -> baseFn ctx @ [ ContributedColumn.ReadOnly(discovered "age") ] }
 
     let ex = Assert.Throws<Exception>(fun () -> apply [ collide ] |> ignore)
 
@@ -167,7 +180,7 @@ let ``A contributed name differing from a discovered one only by case raises`` (
     // On SQL Server or MySQL `Age` is the `age` column, and two fields bound to it would compile.
     let collide =
         { new IContributeColumns with
-            member _.Contribute(baseFn) = fun ctx -> baseFn ctx @ [ { xminColumn with Name = "Age" } ] }
+            member _.Contribute(baseFn) = fun ctx -> baseFn ctx @ [ ContributedColumn.ReadOnly { xminColumn with Name = "Age" } ] }
 
     let ex = Assert.Throws<Exception>(fun () -> apply [ collide ] |> ignore)
 
@@ -256,7 +269,7 @@ let ``A doc entry with a line break is emitted as separate comment lines`` () =
     let multiLine =
         { new IContributeColumns with
             member _.Contribute(baseFn) =
-                fun ctx -> baseFn ctx @ [ { xminColumn with Doc = [ "first\nsecond\r\nthird" ] } ] }
+                fun ctx -> baseFn ctx @ [ ContributedColumn.ReadOnly { xminColumn with Doc = [ "first\nsecond\r\nthird" ] } ] }
 
     let body = apply [ multiLine ] |> generate [] |> recordBody "users"
     let lines = body.Split('\n') |> Array.map _.Trim()
@@ -265,3 +278,21 @@ let ``A doc entry with a line break is emitted as separate comment lines`` () =
     test <@ lines |> Array.contains "/// second" @>
     test <@ lines |> Array.contains "/// third" @>
     test <@ not (lines |> Array.exists (fun l -> l = "second" || l = "third")) @>
+
+/// The body of the generated write record for `tableName`. It continues the read record's
+/// `type ... and ...` group, after the read record's `ToWrite() : {tableName}_write =`.
+let private writeRecordBody (tableName: string) (code: string) =
+    let fromType = code.Substring(code.LastIndexOf $"{tableName}_write =")
+    fromType.Substring(0, fromType.IndexOf "}")
+
+[<Test>]
+let ``Only a Writable contribution lands on the write record`` () =
+    let rowid =
+        { new IContributeColumns with
+            member _.Contribute(baseFn) =
+                fun ctx -> baseFn ctx @ [ ContributedColumn.Writable { xminColumn with Name = "rowid"; Doc = [] } ] }
+
+    let body = apply [ XminContribution(); rowid ] |> generate [] |> writeRecordBody "users"
+
+    test <@ body.Contains "rowid: uint" @>
+    test <@ not (body.Contains "xmin") @>

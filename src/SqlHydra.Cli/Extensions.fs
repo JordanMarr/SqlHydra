@@ -214,11 +214,11 @@ let contributeColumns
     : Schema =
 
     let contribute =
-        let baseFn (_: ColumnContributionContext) : Column list = []
+        let baseFn (_: ColumnContributionContext) : ContributedColumn list = []
         extensions |> List.fold (fun acc (ext: IContributeColumns) -> ext.Contribute(acc)) baseFn
 
     let contributeTo (table: Table) =
-        let contributed = contribute { Table = table; Provider = provider }
+        let contributed = contribute { Table = table; Provider = provider } |> List.map _.Column
         let tableName = $"{table.Schema}.{table.Name}"
 
         // Ignoring case: SQL Server and MySQL do, so `Age` and `age` are one column there, and
@@ -245,11 +245,6 @@ let contributeColumns
                 + "does not override discovered ones. Use an `IExtendTypeMapping` to retype a discovered "
                 + "column, or an `IExtendNaming` to rename one."
             ))
-
-        // A column the catalog does not list is one the database owns: a system column or a
-        // pseudo-column, which rejects a statement that assigns to it. Marked here rather than
-        // left to each extension, so one that forgets cannot put it on the write record.
-        let contributed = contributed |> List.map (fun col -> { col with IsReadOnly = true })
 
         if contributed.IsEmpty
         then table
