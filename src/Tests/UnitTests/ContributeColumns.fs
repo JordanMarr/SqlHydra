@@ -1,4 +1,4 @@
-﻿module UnitTests.ContributeColumns
+module UnitTests.ContributeColumns
 
 open System
 open NUnit.Framework

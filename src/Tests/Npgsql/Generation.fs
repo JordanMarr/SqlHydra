@@ -1,4 +1,4 @@
-﻿module Npgsql.Generation
+module Npgsql.Generation
 
 open Swensen.Unquote
 open SqlHydra
