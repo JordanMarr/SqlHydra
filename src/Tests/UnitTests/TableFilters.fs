@@ -98,3 +98,49 @@ let ``Apply Multiple Includes``() =
 
     let filteredTables = tables |> filterTables filters
     Assert.AreEqual(filteredTables, [ dboTbl1; prodTbl2 ])
+
+[<Test>]
+let ``Apply Excludes Without Includes``() =
+    // #128: excludes with no includes used to drop every table.
+    let dboTbl1 = tbl "dbo" "tbl1"
+    let dboTbl2 = tbl "dbo" "tbl2"
+    let prodTbl1 = tbl "prod" "tbl1"
+    let prodTbl2 = tbl "prod" "tbl2"
+    let tables = [ dboTbl1; dboTbl2; prodTbl1; prodTbl2 ]
+
+    let filters = { 
+        Includes = [ ]
+        Excludes = [ "dbo/tbl1" ] 
+        Restrictions = Map.empty
+    }
+
+    let filteredTables = tables |> filterTables filters
+    Assert.AreEqual(filteredTables, [ dboTbl2; prodTbl1; prodTbl2 ])
+
+[<Test>]
+let ``Column Filters Do Not Affect Tables``() =
+    let dboTbl1 = tbl "dbo" "tbl1"
+    let dboTbl2 = tbl "dbo" "tbl2"
+    let tables = [ dboTbl1; dboTbl2 ]
+
+    let filters = { 
+        Includes = [ "*" ]
+        Excludes = [ "dbo/tbl1.Col" ] 
+        Restrictions = Map.empty
+    }
+
+    let filteredTables = tables |> filterTables filters
+    Assert.AreEqual(filteredTables, tables)
+
+[<Test>]
+let ``Filtering Preserves Table Order``() =
+    let tables = [ tbl "prod" "b"; tbl "dbo" "z"; tbl "dbo" "a" ]
+
+    let filters = { 
+        Includes = [ "*" ]
+        Excludes = [ "prod/x" ] 
+        Restrictions = Map.empty
+    }
+
+    let filteredTables = tables |> filterTables filters
+    Assert.AreEqual(filteredTables, tables)
