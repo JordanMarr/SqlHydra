@@ -275,7 +275,17 @@ let orders = rows |> Seq.map (fun (o, d) -> o, d.ToOption())  // d.ToOption() : 
 
 `ToOption()` is generated as an extension member, so it is available whenever the generated namespace is `open`ed (which query code already requires).
 
-The classic `leftJoin ... on (o.Id = d.Value.Id)` form (whole record as `Option`) still works; both forms can be mixed per join site, so queries can be migrated one at a time.
+The predicate-style `leftJoin'` works with left-views too. Its `on'` clause sees the joined row as the view, so lift the outer column with `Some` instead of reaching into the inner one with `.Value`:
+
+```fsharp
+selectTask db {
+    for o in Sales.SalesOrderHeader do
+    leftJoin' d in Sales.LeftJoined.SalesOrderDetail; on' (Some o.SalesOrderID = d.SalesOrderID && d.OrderQty > Some 5s)
+    select (o, d)
+}
+```
+
+The classic `leftJoin ... on (o.Id = d.Value.Id)` and `leftJoin' ... on' (o.Id = d.Value.Id)` forms (whole record as `Option`) still work; both forms can be mixed per join site, so queries can be migrated one at a time.
 
 ### Selecting Columns
 

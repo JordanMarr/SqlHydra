@@ -317,6 +317,49 @@ let ``Left Join Left-View - anti-join via isNullValue on the witness column``() 
     sql.Contains("WHERE (\"d\".\"salesorderdetailid\" IS NULL)") =! true
 
 [<Test>]
+let ``Left Join Left-View with on' - lifted outer column, extra view-column condition``() =
+    let sql =
+        select {
+            for o in sales.salesorderheader do
+            leftJoin' d in sales.LeftJoined.salesorderdetail; on' (Some o.salesorderid = d.salesorderid && d.orderqty > Some 5s)
+            select (o, d)
+        }
+        |> toSql
+
+    sql =!
+        "SELECT \"o\".*, \"d\".* FROM \"sales\".\"salesorderheader\" AS \"o\" \
+        LEFT JOIN \"sales\".\"salesorderdetail\" AS \"d\" ON (\"o\".\"salesorderid\" = \"d\".\"salesorderid\" AND \"d\".\"orderqty\" > @p0)"
+
+[<Test>]
+let ``Left Join Left-View with on' - nullable columns downstream``() =
+    let sql =
+        select {
+            for o in sales.salesorderheader do
+            leftJoin' d in sales.LeftJoined.salesorderdetail; on' (Some o.salesorderid = d.salesorderid)
+            where (isNullValue d.salesorderdetailid)
+            select (o.salesorderid, d.orderqty)
+        }
+        |> toSql
+
+    sql.Contains("SELECT \"o\".\"salesorderid\", \"d\".\"orderqty\"") =! true
+    sql.Contains("WHERE (\"d\".\"salesorderdetailid\" IS NULL)") =! true
+
+[<Test>]
+let ``A lifted column compared to an option-returning SQL function is a column``() =
+    // `Some a.addressline1` is a column. Here `where` reaches its SQL-function arms before its
+    // column arms, so evaluating the lifted column as a value would throw.
+    let sql =
+        select {
+            for a in person.address do
+            where (SqlFn.nullif (SqlFn.upper a.city, "") = Some a.addressline1)
+            select a.addressid
+        }
+        |> toSql
+
+    // A column, not a bound value. Quoting is left out: it is #166's concern, not this one's.
+    test <@ sql.Contains "NULLIF(UPPER(" && sql.Contains "addressline1)" && not (sql.Contains "@p") @>
+
+[<Test>]
 let ``Correlated Subquery``() =
     let latestOrderByCustomer = 
         select {
@@ -1290,6 +1333,32 @@ let ``cteFrom produces a WITH clause and FROM alias``() =
         |> toSql
     sql.Contains("WITH \"recent_addrs\" AS (") =! true
     sql.Contains("FROM \"recent_addrs\" AS \"r\"") =! true
+
+[<TestCase "join'">]
+[<TestCase "leftJoin'">]
+let ``A cteFrom on the inner side of a predicate join keeps its WITH clause``(joinOp: string) =
+    let recent =
+        cteFrom<person.address> "recent_addrs" (
+            select {
+                for a in person.address do
+                where (a.city = "Dallas")
+            })
+    let sql =
+        if joinOp = "join'" then
+            select {
+                for e in person.businessentityaddress do
+                join' r in recent; on' (e.addressid = r.addressid)
+                select e.businessentityid
+            }
+            |> toSql
+        else
+            select {
+                for e in person.businessentityaddress do
+                leftJoin' r in recent; on' (e.addressid = r.Value.addressid)
+                select e.businessentityid
+            }
+            |> toSql
+    sql.Contains("WITH \"recent_addrs\" AS (") =! true
 
 [<Test>]
 let ``inlineValue emits a SQL literal not a parameter``() =

@@ -437,8 +437,17 @@ module NormalizedPatterns =
     /// A constant value or an evaluable expression.
     /// Delegates to compileAndEvaluateExpression for non-constant evaluable expressions.
     let (|NValue|_|) (nexp: NormalizedExpression) =
+        let rec isQueryVariable nexp =
+            match nexp with
+            | NParameter _ -> true
+            | NMemberAccess(inner, _) -> isQueryVariable inner
+            | _ -> false
+
         match nexp with
         | NConstant(v, _) -> Some v
+        // `Some o.Col` lifts a column to compare with a left-view's option column; it is a
+        // column (see NProperty), not a value, and evaluating it would throw.
+        | NMethodCall(call, [ arg ]) when call.Method.Name = "Some" && isQueryVariable arg -> None
         | NMethodCall(call, _) when not (isSqlHydraFunction call.Method) ->
             compileAndEvaluateExpression (call :> Expression) |> Some
         | NMemberAccess(NConstant _, m) ->
