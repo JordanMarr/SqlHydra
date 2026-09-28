@@ -138,6 +138,20 @@ let ``Conditional Where Bit Column`` () =
 
     sql =! "SELECT * FROM [Sales].[SalesOrderHeader] AS [o] WHERE (([o].[OnlineOrderFlag] = cast(0 as bit)) AND ([o].[CustomerID] = @p0))"
 
+[<SqlHydraFunction>]
+let UPPER (s: string) : string = sqlFn
+
+[<Test>]
+let ``An orderBy on a SQL function quotes its column in the dialect's brackets``() =
+    let sql =
+        select {
+            for a in Person.Address do
+            orderBy (UPPER a.City)
+        }
+        |> toSql
+
+    sql =! "SELECT * FROM [Person].[Address] AS [a] ORDER BY UPPER([a].[City])"
+
 [<Test>]
 let ``Conditional OrderBy``() = 
     let isCitySortEnabled() = true

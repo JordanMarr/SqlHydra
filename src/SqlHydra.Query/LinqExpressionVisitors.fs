@@ -607,6 +607,17 @@ let private renderObjAsLiteral (v: obj) =
         renderStringLiteral (dto.ToString("yyyy-MM-dd HH:mm:sszzz", inv))
     | _ -> formatNumericLiteral v (v.GetType())
 
+/// Marks a qualified dotted name (`alias.Column`, `schema.Table.Column`) for the emitter's
+/// `QuoteRawFragment`. A structured clause (`Compare`, `IsNull`, ...) quotes its column slot
+/// itself; a raw fragment is emitted almost verbatim, so a column bound for one is marked.
+let markQualified (fqCol: string) =
+    fqCol.Split('.')
+    |> Array.map (fun segment -> $"{{%s{segment}}}")
+    |> String.concat "."
+
+/// `alias.Column`, marked for `QuoteRawFragment`.
+let markColumn (alias: string) (mem: MemberInfo) = markQualified $"%s{alias}.%s{mem.Name}"
+
 /// Converts a SQL function MethodCall expression to a SQL fragment string.
 /// Also renders argument expressions when called recursively as the entry point for
 /// general select-fragment compilation (caseWhen, castAs, etc.).
@@ -683,11 +694,11 @@ let rec visitSqlFn (qualifyColumn: string -> MemberInfo -> string) (exp: Express
             |> List.map (fun (c, v) -> $"WHEN {c} THEN {v}")
             |> String.concat " "
         $"CASE {whens} ELSE {renderExpr m.Arguments.[1]} END"
-    // Lateral subquery column reference: lateralCol "alias" "col" → "alias"."col"
+    // Lateral subquery column reference: lateralCol "alias" "col" → {alias}.{col}, quoted by the emitter
     | MethodCall m when m.Method.Name = nameof lateralCol && m.Arguments.Count = 2 ->
         let alias = compileAndEval m.Arguments.[0] :?> string
         let column = compileAndEval m.Arguments.[1] :?> string
-        $"\"{alias}\".\"{column}\""
+        markQualified $"{alias}.{column}"
     // inlineValue marker: emit the wrapped value as a SQL literal.
     | MethodCall m when m.Method.Name = nameof inlineValue && m.Arguments.Count = 1 ->
         renderObjAsLiteral (compileAndEval m.Arguments.[0])
@@ -720,11 +731,16 @@ let rec visitSqlFn (qualifyColumn: string -> MemberInfo -> string) (exp: Express
     | _ ->
         notImplMsg $"Expected a method call expression but got: {exp.NodeType}"
 
-/// Delegates to existing visitSqlFn by extracting the original MethodCallExpression.
+/// Wraps a builder-supplied `qualifyColumn` so its output is marked for `QuoteRawFragment`.
+let markingQualifier (qualifyColumn: string -> MemberInfo -> string) =
+    fun alias (mem: MemberInfo) -> markQualified (qualifyColumn alias mem)
+
+/// Renders a SQL function call to a raw fragment, marking the columns `qualifyColumn` returns.
 let nVisitSqlFn (qualifyColumn: string -> MemberInfo -> string) (nexp: NormalizedExpression) : string =
     match nexp with
-    | NMethodCall(m, _) -> visitSqlFn qualifyColumn (m :> Expression)
+    | NMethodCall(m, _) -> visitSqlFn (markingQualifier qualifyColumn) (m :> Expression)
     | _ -> notImplMsg $"Expected NMethodCall for SQL function"
+
 
 /// `x = None` (a null) is `x IS NULL`, since `= NULL` never matches; `x = Some v` binds v.
 /// A column binds a parameter typed from its member; a rendered fragment binds a raw one.
@@ -745,6 +761,8 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
         match nexp with
         | NProperty (p, ext) when tables |> Seq.exists (fun tbl -> tbl.IsInTable p) -> Some (p, ext)
         | _ -> None
+
+    let qualifyForRaw = markingQualifier qualifyColumn
 
     /// Evaluate a NormalizedExpression to a runtime value.
     let nEvaluate (nexp: NormalizedExpression) =
@@ -1023,13 +1041,13 @@ let visitWhere<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool>
             | NMethodCall (m, _), NColumn (p, _) when isSqlHydraFunction m.Method ->
                 let sqlFragment = nVisitSqlFn qualifyColumn left
                 let alias = visitAlias p.Expression
-                let fqCol = qualifyColumn alias p.Member
+                let fqCol = qualifyForRaw alias p.Member
                 RawWhere($"{sqlFragment} {comparison} {fqCol}", [||])
 
             // Column compared to SQL function
             | NColumn (p, _), NMethodCall (m, _) when isSqlHydraFunction m.Method ->
                 let alias = visitAlias p.Expression
-                let fqCol = qualifyColumn alias p.Member
+                let fqCol = qualifyForRaw alias p.Member
                 let sqlFragment = nVisitSqlFn qualifyColumn right
                 RawWhere($"{fqCol} {comparison} {sqlFragment}", [||])
 
@@ -1134,6 +1152,8 @@ let visitHaving<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool
         | NProperty (p, ext) when tables |> Seq.exists (fun tbl -> tbl.IsInTable p) -> Some (p, ext)
         | _ -> None
 
+    let qualifyForRaw = markingQualifier qualifyColumn
+
     let rec visit (nexp: NormalizedExpression) : WhereClause =
         match nexp with
         | NNot operand ->
@@ -1223,14 +1243,14 @@ let visitHaving<'T> (tables: TableMapping seq) (filter: Expression<Func<'T, bool
             | NAggregateColumn (aggType, (p1, _)), NColumn (p2, _) ->
                 let lt =
                     let alias = visitAlias p1.Expression
-                    qualifyColumn alias p1.Member
+                    qualifyForRaw alias p1.Member
                 let rt =
                     let alias = visitAlias p2.Expression
-                    qualifyColumn alias p2.Member
+                    qualifyForRaw alias p2.Member
                 RawWhere($"{renderAggregate aggType lt} {comparison} {rt}", [||])
             | NAggregateColumn (aggType, (p, _)), NValue value ->
                 let alias = visitAlias p.Expression
-                compareFragmentToValue (renderAggregate aggType (qualifyColumn alias p.Member)) op value
+                compareFragmentToValue (renderAggregate aggType (qualifyForRaw alias p.Member)) op value
             | NColumn (p1, _), NColumn (p2, _) ->
                 let lt =
                     let alias = visitAlias p1.Expression
@@ -1298,7 +1318,7 @@ let visitOrderByPropertySelector<'T, 'Prop> (propertySelector: Expression<Func<'
         // parameters; columns are qualified; InfixOperators registrations rewrite to infix.
         | NMethodCall(m, _) ->
             let parms = ResizeArray<obj>()
-            let qualifyColumn alias (mem: MemberInfo) = $"\"{alias}\".\"{mem.Name}\""
+            let qualifyColumn = markColumn
             let rec render (e: Expression) : string =
                 match e with
                 | :? UnaryExpression as u when u.NodeType = ExpressionType.Convert ->
@@ -1400,6 +1420,8 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
         | NProperty (p, ext) when tables |> Seq.exists (fun tbl -> tbl.IsInTable p) -> Some (p, ext)
         | _ -> None
 
+    let qualifyForRaw = markingQualifier qualifyColumn
+
     let rec visit (nexp: NormalizedExpression) : WhereClause =
         match nexp with
         | NBinaryAnd(left, right) ->
@@ -1418,12 +1440,12 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
             // below, which compile-and-eval whichever side is not a column.
             | NColumn (p, _), NMethodCall (m, _) when isSqlHydraFunction m.Method ->
                 let alias = visitAlias p.Expression
-                let fqCol = qualifyColumn alias p.Member
+                let fqCol = qualifyForRaw alias p.Member
                 RawWhere($"{fqCol} {comparison} {nVisitSqlFn qualifyColumn right}", [||])
 
             | NMethodCall (m, _), NColumn (p, _) when isSqlHydraFunction m.Method ->
                 let alias = visitAlias p.Expression
-                let fqCol = qualifyColumn alias p.Member
+                let fqCol = qualifyForRaw alias p.Member
                 RawWhere($"{nVisitSqlFn qualifyColumn left} {comparison} {fqCol}", [||])
 
             | NMethodCall (m, _), NValue value when isSqlHydraFunction m.Method ->
@@ -1574,7 +1596,7 @@ let visitJoinPredicate<'T> (tables: TableMapping seq) (predicate: Expression<Fun
 /// InfixOperators rewrites apply.
 let private renderSelectExpression (exp: Expression) : string * obj[] =
     let parms = ResizeArray<obj>()
-    let qualifyColumn alias (mem: MemberInfo) = $"{{{alias}}}.{{{mem.Name}}}"
+    let qualifyColumn = markColumn
     let rec render (e: Expression) : string =
         match e with
         | :? UnaryExpression as u when u.NodeType = ExpressionType.Convert ->
@@ -1687,15 +1709,15 @@ let visitSelect<'T, 'Prop> (propertySelector: Expression<Func<'T, 'Prop>>) =
                     | _ -> notImplMsg $"Unsupported Option.map lambda body: {mapLam.Body.NodeType}"
                 | None -> notImplMsg $"Could not extract mapping lambda from Option.map expression"
             else
-                let qualifyCol alias (mem: MemberInfo) = $"{{%s{alias}}}.{{%s{mem.Name}}}"
+                let qualifyCol = markColumn
                 let sqlFragment = visitSqlFn qualifyCol (m :> Expression)
                 [ SelectedExpression sqlFragment ]
         | NAggregateColumn (aggType, (p, _)) ->
             let alias = visitAlias p.Expression
-            let fqCol = $"{{%s{alias}}}.{{%s{p.Member.Name}}}"
+            let fqCol = markColumn alias p.Member
             [ SelectedExpression (renderAggregate aggType fqCol) ]
         | NMethodCall(m, _) ->
-            let qualifyCol alias (mem: MemberInfo) = $"{{%s{alias}}}.{{%s{mem.Name}}}"
+            let qualifyCol = markColumn
             let sqlFragment = visitSqlFn qualifyCol (m :> Expression)
             [ SelectedExpression sqlFragment ]
         | NNew(newExpr, args) ->

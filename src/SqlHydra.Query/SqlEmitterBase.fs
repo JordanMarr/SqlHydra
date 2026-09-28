@@ -22,6 +22,7 @@ type ParameterCollector(prefix: string) =
 /// Base class providing shared SQL rendering logic for all provider emitters.
 [<AbstractClass>]
 type SqlEmitterBase() =
+    static let markedIdentifier = Regex(@"\{\w+\}(?:\.\{\w+\})+", RegexOptions.Compiled)
 
     /// Quote a single identifier segment (table, column, alias).
     abstract QuoteIdentifier: string -> string
@@ -148,13 +149,11 @@ type SqlEmitterBase() =
     member this.QuoteColumn(col: string) =
         this.QuoteDotted(col)
 
-    /// Processes a raw SQL fragment, replacing {alias}.{column} templates with quoted identifiers.
+    /// Quotes the `{a}.{b}` / `{a}.{b}.{c}` identifiers the visitors mark in a raw fragment.
+    /// Two or more segments are required, so a lone `{...}` in hand-written SQL is left alone.
     member this.QuoteRawFragment(fragment: string) =
-        Regex.Replace(fragment, @"\{(\w+)\}\.\{(\w+)\}", fun m ->
-            let alias = m.Groups.[1].Value
-            let col = m.Groups.[2].Value
-            $"{this.QuoteIdentifier(alias)}.{this.QuoteIdentifier(col)}"
-        )
+        if fragment.IndexOf '{' < 0 then fragment
+        else markedIdentifier.Replace(fragment, fun m -> this.QuoteDotted(m.Value.Replace("{", "").Replace("}", "")))
 
     /// Emits a SqlValue, returning the SQL fragment.
     member this.EmitValue(value: SqlValue, collector: ParameterCollector) =
@@ -240,7 +239,7 @@ type SqlEmitterBase() =
         | Grouped inner ->
             this.EmitWhere(inner, collector) // wrap in parens
         | RawWhere (fragment, parms) ->
-            this.SubstituteParams(fragment, parms, collector)
+            this.SubstituteParams(this.QuoteRawFragment(fragment), parms, collector)
         | BoolColumn (col, value) ->
             let quotedCol = this.QuoteColumn(col)
             this.EmitBoolColumn(quotedCol, value, collector)

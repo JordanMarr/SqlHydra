@@ -506,3 +506,22 @@ let ``a niladic member takes no arguments``() =
     test <@ niladic.Length > 0 @>
     for m in niladic do
         Assert.That(m.GetParameters().Length, Is.EqualTo 0, $"{m.Name} is marked Niladic but takes arguments")
+
+[<Test>]
+let ``a column compared to a SQL function is quoted like any other column``() =
+    // The value path (a `Compare` node) and the function path (a `RawWhere`) quote alike.
+    let viaValue =
+        select {
+            for o in OT.ORDERS do
+            where (o.ORDER_DATE < System.DateTime.Now)
+        }
+        |> toSql
+    let viaFunction =
+        select {
+            for o in OT.ORDERS do
+            where (o.ORDER_DATE < SYSDATE())
+        }
+        |> toSql
+
+    test <@ viaValue.Contains "\"o\".\"ORDER_DATE\"" @>      // control: already correct
+    test <@ viaFunction.Contains "\"o\".\"ORDER_DATE\"" @>
