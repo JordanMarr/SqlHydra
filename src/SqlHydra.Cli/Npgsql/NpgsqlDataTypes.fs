@@ -48,21 +48,6 @@ let supportedTypeMappings isLegacy = // https://www.npgsql.org/doc/types/basic.h
         "name",                         "string",                                        DbType.String,          Some (nameof NpgsqlDbType.Name),        None
         "(internal) char",              "char",                                          DbType.String,          Some (nameof NpgsqlDbType.InternalChar), Some NpgsqlDbType.InternalChar
         // skipped unsupported types
-
-        // Handle Materialized View Column Mappings
-        // https://www.postgresql.org/docs/current/datatype.html#DATATYPE-TABLE
-        "int8",                         "int64",                                         DbType.Int64,           Some (nameof NpgsqlDbType.Bigint),      Some NpgsqlDbType.Bigint
-        "bool",                         "bool",                                          DbType.Boolean,         Some (nameof NpgsqlDbType.Boolean),     Some NpgsqlDbType.Boolean
-        "char",                         "string",                                        DbType.String,          Some (nameof NpgsqlDbType.Char),        Some NpgsqlDbType.Char
-        "varchar",                      "string",                                        DbType.String,          Some (nameof NpgsqlDbType.Varchar),     Some NpgsqlDbType.Varchar
-        "float8",                       "double",                                        DbType.Double,          Some (nameof NpgsqlDbType.Double),      Some NpgsqlDbType.Double
-        "int",                          "int",                                           DbType.Int32,           Some (nameof NpgsqlDbType.Integer),     Some NpgsqlDbType.Integer
-        "int4",                         "int",                                           DbType.Int32,           Some (nameof NpgsqlDbType.Integer),     Some NpgsqlDbType.Integer
-        "decimal",                      "decimal",                                       DbType.Decimal,         Some (nameof NpgsqlDbType.Numeric),     Some NpgsqlDbType.Numeric
-        "float4",                       "float",                                         DbType.Single,          Some (nameof NpgsqlDbType.Real),        Some NpgsqlDbType.Real
-        "int2",                         "int16",                                         DbType.Int16,           Some (nameof NpgsqlDbType.Smallint),    Some NpgsqlDbType.Smallint
-        "timetz",                       "System.DateTime",                               DbType.DateTime,        Some (nameof NpgsqlDbType.TimeTz),      Some NpgsqlDbType.TimeTz
-        "timestamptz",                  "System.DateTime",                               DbType.DateTime,        Some (nameof NpgsqlDbType.TimestampTz), Some NpgsqlDbType.TimestampTz
     ]
     /// Programmatically add array mappings (where ArrayType is Some)
     |> List.collect (fun (columnTypeAlias, clrType, dbType, providerDbType, arrayBaseType) ->

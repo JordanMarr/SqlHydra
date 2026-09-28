@@ -1978,22 +1978,28 @@ module person =
     type vstateprovincecountryregion =
         { [<ProviderDbType("Integer")>]
           stateprovinceid: Option<int>
-          [<ProviderDbType("Name")>]
+          [<ProviderDbType("Char")>]
+          stateprovincecode: Option<string>
+          [<ProviderDbType("Boolean")>]
+          isonlystateprovinceflag: bool
+          [<ProviderDbType("Varchar")>]
           stateprovincename: Option<string>
           [<ProviderDbType("Integer")>]
           territoryid: Option<int>
           [<ProviderDbType("Varchar")>]
           countryregioncode: Option<string>
-          [<ProviderDbType("Name")>]
+          [<ProviderDbType("Varchar")>]
           countryregionname: Option<string> }
 
         interface IWriteColumns with
             member this.WriteColumns =
                 [ { WriteColumn.Name = "stateprovinceid"; Value = box this.stateprovinceid; ProviderDbType = Some "Integer" }
-                  { WriteColumn.Name = "stateprovincename"; Value = box this.stateprovincename; ProviderDbType = Some "Name" }
+                  { WriteColumn.Name = "stateprovincecode"; Value = box this.stateprovincecode; ProviderDbType = Some "Char" }
+                  { WriteColumn.Name = "isonlystateprovinceflag"; Value = box this.isonlystateprovinceflag; ProviderDbType = Some "Boolean" }
+                  { WriteColumn.Name = "stateprovincename"; Value = box this.stateprovincename; ProviderDbType = Some "Varchar" }
                   { WriteColumn.Name = "territoryid"; Value = box this.territoryid; ProviderDbType = Some "Integer" }
                   { WriteColumn.Name = "countryregioncode"; Value = box this.countryregioncode; ProviderDbType = Some "Varchar" }
-                  { WriteColumn.Name = "countryregionname"; Value = box this.countryregionname; ProviderDbType = Some "Name" } ]
+                  { WriteColumn.Name = "countryregionname"; Value = box this.countryregionname; ProviderDbType = Some "Varchar" } ]
 
     let vstateprovincecountryregion = table<vstateprovincecountryregion>
 
@@ -2309,13 +2315,17 @@ module person =
         type vstateprovincecountryregion =
             { [<ProviderDbType("Integer")>]
               stateprovinceid: Option<int>
-              [<ProviderDbType("Name")>]
+              [<ProviderDbType("Char")>]
+              stateprovincecode: Option<string>
+              [<ProviderDbType("Boolean")>]
+              isonlystateprovinceflag: Option<bool>
+              [<ProviderDbType("Varchar")>]
               stateprovincename: Option<string>
               [<ProviderDbType("Integer")>]
               territoryid: Option<int>
               [<ProviderDbType("Varchar")>]
               countryregioncode: Option<string>
-              [<ProviderDbType("Name")>]
+              [<ProviderDbType("Varchar")>]
               countryregionname: Option<string> }
 
             interface ILeftViewOf<``vstateprovincecountryregion (base)``>
@@ -4324,18 +4334,21 @@ module production =
     type vproductanddescription =
         { [<ProviderDbType("Integer")>]
           productid: Option<int>
-          [<ProviderDbType("Name")>]
+          [<ProviderDbType("Varchar")>]
           name: Option<string>
-          [<ProviderDbType("Name")>]
+          [<ProviderDbType("Varchar")>]
           productmodel: Option<string>
+          [<ProviderDbType("Char")>]
+          cultureid: Option<string>
           [<ProviderDbType("Varchar")>]
           description: Option<string> }
 
         interface IWriteColumns with
             member this.WriteColumns =
                 [ { WriteColumn.Name = "productid"; Value = box this.productid; ProviderDbType = Some "Integer" }
-                  { WriteColumn.Name = "name"; Value = box this.name; ProviderDbType = Some "Name" }
-                  { WriteColumn.Name = "productmodel"; Value = box this.productmodel; ProviderDbType = Some "Name" }
+                  { WriteColumn.Name = "name"; Value = box this.name; ProviderDbType = Some "Varchar" }
+                  { WriteColumn.Name = "productmodel"; Value = box this.productmodel; ProviderDbType = Some "Varchar" }
+                  { WriteColumn.Name = "cultureid"; Value = box this.cultureid; ProviderDbType = Some "Char" }
                   { WriteColumn.Name = "description"; Value = box this.description; ProviderDbType = Some "Varchar" } ]
 
     let vproductanddescription = table<vproductanddescription>
@@ -5060,10 +5073,12 @@ module production =
         type vproductanddescription =
             { [<ProviderDbType("Integer")>]
               productid: Option<int>
-              [<ProviderDbType("Name")>]
+              [<ProviderDbType("Varchar")>]
               name: Option<string>
-              [<ProviderDbType("Name")>]
+              [<ProviderDbType("Varchar")>]
               productmodel: Option<string>
+              [<ProviderDbType("Char")>]
+              cultureid: Option<string>
               [<ProviderDbType("Varchar")>]
               description: Option<string> }
 
@@ -9119,6 +9134,24 @@ module LeftViewExtensions =
                       territoryid = this.territoryid.Value
                       rowguid = this.rowguid.Value
                       modifieddate = this.modifieddate.Value }
+
+                Some record
+            | None -> None
+
+    type person.LeftJoined.vstateprovincecountryregion with
+        /// Recovers the whole-record option after materialization (pure .NET, not SQL):
+        /// Some when the left join matched, None when it did not.
+        member this.ToOption() : person.vstateprovincecountryregion option =
+            match this.isonlystateprovinceflag with
+            | Some value ->
+                let record: person.vstateprovincecountryregion =
+                    { stateprovinceid = this.stateprovinceid
+                      stateprovincecode = this.stateprovincecode
+                      isonlystateprovinceflag = value
+                      stateprovincename = this.stateprovincename
+                      territoryid = this.territoryid
+                      countryregioncode = this.countryregioncode
+                      countryregionname = this.countryregionname }
 
                 Some record
             | None -> None
