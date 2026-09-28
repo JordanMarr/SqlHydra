@@ -356,8 +356,8 @@ let ``A lifted column compared to an option-returning SQL function is a column``
         }
         |> toSql
 
-    // A column, not a bound value. Quoting is left out: it is #166's concern, not this one's.
-    test <@ sql.Contains "NULLIF(UPPER(" && sql.Contains "addressline1)" && not (sql.Contains "@p") @>
+    // A column, not a bound value.
+    test <@ sql.Contains "(NULLIF(UPPER(\"a\".\"city\"), '') = \"a\".\"addressline1\")" && not (sql.Contains "@p") @>
 
 [<Test>]
 let ``Correlated Subquery``() =
