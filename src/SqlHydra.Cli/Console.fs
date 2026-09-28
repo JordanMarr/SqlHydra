@@ -150,7 +150,11 @@ let run (args: Args) =
         let typeMappingExts = extensions |> Extensions.ofType<IExtendTypeMapping>
         //let namingExts = extensions |> Extensions.ofType<IExtendNaming> // TODO: enable once IExtendNaming is stable
         let namingExts : IExtendNaming list = []
-        let schema = args.Provider.GetSchema(cfg, isLegacy, typeMappingExts)
+        let contributionExts = extensions |> Extensions.ofType<IContributeColumns>
+        let schema =
+            args.Provider.GetSchema(cfg, isLegacy, typeMappingExts)
+            // After discovery, before emission, so naming extensions see contributed columns too.
+            |> Extensions.contributeColumns contributionExts args.Provider.Type
         SchemaTemplate.generate cfg args.Provider schema args.Version namingExts
         |> formatCodeWithFantomas
         

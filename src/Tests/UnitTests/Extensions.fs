@@ -2,6 +2,7 @@ module UnitTests.Extensions
 
 open System
 open System.IO
+open System.Reflection
 open NUnit.Framework
 open Swensen.Unquote
 open SqlHydra
@@ -40,6 +41,24 @@ let private withTempProject (name: string) (placeDll: bool) (run: FileInfo -> un
         File.Copy(asm.Location, Path.Combine(bin.FullName, $"{name}.dll"))
     try run proj
     finally (try Directory.Delete(root, true) with _ -> ())
+
+[<Test>]
+let ``only externally visible types are discovered as extensions`` () =
+    // This assembly holds the closure classes F# generates for the object expressions in
+    // UnitTests.ContributeColumns. Were they discovered, regenerating the sqlite fixtures (whose
+    // tomls register `Tests`) would add their columns to every table.
+    let root = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"sqlhydra-ext-{Guid.NewGuid():N}"))
+    let bin = root.CreateSubdirectory("bin")
+    let asm = Assembly.GetExecutingAssembly()
+    File.Copy(asm.Location, Path.Combine(bin.FullName, "Tests.dll"))
+
+    try
+        let discovered = Extensions.scanProject (FileInfo(Path.Combine(root.FullName, "Tests.fsproj")))
+
+        test <@ not discovered.IsEmpty @> // the public TextTypeMapping, so the scan really ran
+        test <@ discovered |> List.forall (fun e -> not (e :? SqlHydra.Domain.IContributeColumns)) @>
+    finally
+        try root.Delete(true) with _ -> ()
 
 [<Test>]
 let ``loadNamed raises when a registered extension yields no implementations`` () =

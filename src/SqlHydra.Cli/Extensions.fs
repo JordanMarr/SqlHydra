@@ -46,7 +46,9 @@ let private discoverExtensions (asm: Assembly) =
 
     types
     |> Array.filter (fun t ->
-        not t.IsAbstract && not t.IsInterface &&
+        // Excludes object-expression closure classes and internal helpers. `IsVisible`, not
+        // `IsPublic`, which is false for a public type nested in a module.
+        t.IsVisible && not t.IsAbstract && not t.IsInterface &&
         markerType.IsAssignableFrom(t))
     |> Array.map (fun t -> Activator.CreateInstance(t) :?> ISqlHydraExtension)
     |> Array.toList
@@ -183,7 +185,41 @@ let loadNamed (project: FileInfo) (extensionNames: string list) : ISqlHydraExten
                     + $"Check that '{extName}' in the TOML [extensions] section matches the package or assembly that "
                     + "implements the extension, and that it is referenced by the project. If the name is correct, the "
                     + "extension's types may have failed to load — ensure its dependencies are present and that it "
-                    + "targets a compatible SqlHydra version."
+                    + "targets a compatible SqlHydra version. An extension type must be visible outside its "
+                    + "assembly: one declared `private` or `internal` is not discovered."
                 )
             | extensions -> extensions
     )
+
+/// Appends what the `IContributeColumns` extensions contribute to each table of a discovered
+/// schema, raising on a name the table already has.
+let contributeColumns
+    (extensions: IContributeColumns list)
+    (provider: ProviderType)
+    (schema: Schema)
+    : Schema =
+
+    let contribute =
+        let baseFn (_: ColumnContributionContext) : ContributedColumn list = []
+        extensions |> List.fold (fun acc (ext: IContributeColumns) -> ext.Contribute(acc)) baseFn
+
+    let contributeTo (table: Table) =
+        let contributed = contribute { Table = table; Provider = provider } |> List.map _.Column
+
+        // Ignoring case: SQL Server and MySQL do, so `Age` and `age` are one column there, and
+        // two fields bound to it would compile. A false alarm on a case-sensitive engine raises;
+        // a missed collision would not.
+        let names = HashSet(table.Columns |> List.map _.Name, StringComparer.OrdinalIgnoreCase)
+
+        for col in contributed do
+            if not (names.Add col.Name) then
+                failwith (
+                    $"'{col.Name}' was contributed to '{table.Schema}.{table.Name}', which already has a column "
+                    + "of that name, discovered or contributed earlier (names compare ignoring case). Contribution "
+                    + "only adds columns: retype a discovered one with an `IExtendTypeMapping`, rename one with an "
+                    + "`IExtendNaming`, and replace an earlier contribution by filtering it out of the list you are given."
+                )
+
+        { table with Columns = table.Columns @ contributed }
+
+    { schema with Tables = schema.Tables |> List.map contributeTo }

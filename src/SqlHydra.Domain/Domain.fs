@@ -52,6 +52,10 @@ type Column =
         /// True when the database owns the value and rejects a statement that names the
         /// column: a generated column, or `GENERATED ALWAYS AS IDENTITY`.
         IsReadOnly: bool
+        /// Doc-comment lines emitted above the generated field, one `///` line each (an entry
+        /// containing a line break becomes several). Puts a caution where whoever uses the
+        /// column is looking, rather than only in an extension's README.
+        Doc: string list
     }
 
 type TableType = 
@@ -209,6 +213,45 @@ type IExtendNaming =
     inherit ISqlHydraExtension
     abstract member ExtendTableName: baseFn: (NamingContext -> string) -> (NamingContext -> string)
     abstract member ExtendColumnName: baseFn: (NamingContext -> string) -> (NamingContext -> string)
+
+/// What an extension is handed when it is offered a table to contribute columns to.
+type ColumnContributionContext =
+    {
+        /// The table as discovered: type mappings resolved and column filters applied.
+        Table: Table
+
+        /// The provider that discovered it, for a column that exists on one engine only.
+        Provider: ProviderType
+    }
+
+/// A contributed column, and whether a statement may write it. The case decides: the wrapped
+/// column's `IsReadOnly` is overwritten from it, so writability is never inherited by omission.
+[<RequireQualifiedAccess>]
+type ContributedColumn =
+    /// The database owns the value and rejects a statement that assigns to it, like
+    /// PostgreSQL's `xmin`. Emitted on the read record only.
+    | ReadOnly of Column
+    /// A caller may write the value, like SQLite's `rowid` on a table without an
+    /// `INTEGER PRIMARY KEY`, which an FTS5 external-content table inserts explicitly.
+    /// Emitted on the read record and the write record.
+    | Writable of Column
+
+    member this.Column =
+        match this with
+        | ReadOnly col -> { col with IsReadOnly = true }
+        | Writable col -> { col with IsReadOnly = false }
+
+/// Contributes columns the catalog does not list, such as PostgreSQL's `xmin`, which no
+/// provider can discover and so no later stage is ever asked about.
+///
+/// Runs once per table, after discovery and type mapping and before emission. Extensions
+/// compose in registration order, each wrapping the last, as `IExtendTypeMapping` does. From
+/// there a contributed column is an ordinary one: `ProviderDbType` becomes an attribute and
+/// `IExtendNaming` renames it. A name the table already has raises rather than shadowing it,
+/// since a shadowed column still compiles.
+type IContributeColumns =
+    inherit ISqlHydraExtension
+    abstract member Contribute: baseFn: (ColumnContributionContext -> ContributedColumn list) -> (ColumnContributionContext -> ContributedColumn list)
 
 type ISqlHydraDbProvider =
     abstract member Id: string
