@@ -135,6 +135,20 @@ type SelectBuilder<'Selected, 'Mapped> () =
                 |> List.filter (fun (alias, _) -> seen.Add alias)
             { outerIr with WithCtes = merged }
 
+    /// The binding a `join'` / `leftJoin'` introduces: the join `on'` will complete, and the
+    /// table mappings merged with the inner source's. The inner alias is the result
+    /// selector's second parameter.
+    let pendingJoin joinType (selectorParams: ParameterExpression seq) outerMappings innerMappings =
+        let innerAlias =
+            match selectorParams |> Seq.toList with
+            | [_; inner] -> inner.Name
+            | _ -> failwith "Expected two parameters in the join result selector"
+
+        let _, innerTableMappings = TableMappings.tryGetByRootOrAlias innerAlias innerMappings
+        let mergedTables = mergeTableMappings (outerMappings, innerTableMappings)
+        let pending = { JoinType = joinType; TableName = FQ.qualifiedTable mergedTables[TableAliasKey innerAlias]; TableAlias = innerAlias }
+        pending, mergedTables
+
     member val MapFn = Option<Func<'Selected, 'Mapped>>.None with get, set
     member val CancellationToken = CancellationToken.None with get, set
     member val private PendingJoinInfo = Option<PendingJoin>.None with get, set
@@ -499,29 +513,9 @@ type SelectBuilder<'Selected, 'Mapped> () =
     member this.Join' (outerSource: QuerySource<'Outer>,
                         innerSource: QuerySource<'Inner>,
                         resultSelector: Expression<Func<'Outer, 'Inner, 'JoinResult>>) =
-        // Extract alias from the resultSelector's second parameter (the inner table alias)
-        let innerAlias =
-            match resultSelector.Parameters |> Seq.toList with
-            | [_; inner] -> inner.Name
-            | _ -> failwith "Expected two parameters in join result selector"
-
-        // Merge table mappings
-        let _, innerTableMappings = TableMappings.tryGetByRootOrAlias innerAlias innerSource.TableMappings
-        let mergedTables = mergeTableMappings (outerSource.TableMappings, innerTableMappings)
-
-        // Get inner table info
-        let innerTable = mergedTables[TableAliasKey innerAlias]
-        let tableName = FQ.qualifiedTable innerTable
-
-        let pendingJoin = {
-            JoinType = JoinType.Inner
-            TableName = tableName
-            TableAlias = innerAlias
-        }
-
-        let ir = mergeCtes (outerSource |> getQueryOrDefault) innerSource
-        this.PendingJoinInfo <- Some pendingJoin
-        QuerySource<'JoinResult, SelectQueryIR>(ir, mergedTables)
+        let pending, mergedTables = pendingJoin JoinType.Inner resultSelector.Parameters outerSource.TableMappings innerSource.TableMappings
+        this.PendingJoinInfo <- Some pending
+        QuerySource<'JoinResult, SelectQueryIR>(mergeCtes (outerSource |> getQueryOrDefault) innerSource, mergedTables)
 
     /// Introduces a LEFT JOIN table binding (use with on' to complete the join).
     /// Unlike the standard `leftJoin ... on`, this allows predicate-style join conditions.
@@ -530,29 +524,21 @@ type SelectBuilder<'Selected, 'Mapped> () =
     member this.LeftJoin' (outerSource: QuerySource<'Outer>,
                             innerSource: QuerySource<'Inner>,
                             resultSelector: Expression<Func<'Outer, 'Inner option, 'JoinResult>>) =
-        // Extract alias from the resultSelector's second parameter (the inner table alias)
-        let innerAlias =
-            match resultSelector.Parameters |> Seq.toList with
-            | [_; inner] -> inner.Name
-            | _ -> failwith "Expected two parameters in leftJoin result selector"
+        let pending, mergedTables = pendingJoin JoinType.Left resultSelector.Parameters outerSource.TableMappings innerSource.TableMappings
+        this.PendingJoinInfo <- Some pending
+        QuerySource<'JoinResult, SelectQueryIR>(mergeCtes (outerSource |> getQueryOrDefault) innerSource, mergedTables)
 
-        // Merge table mappings
-        let _, innerTableMappings = TableMappings.tryGetByRootOrAlias innerAlias innerSource.TableMappings
-        let mergedTables = mergeTableMappings (outerSource.TableMappings, innerTableMappings)
-
-        // Get inner table info
-        let innerTable = mergedTables[TableAliasKey innerAlias]
-        let tableName = FQ.qualifiedTable innerTable
-
-        let pendingJoin = {
-            JoinType = JoinType.Left
-            TableName = tableName
-            TableAlias = innerAlias
-        }
-
-        let ir = mergeCtes (outerSource |> getQueryOrDefault) innerSource
-        this.PendingJoinInfo <- Some pendingJoin
-        QuerySource<'JoinResult, SelectQueryIR>(ir, mergedTables)
+    /// LEFT JOIN a generated left-view (`Schema.LeftJoined.tbl`) with a predicate-style
+    /// `on'` clause. Because `on'` sees the post-join variable space, the joined row is
+    /// already the 'View record (every column nullable), so lift the outer column:
+    /// Example: `leftJoin' d in Sales.LeftJoined.Detail; on' (Some o.Id = d.Id && d.Qty > Some 5s)`
+    [<CustomOperation("leftJoin'", MaintainsVariableSpace = true, IsLikeZip = true)>]
+    member this.LeftJoin' (outerSource: QuerySource<'Outer>,
+                            innerSource: LeftViewQuerySource<'Table, 'View>,
+                            resultSelector: Expression<Func<'Outer, 'View, 'JoinResult>>) =
+        let pending, mergedTables = pendingJoin JoinType.Left resultSelector.Parameters outerSource.TableMappings innerSource.TableMappings
+        this.PendingJoinInfo <- Some pending
+        QuerySource<'JoinResult, SelectQueryIR>(outerSource |> getQueryOrDefault, mergedTables)
 
     /// Completes a pending join with a predicate expression.
     /// Used after `join'` or `leftJoin'` to specify the join condition.

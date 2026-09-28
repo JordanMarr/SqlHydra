@@ -548,6 +548,62 @@ let ``Left Join Left-View - individual view columns in select``() =
     sql.Contains("SELECT [o].[SalesOrderID], [d].[OrderQty]") =! true
 
 [<Test>]
+let ``Left Join Left-View with on' - lifted outer column, extra view-column condition``() =
+    let sql =
+        select {
+            for o in Sales.SalesOrderHeader do
+            leftJoin' d in Sales.LeftJoined.SalesOrderDetail; on' (Some o.SalesOrderID = d.SalesOrderID && d.OrderQty > Some 5s)
+            select (o, d)
+        }
+        |> toSql
+
+    sql =!
+        "SELECT [o].*, [d].* FROM [Sales].[SalesOrderHeader] AS [o] \
+        LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID] AND [d].[OrderQty] > @p0)"
+
+[<Test>]
+let ``Left Join Left-View with on' - view column on the left of the =``() =
+    let sql =
+        select {
+            for o in Sales.SalesOrderHeader do
+            leftJoin' d in Sales.LeftJoined.SalesOrderDetail; on' (d.SalesOrderID = Some o.SalesOrderID)
+            select o
+        }
+        |> toSql
+
+    sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([d].[SalesOrderID] = [o].[SalesOrderID])") =! true
+
+[<Test>]
+let ``Left Join Left-View with on' - nullable columns downstream``() =
+    let sql =
+        select {
+            for o in Sales.SalesOrderHeader do
+            leftJoin' d in Sales.LeftJoined.SalesOrderDetail; on' (Some o.SalesOrderID = d.SalesOrderID)
+            where (isNullValue d.SalesOrderDetailID)
+            select (o.SalesOrderID, d.OrderQty)
+        }
+        |> toSql
+
+    sql =!
+        "SELECT [o].[SalesOrderID], [d].[OrderQty] FROM [Sales].[SalesOrderHeader] AS [o] \
+        LEFT JOIN [Sales].[SalesOrderDetail] AS [d] ON ([o].[SalesOrderID] = [d].[SalesOrderID]) \
+        WHERE ([d].[SalesOrderDetailID] IS NULL)"
+
+[<Test>]
+let ``Multiple Left Join Left-Views with on'``() =
+    let sql =
+        select {
+            for o in Sales.SalesOrderHeader do
+            leftJoin' d1 in Sales.LeftJoined.SalesOrderDetail; on' (Some o.SalesOrderID = d1.SalesOrderID && d1.OrderQty > Some 1s)
+            leftJoin' d2 in Sales.LeftJoined.SalesOrderDetail; on' (Some o.SalesOrderID = d2.SalesOrderID && d2.OrderQty > Some 5s)
+            select (o, d1, d2)
+        }
+        |> toSql
+
+    sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] AS [d1] ON ([o].[SalesOrderID] = [d1].[SalesOrderID] AND [d1].[OrderQty] > @p0)") =! true
+    sql.Contains("LEFT JOIN [Sales].[SalesOrderDetail] AS [d2] ON ([o].[SalesOrderID] = [d2].[SalesOrderID] AND [d2].[OrderQty] > @p1)") =! true
+
+[<Test>]
 let ``Correlated Subquery``() =
     let maxOrderQty = 
         select {
