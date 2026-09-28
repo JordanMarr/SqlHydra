@@ -281,9 +281,9 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
                     ColumnSchema.DefaultValue = None
                 }
         ]
-        |> Seq.sortBy (fun col -> col.Ordinal)
-        |> Seq.groupBy (fun col -> col.Schema, col.Table)
-        |> Map.ofSeq
+        |> List.sortBy (fun col -> col.Ordinal)
+        |> List.groupBy (fun col -> col.Schema, col.Table)
+        |> Map.ofList
 
     let columnsByTable =
         allColumns
@@ -294,60 +294,14 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
         let baseTryFind = NpgsqlDataTypes.tryFindTypeMapping isLegacy
         extensions |> List.fold (fun acc (ext: IExtendTypeMapping) -> ext.Extend(acc)) baseTryFind
 
-    let matViews =
-        includedRelations
-        |> Seq.filter (fun tbl -> tbl.Type = "materialized view")
-        |> Seq.choose (fun tbl ->
-            let matViewCols =
-                match materializedViewColumns.TryFind(tbl.Schema, tbl.Name) with
-                | Some cols -> cols |> Seq.toList
-                | None -> []
-
-            let tableSchema =
-                {
-                    TableSchema.Catalog = tbl.Catalog
-                    TableSchema.Schema = tbl.Schema
-                    TableSchema.Name = tbl.Name
-                    TableSchema.Type = TableType.View
-                    TableSchema.Columns = matViewCols
-                }
-
-            let mappedColumns =
-                matViewCols
-                |> List.choose (fun col ->
-                    let ctx = { TypeMappingContext.Table = tableSchema; TypeMappingContext.Column = col }
-                    tryFindTypeMapping ctx
-                    |> Option.map (fun typeMapping ->
-                        {
-                            Column.Name = col.Name
-                            Column.IsNullable = col.IsNullable
-                            Column.TypeMapping = typeMapping
-                            Column.IsPK = col.IsPrimaryKey
-                            Column.IsReadOnly = false
-                        }
-                    )
-                )
-
-            if mappedColumns.Length > 0 then
-                Some {
-                    Table.Catalog = tbl.Catalog
-                    Table.Schema = tbl.Schema
-                    Table.Name =  tbl.Name
-                    Table.Type = TableType.View
-                    Table.Columns = mappedColumns
-                    Table.TotalColumns = matViewCols |> List.length
-                }
-            else None
-        )
-        |> Seq.toList
-
     let tables =
         includedRelations
-        |> Seq.filter (fun tbl -> tbl.Type <> "materialized view")
         |> Seq.choose (fun tbl ->
             let tableCols =
-                columnsByTable
-                |> Map.tryFind (tbl.Catalog, tbl.Schema, tbl.Name)
+                // information_schema.columns omits materialized views, so theirs come from pg_catalog.
+                (if tbl.Type = "materialized view"
+                 then materializedViewColumns |> Map.tryFind (tbl.Schema, tbl.Name)
+                 else columnsByTable |> Map.tryFind (tbl.Catalog, tbl.Schema, tbl.Name))
                 |> Option.defaultValue []
 
             let tableSchema =
@@ -429,6 +383,6 @@ let getSchema (cfg: Config, isLegacy: bool, extensions: IExtendTypeMapping list)
         |> Seq.toList
 
     {
-        Tables = tables @ matViews
+        Tables = tables
         Enums = enums
     }

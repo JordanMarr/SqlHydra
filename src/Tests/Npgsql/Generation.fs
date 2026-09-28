@@ -469,3 +469,12 @@ let ``A wildcard include keeps every relation, materialized views included``() =
     let paths = generatedPaths { Filters.Empty with Includes = [ "*" ] }
     (paths |> List.contains "person/address") =! true
     (paths |> List.contains "person/vstateprovincecountryregion") =! true
+
+[<Test>]
+let ``Column filters apply to materialized views too``() =
+    let filters = { Filters.Empty with Includes = [ "*"; "*.*" ]; Excludes = [ "person/vstateprovincecountryregion.territoryid" ] }
+    let matView =
+        (NpgsqlSchemaProvider.getSchema(filterCfg filters, false, [])).Tables
+        |> List.find (fun tbl -> $"{tbl.Schema}/{tbl.Name}" = "person/vstateprovincecountryregion")
+    set [ for col in matView.Columns -> col.Name ]
+        =! set [ "stateprovinceid"; "stateprovincename"; "countryregioncode"; "countryregionname" ]
