@@ -44,7 +44,7 @@ let read(toml: string) =
             |> Option.defaultValue NullablePropertyType.Option
         Config.ProviderDbTypeAttributes = 
             match queryIntegrationTableMaybe with
-            | Some queryIntegrationTable -> queryIntegrationTable.Get "provider_db_type_attributes"
+            | Some queryIntegrationTable -> queryIntegrationTable.TryGet "provider_db_type_attributes" |> Option.defaultValue true
             | None -> true // Default to true if missing
         Config.TableDeclarations =
             match queryIntegrationTableMaybe with
@@ -77,8 +77,8 @@ let read(toml: string) =
             match filtersTableMaybe with
             | Some filtersTable -> 
                 {
-                    Filters.Includes = filtersTable.Get "include" |> Seq.cast<string> |> Seq.toList
-                    Filters.Excludes = filtersTable.Get "exclude" |> Seq.cast<string> |> Seq.toList
+                    Filters.Includes = filtersTable.TryGet "include" |> Option.map (Seq.cast<string> >> Seq.toList) |> Option.defaultValue []
+                    Filters.Excludes = filtersTable.TryGet "exclude" |> Option.map (Seq.cast<string> >> Seq.toList) |> Option.defaultValue []
                     Filters.Restrictions = 
                         match filtersTable.TryGet<TomlTable> "restrictions" with
                         | Some restrictions -> 

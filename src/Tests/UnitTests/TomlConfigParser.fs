@@ -169,3 +169,27 @@ let ``Read: should parse schema restrictions``() =
     let cfg = TomlConfigParser.read(toml)
 
     cfg.Filters =! expectedFilters
+
+/// A valid [general] table, for tests about the tables after it.
+[<Literal>]
+let private General = "[general]\nconnection = 'c'\noutput = 'o.fs'\nnamespace = 'N'\ncli_mutable = true\n"
+
+[<Test>]
+let ``Read: filters with include but no exclude``() =
+    (TomlConfigParser.read (General + "[filters]\ninclude = [ 'dbo/*' ]")).Filters
+    =! { Filters.Empty with Includes = [ "dbo/*" ] }
+
+[<Test>]
+let ``Read: filters with exclude but no include``() =
+    (TomlConfigParser.read (General + "[filters]\nexclude = [ 'dbo/temp*' ]")).Filters
+    =! { Filters.Empty with Excludes = [ "dbo/temp*" ] }
+
+[<Test>]
+let ``Read: filters with only restrictions``() =
+    (TomlConfigParser.read (General + "[filters]\nrestrictions = { Tables = [ 'products' ] }")).Filters
+    =! { Filters.Empty with Restrictions = Map [ "Tables", [| "products" |] ] }
+
+[<Test>]
+let ``Read: query integration without provider_db_type_attributes defaults to true``() =
+    (TomlConfigParser.read (General + "[sqlhydra_query_integration]\ntable_declarations = true")).ProviderDbTypeAttributes
+    =! true
