@@ -90,6 +90,14 @@
   <ItemGroup>
     <ProjectReference Include="..\SqlHydra.Query\SqlHydra.Query.fsproj" />
     <ProjectReference Include="..\SqlHydra.Cli\SqlHydra.Cli.fsproj" />
+    <!-- Run as a separate process by UnitTests/InfixOperators.fs; not referenced from code. -->
+    <ProjectReference Include="..\Tests.Fixtures\InfixRace.App\InfixRace.App.fsproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>InfixRaceApp</_Parameter1>
+      <_Parameter2>$(MSBuildThisFileDirectory)../Tests.Fixtures/InfixRace.App/bin/$(TargetFramework)/InfixRace.App.dll</_Parameter2>
+    </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Oracle\Verify\" />
