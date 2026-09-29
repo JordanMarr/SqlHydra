@@ -67,6 +67,7 @@
     <Compile Include="UnitTests\Extensions.fs" />
     <Compile Include="UnitTests\ContributeColumns.fs" />
     <Compile Include="UnitTests\SchemaTemplateTests.fs" />
+    <Compile Include="UnitTests\InfixOperators.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="8.0.100" Condition="'$(TargetFramework)' == 'net8.0'" />
