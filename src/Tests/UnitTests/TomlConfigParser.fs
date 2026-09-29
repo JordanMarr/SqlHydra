@@ -193,3 +193,14 @@ let ``Read: filters with only restrictions``() =
 let ``Read: query integration without provider_db_type_attributes defaults to true``() =
     (TomlConfigParser.read (General + "[sqlhydra_query_integration]\ntable_declarations = true")).ProviderDbTypeAttributes
     =! true
+
+[<TestCase("[general]\noutput = 'o.fs'\nnamespace = 'N'\ncli_mutable = true",
+           "[general] is missing required key 'connection'.")>]
+[<TestCase("[general]\nconnection = 'c'\noutput = 'o.fs'\nnamespace = 'N'\ncli_mutable = 'yes'",
+           "[general] key 'cli_mutable' should be a Boolean, but is a String.")>]
+[<TestCase(General + "[filters]\ninclude = 'dbo/*'",
+           "[filters] key 'include' should be an Array, but is a String.")>]
+[<TestCase(General + "[filters]\nrestrictions = { Tables = [ 1 ] }",
+           "[filters.restrictions] key 'Tables' should be a String, but is an Integer.")>]
+let ``Read: a config mistake names the section, the key and the TOML kinds``(toml: string, message: string) =
+    Assert.Throws<exn>(fun () -> TomlConfigParser.read toml |> ignore).Message =! message
