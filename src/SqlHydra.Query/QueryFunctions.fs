@@ -219,13 +219,20 @@ module InfixOperators =
                 registry.[a.FnName] <- a.Operator
         with _ -> () // tolerate dynamic / reflection-only / partially-loaded assemblies
 
+    /// Listens for DLLs (assemblies) that load from now on, then scans those already loaded,
+    /// so one that another thread loads mid-scan is still seen. Seeing a DLL twice is harmless.
+    let internal watch subscribe (loadedAssemblies: unit -> System.Reflection.Assembly[]) scan =
+        subscribe scan
+        for asm in loadedAssemblies () do
+            scan asm
+
+    // Runs once, on the first `tryGetOperator` call.
     let private initOnce =
         lazy (
-            // Pick up assemblies already loaded at startup.
-            for asm in System.AppDomain.CurrentDomain.GetAssemblies() do
-                scanAssembly asm
-            // Pick up plugin assemblies that load lazily after first use.
-            System.AppDomain.CurrentDomain.AssemblyLoad.Add(fun e -> scanAssembly e.LoadedAssembly)
+            watch
+                (fun scan -> System.AppDomain.CurrentDomain.AssemblyLoad.Add(fun e -> scan e.LoadedAssembly))
+                System.AppDomain.CurrentDomain.GetAssemblies
+                scanAssembly
         )
 
     /// Manually register a function name. Extension packages should prefer
