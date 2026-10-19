@@ -5,27 +5,61 @@ open Tomlyn.Model
 open Tomlyn.Syntax
 open Domain
 
-type TomlTable with
+/// A TOML table that names itself in error messages, e.g. "[general]" for the table at `path` "general".
+type private Section(path: string, table: TomlTable) =
+    let name = if path = "" then "The config" else $"[{path}]"
 
-    member this.Get<'T>(name: string) = 
-        this.Item(name) :?> 'T
+    let child (key: string) (t: TomlTable) = Section((if path = "" then key else $"{path}.{key}"), t)
 
-    member this.TryGet<'T>(name: string) =
-        if this.ContainsKey(name)
-        then Some (this.Item(name) :?> 'T)
-        else None
+    member _.Keys = table.Keys
+
+    member private _.Cast<'T>(key: string, value: obj) : 'T =
+        let kind (t: System.Type) =
+            if t = typeof<string> then "a String"
+            elif t = typeof<bool> then "a Boolean"
+            elif t = typeof<int64> then "an Integer"
+            elif t = typeof<float> then "a Float"
+            elif t = typeof<TomlDateTime> then "a Date-Time"
+            elif t = typeof<TomlArray> || t = typeof<TomlTableArray> then "an Array"
+            elif t = typeof<TomlTable> then "a Table"
+            else $"a {t.Name}"
+        match value with
+        | :? 'T as typed -> typed
+        | _ -> failwith $"{name} key '{key}' should be {kind typeof<'T>}, but is {kind (value.GetType())}."
+
+    /// The value at `key`, or None when it is left out. Fails when the value has the wrong type.
+    member this.TryGet<'T>(key: string) : 'T option =
+        match table.TryGetValue key with
+        | true, value -> Some (this.Cast<'T>(key, value))
+        | _ -> None
+
+    /// The value at `key`. Fails when it is left out or has the wrong type.
+    member this.Get<'T>(key: string) : 'T =
+        this.TryGet<'T> key |> Option.defaultWith (fun () -> failwith $"{name} is missing required key '{key}'.")
+
+    /// The table at `key`. Fails when it is left out or is not a table.
+    member this.Required(key: string) = child key (this.Get key)
+
+    /// The table at `key`, or None when it is left out. Fails when it is not a table.
+    member this.Optional(key: string) = this.TryGet key |> Option.map (child key)
+
+    /// The list of strings at `key`, or [] when it is left out. Fails when it is not a list of strings.
+    member this.Strings(key: string) =
+        this.TryGet<TomlArray> key
+        |> Option.map (Seq.map (fun value -> this.Cast<string>(key, value)) >> Seq.toList)
+        |> Option.defaultValue []
 
 /// Reads .toml file and returns a Config.
 let read(toml: string) =
 
     // NOTE: New configuration keys should be parsed gracefully so as to not break older versions!
     let doc = Toml.Parse toml
-    let model = doc.ToModel()
-    let generalTable = model.Get<TomlTable> "general"
-    let readersTableMaybe = model.TryGet<TomlTable> "readers"
-    let filtersTableMaybe = model.TryGet<TomlTable> "filters"
-    let extensionsTableMaybe = model.TryGet<TomlTable> "extensions"
-    let queryIntegrationTableMaybe = model.TryGet<TomlTable> "sqlhydra_query_integration"
+    let model = Section("", doc.ToModel())
+    let generalTable = model.Required "general"
+    let readersTableMaybe = model.Optional "readers"
+    let filtersTableMaybe = model.Optional "filters"
+    let extensionsTableMaybe = model.Optional "extensions"
+    let queryIntegrationTableMaybe = model.Optional "sqlhydra_query_integration"
 
     {
         Config.ConnectionString = generalTable.Get "connection"
@@ -44,7 +78,7 @@ let read(toml: string) =
             |> Option.defaultValue NullablePropertyType.Option
         Config.ProviderDbTypeAttributes = 
             match queryIntegrationTableMaybe with
-            | Some queryIntegrationTable -> queryIntegrationTable.Get "provider_db_type_attributes"
+            | Some queryIntegrationTable -> queryIntegrationTable.TryGet "provider_db_type_attributes" |> Option.defaultValue true
             | None -> true // Default to true if missing
         Config.TableDeclarations =
             match queryIntegrationTableMaybe with
@@ -69,24 +103,21 @@ let read(toml: string) =
         Config.TypeMappingExtensions =
             match extensionsTableMaybe with
             | Some extTable ->
-                extTable.TryGet "type_mappings"
-                |> Option.map (Seq.cast<string> >> Seq.toList)
-                |> Option.defaultValue []
+                extTable.Strings "type_mappings"
             | None -> []
         Config.Filters =
             match filtersTableMaybe with
             | Some filtersTable -> 
                 {
-                    Filters.Includes = filtersTable.Get "include" |> Seq.cast<string> |> Seq.toList
-                    Filters.Excludes = filtersTable.Get "exclude" |> Seq.cast<string> |> Seq.toList
+                    Filters.Includes = filtersTable.Strings "include"
+                    Filters.Excludes = filtersTable.Strings "exclude"
                     Filters.Restrictions = 
-                        match filtersTable.TryGet<TomlTable> "restrictions" with
+                        match filtersTable.Optional "restrictions" with
                         | Some restrictions -> 
-                            restrictions 
-                            |> Seq.map (fun kvp -> 
-                                kvp.Key, 
-                                    kvp.Value :?> TomlArray 
-                                    |> Seq.cast<string> 
+                            restrictions.Keys
+                            |> Seq.map (fun key -> 
+                                key, 
+                                    restrictions.Strings key
                                     |> Seq.toArray 
                                     |> Array.map (fun s -> if s = "" then null else s) // GetSchema expects nulls for missing values, not empty strings.
                             )
